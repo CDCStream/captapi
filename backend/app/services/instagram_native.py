@@ -1903,19 +1903,62 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
 
 
 def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
-    """Compact profile row for /profile-search (same fields as Decodo basic_profile)."""
+    """Profile-search row: stable id + channel-details enrichment (resolver, not discovery).
+
+    Still a single resolved account (name → @handle), but CRM-ready: numeric id,
+    bio, links, category, business flags, following/postCount — so callers do not
+    need a second channel-details call for the common enrichment fields.
+    """
+    from app.utils.formatters import strip_empty
+
     username = safe_str(user.get("username"))
     verified = user.get("is_verified")
     private = user.get("is_private")
-    return {
+    uid = safe_str(user.get("id") or user.get("pk"))
+    pic = safe_str(user.get("profile_pic_url"))
+    pic_hd = safe_str(user.get("profile_pic_url_hd"))
+    hd_info = user.get("hd_profile_pic_url_info")
+    if not pic_hd and isinstance(hd_info, dict):
+        pic_hd = safe_str(hd_info.get("url"))
+    category = safe_str(
+        user.get("category_name")
+        or user.get("categoryName")
+        or user.get("business_category_name")
+        or user.get("overall_category_name")
+        or user.get("category")
+    )
+    bio_links = _bio_links(user)
+    external = _external_url_from_user(user)
+    is_business = user.get("is_business_account")
+    if is_business is None:
+        is_business = user.get("is_business")
+    is_pro = user.get("is_professional_account")
+    out: dict[str, Any] = {
+        "id": uid,
         "username": username,
         "displayName": safe_str(user.get("full_name")),
         "url": f"https://instagram.com/{username}" if username else None,
+        "bio": safe_str(user.get("biography")),
         "followers": _edge_count(user.get("edge_followed_by") or user.get("follower_count")),
+        "following": _edge_count(user.get("edge_follow") or user.get("following_count")),
+        "postCount": _edge_count(
+            user.get("edge_owner_to_timeline_media")
+            or user.get("media_count")
+            or user.get("all_media_count")
+        ),
         "verified": False if verified is None else bool(verified),
+        # Keep ``private`` for back-compat; ``isPrivate`` matches channel-details.
         "private": False if private is None else bool(private),
-        "profileImage": safe_str(user.get("profile_pic_url_hd") or user.get("profile_pic_url")),
+        "isPrivate": False if private is None else bool(private),
+        "isBusinessAccount": None if is_business is None else bool(is_business),
+        "isProfessionalAccount": None if is_pro is None else bool(is_pro),
+        "categoryName": category,
+        "externalUrl": external,
+        "bioLinks": bio_links,
+        "profileImage": pic_hd or pic,
+        "profileImageHd": pic_hd,
     }
+    return strip_empty(out)
 
 
 # Logged-out api/v1 tags / clips-music endpoints return login HTML. Decodo

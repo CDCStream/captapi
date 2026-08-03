@@ -377,6 +377,11 @@ async def channel_details(handle: str) -> dict[str, Any] | None:
     return map_channel_details(user, handle=handle)
 
 
+async def profile_user(handle: str) -> dict[str, Any] | None:
+    """Raw Instagram GraphQL user node for profile-search enrichment."""
+    return await _profile(handle)
+
+
 async def basic_profile(handle: str) -> dict[str, Any] | None:
     user = await _profile(handle)
     if not user:

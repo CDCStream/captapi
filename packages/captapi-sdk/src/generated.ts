@@ -788,7 +788,7 @@ export class InstagramApi {
   hashtagSearch(params: InstagramHashtagSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/hashtag-search", params);
   }
-  /** Instagram Profile Search — Resolve an Instagram account name or @handle to its public profile. (1 credit) */
+  /** Instagram Profile Search — Resolve a brand or @handle to one Instagram profile with id, bio, links, and stats (not niche discovery). (1 credit) */
   profileSearch(params: InstagramProfileSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/profile-search", params);
   }

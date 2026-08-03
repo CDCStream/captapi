@@ -3082,15 +3082,31 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "totalReturned": 1,
     "users": [
       {
+        "id": "13460080",
         "username": "nike",
         "displayName": "Nike",
         "url": "https://instagram.com/nike",
-        "followers": 291780978,
+        "bio": "Just Do It.",
+        "followers": 291623659,
+        "following": 264,
+        "postCount": 1668,
         "verified": true,
         "private": false,
-        "profileImage": "https://instagram.ftas2-1.fna.fbcdn.net/v/t51.82787-19/551608484_18567162979020081_1135468084872726555_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4zOTkuYzIifQ&_nc_ht=instagram.ftas2-1.fna.fbcdn.net&_nc_cat=1&_nc_ohc=8gPTDp1oVhMQ7kNvwETrvZ3&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQBCOb7zz2iSBpbY2fpaSBUR25Hk-mqCp17LsL48j6fuIw&oe=6A5E90BA&_nc_sid=8b3546"
+        "isPrivate": false,
+        "isBusinessAccount": true,
+        "isProfessionalAccount": true,
+        "externalUrl": "http://empli.fi/nike",
+        "bioLinks": [
+          {
+            "url": "http://empli.fi/nike",
+            "linkType": "external"
+          }
+        ],
+        "profileImage": "https://instagram.fadb3-1.fna.fbcdn.net/v/t51.82787-19/551608484_18567162979020081_1135468084872726555_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4zOTkuYzIifQ&_nc_ht=instagram.fadb3-1.fna.fbcdn.net&_nc_cat=1&_nc_oc=Q6cZ2gE3fm8U-4zquMXb-DCa2XFEqsm-rZ_BWOXzqz5HNEFIKiHcxSpjEdlCVP0v32ZLy3tMLEVo2JvIx8SA4xy09gYm&_nc_ohc=jOWQehR8N0kQ7kNvwHCN0UL&_nc_gid=Ov3EEVEX3-M4dSFajR8eTQ&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQE94ajaP7La8AcjJgA2RbClgYMx9xGFF0qoyUObgazGWg&oe=6A764BBA&_nc_sid=8b3546",
+        "profileImageHd": "https://instagram.fadb3-1.fna.fbcdn.net/v/t51.82787-19/551608484_18567162979020081_1135468084872726555_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4zOTkuYzIifQ&_nc_ht=instagram.fadb3-1.fna.fbcdn.net&_nc_cat=1&_nc_oc=Q6cZ2gE3fm8U-4zquMXb-DCa2XFEqsm-rZ_BWOXzqz5HNEFIKiHcxSpjEdlCVP0v32ZLy3tMLEVo2JvIx8SA4xy09gYm&_nc_ohc=jOWQehR8N0kQ7kNvwHCN0UL&_nc_gid=Ov3EEVEX3-M4dSFajR8eTQ&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQE94ajaP7La8AcjJgA2RbClgYMx9xGFF0qoyUObgazGWg&oe=6A764BBA&_nc_sid=8b3546"
       }
-    ]
+    ],
+    "mode": "resolve"
   },
   "instagram-reels-by-audio-id": {
     "platform": "instagram",

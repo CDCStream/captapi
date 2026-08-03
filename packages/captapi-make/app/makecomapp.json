@@ -973,7 +973,7 @@
       },
       "instagramProfileSearch": {
         "label": "Instagram Profile Search",
-        "description": "Resolve an Instagram account name or @handle to its public profile. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Resolve a brand or @handle to one Instagram profile with id, bio, links, and stats (not niche discovery). Costs 1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

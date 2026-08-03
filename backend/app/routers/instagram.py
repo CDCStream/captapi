@@ -1782,16 +1782,38 @@ def _profile_search_candidates(q: str) -> list[str]:
 
 
 def _profile_to_search_user(profile: dict) -> dict:
+    """Map sparse Decodo/meta fallback shapes into the enriched search row."""
+    from app.utils.formatters import strip_empty
+
     username = safe_str(profile.get("username"))
-    return {
+    private = profile.get("private")
+    if private is None:
+        private = profile.get("isPrivate")
+    out = {
+        "id": safe_str(profile.get("id")),
         "username": username,
-        "displayName": safe_str(profile.get("displayName")),
+        "displayName": safe_str(profile.get("displayName") or profile.get("full_name")),
         "url": f"https://instagram.com/{username}" if username else safe_str(profile.get("url")),
-        "followers": safe_int(profile.get("followers")),
-        "verified": profile.get("verified"),
-        "private": profile.get("private"),
-        "profileImage": safe_str(profile.get("profileImage")),
+        "bio": safe_str(profile.get("bio") or profile.get("biography")),
+        "followers": safe_int(profile.get("followers") or profile.get("follower_count")),
+        "following": safe_int(profile.get("following") or profile.get("following_count")),
+        "postCount": safe_int(profile.get("postCount") or profile.get("media_count")),
+        "verified": profile.get("verified") if profile.get("verified") is not None else profile.get("is_verified"),
+        "private": private,
+        "isPrivate": private,
+        "isBusinessAccount": profile.get("isBusinessAccount")
+        if profile.get("isBusinessAccount") is not None
+        else profile.get("is_business_account"),
+        "isProfessionalAccount": profile.get("isProfessionalAccount")
+        if profile.get("isProfessionalAccount") is not None
+        else profile.get("is_professional_account"),
+        "categoryName": safe_str(profile.get("categoryName") or profile.get("category_name")),
+        "externalUrl": safe_str(profile.get("externalUrl") or profile.get("external_url")),
+        "bioLinks": profile.get("bioLinks") or profile.get("bio_links"),
+        "profileImage": safe_str(profile.get("profileImage") or profile.get("profile_pic_url")),
+        "profileImageHd": safe_str(profile.get("profileImageHd") or profile.get("profile_pic_url_hd")),
     }
+    return strip_empty(out)
 
 
 @router.get("/profile-search", summary="Find an Instagram profile by name or @handle")
@@ -1816,33 +1838,44 @@ async def instagram_profile_search(
                     ctx["source"] = "direct"
                     users.append(instagram_native.map_profile_search_user(user))
                     break
-                profile: dict[str, Any] | None = None
+                mapped: dict[str, Any] | None = None
                 if decodo.enabled():
-                    profile = await decodo.basic_profile(candidate)
-                    if profile is not None:
+                    # Prefer raw GraphQL user so search rows get id/bio/links,
+                    # not the sparse basic_profile subset.
+                    raw = await decodo.profile_user(candidate)
+                    if raw is not None:
                         ctx["source"] = "decodo"
-                if profile is None:
+                        mapped = instagram_native.map_profile_search_user(raw)
+                if mapped is None:
                     meta = await _public_instagram_meta(f"https://www.instagram.com/{candidate}/")
                     if meta:
                         ctx["source"] = "meta"
-                        profile = {
-                            "username": candidate,
-                            "displayName": meta["title"],
-                            "followers": None,
-                            "verified": False,
-                            "private": False,
-                            "profileImage": meta["image"],
-                        }
-                if profile:
-                    users.append(_profile_to_search_user(profile))
+                        mapped = _profile_to_search_user(
+                            {
+                                "username": candidate,
+                                "displayName": meta["title"],
+                                "followers": None,
+                                "verified": False,
+                                "private": False,
+                                "profileImage": meta["image"],
+                            }
+                        )
+                if mapped:
+                    users.append(mapped)
                     break
             if not users:
                 ctx["source"] = ctx.get("source") or "direct"
-            return {"query": q, "totalReturned": len(users), "users": users}
+            return {
+                "query": q,
+                "totalReturned": len(users),
+                "users": users,
+                # Honest scope: name/@handle → one public profile, not niche discovery.
+                "mode": "resolve",
+            }
 
         data = await cached_or_run(
             endpoint="instagram.profile-search",
-            params={"q": q, "v": 6},
+            params={"q": q, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

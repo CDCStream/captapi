@@ -955,7 +955,7 @@ class InstagramApi:
         return self._t.get("/v1/instagram/hashtag-search", {"q": q, "limit": limit, "mediaType": mediaType, "cache": cache})
 
     def profile_search(self, *, q: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Profile Search — Resolve an Instagram account name or @handle to its public profile. (1 credit)
+        """Instagram Profile Search — Resolve a brand or @handle to one Instagram profile with id, bio, links, and stats (not niche discovery). (1 credit)
 
         :param q: Search query or keywords (min 2 chars).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1095,7 +1095,7 @@ class AsyncInstagramApi:
         return await self._t.get("/v1/instagram/hashtag-search", {"q": q, "limit": limit, "mediaType": mediaType, "cache": cache})
 
     async def profile_search(self, *, q: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Profile Search — Resolve an Instagram account name or @handle to its public profile. (1 credit)
+        """Instagram Profile Search — Resolve a brand or @handle to one Instagram profile with id, bio, links, and stats (not niche discovery). (1 credit)
 
         :param q: Search query or keywords (min 2 chars).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
