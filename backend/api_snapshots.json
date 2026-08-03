@@ -14238,7 +14238,7 @@
   "instagram-trending-reels": {
     "ok": true,
     "status": 200,
-    "credits": null,
+    "credits": 1,
     "data": {
       "platform": "instagram",
       "country": "United States",
@@ -14313,8 +14313,7 @@
           ]
         }
       ],
-      "note": "Instagram returns a small overlapping batch per call; duplicates across requests are expected.",
-      "credits": 1
+      "note": "Instagram returns a small overlapping batch per call; duplicates across requests are expected."
     }
   },
   "soundcloud-track": {
