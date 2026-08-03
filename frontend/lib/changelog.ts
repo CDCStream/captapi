@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Facebook page details: distinct likes vs followers, talkingAbout",
+    description:
+      "GET /v1/facebook/page-details no longer copies likes into followers (they are different Facebook metrics). Parses exact likes from og:description, compact followers from page chrome (followersApproximate when K/M/B), and talkingAbout. Drops redundant name (kept displayName + fullName). Still returns category, website, and public email when exposed. Flat 2 credits.",
+    items: [
+      "likes and followers parsed separately (no copy)",
+      "talkingAbout + followersApproximate for compact labels",
+      "Drop duplicate name; keep displayName + fullName",
+      "email / category / website unchanged",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "Spotify search: full URIs, explicit/playable, scrapedAt",
     description:
       "GET /v1/spotify/search now returns canonical Spotify URIs (spotify:track:… etc.) so search hits chain into Track/Album/Artist/Podcast endpoints without prefixing bare IDs. Promotes explicit, playable, durationFormatted, and scrapedAt onto each result (no longer buried in raw). type=tracks|albums|artists|podcasts|episodes filter kept. Flat 2 credits native.",

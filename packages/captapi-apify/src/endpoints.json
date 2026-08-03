@@ -1794,8 +1794,8 @@
     "platform": "facebook",
     "name": "Facebook Page Details",
     "path": "/v1/facebook/page-details",
-    "credits": 1,
-    "summary": "Info & stats for a Facebook page.",
+    "credits": 2,
+    "summary": "Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. Flat 2 credits.",
     "params": [
       {
         "name": "url",

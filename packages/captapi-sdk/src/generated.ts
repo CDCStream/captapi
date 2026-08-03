@@ -895,7 +895,7 @@ export class FacebookApi {
   comments(params: FacebookCommentsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/comments", params);
   }
-  /** Facebook Page Details — Info & stats for a Facebook page. (1 credit) */
+  /** Facebook Page Details — Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. (2 credits) */
   pageDetails(params: FacebookPageDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/page-details", params);
   }

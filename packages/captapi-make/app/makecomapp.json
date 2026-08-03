@@ -1075,7 +1075,7 @@
       },
       "facebookPageDetails": {
         "label": "Facebook Page Details",
-        "description": "Info & stats for a Facebook page. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. Costs 2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

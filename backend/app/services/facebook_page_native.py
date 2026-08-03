@@ -89,24 +89,70 @@ def _parse_count(text: str | None) -> int | None:
     return int(num)
 
 
-def _counts_from_text(html: str, og_desc: str | None) -> dict[str, int | None]:
-    blob = f"{og_desc or ''}\n{html}"
+def _counts_from_text(html: str, og_desc: str | None) -> dict[str, Any]:
+    """Parse distinct page metrics. Never copy likes ↔ followers.
+
+    Logged-out HTML typically exposes exact likes (+ talking about) in
+    ``og:description``, and a separate compact followers label in page
+    chrome (e.g. ``28M followers``). Treating them as one field was wrong.
+    """
+    og = og_desc or ""
+    blob = f"{og}\n{html}"
     likes = None
     followers = None
     following = None
-    m = re.search(r"([\d,.]+)\s*likes", blob, re.I)
+    talking_about = None
+    followers_approximate = False
+
+    # Prefer og:description — exact likes / talking-about when present.
+    m = re.search(r"([\d,.]+)\s*likes\b", og, re.I)
     if m:
         likes = _parse_count(m.group(1))
-    m = re.search(r"([\d,.]+)\s*followers", blob, re.I)
+    m = re.search(r"([\d,.]+)\s*followers\b", og, re.I)
     if m:
         followers = _parse_count(m.group(1))
-    m = re.search(r"([\d,.]+)\s*following", blob, re.I)
+    m = re.search(r"([\d,.]+)\s*talking about", og, re.I)
+    if m:
+        talking_about = _parse_count(m.group(1))
+
+    # Page chrome: compact followers ("28M followers") — require a real count
+    # token so CSS/JSON keys like ``.followers`` do not match.
+    if followers is None:
+        for pat in (
+            r">([\d,.]+(?:\.\d+)?\s*[kmbKMB]?)</(?:strong|span)>\s*followers\b",
+            r'"text"\s*:\s*"([\d,.]+(?:\.\d+)?\s*[kmbKMB]?)\s*followers"',
+            r"(?<![\w.])([\d,.]+(?:\.\d+)?[kmbKMB])\s*followers\b",
+            r"(?<![\w.])([\d,]{3,})\s*followers\b",
+        ):
+            m = re.search(pat, html, re.I)
+            if m:
+                token = m.group(1).replace(" ", "")
+                followers = _parse_count(token)
+                if followers is not None:
+                    followers_approximate = bool(re.search(r"[kmb]$", token, re.I))
+                    break
+
+    if likes is None:
+        m = re.search(r"(?:^|[^\w.])([\d,.]+)\s*likes\b", blob, re.I)
+        if m:
+            likes = _parse_count(m.group(1))
+
+    m = re.search(r"(?:^|[^\w.])([\d,.]+)\s*following\b", blob, re.I)
     if m:
         following = _parse_count(m.group(1))
-    # FB pages usually surface likes; treat as follower count when missing.
-    if followers is None and likes is not None:
-        followers = likes
-    return {"likes": likes, "followers": followers, "following": following}
+
+    if talking_about is None:
+        m = re.search(r"([\d,.]+)\s*talking about", blob, re.I)
+        if m:
+            talking_about = _parse_count(m.group(1))
+
+    return {
+        "likes": likes,
+        "followers": followers,
+        "following": following,
+        "talkingAbout": talking_about,
+        "followersApproximate": True if followers_approximate and followers is not None else None,
+    }
 
 
 def _username_from_url(url: str) -> str | None:
@@ -379,13 +425,15 @@ async def page_details_native(url: str) -> dict[str, Any] | None:
         "platform": "facebook",
         "url": safe_str(og_url) or url,
         "username": username,
-        "name": display_name,
+        # displayName = short brand; fullName = page title. No duplicate ``name``.
         "displayName": display_name,
         "fullName": full_name or display_name,
         "bio": bio,
         "followers": counts["followers"],
+        "followersApproximate": counts.get("followersApproximate"),
         "following": counts["following"],
         "likes": counts["likes"],
+        "talkingAbout": counts.get("talkingAbout"),
         "verified": _verified(blobs, ctx),
         "profileImage": profile_image,
         "coverImage": cover_image,

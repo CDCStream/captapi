@@ -1142,7 +1142,7 @@ async def facebook_page_details(
 
         data = await cached_or_run(
             endpoint="facebook.page-details",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

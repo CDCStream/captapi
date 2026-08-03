@@ -1149,7 +1149,7 @@ class FacebookApi:
         return self._t.get("/v1/facebook/comments", {"url": url, "limit": limit, "cache": cache})
 
     def page_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Page Details — Info & stats for a Facebook page. (1 credit)
+        """Facebook Page Details — Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. (2 credits)
 
         :param url: Facebook page URL, e.g. https://facebook.com/PageName. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1234,7 +1234,7 @@ class AsyncFacebookApi:
         return await self._t.get("/v1/facebook/comments", {"url": url, "limit": limit, "cache": cache})
 
     async def page_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Page Details — Info & stats for a Facebook page. (1 credit)
+        """Facebook Page Details — Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. (2 credits)
 
         :param url: Facebook page URL, e.g. https://facebook.com/PageName. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

@@ -395,7 +395,19 @@ const FACEBOOK: Spec[] = [
   { slug: "facebook-details", name: "Facebook Details API", shortName: "Details", category: "details", method: "GET", path: "/v1/facebook/details", credits: 2, tagline: "Facebook post or Reel — caption, engagement, author id, SD/HD video, captions, and music when Facebook exposes them.", longDescription: "Paste a Facebook post or Reel URL and get clean JSON: caption, publishedAt, engagement, author (including stable author.id when present), videoUrl plus additive videoSdUrl/videoHdUrl, videoWidth/videoHeight, captionsUrl (.srt), feedbackId, and music when available. Note: for some Reels, the view count on the individual post page can be null or lower than the public Reels grid badge — use Facebook Profile Reels and match by post id if you need that badge count. Flat 2 credits per call." },
   { slug: "facebook-summarizer", name: "Facebook Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/facebook/summarize", credits: 4 },
   { slug: "facebook-comments", name: "Facebook Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/facebook/comments", credits: 2 },
-  { slug: "facebook-page-details", name: "Facebook Page Details API", shortName: "Page Details", category: "channel", method: "GET", path: "/v1/facebook/page-details", credits: 2 },
+  {
+    slug: "facebook-page-details",
+    name: "Facebook Page Details API",
+    shortName: "Page Details",
+    category: "channel",
+    method: "GET",
+    path: "/v1/facebook/page-details",
+    credits: 2,
+    tagline:
+      "Facebook page profile — likes vs followers (distinct), talkingAbout, category, website, and public email.",
+    longDescription:
+      "Pass a Facebook page URL, @handle, or page name and get clean JSON: username, displayName (short brand) + fullName (page title), bio, verified, profileImage/coverImage, category, website, and public email when the page exposes one (CRM/outreach-ready). Metrics are distinct: likes (exact page likes from Facebook), followers (often a compact chrome label like 28M — flagged with followersApproximate=true), following, and talkingAbout. Likes are never copied into followers. Flat 2 credits. Pass cache=true for the 24h shared cache.",
+  },
   { slug: "facebook-profile-posts", name: "Facebook Profile Posts API", shortName: "Profile Posts", category: "list", method: "GET", path: "/v1/facebook/profile-posts", credits: 2 },
   { slug: "facebook-profile-reels", name: "Facebook Profile Reels API", shortName: "Profile Reels", category: "list", method: "GET", path: "/v1/facebook/profile-reels", credits: 2, tagline: "Latest Facebook page Reels — views, likes, comments, shares; newest-first without archive padding.", longDescription: "Pass a Facebook page or profile URL and get that account's recent Reels as clean JSON: caption, publishedAt, duration, thumbnail / video URL, author, and full engagement (views, likes, comments, shares). Results are newest-first. Listing uses the Reels tab when available (else Videos), with a shallow scroll so years-old archive videos from deep /videos history are not mixed in; a >1 year gap between consecutive items stops the page (recency cliff). Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "facebook-group-posts", name: "Facebook Group Posts API", shortName: "Group Posts", category: "list", method: "GET", path: "/v1/facebook/group-posts", credits: 2 },
@@ -1860,7 +1872,10 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-details": [up(FB_VIDEO)],
   "facebook-summarizer": [up(FB_VIDEO), cacheP()],
   "facebook-comments": [up(FB_VIDEO), lpFlat(50, 500, 2)],
-  "facebook-page-details": [up("Facebook page URL, @handle, or page name, e.g. https://facebook.com/PageName.")],
+  "facebook-page-details": [
+    up("Facebook page URL, @handle, or page name, e.g. https://facebook.com/PageName."),
+    cacheP(),
+  ],
   "facebook-profile-posts": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
   "facebook-profile-reels": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
   "facebook-group-posts": [
@@ -3114,6 +3129,10 @@ const FIELD_DESCS: Record<string, string> = {
   totalVideos: "Total videos in the playlist (full size). Differs from totalReturned, which is this response's page length.",
   viewCountApproximate:
     "True when viewCount was parsed from a compact UI label (e.g. 2.5B / 894M) rather than an exact integer.",
+  followersApproximate:
+    "True when followers was parsed from a compact Facebook chrome label (e.g. 28M) rather than an exact integer.",
+  talkingAbout:
+    "Facebook 'people talking about this' count for the page when exposed (distinct from likes/followers).",
   createdAt: "Creation date (ISO 8601).",
   updatedAt: "Last update date (ISO 8601).",
   timestamp: "Human-readable timestamp (MM:SS format).",
