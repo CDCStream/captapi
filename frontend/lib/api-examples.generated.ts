@@ -526,22 +526,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "media": [
       "https://video-dfw5-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-dfw5-1.xx.fbcdn.net&_nc_ohc=DeBVZh2ChkAQ7kNvwELM_GV&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyNDEsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=oKi5rqU7-78Y6XFLpAVqvA&_nc_ss=79289&_nc_zt=28&oh=00_AQB-CUR53tb21BEWdlRLg5BhAauE3-hDDO9zmz06SvSAdg&oe=6A6D9B48",
       "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=JCEJHIw0engQ7kNvwEcgh1o&_nc_oc=Ado6Dn6wrEd2aZKTiM6OLVJyx_BYbHRC0Bmv70xAZp21Pm2Enab2l80KoUSxQZAs1Ow&_nc_zt=14&_nc_ht=scontent-dfw5-1.xx&_nc_gid=oKi5rqU7-78Y6XFLpAVqvA&_nc_ss=79289&oh=00_AQAw5ZEVUbeJYpBcx6Qa4wV6V-hZRjNvtI487nUdgq8UZA&oe=6A6D850A"
-    ],
-    "platforms": ["FACEBOOK", "INSTAGRAM"],
-    "publisherPlatforms": ["FACEBOOK", "INSTAGRAM"],
-    "demographicDistribution": [
-      { "age": "25-34", "gender": "Female", "percentage": 0.28 },
-      { "age": "25-34", "gender": "Male", "percentage": 0.22 }
-    ],
-    "regionDistribution": [
-      { "region": "California", "percentage": 0.12 },
-      { "region": "Texas", "percentage": 0.09 }
-    ],
-    "ageCountryGenderReachBreakdown": null,
-    "variantCount": 3,
-    "collationId": null,
-    "isAaaEligible": false,
-    "euTransparency": null
+    ]
   },
   "facebook-ad-library-ad-transcript": {
     "platform": "facebook_ad_library",
@@ -721,12 +706,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "facebook-ad-library-search": {
     "query": "election",
     "country": "US",
-    "status": "ALL",
-    "limit": 5,
     "totalReturned": 5,
-    "searchResultsCount": 50001,
-    "hasMore": true,
-    "nextCursor": "eyJvZmZzZXQiOjV9",
     "ads": [
       {
         "platform": "facebook_ad_library",
@@ -735,7 +715,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "The Voting Information Center—one-tap voting registration information from election experts and authorities in one place.",
         "headline": "Voting Information Center",
         "cta": "Learn more",
-        "ctaType": "LEARN_MORE",
         "landingUrl": "http://facebook.com/votinginformationcenter",
         "adFormat": "VIDEO",
         "firstShown": "2020-09-22T07:00:00.000Z",
@@ -743,45 +722,16 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "impressions": ">1M",
         "spend": ">$1M",
         "country": "US",
-        "isActive": false,
-        "publisherPlatforms": ["FACEBOOK", "INSTAGRAM"],
-        "platforms": ["FACEBOOK", "INSTAGRAM"],
-        "caption": "facebook.com",
-        "linkDescription": "Voting Information Center",
-        "pageLikeCount": 12000000,
-        "pageCategories": ["Product/service"],
-        "pageEntityType": "PERSON_PROFILE",
-        "politicalCountries": ["US"],
-        "reachEstimate": null,
         "advertiser": {
           "id": "108824017345866",
-          "pageId": "108824017345866",
-          "advertiserId": "108824017345866",
-          "profileId": null,
           "name": "Meta",
           "url": "https://www.facebook.com/Meta/",
-          "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwHuGOSN&_nc_oc=AdpUTiQHP0F2DQWlJJsFhLjPwiKgiTaMBS9Gf3J_Ogy1Z6nYv2kt_BhKXvw8jPupOMg&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCbS0Qc_-2kHNJh8Yysq78dbBXaaJS4Osw3-xA3_SHVlw&oe=6A89438E",
-          "likeCount": 12000000,
-          "categories": ["Product/service"]
+          "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwHuGOSN&_nc_oc=AdpUTiQHP0F2DQWlJJsFhLjPwiKgiTaMBS9Gf3J_Ogy1Z6nYv2kt_BhKXvw8jPupOMg&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCbS0Qc_-2kHNJh8Yysq78dbBXaaJS4Osw3-xA3_SHVlw&oe=6A89438E"
         },
         "media": [
           "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=VIhm6QH6QpYQ7kNvwEGz32Z&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyMzcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQBmg1RWfbVvJ3MUBSfprUeNw4A1j1otLN5iP3DoZ8RxIw&oe=6A677448",
           "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XJsOGtccv7UQ7kNvwFOmuvH&_nc_oc=AdqJh0Avn_pYIk_hzhEW3QS1dyOrrTJn4nBpQ38NLoUvb1OE8Kwj7qy75S7f1QbV1cs&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQBESYOW184a4FJWDENcSYwQSBzwkH5yonZh3U5v6ZZEgA&oe=6A67964A"
-        ],
-        "images": [
-          {
-            "url": "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg",
-            "resizedUrl": "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg"
-          }
-        ],
-        "videos": [
-          {
-            "url": "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4",
-            "sdUrl": null,
-            "previewUrl": "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg"
-          }
-        ],
-        "cards": []
+        ]
       },
       {
         "platform": "facebook_ad_library",
@@ -824,7 +774,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "country": "US",
         "advertiser": {
           "id": "20531316728",
-          "name": "Facebook App",
+          "name": "Facebook",
           "url": "https://www.facebook.com/facebook/",
           "logo": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.35426-6/123254501_376431443560946_8642123156381274111_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=uPcoVSVedoQQ7kNvwHgmWWe&_nc_oc=AdqwXTjc5hWqxKmTPliHRnVkbtl62MNcyuFRVtYt5e11rm_kKl_7cbhn2U6FxOqfz_4&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQAwgOXSH-Za4uSlnK2E_DN8SP8iELP-mBG2Fa6sq_k6fA&oe=6A678FB0"
         },
@@ -888,27 +838,25 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "facebook-ad-library-search-companies": {
     "query": "nike",
     "country": "US",
-    "totalReturned": 2,
+    "totalReturned": 3,
     "companies": [
       {
-        "id": "15087023444",
-        "pageId": "15087023444",
-        "advertiserId": "15087023444",
-        "profileId": null,
-        "name": "Nike",
-        "url": "https://www.facebook.com/nike/",
-        "logo": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.35426-6/366635364_819887626183060_5665913834577832309_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=cpw1LHoxRRMQ7kNvwF0VELk&_nc_oc=Adp4gYKupQoA3SFulWbqwUFHqP4Hb9COtOidu_sWgA0fqGKhHNgkorx0YOcUbNCeAek&_nc_zt=14&_nc_ht=scontent-iad6-1.xx&_nc_gid=WFVhUXC3vFhp5HqXMO2_vg&_nc_ss=72289&oh=00_AQCzxYXtTr8L2PBX03C3WTbVmtXlrB0ZHR45OVmp6Pv9mA&oe=6A612326",
-        "libraryUrl": "https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=US&view_all_page_id=15087023444&media_type=all"
+        "id": "146705838515566",
+        "name": "Sukeban World",
+        "url": "https://www.facebook.com/61551864263186/",
+        "logo": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.35426-6/517640014_2104272360362331_1464623957160374455_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=zj4Fm9x6lhEQ7kNvwGyzer2&_nc_oc=Adpw1Rqb_eBzffqqgyQt5_CPB2Dct1h7kaRFJQZmeucV_ui5BXf-Q6skKKVFDUKvDH4&_nc_zt=14&_nc_ht=scontent-iad6-1.xx&_nc_gid=WFVhUXC3vFhp5HqXMO2_vg&_nc_ss=72289&oh=00_AQCbgqCqvp545MCPZrHlySJ8QWqgsWnjuxmEGnyIw8Gw3A&oe=6A611F63"
       },
       {
-        "id": "108824017345866",
-        "pageId": "108824017345866",
-        "advertiserId": "108824017345866",
-        "profileId": null,
-        "name": "Nike Training Club",
-        "url": "https://www.facebook.com/niketraining/",
-        "logo": null,
-        "libraryUrl": "https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=US&view_all_page_id=108824017345866&media_type=all"
+        "id": "15087023444",
+        "name": "Nike",
+        "url": "https://www.facebook.com/nike/",
+        "logo": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.35426-6/366635364_819887626183060_5665913834577832309_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=cpw1LHoxRRMQ7kNvwF0VELk&_nc_oc=Adp4gYKupQoA3SFulWbqwUFHqP4Hb9COtOidu_sWgA0fqGKhHNgkorx0YOcUbNCeAek&_nc_zt=14&_nc_ht=scontent-iad6-1.xx&_nc_gid=WFVhUXC3vFhp5HqXMO2_vg&_nc_ss=72289&oh=00_AQCzxYXtTr8L2PBX03C3WTbVmtXlrB0ZHR45OVmp6Pv9mA&oe=6A612326"
+      },
+      {
+        "id": "721404351056614",
+        "name": "IControl: Easy Widgets Themes",
+        "url": "https://www.facebook.com/61578892468353/",
+        "logo": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.35426-6/695177587_1511487320476777_920753808075681498_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=ymXmwsmzZqIQ7kNvwE2kif9&_nc_oc=AdrjQG4Qk6k7RYor663OBc3KYDml9EWij735hvCXNqbLvnje1pwp4JEzlGGYcxOAigU&_nc_zt=14&_nc_ht=scontent-iad6-1.xx&_nc_gid=WFVhUXC3vFhp5HqXMO2_vg&_nc_ss=72289&oh=00_AQBS8dexsIwImNwFM5phyZrj9jrF4PSW61cknXtjYUI1IA&oe=6A612EE7"
       }
     ]
   },
@@ -2636,115 +2584,51 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "google-ad-library-ad-details": {
     "platform": "google_ad_library",
-    "id": "CR13596485266373083137",
-    "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR13596485266373083137",
+    "id": "CR08395356613392728065",
+    "url": "https://adstransparency.google.com/advertiser/AR18378488041124659201/creative/CR08395356613392728065",
     "text": "Discover {KeyWord:Nike Shoes} Online At Nike.com. Shop The Official Nike Site.",
     "headline": "{KeyWord:Nike Vomero}",
-    "cta": null,
     "landingUrl": "nike.com",
     "adFormat": "text",
-    "firstShown": "2022-11-30T14:47:01.000Z",
-    "lastShown": "2026-07-26T13:01:42.000Z",
+    "firstShown": "2025-09-19T13:04:37.000Z",
+    "lastShown": "2026-07-23T06:18:08.000Z",
     "impressions": "7000-8000",
-    "spend": null,
-    "country": null,
-    "countries": [
-      "MT",
-      "AE",
-      "CY",
-      "BE",
-      "GB",
-      "CZ",
-      "HU",
-      "US",
-      "IS",
-      "IE",
-      "IT",
-      "SE",
-      "IN",
-      "ES",
-      "GR",
-      "HR",
-      "BG",
-      "PT",
-      "DK",
-      "LT",
-      "PL",
-      "NL",
-      "DE",
-      "AU",
-      "NO",
-      "FR",
-      "RO"
-    ],
-    "textIsTemplate": true,
+    "country": "Malta, United Arab Emirates, Cyprus, Belgium, United Kingdom, Czechia, Hungary, United States, Iceland, Ireland, Italy, Sweden, India, Spain, Greece, Croatia, Bulgaria, Portugal, Denmark, Lithuania, Poland, Netherlands, Germany, Australia, Norway, France, Romania",
     "advertiser": {
-      "id": "AR16735076323512287233",
-      "name": "Nike, Inc.",
-      "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
-      "logo": null,
-      "location": null
+      "id": "AR18378488041124659201",
+      "name": "Nike Retail BV",
+      "url": "https://adstransparency.google.com/advertiser/AR18378488041124659201"
     },
-    "media": [
-      "https://tpc.googlesyndication.com/archive/simgad/1889619096914274581"
-    ]
+    "media": []
   },
   "google-ad-library-advertiser-search": {
     "query": "nike",
     "country": "US",
-    "totalReturned": 3,
+    "totalReturned": 1,
     "advertisers": [
-      {
-        "id": "AR16735076323512287233",
-        "name": "Nike, Inc.",
-        "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
-        "adsCount": 5000
-      },
       {
         "id": "AR17365672681860497409",
         "name": "NIKE SRL",
-        "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409",
-        "adsCount": 120
-      },
-      {
-        "id": "AR18378488041124659201",
-        "name": "Nike Retail BV",
-        "url": "https://adstransparency.google.com/advertiser/AR18378488041124659201",
-        "adsCount": 200
+        "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
       }
     ]
   },
   "google-ad-library-company-ads": {
-    "advertiser": "AR16735076323512287233",
-    "resolvedAdvertiser": {
-      "id": "AR16735076323512287233",
-      "name": "Nike, Inc.",
-      "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
-    },
+    "advertiser": "nike.com",
     "country": "US",
     "totalReturned": 5,
-    "adsCountEstimate": 5000,
-    "hasMore": true,
-    "nextCursor": "eyJ2IjoxLCJhZHZlcnRpc2VySWQiOiJBUjE2NzM1MDc2MzIzNTEyMjg3MjMzIn0",
     "ads": [
       {
         "platform": "google_ad_library",
         "id": "CR13596485266373083137",
         "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR13596485266373083137",
-        "text": null,
-        "headline": null,
-        "cta": null,
-        "landingUrl": null,
         "adFormat": "image",
         "firstShown": "2022-11-30T14:47:01.000Z",
         "lastShown": "2026-07-26T13:01:42.000Z",
-        "impressions": null,
-        "spend": null,
         "advertiser": {
           "id": "AR16735076323512287233",
           "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
-          "logo": null
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/1889619096914274581"
@@ -2754,20 +2638,13 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "google_ad_library",
         "id": "CR00101170943954518017",
         "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR00101170943954518017",
-        "text": null,
-        "headline": null,
-        "cta": null,
-        "landingUrl": null,
         "adFormat": "image",
         "firstShown": "2022-11-30T18:54:18.000Z",
         "lastShown": "2026-07-26T12:53:39.000Z",
-        "impressions": null,
-        "spend": null,
         "advertiser": {
           "id": "AR16735076323512287233",
           "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
-          "logo": null
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/3850814477191431652"
@@ -2777,20 +2654,13 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "google_ad_library",
         "id": "CR11855191862560161793",
         "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR11855191862560161793",
-        "text": null,
-        "headline": null,
-        "cta": null,
-        "landingUrl": null,
         "adFormat": "image",
         "firstShown": "2022-11-30T14:47:41.000Z",
         "lastShown": "2026-07-26T12:29:26.000Z",
-        "impressions": null,
-        "spend": null,
         "advertiser": {
           "id": "AR16735076323512287233",
           "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
-          "logo": null
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/10582874225811561496"
@@ -2800,20 +2670,13 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "google_ad_library",
         "id": "CR10403323179404623873",
         "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR10403323179404623873",
-        "text": null,
-        "headline": null,
-        "cta": null,
-        "landingUrl": null,
         "adFormat": "image",
         "firstShown": "2022-11-30T14:47:37.000Z",
         "lastShown": "2026-07-26T12:28:37.000Z",
-        "impressions": null,
-        "spend": null,
         "advertiser": {
           "id": "AR16735076323512287233",
           "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
-          "logo": null
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/11551318734521008902"
@@ -2823,20 +2686,13 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "google_ad_library",
         "id": "CR15203746965809528833",
         "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR15203746965809528833",
-        "text": null,
-        "headline": null,
-        "cta": null,
-        "landingUrl": null,
         "adFormat": "image",
         "firstShown": "2022-11-30T15:11:07.000Z",
         "lastShown": "2026-07-26T12:27:34.000Z",
-        "impressions": null,
-        "spend": null,
         "advertiser": {
           "id": "AR16735076323512287233",
           "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
-          "logo": null
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/12062534195836224920"
@@ -4331,8 +4187,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     },
     "carouselImages": [],
     "paidForBy": "ScriptRunner Software GmbH",
-    "countries": ["US", "CA", "GB"],
-    "spend": null
+    "countries": []
   },
   "linkedin-ad-library-search-ads": {
     "query": "microsoft",
@@ -4360,8 +4215,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "cta": "Learn more",
         "landingUrl": "https://calendly.com/d/cvqn-kt5-t72/free-consultation?utm_campaign=32735245-PowerHouse&utm_source=linkedin&utm_medium=paidsocial&utm_term=free%20consultation&utm_content=calendly%20link&trk=ad_library_ad_preview_content_image",
         "adFormat": null,
-        "firstShown": "2026-07-28T00:00:00.000Z",
-        "lastShown": "2026-08-02T00:00:00.000Z",
+        "firstShown": "2026-07-28",
+        "lastShown": "2026-08-02",
         "impressions": "1k-5k",
         "country": "US",
         "advertiser": {
@@ -4374,8 +4229,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "description": "Drowning in one off scripts and manual steps? In a free 15 minute consult, our experts help streamline IT Infrastructure Operations with PowerShell.",
         "destinationUrl": "https://calendly.com/d/cvqn-kt5-t72/free-consultation?utm_campaign=32735245-PowerHouse&utm_source=linkedin&utm_medium=paidsocial&utm_term=free%20consultation&utm_content=calendly%20link&trk=ad_library_ad_preview_content_image",
         "adDuration": "Ran from Jul 28, 2026 to Aug 2, 2026",
-        "startDate": "2026-07-28T00:00:00.000Z",
-        "endDate": "2026-08-02T00:00:00.000Z",
+        "startDate": "2026-07-28",
+        "endDate": "2026-08-02",
         "totalImpressions": "1k-5k",
         "impressionsByCountry": [
           {
@@ -4393,12 +4248,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         ],
         "targeting": {
           "language": "Targeting includes English",
-          "location": "Targeting includes Germany, Switzerland and Netherlands, Benelux, DACH, United States, Canada, Austria, Belgium, United Kingdom",
-          "company": "Exclusion targeting applied"
+          "location": "Targeting includes Germany, Switzerland and Netherlands, Benelux, DACH, United States, Canada, Austria, Belgium, United Kingdom"
         },
         "carouselImages": [],
         "paidForBy": "ScriptRunner Software GmbH",
-        "advertiserLinkedinPage": "https://www.linkedin.com/company/16217038",
         "countries": [
           "US"
         ]
@@ -4417,10 +4270,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "impressions": null,
         "country": "US",
         "advertiser": {
-          "id": "1035",
-          "name": "Microsoft",
-          "url": "https://www.linkedin.com/company/1035",
-          "logo": null
+          "name": "Built to grow together: The FY27 Microsoft Marketplace opportunity"
         },
         "media": [],
         "description": null,
@@ -4433,7 +4283,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "targeting": null,
         "carouselImages": [],
         "paidForBy": null,
-        "advertiserLinkedinPage": "https://www.linkedin.com/company/1035",
         "countries": [
           "US"
         ]
@@ -4452,10 +4301,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "impressions": null,
         "country": "US",
         "advertiser": {
-          "id": null,
-          "name": null,
-          "url": null,
-          "logo": null
+          "name": "See how Rhenus scaled secure IT automation"
         },
         "media": [],
         "description": null,
@@ -9631,65 +9477,91 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "tiktok-ad-library-ad-details": {
     "platform": "tiktok_ad_library",
-    "id": "1872402620173314",
-    "url": "https://library.tiktok.com/ads/detail/?ad_id=1872402620173314",
-    "text": "Just Do It — new Nike running drop. Shop the collection.",
-    "headline": null,
-    "cta": "Shop now",
-    "landingUrl": "https://www.nike.com/",
+    "id": "1872034324356433",
+    "url": "https://library.tiktok.com/ads/detail/?ad_id=1872034324356433",
+    "text": "#gandurilemele #foryoupage❤️❤️ Buna dimineața tuturor!Zi binecuvântata tuturor!🙏🙏🙏",
     "adFormat": "video",
-    "firstShown": "2026-07-29T00:00:00.000Z",
-    "lastShown": "2026-07-29T00:00:00.000Z",
-    "impressions": "1K-10K",
-    "spend": null,
+    "firstShown": "07/29/2026",
+    "lastShown": "07/29/2026",
     "advertiser": {
-      "id": null,
-      "name": "Nike European Operations Netherlands B.V.",
-      "url": null,
-      "logo": null,
-      "location": "Netherlands"
+      "name": "alyalina535"
     },
     "media": [
-      "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/3dff80d5a4f73a22d6682afa5f45d78d~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=cd5ba53f&x-expires=1785686400&x-signature=m6GakMpuep1d%2BRNlCGpC0K9CiWE%3D&t=4d5b0474&ps=13740610&a"
-    ],
-    "impressionsRange": {
-      "min": 1000,
-      "max": 10000,
-      "raw": "1K-10K"
-    }
+      "https://library.tiktok.com/api/v1/cdn/1785356384/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS8zYTU3ZmRiZjYzZGIzYjY5Nzc1NzA5ZjQ0ZTMwOGZkNC82YTZhYjUwZS92aWRlby90b3MvdXNlYXN0MmEvdG9zLXVzZWFzdDJhLXZlLTAwNjgtZXV0dHAvbzRJMXRCVHdBNUVFNlEzMW01emlpY1NNSUE0ZjlLQW53b0JMQ2sv/7467d396-0387-4b9f-90c7-2d2cd26db171?a=475769&bt=1049&btag=e00090000&bti=PDU2NmYwMy86&ft=.NpOcInz7ThRcbuGXq8Zmo&l=20260730041944142876664F10EA1EB193&mime_type=video_mp4&rc=NWZoZWU8ZDM6NDU3OGk6ZEBpM3Q0aHM5cjxsPDMzZjczNUA2YWM2MF9eXmExMWBeYDFgYSNnMjNmMmRzcGdhLS1kMTNzcw%3D%3D&signature=Qzo7c7UEa5N40yYL1KKsuy%2BR%2BCnqSwFptCMo9QOZPtQ%3D&vvpl=1"
+    ]
   },
   "tiktok-ad-library-search": {
     "query": "nike",
     "country": "GB",
-    "totalReturned": 1,
+    "totalReturned": 3,
     "ads": [
       {
         "platform": "tiktok_ad_library",
         "id": "1872402620173314",
         "url": "https://library.tiktok.com/ads/detail/?ad_id=1872402620173314",
-        "text": "Just Do It — new Nike running drop. Shop the collection.",
-        "headline": null,
-        "cta": "Shop now",
-        "landingUrl": "https://www.nike.com/",
+        "text": "Professional Massage Therapy for Relaxation, Recovery, and Wellness.",
         "adFormat": "video",
-        "firstShown": "2026-07-29T00:00:00.000Z",
-        "lastShown": "2026-07-29T00:00:00.000Z",
-        "impressions": "1K-10K",
-        "spend": null,
+        "firstShown": "2026-08-02T00:00:00.000Z",
+        "lastShown": "2026-08-02T00:00:00.000Z",
+        "impressions": "0-1K",
         "advertiser": {
-          "id": null,
-          "name": "Nike European Operations Netherlands B.V.",
-          "url": null,
-          "logo": null,
-          "location": "Netherlands"
+          "name": "HongKong AdTiger Media Co., Limited",
+          "location": "Hong Kong"
         },
         "media": [
-          "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/3dff80d5a4f73a22d6682afa5f45d78d~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=cd5ba53f&x-expires=1785686400&x-signature=m6GakMpuep1d%2BRNlCGpC0K9CiWE%3D&t=4d5b0474&ps=13740610&a"
+          "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/3dff80d5a4f73a22d6682afa5f45d78d~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=cd5ba53f&x-expires=1785686400&x-signature=m6GakMpuep1d%2BRNlCGpC0K9CiWE%3D&t=4d5b0474&ps=13740610&a",
+          "https://library.tiktok.com/api/v1/cdn/1785667308/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS9mMTgyNTU3Yzg1OGVjOGEwM2RkMGQ1MjRjZTRlOWM4Ny82YTZmNzM3ZS92aWRlby90b3MvYWxpc2cvdG9zLWFsaXNnLXZlLTAwNTFjMDAxLXNnL29zOU5VSkFzZ0lMUGVtT0RoRlVHZUdSQzNSb1JnbW5lQUFKTEdiLw==/fee44425-7600-4c48-8df9-ce242eb52069?a=475769&bt=593&btag=e00088000&bti=PDU2NmYwMy86&ft=.NpOcInz7Thz~INGXq8Zmo&l=2026080218414895FDAC2A6CF961573BDF&mime_type=video_mp4&rc=N2hoOzVpZzM1OTs0aDM5aUBpajVpOGw5cjRqPDMzODYzNEBjMmFeYy9fXzMxMS0zLTJjYSNxZy82MmRraWthLS1kMC1zcw%3D%3D&signature=v7cmUB0AYCwTjyukuWGzRGtiRJKMRb6UOyUo2szN2pY%3D&vvpl=1"
         ],
         "impressionsRange": {
-          "min": 1000,
-          "max": 10000,
-          "raw": "1K-10K"
+          "min": 0,
+          "max": 1000,
+          "raw": "0-1K"
+        }
+      },
+      {
+        "platform": "tiktok_ad_library",
+        "id": "1872069030885697",
+        "url": "https://library.tiktok.com/ads/detail/?ad_id=1872069030885697",
+        "text": "Visit the website and learn more.",
+        "adFormat": "video",
+        "firstShown": "2026-08-02T00:00:00.000Z",
+        "lastShown": "2026-08-02T00:00:00.000Z",
+        "impressions": "0-1K",
+        "advertiser": {
+          "name": "VV7 HOLDING LLC",
+          "location": "United States"
+        },
+        "media": [
+          "https://p16-common-sign.tiktokcdn.com/ad-site-i18n-sg/20260729c7c7767b1bd4c6634305aba2~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=a7fcf310&x-expires=1785686400&x-signature=H8hajcaAaLOzUe4Qcbse8V10R%2Bs%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&s",
+          "https://library.tiktok.com/api/v1/cdn/1785667310/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS9kOTEzMzQzYmVlZTBlODkyNDRhOTZjYmE0ZTdjYzk1OS82YTZmNzM2MC92aWRlby90b3MvYWxpc2cvdG9zLWFsaXNnLXZlLTAwNTFjMDAxLXNnL28wM3VvbDdZak5BRUFpSHcybXk5enB2aVVNY0JCWGFRQ3FOSUEv/a83a6b69-bc09-432a-a704-4cb96c22fbb2?a=475769&bt=997&btag=e000b8000&bti=PDU2NmYwMy86&ft=.NpOcInz7Thn~INGXq8Zmo&l=202608021841508CA9C9F51CA00456AC9F&mime_type=video_mp4&rc=Z2dpNWY5ZTdmM2k8ZzU2OEBpM3FvcnU5cmw2PDMzODYzNEBhMDUyLjFhXjQxMF5jXy1eYSNiY3MwMmRrLmlhLS1kMC1zcw%3D%3D&signature=c1LXfiH6SOrrYOTEWg4TRCzE%2BNR%2BSu0k%2Fuj%2FDEUJ3vk%3D&vvpl=1"
+        ],
+        "impressionsRange": {
+          "min": 0,
+          "max": 1000,
+          "raw": "0-1K"
+        }
+      },
+      {
+        "platform": "tiktok_ad_library",
+        "id": "1872402620170418",
+        "url": "https://library.tiktok.com/ads/detail/?ad_id=1872402620170418",
+        "text": "Relax and Recharge with Professional Massage Services Near You. Book Today.",
+        "adFormat": "video",
+        "firstShown": "2026-08-02T00:00:00.000Z",
+        "lastShown": "2026-08-02T00:00:00.000Z",
+        "impressions": "0-1K",
+        "advertiser": {
+          "name": "HongKong AdTiger Media Co., Limited",
+          "location": "Hong Kong"
+        },
+        "media": [
+          "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/3de4a6d6aeade6ab958a291a3a5bd49c~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=d3c7a0dd&x-expires=1785686400&x-signature=GyiPUhUAFUFyEOGfF1XhsMSx4rQ%3D&t=4d5b0474&ps=13740610&",
+          "https://library.tiktok.com/api/v1/cdn/1785667307/video/aHR0cHM6Ly92MTZtLnRpa3Rva2Nkbi5jb20vNjQxZWM4ZWZiYTgwY2M1YzU0OWI4N2NhZjk5MjEyMDEvNmE2ZjczNTgvdmlkZW8vdG9zL2FsaXNnL3Rvcy1hbGlzZy12ZS0wMDUxYzAwMS1zZy9vd2dJMzRBYlZnRzBHRmZEUVVoQWZVTWdXWjhBQUNTRUdSOWVtWS8=/bb0280a2-4a63-46e8-a759-8d4b732e6d88?a=475769&bt=720&btag=e000b0000&bti=PDU2NmYwMy86&ft=.NpOcInz7Th2~INGXq8Zmo&l=202608021841474F1F2ED09C9DE84DF0AE&mime_type=video_mp4&rc=NDQ8NjQ0ZTxlM2Y2Njs5ZEBpMzhuZ245cjZqPDMzODYzNEAtLmNjXl5jNV8xMi0yLzJgYSNjMXMtMmQ0aWthLS1kMC1zcw%3D%3D&signature=2pQWORzvAEmUKgGQGmydZDn%2B0mYazq1nnnXy7NGPupQ%3D&vvpl=1"
+        ],
+        "impressionsRange": {
+          "min": 0,
+          "max": 1000,
+          "raw": "0-1K"
         }
       }
     ]
@@ -13376,71 +13248,81 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "videoId": "dQw4w9WgXcQ",
     "commentId": "Ugzge340dBgB75hWBm54AaABAg",
-    "totalReturned": 10,
+    "totalReturned": 5,
     "replies": [
       {
         "id": "Ugzge340dBgB75hWBm54AaABAg.AHE8_QAWJx9AHE9eIiztxR",
         "author": "@linganguliguliwatcha",
+        "authorChannelId": "UCjFRISlX-LPxiqViJAE3h6Q",
         "authorAvatarUrl": "https://yt3.ggpht.com/AbGqKNjK9k5tyOqdV7cdXx-GgnGuuGQ5wj8RN42U5YCDvYHT0vaOKXGFahR36iaDPseGN08DjQ=s88-c-k-c0x00ffffff-no-rj",
         "authorIsVerified": false,
         "authorIsChannelOwner": false,
         "text": "YOUTUBE AND ONE LIKE WOOHAAAAH",
-        "likeCount": 7100,
+        "likeCount": 7200,
         "replyCount": 5,
-        "hasCreatorHeart": true,
+        "hasCreatorHeart": false,
         "publishedTimeText": "1 year ago",
+        "publishedTime": "2025-08-03T20:35:17.000Z",
         "replyToId": "Ugzge340dBgB75hWBm54AaABAg"
       },
       {
         "id": "Ugzge340dBgB75hWBm54AaABAg.AHE8_QAWJx9AHEAB_-JmDA",
         "author": "@_bugrabilgin",
+        "authorChannelId": "UCg9tPtxMOieUEyhSv63uJ4g",
         "authorAvatarUrl": "https://yt3.ggpht.com/LvMpN24GYYr8w43sGoMeYZYejDPJz_skehI6jm_XGGhfM5YeRa9OOsaplj60LnFNehE79ZxImg=s88-c-k-c0x00ffffff-no-rj",
         "authorIsVerified": false,
         "authorIsChannelOwner": false,
         "text": "HEY YOUTUBE",
         "likeCount": 3000,
         "replyCount": 2,
-        "hasCreatorHeart": true,
+        "hasCreatorHeart": false,
         "publishedTimeText": "1 year ago",
+        "publishedTime": "2025-08-03T20:35:17.000Z",
         "replyToId": "Ugzge340dBgB75hWBm54AaABAg"
       },
       {
         "id": "Ugzge340dBgB75hWBm54AaABAg.AHE8_QAWJx9AHEAOCSlaNN",
         "author": "@NashiraArif",
+        "authorChannelId": "UCWrbmlBO2iW7jwhSuvLsgXQ",
         "authorAvatarUrl": "https://yt3.ggpht.com/ytc/AIdro_n1guDiz8iQIUgFGnmh5VA5PJlNSiWQwX3Ik0ywlPv8JUDRXZiF6wxDvbC7F3YSi1BdlA=s88-c-k-c0x00ffffff-no-rj",
         "authorIsVerified": false,
         "authorIsChannelOwner": false,
         "text": "new comment alert",
-        "likeCount": 2000,
+        "likeCount": 2100,
         "replyCount": 0,
-        "hasCreatorHeart": true,
+        "hasCreatorHeart": false,
         "publishedTimeText": "1 year ago",
+        "publishedTime": "2025-08-03T20:35:17.000Z",
         "replyToId": "Ugzge340dBgB75hWBm54AaABAg"
       },
       {
         "id": "Ugzge340dBgB75hWBm54AaABAg.AHE8_QAWJx9AHEAQwtwdoZ",
         "author": "@jennaortega-m4m",
+        "authorChannelId": "UCbHhpa0tTOY_LO-uMH5ZKig",
         "authorAvatarUrl": "https://yt3.ggpht.com/ytc/AIdro_lVdgv6VK0IOScTdHt1R4NdIFdRkvG2Y1jsrCR_otHBLogTg1YjnUt3k9YQBrmAT3VFLg=s88-c-k-c0x00ffffff-no-rj",
         "authorIsVerified": false,
         "authorIsChannelOwner": false,
         "text": "oop 3rd didnt realise youtube was here😄",
-        "likeCount": 909,
+        "likeCount": 918,
         "replyCount": 0,
-        "hasCreatorHeart": true,
+        "hasCreatorHeart": false,
         "publishedTimeText": "1 year ago",
+        "publishedTime": "2025-08-03T20:35:17.000Z",
         "replyToId": "Ugzge340dBgB75hWBm54AaABAg"
       },
       {
         "id": "Ugzge340dBgB75hWBm54AaABAg.AHE8_QAWJx9AHEB5iPJLDp",
         "author": "@TheAngelofBattle99",
+        "authorChannelId": "UCCejpvuOWrro8w-YM4SecQQ",
         "authorAvatarUrl": "https://yt3.ggpht.com/92UP2htp8mRB1oRt7tZ1bmid5hSmtrt-fNUlOH0sgx0zBFEwLSQ7OT0Vo8nuyWC3XSyUxNl3oMQ=s88-c-k-c0x00ffffff-no-rj",
         "authorIsVerified": false,
         "authorIsChannelOwner": false,
         "text": "He's ingrained in our brains at this point. Such a devoted man.",
-        "likeCount": 698,
+        "likeCount": 707,
         "replyCount": 0,
-        "hasCreatorHeart": true,
+        "hasCreatorHeart": false,
         "publishedTimeText": "1 year ago",
+        "publishedTime": "2025-08-03T20:35:17.000Z",
         "replyToId": "Ugzge340dBgB75hWBm54AaABAg"
       }
     ]
@@ -13449,69 +13331,79 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "videoId": "dQw4w9WgXcQ",
     "totalReturned": 5,
-    "totalComments": 2446085,
+    "totalComments": 2400000,
     "nextCursor": "Eg0SC2RRdzR3OVdnWGNRGAYyJSIRIgtkUXc0dzlXZ1hjUTAAeAJCEGNvbW1lbnRzLXNlY3Rpb24%3D",
     "hasMore": true,
     "comments": [
       {
         "id": "Ugzge340dBgB75hWBm54AaABAg",
         "author": "@YouTube",
+        "authorChannelId": "UCBR8-60-B28hp2BmDPdntcQ",
         "authorAvatarUrl": "https://yt3.ggpht.com/3s6evpqAiDU9tQR4sC2siJippbH2RWVPnwHgyl4V0th2iuQz0VDQZbUhQBGmsxLYo-mjG6TqZQ=s88-c-k-c0x00ffffff-no-rj",
         "authorIsVerified": true,
         "authorIsChannelOwner": false,
         "text": "can confirm: he never gave us up",
-        "likeCount": 274000,
+        "likeCount": 290000,
         "replyCount": 961,
         "hasCreatorHeart": false,
-        "publishedTimeText": "1 year ago"
+        "publishedTimeText": "1 year ago",
+        "publishedTime": "2025-08-03T20:35:12.000Z"
       },
       {
-        "id": "UgyBphvOZuIgdVHgFvx4AaABAg",
-        "author": "@Neouss",
-        "authorAvatarUrl": "https://yt3.ggpht.com/GEhF3wh6dcR36TBui5D4TxzcMAjZXtUdo4neBfxJnbNMpqvbThH31zYQnB9QH-7PeydlKc4ueA=s88-c-k-c0x00ffffff-no-rj",
+        "id": "UgxTsG2dsspEiq6MAZJ4AaABAg",
+        "author": "@MariahRhona",
+        "authorChannelId": "UCe8dr6l5fgxVh6peaTtx8XA",
+        "authorAvatarUrl": "https://yt3.ggpht.com/sEIirS_KS8tpBOKKPUIrE887msAjyf3N4gggHploxxmmwt3B2MkNRBB_t90olc0hXeghSsLj3A=s88-c-k-c0x00ffffff-no-rj",
         "authorIsVerified": false,
         "authorIsChannelOwner": false,
-        "text": "MuffinJuice sent me here",
-        "likeCount": 1200,
-        "replyCount": 260,
+        "text": "who came here saying this video was taken down",
+        "likeCount": 27000,
+        "replyCount": 982,
         "hasCreatorHeart": false,
-        "publishedTimeText": "18 hours ago"
+        "publishedTimeText": "3 days ago",
+        "publishedTime": "2026-07-31T20:35:12.000Z"
       },
       {
-        "id": "UgyEnXfdC-umwvTt8JF4AaABAg",
-        "author": "@Oatman69",
-        "authorAvatarUrl": "https://yt3.ggpht.com/ghenbV7T5VMOA3iqp3PThC82exqcu7iVng_iWNx1Ujak72Ti4oZZ_XzSVzIrfk9arP1XrFtnZA=s88-c-k-c0x00ffffff-no-rj",
+        "id": "UgxPYbA7XtJzYXPPPHV4AaABAg",
+        "author": "@encikk444",
+        "authorChannelId": "UCNIQaysmPT6w3TFRiqXJ0nw",
+        "authorAvatarUrl": "https://yt3.ggpht.com/U-R6bbqYCbcKlkAH5Tpn7VHuYaCHW4TPdEmId_pXZvvdLFEmtXt-TAjm_wAKa6i_TO8gJzbhHA=s88-c-k-c0x00ffffff-no-rj",
         "authorIsVerified": false,
         "authorIsChannelOwner": false,
-        "text": "Gonna flag this for nudity so I can rick roll the YouTube staff",
-        "likeCount": 561000,
-        "replyCount": 670,
+        "text": "I knew it was a trap, but I clicked the link anyway. It's fire tho",
+        "likeCount": 2800,
+        "replyCount": 28,
         "hasCreatorHeart": false,
-        "publishedTimeText": "6 years ago"
+        "publishedTimeText": "3 days ago",
+        "publishedTime": "2026-07-31T20:35:12.000Z"
       },
       {
-        "id": "Ugxzbv_ZeZXNRcfwsSF4AaABAg",
-        "author": "@candycake9531",
-        "authorAvatarUrl": "https://yt3.ggpht.com/ytc/AIdro_mEO82VrM8XtyGrBUkJgbAYgpAmDpUZixd1QvK9kyA=s88-c-k-c0x00ffffff-no-rj",
+        "id": "Ugw1tpIYg_PAwdPneep4AaABAg",
+        "author": "@yourlocalragingTVaddict",
+        "authorChannelId": "UCtAP9l1ZFYsRwKTvt-Ip6rA",
+        "authorAvatarUrl": "https://yt3.ggpht.com/rvOHqMNfgroNyVK_V6wJfTBdX8z3oMlP9M9Z4HWccOutbj3mKmzHxzFj4p6JY88sgXwetOqtrA=s88-c-k-c0x00ffffff-no-rj",
         "authorIsVerified": false,
         "authorIsChannelOwner": false,
-        "text": "Is everyone going to ignore the fact that Rick Astley looks like a twelve year old boy but has a uniquely deep voice?",
-        "likeCount": 288000,
-        "replyCount": 635,
+        "text": "i love how everyone just got summoned here now for the same reason",
+        "likeCount": 1800,
+        "replyCount": 33,
         "hasCreatorHeart": false,
-        "publishedTimeText": "6 years ago"
+        "publishedTimeText": "1 day ago",
+        "publishedTime": "2026-08-02T20:35:12.000Z"
       },
       {
-        "id": "UgyOBSJT7Ca0h-XMMQ54AaABAg",
-        "author": "@Aubslovesredbull",
-        "authorAvatarUrl": "https://yt3.ggpht.com/3qSnEkftXN9c1oU3e7lh106XqMKEG1_sYJ8G_PznBozt1qyMcJYS7E0aHBAU1c0FktK9x-w7p5k=s88-c-k-c0x00ffffff-no-rj",
+        "id": "UgyfzmVVGOa1-5OAerd4AaABAg",
+        "author": "@bjnewton55",
+        "authorChannelId": "UCzAP_WqmodDqnfhUK1GedkA",
+        "authorAvatarUrl": "https://yt3.ggpht.com/7Uk2UnY5tSqWPR_1VZgRgesIYvs9VFDJ5QJEnEFtTyXKiJUJoG7LQsEzZ9iFgoikLpvIa7oniQ=s88-c-k-c0x00ffffff-no-rj",
         "authorIsVerified": false,
         "authorIsChannelOwner": false,
-        "text": "MUFFIN JUICE RICK ROLLED ME",
-        "likeCount": 94,
-        "replyCount": 3,
+        "text": "You know the rules, get rick rolled once a year at least.",
+        "likeCount": 226,
+        "replyCount": 4,
         "hasCreatorHeart": false,
-        "publishedTimeText": "18 hours ago"
+        "publishedTimeText": "6 hours ago",
+        "publishedTime": "2026-08-03T14:35:12.000Z"
       }
     ]
   },
@@ -13519,32 +13411,16 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "platform": "youtube",
     "id": "UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO",
     "url": "https://www.youtube.com/post/UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO",
-    "author": "MrBeast",
-    "channel": {
-      "id": "UCX6OQ3DkcsbYNE6H8uQQuVA",
-      "title": "MrBeast",
-      "url": "https://www.youtube.com/@MrBeast",
-      "handle": "@MrBeast"
-    },
     "text": "Inside this box is the world's FIRST 500M Play Button. We're 10M away from 500M and I cannot wait to see what’s in here so help me out.",
-    "likeCount": 727000,
-    "likeCountText": "727K",
-    "likeCountApproximate": true,
     "publishedAt": "2026-07-03T19:42:10.000Z",
-    "publishedTime": "2026-07-03T19:42:10.000Z",
-    "publishedTimeText": "1 month ago (edited)",
-    "postType": "image",
     "channelName": "MrBeast",
     "channelUrl": "https://www.youtube.com/@MrBeast",
+    "likes": "727K",
     "comments": 16260,
     "images": [
       "https://yt3.ggpht.com/BgBr4f_nvLm84HY2JVaPiDZRLZXJsqA7Q29CJkAksrwRFNXN1GgQJxzjYfzWUYR6ZekKBXCVwxPQKw=s1000-rw-nd-v1"
     ],
-    "image": "https://yt3.ggpht.com/BgBr4f_nvLm84HY2JVaPiDZRLZXJsqA7Q29CJkAksrwRFNXN1GgQJxzjYfzWUYR6ZekKBXCVwxPQKw=s1000-rw-nd-v1",
-    "hashtags": [],
-    "linkedVideos": [],
-    "video": null,
-    "sourceUrl": "https://www.youtube.com/post/UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO"
+    "publishedTimeText": "1 month ago (edited)"
   },
   "youtube-community-posts": {
     "url": "https://www.youtube.com/@MrBeast",
@@ -13653,16 +13529,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "linkedVideos": [],
         "video": null,
         "publishedTime": "2026-07-19T19:42:10.000Z",
-        "publishedAt": "2026-07-19T19:42:10.000Z",
         "publishedTimeText": "2 weeks ago",
         "postType": "poll",
-        "pollOptions": [
-          { "text": "100 Years Of No Aging", "voteCount": null, "percentage": null },
-          { "text": "1 Billion Dollars", "voteCount": null, "percentage": null }
-        ],
-        "totalVotes": 1600000,
-        "totalVotesText": "1.6M votes",
-        "totalVotesApproximate": true,
         "images": [],
         "image": null,
         "sourceUrl": "https://www.youtube.com/post/UgkxZusu9I1Z-VuU5PGZNA2gclHi8V9CJVZk",
@@ -13748,141 +13616,187 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "youtube-playlist": {
     "platform": "youtube",
     "url": "https://www.youtube.com/playlist?list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
+    "id": "PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
     "title": "Pop Music Playlist - Timeless Pop Songs (Updated Weekly 2026)",
-    "channelName": "ROSÉ and Bruno Mars",
+    "channelName": "by Redlist - Just Hits",
+    "owner": {
+      "id": "UCs72iRpTEuwV3y6pdWYLgiw",
+      "name": "by Redlist - Just Hits",
+      "url": "https://www.youtube.com/@Redlist-JustHits",
+      "handle": "@Redlist-JustHits"
+    },
+    "totalVideos": 200,
     "totalReturned": 5,
     "videos": [
       {
+        "id": "ekr2nIex040",
         "url": "https://www.youtube.com/watch?v=ekr2nIex040",
         "title": "ROSÉ & Bruno Mars - APT. (Official Music Video)",
-        "publishedAt": "2025-08-02T12:00:00.000Z",
-        "viewCount": 2500000000,
-        "durationSeconds": 174,
-        "thumbnailUrl": "https://i.ytimg.com/vi/ekr2nIex040/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDzyvnY8qeogjw9kGhO1TPZkM12-A",
-        "channelName": "ROSÉ and Bruno Mars",
-        "id": "ekr2nIex040",
-        "publishedTimeText": "1 year ago",
-        "viewCountApproximate": true
+        "publishedAt": "2025-08-03T20:35:07.000Z",
+        "publishedTimeText": "1y ago",
+        "viewCount": 2606548493,
+        "durationSeconds": 173,
+        "thumbnailUrl": "https://i.ytimg.com/vi_webp/ekr2nIex040/sddefault.webp?v=6711dbac",
+        "channelName": "ROSÉ",
+        "channel": {
+          "id": "UCBo1hnzxV9rz3WVsv__Rn1g",
+          "title": "ROSÉ",
+          "url": "https://www.youtube.com/channel/UCBo1hnzxV9rz3WVsv__Rn1g"
+        }
       },
       {
+        "id": "kPa7bsKwL-c",
         "url": "https://www.youtube.com/watch?v=kPa7bsKwL-c",
         "title": "Lady Gaga, Bruno Mars - Die With A Smile (Official Music Video)",
-        "publishedAt": "2025-08-02T12:00:00.000Z",
-        "viewCount": 1700000000,
-        "durationSeconds": 253,
-        "thumbnailUrl": "https://i.ytimg.com/vi/kPa7bsKwL-c/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDF3iMqsC6OQclYtXdkxhPQUpKHUA",
-        "channelName": "Lady Gaga",
-        "id": "kPa7bsKwL-c",
-        "publishedTimeText": "1 year ago",
-        "viewCountApproximate": true
+        "publishedAt": "2025-08-03T20:35:07.000Z",
+        "publishedTimeText": "1y ago",
+        "viewCount": 1782354502,
+        "durationSeconds": 252,
+        "thumbnailUrl": "https://i.ytimg.com/vi/kPa7bsKwL-c/sddefault.jpg",
+        "channelName": "LadyGagaVEVO",
+        "channel": {
+          "id": "UC07Kxew-cMIaykMOkzqHtBQ",
+          "title": "LadyGagaVEVO",
+          "url": "https://www.youtube.com/channel/UC07Kxew-cMIaykMOkzqHtBQ"
+        }
       },
       {
+        "id": "euCqAq6BRa4",
         "url": "https://www.youtube.com/watch?v=euCqAq6BRa4",
         "title": "DJ Snake - Let Me Love You (Official Music Video) ft. Justin Bieber",
-        "publishedAt": "2017-08-04T12:00:00.000Z",
-        "viewCount": 2000000000,
-        "durationSeconds": 206,
-        "thumbnailUrl": "https://i.ytimg.com/vi/euCqAq6BRa4/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDohgpb2pBRT0I2x0NJiDghKYbSkA",
-        "channelName": "DJ Snake",
-        "id": "euCqAq6BRa4",
-        "publishedTimeText": "9 years ago",
-        "viewCountApproximate": true
+        "publishedAt": "2017-08-05T20:35:07.000Z",
+        "publishedTimeText": "9y ago",
+        "viewCount": 2086513882,
+        "durationSeconds": 205,
+        "thumbnailUrl": "https://i.ytimg.com/vi_webp/euCqAq6BRa4/sddefault.webp",
+        "channelName": "DJSnakeVEVO",
+        "channel": {
+          "id": "UCGkSXL5saM8y3VvJD_PdMFQ",
+          "title": "DJSnakeVEVO",
+          "url": "https://www.youtube.com/channel/UCGkSXL5saM8y3VvJD_PdMFQ"
+        }
       },
       {
+        "id": "V9PVRfjEBTI",
         "url": "https://www.youtube.com/watch?v=V9PVRfjEBTI",
         "title": "Billie Eilish - BIRDS OF A FEATHER (Official Music Video)",
-        "publishedAt": "2025-08-02T12:00:00.000Z",
-        "viewCount": 894000000,
+        "publishedAt": "2025-08-03T20:35:07.000Z",
+        "publishedTimeText": "1y ago",
+        "viewCount": 902681260,
         "durationSeconds": 231,
-        "thumbnailUrl": "https://i.ytimg.com/vi/V9PVRfjEBTI/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLBvvxAwBQjBvuWLg_hCUQMH6nfFXA",
-        "channelName": "Billie Eilish",
-        "id": "V9PVRfjEBTI",
-        "publishedTimeText": "1 year ago",
-        "viewCountApproximate": true
+        "thumbnailUrl": "https://i.ytimg.com/vi/V9PVRfjEBTI/sddefault.jpg",
+        "channelName": "BillieEilishVEVO",
+        "channel": {
+          "id": "UCDGmojLIoWpXok597xYo8cg",
+          "title": "BillieEilishVEVO",
+          "url": "https://www.youtube.com/channel/UCDGmojLIoWpXok597xYo8cg"
+        }
       },
       {
-        "url": "https://www.youtube.com/watch?v=q4lU1N3oqYQ",
-        "title": "Madison Beer - lovergirl (Official Music Video)",
-        "publishedAt": "2026-06-03T12:00:00.000Z",
-        "viewCount": 2400000,
-        "durationSeconds": 202,
-        "thumbnailUrl": "https://i.ytimg.com/vi/q4lU1N3oqYQ/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDHwDbvQb7vLyC4A9CadeUa1Zit0w",
-        "channelName": "Madison Beer",
-        "id": "q4lU1N3oqYQ",
-        "publishedTimeText": "2 months ago"
+        "id": "omuBaHRavpQ",
+        "url": "https://www.youtube.com/watch?v=omuBaHRavpQ",
+        "title": "Alok & Jennifer Lopez – Everything’s Fine (PM) (Official Lyric Video)",
+        "publishedAt": "2026-07-04T20:37:14.000Z",
+        "publishedTimeText": "1mo ago",
+        "viewCount": 1875446,
+        "durationSeconds": 167,
+        "thumbnailUrl": "https://i.ytimg.com/vi_webp/omuBaHRavpQ/sddefault.webp",
+        "channelName": "Alok",
+        "channel": {
+          "id": "UCQlaArsZfebRbb70iXm6usg",
+          "title": "Alok",
+          "url": "https://www.youtube.com/channel/UCQlaArsZfebRbb70iXm6usg"
+        }
       }
-    ],
-    "id": "PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
-    "owner": {
-      "name": "ROSÉ and Bruno Mars"
-    },
-    "totalVideos": 98
+    ]
   },
   "youtube-playlist-videos": {
     "url": "https://www.youtube.com/playlist?list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
+    "id": "PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
+    "totalVideos": 200,
     "totalReturned": 5,
     "videos": [
       {
+        "id": "ekr2nIex040",
         "url": "https://www.youtube.com/watch?v=ekr2nIex040",
         "title": "ROSÉ & Bruno Mars - APT. (Official Music Video)",
-        "publishedAt": "2025-08-02T12:00:00.000Z",
-        "viewCount": 2500000000,
-        "durationSeconds": 174,
-        "thumbnailUrl": "https://i.ytimg.com/vi/ekr2nIex040/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDzyvnY8qeogjw9kGhO1TPZkM12-A",
-        "channelName": "ROSÉ and Bruno Mars",
-        "id": "ekr2nIex040",
-        "publishedTimeText": "1 year ago",
-        "viewCountApproximate": true
+        "publishedAt": "2025-08-03T20:35:07.000Z",
+        "publishedTimeText": "1y ago",
+        "viewCount": 2606548493,
+        "durationSeconds": 173,
+        "thumbnailUrl": "https://i.ytimg.com/vi_webp/ekr2nIex040/sddefault.webp?v=6711dbac",
+        "channelName": "ROSÉ",
+        "channel": {
+          "id": "UCBo1hnzxV9rz3WVsv__Rn1g",
+          "title": "ROSÉ",
+          "url": "https://www.youtube.com/channel/UCBo1hnzxV9rz3WVsv__Rn1g"
+        }
       },
       {
+        "id": "kPa7bsKwL-c",
         "url": "https://www.youtube.com/watch?v=kPa7bsKwL-c",
         "title": "Lady Gaga, Bruno Mars - Die With A Smile (Official Music Video)",
-        "publishedAt": "2025-08-02T12:00:00.000Z",
-        "viewCount": 1700000000,
-        "durationSeconds": 253,
-        "thumbnailUrl": "https://i.ytimg.com/vi/kPa7bsKwL-c/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDF3iMqsC6OQclYtXdkxhPQUpKHUA",
-        "channelName": "Lady Gaga",
-        "id": "kPa7bsKwL-c",
-        "publishedTimeText": "1 year ago",
-        "viewCountApproximate": true
+        "publishedAt": "2025-08-03T20:35:07.000Z",
+        "publishedTimeText": "1y ago",
+        "viewCount": 1782354502,
+        "durationSeconds": 252,
+        "thumbnailUrl": "https://i.ytimg.com/vi/kPa7bsKwL-c/sddefault.jpg",
+        "channelName": "LadyGagaVEVO",
+        "channel": {
+          "id": "UC07Kxew-cMIaykMOkzqHtBQ",
+          "title": "LadyGagaVEVO",
+          "url": "https://www.youtube.com/channel/UC07Kxew-cMIaykMOkzqHtBQ"
+        }
       },
       {
+        "id": "euCqAq6BRa4",
         "url": "https://www.youtube.com/watch?v=euCqAq6BRa4",
         "title": "DJ Snake - Let Me Love You (Official Music Video) ft. Justin Bieber",
-        "publishedAt": "2017-08-04T12:00:00.000Z",
-        "viewCount": 2000000000,
-        "durationSeconds": 206,
-        "thumbnailUrl": "https://i.ytimg.com/vi/euCqAq6BRa4/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDohgpb2pBRT0I2x0NJiDghKYbSkA",
-        "channelName": "DJ Snake",
-        "id": "euCqAq6BRa4",
-        "publishedTimeText": "9 years ago",
-        "viewCountApproximate": true
+        "publishedAt": "2017-08-05T20:35:07.000Z",
+        "publishedTimeText": "9y ago",
+        "viewCount": 2086513882,
+        "durationSeconds": 205,
+        "thumbnailUrl": "https://i.ytimg.com/vi_webp/euCqAq6BRa4/sddefault.webp",
+        "channelName": "DJSnakeVEVO",
+        "channel": {
+          "id": "UCGkSXL5saM8y3VvJD_PdMFQ",
+          "title": "DJSnakeVEVO",
+          "url": "https://www.youtube.com/channel/UCGkSXL5saM8y3VvJD_PdMFQ"
+        }
       },
       {
+        "id": "V9PVRfjEBTI",
         "url": "https://www.youtube.com/watch?v=V9PVRfjEBTI",
         "title": "Billie Eilish - BIRDS OF A FEATHER (Official Music Video)",
-        "publishedAt": "2025-08-02T12:00:00.000Z",
-        "viewCount": 894000000,
+        "publishedAt": "2025-08-03T20:35:07.000Z",
+        "publishedTimeText": "1y ago",
+        "viewCount": 902681260,
         "durationSeconds": 231,
-        "thumbnailUrl": "https://i.ytimg.com/vi/V9PVRfjEBTI/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLBvvxAwBQjBvuWLg_hCUQMH6nfFXA",
-        "channelName": "Billie Eilish",
-        "id": "V9PVRfjEBTI",
-        "publishedTimeText": "1 year ago",
-        "viewCountApproximate": true
+        "thumbnailUrl": "https://i.ytimg.com/vi/V9PVRfjEBTI/sddefault.jpg",
+        "channelName": "BillieEilishVEVO",
+        "channel": {
+          "id": "UCDGmojLIoWpXok597xYo8cg",
+          "title": "BillieEilishVEVO",
+          "url": "https://www.youtube.com/channel/UCDGmojLIoWpXok597xYo8cg"
+        }
       },
       {
-        "url": "https://www.youtube.com/watch?v=q4lU1N3oqYQ",
-        "title": "Madison Beer - lovergirl (Official Music Video)",
-        "publishedAt": "2026-06-03T12:00:00.000Z",
-        "viewCount": 2400000,
-        "durationSeconds": 202,
-        "thumbnailUrl": "https://i.ytimg.com/vi/q4lU1N3oqYQ/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDHwDbvQb7vLyC4A9CadeUa1Zit0w",
-        "channelName": "Madison Beer",
-        "id": "q4lU1N3oqYQ",
-        "publishedTimeText": "2 months ago"
+        "id": "omuBaHRavpQ",
+        "url": "https://www.youtube.com/watch?v=omuBaHRavpQ",
+        "title": "Alok & Jennifer Lopez – Everything’s Fine (PM) (Official Lyric Video)",
+        "publishedAt": "2026-07-04T20:37:14.000Z",
+        "publishedTimeText": "1mo ago",
+        "viewCount": 1875446,
+        "durationSeconds": 167,
+        "thumbnailUrl": "https://i.ytimg.com/vi_webp/omuBaHRavpQ/sddefault.webp",
+        "channelName": "Alok",
+        "channel": {
+          "id": "UCQlaArsZfebRbb70iXm6usg",
+          "title": "Alok",
+          "url": "https://www.youtube.com/channel/UCQlaArsZfebRbb70iXm6usg"
+        }
       }
-    ],
-    "id": "PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj"
+    ]
   },
   "youtube-search": {
     "query": "space",
@@ -14133,8 +14047,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 50000,
         "replyCount": 1200,
         "hasCreatorHeart": true,
-        "publishedTimeText": "1 year ago",
-        "publishedTime": "2025-08-03T12:00:00.000Z"
+        "publishedTimeText": "1 year ago"
       },
       {
         "id": "Ugshortcomment002",
@@ -14146,8 +14059,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 8000,
         "replyCount": 40,
         "hasCreatorHeart": false,
-        "publishedTimeText": "1 year ago",
-        "publishedTime": "2025-08-03T12:00:00.000Z"
+        "publishedTimeText": "1 year ago"
       }
     ]
   },
@@ -14317,11 +14229,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "youtube-video-sponsors": {
     "videoId": "Wdjh81uH6FU",
-    "url": "https://www.youtube.com/watch?v=Wdjh81uH6FU",
     "videoDurationSeconds": 938.852,
-    "totalReturned": 4,
-    "coverageSeconds": 83.686,
-    "minVotes": 0,
+    "totalReturned": 5,
     "segments": [
       {
         "category": "selfpromo",
@@ -14332,40 +14241,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "endFormatted": "10:38",
         "durationSeconds": 83.686,
         "votes": 1,
-        "uuid": "52f9974390e30c4941d529cb028dfa56886a6e738fd1c5f1603a37f9bd9c21217",
-        "overlapsWith": [
-          "f75d77a0658f668c014ffa63f26f2ecc439a6d6b18b868d93c0875f55a47ba017",
-          "328569d7ae428c1243bc54f010800a5cf6b5449e47abd3ee0f8093531ebeb8137",
-          "6377104df535c8eb2c2d7d6437320e71660b93a02517da2ba668c3813d7de6ff7"
-        ]
-      },
-      {
-        "category": "sponsor",
-        "actionType": "skip",
-        "startSeconds": 555.65,
-        "endSeconds": 560.175,
-        "startFormatted": "9:16",
-        "endFormatted": "9:20",
-        "durationSeconds": 4.525,
-        "votes": 0,
-        "uuid": "f75d77a0658f668c014ffa63f26f2ecc439a6d6b18b868d93c0875f55a47ba017",
-        "overlapsWith": [
-          "52f9974390e30c4941d529cb028dfa56886a6e738fd1c5f1603a37f9bd9c21217"
-        ]
-      },
-      {
-        "category": "selfpromo",
-        "actionType": "skip",
-        "startSeconds": 567.302,
-        "endSeconds": 573,
-        "startFormatted": "9:27",
-        "endFormatted": "9:33",
-        "durationSeconds": 5.698,
-        "votes": 0,
-        "uuid": "328569d7ae428c1243bc54f010800a5cf6b5449e47abd3ee0f8093531ebeb8137",
-        "overlapsWith": [
-          "52f9974390e30c4941d529cb028dfa56886a6e738fd1c5f1603a37f9bd9c21217"
-        ]
+        "uuid": "52f9974390e30c4941d529cb028dfa56886a6e738fd1c5f1603a37f9bd9c21217"
       },
       {
         "category": "sponsor",
@@ -14376,10 +14252,40 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "endFormatted": "10:17",
         "durationSeconds": 16.475,
         "votes": 0,
-        "uuid": "6377104df535c8eb2c2d7d6437320e71660b93a02517da2ba668c3813d7de6ff7",
-        "overlapsWith": [
-          "52f9974390e30c4941d529cb028dfa56886a6e738fd1c5f1603a37f9bd9c21217"
-        ]
+        "uuid": "6377104df535c8eb2c2d7d6437320e71660b93a02517da2ba668c3813d7de6ff7"
+      },
+      {
+        "category": "sponsor",
+        "actionType": "skip",
+        "startSeconds": 555.65,
+        "endSeconds": 560.175,
+        "startFormatted": "9:16",
+        "endFormatted": "9:20",
+        "durationSeconds": 4.525,
+        "votes": 0,
+        "uuid": "f75d77a0658f668c014ffa63f26f2ecc439a6d6b18b868d93c0875f55a47ba017"
+      },
+      {
+        "category": "selfpromo",
+        "actionType": "skip",
+        "startSeconds": 567.302,
+        "endSeconds": 573,
+        "startFormatted": "9:27",
+        "endFormatted": "9:33",
+        "durationSeconds": 5.698,
+        "votes": 0,
+        "uuid": "328569d7ae428c1243bc54f010800a5cf6b5449e47abd3ee0f8093531ebeb8137"
+      },
+      {
+        "category": "sponsor",
+        "actionType": "skip",
+        "startSeconds": 621.375,
+        "endSeconds": 627.7,
+        "startFormatted": "10:21",
+        "endFormatted": "10:28",
+        "durationSeconds": 6.325,
+        "votes": -1,
+        "uuid": "ee142c1cb73f13b3eceef18ffdd1eafd763c1adaef8df88f2c2b20f768e40ad27"
       }
     ]
   }

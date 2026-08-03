@@ -197,25 +197,34 @@ _COUNT_RE = re.compile(r"([\d.,]+)\s*([KMB])?", re.IGNORECASE)
 _MULT = {"K": 1_000, "M": 1_000_000, "B": 1_000_000_000}
 _RELATIVE_PUBLISHED_RE = re.compile(
     r"(?:streamed\s+|premiered\s+)?"
-    r"(?:(\d+)\s*(second|minute|hour|day|week|month|year)s?"
+    r"(?:(\d+)\s*(seconds?|minutes?|hours?|days?|weeks?|months?|years?|mo|yr)"
     r"|(\d+)\s*([smhdwy]))"
     r"\s+ago",
     re.IGNORECASE,
 )
 _UNIT_SECONDS = {
     "second": 1,
+    "seconds": 1,
     "s": 1,
     "minute": 60,
+    "minutes": 60,
     "m": 60,
     "hour": 3600,
+    "hours": 3600,
     "h": 3600,
     "day": 86400,
+    "days": 86400,
     "d": 86400,
     "week": 604800,
+    "weeks": 604800,
     "w": 604800,
     "month": 2_592_000,  # 30d — YouTube's label is already approximate
+    "months": 2_592_000,
+    "mo": 2_592_000,
     "year": 31_536_000,  # 365d
+    "years": 31_536_000,
     "y": 31_536_000,
+    "yr": 31_536_000,
 }
 
 
@@ -2601,10 +2610,9 @@ def _comment_published_time(props: dict[str, Any]) -> tuple[str | None, str | No
 def _has_creator_heart(toolbar: dict[str, Any]) -> bool:
     """True only when the creator actually hearted the comment.
 
-    Do not trust emoji or generic heart-button tooltips — YouTube often ships
-    ``heartActiveTooltip`` like ``❤ by @Channel`` for the *inactive* control on
-    every comment (Rick Astley video: 5/5 tooltips, 0 real hearts). Require an
-    explicit hearted payload or past-tense wording.
+    YouTube ships ``heartActiveTooltip`` like ``❤ by @Channel`` on *every*
+    unhearted comment (Rickroll replies: 5/5 tooltips, 0 ``creatorHeart``).
+    Never treat a non-empty tooltip alone as hearted — that was the 10/10-true bug.
     """
     if toolbar.get("isHeartedByCreator") is True:
         return True

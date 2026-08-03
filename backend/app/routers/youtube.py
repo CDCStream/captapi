@@ -1230,7 +1230,7 @@ async def youtube_comments(
 
         data = await cached_or_run(
             endpoint="youtube.comments",
-            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 7},
+            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2110,7 +2110,7 @@ async def youtube_comment_replies(
 
         data = await cached_or_run(
             endpoint="youtube.comment-replies",
-            params={"url": norm_url, "comment_id": comment_id, "limit": limit, "v": 4},
+            params={"url": norm_url, "comment_id": comment_id, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

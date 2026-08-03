@@ -49,6 +49,19 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 /** Static mirror of the migration seed — used only when the table is unavailable. */
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
+    publishedAt: "2026-08-04",
+    category: "fix",
+    title: "hasCreatorHeart false positives; refresh playlist examples + totalVideos",
+    description:
+      "YouTube comment toolbars include heartActiveTooltip (❤ by @Channel) on every unhearted comment — older builds treated any non-empty tooltip as hasCreatorHeart=true (10/10 on rickroll replies). Detection stays strict; comments/comment-replies caches bumped. Docs examples regenerated: playlist-videos now shows totalVideos + channel{}, comment-replies hearts are false, footer docs stamp → 2026-08-04.",
+    items: [
+      "hasCreatorHeart: never true from inactive ❤ by @Channel tooltip",
+      "playlist-videos example: totalVideos + channel{} (was missing from snapshot)",
+      "comment-replies example: hasCreatorHeart false; cache v bump",
+      "docs stamp CONTENT_UPDATED → 2026-08-04",
+    ],
+  },
+  {
     publishedAt: "2026-08-03",
     category: "fix",
     title: "Align /apis SSG builds; playlist enrich + channel-playlists id",
