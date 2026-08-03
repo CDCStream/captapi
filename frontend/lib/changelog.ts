@@ -49,6 +49,19 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 /** Static mirror of the migration seed — used only when the table is unavailable. */
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "Reddit search: sort + timeframe, scores, authorFullname",
+    description:
+      "GET /v1/reddit/search and /subreddit-search now accept sort=relevance|new|top|hot|comments (alias comment_count) and timeframe=hour|day|week|month|year|all (default all for top/comments). Results already expose authorFullname (t2_…), name (t3_…), score/downs/upvoteRatio, subscriberCount, totalAwardsReceived, and isVideo — docs/examples refreshed. publishedAt normalized to ISO …Z across Reddit. Still 2 credits.",
+    items: [
+      "sort + timeframe (e.g. top&timeframe=week, or new)",
+      "authorFullname / score / upvoteRatio / subscriberCount in examples",
+      "Same controls on subreddit-search",
+      "ISO publishedAt …Z consistency",
+    ],
+  },
+  {
     publishedAt: "2026-08-02",
     category: "fix",
     title: "Facebook profile reels: drop archive padding after recency cliff",

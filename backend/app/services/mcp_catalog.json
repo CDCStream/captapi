@@ -2265,13 +2265,25 @@
     "name": "Reddit Search",
     "path": "/v1/reddit/search",
     "credits": 2,
-    "summary": "Search Reddit posts site-wide by keyword — title, subreddit, author, upvotes, comments; cursor pagination.",
+    "summary": "Site-wide Reddit search with sort/timeframe, scores, authorFullname, cursor.",
     "params": [
       {
         "name": "q",
         "type": "string",
         "required": true,
         "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "sort",
+        "type": "string",
+        "required": false,
+        "description": "relevance (default) | new | top | hot | comments (alias: comment_count)."
+      },
+      {
+        "name": "timeframe",
+        "type": "string",
+        "required": false,
+        "description": "For sort=top or comments: hour | day | week | month | year | all (default all)."
       },
       {
         "name": "limit",
@@ -2321,7 +2333,7 @@
     "name": "Reddit Subreddit Search",
     "path": "/v1/reddit/subreddit-search",
     "credits": 2,
-    "summary": "Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore).",
+    "summary": "Search inside one subreddit — same sort/timeframe and fields as site-wide Search.",
     "params": [
       {
         "name": "url",
@@ -2334,6 +2346,18 @@
         "type": "string",
         "required": true,
         "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "sort",
+        "type": "string",
+        "required": false,
+        "description": "relevance (default) | new | top | hot | comments (alias: comment_count)."
+      },
+      {
+        "name": "timeframe",
+        "type": "string",
+        "required": false,
+        "description": "For sort=top or comments: hour | day | week | month | year | all (default all)."
       },
       {
         "name": "limit",

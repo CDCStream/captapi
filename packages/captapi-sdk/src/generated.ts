@@ -1051,6 +1051,10 @@ export interface RedditPostTranscriptParams {
 export interface RedditSearchParams {
   /** Search query or keywords (min 2 chars). */
   q: string;
+  /** relevance (default) | new | top | hot | comments (alias: comment_count). */
+  sort?: string;
+  /** For sort=top or comments: hour | day | week | month | year | all (default all). */
+  timeframe?: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
   /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
@@ -1071,6 +1075,10 @@ export interface RedditSubredditSearchParams {
   url: string;
   /** Search query or keywords (min 2 chars). */
   q: string;
+  /** relevance (default) | new | top | hot | comments (alias: comment_count). */
+  sort?: string;
+  /** For sort=top or comments: hour | day | week | month | year | all (default all). */
+  timeframe?: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
   /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
@@ -1097,7 +1105,7 @@ export class RedditApi {
   postTranscript(params: RedditPostTranscriptParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/post-transcript", params);
   }
-  /** Reddit Search — Search Reddit posts site-wide by keyword — title, subreddit, author, upvotes, comments; cursor pagination. (2 credits) */
+  /** Reddit Search — Site-wide Reddit search with sort/timeframe, scores, authorFullname, cursor. (2 credits) */
   search(params: RedditSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/search", params);
   }
@@ -1105,7 +1113,7 @@ export class RedditApi {
   subredditDetails(params: RedditSubredditDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/subreddit-details", params);
   }
-  /** Reddit Subreddit Search — Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). (2 credits) */
+  /** Reddit Subreddit Search — Search inside one subreddit — same sort/timeframe and fields as site-wide Search. (2 credits) */
   subredditSearch(params: RedditSubredditSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/subreddit-search", params);
   }

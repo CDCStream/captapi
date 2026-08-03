@@ -96,12 +96,66 @@ def _epoch_to_iso(value: Any) -> Any:
         return datetime.fromtimestamp(int(value), tz=timezone.utc).strftime(
             "%Y-%m-%dT%H:%M:%S.000Z"
         )
-    if isinstance(value, str) and re.fullmatch(r"\d+(?:\.\d+)?", value.strip()):
-        try:
-            return _epoch_to_iso(float(value))
-        except ValueError:
-            return value
+    if isinstance(value, str):
+        s = value.strip()
+        if re.fullmatch(r"\d+(?:\.\d+)?", s):
+            try:
+                return _epoch_to_iso(float(s))
+            except ValueError:
+                return value
+        # Normalize already-parsed ISO strings to the same ``…Z`` shape.
+        if "T" in s:
+            try:
+                dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+            except ValueError:
+                return value
     return value
+
+
+# Reddit /search.json sort values. ``comment_count`` is the ScrapeCreators alias
+# for Reddit's ``comments``.
+_SEARCH_SORTS = {
+    "relevance": "relevance",
+    "hot": "hot",
+    "top": "top",
+    "new": "new",
+    "comments": "comments",
+    "comment_count": "comments",
+}
+_SEARCH_TIMEFRAMES = {"hour", "day", "week", "month", "year", "all"}
+
+
+def _resolve_search_sort_timeframe(
+    sort: str | None, timeframe: str | None
+) -> tuple[str, str | None]:
+    """Return ``(reddit_sort, t_param_or_none)`` for site/subreddit search."""
+    sort_key = (sort or "relevance").strip().lower()
+    reddit_sort = _SEARCH_SORTS.get(sort_key)
+    if not reddit_sort:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Invalid sort. Use relevance, new, top, hot, comments, "
+                "or comment_count."
+            ),
+        )
+    resolved_t: str | None = None
+    # Reddit honors ``t`` for top/comments (and sometimes hot); always accept
+    # an explicit timeframe, default ``all`` when sort needs a window.
+    if reddit_sort in {"top", "comments"} or timeframe:
+        t_raw = (timeframe or ("all" if reddit_sort in {"top", "comments"} else None))
+        if t_raw is not None:
+            t_raw = t_raw.strip().lower()
+            if t_raw not in _SEARCH_TIMEFRAMES:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid timeframe. Use hour, day, week, month, year, or all.",
+                )
+            resolved_t = t_raw
+    return reddit_sort, resolved_t
 
 
 def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
@@ -884,6 +938,20 @@ async def subreddit_search(
     url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
     q: str = Query(..., min_length=2, description="Search query"),
     limit: int = Query(25, ge=1, le=200),
+    sort: str = Query(
+        "relevance",
+        description=(
+            "Search sort: relevance|new|top|hot|comments (alias: comment_count). "
+            "Default relevance."
+        ),
+    ),
+    timeframe: str | None = Query(
+        None,
+        description=(
+            "Time window for sort=top or sort=comments: hour|day|week|month|year|all. "
+            "Default all when those sorts are used and timeframe is omitted."
+        ),
+    ),
     cursor: str | None = Query(
         None,
         description=(
@@ -895,6 +963,13 @@ async def subreddit_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     sub = _require_subreddit(url)
+    reddit_sort, resolved_t = _resolve_search_sort_timeframe(sort, timeframe)
+    sort_key = (sort or "relevance").strip().lower()
+    if sort_key == "comment_count":
+        sort_key = "comments"
+    listing: dict[str, Any] = {"q": q, "restrict_sr": "1", "sort": reddit_sort}
+    if resolved_t:
+        listing["t"] = resolved_t
     async with billed_call(
         caller=caller,
         endpoint="/v1/reddit/subreddit-search",
@@ -905,7 +980,7 @@ async def subreddit_search(
         async def _run() -> dict[str, Any]:
             results, next_cursor = await _reddit_listing_json(
                 f"/r/{sub}/search.json",
-                {"q": q, "restrict_sr": "1", "sort": "relevance"},
+                listing,
                 limit,
                 after=cursor,
             )
@@ -914,6 +989,8 @@ async def subreddit_search(
                 return {
                     "subreddit": sub,
                     "query": q,
+                    "sort": sort_key,
+                    "timeframe": resolved_t,
                     "totalReturned": len(results),
                     "nextCursor": next_cursor,
                     "hasMore": bool(next_cursor),
@@ -931,7 +1008,15 @@ async def subreddit_search(
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-search",
-            params={"sub": sub, "q": q, "limit": limit, "cursor": cursor or "", "v": 3},
+            params={
+                "sub": sub,
+                "q": q,
+                "limit": limit,
+                "sort": sort_key,
+                "timeframe": resolved_t or "",
+                "cursor": cursor or "",
+                "v": 4,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -943,6 +1028,21 @@ async def subreddit_search(
 async def reddit_search(
     q: str = Query(..., min_length=2, description="Keyword or phrase to search Reddit posts site-wide"),
     limit: int = Query(25, ge=1, le=200),
+    sort: str = Query(
+        "relevance",
+        description=(
+            "Search sort: relevance|new|top|hot|comments (alias: comment_count). "
+            "Default relevance."
+        ),
+    ),
+    timeframe: str | None = Query(
+        None,
+        description=(
+            "Time window for sort=top or sort=comments: hour|day|week|month|year|all. "
+            "Default all when those sorts are used and timeframe is omitted. "
+            "Example: sort=new for chronology, or sort=top&timeframe=week for last week."
+        ),
+    ),
     cursor: str | None = Query(
         None,
         description=(
@@ -953,6 +1053,13 @@ async def reddit_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    reddit_sort, resolved_t = _resolve_search_sort_timeframe(sort, timeframe)
+    sort_key = (sort or "relevance").strip().lower()
+    if sort_key == "comment_count":
+        sort_key = "comments"
+    listing: dict[str, Any] = {"q": q, "sort": reddit_sort}
+    if resolved_t:
+        listing["t"] = resolved_t
     async with billed_call(
         caller=caller,
         endpoint="/v1/reddit/search",
@@ -962,12 +1069,14 @@ async def reddit_search(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             results, next_cursor = await _reddit_listing_json(
-                "/search.json", {"q": q, "sort": "relevance"}, limit, after=cursor
+                "/search.json", listing, limit, after=cursor
             )
             if results:
                 ctx["source"] = "direct"
                 return {
                     "query": q,
+                    "sort": sort_key,
+                    "timeframe": resolved_t,
                     "totalReturned": len(results),
                     "nextCursor": next_cursor,
                     "hasMore": bool(next_cursor),
@@ -985,7 +1094,14 @@ async def reddit_search(
 
         data = await cached_or_run(
             endpoint="reddit.search",
-            params={"q": q, "limit": limit, "cursor": cursor or "", "v": 3},
+            params={
+                "q": q,
+                "limit": limit,
+                "sort": sort_key,
+                "timeframe": resolved_t or "",
+                "cursor": cursor or "",
+                "v": 4,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,

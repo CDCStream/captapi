@@ -7,6 +7,20 @@
     "help": "Search query or keywords (min 2 chars)."
   },
   {
+    "name": "sort",
+    "type": "text",
+    "label": "Sort",
+    "required": false,
+    "help": "relevance (default) | new | top | hot | comments (alias: comment_count)."
+  },
+  {
+    "name": "timeframe",
+    "type": "text",
+    "label": "Timeframe",
+    "required": false,
+    "help": "For sort=top or comments: hour | day | week | month | year | all (default all)."
+  },
+  {
     "name": "limit",
     "type": "number",
     "label": "Limit",

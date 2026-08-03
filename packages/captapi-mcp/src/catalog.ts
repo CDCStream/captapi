@@ -309,9 +309,22 @@ const REDDIT: Omit<Endpoint, "platform">[] = [
   { tool: "reddit_post_details", name: "Reddit Post Details", path: "/v1/reddit/post-details", credits: 1, summary: "Metadata + stats for a Reddit post.", params: [url(RD_POST)] },
   { tool: "reddit_post_comments", name: "Reddit Post Comments", path: "/v1/reddit/post-comments", credits: 2, summary: "Comments on a Reddit post.", params: [url(RD_POST), limit(50, 500)] },
   { tool: "reddit_post_transcript", name: "Reddit Post Transcript", path: "/v1/reddit/post-transcript", credits: 2, summary: "Extract Reddit post text and top comments as a discussion transcript.", params: [url(RD_POST), limit(50, 200)] },
-  { tool: "reddit_search", name: "Reddit Search", path: "/v1/reddit/search", credits: 2, summary: "Search Reddit posts site-wide by keyword — title, subreddit, author, upvotes, comments; cursor pagination.", params: [q(), limit(25, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
+  { tool: "reddit_search", name: "Reddit Search", path: "/v1/reddit/search", credits: 2, summary: "Site-wide Reddit search with sort/timeframe, scores, authorFullname, cursor.", params: [
+    q(),
+    { name: "sort", type: "string", required: false, description: "relevance (default) | new | top | hot | comments (alias: comment_count)." },
+    { name: "timeframe", type: "string", required: false, description: "For sort=top or comments: hour | day | week | month | year | all (default all)." },
+    limit(25, 200),
+    { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." },
+  ] },
   { tool: "reddit_subreddit_details", name: "Reddit Subreddit Details", path: "/v1/reddit/subreddit-details", credits: 1, summary: "Info & member stats for a subreddit.", params: [url(RD_SUB)] },
-  { tool: "reddit_subreddit_search", name: "Reddit Subreddit Search", path: "/v1/reddit/subreddit-search", credits: 2, summary: "Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore).", params: [url(RD_SUB), q(), limit(25, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
+  { tool: "reddit_subreddit_search", name: "Reddit Subreddit Search", path: "/v1/reddit/subreddit-search", credits: 2, summary: "Search inside one subreddit — same sort/timeframe and fields as site-wide Search.", params: [
+    url(RD_SUB),
+    q(),
+    { name: "sort", type: "string", required: false, description: "relevance (default) | new | top | hot | comments (alias: comment_count)." },
+    { name: "timeframe", type: "string", required: false, description: "For sort=top or comments: hour | day | week | month | year | all (default all)." },
+    limit(25, 200),
+    { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." },
+  ] },
 ];
 
 const THREADS: Omit<Endpoint, "platform">[] = [

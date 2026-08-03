@@ -459,9 +459,9 @@ const REDDIT: Spec[] = [
       "Fetch comments on a Reddit post as a flat list with depth and parentId (easy to store, rebuild the tree when you need it). publishedAt is ISO 8601 UTC. Each comment includes score/downs and authorFullname (t2_…) when Reddit exposes them. The response also includes the parent post (title, score, upvoteRatio, subscriberCount) plus hasMore when more comments exist beyond the limit. Flat 2 credits per call. Max 500 comments per request.",
   },
   { slug: "reddit-post-transcript", name: "Reddit Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/reddit/post-transcript", credits: 2 , tagline: "Get a Reddit post's discussion as readable text — title, body, and comments in one transcript-style payload. Flat 2 credits per call.", longDescription: "Paste a Reddit post URL and get the discussion as structured text: the post title and body plus comments flattened into a transcript-style response. This is discussion text, not speech-to-text from a video. Flat 2 credits per call." },
-  { slug: "reddit-search", name: "Reddit Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/reddit/search", credits: 2, tagline: "Search Reddit posts site-wide by keyword — title, text, subreddit, author, upvotes, and comments, with cursor pagination. Flat 2 credits per call.", longDescription: "Pass a keyword or phrase and the Reddit Search API returns matching public posts from across Reddit as clean JSON — the same kind of site-wide search you'd run on reddit.com. Each result includes the post URL and id, title, body text when present, subreddit, author, upvotes, comment count, publish time, NSFW flag, flair, and thumbnail when available. Need more than the first page? Pass the nextCursor value from the previous response to keep paging, and use hasMore to know when you've reached the end. To search inside one community only, use Reddit Subreddit Search instead. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Public Reddit posts matching your keyword across all of Reddit", "Title, body text, subreddit, author, and post URL", "Upvotes, comment count, publish time, NSFW flag, and thumbnail", "Cursor pagination (nextCursor + hasMore) through every page"] },
+  { slug: "reddit-search", name: "Reddit Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/reddit/search", credits: 2, tagline: "Search Reddit site-wide — sort (relevance/new/top/comments), timeframe, full scores, authorFullname, cursor. Flat 2 credits.", longDescription: "Pass a keyword or phrase and get matching public posts across Reddit as clean JSON. Sort with sort=relevance|new|top|hot|comments (alias comment_count); for top/comments use timeframe=hour|day|week|month|year|all (default all). Each result includes id/name (t3_…), title, text, subreddit, author + authorFullname (t2_…), upvotes/score/downs/upvoteRatio, comments, subscriberCount, totalAwardsReceived, isVideo, ISO publishedAt, flair, nsfw, and thumbnail. Cursor pagination via nextCursor/hasMore. Example: sort=new for chronology, or sort=top&timeframe=week for last week's top mentions. Flat 2 credits. Pass cache=true for the 24h shared cache.", delivers: ["sort + timeframe (relevance/new/top/comments × hour…all)", "authorFullname, score/downs/upvoteRatio, subscriberCount", "isVideo + totalAwardsReceived; flair/nsfw/thumbnail", "Cursor pagination; ISO publishedAt"] },
   { slug: "reddit-subreddit-details", name: "Reddit Subreddit Details API", shortName: "Subreddit Details", category: "details", method: "GET", path: "/v1/reddit/subreddit-details", credits: 1 , tagline: "Get a subreddit — title, description, subscribers, and community rules signals as structured JSON." },
-  { slug: "reddit-subreddit-search", name: "Reddit Subreddit Search API", shortName: "Subreddit Search", category: "search", method: "GET", path: "/v1/reddit/subreddit-search", credits: 2 },
+  { slug: "reddit-subreddit-search", name: "Reddit Subreddit Search API", shortName: "Subreddit Search", category: "search", method: "GET", path: "/v1/reddit/subreddit-search", credits: 2, tagline: "Search inside one subreddit — same sort/timeframe and post fields as site-wide Search. Flat 2 credits.", longDescription: "Pass a subreddit (r/name) and a query to search posts inside that community only. Same sort (relevance/new/top/hot/comments), timeframe, cursor pagination, and result fields as Reddit Search (authorFullname, score/upvoteRatio, subscriberCount, isVideo, flair, …). Flat 2 credits." },
 ];
 
 const THREADS: Spec[] = [
@@ -1904,9 +1904,22 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "reddit-post-details": [up("Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/...")],
   "reddit-post-comments": [up("Reddit post URL."), lpFlat(50, 500, 2)],
   "reddit-post-transcript": [up("Reddit post URL."), lp(50, 200)],
-  "reddit-search": [qp("Keyword or phrase to search Reddit posts site-wide (min 2 characters)."), lp(25, 200), CURSOR],
+  "reddit-search": [
+    qp("Keyword or phrase to search Reddit posts site-wide (min 2 characters)."),
+    { name: "sort", type: "string", required: false, description: "relevance (default) | new | top | hot | comments (alias: comment_count)." },
+    { name: "timeframe", type: "string", required: false, description: "For sort=top or comments: hour | day | week | month | year | all (default all)." },
+    lp(25, 200),
+    CURSOR,
+  ],
   "reddit-subreddit-details": [up("Subreddit URL, r/name, or bare name, e.g. r/technology.")],
-  "reddit-subreddit-search": [up("Subreddit URL, r/name, or bare name, e.g. r/technology."), qp("Keywords or search query (min 2 characters)."), lp(25, 200), CURSOR],
+  "reddit-subreddit-search": [
+    up("Subreddit URL, r/name, or bare name, e.g. r/technology."),
+    qp("Keywords or search query (min 2 characters)."),
+    { name: "sort", type: "string", required: false, description: "relevance (default) | new | top | hot | comments (alias: comment_count)." },
+    { name: "timeframe", type: "string", required: false, description: "For sort=top or comments: hour | day | week | month | year | all (default all)." },
+    lp(25, 200),
+    CURSOR,
+  ],
   // Threads
   "threads-profile": [up("Threads profile URL or @handle, e.g. https://threads.net/@username.")],
   "threads-user-posts": [up("Threads profile URL or @handle."), lp(20, 100)],

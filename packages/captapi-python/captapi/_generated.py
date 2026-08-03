@@ -1459,15 +1459,17 @@ class RedditApi:
         """
         return self._t.get("/v1/reddit/post-transcript", {"url": url, "limit": limit, "cache": cache})
 
-    def search(self, *, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Search — Search Reddit posts site-wide by keyword — title, subreddit, author, upvotes, comments; cursor pagination. (2 credits)
+    def search(self, *, q: str, sort: str | None = None, timeframe: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Reddit Search — Site-wide Reddit search with sort/timeframe, scores, authorFullname, cursor. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
+        :param sort: relevance (default) | new | top | hot | comments (alias: comment_count).
+        :param timeframe: For sort=top or comments: hour | day | week | month | year | all (default all).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/reddit/search", {"q": q, "limit": limit, "cursor": cursor, "cache": cache})
+        return self._t.get("/v1/reddit/search", {"q": q, "sort": sort, "timeframe": timeframe, "limit": limit, "cursor": cursor, "cache": cache})
 
     def subreddit_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Reddit Subreddit Details — Info & member stats for a subreddit. (1 credit)
@@ -1477,16 +1479,18 @@ class RedditApi:
         """
         return self._t.get("/v1/reddit/subreddit-details", {"url": url, "cache": cache})
 
-    def subreddit_search(self, *, url: str, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Search — Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). (2 credits)
+    def subreddit_search(self, *, url: str, q: str, sort: str | None = None, timeframe: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Reddit Subreddit Search — Search inside one subreddit — same sort/timeframe and fields as site-wide Search. (2 credits)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param q: Search query or keywords (min 2 chars).
+        :param sort: relevance (default) | new | top | hot | comments (alias: comment_count).
+        :param timeframe: For sort=top or comments: hour | day | week | month | year | all (default all).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/reddit/subreddit-search", {"url": url, "q": q, "limit": limit, "cursor": cursor, "cache": cache})
+        return self._t.get("/v1/reddit/subreddit-search", {"url": url, "q": q, "sort": sort, "timeframe": timeframe, "limit": limit, "cursor": cursor, "cache": cache})
 
 
 class AsyncRedditApi:
@@ -1531,15 +1535,17 @@ class AsyncRedditApi:
         """
         return await self._t.get("/v1/reddit/post-transcript", {"url": url, "limit": limit, "cache": cache})
 
-    async def search(self, *, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Search — Search Reddit posts site-wide by keyword — title, subreddit, author, upvotes, comments; cursor pagination. (2 credits)
+    async def search(self, *, q: str, sort: str | None = None, timeframe: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Reddit Search — Site-wide Reddit search with sort/timeframe, scores, authorFullname, cursor. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
+        :param sort: relevance (default) | new | top | hot | comments (alias: comment_count).
+        :param timeframe: For sort=top or comments: hour | day | week | month | year | all (default all).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/reddit/search", {"q": q, "limit": limit, "cursor": cursor, "cache": cache})
+        return await self._t.get("/v1/reddit/search", {"q": q, "sort": sort, "timeframe": timeframe, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def subreddit_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Reddit Subreddit Details — Info & member stats for a subreddit. (1 credit)
@@ -1549,16 +1555,18 @@ class AsyncRedditApi:
         """
         return await self._t.get("/v1/reddit/subreddit-details", {"url": url, "cache": cache})
 
-    async def subreddit_search(self, *, url: str, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Search — Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). (2 credits)
+    async def subreddit_search(self, *, url: str, q: str, sort: str | None = None, timeframe: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Reddit Subreddit Search — Search inside one subreddit — same sort/timeframe and fields as site-wide Search. (2 credits)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param q: Search query or keywords (min 2 chars).
+        :param sort: relevance (default) | new | top | hot | comments (alias: comment_count).
+        :param timeframe: For sort=top or comments: hour | day | week | month | year | all (default all).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/reddit/subreddit-search", {"url": url, "q": q, "limit": limit, "cursor": cursor, "cache": cache})
+        return await self._t.get("/v1/reddit/subreddit-search", {"url": url, "q": q, "sort": sort, "timeframe": timeframe, "limit": limit, "cursor": cursor, "cache": cache})
 
 
 class ThreadsApi:
