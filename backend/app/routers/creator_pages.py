@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.core.auth import ApiCaller, require_api_key
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
+from app.services.browser_fetch import _is_cloudflare_block, fetch_html
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_str, strip_empty
 from app.utils.url import detect_url_platform, platform_mismatch_detail
@@ -329,15 +330,18 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
         if komi:
             return komi
     profile = _url(platform, value)
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
-    async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
-        resp = await client.get(profile)
+    # lnk.bio (and occasionally peers) sit behind Cloudflare bot checks that
+    # reject plain httpx — browser_fetch uses Chrome TLS impersonation first.
+    try:
+        resp = await fetch_html(profile, timeout=30.0, prefer_impersonate=True)
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"{platform.title()} lookup failed") from exc
     if resp.status_code == 404:
         raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")
-    if resp.status_code >= 400:
+    if resp.status_code >= 400 or _is_cloudflare_block(resp.status_code, resp.text):
         raise HTTPException(status_code=502, detail=f"{platform.title()} lookup failed")
     page = resp.text
-    page_url = str(resp.url)
+    page_url = resp.url
     data = _next_data(page)
     links = _links(data)
     if not links:
@@ -411,7 +415,7 @@ async def _page(platform: str, url: str, caller: ApiCaller, use_cache: bool = Tr
         )
     profile = _url(platform, url)
     async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=4) as ctx:
-        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 8}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
+        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 9}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
         if data.pop("_marketingShell", None) or not (data.get("username") or data.get("links")):
             raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")
         # Pillar soft-404s to a marketing shell with the path username but no creator links.

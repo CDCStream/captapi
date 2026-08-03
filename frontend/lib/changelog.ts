@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Linkbio (lnk.bio): bypass Cloudflare 403 that marked the platform Degraded",
+    description:
+      "lnk.bio started returning Cloudflare challenge pages to plain httpx, so /v1/linkbio/page failed with HTTP 502 and /status showed Linkbio as Degraded. Fetches now prefer Chrome TLS impersonation (curl_cffi) before residential/direct httpx, restore profile + links for handles like @charlidamelio, and bump the page cache key.",
+    items: [
+      "browser_fetch: Chrome impersonation for CF-protected HTML",
+      "creator-pages / linkbio: use browser_fetch; cache v9",
+      "curl_cffi dependency for production Docker image",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "Community posts: numeric likes + pollOptions; /apis ISR; cache docs no longer overclaim cacheMaxAge",
     description:
       "community-post-details now shares the list schema: likeCount (int) + likeCountText (was string likes like \"727K\"), channel{}, ISO publishedAt/publishedTime, and pollOptions[{text,voteCount,percentage}] + totalVotes for polls (per-choice votes often null publicly — YouTube gates them). Marketing /apis pages use revalidate=3600 so PLATFORM_COUNT/ENDPOINT_COUNT cannot stick across mixed SSG deploys; OG image reads live catalog counts (was hardcoded 173). Generic cache= param copy no longer tells every endpoint to prefer cacheMaxAge — only profile endpoints that actually accept it.",
