@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Docs: profile use cases are enrichment, not influencer discovery",
+    description:
+      "API pages in the channel category (and Instagram Profile Search) no longer advertise \"Influencer Discovery — Find and vet creators by audience size.\" Those endpoints resolve or enrich a known handle/URL; they do not search niches. Use cases are now Profile Enrichment, Creator Verification, Competitive Analysis, and Partnership Qualification.",
+    items: [
+      "Replace Influencer Discovery template on channel endpoints",
+      "Instagram Profile Search uses the same enrichment use cases",
+      "Copy matches resolve/enrichment product scope",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "Instagram profile search: id, bio, links — honest resolve mode",
     description:
       "GET /v1/instagram/profile-search now returns a CRM-ready resolved profile: numeric id, bio, bioLinks, externalUrl, categoryName, following/postCount, and business/professional flags — from the same web_profile_info path, still flat 1 credit. Docs clarify this is name→@handle resolve (mode=resolve), not niche discovery search like \"fitness coach\" creator lists.",
