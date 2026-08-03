@@ -331,9 +331,9 @@ def _map_preview_comment(raw: dict[str, Any], *, post_url: str) -> dict[str, Any
         "author": author,
         "authorAvatarUrl": safe_str(user.get("profile_pic_url")),
         "authorIsVerified": bool(user.get("is_verified")) if user.get("is_verified") is not None else False,
-        "likeCount": like_count or 0,
+        "likeCount": like_count,
         "publishedAt": published,
-        "replyCount": reply_count or 0,
+        "replyCount": reply_count,
     }
 
 

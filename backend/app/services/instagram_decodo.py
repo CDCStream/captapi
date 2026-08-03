@@ -198,13 +198,16 @@ _MENTION_RE = re.compile(r"@([A-Za-z0-9_](?:[A-Za-z0-9_.]*[A-Za-z0-9_])?)")
 
 
 def hidden_count(value: Any) -> int | None:
-    """Instagram reports hidden like counts as -1; treat any negative count
-    as unknown (None) so it gets stripped instead of leaking -1, and missing
-    counts as 0 like the rest of the platform."""
+    """Normalize Instagram engagement counts.
+
+    Instagram uses ``-1`` for hidden like counts — map that to ``None``.
+    Missing values stay ``None`` too (never invent ``0``; silent zeros poison
+    averages and engagement rates).
+    """
     n = safe_int(value)
-    if n is None:
-        return 0
-    return None if n < 0 else n
+    if n is None or n < 0:
+        return None
+    return n
 
 
 def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:

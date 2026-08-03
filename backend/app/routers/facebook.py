@@ -116,7 +116,7 @@ def _reply_payload(r: dict) -> dict:
         "author": safe_str(r.get("profileName") or r.get("authorName")),
         "authorUrl": safe_str(r.get("profileUrl")),
         "authorAvatarUrl": safe_str(r.get("profilePicture")),
-        "likeCount": safe_int(r.get("likesCount") or r.get("reactionsCount")) or 0,
+        "likeCount": safe_int(r.get("likesCount") or r.get("reactionsCount")),
         "publishedAt": safe_str(r.get("date") or r.get("publishedAt")),
     }
 
@@ -417,8 +417,7 @@ def _normalize_post(item: dict) -> dict:
     video_view_count = safe_int(
         item.get("viewsCount") or item.get("videoViewCount") or item.get("videoPostViewCount")
     )
-    # shares: missing stays None (never invent 0). likes/comments keep 0 floor for
-    # classic post cards where FB routinely exposes those counters.
+    # Missing engagement stays None — never invent 0 (silent zeros poison rates).
     shares_count = safe_int(
         item.get("shares")
         if item.get("shares") is not None
@@ -460,14 +459,12 @@ def _normalize_post(item: dict) -> dict:
                 or item.get("likesCount")
                 or item.get("reactionsCount")
                 or likers.get("count")
-            )
-            or 0,
+            ),
             "comments": safe_int(
                 item.get("comments")
                 or item.get("commentsCount")
                 or item.get("total_comment_count")
-            )
-            or 0,
+            ),
             "shares": shares_count,
         },
         "isVideo": bool(is_video),
@@ -516,6 +513,11 @@ def _normalize_post(item: dict) -> dict:
     top_comments = item.get("topComments")
     if isinstance(top_comments, list) and top_comments:
         out["topComments"] = top_comments
+    # Drop null author/engagement keys (e.g. group slug must not become username).
+    if isinstance(out.get("author"), dict):
+        out["author"] = {k: v for k, v in out["author"].items() if v is not None and v != ""}
+    if isinstance(out.get("engagement"), dict):
+        out["engagement"] = {k: v for k, v in out["engagement"].items() if v is not None}
     return out
 
 
@@ -1096,9 +1098,9 @@ async def facebook_comments(
                         "author": safe_str(c.get("profileName") or c.get("authorName")),
                         "authorUrl": safe_str(c.get("profileUrl")),
                         "authorAvatarUrl": safe_str(c.get("profilePicture")),
-                        "likeCount": safe_int(c.get("likesCount") or c.get("reactionsCount")) or 0,
+                        "likeCount": safe_int(c.get("likesCount") or c.get("reactionsCount")),
                         "publishedAt": safe_str(c.get("date") or c.get("publishedAt")),
-                        "replyCount": safe_int(c.get("repliesCount") or c.get("commentsCount")) or 0,
+                        "replyCount": safe_int(c.get("repliesCount") or c.get("commentsCount")),
                     }
                 )
             ctx["source"] = "apify"
@@ -1175,7 +1177,7 @@ async def facebook_profile_posts(
 
         data = await cached_or_run(
             endpoint="facebook.profile-posts",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1254,7 +1256,7 @@ async def facebook_group_posts(
 
         data = await cached_or_run(
             endpoint="facebook.group-posts",
-            params={"url": url, "limit": limit, "sortBy": sort_mode, "v": 7},
+            params={"url": url, "limit": limit, "sortBy": sort_mode, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

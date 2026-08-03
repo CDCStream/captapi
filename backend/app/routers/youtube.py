@@ -361,7 +361,7 @@ def _reply_payload(r: dict) -> dict:
             r.get("authorIsChannelOwner") or (author.get("isCreator") if isinstance(author, dict) else False)
         ),
         "text": (r.get("comment") or r.get("text") or r.get("content") or "").strip(),
-        "likeCount": safe_int(r.get("voteCount") or r.get("votes") or r.get("likeCount")) or 0,
+        "likeCount": safe_int(r.get("voteCount") or r.get("votes") or r.get("likeCount")),
         "hasCreatorHeart": bool(r.get("hasCreatorHeart")),
         "publishedTimeText": safe_str(r.get("publishedTimeText") or r.get("publishedAt")),
         "publishedTime": safe_str(r.get("publishedTime")),
@@ -1134,7 +1134,7 @@ async def youtube_comments(
 
         data = await cached_or_run(
             endpoint="youtube.comments",
-            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 5},
+            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

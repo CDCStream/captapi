@@ -781,9 +781,9 @@ async def instagram_comments(
                             "author": safe_str(c.get("ownerUsername") or owner.get("username")),
                             "authorAvatarUrl": safe_str(c.get("ownerProfilePicUrl") or owner.get("profile_pic_url")),
                             "authorIsVerified": bool(owner.get("is_verified")),
-                            "likeCount": safe_int(c.get("likesCount") or c.get("likeCount")) or 0,
+                            "likeCount": safe_int(c.get("likesCount") or c.get("likeCount")),
                             "publishedAt": safe_str(c.get("timestamp")),
-                            "replyCount": safe_int(reply_count) or 0,
+                            "replyCount": safe_int(reply_count),
                         }
                     )
                 return {
@@ -809,7 +809,7 @@ async def instagram_comments(
 
         data = await cached_or_run(
             endpoint="instagram.comments",
-            params={"url": url, "limit": limit, "v": 7},
+            params={"url": url, "limit": limit, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

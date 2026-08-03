@@ -83,12 +83,9 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
         "channel": safe_str(item.get("channel") or item.get("channelName") or item.get("author")),
         "channelUrl": _clean_url(item.get("channelUrl")),
         "views": parse_compact_count(item.get("views") or item.get("viewCount") or item.get("viewsCount")),
+        # Do not map engagementCount/votes blobs into likes — missing stays null.
         "likes": parse_compact_count(
-            item.get("likes")
-            or item.get("likeCount")
-            or item.get("likesCount")
-            or item.get("engagementCount")
-            or item.get("votes")
+            item.get("likes") or item.get("likeCount") or item.get("likesCount")
         ),
         "dislikes": parse_compact_count(item.get("dislikes") or item.get("dislikeCount")),
         "duration": safe_str(item.get("duration") or item.get("durationSeconds")),
@@ -302,7 +299,7 @@ async def video_details(
 
         data = await cached_or_run(
             endpoint="rumble.video-details",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

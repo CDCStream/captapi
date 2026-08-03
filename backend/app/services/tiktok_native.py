@@ -703,7 +703,7 @@ def _map_comment(c: dict[str, Any]) -> dict[str, Any] | None:
         "text": (safe_str(c.get("text")) or "").strip(),
         "author": safe_str(user.get("unique_id") or user.get("nickname")),
         "authorAvatarUrl": safe_str(avatars[0] if avatars else None),
-        "likeCount": safe_int(c.get("digg_count")) or 0,
+        "likeCount": safe_int(c.get("digg_count")),
         "publishedAt": _iso(c.get("create_time")),
     }
 

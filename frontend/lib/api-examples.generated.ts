@@ -1615,8 +1615,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "engagement": {
           "likes": 1861,
-          "comments": 84,
-          "shares": 0
+          "comments": 84
         },
         "isVideo": false
       },
@@ -2929,9 +2928,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "giulianagrichetta",
         "authorAvatarUrl": "https://scontent-atl3-1.cdninstagram.com/v/t51.82787-19/728156182_18607734223047509_7404583005739996663_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=100&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=cGoAOlkd3_cQ7kNvwH3cesI&_nc_oc=AdoV430X7wZK1hp5x9HI0Hg267Kf8LmyXB11Ej7I4nXePNxGKZduI8DcOoBp0IN0ER4&_nc_zt=24&_nc_ht=scontent-atl3-1.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQBT4Z-zQV-Z89Kd0BKVNmhs_-iOYakXFRvy-kMFVfLWsA&oe=6A4DA794",
         "authorIsVerified": false,
-        "likeCount": 0,
-        "publishedAt": "2026-07-01T07:49:55.000Z",
-        "replyCount": 0
+        "publishedAt": "2026-07-01T07:49:55.000Z"
       },
       {
         "id": "18083281052356825",
@@ -2940,9 +2937,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "redkidane",
         "authorAvatarUrl": "https://scontent-atl3-3.cdninstagram.com/v/t51.82787-19/686139918_18580722691039268_2096250779414967342_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=111&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=5ruLx7cECMUQ7kNvwEw883n&_nc_oc=Adp-jPSBc0mkti93nI0FR-bBBq_hLclzrrRqC70JO7HsI47RMZeVJF159wD-BivgyvM&_nc_zt=24&_nc_ht=scontent-atl3-3.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQD-UwNDAfkrNje1f_2dMoh9ax8alu8E-J44od76mYrB5g&oe=6A4DA11B",
         "authorIsVerified": false,
-        "likeCount": 0,
-        "publishedAt": "2026-06-24T23:45:01.000Z",
-        "replyCount": 0
+        "publishedAt": "2026-06-24T23:45:01.000Z"
       },
       {
         "id": "18168040507426702",
@@ -2951,9 +2946,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "atelier_analog",
         "authorAvatarUrl": "https://scontent-atl3-2.cdninstagram.com/v/t51.82787-19/653415034_18147464455460951_7280452665537162423_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=105&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=sgO1NkmgyHkQ7kNvwEs4IhC&_nc_oc=AdqrU2fSq-MftowsOT89mq35G26EUb_ccYTWEERkb4STtTgH5l_hPIHV-S-jHatax1I&_nc_zt=24&_nc_ht=scontent-atl3-2.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQDxOoCyfhth2CWXFvEhPQTpVHxEn_SStaC3RmL4tIbTww&oe=6A4DBCAD",
         "authorIsVerified": false,
-        "likeCount": 0,
-        "publishedAt": "2026-06-20T04:32:16.000Z",
-        "replyCount": 0
+        "publishedAt": "2026-06-20T04:32:16.000Z"
       },
       {
         "id": "18602523952011665",
@@ -2962,9 +2955,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "lildazysnout",
         "authorAvatarUrl": "https://scontent-atl3-3.cdninstagram.com/v/t51.82787-19/540687345_17845526541559863_1472397767289735179_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=110&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy42NjUuQzMifQ%3D%3D&_nc_ohc=OdhOK4PpFmMQ7kNvwGiQiHx&_nc_oc=AdoFCPMVJaPuhDSavbyq8hrb1Y12w-ytKfAnBwwCGQmw4pIe1HihjTLmnT9UL-6fQUE&_nc_zt=24&_nc_ht=scontent-atl3-3.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQDntuUMWuF4uoh4NfqJGaRRjB7WNiwPa6KP9SBj0OUOJQ&oe=6A4DACC3",
         "authorIsVerified": false,
-        "likeCount": 0,
-        "publishedAt": "2026-06-18T04:44:36.000Z",
-        "replyCount": 0
+        "publishedAt": "2026-06-18T04:44:36.000Z"
       },
       {
         "id": "18065034263460905",
@@ -2973,9 +2964,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "fillehippievegetalienne",
         "authorAvatarUrl": "https://scontent-atl3-1.cdninstagram.com/v/t51.82787-19/545026581_18527383597050844_8655935088175060424_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=100&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy45NjAuQzMifQ%3D%3D&_nc_ohc=G75Ndz8uPkAQ7kNvwFSqxFu&_nc_oc=AdpdjJMmNwlb077uOPCcmoUtu8QLb8xhR1zoyQ1hklQ9FxL4eumrq0O0anY0gDBsS7c&_nc_zt=24&_nc_ht=scontent-atl3-1.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQAa7XgAf8l4dmcCCmD9ohILE4ee33UvM-46-an_z6Tfrg&oe=6A4D927C",
         "authorIsVerified": false,
-        "likeCount": 0,
-        "publishedAt": "2026-06-17T12:26:18.000Z",
-        "replyCount": 0
+        "publishedAt": "2026-06-17T12:26:18.000Z"
       },
       {
         "id": "18108644500985713",
@@ -2984,9 +2973,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "ratt.mouse",
         "authorAvatarUrl": "https://scontent-atl3-1.cdninstagram.com/v/t51.82787-19/617565450_18550688539034657_1045185118642898438_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=103&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=qyqTJYAR98kQ7kNvwGdknXh&_nc_oc=Adr2EyT8vlJ_JlBzxQXCBRP7c-aryg1HX5qOlgd36pN1ZVT-JrAxAbVmsWyxBsojFVk&_nc_zt=24&_nc_ht=scontent-atl3-1.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQB9nlMS4gBKwD9ybLzNzOsxWj_y83q1bq-_oIw97X3zxw&oe=6A4DAB5B",
         "authorIsVerified": false,
-        "likeCount": 0,
-        "publishedAt": "2026-06-16T16:33:30.000Z",
-        "replyCount": 0
+        "publishedAt": "2026-06-16T16:33:30.000Z"
       },
       {
         "id": "17939614617252811",
@@ -2995,9 +2982,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "adu_grah",
         "authorAvatarUrl": "https://scontent-atl3-2.cdninstagram.com/v/t51.2885-19/435430362_1468409024028549_7215614235883756286_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=102&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy45NjAuQzMifQ%3D%3D&_nc_ohc=gl3Qj1ufzfMQ7kNvwFbo6V0&_nc_oc=AdqYQ0ub4th5SsgirchY4eGpzfqG-1y6skUtd8y7aivfhSV6d4G6IDHzRvFp551o6ro&_nc_zt=24&_nc_ht=scontent-atl3-2.cdninstagram.com&_nc_ss=72a8c&oh=00_AQA3xdyQoxo9-nmbO6H3MkSNN1SGR7Ep8-cCC4lvFvOv-w&oe=6A4DB8E7",
         "authorIsVerified": false,
-        "likeCount": 0,
-        "publishedAt": "2026-06-16T09:04:04.000Z",
-        "replyCount": 0
+        "publishedAt": "2026-06-16T09:04:04.000Z"
       },
       {
         "id": "18601722808011757",
@@ -3006,9 +2991,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "jacobwhall",
         "authorAvatarUrl": "https://scontent-atl3-3.cdninstagram.com/v/t51.2885-19/72348062_3275652385839850_7817276323411263488_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=109&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=pwQ_L9tB_5YQ7kNvwGlFGO_&_nc_oc=Ado5QWk6xRasGtjTE7lwH4hbtp-ueoOKm7lMEg6_iz5BtZXhyEY2RfWb0qy7p5oPp7M&_nc_zt=24&_nc_ht=scontent-atl3-3.cdninstagram.com&_nc_ss=72a8c&oh=00_AQCXz4B8urpvrw__jjp54NN5E6_iOXTLyfROrrKd0GmsiQ&oe=6A4DA30D",
         "authorIsVerified": false,
-        "likeCount": 0,
-        "publishedAt": "2026-06-16T03:53:52.000Z",
-        "replyCount": 0
+        "publishedAt": "2026-06-16T03:53:52.000Z"
       },
       {
         "id": "18045448631587928",
@@ -3017,9 +3000,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "paolagamboa59",
         "authorAvatarUrl": "https://scontent-atl3-3.cdninstagram.com/v/t51.82787-19/649524491_18569449696002188_8145258155523687999_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=108&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy44NDguQzMifQ%3D%3D&_nc_ohc=pfuv9zH_B2UQ7kNvwE5gYDL&_nc_oc=AdrE0VFzInUOa0E9VTzLzNDY8j2W0TeuwYOdpJmcglIg9RiMakOxpSCTrdSzMeJyzKk&_nc_zt=24&_nc_ht=scontent-atl3-3.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQDjVFKUpNs435jVzTOY8im-M-aj3lP0_mPPOX9twCiuLw&oe=6A4DC09A",
         "authorIsVerified": false,
-        "likeCount": 0,
-        "publishedAt": "2026-06-15T22:53:40.000Z",
-        "replyCount": 0
+        "publishedAt": "2026-06-15T22:53:40.000Z"
       },
       {
         "id": "18125837404633126",
@@ -3028,9 +3009,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "avinacheryl",
         "authorAvatarUrl": "https://scontent-atl3-2.cdninstagram.com/v/t51.82787-19/728090245_18608712895002839_4761565059693675973_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=105&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=UV5OY7h9uwIQ7kNvwGanqsa&_nc_oc=Adpp8_qAJ6hZSwGnYc9xRoV6TBM3rNhNEnO6vBp3K93fEWH3sXNj0dJNHw_g5cww7GA&_nc_zt=24&_nc_ht=scontent-atl3-2.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQBjzzwPTddB6tLwWhduMgCN2QytVqO7CNp06T5jI7s_XQ&oe=6A4DA3E6",
         "authorIsVerified": false,
-        "likeCount": 0,
-        "publishedAt": "2026-06-15T19:40:41.000Z",
-        "replyCount": 0
+        "publishedAt": "2026-06-15T19:40:41.000Z"
       }
     ]
   },
@@ -4506,7 +4485,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "264938390611768286",
         "url": "https://www.pinterest.com/pin/264938390611768286/",
         "description": "Our Rockport Metal Rectangular Outdoor Dining Table is the perfect table to gather around, share everyday meals, and create everlasting memories. Layer with your favorite dinnerware, table linens, and decor. Tap to shop our table.",
-        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&amp;cm_cat=Pinterest&amp;cm_pla=stpin&amp;cm_ite=rusticlodgeoutdoordining",
+        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&cm_cat=Pinterest&cm_pla=stpin&cm_ite=rusticlodgeoutdoordining",
         "image": "https://i.pinimg.com/564x/c5/3c/d8/c53cd8cbf2c9ac113541297716ea4f79.jpg",
         "board": {
           "name": "Rustic Lodge Lookbook",
@@ -4523,7 +4502,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "264938390611768285",
         "url": "https://www.pinterest.com/pin/264938390611768285/",
         "description": "Turn your home into a cozy retreat with our Faux Fur Mink Throw Blankets. Available in over 10 colors, this soft throw blanket is perfect for cozying up on the couch, layering on a bed, or adding warmth and texture to any living room or bedroom. Tap to shop!",
-        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&amp;cm_cat=Pinterest&amp;cm_pla=stpin&amp;cm_ite=rusticlodgeblankets",
+        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&cm_cat=Pinterest&cm_pla=stpin&cm_ite=rusticlodgeblankets",
         "image": "https://i.pinimg.com/564x/92/11/09/92110909d4268cb415bfb10ae6281f50.jpg",
         "board": {
           "name": "Rustic Lodge Lookbook",
@@ -4540,7 +4519,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "264938390611768272",
         "url": "https://www.pinterest.com/pin/264938390611768272/",
         "description": "Soft plaid flannel meets rustic design to create a table setting that's warm, welcoming, and made for gathering. Layer plaid table linens with timeless dinnerware and natural textures for a cozy fall table. Tap to shop one of our favorite table settings.",
-        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&amp;cm_cat=Pinterest&amp;cm_pla=stpin&amp;cm_ite=rusticlodgetablesetting",
+        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&cm_cat=Pinterest&cm_pla=stpin&cm_ite=rusticlodgetablesetting",
         "image": "https://i.pinimg.com/564x/5a/ae/12/5aae12341bb187a4053a9ced43e2f700.jpg",
         "board": {
           "name": "Rustic Lodge Lookbook",
@@ -4557,7 +4536,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "264938390611768263",
         "url": "https://www.pinterest.com/pin/264938390611768263/",
         "description": "Bring subtle color and rich texture to your living room sofa by layering our mix of decorative throw pillows. Mix prints, patterns, and soft textures to create a living room that feels collected, cozy, and timeless.",
-        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&amp;cm_cat=Pinterest&amp;cm_pla=stpin&amp;cm_ite=rusticlodgepillows",
+        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&cm_cat=Pinterest&cm_pla=stpin&cm_ite=rusticlodgepillows",
         "image": "https://i.pinimg.com/564x/13/37/dd/1337dd421b303196c96002b735618cc3.jpg",
         "board": {
           "name": "Rustic Lodge Lookbook",
@@ -4800,7 +4779,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "264938390611768286",
         "url": "https://www.pinterest.com/pin/264938390611768286/",
         "description": "Our Rockport Metal Rectangular Outdoor Dining Table is the perfect table to gather around, share everyday meals, and create everlasting memories. Layer with your favorite dinnerware, table linens, and decor. Tap to shop our table.",
-        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&amp;cm_cat=Pinterest&amp;cm_pla=stpin&amp;cm_ite=rusticlodgeoutdoordining",
+        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&cm_cat=Pinterest&cm_pla=stpin&cm_ite=rusticlodgeoutdoordining",
         "image": "https://i.pinimg.com/564x/c5/3c/d8/c53cd8cbf2c9ac113541297716ea4f79.jpg",
         "board": {
           "name": "Rustic Lodge Lookbook",
@@ -4817,7 +4796,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "264938390611768285",
         "url": "https://www.pinterest.com/pin/264938390611768285/",
         "description": "Turn your home into a cozy retreat with our Faux Fur Mink Throw Blankets. Available in over 10 colors, this soft throw blanket is perfect for cozying up on the couch, layering on a bed, or adding warmth and texture to any living room or bedroom. Tap to shop!",
-        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&amp;cm_cat=Pinterest&amp;cm_pla=stpin&amp;cm_ite=rusticlodgeblankets",
+        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&cm_cat=Pinterest&cm_pla=stpin&cm_ite=rusticlodgeblankets",
         "image": "https://i.pinimg.com/564x/92/11/09/92110909d4268cb415bfb10ae6281f50.jpg",
         "board": {
           "name": "Rustic Lodge Lookbook",
@@ -4834,7 +4813,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "264938390611768272",
         "url": "https://www.pinterest.com/pin/264938390611768272/",
         "description": "Soft plaid flannel meets rustic design to create a table setting that's warm, welcoming, and made for gathering. Layer plaid table linens with timeless dinnerware and natural textures for a cozy fall table. Tap to shop one of our favorite table settings.",
-        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&amp;cm_cat=Pinterest&amp;cm_pla=stpin&amp;cm_ite=rusticlodgetablesetting",
+        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&cm_cat=Pinterest&cm_pla=stpin&cm_ite=rusticlodgetablesetting",
         "image": "https://i.pinimg.com/564x/5a/ae/12/5aae12341bb187a4053a9ced43e2f700.jpg",
         "board": {
           "name": "Rustic Lodge Lookbook",
@@ -4851,7 +4830,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "264938390611768263",
         "url": "https://www.pinterest.com/pin/264938390611768263/",
         "description": "Bring subtle color and rich texture to your living room sofa by layering our mix of decorative throw pillows. Mix prints, patterns, and soft textures to create a living room that feels collected, cozy, and timeless.",
-        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&amp;cm_cat=Pinterest&amp;cm_pla=stpin&amp;cm_ite=rusticlodgepillows",
+        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&cm_cat=Pinterest&cm_pla=stpin&cm_ite=rusticlodgepillows",
         "image": "https://i.pinimg.com/564x/13/37/dd/1337dd421b303196c96002b735618cc3.jpg",
         "board": {
           "name": "Rustic Lodge Lookbook",
@@ -4868,7 +4847,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "4598878985126594944",
         "url": "https://www.pinterest.com/pin/4598878985126594944/",
         "description": "Construction Slope arm. Swivel mechanism allows chair to turn 360deg.. Standard cushions have a down-blend-wrapped core for a softer feel and extra comfort. No-sag steel sinuous springs provides cushion support. Expertly crafted, kiln-dried engineered wood frame with mortise-and-tenon joinery, which provides exceptional structural integrity. Contract Grade: Thoughtfully designed and expertly engineered to meet rigorous testing standards and best practices from select ANSI/BIFMA testing protocols. Quality Exclusively designed and masterfully upholstered at our Sutter Street Factory from USA and Imported materials. Care Vacuum cushions regularly. To prevent fading, keep fabric out of direct sunlight. Blot spills immediately with a clean colorfast towel or sponge. Assembly White Glove Service",
-        "destinationUrl": "https://www.potterybarn.com/products/beaumont-upholstered-swivel-chair/?catalogId=84&amp;sku=1078915&amp;cm_ven=organicsocial&amp;cm_cat=pinterest&amp;cm_pla=organic&amp;cm_ite=%7Bproduct_id%7D/",
+        "destinationUrl": "https://www.potterybarn.com/products/beaumont-upholstered-swivel-chair/?catalogId=84&sku=1078915&cm_ven=organicsocial&cm_cat=pinterest&cm_pla=organic&cm_ite=%7Bproduct_id%7D/",
         "image": "https://i.pinimg.com/564x/03/b6/50/03b650cdee48f68e6a965f3d4a43338e.jpg",
         "board": {
           "name": "Products",
@@ -6717,7 +6696,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
     "url": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02?si=XzEUcLZ4RlmEQtnhJVQ2MQ",
     "name": "Taylor Swift",
-    "description": "And, baby, that’s show business for you. New album The Life of a Showgirl. Available now ❤️‍&#x1f525;",
+    "description": "And, baby, that’s show business for you. New album The Life of a Showgirl. Available now ❤️‍🔥",
     "followers": 161714021,
     "monthlyListeners": 100752084,
     "image": "https://i.scdn.co/image/ab6761610000e5ebe2e8e7ff002a4afda1c7147e",
@@ -7307,7 +7286,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       },
       "profile": {
         "biography": {
-          "text": "And, baby, that’s show business for you. New album The Life of a Showgirl. Available now ❤️‍&#x1f525;",
+          "text": "And, baby, that’s show business for you. New album The Life of a Showgirl. Available now ❤️‍🔥",
           "type": "AUTOBIOGRAPHY"
         },
         "externalLinks": {
@@ -7426,7 +7405,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       },
       "name": "Taylor Swift",
       "biography": {
-        "text": "And, baby, that’s show business for you. New album The Life of a Showgirl. Available now ❤️‍&#x1f525;",
+        "text": "And, baby, that’s show business for you. New album The Life of a Showgirl. Available now ❤️‍🔥",
         "type": "AUTOBIOGRAPHY"
       }
     },
@@ -7663,7 +7642,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "duration": {
             "totalMilliseconds": 10123050
           },
-          "htmlDescription": "<p>Jimmy Donaldson, better known as MrBeast, is a YouTuber, entrepreneur, and philanthropist. He is the founder of Beast Industries and Beast Philanthropy, and the creator and host of the Prime Video competition series “Beast Games.”<br />www.beastgames.com<br />www.beastphilanthropy.org<br />www.youtube.com/&#64;MrBeast<br /></p><br/><p><br /><a href=\"https://pplx.ai/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://dkng.co/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://BlueChew.com\" rel=\"nofollow\"><br /></a><br /></p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
+          "htmlDescription": "<p>Jimmy Donaldson, better known as MrBeast, is a YouTuber, entrepreneur, and philanthropist. He is the founder of Beast Industries and Beast Philanthropy, and the creator and host of the Prime Video competition series “Beast Games.”<br />www.beastgames.com<br />www.beastphilanthropy.org<br />www.youtube.com/@MrBeast<br /></p><br/><p><br /><a href=\"https://pplx.ai/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://dkng.co/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://BlueChew.com\" rel=\"nofollow\"><br /></a><br /></p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
           "id": "25xKO33R8MuWDHon82THE0",
           "mediaTypes": [
             "AUDIO",
@@ -8163,7 +8142,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "duration": {
             "totalMilliseconds": 8081918
           },
-          "htmlDescription": "<p>Nick Bostrom is a philosopher whose work focuses on artificial intelligence, existential risk, and the future of humanity. He is Principal Researcher at the Macrostrategy Research Initiative and the author of several books, the most recent of which is “Deep Utopia: Life and Meaning in a Solved World.”<br />www.simonandschuster.com/books/Deep-Utopia/Nick-Bostrom/9781646871643<br />www.nickbostrom.com</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Switch today at <a href=\"https://Visible.com\" rel=\"nofollow\">https://Visible.com</a> for just 25/mo. Or Save $10 on your first month of Visible&#43; Pro with code ROGAN. </p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
+          "htmlDescription": "<p>Nick Bostrom is a philosopher whose work focuses on artificial intelligence, existential risk, and the future of humanity. He is Principal Researcher at the Macrostrategy Research Initiative and the author of several books, the most recent of which is “Deep Utopia: Life and Meaning in a Solved World.”<br />www.simonandschuster.com/books/Deep-Utopia/Nick-Bostrom/9781646871643<br />www.nickbostrom.com</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Switch today at <a href=\"https://Visible.com\" rel=\"nofollow\">https://Visible.com</a> for just 25/mo. Or Save $10 on your first month of Visible+ Pro with code ROGAN. </p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
           "id": "10TcPJFzFUDyyBzsj72nxi",
           "mediaTypes": [
             "AUDIO",
@@ -8413,7 +8392,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "duration": {
             "totalMilliseconds": 9543167
           },
-          "htmlDescription": "<p>Joe is joined by mixed martial artists John Rallo, Matt Serra, and Din Thomas.</p><br/><p>John Rallo owns Shogun Fights and is the owner and head coach of Ground Control Mixed Martial Arts Academy.<br />www.groundcontrolbaltimore.com<br />www.shogunfights.com</p><br/><p>Matt Serra is a mixed martial artist and host of &#34;UFC Unfiltered&#34; with Jim Norton and &#34;Geeking Out with Matt Serra.&#34; He is the owner and an instructor at Serra BJJ.<br />www.youtube.com/&#64;MattSerraBJJ<br />www.serrabjjacademy.com</p><br/><p>Din Thomas is a mixed martial arts analyst, actor, and host of &#34;Din Thomas&#39; Fight Court.&#34;<br />www.youtube.com/&#64;FightCourt</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Don’t miss out on all the action this week at DraftKings! Download the DraftKings app today! Sign-up using <a href=\"https://dkng.co/rogan\" rel=\"nofollow\">https://dkng.co/rogan</a> or through my promo code ROGAN.</p><br/><p><br /></p><br/><p>Get watch party snacks and groceries on Uber Eats.</p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
+          "htmlDescription": "<p>Joe is joined by mixed martial artists John Rallo, Matt Serra, and Din Thomas.</p><br/><p>John Rallo owns Shogun Fights and is the owner and head coach of Ground Control Mixed Martial Arts Academy.<br />www.groundcontrolbaltimore.com<br />www.shogunfights.com</p><br/><p>Matt Serra is a mixed martial artist and host of \"UFC Unfiltered\" with Jim Norton and \"Geeking Out with Matt Serra.\" He is the owner and an instructor at Serra BJJ.<br />www.youtube.com/@MattSerraBJJ<br />www.serrabjjacademy.com</p><br/><p>Din Thomas is a mixed martial arts analyst, actor, and host of \"Din Thomas' Fight Court.\"<br />www.youtube.com/@FightCourt</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Don’t miss out on all the action this week at DraftKings! Download the DraftKings app today! Sign-up using <a href=\"https://dkng.co/rogan\" rel=\"nofollow\">https://dkng.co/rogan</a> or through my promo code ROGAN.</p><br/><p><br /></p><br/><p>Get watch party snacks and groceries on Uber Eats.</p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
           "id": "4imTpV50bg8l1lIccXTqoC",
           "mediaTypes": [
             "AUDIO",
@@ -12969,7 +12948,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "can confirm: he never gave us up",
         "likeCount": 274000,
         "replyCount": 961,
-        "hasCreatorHeart": true,
+        "hasCreatorHeart": false,
         "publishedTimeText": "1 year ago"
       },
       {
@@ -12981,7 +12960,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "MuffinJuice sent me here",
         "likeCount": 1200,
         "replyCount": 260,
-        "hasCreatorHeart": true,
+        "hasCreatorHeart": false,
         "publishedTimeText": "18 hours ago"
       },
       {
@@ -12993,7 +12972,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "Gonna flag this for nudity so I can rick roll the YouTube staff",
         "likeCount": 561000,
         "replyCount": 670,
-        "hasCreatorHeart": true,
+        "hasCreatorHeart": false,
         "publishedTimeText": "6 years ago"
       },
       {
@@ -13005,7 +12984,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "Is everyone going to ignore the fact that Rick Astley looks like a twelve year old boy but has a uniquely deep voice?",
         "likeCount": 288000,
         "replyCount": 635,
-        "hasCreatorHeart": true,
+        "hasCreatorHeart": false,
         "publishedTimeText": "6 years ago"
       },
       {
@@ -13017,7 +12996,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "MUFFIN JUICE RICK ROLLED ME",
         "likeCount": 94,
         "replyCount": 3,
-        "hasCreatorHeart": true,
+        "hasCreatorHeart": false,
         "publishedTimeText": "18 hours ago"
       }
     ]
@@ -13616,7 +13595,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "Rakai is a type of guy who everyone wants to avoid, but still sticks around like a parasite.",
         "likeCount": 20000,
         "replyCount": 70,
-        "hasCreatorHeart": true,
+        "hasCreatorHeart": false,
         "publishedTimeText": "3 months ago"
       }
     ]

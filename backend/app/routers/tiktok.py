@@ -1014,7 +1014,7 @@ async def tiktok_comments(
                         "text": (c.get("text") or "").strip(),
                         "author": safe_str(c.get("uniqueId") or user.get("uniqueId") or c.get("authorName")),
                         "authorAvatarUrl": safe_str(c.get("avatarThumbnail") or user.get("avatarThumb")),
-                        "likeCount": safe_int(c.get("diggCount") or c.get("likeCount")) or 0,
+                        "likeCount": safe_int(c.get("diggCount") or c.get("likeCount")),
                         "publishedAt": safe_str(c.get("createTimeISO")),
                     }
                 )
@@ -1034,7 +1034,7 @@ async def tiktok_comments(
 
         data = await cached_or_run(
             endpoint="tiktok.comments",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 6},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1816,7 +1816,7 @@ async def tiktok_comment_replies(
                                     "text": (child.get("replyText") or child.get("text") or child.get("body") or "").strip(),
                                     "author": safe_str(child.get("replyAuthorUsername") or child.get("author") or child.get("uniqueId")),
                                     "authorName": safe_str(child.get("replyAuthorNickname") or child.get("authorName") or child.get("nickname")),
-                                    "likeCount": safe_int(child.get("replyLikeCount") or child.get("likeCount") or child.get("likes")) or 0,
+                                    "likeCount": safe_int(child.get("replyLikeCount") or child.get("likeCount") or child.get("likes")),
                                     "publishedAt": safe_str(child.get("replyCreateTime") or child.get("createdAt") or child.get("createTimeISO")),
                                     "verified": False if verified is None else bool(verified),
                                     "profileImage": safe_str(child.get("replyAuthorAvatar") or child.get("avatar")),
@@ -1832,7 +1832,7 @@ async def tiktok_comment_replies(
                         "text": (r.get("replyText") or r.get("text") or r.get("body") or "").strip(),
                         "author": safe_str(r.get("replyAuthorUsername") or r.get("uniqueId") or r.get("authorId") or r.get("author")),
                         "authorName": safe_str(r.get("replyAuthorNickname") or r.get("authorName") or r.get("nickname") or r.get("author")),
-                        "likeCount": safe_int(r.get("replyLikeCount") or r.get("likeCount") or r.get("likes")) or 0,
+                        "likeCount": safe_int(r.get("replyLikeCount") or r.get("likeCount") or r.get("likes")),
                         "publishedAt": safe_str(r.get("replyCreateTime") or r.get("createdAt") or r.get("createTimeISO")),
                         "verified": False if verified is None else bool(verified),
                         "profileImage": safe_str(r.get("replyAuthorAvatar") or r.get("avatar") or r.get("authorAvatarUrl")),

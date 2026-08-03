@@ -2059,11 +2059,15 @@ def _comment_published_time(props: dict[str, Any]) -> tuple[str | None, str | No
 def _has_creator_heart(toolbar: dict[str, Any]) -> bool:
     """True only when the creator actually hearted the comment.
 
-    ``heartActiveTooltip`` is often a non-empty UI string even when inactive,
-    so ``bool(tooltip)`` false-positives — require an explicit heart object or
-    tooltip language that says the comment was hearted.
+    Do not trust emoji or generic heart-button tooltips — YouTube often ships a
+    non-empty ``heartActiveTooltip`` for the inactive control, which made every
+    comment look hearted. Require an explicit heart payload or wording that the
+    creator already hearted it.
     """
-    if toolbar.get("creatorHeart") or toolbar.get("isHeartedByCreator"):
+    heart = toolbar.get("creatorHeart")
+    if isinstance(heart, dict) and heart:
+        return True
+    if toolbar.get("isHeartedByCreator") is True:
         return True
     tip = toolbar.get("heartActiveTooltip")
     if not isinstance(tip, str):
@@ -2071,14 +2075,16 @@ def _has_creator_heart(toolbar: dict[str, Any]) -> bool:
     t = tip.strip().lower()
     if not t:
         return False
+    # Explicit past-tense / creator attribution only — not bare ❤ UI chrome.
     return any(
         needle in t
         for needle in (
-            "hearted",
+            "hearted by",
             "hearts this",
-            "loved by",
-            "❤",
-            "❤️",
+            "loved by the creator",
+            "loved by creator",
+            "creator hearted",
+            "hearted this comment",
         )
     )
 
@@ -2107,8 +2113,8 @@ def _comment_payload_to_api(p: dict[str, Any]) -> dict[str, Any] | None:
         "authorIsVerified": bool(author.get("isVerified")),
         "authorIsChannelOwner": bool(author.get("isCreator")),
         "text": text.strip(),
-        "likeCount": like_count or 0,
-        "replyCount": safe_int(toolbar.get("replyCount")) or parse_count_text(toolbar.get("replyCountA11y")) or 0,
+        "likeCount": like_count,
+        "replyCount": safe_int(toolbar.get("replyCount")) or parse_count_text(toolbar.get("replyCountA11y")),
         "hasCreatorHeart": _has_creator_heart(toolbar),
         "publishedTimeText": published_text,
         "publishedTime": published_iso,

@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Stop inventing engagement zeros (IG/FB/YT/TikTok/Rumble)",
+    description:
+      "Missing like/comment/share/reply counts now stay null instead of becoming 0. Root cause: shared patterns like Instagram hidden_count(None)→0 and safe_int(...) or 0 across comments and post engagement. Also tightened YouTube hasCreatorHeart (emoji tooltips no longer force true) and stopped mapping Rumble engagementCount into likes. Kick likes:0 is Kick's own API returning zero — not invented. Prefer null over silent zeros so averages and engagement rates are not poisoned.",
+    items: [
+      "hidden_count: missing → null (not 0)",
+      "IG/FB/YT/TikTok comments: drop or 0 on like/reply counts",
+      "Facebook post engagement likes/comments: no invented zeros",
+      "YouTube hasCreatorHeart: require real creator-heart signal",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "Docs: profile use cases are enrichment, not influencer discovery",
     description:
       "API pages in the channel category (and Instagram Profile Search) no longer advertise \"Influencer Discovery — Find and vet creators by audience size.\" Those endpoints resolve or enrich a known handle/URL; they do not search niches. Use cases are now Profile Enrichment, Creator Verification, Competitive Analysis, and Partnership Qualification.",
