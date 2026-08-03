@@ -1668,12 +1668,21 @@ async def instagram_reels_by_audio_id(
         async def _run() -> dict[str, Any]:
             native = await instagram_native.reels_by_audio_native(audio_id, limit=limit)
             if native:
-                reels = [decodo.strip_null_post_fields(r) for r in native[:limit]]
+                reels = [
+                    decodo.strip_null_post_fields(r)
+                    for r in (native.get("reels") or [])[:limit]
+                ]
                 ctx["source"] = "direct"
+                music = native.get("music") if isinstance(native.get("music"), dict) else None
                 return {
                     "platform": "instagram",
-                    "audioId": audio_id,
-                    "audioUrl": audio_url,
+                    "audioId": native.get("audioId") or audio_id,
+                    "audioUrl": native.get("audioUrl") or audio_url,
+                    # Trend signals — why callers hit this endpoint.
+                    "isTrendingInClips": native.get("isTrendingInClips"),
+                    "trendRank": native.get("trendRank"),
+                    "previousTrendRank": native.get("previousTrendRank"),
+                    "music": music,
                     "totalReturned": len(reels),
                     "reels": reels,
                 }
@@ -1693,13 +1702,17 @@ async def instagram_reels_by_audio_id(
                 "platform": "instagram",
                 "audioId": audio_id,
                 "audioUrl": audio_url,
+                "isTrendingInClips": None,
+                "trendRank": None,
+                "previousTrendRank": None,
+                "music": {"id": audio_id, "clusterId": audio_id},
                 "totalReturned": len(reels),
                 "reels": reels,
             }
 
         data = await cached_or_run(
             endpoint="instagram.reels-by-audio-id",
-            params={"audio_id": audio_id, "limit": limit, "v": 6},
+            params={"audio_id": audio_id, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

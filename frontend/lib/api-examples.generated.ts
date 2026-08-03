@@ -3131,7 +3131,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "comments": 914
         },
         "musicId": "27919946310946207",
-        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/"
+        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/",
+        "hasAudio": true,
+        "music": {
+          "id": "27919946310946207",
+          "clusterId": "27919946310946207",
+          "assetId": "audio_asset_example",
+          "canonicalId": "18455463055100927",
+          "artistId": "42",
+          "title": "Freakin Out",
+          "artist": "Dexter and The Moonrocks",
+          "durationMs": 217897,
+          "audioType": "licensed_music",
+          "coverUrl": "https://cdn.example/cover.jpg",
+          "isTrendingInClips": true,
+          "trendRank": 3,
+          "previousTrendRank": 7,
+          "isExplicit": false,
+          "hasLyrics": true
+        },
+        "isPaidPartnership": false
       },
       {
         "platform": "instagram",
@@ -3155,7 +3174,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "comments": 0
         },
         "musicId": "27919946310946207",
-        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/"
+        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/",
+        "hasAudio": true,
+        "music": {
+          "id": "27919946310946207",
+          "clusterId": "27919946310946207",
+          "assetId": "audio_asset_example",
+          "canonicalId": "18455463055100927",
+          "artistId": "42",
+          "title": "Freakin Out",
+          "artist": "Dexter and The Moonrocks",
+          "durationMs": 217897,
+          "audioType": "licensed_music",
+          "coverUrl": "https://cdn.example/cover.jpg",
+          "isTrendingInClips": true,
+          "trendRank": 3,
+          "previousTrendRank": 7,
+          "isExplicit": false,
+          "hasLyrics": true
+        },
+        "isPaidPartnership": false
       },
       {
         "platform": "instagram",
@@ -3179,7 +3217,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "comments": 0
         },
         "musicId": "27919946310946207",
-        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/"
+        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/",
+        "hasAudio": true,
+        "music": {
+          "id": "27919946310946207",
+          "clusterId": "27919946310946207",
+          "assetId": "audio_asset_example",
+          "canonicalId": "18455463055100927",
+          "artistId": "42",
+          "title": "Freakin Out",
+          "artist": "Dexter and The Moonrocks",
+          "durationMs": 217897,
+          "audioType": "licensed_music",
+          "coverUrl": "https://cdn.example/cover.jpg",
+          "isTrendingInClips": true,
+          "trendRank": 3,
+          "previousTrendRank": 7,
+          "isExplicit": false,
+          "hasLyrics": true
+        },
+        "isPaidPartnership": false
       },
       {
         "platform": "instagram",
@@ -3203,7 +3260,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "comments": 0
         },
         "musicId": "27919946310946207",
-        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/"
+        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/",
+        "hasAudio": true,
+        "music": {
+          "id": "27919946310946207",
+          "clusterId": "27919946310946207",
+          "assetId": "audio_asset_example",
+          "canonicalId": "18455463055100927",
+          "artistId": "42",
+          "title": "Freakin Out",
+          "artist": "Dexter and The Moonrocks",
+          "durationMs": 217897,
+          "audioType": "licensed_music",
+          "coverUrl": "https://cdn.example/cover.jpg",
+          "isTrendingInClips": true,
+          "trendRank": 3,
+          "previousTrendRank": 7,
+          "isExplicit": false,
+          "hasLyrics": true
+        },
+        "isPaidPartnership": false
       },
       {
         "platform": "instagram",
@@ -3227,9 +3303,48 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "comments": 0
         },
         "musicId": "27919946310946207",
-        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/"
+        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/",
+        "hasAudio": true,
+        "music": {
+          "id": "27919946310946207",
+          "clusterId": "27919946310946207",
+          "assetId": "audio_asset_example",
+          "canonicalId": "18455463055100927",
+          "artistId": "42",
+          "title": "Freakin Out",
+          "artist": "Dexter and The Moonrocks",
+          "durationMs": 217897,
+          "audioType": "licensed_music",
+          "coverUrl": "https://cdn.example/cover.jpg",
+          "isTrendingInClips": true,
+          "trendRank": 3,
+          "previousTrendRank": 7,
+          "isExplicit": false,
+          "hasLyrics": true
+        },
+        "isPaidPartnership": false
       }
-    ]
+    ],
+    "isTrendingInClips": true,
+    "trendRank": 3,
+    "previousTrendRank": 7,
+    "music": {
+      "id": "27919946310946207",
+      "clusterId": "27919946310946207",
+      "assetId": "audio_asset_example",
+      "canonicalId": "18455463055100927",
+      "artistId": "42",
+      "title": "Freakin Out",
+      "artist": "Dexter and The Moonrocks",
+      "durationMs": 217897,
+      "audioType": "licensed_music",
+      "coverUrl": "https://cdn.example/cover.jpg",
+      "isTrendingInClips": true,
+      "trendRank": 3,
+      "previousTrendRank": 7,
+      "isExplicit": false,
+      "hasLyrics": true
+    }
   },
   "instagram-reels-search": {
     "query": "travel",

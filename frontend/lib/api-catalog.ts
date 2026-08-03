@@ -526,7 +526,26 @@ const INSTAGRAM: Spec[] = [
       "Cursor pagination (nextCursor + hasMore)",
     ],
   },
-  { slug: "instagram-reels-by-audio-id", name: "Instagram Reels By Audio ID API", shortName: "Reels By Audio ID", category: "list", method: "GET", path: "/v1/instagram/reels-by-audio-id", credits: 28, creditsPerResult: 1.4, tagline: "Give it an Instagram sound and get back every Reel that uses it — each with its video, caption, creator, and view / like / comment counts.", longDescription: "On Instagram every Reel is built on an audio track, and each track has its own page listing the Reels that use it. This API takes that sound — either the numeric audio ID (the musicId you see on a Reel) or a full audio-page URL like https://www.instagram.com/reels/audio/AUDIO_ID/ — and returns those Reels as clean JSON. For each Reel you get a direct video URL, caption, the creator's profile, play / like / comment counts, duration, and publish date. Use it to see how far a trending sound has spread, find every creator who used your music, or measure a branded-audio campaign. No Instagram login, no OAuth, and no infrastructure to maintain. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Every public Reel made with that audio track", "Direct MP4 video URL and thumbnail for each Reel", "Caption, duration, publish date, and the sound's audio ID", "Creator handle plus play / like / comment counts"] },
+  {
+    slug: "instagram-reels-by-audio-id",
+    name: "Instagram Reels By Audio ID API",
+    shortName: "Reels By Audio ID",
+    category: "list",
+    method: "GET",
+    path: "/v1/instagram/reels-by-audio-id",
+    credits: 28,
+    creditsPerResult: 1.4,
+    tagline:
+      "Is this Instagram sound trending? Reels that use it + isTrendingInClips / trendRank / rich music{}.",
+    longDescription:
+      "Pass an audio ID or https://www.instagram.com/reels/audio/AUDIO_ID/ URL. The response includes the trend signals this endpoint is for — isTrendingInClips, trendRank, previousTrendRank — plus music{} (clusterId, assetId, canonicalId, title, artist, durationMs, audioType, isExplicit, hasLyrics, coverUrl). Then the list of public Reels using that sound: video URL, caption, creator, views/likes/comments, durationSeconds, hasAudio, and when Instagram exposes them coauthors[] (collabs) and mashupInfo.hasBeenMashedUp. Use it to measure how far a sound has spread or whether it is trending in Reels. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "isTrendingInClips + trendRank + previousTrendRank",
+      "music{} with clusterId / title / artist / audioType / coverUrl",
+      "Reels list with hasAudio, coauthors, mashupInfo when available",
+      "Video URL, caption, engagement, durationSeconds",
+    ],
+  },
   { slug: "instagram-hashtag-search", name: "Instagram Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/instagram/hashtag-search", credits: 2, tagline: "Native Instagram hashtag grid — posts with media, caption, author followers, views, paid-partnership flags, audio, and location. Flat 2 credits per call.", longDescription: "Pass a hashtag without the # (e.g. travel or foodie) and the Instagram Hashtag Search API returns the public posts and Reels from that tag's Explore grid as clean JSON — the same grid you'd see on the hashtag's page in the app (not a Google-indexed subset). Each result includes the post URL, media type, caption, author (with followers / postCount when available), like / comment / view counts, paid-partnership / ad / affiliate flags, audio (musicId), location, sample preview comments, a thumbnail, and hashtags / @mentions. Optional mediaType=reels filters to Reels only. Use it to track a campaign or branded hashtag, separate organic from sponsored hits, discover creators by size, or watch a trend grow. No Instagram login, no OAuth, and no infrastructure to maintain. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Native hashtag grid posts and Reels (not Google index)", "Author followers / postCount plus like / comment / view counts", "isPaidPartnership / isAd / isAffiliate flags", "musicId, location, previewComments, mediaType=reels filter"] },
   {
     slug: "instagram-profile-search",

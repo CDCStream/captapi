@@ -135,10 +135,71 @@ def _location_from_media(media: dict[str, Any]) -> dict[str, Any] | None:
     return out
 
 
-def _music_from_media(media: dict[str, Any]) -> dict[str, Any] | None:
-    """Audio attribution from clips_metadata (licensed track or original sound)."""
+def _coauthors_from_media(media: dict[str, Any]) -> list[dict[str, Any]]:
+    """Collab partners from ``coauthor_producers`` (empty when solo)."""
+    raw = media.get("coauthor_producers") or media.get("coauthor_producer") or []
+    if not isinstance(raw, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for user in raw:
+        if not isinstance(user, dict):
+            continue
+        username = safe_str(user.get("username"))
+        if not username and not user.get("pk") and not user.get("id"):
+            continue
+        out.append(
+            {
+                "id": safe_str(user.get("pk") or user.get("pk_id") or user.get("id")),
+                "username": username,
+                "displayName": safe_str(user.get("full_name")),
+                "url": f"https://instagram.com/{username}" if username else None,
+                "verified": user.get("is_verified"),
+                "profileImage": safe_str(user.get("profile_pic_url")),
+            }
+        )
+    return out
+
+
+def _mashup_from_media(media: dict[str, Any]) -> dict[str, Any] | None:
     clips = media.get("clips_metadata") if isinstance(media.get("clips_metadata"), dict) else {}
-    music_info = clips.get("music_info") if isinstance(clips.get("music_info"), dict) else {}
+    mashup = clips.get("mashup_info") if isinstance(clips.get("mashup_info"), dict) else None
+    if not mashup:
+        return None
+    has_been = mashup.get("has_been_mashed_up")
+    count = safe_int(
+        mashup.get("non_privacy_filtered_mashups_media_count")
+        or mashup.get("mashups_count")
+    )
+    if has_been is None and count is None:
+        return None
+    out: dict[str, Any] = {}
+    if has_been is not None:
+        out["hasBeenMashedUp"] = bool(has_been)
+    if count is not None:
+        out["mashupCount"] = count
+    return out or None
+
+
+def _music_from_media(media: dict[str, Any]) -> dict[str, Any] | None:
+    """Audio attribution + trend signals from ``clips_metadata.music_info``.
+
+    This is the payload users call ``reels-by-audio-id`` for: whether the sound
+    is trending in Reels (``isTrendingInClips`` / ``trendRank``), plus stable
+    audio IDs for joining the audio page URL.
+    """
+    clips = media.get("clips_metadata") if isinstance(media.get("clips_metadata"), dict) else {}
+    music_meta = (
+        media.get("music_metadata") if isinstance(media.get("music_metadata"), dict) else {}
+    )
+    music_info = (
+        clips.get("music_info")
+        if isinstance(clips.get("music_info"), dict)
+        else None
+    ) or (
+        music_meta.get("music_info")
+        if isinstance(music_meta.get("music_info"), dict)
+        else {}
+    )
     original = (
         clips.get("original_sound_info")
         if isinstance(clips.get("original_sound_info"), dict)
@@ -149,30 +210,130 @@ def _music_from_media(media: dict[str, Any]) -> dict[str, Any] | None:
         if isinstance(music_info.get("music_asset_info"), dict)
         else {}
     )
-    audio_id = safe_str(
+    consumption = (
+        music_info.get("music_consumption_info")
+        if isinstance(music_info.get("music_consumption_info"), dict)
+        else None
+    ) or (
+        music_info.get("consumption_info")
+        if isinstance(music_info.get("consumption_info"), dict)
+        else None
+    ) or (
+        original.get("consumption_info")
+        if isinstance(original.get("consumption_info"), dict)
+        else {}
+    )
+
+    cluster_id = safe_str(
         asset.get("audio_cluster_id")
-        or asset.get("audio_asset_id")
+        or music_info.get("audio_cluster_id")
+        or original.get("audio_cluster_id")
+    )
+    asset_id = safe_str(
+        asset.get("audio_asset_id")
         or music_info.get("audio_asset_id")
         or original.get("audio_asset_id")
         or original.get("audio_id")
     )
+    canonical_id = safe_str(
+        asset.get("music_canonical_id")
+        or music_info.get("music_canonical_id")
+        or music_meta.get("music_canonical_id")
+        or clips.get("music_canonical_id")
+    )
+    artist_id = safe_str(asset.get("artist_id") or music_info.get("artist_id"))
+    ig_artist_early = consumption.get("ig_artist") if isinstance(consumption, dict) else None
+    if not artist_id and isinstance(ig_artist_early, dict):
+        artist_id = safe_str(ig_artist_early.get("pk") or ig_artist_early.get("id"))
+
+    # Prefer cluster id for joining /reels/audio/{id}/ URLs.
+    audio_id = cluster_id or asset_id or canonical_id
     title = safe_str(
         asset.get("title")
         or music_info.get("song_name")
+        or music_info.get("title")
         or original.get("original_audio_title")
     )
     artist = None
-    for block in (music_info, original, asset):
-        ig_artist = block.get("ig_artist") if isinstance(block, dict) else None
+    for block in (consumption, music_info, original, asset):
+        if not isinstance(block, dict):
+            continue
+        ig_artist = block.get("ig_artist")
         if isinstance(ig_artist, dict):
             artist = safe_str(ig_artist.get("username") or ig_artist.get("full_name"))
             if artist:
+                if not artist_id:
+                    artist_id = safe_str(ig_artist.get("pk") or ig_artist.get("id"))
                 break
     if not artist:
-        artist = safe_str(asset.get("display_artist"))
-    if not audio_id and not title:
+        artist = safe_str(asset.get("display_artist") or music_info.get("display_artist"))
+
+    duration_ms = safe_int(
+        asset.get("duration_in_ms")
+        or music_info.get("duration_in_ms")
+        or original.get("duration_in_ms")
+    )
+    audio_type = safe_str(
+        asset.get("audio_type")
+        or music_info.get("audio_type")
+        or ("original" if original and not asset else None)
+        or ("licensed_music" if asset else None)
+    )
+    cover = safe_str(
+        asset.get("cover_artwork_uri")
+        or asset.get("cover_artwork_thumbnail_uri")
+        or music_info.get("cover_artwork_uri")
+        or original.get("cover_artwork_uri")
+    )
+
+    is_trending = consumption.get("is_trending_in_clips")
+    if is_trending is None:
+        is_trending = music_info.get("is_trending_in_clips")
+    if is_trending is None:
+        is_trending = original.get("is_trending_in_clips")
+    trend_rank = safe_int(
+        asset.get("trend_rank")
+        or music_info.get("trend_rank")
+        or original.get("trend_rank")
+        or consumption.get("trend_rank")
+    )
+    previous_rank = safe_int(
+        asset.get("previous_trend_rank")
+        or music_info.get("previous_trend_rank")
+        or original.get("previous_trend_rank")
+        or consumption.get("previous_trend_rank")
+    )
+
+    is_explicit = asset.get("is_explicit")
+    if is_explicit is None:
+        is_explicit = original.get("is_explicit")
+    if is_explicit is None:
+        is_explicit = music_info.get("is_explicit")
+    has_lyrics = asset.get("has_lyrics")
+    if has_lyrics is None:
+        has_lyrics = music_info.get("has_lyrics")
+
+    if not audio_id and not title and is_trending is None:
         return None
-    return {"id": audio_id, "title": title, "artist": artist}
+
+    out: dict[str, Any] = {
+        "id": audio_id,
+        "clusterId": cluster_id,
+        "assetId": asset_id,
+        "canonicalId": canonical_id,
+        "artistId": artist_id,
+        "title": title,
+        "artist": artist,
+        "durationMs": duration_ms,
+        "audioType": audio_type,
+        "coverUrl": cover,
+        "isTrendingInClips": None if is_trending is None else bool(is_trending),
+        "trendRank": trend_rank,
+        "previousTrendRank": previous_rank,
+        "isExplicit": None if is_explicit is None else bool(is_explicit),
+        "hasLyrics": None if has_lyrics is None else bool(has_lyrics),
+    }
+    return {k: v for k, v in out.items() if v is not None}
 
 
 def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) -> dict[str, Any]:
@@ -283,10 +444,13 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
         "isPaidPartnership": bool(is_paid) if is_paid is not None else False,
         "isAd": is_ad,
         "isAffiliate": is_affiliate,
+        "hasAudio": media.get("has_audio") if media.get("has_audio") is not None else None,
         "accessibilityCaption": safe_str(media.get("accessibility_caption")),
         "location": location,
         "music": music,
         "musicId": (music or {}).get("id") if music else None,
+        "coauthors": _coauthors_from_media(media) or None,
+        "mashupInfo": _mashup_from_media(media),
         "previewComments": preview_comments or None,
     }
     return strip_null_post_fields(post)
@@ -2112,10 +2276,29 @@ async def hydrate_shortcodes(codes: list[str], *, limit: int) -> list[dict[str, 
     return [r for r in rows if r]
 
 
-async def reels_by_audio_native(audio_id: str, *, limit: int = 20) -> list[dict[str, Any]] | None:
+def _pick_audio_music_meta(posts: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Best music/trend block from hydrated reels (prefer one with trend flags)."""
+    fallback: dict[str, Any] | None = None
+    for post in posts:
+        music = post.get("music") if isinstance(post.get("music"), dict) else None
+        if not music:
+            continue
+        if fallback is None:
+            fallback = music
+        if music.get("isTrendingInClips") is not None or music.get("trendRank") is not None:
+            return music
+    return fallback
+
+
+async def reels_by_audio_native(
+    audio_id: str, *, limit: int = 20
+) -> dict[str, Any] | None:
     """Reels that use ``audio_id`` via Decodo Explore audio page + Polaris hydrate.
 
-    Listing itself is not available logged-out on api/v1; Apify remains fallthrough.
+    Returns an envelope with top-level trend signals (``isTrendingInClips``,
+    ``trendRank``, rich ``music``) plus the reel list — the reason callers hit
+    this endpoint. Listing itself is not available logged-out on api/v1; Apify
+    remains fallthrough (router).
     """
     raw = (audio_id or "").strip()
     if not raw:
@@ -2135,12 +2318,26 @@ async def reels_by_audio_native(audio_id: str, *, limit: int = 20) -> list[dict[
     if not posts:
         return None
     for post in posts:
-        code = safe_str(post.get("id"))
-        if code:
-            post["url"] = f"https://www.instagram.com/reel/{code}/"
+        shortcode = safe_str(post.get("shortcode") or post.get("id"))
+        if shortcode and not shortcode.isdigit():
+            post["url"] = f"https://www.instagram.com/reel/{shortcode}/"
         post["musicId"] = aid
         post["musicUrl"] = page_url
-    return posts
+        # Keep music.id aligned with the audio page id when cluster matches.
+        music = post.get("music") if isinstance(post.get("music"), dict) else None
+        if music and not music.get("clusterId"):
+            music["clusterId"] = aid
+            post["music"] = music
+    music = _pick_audio_music_meta(posts) or {"id": aid, "clusterId": aid}
+    return {
+        "audioId": aid,
+        "audioUrl": page_url,
+        "isTrendingInClips": music.get("isTrendingInClips"),
+        "trendRank": music.get("trendRank"),
+        "previousTrendRank": music.get("previousTrendRank"),
+        "music": music,
+        "reels": posts,
+    }
 
 
 def is_reel_post(post: dict[str, Any]) -> bool:

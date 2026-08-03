@@ -404,6 +404,8 @@ def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
         "shortcode",
         "mediaId",
         "hasAudio",
+        "coauthors",
+        "mashupInfo",
     ):
         val = post.get(key)
         if val in (None, [], {}):

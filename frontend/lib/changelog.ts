@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Instagram reels-by-audio-id: trend signals + rich music",
+    description:
+      "reels-by-audio-id exists to answer “is this sound trending?” but returned only a reel list with a bare musicId. The response now includes top-level isTrendingInClips / trendRank / previousTrendRank and a music{} object (clusterId, assetId, canonicalId, title, artist, durationMs, audioType, isExplicit, hasLyrics, coverUrl). Each Reel can also carry hasAudio, coauthors[], and mashupInfo when Instagram exposes them.",
+    items: [
+      "Top-level isTrendingInClips + trendRank + music{}",
+      "music.clusterId joins the /reels/audio/{id}/ URL",
+      "Reel hasAudio, coauthors, mashupInfo (hasBeenMashedUp)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "Instagram Reels: split views into IG vs Facebook plays",
     description:
       "Instagram exposes three play metrics on Reels (play_count total, ig_play_count, fb_play_count) — Captapi was collapsing them into a single engagement.views, so Instagram-only analytics silently included Facebook cross-post plays (~20% on some Reels). Engagement now returns views (total), viewsInstagram, and viewsFacebook. Docs warn to use viewsInstagram for IG performance.",
