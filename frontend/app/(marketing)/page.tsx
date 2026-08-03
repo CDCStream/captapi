@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 // Revalidate so new testimonials/reviews appear without a redeploy.
-export const revalidate = 3600;
+export const revalidate = 60;
 
 const features = [
   {

@@ -14,9 +14,14 @@ import {
   PLATFORM_PAGES,
   platformSlug,
 } from "@/lib/api-catalog";
+import { CONTENT_UPDATED } from "@/lib/seo";
 
-/** Shared footer bakes PLATFORM_COUNT/ENDPOINT_COUNT at render — ISR avoids sticky multi-version SSG. */
-export const revalidate = 3600;
+/**
+ * Shared footer bakes PLATFORM_COUNT/ENDPOINT_COUNT at render. Keep ISR short so a
+ * redeploy cannot leave /apis index on an older endpoint count than new slug pages
+ * (auditors were reading 173 vs 177 as "different builds").
+ */
+export const revalidate = 60;
 
 const NAV_PLATFORMS: NavPlatform[] = PLATFORM_PAGES.map((g) => ({
   label: g.name,
@@ -196,7 +201,9 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           </div>
           <div className="pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
             <span>© {new Date().getFullYear()} Captapi. All rights reserved.</span>
-            <span>Made for developers, by developers.</span>
+            <span>
+              {PLATFORM_COUNT}/{ENDPOINT_COUNT} · docs {CONTENT_UPDATED}
+            </span>
           </div>
         </div>
       </footer>

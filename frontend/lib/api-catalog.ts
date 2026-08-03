@@ -251,16 +251,17 @@ const YOUTUBE: Spec[] = [
     tagline:
       "Latest uploads from a YouTube channel — ISO publishedAt + relative publishedTimeText for monitors.",
     longDescription:
-      "Send a channel URL, @handle, or UC… id and get recent uploads as clean JSON: url, title, publishedAt (ISO-8601; approximate when YouTube only exposes labels like \"4 days ago\"), publishedTimeText (the original relative label), viewCount, durationSeconds, thumbnailUrl, and channelName. Use publishedAt for sorting, date filters, and \"detect new uploads\" monitors — never parse the relative string. Optional fast=true uses YouTube RSS (exact publishedAt, thinner metadata). Flat 2 credits on the native path. Pass cache=true for the 24h shared cache.",
+      "Send a channel URL, @handle, or UC… id and get recent uploads as clean JSON. Each row is player-enriched like channel-streams: exact viewCount (not shelf K/M rounding), publishedAt ISO-8601 + publishedTimeText (e.g. \"4 days ago\"), durationSeconds, thumbnailUrl, and channel{}. Use publishedAt for sorting and \"detect new uploads\" monitors — never parse the relative string. Optional fast=true uses YouTube RSS (exact publishedAt, thinner metadata, no player enrich). Flat 2 credits on the native path. Pass cache=true for the 24h shared cache.",
     delivers: [
-      "publishedAt ISO-8601 (sortable / filterable)",
+      "Player-enriched exact viewCount + ISO publishedAt",
       "publishedTimeText keeps the UI label (e.g. \"4 days ago\")",
-      "viewCount + durationSeconds numeric",
+      "thumbnailUrl + durationSeconds from player when shelf omits them",
       "Optional fast RSS path",
     ],
   },
-  { slug: "youtube-playlist-videos", name: "YouTube Playlist Videos API", shortName: "Playlist Videos", category: "list", method: "GET", path: "/v1/youtube/playlist-videos", credits: 2 , tagline: "List videos in a YouTube playlist — id, ISO publishedAt, views, duration. Flat 2 credits.", longDescription: "Paste a YouTube playlist URL and get the videos as clean JSON: id, url, title, publishedAt (ISO-8601; approximate when derived from YouTube's relative label), publishedTimeText (e.g. \"1 year ago\"), viewCount (viewCountApproximate=true when YouTube only shows 2.5B-style compact counts), durationSeconds, thumbnailUrl, channelName. Also returns playlist id and totalVideos when available. Prefer Playlist when you also need owner metadata. Optional fast=true uses YouTube RSS (exact publishedAt, fewer items). Flat 2 credits on the native path." },
-  { slug: "youtube-playlist", name: "YouTube Playlist API", shortName: "Playlist", category: "list", method: "GET", path: "/v1/youtube/playlist", credits: 2 , tagline: "YouTube playlist metadata + videos — owner{id,name,handle}, totalVideos, ISO publishedAt. Flat 2 credits.", longDescription: "Paste a YouTube playlist URL and get playlist id/title, channelName, owner{id,name,url,handle}, totalVideos (full playlist size), totalReturned (this page), and videos[] with id, url, title, publishedAt (ISO-8601; approximate from relative labels when YouTube doesn't expose an exact timestamp), publishedTimeText, viewCount (+ viewCountApproximate for compact K/M/B labels), durationSeconds, thumbnailUrl, and channel{}. Prefer this over Playlist Videos when you need owner + total size. Optional fast=true uses YouTube RSS. Flat 2 credits on the native path." },
+  { slug: "youtube-playlist-videos", name: "YouTube Playlist Videos API", shortName: "Playlist Videos", category: "list", method: "GET", path: "/v1/youtube/playlist-videos", credits: 2 , tagline: "List videos in a YouTube playlist — id, exact views, ISO publishedAt, totalVideos. Flat 2 credits.", longDescription: "Paste a YouTube playlist URL and get the videos as clean JSON: id, url, title, publishedAt (ISO-8601 from the watch player; publishedTimeText keeps YouTube's relative label), exact viewCount (not K/M/B rounded), durationSeconds, thumbnailUrl, channelName + channel{id,title,handle,url}. Also returns playlist id and totalVideos (full playlist size vs totalReturned for this page). Prefer Playlist when you also need owner metadata. Optional fast=true uses YouTube RSS (exact publishedAt, fewer items, no views). Flat 2 credits on the native path." },
+  { slug: "youtube-playlist", name: "YouTube Playlist API", shortName: "Playlist", category: "list", method: "GET", path: "/v1/youtube/playlist", credits: 2 , tagline: "YouTube playlist metadata + videos — owner{}, totalVideos, exact views, ISO publishedAt. Flat 2 credits.", longDescription: "Paste a YouTube playlist URL and get playlist id/title, channelName, owner{id,name,url,handle}, totalVideos (full playlist size), totalReturned (this page), and videos[] with id, url, title, publishedAt (ISO from the watch player; publishedTimeText keeps relative labels), exact viewCount, durationSeconds, thumbnailUrl, and channel{id,title,handle,url}. Prefer this over Playlist Videos when you need owner + total size. Optional fast=true uses YouTube RSS. Flat 2 credits on the native path." },
+
   {
     slug: "youtube-shorts-transcript",
     name: "YouTube Shorts Transcript API",
@@ -335,7 +336,24 @@ const YOUTUBE: Spec[] = [
     longDescription:
       "Fetches Shorts from YouTube's reel_watch_sequence feed (same surface ScrapeCreators uses for /v1/youtube/shorts/trending). Each call returns a fresh batch with channel, exact views, duration, publish date, and engagement when available. Optional q only seeds the sequence from a topic Short — it is not a search of the word trending. Flat 2 credits.",
   },
-  { slug: "youtube-channel-streams", name: "YouTube Channel Streams API", shortName: "Channel Streams", category: "list", method: "GET", path: "/v1/youtube/channel-streams", credits: 20, creditsPerResult: 1 },
+  {
+    slug: "youtube-channel-streams",
+    name: "YouTube Channel Streams API",
+    shortName: "Channel Streams",
+    category: "list",
+    method: "GET",
+    path: "/v1/youtube/channel-streams",
+    credits: 2,
+    tagline: "Channel Live tab only — past streams + upcoming; empty when the channel has no Live tab.",
+    longDescription:
+      "Reads YouTube's Live tab (not Videos). Channels without a Live tab (common for non-streamers) return totalReturned:0 and hasLiveTab:false instead of silently echoing Videos. Each row is player-enriched with exact viewCount, ISO publishedAt + publishedTimeText, thumbnailUrl, and type stream|upcoming|video. Flat 2 credits on the native path (was incorrectly ~1/result at 20).",
+    delivers: [
+      "Live tab only — never Videos fallthrough",
+      "hasLiveTab false when the channel has no Live tab",
+      "Exact viewCount + ISO publishedAt via player enrich",
+      "Flat 2 credits native",
+    ],
+  },
   {
     slug: "youtube-hashtag-search",
     name: "YouTube Hashtag Search API",
@@ -357,7 +375,24 @@ const YOUTUBE: Spec[] = [
     ],
   },
   { slug: "youtube-comment-replies", name: "YouTube Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/youtube/comment-replies", credits: 2 },
-  { slug: "youtube-channel-playlists", name: "YouTube Channel Playlists API", shortName: "Channel Playlists", category: "list", method: "GET", path: "/v1/youtube/channel-playlists", credits: 2 },
+  {
+    slug: "youtube-channel-playlists",
+    name: "YouTube Channel Playlists API",
+    shortName: "Channel Playlists",
+    category: "list",
+    method: "GET",
+    path: "/v1/youtube/channel-playlists",
+    credits: 2,
+    tagline:
+      "List a channel's playlists — id, title, videoCount, thumbnailUrl. Flat 2 credits.",
+    longDescription:
+      "Pass a channel URL, @handle, or UC… ID and get that channel's /playlists tab as clean JSON. Each row: id (playlist list= ID — chain into /v1/youtube/playlist), url, title, videoCount, thumbnailUrl. Flat 2 credits.",
+    delivers: [
+      "Playlist id (list=) for chaining into /youtube/playlist",
+      "title, videoCount, thumbnailUrl, canonical url",
+      "Flat 2 credits",
+    ],
+  },
   {
     slug: "youtube-community-posts",
     name: "YouTube Community Posts API",
@@ -396,7 +431,25 @@ const YOUTUBE: Spec[] = [
       "channel{id,title,url,handle}; ISO publishedAt / publishedTime",
     ],
   },
-  { slug: "youtube-video-sponsors", name: "YouTube Video Sponsors API", shortName: "Video Sponsors", category: "details", method: "GET", path: "/v1/youtube/video-sponsors", credits: 1 , tagline: "Find sponsor, self-promo, and interaction segments inside a YouTube video — start/end times and category for each segment.", longDescription: "Paste a YouTube video URL and get the sponsor and promo segments viewers have marked for that video: each segment includes a category (sponsor, self-promo, interaction, and similar), plus start and end timestamps. Useful for skipping ads in players, estimating brand-deal density, or cleaning footage for reuse. No YouTube OAuth required." },
+  {
+    slug: "youtube-video-sponsors",
+    name: "YouTube Video Sponsors API",
+    shortName: "Video Sponsors",
+    category: "details",
+    method: "GET",
+    path: "/v1/youtube/video-sponsors",
+    credits: 1,
+    tagline:
+      "SponsorBlock segments — sorted by time, overlapsWith flagged, minVotes filter, coverageSeconds for density.",
+    longDescription:
+      "Paste a YouTube video URL (response videoId/url always match the request). Returns community-sourced SponsorBlock skip segments: category (sponsor|selfpromo|interaction|intro|outro|preview|music_offtopic|poi_highlight|filler), actionType, start/end seconds + formatted times, votes, uuid. Segments are sorted by startSeconds; overlapping rows include overlapsWith:[uuid…]; coverageSeconds is the union duration (no double-count for brand-density). Default minVotes=0 drops rejected segments (votes < 0). Optional categories= comma list. Flat 1 credit. Data comes from SponsorBlock — not YouTube official.",
+    delivers: [
+      "Sorted segments + overlapsWith for nested skips",
+      "coverageSeconds union length for density math",
+      "minVotes filter (default 0 excludes votes < 0)",
+      "videoId/url echo the requested video",
+    ],
+  },
 ];
 
 const TIKTOK: Spec[] = [
@@ -2437,7 +2490,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     },
     lpFlat(20, 100, 2),
   ],
-  "youtube-channel-streams": [up(YT_CHANNEL), lp(20, 200)],
+  "youtube-channel-streams": [up(YT_CHANNEL), lpFlat(20, 200, 2)],
   "youtube-hashtag-search": [qp("Hashtag with or without the # (min 2 characters)."), lp(20, 200)],
   "youtube-comment-replies": [up(YT_VIDEO), cid(), lp(50, 500)],
   "youtube-channel-playlists": [up(YT_CHANNEL), lp(20, 200)],
@@ -2453,7 +2506,23 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     },
   ],
   "youtube-community-post-details": [up("YouTube community post URL.")],
-  "youtube-video-sponsors": [up(YT_VIDEO)],
+  "youtube-video-sponsors": [
+    up(YT_VIDEO),
+    {
+      name: "minVotes",
+      type: "integer",
+      required: false,
+      description:
+        "Minimum SponsorBlock votes to keep a segment. Default 0 (drops community-rejected votes < 0).",
+    },
+    {
+      name: "categories",
+      type: "string",
+      required: false,
+      description:
+        "Comma-separated categories. Default sponsor,selfpromo,interaction. Also intro,outro,preview,music_offtopic,poi_highlight,filler.",
+    },
+  ],
   // TikTok
   "tiktok-transcript": [up(TT_VIDEO), lang(), cachePDefaultTrue()],
   "tiktok-summarizer": [up(TT_VIDEO), langOut(), cacheP()],
@@ -4223,6 +4292,20 @@ const FIELD_DESCS: Record<string, string> = {
   type: "Content type of the item.",
   postType:
     'Content type. YouTube community: "text" | "image" | "poll" | "video" | "playlist" | "quiz". Instagram: "Image" | "Video" | "Sidecar" (carousel).',
+  category:
+    'SponsorBlock segment category on video-sponsors: "sponsor" | "selfpromo" | "interaction" | "intro" | "outro" | "preview" | "music_offtopic" | "poi_highlight" | "filler". Elsewhere: generic category label.',
+  overlapsWith:
+    "UUIDs of other segments whose time range overlaps this one (SponsorBlock nested/duplicate skips).",
+  coverageSeconds:
+    "Union duration of all returned segments in seconds — use for brand-deal density instead of summing durationSeconds (which double-counts overlaps).",
+  minVotes: "Minimum SponsorBlock votes applied when filtering segments for this response.",
+  actionType: 'SponsorBlock action (usually "skip").',
+  startSeconds: "Segment start time in seconds.",
+  endSeconds: "Segment end time in seconds.",
+  startFormatted: "Segment start as M:SS or H:MM:SS.",
+  endFormatted: "Segment end as M:SS or H:MM:SS.",
+  hasLiveTab:
+    "Whether the YouTube channel exposes a Live tab. False ⇒ channel-streams returns no rows (not Videos fallthrough).",
   productType: "Platform product type (e.g. clips, feed). Null when not applicable (Image/Sidecar) — never an empty string.",
   pollOptions:
     "Poll choices when postType is poll. Each item has text, voteCount (null when YouTube gates counts behind sign-in), and percentage.",
@@ -4271,7 +4354,8 @@ const FIELD_DESCS: Record<string, string> = {
   videosSampled: "How many of the creator's recent videos were sampled to build the breakdown.",
   usageCount:
     "How many TikTok videos use this sound when TikTok exposes the total. Null when the music/aweme embed and music page omit it — never a fake zero.",
-  durationSeconds: "Length in seconds as a float (canonical). Song-details also echoes the same value as duration for back-compat.",
+  durationSeconds:
+    "Length in seconds. On video-sponsors this is the segment span (end − start); on videos/audio it is the full item length.",
   artistId: "Primary artist / sound-owner user id when TikTok exposes one.",
   authorSecUid: "Primary artist / sound-owner secUid when TikTok exposes one.",
   lang: "Language code of the content.",
@@ -4279,7 +4363,6 @@ const FIELD_DESCS: Record<string, string> = {
   mentions: "Accounts mentioned in the text.",
   tags: "Tags attached to the item.",
   topics: "Detected topics and themes.",
-  category: "Category of the item.",
   nsfw: "Whether the content is marked NSFW.",
   sensitive: "Whether the content is flagged sensitive.",
   isLive: "Whether the account/channel is currently live. For TikTok Live, true only when status === 2 — a non-empty room does not mean live.",

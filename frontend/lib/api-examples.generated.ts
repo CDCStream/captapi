@@ -14317,8 +14317,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "youtube-video-sponsors": {
     "videoId": "Wdjh81uH6FU",
+    "url": "https://www.youtube.com/watch?v=Wdjh81uH6FU",
     "videoDurationSeconds": 938.852,
-    "totalReturned": 5,
+    "totalReturned": 4,
+    "coverageSeconds": 83.686,
+    "minVotes": 0,
     "segments": [
       {
         "category": "selfpromo",
@@ -14329,18 +14332,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "endFormatted": "10:38",
         "durationSeconds": 83.686,
         "votes": 1,
-        "uuid": "52f9974390e30c4941d529cb028dfa56886a6e738fd1c5f1603a37f9bd9c21217"
-      },
-      {
-        "category": "sponsor",
-        "actionType": "skip",
-        "startSeconds": 600.675,
-        "endSeconds": 617.15,
-        "startFormatted": "10:01",
-        "endFormatted": "10:17",
-        "durationSeconds": 16.475,
-        "votes": 0,
-        "uuid": "6377104df535c8eb2c2d7d6437320e71660b93a02517da2ba668c3813d7de6ff7"
+        "uuid": "52f9974390e30c4941d529cb028dfa56886a6e738fd1c5f1603a37f9bd9c21217",
+        "overlapsWith": [
+          "f75d77a0658f668c014ffa63f26f2ecc439a6d6b18b868d93c0875f55a47ba017",
+          "328569d7ae428c1243bc54f010800a5cf6b5449e47abd3ee0f8093531ebeb8137",
+          "6377104df535c8eb2c2d7d6437320e71660b93a02517da2ba668c3813d7de6ff7"
+        ]
       },
       {
         "category": "sponsor",
@@ -14351,7 +14348,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "endFormatted": "9:20",
         "durationSeconds": 4.525,
         "votes": 0,
-        "uuid": "f75d77a0658f668c014ffa63f26f2ecc439a6d6b18b868d93c0875f55a47ba017"
+        "uuid": "f75d77a0658f668c014ffa63f26f2ecc439a6d6b18b868d93c0875f55a47ba017",
+        "overlapsWith": [
+          "52f9974390e30c4941d529cb028dfa56886a6e738fd1c5f1603a37f9bd9c21217"
+        ]
       },
       {
         "category": "selfpromo",
@@ -14362,18 +14362,24 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "endFormatted": "9:33",
         "durationSeconds": 5.698,
         "votes": 0,
-        "uuid": "328569d7ae428c1243bc54f010800a5cf6b5449e47abd3ee0f8093531ebeb8137"
+        "uuid": "328569d7ae428c1243bc54f010800a5cf6b5449e47abd3ee0f8093531ebeb8137",
+        "overlapsWith": [
+          "52f9974390e30c4941d529cb028dfa56886a6e738fd1c5f1603a37f9bd9c21217"
+        ]
       },
       {
         "category": "sponsor",
         "actionType": "skip",
-        "startSeconds": 621.375,
-        "endSeconds": 627.7,
-        "startFormatted": "10:21",
-        "endFormatted": "10:28",
-        "durationSeconds": 6.325,
-        "votes": -1,
-        "uuid": "ee142c1cb73f13b3eceef18ffdd1eafd763c1adaef8df88f2c2b20f768e40ad27"
+        "startSeconds": 600.675,
+        "endSeconds": 617.15,
+        "startFormatted": "10:01",
+        "endFormatted": "10:17",
+        "durationSeconds": 16.475,
+        "votes": 0,
+        "uuid": "6377104df535c8eb2c2d7d6437320e71660b93a02517da2ba668c3813d7de6ff7",
+        "overlapsWith": [
+          "52f9974390e30c4941d529cb028dfa56886a6e738fd1c5f1603a37f9bd9c21217"
+        ]
       }
     ]
   }

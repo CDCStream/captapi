@@ -31,12 +31,14 @@ from app.services.youtube_native import (
     build_youtube_video_details,
     channel_details_native,
     channel_playlists_native,
+    channel_has_live_tab,
     channel_tab_native,
     comment_count_native,
     comment_replies_native,
     comments_native,
     community_posts_native,
     enrich_short_cards,
+    enrich_video_cards,
     extract_initial_json,
     find_continuation_token,
     hashtag_native,
@@ -234,6 +236,7 @@ async def _channel_playlists_native(url: str, limit: int) -> list[dict[str, Any]
             thumbnail = safe_str(sources[-1].get("url"))
         rows.append(
             {
+                "id": pid,
                 "url": f"https://www.youtube.com/playlist?list={pid}",
                 "title": title or "",
                 "videoCount": safe_int(badge.group(1).replace(",", "")) if badge else None,
@@ -1295,8 +1298,11 @@ async def youtube_channel_videos(
                 _channel_tab_url(url, "videos"), limit, tab="videos"
             )
             if native_videos:
+                # Player enrich: exact viewCount + ISO publishedAt (same mapper
+                # quality channel-streams historically got via Apify fallthrough).
+                enriched = await enrich_video_cards(native_videos[:limit])
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(native_videos), "videos": native_videos}
+                return {"url": url, "totalReturned": len(enriched), "videos": enriched}
             # RSS fallback — thinner metadata, no Apify.
             feed_videos = await _youtube_channel_feed(url, limit)
             if feed_videos:
@@ -1306,7 +1312,7 @@ async def youtube_channel_videos(
 
         data = await cached_or_run(
             endpoint="youtube.channel-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 8},
+            params={"url": url, "limit": limit, "fast": fast, "v": 9},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1355,12 +1361,13 @@ async def youtube_playlist_videos(
             native = await playlist_native(url, limit)
             if native and native.get("videos"):
                 ctx["source"] = "direct"
+                videos = await enrich_video_cards(native["videos"][:limit])
                 return {
                     "url": url,
                     "id": safe_str(native.get("id")) or _playlist_id(url),
                     "totalVideos": native.get("totalVideos"),
-                    "totalReturned": len(native["videos"]),
-                    "videos": native["videos"],
+                    "totalReturned": len(videos),
+                    "videos": videos,
                 }
             feed_videos = await _youtube_playlist_feed(url, limit)
             if feed_videos:
@@ -1393,7 +1400,7 @@ async def youtube_playlist_videos(
 
         data = await cached_or_run(
             endpoint="youtube.playlist-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 11},
+            params={"url": url, "limit": limit, "fast": fast, "v": 12},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1448,6 +1455,7 @@ async def youtube_playlist(
             if native and native.get("videos"):
                 ctx["source"] = "direct"
                 owner = native.get("owner") if isinstance(native.get("owner"), dict) else None
+                videos = await enrich_video_cards(native["videos"][:limit])
                 return {
                     "platform": "youtube",
                     "url": url,
@@ -1456,8 +1464,8 @@ async def youtube_playlist(
                     "channelName": safe_str(native.get("channelName")) or "",
                     "owner": owner,
                     "totalVideos": native.get("totalVideos"),
-                    "totalReturned": len(native["videos"]),
-                    "videos": native["videos"],
+                    "totalReturned": len(videos),
+                    "videos": videos,
                 }
             feed_videos = await _youtube_playlist_feed(url, limit)
             if feed_videos:
@@ -1500,7 +1508,7 @@ async def youtube_playlist(
 
         data = await cached_or_run(
             endpoint="youtube.playlist",
-            params={"url": url, "limit": limit, "fast": fast, "v": 10},
+            params={"url": url, "limit": limit, "fast": fast, "v": 11},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1793,23 +1801,42 @@ async def youtube_channel_streams(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    """Channel Live tab only — not Videos.
+
+    Channels without a Live tab (e.g. MrBeast) used to return Videos content
+    because InnerTube still accepts the streams ``params``. We gate on the tab
+    list and return an empty page instead. Flat 2 credits on the native path.
+    """
     url = normalize_youtube_channel_url(url)
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/channel-streams",
         platform="youtube",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_YT_NATIVE_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            if not await channel_has_live_tab(url):
+                ctx["source"] = "direct"
+                return {
+                    "url": url,
+                    "totalReturned": 0,
+                    "hasLiveTab": False,
+                    "streams": [],
+                }
             native_streams = await channel_tab_native(
                 _channel_tab_url(url, "streams"), limit, tab="streams"
             )
             if native_streams:
+                enriched = await enrich_video_cards(native_streams[:limit])
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(native_streams), "streams": native_streams}
+                return {
+                    "url": url,
+                    "totalReturned": len(enriched),
+                    "hasLiveTab": True,
+                    "streams": enriched,
+                }
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -1819,16 +1846,25 @@ async def youtube_channel_streams(
             )
             streams = [_video_card(v) for v in items[:limit]]
             ctx["source"] = "apify"
-            return {"url": url, "totalReturned": len(streams), "streams": streams}
+            return {
+                "url": url,
+                "totalReturned": len(streams),
+                "hasLiveTab": True,
+                "streams": streams,
+            }
 
         data = await cached_or_run(
             endpoint="youtube.channel-streams",
-            params={"url": url, "limit": limit, "v": 5},
+            params={"url": url, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["streams"]), RATE_YT_VIDEO, 2)
+        ctx["credits_override"] = (
+            CREDIT_YT_NATIVE_LIST
+            if ctx.get("source") == "direct"
+            else _scaled_credits(len(data["streams"]), RATE_YT_VIDEO, 2)
+        )
         return ApiResponse(data=data)
 
 
@@ -2111,7 +2147,7 @@ async def youtube_channel_playlists(
 
         data = await cached_or_run(
             endpoint="youtube.channel-playlists",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2396,7 +2432,20 @@ async def youtube_community_post_details(
 
 # ---------- VIDEO SPONSORS (SponsorBlock) ---------------------------------
 CREDIT_SPONSORS = 1
-_SPONSOR_CATEGORIES = ["sponsor", "selfpromo", "interaction"]
+# Default categories match prior behavior; pass categories= to expand.
+_SPONSOR_CATEGORIES_DEFAULT = ("sponsor", "selfpromo", "interaction")
+_SPONSOR_CATEGORIES_ALL = (
+    "sponsor",
+    "selfpromo",
+    "interaction",
+    "intro",
+    "outro",
+    "preview",
+    "music_offtopic",
+    "poi_highlight",
+    "filler",
+)
+_SPONSOR_CATEGORY_SET = frozenset(_SPONSOR_CATEGORIES_ALL)
 
 
 def _format_seconds(value: float | int | None) -> str | None:
@@ -2425,14 +2474,103 @@ def _normalize_sponsor_segment(seg: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _sponsor_intervals_overlap(a: dict[str, Any], b: dict[str, Any]) -> bool:
+    a0, a1 = a.get("startSeconds"), a.get("endSeconds")
+    b0, b1 = b.get("startSeconds"), b.get("endSeconds")
+    if a0 is None or a1 is None or b0 is None or b1 is None:
+        return False
+    return float(a0) < float(b1) and float(b0) < float(a1)
+
+
+def _merged_coverage_seconds(segments: list[dict[str, Any]]) -> float:
+    """Union length of [start,end) intervals — brand-density without double count."""
+    intervals: list[tuple[float, float]] = []
+    for seg in segments:
+        start, end = seg.get("startSeconds"), seg.get("endSeconds")
+        if start is None or end is None:
+            continue
+        s, e = float(start), float(end)
+        if e > s:
+            intervals.append((s, e))
+    if not intervals:
+        return 0.0
+    intervals.sort()
+    merged: list[list[float]] = [[intervals[0][0], intervals[0][1]]]
+    for s, e in intervals[1:]:
+        if s <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], e)
+        else:
+            merged.append([s, e])
+    return round(sum(e - s for s, e in merged), 3)
+
+
+def _process_sponsor_segments(
+    raw: list[Any],
+    *,
+    min_votes: int,
+) -> tuple[list[dict[str, Any]], float]:
+    segments: list[dict[str, Any]] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        row = _normalize_sponsor_segment(item)
+        if row.get("uuid"):
+            segments.append(row)
+    # Drop community-rejected segments by default (votes < 0). votes == 0 stays.
+    segments = [s for s in segments if (s.get("votes") if s.get("votes") is not None else 0) >= min_votes]
+    segments.sort(
+        key=lambda s: (
+            float(s["startSeconds"]) if s.get("startSeconds") is not None else 0.0,
+            float(s["endSeconds"]) if s.get("endSeconds") is not None else 0.0,
+        )
+    )
+    for i, a in enumerate(segments):
+        overlaps = [
+            b["uuid"]
+            for j, b in enumerate(segments)
+            if i != j and b.get("uuid") and _sponsor_intervals_overlap(a, b)
+        ]
+        if overlaps:
+            a["overlapsWith"] = overlaps
+    return segments, _merged_coverage_seconds(segments)
+
+
 @router.get("/video-sponsors", summary="Sponsor/self-promo segments in a YouTube video")
 async def youtube_video_sponsors(
     url: str = Query(..., description="YouTube video URL or ID"),
+    minVotes: int = Query(
+        0,
+        ge=-10,
+        le=100,
+        description=(
+            "Minimum SponsorBlock votes to keep a segment. Default 0 drops "
+            "community-rejected rows (votes < 0). Raise to require verified segments."
+        ),
+    ),
+    categories: str | None = Query(
+        None,
+        description=(
+            "Comma-separated SponsorBlock categories. Default: sponsor,selfpromo,interaction. "
+            "Also: intro,outro,preview,music_offtopic,poi_highlight,filler."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, _ = _require_youtube_url(url)
     settings = get_settings()
+    if categories and categories.strip():
+        cats = [c.strip().lower() for c in categories.split(",") if c.strip()]
+        bad = [c for c in cats if c not in _SPONSOR_CATEGORY_SET]
+        if bad:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unknown SponsorBlock categories: {', '.join(bad)}. "
+                f"Allowed: {', '.join(_SPONSOR_CATEGORIES_ALL)}.",
+            )
+        chosen = tuple(cats) or _SPONSOR_CATEGORIES_DEFAULT
+    else:
+        chosen = _SPONSOR_CATEGORIES_DEFAULT
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/video-sponsors",
@@ -2441,34 +2579,51 @@ async def youtube_video_sponsors(
         base_credits=CREDIT_SPONSORS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            params = [("videoID", vid)]
-            params += [("category", c) for c in _SPONSOR_CATEGORIES]
+            params: list[tuple[str, str]] = [("videoID", vid)]
+            params += [("category", c) for c in chosen]
             async with httpx.AsyncClient(timeout=30) as client:
                 resp = await client.get(
                     f"{settings.SPONSORBLOCK_API_BASE}/api/skipSegments",
                     params=params,
                 )
             if resp.status_code == 404:
-                return {"videoId": vid, "totalReturned": 0, "segments": []}
+                return {
+                    "videoId": vid,
+                    "url": f"https://www.youtube.com/watch?v={vid}",
+                    "totalReturned": 0,
+                    "coverageSeconds": 0,
+                    "minVotes": minVotes,
+                    "segments": [],
+                }
             if resp.status_code >= 400:
                 raise HTTPException(status_code=502, detail="Sponsor lookup failed upstream")
             raw = resp.json()
+            if not isinstance(raw, list):
+                raw = []
             ctx["source"] = "direct"  # SponsorBlock public API, no actor
-            segments = [_normalize_sponsor_segment(s) for s in raw if isinstance(s, dict)]
+            segments, coverage = _process_sponsor_segments(raw, min_votes=minVotes)
             video_duration = next(
                 (s.get("videoDuration") for s in raw if isinstance(s, dict) and s.get("videoDuration")),
                 None,
             )
             return {
                 "videoId": vid,
+                "url": f"https://www.youtube.com/watch?v={vid}",
                 "videoDurationSeconds": video_duration,
                 "totalReturned": len(segments),
+                "coverageSeconds": coverage,
+                "minVotes": minVotes,
                 "segments": segments,
             }
 
         data = await cached_or_run(
             endpoint="youtube.video-sponsors",
-            params={"vid": vid, "v": 2},
+            params={
+                "vid": vid,
+                "minVotes": minVotes,
+                "categories": ",".join(chosen),
+                "v": 3,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -12,7 +12,7 @@ import { USE_CASE_SLUGS } from "@/lib/use-cases";
 import { CONTENT_UPDATED_DATE } from "@/lib/seo";
 import { getServiceClient } from "@/lib/supabase/admin";
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 async function blogEntries(base: string): Promise<MetadataRoute.Sitemap> {
   const sb = getServiceClient();

@@ -466,8 +466,8 @@
     "platform": "youtube",
     "name": "YouTube Channel Streams",
     "path": "/v1/youtube/channel-streams",
-    "credits": 20,
-    "summary": "List a channel's live/past streams.",
+    "credits": 2,
+    "summary": "Channel Live tab only (empty when hasLiveTab=false) — player-enriched streams.",
     "params": [
       {
         "name": "url",

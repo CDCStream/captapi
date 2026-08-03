@@ -634,8 +634,9 @@ def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
             break
 
     published_at, published_text = published_fields(published_raw)
+    rtype = _lockup_result_type(published_raw)
     card: dict[str, Any] = {
-        "type": "video",
+        "type": rtype,
         "id": video_id,
         "url": f"https://www.youtube.com/watch?v={video_id}",
         "title": title,
@@ -643,7 +644,7 @@ def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
         "publishedTimeText": published_text,
         "viewCount": view_count,
         "durationSeconds": duration,
-        "thumbnailUrl": _best_thumb(lk.get("contentImage")),
+        "thumbnailUrl": _best_thumb(lk.get("contentImage")) or thumbnail_url_for_video_id(video_id),
         "channelName": channel_name,
         "channelId": None,
         "channel": {"id": None, "title": channel_name, "handle": None, "url": None, "thumbnail": None},
@@ -652,6 +653,16 @@ def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
     if view_approx:
         card["viewCountApproximate"] = True
     return card
+
+
+def _lockup_result_type(published_raw: str | None) -> str:
+    """Classify Live-tab lockups: upcoming / live stream VOD / regular video."""
+    low = (published_raw or "").lower()
+    if "scheduled" in low or "premiere" in low:
+        return "upcoming"
+    if "streamed" in low:
+        return "stream"
+    return "video"
 
 
 def _normalize_playlist_video(pv: dict[str, Any]) -> dict[str, Any] | None:
@@ -1409,6 +1420,101 @@ async def enrich_short_cards(
     return list(await asyncio.gather(*[_one(c) for c in cards]))
 
 
+async def enrich_video_cards(
+    cards: list[dict[str, Any]],
+    *,
+    concurrency: int = 6,
+) -> list[dict[str, Any]]:
+    """Player-enrich long-form / stream list rows (exact views, ISO publishedAt).
+
+    Same dual-field pattern as ``enrich_short_cards`` but uses the watch player
+    (not reel_item_watch). Preserves card ``type`` (video|stream|upcoming|live).
+    """
+    if not cards:
+        return cards
+    sem = asyncio.Semaphore(max(1, concurrency))
+
+    async def _one(card: dict[str, Any]) -> dict[str, Any]:
+        async with sem:
+            vid = safe_str(card.get("id"))
+            if not vid and card.get("url"):
+                m = re.search(r"(?:shorts/|v=|youtu\.be/)([\w-]{11})", str(card.get("url")))
+                vid = m.group(1) if m else None
+            if not vid:
+                return card
+            url = safe_str(card.get("url")) or f"https://www.youtube.com/watch?v={vid}"
+            out = {**card, "id": vid, "url": url}
+            out["thumbnailUrl"] = out.get("thumbnailUrl") or thumbnail_url_for_video_id(vid)
+            details = await video_details_native(vid, url)
+            if not isinstance(details, dict):
+                return coerce_published_fields(out)
+            exact_views = safe_int(details.get("viewCount"))
+            if exact_views is not None:
+                _stamp_count_fields(out, count=exact_views, approximate=False)
+                out.pop("viewCountApproximate", None)
+            for src, dest in (
+                ("title", "title"),
+                ("description", "description"),
+                ("publishedAt", "publishedAt"),
+                ("durationSeconds", "durationSeconds"),
+                ("channelName", "channelName"),
+                ("channelId", "channelId"),
+                ("channelHandle", "channelHandle"),
+                ("channelUrl", "channelUrl"),
+                ("thumbnailUrl", "thumbnailUrl"),
+            ):
+                val = details.get(src)
+                if val not in (None, "", []):
+                    out[dest] = val
+            if out.get("channelId") or out.get("channelName"):
+                out["channel"] = {
+                    "id": out.get("channelId"),
+                    "title": out.get("channelName"),
+                    "handle": out.get("channelHandle"),
+                    "url": out.get("channelUrl"),
+                    "thumbnail": None,
+                }
+            # Keep relative label when player only gave ISO.
+            if out.get("publishedAt") and not out.get("publishedTimeText"):
+                _, rel = published_fields(card.get("publishedTimeText") or card.get("publishedAt"))
+                if rel:
+                    out["publishedTimeText"] = rel
+            return coerce_published_fields(out)
+
+    return list(await asyncio.gather(*[_one(c) for c in cards]))
+
+
+async def channel_has_live_tab(channel_url: str) -> bool:
+    """True when the channel exposes a Live / Streams tab.
+
+    YouTube accepts the streams browse ``params`` even when the tab is missing
+    and silently returns Videos/Home content (MrBeast). Gate on the tab list.
+    """
+    base = (channel_url or "").strip().rstrip("/")
+    for suffix in (
+        "/videos",
+        "/shorts",
+        "/streams",
+        "/live",
+        "/playlists",
+        "/featured",
+        "/posts",
+        "/community",
+        "/about",
+    ):
+        if base.lower().endswith(suffix):
+            base = base[: -len(suffix)]
+            break
+    data, _ = await fetch_page_data(base or channel_url, timeout=12.0)
+    if data is None:
+        return False
+    for tab in walk_find(data, "tabRenderer"):
+        title = (text_of(tab.get("title")) or safe_str(tab.get("title")) or "").strip().lower()
+        if title in {"live", "streams", "livestreams"}:
+            return True
+    return False
+
+
 # ---------------------------------------------------------------- playlist -
 def _playlist_total_videos(data: Any, header: dict[str, Any] | None) -> int | None:
     """Playlist size from header / sidebar stats (not the page slice length)."""
@@ -1638,6 +1744,7 @@ def collect_playlist_cards(data: Any) -> list[dict[str, Any]]:
                 video_count = safe_int(m.group(1).replace(",", ""))
         rows.append(
             {
+                "id": pid,
                 "url": f"https://www.youtube.com/playlist?list={pid}",
                 "title": title,
                 "videoCount": video_count,

@@ -51,6 +51,31 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Align /apis SSG builds; playlist enrich + channel-playlists id",
+    description:
+      "Marketing pages were sticky across deploys — /apis index could show an older ENDPOINT_COUNT (e.g. 173) while newer slug pages showed 177, hiding already-shipped fixes like popular-hashtags videoCount docs. Footer now stamps PLATFORM_COUNT/ENDPOINT_COUNT · docs DATE, CONTENT_UPDATED bumped, and ISR is 60s on marketing/apis. youtube/playlist player-enriches videos for exact viewCount + ISO publishedAt (owner/totalVideos already native). channel-playlists rows expose id for chaining into /playlist.",
+    items: [
+      "/apis ISR 60s + footer build stamp (N/M · docs DATE)",
+      "CONTENT_UPDATED → 2026-08-03 (force catalog/sitemap freshness)",
+      "youtube/playlist(+videos): enrich_video_cards (exact views, ISO)",
+      "channel-playlists: id field on each playlist row",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "channel-streams Live-tab gate + video enrich; video-sponsors overlaps/minVotes",
+    description:
+      "channel-streams was returning Videos for channels without a Live tab (InnerTube still accepts streams params — MrBeast looked like live VODs). We now require a Live tab (hasLiveTab:false ⇒ empty), player-enrich streams/videos for exact viewCount + ISO publishedAt, and bill streams flat 2 credits. video-sponsors sorts by startSeconds, drops votes<0 by default (minVotes), flags overlapsWith, and exposes coverageSeconds for density without double-counting.",
+    items: [
+      "channel-streams: Live tab gate + hasLiveTab; flat 2 credits",
+      "channel-videos/streams: player enrich (exact views, ISO dates)",
+      "video-sponsors: sort, minVotes, overlapsWith, coverageSeconds",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "Linkbio (lnk.bio): bypass Cloudflare 403 that marked the platform Degraded",
     description:
       "lnk.bio started returning Cloudflare challenge pages to plain httpx, so /v1/linkbio/page failed with HTTP 502 and /status showed Linkbio as Degraded. Fetches now prefer Chrome TLS impersonation (curl_cffi) before residential/direct httpx, restore profile + links for handles like @charlidamelio, and bump the page cache key.",

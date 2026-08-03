@@ -10,7 +10,7 @@ import {
 } from "@/lib/api-catalog";
 
 /** Keep catalog landing in sync with ENDPOINT_COUNT / PLATFORM_COUNT after deploys. */
-export const revalidate = 3600;
+export const revalidate = 60;
 
 const TITLE = "Social Media APIs — YouTube, TikTok, Instagram, Facebook & X";
 const DESCRIPTION = `One REST API for ${ENDPOINT_COUNT} endpoints across ${PLATFORM_COUNT} social platforms — YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Twitch, Spotify, and more. Transcripts, AI summaries, details, comments, and search — structured JSON, no OAuth.`;
