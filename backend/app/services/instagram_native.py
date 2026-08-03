@@ -2445,21 +2445,23 @@ def _as_trending_reel(post: dict[str, Any]) -> dict[str, Any]:
 async def trending_reels_native(
     country: str = "United States", *, limit: int = 20
 ) -> list[dict[str, Any]] | None:
-    """Explore Reels via Decodo (optional geo) + Polaris hydrate.
+    """Trending Reels from Instagram's public ``/reels`` surface.
 
-    Scrapes Reels-first URLs, hydrates shortcodes, then **keeps only videos**
-    (same contract as channel-reels). Photos/carousels are never returned —
-    padding with Explore images made the docs lie. Apify remains fallthrough.
+    Scrapes ``instagram.com/reels`` (then ``/explore/reels``) — **never** the
+    general Explore photo grid. Hydrates shortcodes and keeps only videos
+    (``product_type=clips`` / Video). Photos/carousels and multi-year stale
+    resurfaces are dropped. Instagram's own page returns small overlapping
+    batches; callers should expect duplicates across requests.
     """
     if limit <= 0:
         return []
     geo = _TRENDING_GEO.get((country or "").strip()) or None
-    # Over-fetch: Explore HTML mixes photos; hydrate 401s some codes.
+    # Over-fetch: hydrate 401s some codes; keep only videos after.
     fetch_n = min(200, max(limit * 5, limit + 40))
+    # SC scrapes /reels — keep that first. Never /explore/ (photos).
     urls = (
-        "https://www.instagram.com/explore/reels/",
         "https://www.instagram.com/reels/",
-        "https://www.instagram.com/explore/",
+        "https://www.instagram.com/explore/reels/",
     )
     codes: list[str] = []
     seen: set[str] = set()
@@ -2482,12 +2484,19 @@ async def trending_reels_native(
     if not posts:
         return None
     reels: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
     for post in posts:
         if not is_reel_post(post):
             continue
         if _is_stale_explore_post(post):
             continue
-        reels.append(_as_trending_reel(post))
+        row = _as_trending_reel(post)
+        rid = safe_str(row.get("id") or row.get("shortcode"))
+        if rid and rid in seen_ids:
+            continue
+        if rid:
+            seen_ids.add(rid)
+        reels.append(row)
 
     def _rank(row: dict[str, Any]) -> tuple[int, float]:
         eng = row.get("engagement") if isinstance(row.get("engagement"), dict) else {}

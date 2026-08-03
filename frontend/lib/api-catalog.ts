@@ -496,14 +496,15 @@ const INSTAGRAM: Spec[] = [
     category: "list",
     method: "GET",
     path: "/v1/instagram/trending-reels",
-    credits: 28,
-    creditsPerResult: 1.4,
-    tagline: "Get Reels currently surfacing on Instagram Explore for a chosen country — video URL, caption, author, views, likes, and comments. Photos and carousels are filtered out.",
-    longDescription: "Pass a country name (default United States) and the Instagram Trending Reels API returns video Reels from that country's Explore / Reels discovery surface as clean JSON — each with video URL, caption, author, and view / like / comment counts when Instagram exposes them. Photo and carousel Explore cards are filtered out (same idea as Channel Reels). Stale multi-year resurfaced posts are dropped. No hashtag needed. Native path is cheaper when available; Apify Explore fallthrough may take longer and bills at the listed rate. Pass cache=true for the 24h shared cache.",
+    credits: 1,
+    tagline:
+      "Trending Reels from Instagram's public /reels page — videos only, flat 1 credit. Expect overlapping duplicates across calls.",
+    longDescription:
+      "Fetches trending Reels from Instagram's public instagram.com/reels surface (not the Explore photo grid). Instagram only gives a small batch at a time and results can overlap, so call this endpoint repeatedly for more coverage — expect some duplicates; that is how Instagram's Reels page behaves too. Each result is a video Reel (productType clips) with video URL when available, caption, author, and view / like / comment counts. Photos, carousels, and multi-year stale resurfaces are never returned (503 if a fallthrough scrape has no Reels yet). Flat 1 credit per call. Pass cache=true for the 24h shared cache.",
     delivers: [
-      "Video Reels only — Image/Sidecar Explore cards filtered out",
-      "id (numeric media id when available) + shortcode for URL building",
-      "engagement.views / likes / comments when Instagram exposes them",
+      "Video Reels only from /reels — never Explore photos",
+      "Flat 1 credit (not per-result)",
+      "Duplicates across calls are expected (Instagram behaviour)",
       "country localization (35 countries)",
     ],
   },
@@ -2080,7 +2081,16 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
         "last_24_hours | last_week | last_month | last_year (aliases: today, this_week, this_month, this_year).",
     },
   ],
-  "instagram-trending-reels": [{ name: "country", type: "string", required: false, description: "Country for Explore localization — full name or ISO code (e.g. 'United States', 'US', 'Turkey', 'TR'). Default United States. 35 countries supported." }, lp(20, 200)],
+  "instagram-trending-reels": [
+    {
+      name: "country",
+      type: "string",
+      required: false,
+      description:
+        "Country for Reels localization — full name or ISO code (e.g. 'United States', 'US', 'Turkey', 'TR'). Default United States. 35 countries supported.",
+    },
+    lpFlat(20, 200, 1),
+  ],
   "instagram-tagged-posts": [
     up(IG_PROFILE),
     lpFlat(20, 200, 1),

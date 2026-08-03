@@ -61,6 +61,8 @@ RATE_IG_MARGIN = 1.4
 RATE_IG_CHANNEL = 0.3
 # Native usertags feed (session cookies) — flat fee; Apify tagged scraper stays RATE_IG_RICH.
 CREDIT_TAGGED_NATIVE = 1
+# Match SC: flat fee for Instagram's public /reels surface (not Explore photos).
+CREDIT_TRENDING_REELS = 1
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -1549,25 +1551,32 @@ def _normalize_trending_country(raw: str) -> str:
     )
 
 
-@router.get("/trending-reels", summary="Instagram trending Reels from Explore")
+@router.get("/trending-reels", summary="Instagram trending Reels from /reels")
 async def instagram_trending_reels(
-    country: str = Query("United States", description="Country name or ISO code (e.g. 'United States' or 'US') for Explore localization"),
-    limit: int = Query(20, ge=10, le=200),
+    country: str = Query(
+        "United States",
+        description="Country name or ISO code (e.g. 'United States' or 'US') for Reels localization",
+    ),
+    limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    """Public Instagram Reels surface — videos only, flat 1 credit.
+
+    Instagram only returns a small overlapping batch per request; call again
+    for more and expect some duplicates (same behaviour as the /reels page).
+    """
     settings = get_settings()
     country = _normalize_trending_country(country)
-    cost = _scaled_credits(limit, RATE_IG_MARGIN, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/trending-reels",
         platform="instagram",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_TRENDING_REELS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # 1) Native Explore Reels (Decodo HTML + Polaris hydrate), videos only.
+            # 1) Native /reels (+ /explore/reels) — never /explore/ photo grid.
             native = await instagram_native.trending_reels_native(country, limit=limit)
             if native:
                 reels = [decodo.strip_null_post_fields(r) for r in native[:limit]]
@@ -1576,12 +1585,16 @@ async def instagram_trending_reels(
                     "platform": "instagram",
                     "country": country,
                     "totalReturned": len(reels),
+                    "note": (
+                        "Instagram returns a small overlapping batch per call; "
+                        "duplicates across requests are expected."
+                    ),
                     "reels": reels,
                 }
 
-            # 2) Apify fallthrough — Explore actor runs take ~10-12 minutes, so
-            # serve a recent snapshot (<=48h), kick a background refresh when
-            # older than 6h, and for a cold country wait out the request budget.
+            # 2) Apify fallthrough — actor runs take ~10-12 minutes, so serve a
+            # recent snapshot (<=48h), kick a background refresh when older
+            # than 6h, and for a cold country wait out the request budget.
             # Over-fetch then filter: the actor returns mixed Explore media.
             client = ApifyClient(timeout=280, max_attempts=1)
             actor = settings.APIFY_ACTOR_INSTAGRAM_TRENDING
@@ -1603,6 +1616,10 @@ async def instagram_trending_reels(
                     "platform": "instagram",
                     "country": country,
                     "totalReturned": len(reels),
+                    "note": (
+                        "Instagram returns a small overlapping batch per call; "
+                        "duplicates across requests are expected."
+                    ),
                     "reels": reels,
                 }
 
@@ -1627,23 +1644,25 @@ async def instagram_trending_reels(
             if payload is None:
                 raise HTTPException(
                     status_code=503,
-                    detail="Trending Reels for this country are being refreshed right now (Explore scraping takes ~10 minutes). Please retry in a few minutes.",
+                    detail=(
+                        "Trending Reels for this country are being refreshed "
+                        "(scraping takes ~10 minutes). Retry shortly — we never "
+                        "return Explore photos as Reels."
+                    ),
                 )
             return payload
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 12},
+            params={"country": country, "limit": limit, "v": 13},
             runner=_run,
             ctx=ctx,
             # Native path is seconds; Apify path still SWR for long actor runs.
             stale_while_revalidate=True,
             use_cache=cache,
         )
-        if ctx.get("source") == "direct":
-            ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_CHANNEL, 1)
-        else:
-            ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_MARGIN, 2)
+        # Flat 1 credit always (native or Apify) — never scale by limit.
+        ctx["credits_override"] = CREDIT_TRENDING_REELS
         return ApiResponse(data=data)
 
 

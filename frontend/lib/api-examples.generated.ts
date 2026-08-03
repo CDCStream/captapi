@@ -3719,7 +3719,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "nasachandraxray"
         ]
       }
-    ]
+    ],
+    "note": "Instagram returns a small overlapping batch per call; duplicates across requests are expected.",
+    "credits": 1
   },
   "kick-clip": {
     "channelUrl": "https://kick.com/xqc",

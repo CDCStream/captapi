@@ -1532,8 +1532,8 @@
     "platform": "instagram",
     "name": "Instagram Trending Reels",
     "path": "/v1/instagram/trending-reels",
-    "credits": 28,
-    "summary": "Trending Instagram Reels / Explore posts by country.",
+    "credits": 1,
+    "summary": "Trending Reels from instagram.com/reels — videos only, flat 1 credit.",
     "params": [
       {
         "name": "country",

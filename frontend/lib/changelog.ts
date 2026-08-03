@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Instagram Trending Reels: flat 1 credit, /reels only",
+    description:
+      "Trending Reels was billed like a 28-credit Apify scrape and could surface Explore photos. It now scrapes instagram.com/reels (then /explore/reels) — never the Explore photo grid — returns videos only, and charges a flat 1 credit. Docs and response note that Instagram returns small overlapping batches; duplicates across calls are expected.",
+    items: [
+      "Flat 1 credit (was ~28 at limit=20)",
+      "Source: /reels — Explore photos never returned",
+      "Honesty note: duplicates across calls are expected",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "Instagram reels-by-audio-id: trend signals + rich music",
     description:
       "reels-by-audio-id exists to answer “is this sound trending?” but returned only a reel list with a bare musicId. The response now includes top-level isTrendingInClips / trendRank / previousTrendRank and a music{} object (clusterId, assetId, canonicalId, title, artist, durationMs, audioType, isExplicit, hasLyrics, coverUrl). Each Reel can also carry hasAudio, coauthors[], and mashupInfo when Instagram exposes them.",
