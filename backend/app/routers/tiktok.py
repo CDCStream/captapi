@@ -28,15 +28,25 @@ from app.services.openai_client import (
 from app.services import tiktok_native
 from app.utils.retry import retry_none
 from app.services.tiktok_native import (
-    audience_regions_native,
+    AUTHOR_NULLABLE_KEYS,
+    ENGAGEMENT_RATE_BASIS,
+    audience_commenters_native,
+    build_author,
     channel_details_native,
     channel_posts_native,
     coerce_stats_v2,
     comment_replies_native,
+    creator_engagement_rate,
+    extract_bio_contact,
+    _collect_hashtags,
+    _collect_mentions,
     hashtag_posts_native,
+    item_has_hashtag,
+    normalize_hashtag_query,
     live_status_native,
     music_posts_native,
     popular_creators_native,
+    enrich_hashtag_population_stats,
     popular_hashtags_native,
     profile_region_native,
     trending_feed_native,
@@ -50,6 +60,7 @@ from app.services.tiktok_native import (
 )
 from app.utils.countries import country_name
 from app.utils.formatters import (
+    duration_seconds,
     first_present,
     normalize_language_code,
     strip_empty,
@@ -81,14 +92,37 @@ CREDIT_SONG_DETAILS_NATIVE = 1
 CREDIT_SONG_DETAILS_APIFY = 2
 CREDIT_SEARCH_SUGGESTIONS = 2  # native search preview; flat fee, our cost ~$0
 CREDIT_PROFILE_REGION = 2  # native profile page + fast LLM region estimate
-CREDIT_AUDIENCE = 3  # video list (actor) + native commenter-region sampling
+CREDIT_AUDIENCE = 3  # video list + native commenter sampling (12 videos)
 CREDIT_SEARCH = 2
 
-# Audience-country sampling for /audience-demographics: how many recent videos
-# to pull commenter regions from, and how many country codes to gather before
-# tallying.
+# Audience-country sampling for /audience-demographics: default videos / target
+# commenters. Callers can raise ``videos`` (12|30|60) for a larger sample.
 AUDIENCE_VIDEO_SAMPLE = 12
 AUDIENCE_TARGET_TOTAL = 500
+AUDIENCE_VIDEOS_ALLOWED = (12, 30, 60)
+
+
+def _audience_credits(videos: int) -> int:
+    """Scale credits with sample depth: 12→3, 30→5, 60→8."""
+    if videos <= 12:
+        return 3
+    if videos <= 30:
+        return 5
+    return 8
+
+
+def _audience_target_total(videos: int) -> int:
+    """More videos → higher commenter target (soft cap 2000)."""
+    return min(2000, max(AUDIENCE_TARGET_TOTAL, videos * 40))
+
+
+def _sample_confidence(n: int) -> str:
+    """Honest sample-strength label for commenter geography."""
+    if n >= 1000:
+        return "high"
+    if n >= 400:
+        return "medium"
+    return "low"
 
 # ---------------------------------------------------------------------------
 # Per-result credit rates for list endpoints.
@@ -358,43 +392,57 @@ def _tt_published_iso(item: dict) -> str | None:
     return None
 
 
-_TT_HASHTAG_RE = re.compile(r"#([^\s#]+)")
-
-
 def _tt_hashtags(item: dict, caption: str | None) -> list[str]:
-    """Deduped hashtags from actor fields + caption; drop empty strings.
+    """Canonical hashtags via ``text_extra`` / structured fields (see native helper)."""
+    return _collect_hashtags(item, caption)
 
-    Case-insensitive (``Latinus`` / ``latinus`` collapse to one lowercase tag).
-    """
-    seen: set[str] = set()
-    out: list[str] = []
 
-    def _add(raw: Any) -> None:
-        name = safe_str(raw)
-        if not name:
-            return
-        name = name.lstrip("#").strip()
-        if not name:
-            return
-        key = name.casefold()
-        if key in seen:
-            return
-        seen.add(key)
-        out.append(key)
+def _tt_mentions(item: dict) -> list[dict[str, Any]]:
+    return _collect_mentions(item)
 
-    for h in safe_list(item.get("hashtags")):
-        _add(h.get("name") if isinstance(h, dict) else h)
-    if caption:
-        for tag in _TT_HASHTAG_RE.findall(caption):
-            _add(tag)
-    return out
+
+_ENGAGEMENT_COUNT_KEYS = ("views", "likes", "comments", "shares", "saves")
+
+
+def _tt_coerce_engagement(eng: Any) -> dict[str, int]:
+    """Always emit the five engagement ints — missing/null → 0 (never omit shares)."""
+    src = eng if isinstance(eng, dict) else {}
+    return {k: safe_int(src.get(k)) or 0 for k in _ENGAGEMENT_COUNT_KEYS}
 
 
 def _tt_finalize_post(post: dict[str, Any]) -> dict[str, Any]:
-    """strip_empty, but always keep ``hashtags`` (empty list when none)."""
+    """strip_empty, then restore stable keys clients rely on (0 / [] / null / false)."""
+    author_in = post.get("author") if isinstance(post.get("author"), dict) else None
+    keep_author_nulls = {
+        k: None
+        for k in AUTHOR_NULLABLE_KEYS
+        if author_in is not None and k in author_in and author_in.get(k) is None
+    }
+    raw_engagement = post.get("engagement")
+    raw_duration = post.get("durationSeconds")
+    raw_is_ad = post.get("isAd")
+    raw_is_paid = post.get("isPaidPartnership")
     out = strip_empty(post)
+    out["engagement"] = _tt_coerce_engagement(out.get("engagement") or raw_engagement)
     if not isinstance(out.get("hashtags"), list):
         out["hashtags"] = []
+    if not isinstance(out.get("mentions"), list):
+        out["mentions"] = []
+    if keep_author_nulls:
+        author_out = out.get("author")
+        if not isinstance(author_out, dict):
+            author_out = {}
+            out["author"] = author_out
+        author_out.update(keep_author_nulls)
+    # Always float seconds (12.0 not 12) — same type on top-search and music-posts.
+    if raw_duration is not None:
+        out["durationSeconds"] = duration_seconds(raw_duration)
+    elif out.get("durationSeconds") is not None:
+        out["durationSeconds"] = duration_seconds(out["durationSeconds"])
+    out["isAd"] = bool(raw_is_ad) if raw_is_ad is not None else bool(out.get("isAd"))
+    out["isPaidPartnership"] = (
+        bool(raw_is_paid) if raw_is_paid is not None else bool(out.get("isPaidPartnership"))
+    )
     return out
 
 
@@ -417,32 +465,33 @@ def _normalize(item: dict) -> dict:
         "url": safe_str(item.get("webVideoUrl") or item.get("url")),
         "id": safe_str(item.get("id") or item.get("videoId")),
         "caption": caption,
-        "description": caption,
         "publishedAt": _tt_published_iso(item),
-        "durationSeconds": safe_float(video_meta.get("duration") or item.get("duration")),
+        "durationSeconds": duration_seconds(video_meta.get("duration") or item.get("duration")),
         "thumbnailUrl": safe_str(
             video_meta.get("coverUrl")
             or video_meta.get("originalCoverUrl")
             or (covers[0] if covers else None)
         ),
-        "author": {
-            "username": safe_str(author.get("name") or author.get("uniqueId")),
-            "displayName": safe_str(author.get("nickName") or author.get("nickname")),
-            "url": safe_str(author.get("profileUrl")),
-            "followers": safe_int(author.get("fans") or author.get("followers")),
-            # Badge flag: missing/unknown -> false (never null).
-            "verified": bool(author.get("verified")) if author.get("verified") is not None else False,
-            "profileImage": safe_str(author.get("avatar") or author.get("avatarLarger")),
-        },
-        "engagement": {
-            "views": safe_int(item.get("playCount") or stats.get("playCount")),
-            "likes": safe_int(item.get("diggCount") or stats.get("diggCount")),
-            "comments": safe_int(item.get("commentCount") or stats.get("commentCount")),
-            "shares": safe_int(item.get("shareCount") or stats.get("shareCount")),
-            "saves": safe_int(item.get("collectCount") or stats.get("collectCount")),
-        },
+        "author": build_author(author, author_stats=stats if isinstance(stats, dict) else None),
+        "engagement": _tt_coerce_engagement(
+            {
+                "views": item.get("playCount") or stats.get("playCount"),
+                "likes": item.get("diggCount") or stats.get("diggCount"),
+                "comments": item.get("commentCount") or stats.get("commentCount"),
+                "shares": item.get("shareCount") or stats.get("shareCount"),
+                "saves": item.get("collectCount") or stats.get("collectCount"),
+            }
+        ),
         "hashtags": _tt_hashtags(item, caption),
+        "mentions": _tt_mentions(item),
         "musicName": _music_name(item, music),
+        "isAd": bool(item.get("isAd") or item.get("is_ad")),
+        "isPaidPartnership": bool(
+            item.get("isPaidPartnership")
+            or item.get("is_paid_partnership")
+            or item.get("isPaidContent")
+            or item.get("is_paid_content")
+        ),
     }
 
 
@@ -543,33 +592,35 @@ def _normalize_aweme(item: dict) -> dict:
     if isinstance(create_time, (int, float)) and create_time > 0:
         published = datetime.fromtimestamp(int(create_time), tz=timezone.utc).isoformat()
     caption = safe_str(item.get("title"))
-    verified = author.get("verified") or author.get("is_verified")
     return {
         "platform": "tiktok",
         "url": f"https://www.tiktok.com/@{username}/video/{video_id}" if username and video_id else None,
         "id": video_id or safe_str(item.get("aweme_id")),
         "caption": caption,
-        "description": caption,
         "publishedAt": published,
-        "durationSeconds": safe_float(item.get("duration")),
+        "durationSeconds": duration_seconds(item.get("duration")),
         "thumbnailUrl": safe_str(item.get("cover") or item.get("origin_cover")),
-        "author": {
-            "username": username,
-            "displayName": safe_str(author.get("nickname")),
-            "url": f"https://www.tiktok.com/@{username}" if username else None,
-            "followers": safe_int(author.get("follower_count") or author.get("followers")),
-            "verified": False if verified is None else bool(verified),
-            "profileImage": safe_str(author.get("avatar")),
-        },
-        "engagement": {
-            "views": safe_int(item.get("play_count")),
-            "likes": safe_int(item.get("digg_count")),
-            "comments": safe_int(item.get("comment_count")),
-            "shares": safe_int(item.get("share_count")),
-            "saves": safe_int(item.get("collect_count")),
-        },
+        "author": build_author(
+            author if isinstance(author, dict) else None,
+            profile_image=safe_str(author.get("avatar")) if isinstance(author, dict) else None,
+        ),
+        "engagement": _tt_coerce_engagement(
+            {
+                "views": item.get("play_count"),
+                "likes": item.get("digg_count"),
+                "comments": item.get("comment_count"),
+                "shares": item.get("share_count"),
+                "saves": item.get("collect_count"),
+            }
+        ),
         "hashtags": _tt_hashtags(item, caption),
+        "mentions": _tt_mentions(item),
         "musicName": _music_name(item),
+        "musicId": safe_str(item.get("music_id") or item.get("musicId")),
+        "isAd": bool(item.get("is_ad") or item.get("isAd")),
+        "isPaidPartnership": bool(
+            item.get("is_paid_partnership") or item.get("isPaidPartnership")
+        ),
     }
 
 
@@ -673,37 +724,52 @@ def _normalize_creator(item: dict) -> dict:
     verified = item.get("verified")
     if verified is None:
         verified = nested.get("verified") if nested.get("verified") is not None else nested.get("isVerified")
-    return strip_empty(
-        {
-            "rank": safe_int(item.get("rank")),
-            "username": handle,
-            "displayName": safe_str(
-                item.get("name")
-                or nested.get("nickname")
-                or nested.get("displayName")
-                or item.get("nickname")
-                or item.get("displayName")
-            ),
-            "url": safe_str(item.get("profileUrl") or nested.get("profileUrl") or item.get("url"))
-            or (f"https://www.tiktok.com/@{handle}" if handle else None),
-            "bio": safe_str(item.get("bio") or nested.get("signature") or nested.get("bio")),
-            "followers": followers,
-            "engagementRate": item.get("engagementRate")
-            or item.get("engagement_rate")
-            or item.get("followerGrowthRate"),
-            "likes": likes,
-            "videos": videos,
-            "country": safe_str(item.get("countryCode") or item.get("country") or nested.get("region")),
-            "verified": verified,
-            "profileImage": safe_str(
-                item.get("creatorAvatarUrl")
-                or nested.get("avatarLarger")
-                or nested.get("avatar")
-                or item.get("avatar")
-                or item.get("avatarUrl")
-            ),
-        }
+    # Prefer our formula when likes/videos/followers exist — never trust actor "growth" as ER.
+    eng = creator_engagement_rate(likes, videos, followers)
+    if eng is None:
+        raw_eng = item.get("engagementRate") or item.get("engagement_rate")
+        eng = safe_float(raw_eng)
+    bio = safe_str(item.get("bio") or nested.get("signature") or nested.get("bio"))
+    contact = extract_bio_contact(bio)
+    # Creator locale only — never the request's feed country echo.
+    region = safe_str(
+        nested.get("region")
+        or item.get("region")
+        or item.get("creatorRegion")
     )
+    out = {
+        "rank": safe_int(item.get("rank")),
+        "id": safe_str(nested.get("id") or nested.get("uid") or item.get("id")),
+        "secUid": safe_str(nested.get("secUid") or nested.get("sec_uid") or item.get("secUid")),
+        "username": handle,
+        "displayName": safe_str(
+            item.get("name")
+            or nested.get("nickname")
+            or nested.get("displayName")
+            or item.get("nickname")
+            or item.get("displayName")
+        ),
+        "url": safe_str(item.get("profileUrl") or nested.get("profileUrl") or item.get("url"))
+        or (f"https://www.tiktok.com/@{handle}" if handle else None),
+        "bio": bio,
+        "followers": followers,
+        "engagementRate": eng,
+        "engagementRateBasis": ENGAGEMENT_RATE_BASIS,
+        "likes": likes,
+        "videos": videos,
+        "region": region,
+        "verified": verified,
+        "profileImage": safe_str(
+            item.get("creatorAvatarUrl")
+            or nested.get("avatarLarger")
+            or nested.get("avatar")
+            or item.get("avatar")
+            or item.get("avatarUrl")
+        ),
+    }
+    if contact:
+        out["contact"] = contact
+    return strip_empty(out)
 
 
 @router.get("/video-details", summary="TikTok video metadata + stats")
@@ -730,7 +796,7 @@ async def tiktok_video_details(
 
         data = await cached_or_run(
             endpoint="tiktok.video-details",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1111,34 +1177,73 @@ async def tiktok_channel_details(
         return ApiResponse(data=data)
 
 
+def _pct(n: int, total: int) -> float:
+    return round(n / total * 100, 2) if total else 0.0
+
+
 def _tally_locations(codes: list[str]) -> list[dict[str, Any]]:
-    """Turn a list of ISO country codes (with duplicates) into a sorted
-    audience-location breakdown: ``[{country, countryCode, count, percentage}]``."""
+    """Turn ISO country codes into a ranked breakdown with numeric percentages."""
     counts = Counter(codes)
     total = sum(counts.values())
     if not total:
         return []
     out: list[dict[str, Any]] = []
     for code, n in counts.most_common():
+        pct = _pct(n, total)
         out.append(
             {
                 "country": country_name(code),
                 "countryCode": code,
                 "count": n,
-                "percentage": f"{n / total * 100:.2f}%",
+                "percentage": pct,
+                "percentageText": f"{pct:.2f}%",
             }
         )
     return out
 
 
-async def _fetch_audience_locations(
+def _tally_languages(codes: list[str]) -> list[dict[str, Any]]:
+    """Turn language codes into a ranked breakdown with numeric percentages."""
+    counts = Counter(codes)
+    total = sum(counts.values())
+    if not total:
+        return []
+    out: list[dict[str, Any]] = []
+    for lang, n in counts.most_common():
+        pct = _pct(n, total)
+        out.append(
+            {
+                "language": lang,
+                "count": n,
+                "percentage": pct,
+                "percentageText": f"{pct:.2f}%",
+            }
+        )
+    return out
+
+
+def _top_n_with_other(
+    items: list[dict[str, Any]], *, limit: int | None, sample_size: int
+) -> tuple[list[dict[str, Any]], dict[str, Any] | None]:
+    """Keep the top ``limit`` buckets; fold the remainder into ``other``."""
+    if limit is None or limit <= 0 or len(items) <= limit:
+        return items, None
+    head = items[:limit]
+    rest = sum(int(x.get("count") or 0) for x in items[limit:])
+    if rest <= 0:
+        return head, None
+    pct = _pct(rest, sample_size)
+    return head, {"count": rest, "percentage": pct, "percentageText": f"{pct:.2f}%"}
+
+
+async def _fetch_audience_demographics(
     handle: str, settings: Any, *, video_sample: int, target_total: int
-) -> tuple[list[dict[str, Any]], int]:
-    """Sample commenter countries across a creator's recent videos.
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int]:
+    """Sample commenter countries + languages across a creator's recent videos.
 
     Prefer native channel posts for video IDs; fall back to the profile actor
-    when TikTok soft-blocks the post list. Commenter ``region`` codes are
-    always pulled natively from TikTok's comment API.
+    when TikTok soft-blocks the post list. Commenter signals come from TikTok's
+    native comment API (``user.region`` + ``comment_language``).
     """
     aweme_ids: list[str] = []
     native_posts = await channel_posts_native(handle, None, video_sample)
@@ -1153,9 +1258,15 @@ async def _fetch_audience_locations(
         aweme_ids = [safe_str(i.get("id") or i.get("videoId")) for i in (items or [])]
         aweme_ids = [a for a in aweme_ids if a]
     if not aweme_ids:
-        return [], 0
-    codes = await audience_regions_native(aweme_ids, target_total=target_total)
-    return _tally_locations(codes or []), len(aweme_ids)
+        return [], [], 0
+    got = await audience_commenters_native(aweme_ids, target_total=target_total)
+    if got is None:
+        return [], [], len(aweme_ids)
+    return (
+        _tally_locations(got.get("regions") or []),
+        _tally_languages(got.get("languages") or []),
+        len(aweme_ids),
+    )
 
 
 async def _resolve_region(data: dict[str, Any]) -> None:
@@ -1623,7 +1734,7 @@ async def tiktok_popular_creators(
 
         data = await cached_or_run(
             endpoint="tiktok.popular-creators",
-            params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit, "v": 6},
+            params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1632,50 +1743,102 @@ async def tiktok_popular_creators(
         return ApiResponse(data=data)
 
 
-@router.get("/audience-demographics", summary="TikTok audience countries (by engaged commenters)")
+@router.get(
+    "/audience-demographics",
+    summary="TikTok commenter countries + languages (engagement sample)",
+    description=(
+        "TikTok does not publish follower geography. This endpoint samples "
+        "people commenting on the creator's recent videos and tallies "
+        "commenter country (user.region) and comment language. Percentages "
+        "are numeric and sum to ~100% across audienceLocations (+ other when "
+        "countriesLimit truncates). Use videos=12|30|60 for sample depth "
+        "(credits 3/5/8). Reflects who engages — not a full follower census."
+    ),
+)
 async def tiktok_audience_demographics(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
+    videos: int = Query(
+        AUDIENCE_VIDEO_SAMPLE,
+        description="How many recent videos to sample comments from (12, 30, or 60). Credits: 3 / 5 / 8.",
+    ),
+    countriesLimit: int | None = Query(
+        None,
+        ge=1,
+        le=100,
+        description=(
+            "Max countries to return in audienceLocations. Remainder is folded "
+            "into other{count,percentage}. Omit to return every country in the sample."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
     settings = get_settings()
+    if videos not in AUDIENCE_VIDEOS_ALLOWED:
+        raise HTTPException(
+            status_code=400,
+            detail=f"videos must be one of {list(AUDIENCE_VIDEOS_ALLOWED)}",
+        )
+    video_sample = videos
+    target_total = _audience_target_total(video_sample)
+    credits = _audience_credits(video_sample)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/audience-demographics",
         platform="tiktok",
         resource_url=f"https://www.tiktok.com/@{handle}",
-        base_credits=CREDIT_AUDIENCE,
+        base_credits=credits,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # TikTok never publishes follower geography, but every commenter's
             # country IS exposed on its own comment API. Sampling commenters
             # across the creator's recent videos yields an engagement-based
             # audience-country breakdown — computed natively, no audience actor.
-            locations, videos_sampled = await _fetch_audience_locations(
-                handle, settings,
-                video_sample=AUDIENCE_VIDEO_SAMPLE,
-                target_total=AUDIENCE_TARGET_TOTAL,
+            locations, languages, videos_sampled = await _fetch_audience_demographics(
+                handle,
+                settings,
+                video_sample=video_sample,
+                target_total=target_total,
             )
             if videos_sampled == 0:
                 raise HTTPException(status_code=404, detail="Profile not found or has no public videos")
+            sample_size = sum(int(loc["count"]) for loc in locations)
+            total_countries = len(locations)
+            shown, other = _top_n_with_other(
+                locations, limit=countriesLimit, sample_size=sample_size
+            )
+            lang_sample = sum(int(x["count"]) for x in languages)
             ctx["source"] = "direct"
             return {
                 "platform": "tiktok",
                 "username": handle,
                 "url": f"https://www.tiktok.com/@{handle}",
+                "basis": "commenters",
                 "videosSampled": videos_sampled,
-                "sampleSize": sum(loc["count"] for loc in locations),
-                "audienceLocations": locations,
+                "videosRequested": video_sample,
+                "sampleSize": sample_size,
+                "totalCountries": total_countries,
+                "confidence": _sample_confidence(sample_size),
+                "audienceLocations": shown,
+                "other": other,
+                "audienceLanguages": languages,
+                "languageSampleSize": lang_sample,
             }
 
         data = await cached_or_run(
             endpoint="tiktok.audience-demographics",
-            params={"handle": handle, "v": 3},
+            params={
+                "handle": handle,
+                "videos": video_sample,
+                "countriesLimit": countriesLimit or "",
+                "v": 4,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
+        ctx["credits_override"] = credits
         return ApiResponse(data=data)
 
 
@@ -1750,7 +1913,7 @@ async def tiktok_channel_posts(
 
         data = await cached_or_run(
             endpoint="tiktok.channel-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 6},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 10},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2031,16 +2194,23 @@ async def tiktok_music_posts(
         base_credits=CREDIT_MUSIC_POSTS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await music_posts_native(url, limit)
-            if native is not None:
-                posts = [_tt_finalize_post(p) for p in native]
+            music_id = _tiktok_music_id(url)
+
+            def _stamp_sound(posts: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 sound_title = next((p.get("musicName") for p in posts if p.get("musicName")), None)
                 if not sound_title:
                     sound_title = _music_name_from_url(url)
-                if sound_title:
-                    for post in posts:
-                        if not post.get("musicName"):
-                            post["musicName"] = sound_title
+                for post in posts:
+                    if sound_title and not post.get("musicName"):
+                        post["musicName"] = sound_title
+                    # Echo the requested sound id onto every row (MUSIC_AWEME often omits it).
+                    if music_id and not post.get("musicId"):
+                        post["musicId"] = music_id
+                return posts
+
+            native = await music_posts_native(url, limit)
+            if native is not None:
+                posts = _stamp_sound([_tt_finalize_post(p) for p in native])
                 ctx["source"] = "direct"
                 return {"url": url, "totalReturned": len(posts), "posts": posts}
 
@@ -2049,21 +2219,13 @@ async def tiktok_music_posts(
                 _tiktok_music_candidates(settings, url, limit),
                 max_items=limit,
             )
-            posts = [_normalize_music_post(i) for i in items[:limit]]
-            # Aweme rows often omit music title; fall back to the first non-empty title in the page.
-            sound_title = next((p.get("musicName") for p in posts if p.get("musicName")), None)
-            if not sound_title:
-                sound_title = _music_name_from_url(url)
-            if sound_title:
-                for post in posts:
-                    if not post.get("musicName"):
-                        post["musicName"] = sound_title
+            posts = _stamp_sound([_normalize_music_post(i) for i in items[:limit]])
             ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="tiktok.music-posts",
-            params={"url": url, "limit": limit, "v": 7},
+            params={"url": url, "limit": limit, "v": 12},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2121,7 +2283,7 @@ async def tiktok_top_search(
 
         data = await cached_or_run(
             endpoint="tiktok.top-search",
-            params={"q": q, "limit": limit, "cursor": cursor, "v": 4},
+            params={"q": q, "limit": limit, "cursor": cursor, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2129,7 +2291,18 @@ async def tiktok_top_search(
         return ApiResponse(data=data)
 
 
-@router.get("/search/hashtag", summary="Search TikTok videos by hashtag")
+@router.get(
+    "/search/hashtag",
+    summary="TikTok videos posted under a hashtag (tag/challenge feed)",
+    description=(
+        "Returns videos from TikTok's /tag/{name} challenge feed — not keyword "
+        "or username search. Each result must carry the requested hashtag in "
+        "structured tags or as #tag in the caption; @comedy… accounts without "
+        "#comedy are dropped. region only chooses the proxy exit country — it "
+        "does not filter results by country. Cursor pagination via nextCursor / "
+        "hasMore (nextCursor null = last page)."
+    ),
+)
 async def tiktok_search_by_hashtag(
     q: str = Query(..., min_length=2, description="Hashtag to search for (with or without the leading #)."),
     limit: int = Query(20, ge=1, le=100, description="Number of videos to return per page."),
@@ -2149,62 +2322,107 @@ async def tiktok_search_by_hashtag(
 ):
     settings = get_settings()
     region_code = region.strip().upper()
+    tag = normalize_hashtag_query(q)
+    if not tag:
+        raise HTTPException(status_code=400, detail="Expected a hashtag (e.g. comedy or #comedy)")
     cost = _scaled_credits(limit, RATE_CHANNEL_POSTS, CREDIT_SEARCH)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/search/hashtag",
         platform="tiktok",
-        resource_url=None,
+        resource_url=f"https://www.tiktok.com/tag/{tag}",
         base_credits=cost,
     ) as ctx:
+        def _keep_tagged(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+            return [r for r in rows if item_has_hashtag(r, tag)]
+
         async def _run() -> dict[str, Any]:
-            # First page: Decodo captures TikTok's own signed
-            # /api/challenge/item_list/ XHR (~20-40s). Deeper offset pages and
-            # soft-blocked Decodo runs fall through to Apify.
+            # Primary: Decodo opens /tag/{name} and captures signed
+            # /api/challenge/item_list/ (real challenge feed). Over-fetch a bit
+            # then require the hashtag so keyword bleed never ships.
             if cursor == 0:
-                native = await hashtag_posts_native(q, limit=limit)
+                native = await hashtag_posts_native(tag, limit=max(limit * 2, limit))
                 if native is not None:
                     posts, has_more, _tt_cursor = native
-                    results = [_tt_finalize_post(p) for p in posts]
-                    ctx["source"] = "direct"
-                    return {
-                        "query": q,
-                        "totalReturned": len(results),
-                        "hasMore": has_more,
-                        "nextCursor": limit if has_more else None,
-                        "results": results,
-                    }
+                    results = _keep_tagged([_tt_finalize_post(p) for p in posts])[:limit]
+                    if results:
+                        ctx["source"] = "direct"
+                        return {
+                            "query": q,
+                            "hashtag": tag,
+                            "totalReturned": len(results),
+                            "hasMore": has_more or len(posts) > limit,
+                            "nextCursor": limit if (has_more or len(posts) > limit) else None,
+                            "results": results,
+                        }
 
             apify = get_apify()
-            # The actor always starts from the top of the hashtag feed, so we
-            # fetch cursor+limit rows and slice the requested page. hasMore is
-            # true when the actor still had rows beyond this page.
-            want = cursor + limit
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK,
-                {
-                    "hashtags": [q.lstrip("#")],
-                    "resultsPerPage": want,
-                    "shouldDownloadVideos": False,
-                    "proxyConfiguration": {"useApifyProxy": True, "apifyProxyCountry": region_code},
-                },
-                max_items=want,
-            )
-            page = items[cursor : cursor + limit]
-            results = [_normalize(i) for i in page]
-            has_more = len(items) > cursor + limit
+            # Prefer the tag page URL. The ``hashtags: [q]`` actor input has been
+            # observed to return keyword/username matches (e.g. @comedy7092 with
+            # no #comedy) — never trust that path without the hashtag filter.
+            want = cursor + max(limit * 3, limit)
+            tag_url = f"https://www.tiktok.com/tag/{tag}"
+            items: list[dict[str, Any]] = []
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_TIKTOK,
+                    {
+                        "startUrls": [tag_url],
+                        "resultsPerPage": want,
+                        "shouldDownloadVideos": False,
+                        "proxyConfiguration": {
+                            "useApifyProxy": True,
+                            "apifyProxyCountry": region_code,
+                        },
+                    },
+                    max_items=want,
+                )
+            except Exception:  # noqa: BLE001
+                items = []
+            if not items:
+                try:
+                    items = await apify.run_actor_sync(
+                        settings.APIFY_ACTOR_TIKTOK,
+                        {
+                            "hashtags": [tag],
+                            "resultsPerPage": want,
+                            "shouldDownloadVideos": False,
+                            "proxyConfiguration": {
+                                "useApifyProxy": True,
+                                "apifyProxyCountry": region_code,
+                            },
+                        },
+                        max_items=want,
+                    )
+                except Exception:  # noqa: BLE001
+                    items = []
+
+            mapped = [_normalize(i) for i in (items or []) if isinstance(i, dict)]
+            tagged = _keep_tagged(mapped)
+            page = tagged[cursor : cursor + limit]
+            has_more = len(tagged) > cursor + limit
+            if not page:
+                raise HTTPException(
+                    status_code=404,
+                    detail=(
+                        f"No videos found under #{tag}. "
+                        "This endpoint only returns the TikTok tag/challenge feed, "
+                        "not keyword or username search."
+                    ),
+                )
             ctx["source"] = "apify"
             return {
                 "query": q,
-                "totalReturned": len(results),
+                "hashtag": tag,
+                "totalReturned": len(page),
                 "hasMore": has_more,
                 "nextCursor": (cursor + limit) if has_more else None,
-                "results": results,
+                "results": page,
             }
 
         data = await cached_or_run(
             endpoint="tiktok.search-hashtag",
-            params={"q": q, "limit": limit, "cursor": cursor, "region": region_code, "v": 2},
+            params={"q": tag, "limit": limit, "cursor": cursor, "region": region_code, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2363,7 +2581,10 @@ def _song_from_apify_music(music: dict[str, Any], *, url: str, url_id: str | Non
         "original": bool(original) if original is not None else None,
         "isOriginalSound": bool(original) if original is not None else None,
         "album": safe_str(music.get("album") or music.get("soundAlbum")) or None,
-        "duration": safe_float(
+        "durationSeconds": duration_seconds(
+            music.get("duration") or music.get("durationSeconds") or music.get("soundDuration")
+        ),
+        "duration": duration_seconds(
             music.get("duration") or music.get("durationSeconds") or music.get("soundDuration")
         ),
         "coverUrl": cover,
@@ -2600,13 +2821,34 @@ async def tiktok_trending_feed(
         return ApiResponse(data=data)
 
 
-@router.get("/popular-hashtags", summary="Trending TikTok hashtags for a topic/keyword")
+@router.get(
+    "/popular-hashtags",
+    summary="Related TikTok hashtags with real population totals",
+    description=(
+        "Discovers co-occurring hashtags from a sample of seed videos, then "
+        "enriches each tag from TikTok's challenge/detail API (statsV2) so "
+        "videoCount and totalPlays are population totals — not sample tallies. "
+        "Sample co-occurrence stays in sampleVideoCount / samplePlays. "
+        "rank is by population videoCount. Default query=trending is a keyword "
+        "seed (top-search), not TikTok's official trending chart. "
+        "growthRate is null — TikTok does not expose it on challenge/detail."
+    ),
+)
 async def tiktok_popular_hashtags(
-    query: str = Query("trending", min_length=1, description="Topic or keyword to discover trending hashtags for"),
+    query: str = Query(
+        "trending",
+        min_length=1,
+        description=(
+            "Seed topic/hashtag for co-occurrence discovery. Default \"trending\" "
+            "searches that keyword — it is not TikTok's official trending-hashtag chart."
+        ),
+    ),
     limit: int = Query(20, ge=1, le=100),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    from app.utils.media_urls import utc_now_iso
+
     settings = get_settings()
     # Apify cost is driven by the number of videos fetched, not returned tags.
     n_videos = max(limit, 25)
@@ -2620,16 +2862,15 @@ async def tiktok_popular_hashtags(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             seed = query.lstrip("#").strip()
-            native_tags = await popular_hashtags_native(seed, limit=limit, n_videos=n_videos)
-            if native_tags:
+            native_payload = await popular_hashtags_native(seed, limit=limit, n_videos=n_videos)
+            if native_payload and native_payload.get("hashtags"):
                 ctx["source"] = "direct"
-                return {"query": query, "totalReturned": len(native_tags), "hashtags": native_tags}
+                native_payload["fetchedAt"] = utc_now_iso()
+                return native_payload
 
             apify = get_apify()
-            # The keyword is used as a seed hashtag (coregent's search mode is
-            # unreliable, but hashtag pages are solid). We then aggregate the
-            # co-occurring hashtags on those videos and rank them by frequency
-            # + total plays to surface related/trending hashtags.
+            # Seed hashtag → sample videos → co-occurring tags → challenge/detail
+            # population enrich (same honesty contract as the native path).
             items, _actor = await apify.run_with_fallback(
                 [
                     (
@@ -2652,9 +2893,11 @@ async def tiktok_popular_hashtags(
                 max_items=n_videos,
             )
             agg: dict[str, dict[str, int]] = {}
+            sample_videos = 0
             for v in items:
                 if v.get("recordType") and v.get("recordType") != "video":
                     continue
+                sample_videos += 1
                 tags = v.get("hashtags") or v.get("challenges")
                 if not isinstance(tags, list):
                     tags = []
@@ -2670,23 +2913,53 @@ async def tiktok_popular_hashtags(
                     slot = agg.setdefault(name, {"count": 0, "plays": 0})
                     slot["count"] += 1
                     slot["plays"] += plays
-            ranked = sorted(agg.items(), key=lambda kv: (kv[1]["count"], kv[1]["plays"]), reverse=True)
-            hashtags = [
+            candidate_n = min(len(agg), max(limit * 2, limit))
+            by_sample = sorted(
+                agg.items(), key=lambda kv: (kv[1]["count"], kv[1]["plays"]), reverse=True
+            )[:candidate_n]
+            sample_rows = [
                 {
                     "name": name,
                     "url": f"https://www.tiktok.com/tag/{name}",
-                    "rank": i + 1,
-                    "videoCount": slot["count"],
-                    "totalPlays": slot["plays"],
+                    "sampleVideoCount": slot["count"],
+                    "samplePlays": slot["plays"],
+                    "videoCount": None,
+                    "totalPlays": None,
+                    "hashtagId": None,
+                    "growthRate": None,
                 }
-                for i, (name, slot) in enumerate(ranked[:limit])
+                for name, slot in by_sample
             ]
+            enriched = await enrich_hashtag_population_stats(sample_rows)
+            enriched.sort(
+                key=lambda r: (
+                    r.get("videoCount") is not None,
+                    r.get("videoCount") or 0,
+                    r.get("sampleVideoCount") or 0,
+                    r.get("samplePlays") or 0,
+                ),
+                reverse=True,
+            )
+            hashtags = []
+            for i, row in enumerate(enriched[:limit]):
+                row = dict(row)
+                row["rank"] = i + 1
+                hashtags.append(row)
             ctx["source"] = "apify"
-            return {"query": query, "totalReturned": len(hashtags), "hashtags": hashtags}
+            return {
+                "query": query,
+                "discovery": "co_occurrence",
+                "discoverySource": "apify_hashtag_videos",
+                "sampleSize": sample_videos,
+                "rankBy": "videoCount",
+                "fetchedAt": utc_now_iso(),
+                "totalReturned": len(hashtags),
+                "hashtags": hashtags,
+            }
 
         data = await cached_or_run(
             endpoint="tiktok.popular-hashtags",
-            params={"query": query, "limit": limit, "v": 3},
+            params={"query": query, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -28,6 +28,7 @@ from app.services.http_fetch import proxy_for
 from app.services.instagram_decodo import (
     dedupe_preserve,
     engagement_with_play_split,
+    feed_play_metrics,
     hidden_count,
 )
 from app.utils.formatters import safe_float, safe_int, safe_str
@@ -372,9 +373,7 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
     media_type = safe_int(media.get("media_type")) or 0
     is_video = media_type == 2
     product = safe_str(media.get("product_type")) or ("clips" if is_video else None)
-    play_count = safe_int(media.get("play_count"))
-    ig_play_count = safe_int(media.get("ig_play_count") or media.get("view_count"))
-    fb_play_count = safe_int(media.get("fb_play_count") or media.get("fbPlayCount"))
+    play_count, ig_play_count, fb_play_count = feed_play_metrics(media)
     likes = hidden_count(media.get("like_count"))
 
     music = _music_from_media(media)
@@ -1031,11 +1030,13 @@ def map_feed_post(
     ):
         author["followers"] = followers
 
-    play_count = safe_int(media.get("play_count"))
-    ig_play_count = safe_int(media.get("ig_play_count") or media.get("view_count"))
-    fb_play_count = safe_int(media.get("fb_play_count") or media.get("fbPlayCount"))
+    play_count, ig_play_count, fb_play_count = feed_play_metrics(media)
     likes = hidden_count(media.get("like_count"))
     product = safe_str(media.get("product_type")) or ("clips" if is_video else None)
+    music = _music_from_media(media)
+    is_paid = media.get("is_paid_partnership")
+    if is_paid is None and media.get("sponsor_tags"):
+        is_paid = True
 
     return strip_null_post_fields(
         {
@@ -1051,6 +1052,7 @@ def map_feed_post(
             "durationSeconds": _video_duration(media, cover),
             "thumbnailUrl": safe_str(images[0].get("url")) if images else None,
             "videoUrl": safe_str(videos[0].get("url")) if videos else None,
+            "hasAudio": media.get("has_audio") if media.get("has_audio") is not None else None,
             "author": author,
             "engagement": engagement_with_play_split(
                 {
@@ -1065,6 +1067,11 @@ def map_feed_post(
             ),
             "hashtags": dedupe_preserve(_HASHTAG_RE.findall(caption)),
             "mentions": dedupe_preserve(_MENTION_RE.findall(caption)),
+            "isPaidPartnership": bool(is_paid) if is_paid is not None else False,
+            "isAd": bool(media.get("is_ad") or media.get("ad_id") or media.get("injected")),
+            "music": music,
+            "musicId": (music or {}).get("id") if music else None,
+            "location": _location_from_media(media),
         }
     )
 
@@ -2583,11 +2590,7 @@ async def enrich_posts_from_author_feeds(
                         code = safe_str(item.get("code"))
                         if not code:
                             continue
-                        play_by_code[code] = (
-                            safe_int(item.get("play_count")),
-                            safe_int(item.get("ig_play_count") or item.get("view_count")),
-                            safe_int(item.get("fb_play_count") or item.get("fbPlayCount")),
-                        )
+                        play_by_code[code] = feed_play_metrics(item)
             profile, _missing = await profile_task
             if isinstance(profile, dict):
                 stats = _stats_from_profile(profile)
@@ -2600,11 +2603,7 @@ async def enrich_posts_from_author_feeds(
                             code = safe_str(item.get("code"))
                             if not code:
                                 continue
-                            play_by_code[code] = (
-                                safe_int(item.get("play_count")),
-                                safe_int(item.get("ig_play_count") or item.get("view_count")),
-                                safe_int(item.get("fb_play_count") or item.get("fbPlayCount")),
-                            )
+                            play_by_code[code] = feed_play_metrics(item)
             elif username not in stats_by_user:
                 # Last resort — full WPI ladder (slow / rate-limited).
                 profile = await fetch_web_profile_info(username)

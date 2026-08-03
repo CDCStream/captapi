@@ -64,6 +64,18 @@ def safe_float(v) -> float | None:
         return None
 
 
+def duration_seconds(v) -> float | None:
+    """Media duration as float seconds (3 dp). Never returns ``int``.
+
+    Whole seconds stay ``12.0`` so JSON/OpenAPI clients see a consistent
+    ``number`` type across endpoints (not ``47`` int vs ``29.534`` float).
+    """
+    n = safe_float(v)
+    if n is None:
+        return None
+    return round(float(n), 3)
+
+
 def safe_str(v) -> str | None:
     """Strip and decode HTML entities (``&amp;`` → ``&``, ``&#x…;`` → char).
 
@@ -126,6 +138,54 @@ _LANG_NAME_TO_ISO: dict[str, str] = {
     "turkish": "tr", "ukrainian": "uk", "urdu": "ur", "uzbek": "uz",
     "vietnamese": "vi", "welsh": "cy",
 }
+
+# ISO → English display name (first win when multiple names share a code).
+_ISO_TO_LANG_NAME: dict[str, str] = {}
+for _name, _code in _LANG_NAME_TO_ISO.items():
+    _ISO_TO_LANG_NAME.setdefault(_code, _name.title())
+# Prefer conventional labels over title-cased map keys.
+_ISO_TO_LANG_NAME.update(
+    {
+        "en": "English",
+        "zh": "Chinese",
+        "fil": "Filipino",
+        "ht": "Haitian Creole",
+        "nb": "Norwegian",
+        "nn": "Norwegian",
+        "iw": "Hebrew",  # legacy YouTube code
+        "in": "Indonesian",  # legacy
+        "jw": "Javanese",
+        "yue": "Cantonese",
+        "zh-Hans": "Chinese (Simplified)",
+        "zh-Hant": "Chinese (Traditional)",
+        "pt-BR": "Portuguese (Brazil)",
+        "es-419": "Spanish (Latin America)",
+    }
+)
+
+
+def language_name_from_code(value: str | None) -> str | None:
+    """Map an ISO language code to an English display name.
+
+    Handles ``en``, ``en-US``, ``zh-Hans``, legacy ``iw``/``in``. Returns None
+    when the code is unknown — never invents a name from thin air.
+    """
+    if not value:
+        return None
+    raw = value.strip()
+    if not raw:
+        return None
+    # Exact regional / script variants first (zh-Hans, pt-BR).
+    if raw in _ISO_TO_LANG_NAME:
+        return _ISO_TO_LANG_NAME[raw]
+    low = raw.lower()
+    if low in _ISO_TO_LANG_NAME:
+        return _ISO_TO_LANG_NAME[low]
+    # en-US → en
+    base = low.split("-", 1)[0]
+    if base in _ISO_TO_LANG_NAME:
+        return _ISO_TO_LANG_NAME[base]
+    return None
 
 
 def normalize_language_code(value: str | None) -> str | None:

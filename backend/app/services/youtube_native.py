@@ -283,6 +283,54 @@ def published_fields(relative_or_iso: Any) -> tuple[str | None, str | None]:
     return None, text
 
 
+def _looks_iso8601(value: Any) -> bool:
+    s = safe_str(value) or ""
+    return bool(s) and "T" in s and (s.endswith("Z") or "+" in s[10:] or s.endswith("+00:00"))
+
+
+def _looks_relative_published(value: Any) -> bool:
+    s = safe_str(value) or ""
+    return bool(
+        re.search(r"\bago\b", s, re.I)
+        or re.search(r"\b(premiere|streamed|scheduled)\b", s, re.I)
+    )
+
+
+def coerce_published_fields(card: dict[str, Any]) -> dict[str, Any]:
+    """Guarantee ``publishedAt`` is ISO (or null) — never a relative label.
+
+    YouTube list cards often only expose ``"4 days ago"``. Callers must keep
+    that string in ``publishedTimeText`` and put an approximate ISO in
+    ``publishedAt`` so typed SDKs / monitors / date filters work.
+    """
+    if not isinstance(card, dict):
+        return card
+    current = card.get("publishedAt")
+    text = card.get("publishedTimeText") or card.get("publishedTime")
+    if _looks_iso8601(current):
+        # Already typed; if the only relative label lived in publishedAt before
+        # a partial migrate, leave publishedTimeText alone.
+        if text is None and _looks_relative_published(card.get("publishedTimeText")):
+            pass
+        return card
+    raw = text if _looks_relative_published(text) else None
+    if raw is None and _looks_relative_published(current):
+        raw = current
+    if raw is None:
+        raw = text or current
+    iso, rel = published_fields(raw)
+    if iso is not None:
+        card["publishedAt"] = iso
+    elif _looks_relative_published(current):
+        # Never leave "4 days ago" in the ISO field.
+        card["publishedAt"] = None
+    if rel:
+        card["publishedTimeText"] = rel
+    elif _looks_relative_published(current) and not card.get("publishedTimeText"):
+        card["publishedTimeText"] = safe_str(current)
+    return card
+
+
 def walk_find(node: Any, key: str) -> Iterator[dict[str, Any]]:
     """Yield every dict found under ``key`` anywhere in the tree."""
     if isinstance(node, dict):
@@ -675,7 +723,7 @@ def collect_video_cards(data: Any, *, shorts: bool = False) -> list[dict[str, An
             add(_normalize_playlist_video(pv))
         for lk in walk_find(data, "lockupViewModel"):
             add(_normalize_video_lockup(lk))
-    return cards
+    return _coerce_card_dates(cards)
 
 
 def collect_search_results(data: Any) -> list[dict[str, Any]]:
@@ -718,7 +766,7 @@ def collect_search_results(data: Any) -> list[dict[str, Any]]:
             add(_normalize_channel_renderer(cr))
         for pr in walk_find(data, "playlistRenderer"):
             add(_normalize_playlist_renderer(pr))
-    return results
+    return _coerce_card_dates(results)
 
 
 def find_continuation_tokens(data: Any) -> list[str]:
@@ -1107,6 +1155,7 @@ async def playlist_native(url: str, limit: int) -> dict[str, Any] | None:
     total_videos = _playlist_total_videos(data, header)
     # Drop empty nested channel thumbs on video cards for a leaner payload.
     for vid in videos:
+        coerce_published_fields(vid)
         ch = vid.get("channel")
         if isinstance(ch, dict):
             vid["channel"] = {k: v for k, v in ch.items() if v is not None}
@@ -1155,6 +1204,12 @@ def _fill_missing_channel_name(
     return cards
 
 
+def _coerce_card_dates(cards: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    for card in cards:
+        coerce_published_fields(card)
+    return cards
+
+
 async def channel_tab_native(
     tab_url: str,
     limit: int,
@@ -1188,14 +1243,18 @@ async def channel_tab_native(
                     data, limit=limit, continuation_endpoint="browse", shorts=shorts
                 )
                 if cards:
-                    return _fill_missing_channel_name(
-                        cards, _channel_title_from_data(data)
+                    return _coerce_card_dates(
+                        _fill_missing_channel_name(
+                            cards, _channel_title_from_data(data)
+                        )
                     )
     data, _ = await fetch_page_data(tab_url, timeout=15.0)
     if data is None:
         return []
     cards = await _paginate(data, limit=limit, continuation_endpoint="browse", shorts=shorts)
-    return _fill_missing_channel_name(cards, _channel_title_from_data(data))
+    return _coerce_card_dates(
+        _fill_missing_channel_name(cards, _channel_title_from_data(data))
+    )
 
 
 def collect_playlist_cards(data: Any) -> list[dict[str, Any]]:
@@ -1278,7 +1337,9 @@ async def hashtag_native(tag: str, limit: int) -> list[dict[str, Any]]:
     data, _ = await fetch_page_data(f"https://www.youtube.com/hashtag/{quote(name)}")
     if data is None:
         return []
-    return await _paginate(data, limit=limit, continuation_endpoint="browse")
+    return _coerce_card_dates(
+        await _paginate(data, limit=limit, continuation_endpoint="browse")
+    )
 
 
 # --------------------------------------------------------- channel details --
@@ -1724,10 +1785,24 @@ def _caption_tracks(player: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _caption_track_name(track: dict[str, Any]) -> str | None:
+    """Human language label for a caption track.
+
+    ANDROID player payloads often omit ``name.simpleText`` (runs-only or empty),
+    so fall back to resolving ``languageCode`` → English name (en → English).
+    """
+    from app.utils.formatters import language_name_from_code
+
     name = track.get("name")
     if isinstance(name, dict):
-        return safe_str(name.get("simpleText") or name.get("content"))
-    return safe_str(name)
+        got = (
+            safe_str(name.get("simpleText") or name.get("content"))
+            or text_of(name)
+        )
+    else:
+        got = safe_str(name)
+    if got:
+        return got
+    return language_name_from_code(safe_str(track.get("languageCode")))
 
 
 def _available_caption_languages(tracks: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1852,16 +1927,10 @@ def _youtube_available_captions(player: dict[str, Any]) -> list[dict[str, Any]]:
         code = safe_str(t.get("languageCode"))
         if not code:
             continue
-        name = t.get("name")
-        language_name = None
-        if isinstance(name, dict):
-            language_name = safe_str(name.get("simpleText")) or text_of(name)
-        else:
-            language_name = safe_str(name)
         base_url = safe_str(t.get("baseUrl"))
         row: dict[str, Any] = {
             "languageCode": code,
-            "languageName": language_name,
+            "languageName": _caption_track_name(t),
             "kind": safe_str(t.get("kind")) or "standard",
             "baseUrl": base_url,
             "expiresAt": cdn_expires_at(base_url),

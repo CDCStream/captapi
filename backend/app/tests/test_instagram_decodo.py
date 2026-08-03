@@ -75,7 +75,7 @@ def test_post_mapper_preserves_public_contract() -> None:
 
 
 def test_pick_video_views_drops_impossible_graphql_view_count() -> None:
-    # NASA reel case: GraphQL video_view_count << like_count.
+    # NASA reel case: GraphQL video_view_count alone must never become views.
     views, plays = decodo.pick_video_views(
         view_count=112_487,
         play_count=None,
@@ -85,7 +85,7 @@ def test_pick_video_views_drops_impossible_graphql_view_count() -> None:
     assert views is None
     assert plays is None
 
-    # Prefer play_count when present (native feed).
+    # Prefer play_count when present (native feed). GraphQL undercount ignored.
     views, plays = decodo.pick_video_views(
         view_count=112_487,
         play_count=13_000_000,
@@ -93,7 +93,22 @@ def test_pick_video_views_drops_impossible_graphql_view_count() -> None:
         is_video=True,
     )
     assert views == 13_000_000
-    assert plays == 112_487
+    assert plays is None
+
+
+def test_feed_play_metrics_per_item_no_zip() -> None:
+    video = {"media_type": 2, "play_count": 13_000_000, "ig_play_count": 10_000_000}
+    image = {"media_type": 1, "like_count": 50}
+    sidecar = {"media_type": 8, "like_count": 99}
+    assert decodo.feed_play_metrics(video) == (13_000_000, 10_000_000, None)
+    assert decodo.feed_play_metrics(image) == (None, None, None)
+    assert decodo.feed_play_metrics(sidecar) == (None, None, None)
+    # Bare view_count without play_count is the GraphQL trap — ignore.
+    assert decodo.feed_play_metrics({"media_type": 2, "view_count": 112_487}) == (
+        None,
+        None,
+        None,
+    )
 
 
 def test_profile_and_timeline_functions(monkeypatch) -> None:
@@ -115,8 +130,11 @@ def test_profile_and_timeline_functions(monkeypatch) -> None:
     assert posts and [post["id"] for post in posts["items"]] == ["ABC", "REEL"]
     assert posts["userId"] == "42"
     assert posts["followers"] == 1234
+    assert posts["user"]["username"] == "captapi"
+    assert posts["user"]["followers"] == 1234
     assert reels and [reel["id"] for reel in reels["items"]] == ["REEL"]
     assert reels["followers"] == 1234
+    assert reels["user"]["id"] == "42"
 
 
 def test_hashtag_deduplicates_top_and_recent(monkeypatch) -> None:

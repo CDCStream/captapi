@@ -240,7 +240,25 @@ const YOUTUBE: Spec[] = [
       "Filters: type, sortBy, uploadDate, duration, region",
     ],
   },
-  { slug: "youtube-channel-videos", name: "YouTube Channel Videos API", shortName: "Channel Videos", category: "list", method: "GET", path: "/v1/youtube/channel-videos", credits: 2 },
+  {
+    slug: "youtube-channel-videos",
+    name: "YouTube Channel Videos API",
+    shortName: "Channel Videos",
+    category: "list",
+    method: "GET",
+    path: "/v1/youtube/channel-videos",
+    credits: 2,
+    tagline:
+      "Latest uploads from a YouTube channel — ISO publishedAt + relative publishedTimeText for monitors.",
+    longDescription:
+      "Send a channel URL, @handle, or UC… id and get recent uploads as clean JSON: url, title, publishedAt (ISO-8601; approximate when YouTube only exposes labels like \"4 days ago\"), publishedTimeText (the original relative label), viewCount, durationSeconds, thumbnailUrl, and channelName. Use publishedAt for sorting, date filters, and \"detect new uploads\" monitors — never parse the relative string. Optional fast=true uses YouTube RSS (exact publishedAt, thinner metadata). Flat 2 credits on the native path. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "publishedAt ISO-8601 (sortable / filterable)",
+      "publishedTimeText keeps the UI label (e.g. \"4 days ago\")",
+      "viewCount + durationSeconds numeric",
+      "Optional fast RSS path",
+    ],
+  },
   { slug: "youtube-playlist-videos", name: "YouTube Playlist Videos API", shortName: "Playlist Videos", category: "list", method: "GET", path: "/v1/youtube/playlist-videos", credits: 2 , tagline: "List videos in a YouTube playlist — id, ISO publishedAt, views, duration. Flat 2 credits.", longDescription: "Paste a YouTube playlist URL and get the videos as clean JSON: id, url, title, publishedAt (ISO-8601; approximate when derived from YouTube's relative label), publishedTimeText (e.g. \"1 year ago\"), viewCount (viewCountApproximate=true when YouTube only shows 2.5B-style compact counts), durationSeconds, thumbnailUrl, channelName. Also returns playlist id and totalVideos when available. Prefer Playlist when you also need owner metadata. Optional fast=true uses YouTube RSS (exact publishedAt, fewer items). Flat 2 credits on the native path." },
   { slug: "youtube-playlist", name: "YouTube Playlist API", shortName: "Playlist", category: "list", method: "GET", path: "/v1/youtube/playlist", credits: 2 , tagline: "YouTube playlist metadata + videos — owner{id,name,handle}, totalVideos, ISO publishedAt. Flat 2 credits.", longDescription: "Paste a YouTube playlist URL and get playlist id/title, channelName, owner{id,name,url,handle}, totalVideos (full playlist size), totalReturned (this page), and videos[] with id, url, title, publishedAt (ISO-8601; approximate from relative labels when YouTube doesn't expose an exact timestamp), publishedTimeText, viewCount (+ viewCountApproximate for compact K/M/B labels), durationSeconds, thumbnailUrl, and channel{}. Prefer this over Playlist Videos when you need owner + total size. Optional fast=true uses YouTube RSS. Flat 2 credits on the native path." },
   {
@@ -308,7 +326,26 @@ const YOUTUBE: Spec[] = [
   },
   { slug: "youtube-trending-shorts", name: "YouTube Trending Shorts API", shortName: "Trending Shorts", category: "list", method: "GET", path: "/v1/youtube/trending-shorts", credits: 2 },
   { slug: "youtube-channel-streams", name: "YouTube Channel Streams API", shortName: "Channel Streams", category: "list", method: "GET", path: "/v1/youtube/channel-streams", credits: 20, creditsPerResult: 1 },
-  { slug: "youtube-hashtag-search", name: "YouTube Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/youtube/hashtag-search", credits: 20, creditsPerResult: 1 },
+  {
+    slug: "youtube-hashtag-search",
+    name: "YouTube Hashtag Search API",
+    shortName: "Hashtag Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/youtube/hashtag-search",
+    credits: 20,
+    creditsPerResult: 1,
+    tagline:
+      "Videos from youtube.com/hashtag/{name} — type (video|short|live), id, channelId. Not keyword search.",
+    longDescription:
+      "Pass a hashtag (with or without #) and get the videos listed on YouTube's hashtag page as clean JSON. This is the /hashtag/{name} feed — not a search?q= keyword query. Titles often omit the #tag (it may live only in the description); association is the hashtag page itself. Each result includes type (video|short|live), id, url, title, publishedAt, viewCount, durationSeconds, channelName, and channelId when YouTube exposes them. Billed per result (~1 credit each).",
+    delivers: [
+      "Hashtag page feed (not keyword search)",
+      "type: video | short | live on every row",
+      "id + channelId when available",
+      "ISO publishedAt + numeric viewCount",
+    ],
+  },
   { slug: "youtube-comment-replies", name: "YouTube Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/youtube/comment-replies", credits: 2 },
   { slug: "youtube-channel-playlists", name: "YouTube Channel Playlists API", shortName: "Channel Playlists", category: "list", method: "GET", path: "/v1/youtube/channel-playlists", credits: 2 },
   {
@@ -341,13 +378,32 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-comments", name: "TikTok Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/tiktok/comments", credits: 2, tagline: "TikTok comments — clean schema plus stable authorId/authorSecUid and commentLanguage for listening loops.", longDescription: "Paste a public TikTok video URL and get comments as clean JSON (not TikTok's 40+ junk user fields). Each comment keeps username + avatar, and adds stable authorId (uid) and authorSecUid for repeat-commenter detection, plus commentLanguage for market listening without a separate language detector. replyCount when TikTok exposes it. totalComments + cursor pagination (nextCursor/hasMore). Flat 2 credits per call. Need replies? Use TikTok Comment Replies with the parent comment id.", delivers: ["Stable authorId + authorSecUid (not just username)", "commentLanguage for market listening", "replyCount when TikTok exposes it", "Like count, publish time, totalComments + cursor pagination", "limit up to 500 — flat 2 credits per call"] },
   { slug: "tiktok-channel-details", name: "TikTok Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/tiktok/channel-details", credits: 1 , tagline: "Get a TikTok profile's key stats — followers, following, likes, video count, bio, and verification." },
   { slug: "tiktok-profile-region", name: "TikTok Profile Region API", shortName: "Profile Region", category: "channel", method: "GET", path: "/v1/tiktok/profile-region", credits: 2 , tagline: "Find out where a TikTok creator is likely based and what language they use — country, language, and core profile stats.", longDescription: "Give the TikTok Profile Region API a profile URL, @handle, or username and it returns location and language as clean JSON. TikTok almost never shows an account's country publicly, so when that value is missing we estimate the country from public cues like the bio, display name, and language. The response tells you whether the country came from TikTok itself or from that estimate, and how confident the estimate is (high, medium, or low). You also get the interface language and core profile stats — followers, following, total likes, and video count — plus display name, verified and private flags, and the avatar. Use it for audience and geo analysis, content localization, compliance checks, or vetting creators before a partnership. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Creator country — TikTok's own when available, otherwise an AI estimate", "Whether the country came from TikTok or was estimated, plus confidence", "Interface language plus followers, following, likes, and video count", "Display name, verified and private flags, and avatar"] },
-  { slug: "tiktok-audience-demographics", name: "TikTok Audience Demographics API", shortName: "Audience Demographics", category: "channel", method: "GET", path: "/v1/tiktok/audience-demographics", credits: 3 , tagline: "See which countries a TikTok creator's audience comes from — a ranked country breakdown based on people who comment on their videos.", longDescription: "Give the TikTok Audience Demographics API a profile URL, @handle, or username and it returns a ranked country breakdown of the creator's audience as clean JSON. TikTok does not publish follower geography, but commenters often expose a country — so we sample people commenting on the creator's recent videos and tally countries into a list with country name, country code, count, and percentage. You also get how many videos and commenters were sampled. This reflects who engages, not a full follower census. Use it for market sizing, geo targeting, localization, and creator verification. Flat 3 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Ranked countries with name, code, count, and percentage", "Country mix based on real commenters, not a follower census", "How many videos and commenters were sampled", "Computed from public TikTok engagement data"] },
+  {
+    slug: "tiktok-audience-demographics",
+    name: "TikTok Audience Demographics API",
+    shortName: "Audience Demographics",
+    category: "channel",
+    method: "GET",
+    path: "/v1/tiktok/audience-demographics",
+    credits: 3,
+    tagline:
+      "Commenter country + language mix for a TikTok creator — engagement sample, not a follower census.",
+    longDescription:
+      "Give a profile URL, @handle, or username and get a ranked commenter-country breakdown as clean JSON. TikTok does not publish follower geography — we sample people commenting on recent videos (user.region) and tally country name, countryCode, count, and numeric percentage (+ percentageText). Response includes basis=\"commenters\", sampleSize, totalCountries, confidence (low/medium/high), optional other{} when countriesLimit truncates, and audienceLanguages[] from comment_language (same sample, no extra cost). Choose videos=12|30|60 (credits 3/5/8) for sample depth. Percentages across audienceLocations (+ other) sum to ~100%. This reflects who engages, not a full follower census.",
+    delivers: [
+      "Numeric percentage + percentageText per country",
+      "totalCountries + other{} when truncated",
+      "audienceLanguages[] from the same comment sample",
+      "videos=12|30|60 with scaled credits (3/5/8)",
+      "basis=commenters + confidence label",
+    ],
+  },
   { slug: "tiktok-search-suggestions", name: "TikTok Search Suggestions API", shortName: "Search Suggestions", category: "search", method: "GET", path: "/v1/tiktok/search-suggestions", credits: 2, tagline: "Get the autocomplete terms TikTok suggests in its search bar for a keyword — the real phrases people search, ranked, so you can find trending queries and long-tail keyword ideas.", delivers: ["The autocomplete terms TikTok suggests for your keyword", "Each suggestion with its rank — the order it appears in the search bar", "A ready-to-open searchUrl that runs that exact search on TikTok", "The seed keyword plus the region and language it was localized for", "Localize by country + language to see what a specific market searches"] , longDescription: "Give the TikTok Search Suggestions API a seed keyword and it returns the autocomplete phrases TikTok shows in its search bar as clean JSON — the actual phrases people search for. Each suggestion includes the search term, its rank (1 = top of the list), a ready-to-open search URL, the seed keyword it came from, and the country and language it was localized for. Use the country and language parameters to see what a specific market is searching (for example US in English, or DE in German). Great for TikTok keyword research, trending queries, and content planning. No TikTok login required. Billed per suggestion returned. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "tiktok-channel-posts", name: "TikTok Channel Posts API", shortName: "Channel Posts", category: "list", method: "GET", path: "/v1/tiktok/channel-posts", credits: 2, tagline: "Get the latest videos from any public TikTok profile — caption, view / like / comment counts, thumbnail, sound, and hashtags for each post, with cursor pagination to page through them all." , longDescription: "Send a profile URL, @handle, or username and the TikTok Channel Posts API returns that creator's most recent videos as clean, structured JSON. If TikTok blocks a direct fetch, the first page automatically retries through a backup path so you still get a response. Each post includes the TikTok page URL and video ID, caption, publish date, duration, thumbnail, hashtags, and the sound/music name, plus full engagement — views, likes, comments, shares, and saves — and the author's profile (username, display name, followers, verified badge, avatar). Fetch up to 200 posts per call with the limit parameter, then pass the returned nextCursor value back in to page through older videos (hasMore tells you when you've reached the end) — a flat 2 credits per call, no matter how many posts you fetch. Ideal for creator monitoring, content calendars, competitor tracking, and feeding analytics or influencer tools. This endpoint focuses on metadata and stats. No TikTok login and no infrastructure to maintain on your side.", delivers: ["Latest public videos from any TikTok profile", "Caption, publish date, duration, thumbnail, hashtags, and sound name", "Views, likes, comments, shares, and saves per video", "Author profile — handle, name, followers, verified, avatar", "Cursor pagination (nextCursor + hasMore) — flat 2 credits per call", "Automatic first-page backup if the direct fetch fails"] },
   { slug: "tiktok-comment-replies", name: "TikTok Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/tiktok/comment-replies", credits: 2, tagline: "Replies under a TikTok comment — same authorId/authorSecUid/commentLanguage shape as comments.", longDescription: "Pass a TikTok video URL and a parent comment id and get that comment's replies as clean JSON. Each reply includes text, author username, stable authorId/authorSecUid when TikTok exposes them, commentLanguage, like count, and publish time. Fetch up to 500 replies per call, then pass nextCursor to page through the rest — a flat 2 credits per call.", delivers: ["Reply text + authorId/authorSecUid", "commentLanguage when available", "Like count and publish time per reply", "Cursor pagination (nextCursor + hasMore)", "Flat 2 credits per call"] },
   { slug: "tiktok-user-followers", name: "TikTok User Followers API", shortName: "User Followers", category: "list", method: "GET", path: "/v1/tiktok/user-followers", credits: 20, creditsPerResult: 0.4 },
   { slug: "tiktok-user-followings", name: "TikTok User Followings API", shortName: "User Followings", category: "list", method: "GET", path: "/v1/tiktok/user-followings", credits: 20, creditsPerResult: 0.4 },
-  { slug: "tiktok-music-posts", name: "TikTok Music Posts API", shortName: "Music Posts", category: "list", method: "GET", path: "/v1/tiktok/music-posts", credits: 2, tagline: "List TikTok videos that use a specific sound — caption, author, and engagement for each post.", longDescription: "Paste a TikTok music/sound URL and get the public videos that use that sound as structured JSON. Each result includes caption, author, thumbnail, and engagement counts. Use Song Details first if you only need the sound's metadata. Flat 2 credits per call." },
+  { slug: "tiktok-music-posts", name: "TikTok Music Posts API", shortName: "Music Posts", category: "list", method: "GET", path: "/v1/tiktok/music-posts", credits: 2, tagline: "List TikTok videos that use a specific sound — caption, author, engagement, canonical hashtags, and mentions.", longDescription: "Paste a TikTok music/sound URL and get the public videos that use that sound as structured JSON. Each result includes caption, author (same shape as top-search / channel-posts: username, displayName, url, profileImage, id, secUid, followers, verified), thumbnail, engagement, canonical hashtags (from TikTok text_extra — not caption regex), and mentions[{userId,secUid,username}] when TikTok exposes them. On MUSIC_AWEME, followers and verified are often null (unknown — not zero/false); use Channel Details for definitive profile stats. Flat 2 credits per call." },
   {
     slug: "tiktok-top-search",
     name: "TikTok Top Search API",
@@ -359,16 +415,37 @@ const TIKTOK: Spec[] = [
     tagline:
       "TikTok Top/General search — videos and photo carousels when TikTok includes them, with contentType + images[].",
     longDescription:
-      "Hits TikTok's Top/General search tab (not video-only keyword search). Results can mix videos and photo carousels: each item has mediaType/contentType (video | photo | multi_photo); carousels include images[]. Hashtags are lowercase-deduped and always present as an array (empty when none). Supports cursor pagination via nextCursor. TikTok may return duplicate ids across pages — we drop duplicates within a page. Flat 2 credits. Not yet: sort_by / publish_time / region filters (use other endpoints or ask).",
+      "Hits TikTok's Top/General search tab (not video-only keyword search). Results can mix videos and photo carousels: each item has mediaType/contentType (video | photo | multi_photo); carousels include images[]. Hashtags come from TikTok text_extra (canonical names — no caption-regex emoji bleed) and are lowercase-deduped; mentions[{userId,secUid,username}] when present. Supports cursor pagination via nextCursor. TikTok may return duplicate ids across pages — we drop duplicates within a page. Flat 2 credits. Not yet: sort_by / publish_time / region filters (use other endpoints or ask).",
     delivers: [
       "Videos + photo carousels (contentType, images[])",
-      "hashtags always present, casefold-deduped",
+      "Canonical hashtags from text_extra (casefold-deduped)",
+      "mentions[{userId,secUid,username}] when TikTok exposes them",
       "cursor / nextCursor / hasMore",
       "isAd + isPaidPartnership when TikTok exposes them",
       "Flat 2 credits",
     ],
   },
-  { slug: "tiktok-search-by-hashtag", name: "TikTok Search by Hashtag API", shortName: "Search by Hashtag", category: "search", method: "GET", path: "/v1/tiktok/search/hashtag", credits: 14, creditsPerResult: 0.7, tagline: "Search TikTok videos by hashtag — video URL, caption, author, and view / like / comment counts for each result, with cursor pagination to page through them all.", delivers: ["Public videos posted under your hashtag", "Video URL, caption, thumbnail, duration, and publish date", "Author profile plus view / like / comment / share / save counts", "Cursor pagination (nextCursor + hasMore) through every result"] , longDescription: "Pass a hashtag (with or without the #) and the TikTok Search by Hashtag API returns the videos posted under that tag as clean, structured JSON. Each result includes the video URL, caption, publish date, duration, thumbnail, the author's profile, and full engagement counts — views, likes, comments, shares, and saves — plus the hashtags and sound used. Need more than the first page? Pass the nextCursor value from the previous response to keep paging, and use hasMore to know when you've reached the end. An optional region parameter only chooses which country our request is sent from — it does not filter results by country. Use it to track a campaign or branded hashtag, discover trending content in a niche, or build a themed content feed. No TikTok login required. Billed per result — about 0.7 credits each." },
+  {
+    slug: "tiktok-search-by-hashtag",
+    name: "TikTok Search by Hashtag API",
+    shortName: "Search by Hashtag",
+    category: "search",
+    method: "GET",
+    path: "/v1/tiktok/search/hashtag",
+    credits: 14,
+    creditsPerResult: 0.7,
+    tagline:
+      "Videos from TikTok's /tag/{name} challenge feed — not keyword or username search. Cursor + hasMore.",
+    longDescription:
+      "Pass a hashtag (with or without #) and get videos from TikTok's /tag/{name} challenge feed as clean JSON — the same feed as the tag page in the app. This is not keyword search: an @comedy… account with no #comedy tag is dropped. Each result must carry the hashtag in structured tags or as #tag in the caption. Fields: url, id, caption (TikTok has no separate description), publishedAt, durationSeconds, thumbnail, author, engagement, hashtags, musicName. Cursor pagination via nextCursor + hasMore (nextCursor null = last page). An optional region parameter only chooses which country our request is sent from — it does not filter results by country. Use it to track a campaign or branded hashtag. Billed per result — about 0.7 credits each.",
+    delivers: [
+      "Real /tag/{name} challenge feed (not keyword search)",
+      "Hashtag required on every result (structured or #tag in caption)",
+      "hasMore + nextCursor (null = end)",
+      "region = proxy exit only — does not filter by country",
+      "Caption only — no duplicate description field",
+    ],
+  },
   {
     slug: "tiktok-search-users",
     name: "TikTok Search Users API",
@@ -397,12 +474,13 @@ const TIKTOK: Spec[] = [
     path: "/v1/tiktok/song-details",
     credits: 1,
     tagline:
-      "TikTok sound metadata — usageCount, artists[{id,secUid,handle}], commerce rights, chorus timing, audio analysis (1 credit native).",
+      "TikTok sound metadata — usageCount, durationSeconds, artists[{id,secUid,handle}], commerce rights (1 credit native).",
     longDescription:
-      "Paste a TikTok music/sound URL and get the sound as clean JSON: title, author, artists[{id,uid,secUid,handle,displayName,verified,avatarUrl}], duration, cover/coverUrl/playUrl, usageCount (videos using the sound — null when TikTok omits it on this path), createdAt, commerce flags (isCommerceMusic / hasCommerceRight / commercialRightType), isOriginalSound / isPgc, matchedSong.chorusInfo{startMs,durationMs}, musicReleaseInfo{isNewReleaseSong}, and extra{bpm,loudnessLufs,beats} when TikTok exposes them. Pair with Music Posts to list videos on the sound. Flat 1 credit on the native path; Apify fallback bills 2.",
+      "Paste a TikTok music/sound URL and get the sound as clean JSON: title, author, artistId/authorSecUid, artists[{id,uid,secUid,handle,displayName,verified,avatarUrl}], durationSeconds (canonical float; duration kept as alias), cover/coverUrl/playUrl, usageCount (videos using the sound — filled from music/detail or the music page when music/aweme omits it; null when TikTok still hides the total), createdAt, isExplicit/hasLyrics when present, commerce flags (isCommerceMusic / hasCommerceRight / commercialRightType), isOriginalSound / isPgc, matchedSong.chorusInfo{startMs,durationMs}, musicReleaseInfo{isNewReleaseSong}, and extra{bpm,loudnessLufs,beats} when TikTok exposes them. Pair with Music Posts to list videos on the sound. Flat 1 credit on the native path; Apify fallback bills 2.",
     delivers: [
       "usageCount when TikTok exposes video-use totals",
-      "artists[] with stable id / secUid / handle",
+      "durationSeconds (float) aligned with Music Posts",
+      "artists[] + artistId / authorSecUid",
       "Commerce rights + matchedSong chorus timing",
       "Audio analysis (loudness / beats) when present; 1 credit native",
     ],
@@ -424,10 +502,51 @@ const TIKTOK: Spec[] = [
       "authorId + secUid; flat 2 credits",
     ],
   },
-  { slug: "tiktok-popular-hashtags", name: "TikTok Popular Hashtags API", shortName: "Popular Hashtags", category: "list", method: "GET", path: "/v1/tiktok/popular-hashtags", credits: 14, creditsPerResult: 0.7 , tagline: "Get currently popular TikTok hashtags — name and popularity signals for each tag." },
+  {
+    slug: "tiktok-popular-hashtags",
+    name: "TikTok Popular Hashtags API",
+    shortName: "Popular Hashtags",
+    category: "list",
+    method: "GET",
+    path: "/v1/tiktok/popular-hashtags",
+    credits: 14,
+    creditsPerResult: 0.7,
+    tagline:
+      "Related TikTok hashtags for a topic — real videoCount/totalPlays from challenge/detail, plus sample co-occurrence counts.",
+    longDescription:
+      "Pass a seed topic or hashtag and get related tags discovered by co-occurrence in a sample of seed videos. Each tag is then enriched from TikTok's challenge/detail API (statsV2): videoCount and totalPlays are population totals (e.g. #skincare ≈ tens of millions of videos), while sampleVideoCount / samplePlays show how often the tag appeared in your sample. rank is by population videoCount (rankBy=videoCount). Also returns hashtagId (TikTok challenge id), sampleSize, discovery=co_occurrence, discoverySource, fetchedAt, and growthRate (null — TikTok does not expose growth on this path). Default query=trending is a keyword seed via top-search — not TikTok's official trending-hashtag chart. Prefer a real niche seed (e.g. skincare). Billed by videos sampled (~0.7 credits each, min search floor).",
+    delivers: [
+      "Population videoCount + totalPlays from challenge/detail (statsV2)",
+      "sampleVideoCount / samplePlays for co-occurrence transparency",
+      "hashtagId + rank by population videoCount",
+      "sampleSize, discoverySource, fetchedAt",
+      "growthRate null until TikTok exposes a public growth signal",
+    ],
+  },
   { slug: "tiktok-live", name: "TikTok Live API", shortName: "Live", category: "details", method: "GET", path: "/v1/tiktok/live", credits: 1 , tagline: "Is this TikTok creator live right now — authoritative isLive/status, last room, and parsed stream qualities.", longDescription: "Send a TikTok profile URL or @handle and learn if that creator is currently live. isLive is true only when TikTok's liveRoom.status is 2 (also exposed as top-level status and room.status). When offline, room may still describe the last broadcast (title, startedAt, viewer/enter counts, stream pull URLs) — trust isLive/status, not a non-empty room. Response also includes creator.id / secUid / following, liveSubOnly, gameTagId / hashTagId when set, streamUrls[], streamQualities[{quality,codec,resolution,bitrate,flv,hls,dash}], and streams{hd,sd,ld,origin,ao,…}. Flat 1 credit per call. Live Info is the same payload at 7 credits for SC compatibility." },
   { slug: "tiktok-live-info", name: "TikTok Live Info API", shortName: "Live Info", category: "details", method: "GET", path: "/v1/tiktok/live-info", credits: 7 , tagline: "Same TikTok live payload as Live — status, room, parsed stream qualities — billed at 7 credits for SC compatibility.", longDescription: "Alias of TikTok Live with its own billing/cache key. Same authoritative isLive / status, creator.id/secUid, room fields, and parsed streamQualities / streams map. Prefer /live (1 credit) unless you need this path for compatibility. Flat 7 credits per call." },
-  { slug: "tiktok-popular-creators", name: "TikTok Popular Creators API", shortName: "Popular Creators", category: "list", method: "GET", path: "/v1/tiktok/popular-creators", credits: 28, creditsPerResult: 1.4 , tagline: "Discover popular TikTok creators — handle, follower count, and profile fields for each account." },
+  {
+    slug: "tiktok-popular-creators",
+    name: "TikTok Popular Creators API",
+    shortName: "Popular Creators",
+    category: "list",
+    method: "GET",
+    path: "/v1/tiktok/popular-creators",
+    credits: 28,
+    creditsPerResult: 1.4,
+    tagline:
+      "Discover popular TikTok creators by market — sort by followers, true engagement %, or FYP popularity.",
+    longDescription:
+      "Pass a two-letter country code (feed market, e.g. US) and get ranked creators appearing in that market's For You feed, hydrated with profile stats. engagementRate is (avg likes per video) / followers × 100 — not lifetime likes÷followers — and every row includes engagementRateBasis so the formula is explicit. sort=engagement uses that rate; sort=follower / popularity also supported. Optional follower_count ranges (10k-100k, 100k-1m, 1m-10m, >10m). Top-level country is the feed market you queried; each creator may include region from TikTok's profile (null when unknown) — we never echo the query country onto the creator. Bios with emails or payment links get contact{emails[],links[]}. ~1.4 credits per returned creator (min 2).",
+    delivers: [
+      "engagementRate = avgLikesPerVideo/followers × 100 (+ engagementRateBasis)",
+      "sort=follower | engagement | popularity",
+      "follower_count range filter",
+      "region from profile when TikTok exposes it (not query echo)",
+      "contact{emails,links} parsed from bio when present",
+      "avgViews from FYP sample + rank",
+    ],
+  },
 ];
 
 const INSTAGRAM: Spec[] = [
@@ -464,9 +583,15 @@ const INSTAGRAM: Spec[] = [
     credits: 6,
     creditsPerResult: 0.3,
     tagline:
-      "Latest posts from a public Instagram profile — on Reels, views splits IG vs Facebook plays.",
+      "Latest posts from a public Instagram profile — viewsInstagram vs Facebook, profile user{} in one call.",
     longDescription:
-      "Send a profile URL or @handle and get recent posts as JSON (caption, media, likes, comments, type, publish date). For video/Reels items, engagement.views is total plays; viewsInstagram excludes Facebook cross-post views and viewsFacebook is the FB share — use viewsInstagram for Instagram-only analytics. Cursor pagination via nextCursor. Pass cache=true for the 24h shared cache.",
+      "Send a profile URL or @handle and get recent posts as JSON plus a top-level user{} profile block (id, username, displayName, verified, followers, profileImage) so you do not need a second channel-details call. Each item includes postType, productType (clips/feed — never an empty string), caption, media, likes, comments, and on videos: durationSeconds, hasAudio, music{}, isPaidPartnership when Instagram exposes them. Play counts are split: engagement.views = total (IG+FB), viewsInstagram = Instagram-only, viewsFacebook = Facebook cross-post — use viewsInstagram for Instagram-only analytics (total can be ~20% higher from Facebook). Image/Sidecar keep engagement.views as null. Cursor pagination via nextCursor + hasMore. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "Top-level user{} profile (no second call)",
+      "views + viewsInstagram + viewsFacebook on videos",
+      "productType, durationSeconds, hasAudio, music{}, isPaidPartnership",
+      "nextCursor + hasMore pagination",
+    ],
   },
   {
     slug: "instagram-channel-reels",
@@ -2063,7 +2188,24 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
         "Pagination cursor. Leave 0 for the first page; then pass nextCursor from the previous response. TikTok may return duplicates across pages.",
     },
   ],
-  "tiktok-search-by-hashtag": [qp("Hashtag to search for, with or without the # (min 2 characters)."), lp(20, 100), { name: "cursor", type: "integer", required: false, description: "Pagination offset. Leave at 0 (or omit) for the first page; then pass the nextCursor value returned in the previous response. A null nextCursor means the end of the results." }, { name: "region", type: "string", required: false, description: "Two-letter ISO 3166-1 country our request is sent from. Default US. Does not filter results by country." }],
+  "tiktok-search-by-hashtag": [
+    qp("Hashtag for the /tag/{name} challenge feed, with or without # (min 2). Not a keyword query."),
+    lp(20, 100),
+    {
+      name: "cursor",
+      type: "integer",
+      required: false,
+      description:
+        "Pagination offset. Leave at 0 (or omit) for the first page; then pass the nextCursor value returned in the previous response. A null nextCursor means the end of the results.",
+    },
+    {
+      name: "region",
+      type: "string",
+      required: false,
+      description:
+        "Two-letter ISO 3166-1 country our request is sent from. Default US. Does not filter results by country.",
+    },
+  ],
   "tiktok-search-users": [qp("Search query matched against usernames, display names and bios (min 2 characters)."), lp(20, 100), { name: "cursor", type: "integer", required: false, description: "Pagination offset. Leave at 0 (or omit) for the first page; then pass the nextCursor value returned in the previous response. A null nextCursor means the end of the results." }],
   "tiktok-song-details": [up(TT_MUSIC)],
   "tiktok-trending-feed": [
@@ -2076,7 +2218,16 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     },
     lpFlat(20, 200, 2),
   ],
-  "tiktok-popular-hashtags": [{ name: "query", type: "string", required: false, description: 'Topic or keyword to discover trending hashtags for. Default "trending".' }, lp(20, 100)],
+  "tiktok-popular-hashtags": [
+    {
+      name: "query",
+      type: "string",
+      required: false,
+      description:
+        'Seed topic/hashtag for co-occurrence discovery. Default "trending" is a keyword search seed — not TikTok\'s official trending chart. Prefer a niche (e.g. skincare).',
+    },
+    lp(20, 100),
+  ],
   "tiktok-live": [up(TT_PROFILE)],
   "tiktok-live-info": [up(TT_PROFILE)],
   "tiktok-popular-creators": [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, { name: "sort", type: "string", required: false, description: "follower, engagement, or popularity. Default follower." }, { name: "follower_count", type: "string", required: false, description: "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m." }, lp(20, 100)],
@@ -3413,7 +3564,22 @@ const FIELD_DESCS: Record<string, string> = {
   playable: "Whether the track is playable in the web player.",
   scrapedAt:
     "When this result was collected (ISO 8601). On Spotify Search, Apify may stamp each hit a few hundred ms apart; native Pathfinder uses the request fetch time.",
-  videoCount: "Total number of videos.",
+  videoCount:
+    "Population video count when the source is authoritative (e.g. TikTok challenge/detail statsV2 on popular-hashtags, or a channel's uploaded-video total). Never a sample tally — sample sizes use sampleVideoCount / sampleSize.",
+  sampleVideoCount:
+    "How many videos in this response's sample included the hashtag (co-occurrence count). Not the hashtag's TikTok-wide total — see videoCount.",
+  samplePlays:
+    "Sum of play/view counts across sample videos that included the hashtag. Not the hashtag's TikTok-wide totalPlays.",
+  totalPlays:
+    "Population total plays/views for a hashtag when from challenge/detail (statsV2). On popular-hashtags this is not the sample sum — see samplePlays.",
+  hashtagId: "TikTok challenge / hashtag id (cid) when available.",
+  growthRate:
+    "Hashtag growth signal when the platform exposes one. On tiktok/popular-hashtags: null — challenge/detail has no growth field.",
+  discovery:
+    'How related hashtags were found. popular-hashtags: "co_occurrence" (tags seen together on seed videos).',
+  discoverySource:
+    "Where the seed video sample came from (hashtag_page, top_search, or apify_hashtag_videos).",
+  rankBy: "Metric used for rank (popular-hashtags: videoCount = population total).",
   tweetCount: "Total number of tweets.",
   mediaCount: "Total number of media posts.",
   location: "Location shown on the profile or item.",
@@ -3446,13 +3612,33 @@ const FIELD_DESCS: Record<string, string> = {
   region: "Creator's country as an ISO code (e.g. IT, US). TikTok's authoritative value when it exposes one (rare); otherwise an AI-inferred guess from public profile cues (bio, display name, language). Check regionSource. Can be null when there is no usable signal.",
   regionConfidence: 'For an inferred region, confidence of the guess: "high", "medium", or "low". Null when the region came from TikTok.',
   regionSource: 'Where region came from: "tiktok" (authoritative, reported by TikTok) or "inferred" (best-effort estimate from public signals).',
-  audienceLocations: "Ranked breakdown of the audience by country, sampled from the people commenting on the creator's recent videos. Each item has country, countryCode, count, and percentage.",
-  country: "Country name (e.g. Mexico, United States).",
+  audienceLocations:
+    "Ranked commenter-country breakdown (basis=commenters). Each item has country, countryCode, count, numeric percentage, and percentageText. Not a follower census.",
+  audienceLanguages:
+    "Ranked comment-language breakdown from the same comment sample (comment_language). Each item has language, count, percentage, percentageText.",
+  other:
+    "Remainder of the sample not shown in the truncated list (count + numeric percentage). Present when countriesLimit (or a docs example) keeps only the top N countries.",
+  basis:
+    'What the demographics sample measures. For audience-demographics: "commenters" (people who commented on sampled videos) — not a full follower census.',
+  totalCountries: "How many distinct countries appeared in the commenter sample (before countriesLimit truncation).",
+  confidence:
+    'Sample-strength label from sampleSize: "low" (<400), "medium" (400–999), "high" (≥1000). Commenter geography is noisy at small n.',
+  languageSampleSize: "How many comments contributed a language code to audienceLanguages.",
+  videosRequested: "videos query parameter used for this call (12, 30, or 60).",
+  country:
+    "Country for the request context. On popular-creators top-level: ISO feed market you queried (e.g. US) — not each creator's home country (see region).",
   count: "Number of items in this bucket (e.g. commenters from this country in the sample).",
   countryCode: "ISO-3166 alpha-2 country code (e.g. US, MX).",
-  percentage: "Share of the sample this country represents, as a string like \"15.96%\".",
+  percentage:
+    "Share of the sample this bucket represents, as a number (e.g. 26.02). Use percentageText for a display string.",
+  percentageText: 'Display form of percentage, e.g. "26.02%". Prefer percentage for math.',
   sampleSize: "Total number of commenter countries counted across the sampled videos.",
   videosSampled: "How many of the creator's recent videos were sampled to build the breakdown.",
+  usageCount:
+    "How many TikTok videos use this sound when TikTok exposes the total. Null when the music/aweme embed and music page omit it — never a fake zero.",
+  durationSeconds: "Length in seconds as a float (canonical). Song-details also echoes the same value as duration for back-compat.",
+  artistId: "Primary artist / sound-owner user id when TikTok exposes one.",
+  authorSecUid: "Primary artist / sound-owner secUid when TikTok exposes one.",
   lang: "Language code of the content.",
   hashtags: "Hashtags extracted from the text.",
   mentions: "Accounts mentioned in the text.",
@@ -3553,8 +3739,7 @@ const FIELD_DESCS: Record<string, string> = {
   photos: "Photo URLs attached to the item.",
 
   // Duration
-  duration: "Length in seconds.",
-  durationSeconds: "Length in seconds.",
+  duration: "Length in seconds (alias of durationSeconds on song-details).",
   durationMs: "Length in milliseconds.",
   durationFormatted: "Human-readable duration.",
   start: "Start time in seconds.",
@@ -3586,7 +3771,12 @@ const FIELD_DESCS: Record<string, string> = {
   dislikes: "Dislike count.",
   score: "Vote score.",
   rank: "Rank position in the list.",
-  engagementRate: "Engagement rate as interactions / views (ratio, not percent). Null when views or interactions are missing.",
+  engagementRate:
+    "Engagement rate. On post analytics: interactions / views (ratio). On TikTok popular-creators: (avg likes per video) / followers × 100 (percent) — see engagementRateBasis.",
+  engagementRateBasis:
+    "Formula for engagementRate on this row (popular-creators: avgLikesPerVideo/followers).",
+  avgViews: "Average views across the sampled For You videos that surfaced this creator.",
+  contact: "Outreach contacts parsed from the bio when present (emails[], links[]).",
   suggestion: "A search term TikTok autocompletes for your keyword — a phrase real users search for.",
   searchUrl: "Direct TikTok search URL for this suggestion — open it to see the matching results.",
   seed: "The seed keyword this suggestion was expanded from.",
@@ -4049,15 +4239,208 @@ const PROFILE_ENRICHMENT_USE_CASES: UseCase[] = [
   },
 ];
 
+/** True profile / page resolve endpoints under category "channel". */
+const PROFILE_CHANNEL_SLUGS = new Set([
+  "youtube-channel-details",
+  "tiktok-channel-details",
+  "instagram-channel-details",
+  "linkedin-company",
+  "github-user",
+  "snapchat-user-profile",
+  "komi-page",
+  "pillar-page",
+  "linkbio-page",
+  "linkme-profile",
+]);
+
 /** Name → @handle resolvers filed under search (e.g. Instagram Profile Search). */
 const RESOLVE_SEARCH_SLUGS = new Set([
   "instagram-profile-search",
 ]);
 
+/** Video/post performance details — safe for the generic Analytics use-cases. */
+const VIDEOISH_DETAILS_SLUGS = new Set([
+  "youtube-video-details",
+  "youtube-community-post-details",
+  "tiktok-video-details",
+  "instagram-details",
+  "instagram-embed",
+  "facebook-details",
+  "twitter-tweet-details",
+  "reddit-post-details",
+  "threads-post-details",
+  "bluesky-post-details",
+  "pinterest-pin-details",
+  "linkedin-post-details",
+  "truth-social-post",
+  "kwai-post",
+]);
+
+const VIDEO_DETAILS_USE_CASES: UseCase[] = [
+  { title: "Analytics", desc: "Track views, likes, and engagement over time." },
+  { title: "Competitor Monitoring", desc: "Benchmark the performance of other creators." },
+  { title: "Dashboards", desc: "Power reporting and BI with real metadata." },
+  { title: "Content Curation", desc: "Filter and rank videos by performance." },
+];
+
+/** Slug-specific use cases when category defaults would mislead. */
+const SLUG_USE_CASES: Record<string, UseCase[]> = {
+  "tiktok-audience-demographics": [
+    { title: "Geo Targeting", desc: "See which countries commenters engage from before localizing creatives." },
+    { title: "Market Sizing", desc: "Estimate which markets show up in a creator's engaged audience." },
+    { title: "Localization", desc: "Pick caption languages and market focus from commenter language mix." },
+    { title: "Creator Vetting", desc: "Check whether engaged commenters match the campaign's target geos." },
+  ],
+  "tiktok-profile-region": [
+    { title: "Creator Location", desc: "Estimate where a creator is based when TikTok hides region." },
+    { title: "Compliance Checks", desc: "Flag likely country of origin for geo-restricted campaigns." },
+    { title: "Localization", desc: "Match outreach language to the creator's interface language." },
+    { title: "Partnership Screening", desc: "Sanity-check geography before briefing a creator." },
+  ],
+  "tiktok-song-details": [
+    { title: "Sound Research", desc: "Pull title, artist, duration, and cover for a TikTok sound." },
+    { title: "Usage Tracking", desc: "Read usageCount when TikTok exposes how many videos use the sound." },
+    { title: "Commerce Rights", desc: "Check isCommerceMusic / hasCommerceRight before brand use." },
+    { title: "Audio Pipelines", desc: "Pair with Music Posts to list videos on the same sound." },
+  ],
+  "tiktok-live": [
+    { title: "Live Monitoring", desc: "Detect whether a TikTok account is currently live." },
+    { title: "Stream Ingest", desc: "Pull live stream URLs and quality variants when the room is active." },
+    { title: "Alerts", desc: "Trigger notifications when a watched creator goes live." },
+  ],
+  "tiktok-live-info": [
+    { title: "Live Room Metadata", desc: "Fetch room title, host, and live status for a TikTok live." },
+    { title: "Stream Monitoring", desc: "Poll live room state without scraping the app UI." },
+  ],
+  "spotify-album": [
+    { title: "Catalog Enrichment", desc: "Pull album metadata, artists, and track lists." },
+    { title: "Music Databases", desc: "Normalize Spotify album IDs into structured JSON." },
+  ],
+  "spotify-track": [
+    { title: "Track Metadata", desc: "Resolve a Spotify track to title, artists, duration, and album." },
+    { title: "Catalog Enrichment", desc: "Enrich playlists and CRM rows with Spotify track fields." },
+  ],
+  "soundcloud-track": [
+    { title: "Track Metadata", desc: "Resolve a SoundCloud track to title, artist, and stats." },
+    { title: "Catalog Enrichment", desc: "Normalize SoundCloud URLs into structured JSON." },
+  ],
+  "github-repository": [
+    { title: "Repo Enrichment", desc: "Pull stars, language, and repo metadata for a GitHub URL." },
+    { title: "Developer Research", desc: "Compare repositories without scraping HTML." },
+  ],
+  "github-contributions": [
+    { title: "Contributor Activity", desc: "Summarize a GitHub user's contribution graph." },
+    { title: "Developer Vetting", desc: "Check recent activity before hiring or partnering." },
+  ],
+  "linktree-page": [
+    { title: "Link-in-Bio Parsing", desc: "Extract links and socials from a Linktree page." },
+    { title: "Contact Discovery", desc: "Find outbound destinations a creator promotes." },
+  ],
+  "facebook-marketplace-item": [
+    { title: "Listing Enrichment", desc: "Pull Marketplace item title, price, and seller signals." },
+    { title: "Price Monitoring", desc: "Track listing details without scraping the UI." },
+  ],
+  "facebook-event-details": [
+    { title: "Event Enrichment", desc: "Resolve a Facebook event to title, time, and host." },
+    { title: "Calendar Pipelines", desc: "Ingest event metadata into dashboards and CRM." },
+  ],
+  "youtube-video-sponsors": [
+    { title: "Sponsorship Detection", desc: "Surface sponsor segments disclosed on a YouTube video." },
+    { title: "Brand Safety", desc: "See which brands appear alongside a creator's content." },
+  ],
+  "reddit-subreddit-details": [
+    { title: "Community Enrichment", desc: "Pull subreddit title, subscribers, and description." },
+    { title: "Research", desc: "Map communities before sampling posts or comments." },
+  ],
+  "twitter-community": [
+    { title: "Community Enrichment", desc: "Resolve a X/Twitter Community to name and metadata." },
+    { title: "Monitoring", desc: "Track community identity for listening workflows." },
+  ],
+  "tiktok-popular-hashtags": [
+    { title: "Hashtag Research", desc: "Find related tags for a niche with real TikTok-wide video counts." },
+    { title: "Content Planning", desc: "Pick high-reach hashtags using population totals, not sample co-occurrence." },
+    { title: "Campaign Tracking", desc: "Monitor hashtagId + videoCount/totalPlays for branded tags over time." },
+    { title: "Competitive Analysis", desc: "Compare related tags in a niche by population size." },
+  ],
+  "tiktok-music-posts": [
+    { title: "Sound Tracking", desc: "List public videos that use a specific TikTok sound." },
+    { title: "Trend Monitoring", desc: "Watch new posts appear on a sound over time." },
+    { title: "Content Sourcing", desc: "Pull examples of a sound for research or UGC." },
+  ],
+  "tiktok-trending-feed": [
+    { title: "Trend Discovery", desc: "Sample what's circulating in TikTok's trending feed for a region." },
+    { title: "Content Research", desc: "Inspect captions, sounds, and engagement on trending posts." },
+  ],
+  "tiktok-popular-creators": [
+    { title: "Creator Discovery", desc: "Find creators appearing in a market's For You feed." },
+    { title: "Outreach Shortlists", desc: "Rank candidates by followers or engagementRate for a country." },
+  ],
+  "facebook-profile-photos": [
+    { title: "Photo Archive", desc: "Pull a Page or profile's public photo album items." },
+    { title: "Brand Monitoring", desc: "Watch new photos posted by a known Page." },
+  ],
+};
+
+/** List endpoints that really are a channel/profile catalog feed. */
+const CHANNEL_CATALOG_LIST_SLUGS = new Set([
+  "youtube-channel-videos",
+  "youtube-channel-shorts",
+  "youtube-channel-streams",
+  "youtube-channel-playlists",
+  "youtube-playlist",
+  "youtube-playlist-videos",
+  "youtube-community-posts",
+  "tiktok-channel-posts",
+  "tiktok-user-followers",
+  "tiktok-user-followings",
+  "instagram-channel-posts",
+  "instagram-channel-reels",
+  "instagram-tagged-posts",
+  "facebook-profile-posts",
+  "facebook-profile-reels",
+  "facebook-group-posts",
+  "twitter-user-tweets",
+  "threads-user-posts",
+  "bluesky-user-posts",
+  "reddit-subreddit-posts",
+  "twitch-user-videos",
+  "rumble-channel-videos",
+  "linkedin-company-posts",
+  "pinterest-user-pins",
+  "pinterest-user-boards",
+  "soundcloud-artist-tracks",
+  "spotify-podcast-episodes",
+  "kwai-user-posts",
+  "truth-social-user-posts",
+  "github-repositories",
+  "github-followers",
+  "github-following",
+  "github-activity",
+  "github-pull-requests",
+]);
+
+const CHANNEL_CATALOG_USE_CASES: UseCase[] = [
+  { title: "Content Pipelines", desc: "Ingest a channel's catalog in bulk." },
+  { title: "Monitoring", desc: "Detect new uploads automatically." },
+  { title: "Archiving", desc: "Snapshot a creator's full library." },
+  { title: "Analytics", desc: "Aggregate performance across many videos." },
+];
+
+const GENERIC_LIST_USE_CASES: UseCase[] = [
+  { title: "Discovery", desc: "Surface items matching a topic, tag, sound, or trend query." },
+  { title: "Monitoring", desc: "Watch a list feed over time for new activity." },
+  { title: "Research", desc: "Sample structured list results for analysis." },
+  { title: "Pipelines", desc: "Ingest list results into your own store or CRM." },
+];
+
 export function useCases(ep: ApiEndpoint): UseCase[] {
-  if (ep.category === "channel" || RESOLVE_SEARCH_SLUGS.has(ep.slug)) {
+  const override = SLUG_USE_CASES[ep.slug];
+  if (override) return override;
+
+  if (PROFILE_CHANNEL_SLUGS.has(ep.slug) || RESOLVE_SEARCH_SLUGS.has(ep.slug)) {
     return PROFILE_ENRICHMENT_USE_CASES;
   }
+
   switch (ep.category) {
     case "transcript":
       return [
@@ -4078,11 +4461,15 @@ export function useCases(ep: ApiEndpoint): UseCase[] {
         { title: "Social", desc: "Draft captions and posts from video content." },
       ];
     case "details":
+      if (VIDEOISH_DETAILS_SLUGS.has(ep.slug) || ep.slug.includes("ad-library-ad-details")) {
+        return VIDEO_DETAILS_USE_CASES;
+      }
+      // Non-video details (album, live, marketplace, repo, …) without a slug
+      // override: keep a neutral metadata default — never claim video metrics.
       return [
-        { title: "Analytics", desc: "Track views, likes, and engagement over time." },
-        { title: "Competitor Monitoring", desc: "Benchmark the performance of other creators." },
-        { title: "Dashboards", desc: "Power reporting and BI with real metadata." },
-        { title: "Content Curation", desc: "Filter and rank videos by performance." },
+        { title: "Metadata Enrichment", desc: "Resolve a URL to structured fields for storage and CRM." },
+        { title: "Dashboards", desc: "Power reporting with clean JSON instead of HTML scrapes." },
+        { title: "Research", desc: "Collect entity metadata at scale for analysis." },
       ];
     case "comments":
       return [
@@ -4099,11 +4486,12 @@ export function useCases(ep: ApiEndpoint): UseCase[] {
         { title: "Research", desc: "Sample large sets of content for analysis." },
       ];
     case "list":
-      return [
-        { title: "Content Pipelines", desc: "Ingest a channel's catalog in bulk." },
-        { title: "Monitoring", desc: "Detect new uploads automatically." },
-        { title: "Archiving", desc: "Snapshot a creator's full library." },
-        { title: "Analytics", desc: "Aggregate performance across many videos." },
-      ];
+      if (CHANNEL_CATALOG_LIST_SLUGS.has(ep.slug)) {
+        return CHANNEL_CATALOG_USE_CASES;
+      }
+      return GENERIC_LIST_USE_CASES;
+    case "channel":
+      // Non-profile channel-category endpoints should set SLUG_USE_CASES.
+      return PROFILE_ENRICHMENT_USE_CASES;
   }
 }

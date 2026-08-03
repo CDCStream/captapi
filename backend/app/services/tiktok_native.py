@@ -28,7 +28,13 @@ import httpx
 
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.http_fetch import proxy_for
-from app.utils.formatters import normalize_language_code, safe_float, safe_int, safe_str
+from app.utils.formatters import (
+    duration_seconds,
+    normalize_language_code,
+    safe_float,
+    safe_int,
+    safe_str,
+)
 
 # TikTok often returns ISO-639-2 (eng) instead of ISO-639-1 (en).
 _ISO639_2_TO_1 = {
@@ -164,21 +170,7 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
     fetched_at = utc_now_iso()
 
     hashtags = _collect_hashtags(item, safe_str(item.get("desc")))
-    mentions: list[dict[str, Any]] = []
-    for te in item.get("textExtra") or []:
-        if not isinstance(te, dict):
-            continue
-        mention_sec = safe_str(te.get("secUid"))
-        if te.get("userId") or te.get("userUniqueId") or mention_sec:
-            mentions.append(
-                {
-                    "userId": safe_str(te.get("userId")),
-                    "secUid": mention_sec,
-                    "username": safe_str(te.get("userUniqueId")),
-                    "start": safe_int(te.get("start")),
-                    "end": safe_int(te.get("end")),
-                }
-            )
+    mentions = _collect_mentions(item)
 
     aweme_type = safe_int(item.get("awemeType") or item.get("aweme_type"))
     image_post = item.get("imagePost") or item.get("image_post") or item.get("image_post_info")
@@ -220,9 +212,8 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
         "url": f"https://www.tiktok.com/@{username}/video/{item['id']}" if username else url,
         "id": safe_str(item.get("id")),
         "caption": safe_str(item.get("desc")),
-        "description": safe_str(item.get("desc")),
         "publishedAt": _iso(item.get("createTime")),
-        "durationSeconds": safe_float(video.get("duration")),
+        "durationSeconds": duration_seconds(video.get("duration")),
         "thumbnailUrl": thumbnail_url,
         "mediaType": media_type,
         "width": safe_int(video.get("width")),
@@ -237,15 +228,8 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
         "authorId": author_id,
         "secUid": author_sec,
         "author": {
-            "id": author_id,
-            "secUid": author_sec,
-            "username": username,
-            "displayName": safe_str(author.get("nickname")),
-            "url": f"https://www.tiktok.com/@{username}" if username else None,
-            "followers": safe_int(author_stats.get("followerCount")),
+            **build_author(author, author_stats=author_stats, profile_image=profile_image),
             "followersAsOf": fetched_at,
-            "verified": False if author.get("verified") is None else bool(author.get("verified")),
-            "profileImage": profile_image,
             "region": author_region,
         },
         "engagement": {
@@ -1077,44 +1061,154 @@ def _url_list_first(node: Any) -> str | None:
     return safe_str(node)
 
 
-# Caption fallback: mobile aweme rows often omit/partial-fill text_extra /
-# cha_list even when the desc is full of #tags.
+# Caption fallback only when text_extra / cha_list are absent. Regex over
+# caption glues trailing emoji onto the tag ("#okaralover💪💪❤️").
 _HASHTAG_RE = re.compile(r"#([^\s#]+)")
+_HASHTAG_EMOJI_TRAIL_RE = re.compile(
+    r"(?:"
+    r"[\U0001F300-\U0001FAFF]"
+    r"|[\U00002700-\U000027BF]"
+    r"|[\U0001F600-\U0001F64F]"
+    r"|[\U00002600-\U000026FF]"
+    r"|[\U0000FE00-\U0000FE0F]"
+    r"|[\U0000200D]"
+    r"|[\U0001F1E0-\U0001F1FF]"
+    r"|[\U0000E000-\U0000F8FF]"
+    r")+$"
+)
+
+
+def _normalize_hashtag_name(raw: Any, *, from_regex: bool = False) -> str | None:
+    name = safe_str(raw)
+    if not name:
+        return None
+    name = name.lstrip("#").strip()
+    if from_regex:
+        name = _HASHTAG_EMOJI_TRAIL_RE.sub("", name).strip()
+    return name or None
+
+
+def normalize_hashtag_query(raw: str | None) -> str | None:
+    """Strip ``#`` / whitespace; lowercase for stable matching."""
+    tag = (raw or "").lstrip("#").strip()
+    return tag.casefold() if tag else None
+
+
+def item_has_hashtag(item: dict[str, Any], tag: str) -> bool:
+    """True when the post is tagged with ``tag`` (structured fields or ``#tag`` in caption).
+
+    Username / keyword matches do **not** count — a video from ``@comedy7092`` with
+    empty hashtags is not a ``#comedy`` result.
+    """
+    want = normalize_hashtag_query(tag)
+    if not want or not isinstance(item, dict):
+        return False
+    # Prefer already-mapped hashtags[] (strings or {name}).
+    for h in item.get("hashtags") or []:
+        name = h.get("name") if isinstance(h, dict) else h
+        if normalize_hashtag_query(safe_str(name)) == want:
+            return True
+    # Raw TikTok / actor shapes before mapping.
+    if want in _collect_hashtags(
+        item,
+        safe_str(item.get("caption") or item.get("desc") or item.get("text") or item.get("title")),
+    ):
+        return True
+    caption = safe_str(
+        item.get("caption") or item.get("desc") or item.get("text") or item.get("title")
+    )
+    if not caption:
+        return False
+    # Token match: #comedy but not #comedytime (word-ish boundary after tag).
+    return bool(
+        re.search(
+            rf"(?i)(?:^|[^a-z0-9_])#{re.escape(want)}(?:$|[^a-z0-9_])",
+            caption,
+        )
+    )
 
 
 def _collect_hashtags(item: dict[str, Any], caption: str | None) -> list[str]:
-    """Deduped hashtags from structured fields + caption, skipping empties.
+    """Canonical hashtags from TikTok structured fields; caption is last resort.
 
-    Case-insensitive: TikTok's ``text_extra`` often has lowercase names while
-    the caption keeps the original casing — without casefolding we return both
-    (``latinus`` + ``Latinus``) and inflate counts by ~2×.
+    Prefer ``text_extra[].hashtag_name`` / ``cha_list`` / actor ``hashtags``.
+    When any structured tag exists, skip caption regex entirely — that avoids
+    emoji bleed, case doubles (``Latinus`` + ``latinus``), and dupes.
     Stored form is lowercase for stable counting.
     """
     seen: set[str] = set()
     out: list[str] = []
 
-    def _add(raw: Any) -> None:
-        name = safe_str(raw)
+    def _add(raw: Any, *, from_regex: bool = False) -> bool:
+        name = _normalize_hashtag_name(raw, from_regex=from_regex)
         if not name:
-            return
-        name = name.lstrip("#").strip()
-        if not name:
-            return
+            return False
         key = name.casefold()
         if key in seen:
-            return
+            return True
         seen.add(key)
         out.append(key)
+        return True
 
+    structured = False
     for te in item.get("text_extra") or item.get("textExtra") or []:
-        if isinstance(te, dict):
-            _add(te.get("hashtag_name") or te.get("hashtagName"))
+        if isinstance(te, dict) and _add(te.get("hashtag_name") or te.get("hashtagName")):
+            structured = True
     for cha in item.get("cha_list") or item.get("chaList") or item.get("challenges") or []:
-        if isinstance(cha, dict):
-            _add(cha.get("cha_name") or cha.get("chaName") or cha.get("title"))
-    if caption:
+        if isinstance(cha, dict) and _add(
+            cha.get("cha_name") or cha.get("chaName") or cha.get("title")
+        ):
+            structured = True
+    for h in item.get("hashtags") or []:
+        if isinstance(h, dict):
+            if _add(h.get("name") or h.get("title") or h.get("hashtag_name")):
+                structured = True
+        elif _add(h):
+            structured = True
+
+    if not structured and caption:
         for tag in _HASHTAG_RE.findall(caption):
-            _add(tag)
+            _add(tag, from_regex=True)
+    return out
+
+
+def _collect_mentions(item: dict[str, Any]) -> list[dict[str, Any]]:
+    """Mentions from ``text_extra`` (userId / secUid / username + offsets).
+
+    No caption-@ regex — TikTok's mention spans are often display names with
+    spaces/emoji, not @handles. Structured rows carry stable ids.
+    """
+    seen: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for te in item.get("text_extra") or item.get("textExtra") or []:
+        if not isinstance(te, dict):
+            continue
+        if te.get("hashtag_name") or te.get("hashtagName") or te.get("hashtag_id") or te.get(
+            "hashtagId"
+        ):
+            continue
+        user_id = safe_str(te.get("user_id") or te.get("userId"))
+        sec = safe_str(te.get("sec_uid") or te.get("secUid"))
+        username = safe_str(
+            te.get("user_unique_id")
+            or te.get("userUniqueId")
+            or te.get("unique_id")
+            or te.get("uniqueId")
+        )
+        if not (user_id or sec or username):
+            continue
+        key = sec or user_id or username.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        row: dict[str, Any] = {
+            "userId": user_id,
+            "secUid": sec,
+            "username": username,
+            "start": safe_int(te.get("start")),
+            "end": safe_int(te.get("end")),
+        }
+        out.append(row)
     return out
 
 
@@ -1149,6 +1243,91 @@ def _extract_photo_images(image_post: Any) -> list[str]:
     return out
 
 
+def author_verified_flag(author: dict[str, Any] | None) -> bool | None:
+    """True/False when TikTok exposes a badge signal; None when the surface omits it.
+
+    MUSIC_AWEME (music-posts) and similar list surfaces often ship author cards
+    without ``verified`` / ``custom_verify``. Missing must stay ``null`` —
+    ``false`` means "confirmed unverified" and causes false negatives
+    (e.g. Khaby Lame). Prefer Channel Details when you need a definitive badge.
+    """
+    if not isinstance(author, dict):
+        return None
+    for key in ("verified", "is_verified", "isVerified"):
+        if key in author and author.get(key) is not None:
+            return bool(author.get(key))
+    custom = author.get("custom_verify")
+    enterprise = author.get("enterprise_verify_reason")
+    if custom is not None or enterprise is not None:
+        return bool(custom) or bool(enterprise)
+    vtype = author.get("verification_type")
+    if vtype is None:
+        return None
+    try:
+        return int(vtype) != 0
+    except (TypeError, ValueError):
+        return bool(vtype)
+
+
+# Stable post-author keys — always present (null when the surface omits data).
+AUTHOR_NULLABLE_KEYS = ("id", "secUid", "followers", "verified")
+
+
+def build_author(
+    author: dict[str, Any] | None,
+    *,
+    author_stats: dict[str, Any] | None = None,
+    profile_image: str | None = None,
+) -> dict[str, Any]:
+    """One author shape for every TikTok post list endpoint.
+
+    MUSIC_AWEME often omits ``follower_count`` / badge fields — those stay
+    ``null`` (key present). Never drop ``followers`` just because it is unknown;
+    that made music-posts look like a different schema than top-search.
+    """
+    author = author if isinstance(author, dict) else {}
+    stats = author_stats if isinstance(author_stats, dict) else {}
+    username = safe_str(
+        author.get("unique_id")
+        or author.get("uniqueId")
+        or author.get("name")
+        or author.get("unique_name")
+    )
+    avatar = profile_image or (
+        _url_list_first(author.get("avatar_larger") or author.get("avatarLarger"))
+        or _url_list_first(author.get("avatar_medium") or author.get("avatarMedium"))
+        or _url_list_first(author.get("avatar_thumb") or author.get("avatarThumb"))
+        or safe_str(
+            author.get("avatar")
+            or author.get("avatarLarger")
+            or author.get("originalAvatarUrl")
+            or author.get("profileImage")
+        )
+    )
+    return {
+        "id": safe_str(
+            author.get("uid") or author.get("id") or author.get("user_id") or author.get("userId")
+        ),
+        "secUid": safe_str(author.get("sec_uid") or author.get("secUid")),
+        "username": username,
+        "displayName": safe_str(
+            author.get("nickname") or author.get("nickName") or author.get("displayName")
+        ),
+        "url": safe_str(author.get("profileUrl") or author.get("profile_url"))
+        or (f"https://www.tiktok.com/@{username}" if username else None),
+        "followers": safe_int(
+            author.get("follower_count")
+            or author.get("followerCount")
+            or author.get("fans")
+            or author.get("followers")
+            or stats.get("follower_count")
+            or stats.get("followerCount")
+        ),
+        "verified": author_verified_flag(author),
+        "profileImage": avatar,
+    }
+
+
 def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
     """Map a mobile aweme row to the same post shape as video_details_native.
 
@@ -1180,9 +1359,11 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
     # Mobile aweme occasionally reports duration in milliseconds.
     if duration is not None and duration > 1000:
         duration = duration / 1000.0
+    duration = duration_seconds(duration)
 
     caption = safe_str(item.get("desc"))
     hashtags = _collect_hashtags(item, caption)
+    mentions = _collect_mentions(item)
 
     aweme_type = safe_int(item.get("aweme_type") or item.get("awemeType"))
     image_post = (
@@ -1224,14 +1405,7 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
             or (images[0] if images else None)
         )
 
-    # Badge flag: missing/unknown -> false (never null).
-    verified = author.get("verified")
-    if verified is None:
-        verified = author.get("is_verified")
-    verified = bool(verified) if verified is not None else False
-
-    author_id = safe_str(author.get("uid") or author.get("id"))
-    author_sec = safe_str(author.get("sec_uid") or author.get("secUid"))
+    author_out = build_author(author, author_stats=author_stats, profile_image=avatar)
     kind = "photo" if is_photo else "video"
     url = (
         f"https://www.tiktok.com/@{username}/{kind}/{aweme_id}"
@@ -1244,35 +1418,21 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
         "url": url,
         "id": aweme_id,
         "caption": caption,
-        "description": caption,
         "publishedAt": _iso(item.get("create_time") or item.get("createTime")),
         "durationSeconds": duration,
         "thumbnailUrl": cover,
         "mediaType": media_type,
         "contentType": content_type,
-        "author": {
-            "id": author_id,
-            "secUid": author_sec,
-            "username": username,
-            "displayName": safe_str(author.get("nickname") or author.get("nickName")),
-            "url": f"https://www.tiktok.com/@{username}" if username else None,
-            "followers": safe_int(
-                author.get("follower_count")
-                or author.get("followerCount")
-                or author_stats.get("follower_count")
-                or author_stats.get("followerCount")
-            ),
-            "verified": verified,
-            "profileImage": avatar,
-        },
+        "author": author_out,
         "engagement": {
-            "views": safe_int(stats.get("play_count") or stats.get("playCount")),
-            "likes": safe_int(stats.get("digg_count") or stats.get("diggCount")),
-            "comments": safe_int(stats.get("comment_count") or stats.get("commentCount")),
-            "shares": safe_int(stats.get("share_count") or stats.get("shareCount")),
-            "saves": safe_int(stats.get("collect_count") or stats.get("collectCount")),
+            "views": safe_int(stats.get("play_count") or stats.get("playCount")) or 0,
+            "likes": safe_int(stats.get("digg_count") or stats.get("diggCount")) or 0,
+            "comments": safe_int(stats.get("comment_count") or stats.get("commentCount")) or 0,
+            "shares": safe_int(stats.get("share_count") or stats.get("shareCount")) or 0,
+            "saves": safe_int(stats.get("collect_count") or stats.get("collectCount")) or 0,
         },
         "hashtags": hashtags,
+        "mentions": mentions,
         "musicName": safe_str(music.get("title")),
         "musicId": safe_str(music.get("id") or music.get("id_str") or music.get("mid")),
         "musicAuthor": safe_str(
@@ -1508,17 +1668,19 @@ async def channel_posts_native(
 # those regions yields an engagement-based audience-country breakdown — the
 # same signal third-party "audience" endpoints surface. Video IDs come from the
 # caller (or from ``channel_posts_native``).
-async def audience_regions_native(
+async def audience_commenters_native(
     aweme_ids: list[str], target_total: int = 500, per_video: int = 150
-) -> list[str] | None:
-    """Collect commenter country codes across the given videos.
+) -> dict[str, list[str]] | None:
+    """Collect commenter country codes + comment languages across videos.
 
-    Fetches comment pages natively and pulls ``user.region`` from each comment,
-    stopping once ``target_total`` codes are gathered or the videos are
-    exhausted. Returns the list of ISO country codes (with duplicates, ready to
-    tally) or ``None`` if every video's comments were blocked.
+    Fetches comment pages natively and pulls ``user.region`` and
+    ``comment_language`` from each comment, stopping once ``target_total``
+    region codes are gathered or the videos are exhausted. Returns
+    ``{"regions": [...], "languages": [...]}`` (duplicates preserved for
+    tallying) or ``None`` if every video's comments were blocked.
     """
     regions: list[str] = []
+    languages: list[str] = []
     any_success = False
     for aweme_id in aweme_ids:
         if len(regions) >= target_total:
@@ -1535,10 +1697,23 @@ async def audience_regions_native(
             any_success = True
             comments = page.get("comments") or []
             for c in comments:
+                if not isinstance(c, dict):
+                    continue
                 user = c.get("user") or {}
+                if not isinstance(user, dict):
+                    user = {}
                 code = safe_str(user.get("region"))
                 if code:
                     regions.append(code.strip().upper())
+                lang = normalize_language_code(
+                    safe_str(
+                        c.get("comment_language")
+                        or c.get("commentLanguage")
+                        or user.get("language")
+                    )
+                )
+                if lang:
+                    languages.append(lang)
             collected += len(comments)
             nxt = page.get("cursor")
             cur = str(nxt) if nxt is not None else cur
@@ -1546,7 +1721,19 @@ async def audience_regions_native(
                 break
     if not any_success:
         return None
-    return regions
+    return {"regions": regions, "languages": languages}
+
+
+async def audience_regions_native(
+    aweme_ids: list[str], target_total: int = 500, per_video: int = 150
+) -> list[str] | None:
+    """Back-compat wrapper — country codes only. Prefer ``audience_commenters_native``."""
+    got = await audience_commenters_native(
+        aweme_ids, target_total=target_total, per_video=per_video
+    )
+    if got is None:
+        return None
+    return got["regions"]
 
 
 # --- Search suggestions (public web autocomplete) ---------------------------
@@ -2197,10 +2384,109 @@ def _map_music_artist(row: dict[str, Any]) -> dict[str, Any] | None:
 def _usage_count_from_music(music: dict[str, Any]) -> int | None:
     """Videos using this sound. TikTok often sends ``0`` on music/aweme embeds —
     treat non-positive as unknown (null) rather than a fake zero."""
-    for key in ("user_count", "music_group_use_count", "music_ugid_use_count"):
+    if not isinstance(music, dict):
+        return None
+    for key in (
+        "user_count",
+        "userCount",
+        "music_group_use_count",
+        "music_ugid_use_count",
+        "video_count",
+        "videoCount",
+        "use_count",
+        "useCount",
+    ):
         n = safe_int(music.get(key))
         if n is not None and n > 0:
             return n
+    stats = music.get("stats") if isinstance(music.get("stats"), dict) else {}
+    for key in ("videoCount", "video_count", "userCount", "user_count"):
+        n = safe_int(stats.get(key))
+        if n is not None and n > 0:
+            return n
+    return None
+
+
+def _usage_count_from_scope(scope: dict[str, Any]) -> int | None:
+    """Pull usage totals from a music page ``__DEFAULT_SCOPE__`` when present."""
+    if not isinstance(scope, dict):
+        return None
+    # Common web shapes: webapp.music-detail → musicInfo.{music,stats}
+    md = scope.get("webapp.music-detail") or scope.get("webapp.music-detail-page") or {}
+    if not isinstance(md, dict):
+        md = {}
+    info = md.get("musicInfo") or md.get("music_info") or md
+    if not isinstance(info, dict):
+        info = {}
+    for blob in (
+        info.get("music"),
+        info.get("stats"),
+        info.get("statsV2"),
+        info,
+        md,
+    ):
+        n = _usage_count_from_music(blob) if isinstance(blob, dict) else None
+        if n is not None:
+            return n
+    # Last resort: walk one level for nested music blobs with a use count.
+    for value in scope.values():
+        if not isinstance(value, dict):
+            continue
+        nested = value.get("musicInfo") or value.get("music") or value
+        if isinstance(nested, dict):
+            n = _usage_count_from_music(nested)
+            if n is not None:
+                return n
+            stats = nested.get("stats") if isinstance(nested.get("stats"), dict) else None
+            if stats:
+                n = _usage_count_from_music(stats)
+                if n is not None:
+                    return n
+    return None
+
+
+_TT_MUSIC_DETAIL_HOSTS = (
+    "https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/music/detail/",
+    "https://api22-normal-c-useast2a.tiktokv.com/aweme/v1/music/detail/",
+    "https://api19-normal-c-useast1a.tiktokv.com/aweme/v1/music/detail/",
+    "https://api.tiktokv.com/aweme/v1/music/detail/",
+)
+
+
+async def _music_detail_native(music_id: str) -> dict[str, Any] | None:
+    """Fetch a fuller music object (often includes ``user_count``) via music/detail."""
+    headers = {"User-Agent": _TT_MOBILE_UA, "Accept": "application/json"}
+    geos = ("US", "NL")
+
+    async def _attempt(host: str, country: str) -> dict[str, Any] | None:
+        did = str(random.randint(10**18, 10**19 - 1))
+        params = {
+            **_TT_COMMENT_PARAMS,
+            "device_id": did,
+            "iid": did,
+            "music_id": music_id,
+        }
+        return await _comment_once(host, params, headers, _residential_proxy(country))
+
+    tasks = [
+        asyncio.create_task(
+            _attempt(_TT_MUSIC_DETAIL_HOSTS[i % len(_TT_MUSIC_DETAIL_HOSTS)], geos[i % len(geos)])
+        )
+        for i in range(8)
+    ]
+    try:
+        for coro in asyncio.as_completed(tasks):
+            res = await coro
+            if not isinstance(res, dict):
+                continue
+            music = res.get("music_info") or res.get("music") or res.get("musicInfo")
+            if isinstance(music, dict) and (
+                music.get("id") or music.get("id_str") or music.get("title")
+            ):
+                return music
+    finally:
+        for t in tasks:
+            t.cancel()
     return None
 
 
@@ -2322,6 +2608,9 @@ def normalize_song_details(
 
     create_ts = safe_int(music.get("create_time") or music.get("createTime"))
     album = safe_str(music.get("album"))
+    dur = duration_seconds(music.get("duration") or music.get("durationSeconds"))
+    # Top-level artist identity (original-sound owner or first credited artist).
+    primary = artists[0] if artists else {}
     out: dict[str, Any] = {
         "platform": "tiktok",
         "url": url,
@@ -2329,6 +2618,10 @@ def normalize_song_details(
         "mid": safe_str(music.get("mid")) or mid,
         "title": title,
         "author": safe_str(music.get("author") or music.get("owner_nickname")),
+        "artistId": safe_str(primary.get("id") or music.get("owner_id")),
+        "authorSecUid": safe_str(
+            primary.get("secUid") or music.get("sec_uid") or music.get("owner_sec_uid")
+        ),
         "artists": artists,
         "original": bool(original) if original is not None else None,
         "isOriginal": bool(is_original) if is_original is not None else None,
@@ -2339,8 +2632,17 @@ def normalize_song_details(
         "isAuthorArtist": bool(music.get("is_author_artist"))
         if music.get("is_author_artist") is not None
         else None,
+        "isExplicit": bool(music.get("is_explicit") or music.get("isExplicit"))
+        if music.get("is_explicit") is not None or music.get("isExplicit") is not None
+        else None,
+        "hasLyrics": bool(music.get("has_lyrics") or music.get("hasLyrics"))
+        if music.get("has_lyrics") is not None or music.get("hasLyrics") is not None
+        else None,
         "album": album or None,
-        "duration": safe_float(music.get("duration")),
+        # durationSeconds is the canonical float (matches music-posts). Keep
+        # duration as a back-compat alias of the same value.
+        "durationSeconds": dur,
+        "duration": dur,
         "coverUrl": cover,
         "cover": {
             "large": cover_large,
@@ -2377,21 +2679,13 @@ def normalize_song_details(
 
 
 async def song_details_native(music_id_or_url: str) -> dict[str, Any] | None:
-    """Song/sound metadata from the first music/aweme row (same mobile API as
-    ``music_posts_native``). Returns the /v1/tiktok/song-details shape, or
-    ``None`` so the caller can fall back to Apify.
+    """Song/sound metadata from music/aweme (+ music/detail / web enrich for usage).
+
+    Returns the /v1/tiktok/song-details shape, or ``None`` so the caller can
+    fall back to Apify.
     """
     music_id = parse_music_id(music_id_or_url)
     if not music_id:
-        return None
-    page = await _music_page(music_id, "0", 1, expect_items=True)
-    if page is None:
-        return None
-    awemes = page.get("aweme_list") or []
-    if not awemes or not isinstance(awemes[0], dict):
-        return None
-    music = awemes[0].get("music")
-    if not isinstance(music, dict):
         return None
 
     url = (
@@ -2399,7 +2693,67 @@ async def song_details_native(music_id_or_url: str) -> dict[str, Any] | None:
         if music_id_or_url.startswith("http")
         else f"https://www.tiktok.com/music/sound-{music_id}"
     )
-    return normalize_song_details(music, url=url, music_id=music_id)
+
+    # Parallel: music/detail often has user_count; music/aweme has covers/play.
+    detail_music, page = await asyncio.gather(
+        _music_detail_native(music_id),
+        _music_page(music_id, "0", 1, expect_items=True),
+    )
+    aweme_music: dict[str, Any] | None = None
+    if isinstance(page, dict):
+        page_music = page.get("music_info") or page.get("music")
+        if isinstance(page_music, dict):
+            aweme_music = page_music
+        else:
+            awemes = page.get("aweme_list") or []
+            if awemes and isinstance(awemes[0], dict) and isinstance(
+                awemes[0].get("music"), dict
+            ):
+                aweme_music = awemes[0]["music"]
+
+    music = detail_music or aweme_music
+    if not isinstance(music, dict):
+        return None
+
+    # Merge usage / cover / play from the other source when the primary omits them.
+    secondary = aweme_music if music is detail_music else detail_music
+    if isinstance(secondary, dict):
+        merged = dict(music)
+        for key in (
+            "user_count",
+            "music_group_use_count",
+            "cover_large",
+            "cover_medium",
+            "cover_thumb",
+            "play_url",
+            "extra",
+            "matched_song",
+            "music_release_info",
+            "artists",
+        ):
+            if merged.get(key) in (None, 0, "", [], {}) and secondary.get(key) not in (
+                None,
+                0,
+                "",
+                [],
+                {},
+            ):
+                merged[key] = secondary[key]
+        music = merged
+
+    out = normalize_song_details(music, url=url, music_id=music_id)
+    if out is None:
+        return None
+
+    if out.get("usageCount") is None:
+        # Web music page sometimes exposes the "X videos" total even when
+        # music/aweme embeds send user_count=0.
+        scope = await _fetch_scope(url)
+        usage = _usage_count_from_scope(scope) if scope else None
+        if usage is not None:
+            out["usageCount"] = usage
+
+    return out
 
 
 # TikTok ``liveRoom.status`` / ``user.status`` — 2 means currently live.
@@ -2705,7 +3059,8 @@ def _map_trend_video(item: dict[str, Any], *, rank: int) -> dict[str, Any] | Non
     duration = safe_float(video.get("duration") or video.get("durationInSec"))
     # Some feeds return duration in ms.
     if duration is not None and duration > 1000:
-        duration = round(duration / 1000.0, 3)
+        duration = duration / 1000.0
+    duration = duration_seconds(duration)
 
     author_id = safe_str(author.get("id") or author.get("uid"))
     author_sec = safe_str(author.get("secUid") or author.get("sec_uid"))
@@ -2803,6 +3158,53 @@ _FOLLOWER_RANGES: dict[str, tuple[int, int | None]] = {
     ">10m": (10_000_000, None),
 }
 
+# Documented on every popular-creators row — not lifetime likes/followers.
+ENGAGEMENT_RATE_BASIS = "avgLikesPerVideo/followers"
+
+_BIO_EMAIL_RE = re.compile(
+    r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+)
+_BIO_LINK_RE = re.compile(
+    r"(?:https?://|www\.)[^\s]+"
+    r"|(?:PayPal\.me|paypal\.me)/[^\s]+"
+    r"|Cash\s*App\s*\$[A-Za-z0-9_]+"
+    r"|\$[A-Za-z][A-Za-z0-9_]{2,}",
+    re.IGNORECASE,
+)
+
+
+def creator_engagement_rate(
+    likes: int | None, videos: int | None, followers: int | None
+) -> float | None:
+    """Percent ER: (likes / videos) / followers × 100.
+
+    Lifetime likes÷followers is NOT engagement — it rewards account age / post
+    volume. Null when any input is missing or non-positive.
+    """
+    if likes is None or videos is None or followers is None:
+        return None
+    if likes < 0 or videos <= 0 or followers <= 0:
+        return None
+    return round((likes / videos) / followers * 100, 4)
+
+
+def extract_bio_contact(bio: str | None) -> dict[str, list[str]] | None:
+    """Pull emails / payment links from a creator bio for outreach."""
+    if not bio:
+        return None
+    emails = list(dict.fromkeys(_BIO_EMAIL_RE.findall(bio)))
+    links: list[str] = []
+    for m in _BIO_LINK_RE.finditer(bio):
+        token = m.group(0).rstrip(".,);]")
+        # Skip bare emails matched by the $ / link heuristics.
+        if "@" in token and "://" not in token.lower() and not token.lower().startswith("www."):
+            continue
+        if token not in links:
+            links.append(token)
+    if not emails and not links:
+        return None
+    return {"emails": emails, "links": links}
+
 
 async def popular_creators_native(
     country: str = "US",
@@ -2870,28 +3272,33 @@ async def popular_creators_native(
         likes = _stat(stats_v2, stats, "heartCount")
         videos = _stat(stats_v2, stats, "videoCount")
         avg_views = int(slot["views"] / slot["posts"]) if slot["posts"] else 0
-        eng = None
-        if followers and likes is not None and followers > 0:
-            eng = round(likes / followers, 4)
-        creators.append(
-            {
-                "username": username,
-                "displayName": safe_str(user.get("nickname")) or slot.get("displayName"),
-                "url": f"https://www.tiktok.com/@{username}",
-                "bio": safe_str(user.get("signature")),
-                "followers": followers,
-                "engagementRate": eng,
-                "likes": likes,
-                "videos": videos,
-                "country": (country or "US").upper(),
-                "verified": bool(user.get("verified")) if user.get("verified") is not None else None,
-                "profileImage": safe_str(
-                    user.get("avatarLarger") or user.get("avatarMedium") or user.get("avatarThumb")
-                ),
-                "_avgViews": avg_views,
-                "_posts": slot["posts"],
-            }
-        )
+        eng = creator_engagement_rate(likes, videos, followers)
+        bio = safe_str(user.get("signature"))
+        contact = extract_bio_contact(bio)
+        # Creator locale from TikTok profile — never echo the feed `country` query.
+        region = safe_str(user.get("region") or user.get("regionCode"))
+        row: dict[str, Any] = {
+            "id": safe_str(user.get("id") or user.get("uid")),
+            "secUid": safe_str(user.get("secUid") or user.get("sec_uid")),
+            "username": username,
+            "displayName": safe_str(user.get("nickname")) or slot.get("displayName"),
+            "url": f"https://www.tiktok.com/@{username}",
+            "bio": bio,
+            "followers": followers,
+            "engagementRate": eng,
+            "engagementRateBasis": ENGAGEMENT_RATE_BASIS,
+            "likes": likes,
+            "videos": videos,
+            "avgViews": avg_views,
+            "region": region,
+            "verified": bool(user.get("verified")) if user.get("verified") is not None else None,
+            "profileImage": safe_str(
+                user.get("avatarLarger") or user.get("avatarMedium") or user.get("avatarThumb")
+            ),
+        }
+        if contact:
+            row["contact"] = contact
+        creators.append(row)
 
     if not creators:
         return None
@@ -2900,36 +3307,134 @@ async def popular_creators_native(
     if sort_key == "engagement":
         creators.sort(key=lambda c: (c.get("engagementRate") or 0, c.get("followers") or 0), reverse=True)
     elif sort_key == "popularity":
-        creators.sort(key=lambda c: (c.get("_avgViews") or 0, c.get("followers") or 0), reverse=True)
+        creators.sort(key=lambda c: (c.get("avgViews") or 0, c.get("followers") or 0), reverse=True)
     else:
-        creators.sort(key=lambda c: (c.get("followers") or 0, c.get("_avgViews") or 0), reverse=True)
+        creators.sort(key=lambda c: (c.get("followers") or 0, c.get("avgViews") or 0), reverse=True)
 
     out: list[dict[str, Any]] = []
     for i, c in enumerate(creators[:limit]):
-        c = {k: v for k, v in c.items() if not k.startswith("_")}
         c["rank"] = i + 1
         out.append(c)
     return out
 
 
+async def challenge_detail_native(hashtag: str) -> dict[str, Any] | None:
+    """Population totals for a TikTok hashtag via ``/api/challenge/detail/``.
+
+    Returns ``{hashtagId, name, videoCount, totalPlays, description}`` using
+    ``statsV2`` (exact string counts). Legacy ``stats.videoCount`` is often 0
+    even for huge tags — ignore it. Residential proxy required (datacenter
+    returns an empty body).
+    """
+    tag = (hashtag or "").lstrip("#").strip()
+    if not tag:
+        return None
+    url = (
+        "https://www.tiktok.com/api/challenge/detail/"
+        f"?challengeName={urllib.parse.quote(tag)}&language=en"
+    )
+    try:
+        resp = await proxy_fetch(url, tier="residential", headers=TT_HEADERS, timeout=20)
+    except httpx.HTTPError:
+        return None
+    if resp.status_code >= 400 or not (resp.text or "").strip():
+        return None
+    try:
+        payload = resp.json()
+    except ValueError:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    info = payload.get("challengeInfo")
+    if not isinstance(info, dict):
+        return None
+    challenge = info.get("challenge") if isinstance(info.get("challenge"), dict) else {}
+    stats_v2 = info.get("statsV2") if isinstance(info.get("statsV2"), dict) else {}
+    if not stats_v2 and isinstance(challenge.get("statsV2"), dict):
+        stats_v2 = challenge["statsV2"]
+    stats = info.get("stats") if isinstance(info.get("stats"), dict) else {}
+    if not stats and isinstance(challenge.get("stats"), dict):
+        stats = challenge["stats"]
+    # Prefer statsV2 exact strings; fall back to stats only when V2 missing.
+    video_count = safe_int(stats_v2.get("videoCount"))
+    if video_count is None or video_count <= 0:
+        video_count = safe_int(stats.get("videoCount"))
+        if video_count is not None and video_count <= 0:
+            video_count = None
+    view_count = safe_int(stats_v2.get("viewCount"))
+    if view_count is None or view_count <= 0:
+        view_count = safe_int(stats.get("viewCount"))
+        if view_count is not None and view_count <= 0:
+            view_count = None
+    hid = safe_str(challenge.get("id") or challenge.get("cid"))
+    name = safe_str(challenge.get("title") or tag).lstrip("#").lower()
+    if not hid and video_count is None and view_count is None:
+        return None
+    return {
+        "hashtagId": hid,
+        "name": name,
+        "videoCount": video_count,
+        "totalPlays": view_count,
+        "description": safe_str(challenge.get("desc")) or None,
+        # TikTok's public challenge/detail payload has no growth signal.
+        "growthRate": None,
+    }
+
+
+async def enrich_hashtag_population_stats(
+    rows: list[dict[str, Any]], *, concurrency: int = 8
+) -> list[dict[str, Any]]:
+    """Attach population videoCount/totalPlays/hashtagId from challenge/detail."""
+    if not rows:
+        return rows
+    sem = asyncio.Semaphore(concurrency)
+
+    async def _one(row: dict[str, Any]) -> dict[str, Any]:
+        async with sem:
+            detail = await challenge_detail_native(row["name"])
+        out = dict(row)
+        if detail:
+            out["hashtagId"] = detail.get("hashtagId")
+            out["videoCount"] = detail.get("videoCount")
+            out["totalPlays"] = detail.get("totalPlays")
+            out["growthRate"] = detail.get("growthRate")
+            if detail.get("description") and not out.get("description"):
+                out["description"] = detail["description"]
+        else:
+            out.setdefault("hashtagId", None)
+            out.setdefault("videoCount", None)
+            out.setdefault("totalPlays", None)
+            out.setdefault("growthRate", None)
+        return out
+
+    return list(await asyncio.gather(*[_one(r) for r in rows]))
+
+
 async def popular_hashtags_native(
     query: str, *, limit: int = 20, n_videos: int = 25
-) -> list[dict[str, Any]] | None:
-    """Co-hashtag ranking from a native seed hashtag page (Decodo).
+) -> dict[str, Any] | None:
+    """Related hashtags for a seed topic, with real TikTok population totals.
 
-    Falls back to signed top-search video rows when the hashtag page misses.
+    Discovery is co-occurrence inside a sample of seed videos (hashtag page, or
+    top-search when the seed tag is weak — e.g. default ``trending``). Sample
+    tallies stay in ``sampleVideoCount`` / ``samplePlays``. Population
+    ``videoCount`` / ``totalPlays`` come from ``/api/challenge/detail/``
+    (statsV2). Final ``rank`` is by population videoCount among discovered tags.
     """
     seed = (query or "").lstrip("#").strip()
     if not seed:
         return None
     want = max(n_videos, limit)
     posts: list[dict[str, Any]] = []
+    discovery_source = "hashtag_page"
     native = await hashtag_posts_native(seed, limit=want)
     if native is not None:
         posts, _has_more, _cursor = native
     if not posts:
         # ``trending`` / weak tags often soft-fail on challenge/item_list; search
-        # still yields videos with co-occurring hashtags.
+        # still yields videos with co-occurring hashtags. Default query
+        # ``trending`` is a keyword search seed — not TikTok's official chart.
+        discovery_source = "top_search"
         searched = await top_search_native(seed, limit=want)
         if searched:
             posts, _more, _cur = searched
@@ -2953,14 +3458,47 @@ async def popular_hashtags_native(
             slot["plays"] += plays
     if not agg:
         return None
-    ranked = sorted(agg.items(), key=lambda kv: (kv[1]["count"], kv[1]["plays"]), reverse=True)
-    return [
+    # Over-fetch candidates so enrichment + re-rank still fills ``limit``.
+    candidate_n = min(len(agg), max(limit * 2, limit))
+    by_sample = sorted(
+        agg.items(), key=lambda kv: (kv[1]["count"], kv[1]["plays"]), reverse=True
+    )[:candidate_n]
+    sample_rows = [
         {
             "name": name,
             "url": f"https://www.tiktok.com/tag/{name}",
-            "rank": i + 1,
-            "videoCount": slot["count"],
-            "totalPlays": slot["plays"],
+            "sampleVideoCount": slot["count"],
+            "samplePlays": slot["plays"],
+            # Legacy aliases kept null until population enrich — never echo sample
+            # into videoCount/totalPlays (that was the silent bug).
+            "videoCount": None,
+            "totalPlays": None,
+            "hashtagId": None,
+            "growthRate": None,
         }
-        for i, (name, slot) in enumerate(ranked[:limit])
+        for name, slot in by_sample
     ]
+    enriched = await enrich_hashtag_population_stats(sample_rows)
+    enriched.sort(
+        key=lambda r: (
+            r.get("videoCount") is not None,
+            r.get("videoCount") or 0,
+            r.get("sampleVideoCount") or 0,
+            r.get("samplePlays") or 0,
+        ),
+        reverse=True,
+    )
+    hashtags = []
+    for i, row in enumerate(enriched[:limit]):
+        row = dict(row)
+        row["rank"] = i + 1
+        hashtags.append(row)
+    return {
+        "query": query,
+        "discovery": "co_occurrence",
+        "discoverySource": discovery_source,
+        "sampleSize": len(posts),
+        "rankBy": "videoCount",
+        "totalReturned": len(hashtags),
+        "hashtags": hashtags,
+    }

@@ -1,6 +1,6 @@
 -- =====================================================
--- Reject signup for known disposable / farming email domains.
--- Runs BEFORE INSERT on auth.users so accounts cannot be created.
+-- Add oakon.com to disposable signup blocklist.
+-- CREATE OR REPLACE so this applies even if 0020 already ran.
 -- =====================================================
 
 create or replace function public.reject_disposable_email()

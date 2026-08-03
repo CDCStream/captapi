@@ -133,8 +133,9 @@ def _clean_hashtag(tag: str) -> str | None:
 
 
 def _clean_hashtags(raw: Any) -> list[str]:
-    cleaned = (_clean_hashtag(str(tag)) for tag in safe_list(raw))
-    return [tag for tag in cleaned if tag]
+    cleaned = [_clean_hashtag(str(tag)) for tag in safe_list(raw)]
+    # Same tag twice (structured + caption) used to leak as ["NASAHubble","NASAHubble"].
+    return decodo.dedupe_preserve([tag for tag in cleaned if tag])
 
 
 def _normalize_post(item: dict) -> dict:
@@ -1026,28 +1027,45 @@ async def _ig_feed_collect(
 async def _overlay_feed_engagement(
     posts: list[dict[str, Any]], user_id: str | None
 ) -> list[dict[str, Any]]:
-    """Replace GraphQL view_count with api/v1 play counts when the feed is reachable.
+    """Replace GraphQL view stubs with per-item api/v1 play counts when reachable.
 
-    Decodo timeline nodes often expose a partial ``video_view_count`` that can
-    sit below ``like_count`` on Reels. Feed ``play_count`` / ``ig_play_count``
-    / ``fb_play_count`` are the trustworthy split metrics.
+    Each Decodo/GraphQL timeline node is matched to **its own** feed row by
+    shortcode or numeric pk — never zip a filtered ``play_count`` list onto
+    posts (that mis-attributes views across Image/Sidecar gaps). Image and
+    Sidecar always get ``engagement.views: null``.
     """
     if not posts or not user_id:
+        for post in posts or []:
+            decodo.strip_null_post_fields(post)
         return posts
     page = await instagram_native.fetch_user_feed_page(user_id, count=33)
     if page is None:
         for post in posts:
             decodo.strip_null_post_fields(post)
         return posts
-    by_code: dict[str, dict[str, Any]] = {}
+    by_key: dict[str, dict[str, Any]] = {}
     for raw in page[0]:
         code = safe_str(raw.get("code"))
+        pk = safe_str(raw.get("pk") or raw.get("pk_id") or raw.get("id"))
         if code:
-            by_code[code] = raw
+            by_key[code] = raw
+        if pk:
+            by_key[pk] = raw
     for post in posts:
-        code = safe_str(post.get("shortcode") or post.get("id"))
-        raw = by_code.get(code or "")
         eng = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
+        raw = None
+        for key in (
+            safe_str(post.get("shortcode")),
+            safe_str(post.get("mediaId")),
+            safe_str(post.get("id")),
+        ):
+            if key and key in by_key:
+                raw = by_key[key]
+                break
+        post_is_video = bool(
+            post.get("postType") == "Video"
+            or safe_str(post.get("productType")) in {"clips", "reel", "reels"}
+        )
         if raw:
             likes = decodo.hidden_count(raw.get("like_count"))
             if likes is not None:
@@ -1055,19 +1073,44 @@ async def _overlay_feed_engagement(
             comments = decodo.hidden_count(raw.get("comment_count"))
             if comments is not None:
                 eng["comments"] = comments
-            is_video = bool(
-                post.get("postType") == "Video"
-                or safe_str(post.get("productType")) in {"clips", "reel", "reels"}
-                or raw.get("media_type") == 2
-            )
+            media_type = safe_int(raw.get("media_type"))
+            is_video = media_type == 2 if media_type is not None else post_is_video
+            play_count, ig_play_count, fb_play_count = decodo.feed_play_metrics(raw)
             post["engagement"] = decodo.engagement_with_play_split(
                 eng,
-                play_count=safe_int(raw.get("play_count")),
-                ig_play_count=safe_int(raw.get("ig_play_count") or raw.get("view_count")),
-                fb_play_count=safe_int(raw.get("fb_play_count") or raw.get("fbPlayCount")),
+                play_count=play_count,
+                ig_play_count=ig_play_count,
+                fb_play_count=fb_play_count,
                 likes=likes if likes is not None else eng.get("likes"),
                 is_video=is_video,
             )
+            # Backfill video/meta fields GraphQL timeline often omits.
+            product = safe_str(raw.get("product_type")) or ("clips" if is_video else None)
+            if product and not post.get("productType"):
+                post["productType"] = product
+            cover = (raw.get("carousel_media") or [raw])[0]
+            duration = instagram_native._video_duration(raw, cover)
+            if duration is not None and post.get("durationSeconds") is None:
+                post["durationSeconds"] = duration
+            if raw.get("has_audio") is not None and post.get("hasAudio") is None:
+                post["hasAudio"] = raw.get("has_audio")
+            if post.get("isPaidPartnership") is None:
+                paid = raw.get("is_paid_partnership")
+                if paid is None and raw.get("sponsor_tags"):
+                    paid = True
+                if paid is not None:
+                    post["isPaidPartnership"] = bool(paid)
+            if not post.get("music"):
+                music = instagram_native._music_from_media(raw)
+                if music:
+                    post["music"] = music
+                    post["musicId"] = music.get("id")
+        else:
+            # No feed row — keep likes/comments; force null views on non-video.
+            if not post_is_video:
+                post["engagement"] = decodo.engagement_with_play_split(
+                    eng, likes=eng.get("likes"), is_video=False
+                )
         mentions = post.get("mentions")
         if isinstance(mentions, list):
             post["mentions"] = decodo.dedupe_preserve(mentions)
@@ -1077,13 +1120,14 @@ async def _overlay_feed_engagement(
 
 def _ig_channel_page(
     first_page: dict[str, Any] | None, limit: int
-) -> tuple[list[dict[str, Any]], str | None, str | None, int | None] | None:
-    """Unpack a Decodo first page into (posts, next_cursor, user_id, followers)."""
+) -> tuple[list[dict[str, Any]], str | None, str | None, int | None, dict[str, Any] | None] | None:
+    """Unpack a Decodo first page into (posts, next_cursor, user_id, followers, user)."""
     if not first_page:
         return None
     posts = first_page["items"]
     user_id = first_page.get("userId")
     followers = first_page.get("followers")
+    user = first_page.get("user") if isinstance(first_page.get("user"), dict) else None
     if followers is None and posts:
         followers = posts[0].get("author", {}).get("followers")
     next_cursor = None
@@ -1097,7 +1141,7 @@ def _ig_channel_page(
     elif first_page.get("hasMore") and posts and user_id and posts[-1].get("id"):
         # Fallback when mediaId wasn't mapped (legacy).
         next_cursor = f"{posts[-1]['id']}_{user_id}"
-    return posts, next_cursor, user_id, followers
+    return posts, next_cursor, user_id, followers, user
 
 
 @router.get("/channel-posts", summary="Latest posts from an Instagram profile")
@@ -1185,26 +1229,31 @@ async def instagram_channel_posts(
                 page = _ig_channel_page(await decodo.channel_posts(handle, limit), limit)
                 if page is None:
                     return None
-                posts, next_cursor, user_id, followers = page
+                posts, next_cursor, user_id, followers, channel_user = page
                 posts = await _overlay_feed_engagement(posts, user_id)
                 if len(posts) < limit and next_cursor and user_id:
                     extra = await _ig_feed_collect(user_id, next_cursor, limit - len(posts), followers=followers)
                     if extra is not None:
                         more_posts, next_cursor = extra
                         posts = posts + more_posts
-                return {
+                out: dict[str, Any] = {
                     "url": url,
                     "totalReturned": len(posts),
                     "posts": posts,
                     "nextCursor": next_cursor,
                     "hasMore": next_cursor is not None,
                 }
+                if channel_user:
+                    out["user"] = channel_user
+                if user_id:
+                    out["userId"] = user_id
+                return out
 
             return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 16},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 18},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1273,6 +1322,7 @@ async def instagram_channel_reels(
             next_cursor: str | None,
             *,
             user_id: str | None = None,
+            user: dict[str, Any] | None = None,
             degraded: bool = False,
             partial: bool = False,
         ) -> dict[str, Any]:
@@ -1286,6 +1336,8 @@ async def instagram_channel_reels(
             }
             if uid:
                 out["userId"] = uid
+            if user:
+                out["user"] = user
             if degraded:
                 out["degraded"] = True
             if partial:
@@ -1382,7 +1434,7 @@ async def instagram_channel_reels(
                 page = _ig_channel_page(await decodo.channel_reels(profile_handle, limit), limit)
                 if page is None:
                     return None
-                reels, next_cursor, uid, fol = page
+                reels, next_cursor, uid, fol, channel_user = page
                 # Prefer the native feed for the whole page: the GraphQL
                 # timeline omits duration/play counts for clips and buries
                 # recent Reels under legacy IGTV uploads. The Decodo items
@@ -1395,7 +1447,12 @@ async def instagram_channel_reels(
                         reels, next_cursor = native
                 if not reels:
                     return None
-                out = _payload(reels, next_cursor, user_id=uid or user_id)
+                out = _payload(
+                    reels,
+                    next_cursor,
+                    user_id=uid or user_id,
+                    user=channel_user,
+                )
                 if time.monotonic() - t0 >= budget_s:
                     out["partial"] = True
                 return out
@@ -1409,7 +1466,7 @@ async def instagram_channel_reels(
                 "userId": known_user_id or "",
                 "limit": limit,
                 "cursor": cursor or "",
-                "v": 19,
+                "v": 20,
             },
             runner=_run,
             ctx=ctx,
@@ -1919,7 +1976,15 @@ async def instagram_tagged_posts(
         return ApiResponse(data=data)
 
 
-@router.get("/hashtag-search", summary="Search Instagram posts by hashtag")
+@router.get(
+    "/hashtag-search",
+    summary="Instagram posts from a hashtag grid (not keyword search)",
+    description=(
+        "Returns posts from Instagram's hashtag Explore grid "
+        "(instagram_graphql_hashtag /tag page) — not keyword or username search. "
+        "Optional mediaType=reels filters to Reels only."
+    ),
+)
 async def instagram_hashtag_search(
     q: str = Query(..., min_length=2, description="Hashtag (without #)"),
     limit: int = Query(20, ge=1, le=200),
@@ -1931,31 +1996,42 @@ async def instagram_hashtag_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    # Native/Decodo only — flat fee (no Apify fallthrough).
+    # Native/Decodo only — flat fee (no Apify fallthrough). Real hashtag grid.
     reels_only = mediaType == "reels"
+    tag = q.lstrip("#").strip().lower()
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/hashtag-search",
         platform="instagram",
-        resource_url=None,
+        resource_url=f"https://www.instagram.com/explore/tags/{tag}/",
         base_credits=CREDIT_SEARCH,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             async def _decodo_run() -> dict[str, Any] | None:
-                results = await decodo.hashtag_medias(q, limit, reels_only=reels_only)
+                results = await decodo.hashtag_medias(tag, limit, reels_only=reels_only)
                 if results is None:
                     return None
                 # GraphQL nodes rarely carry play counts / owner stats — enrich.
                 results = await instagram_native.enrich_posts_from_author_feeds(results)
-                return {"query": q, "totalReturned": len(results), "results": results}
+                return {
+                    "query": q,
+                    "hashtag": tag,
+                    "totalReturned": len(results),
+                    "results": results,
+                }
 
             async def _headless_hydrate() -> dict[str, Any] | None:
                 results = await instagram_native.hashtag_posts_native(
-                    q, limit=limit, reels_only=reels_only
+                    tag, limit=limit, reels_only=reels_only
                 )
                 if not results:
                     return None
-                return {"query": q, "totalReturned": len(results), "results": results}
+                return {
+                    "query": q,
+                    "hashtag": tag,
+                    "totalReturned": len(results),
+                    "results": results,
+                }
 
             if decodo.enabled():
                 gql = await _decodo_run()
@@ -1973,7 +2049,7 @@ async def instagram_hashtag_search(
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": q, "limit": limit, "mediaType": mediaType, "v": 15},
+            params={"q": tag, "limit": limit, "mediaType": mediaType, "v": 16},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

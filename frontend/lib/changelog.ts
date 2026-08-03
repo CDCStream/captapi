@@ -50,6 +50,103 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
+    category: "fix",
+    title: "TikTok popular-creators: real engagementRate (not likes÷followers)",
+    description:
+      "engagementRate was lifetime likes ÷ followers, which ranks high-volume posters above high-engagement ones and contradicted our own docs. It is now (likes/videos)/followers × 100 (percent), with engagementRateBasis: \"avgLikesPerVideo/followers\". sort=engagement uses the corrected rate. Per-creator country no longer echoes the query market (misleading for non-US creators); use top-level country for the feed market and creator.region when TikTok exposes a profile locale. Additive: avgViews, id/secUid when present, and contact{emails,links} parsed from bio.",
+    items: [
+      "engagementRate = avg likes per video / followers × 100",
+      "engagementRateBasis documents the formula",
+      "Removed query-country echo on each creator (region when known)",
+      "contact{} from bio emails / PayPal / Cash App when present",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "TikTok posts always include engagement shares + empty hashtags",
+    description:
+      "strip_empty was dropping null engagement.shares and empty hashtags, so some music-posts rows looked like a different schema. Every finalized post now always has engagement{views,likes,comments,shares,saves} (missing → 0), hashtags[] / mentions[] (missing → []), and isAd / isPaidPartnership (missing → false). music-posts also echoes musicId from the request URL when the row omits it.",
+    items: [
+      "engagement.shares always present (0 when TikTok omits it)",
+      "hashtags / mentions always arrays",
+      "isAd / isPaidPartnership always boolean",
+      "music-posts musicId echoed from the sound URL",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "TikTok author{} is one shape across list endpoints",
+    description:
+      "music-posts omitted author.followers (and id/secUid) when MUSIC_AWEME left them blank, while top-search included followers — two schemas for the same author concept. All post lists now go through build_author(): username, displayName, url, profileImage, plus id / secUid / followers / verified always present (null when TikTok's surface omits them).",
+    items: [
+      "build_author() shared by music-posts / top-search / channel-posts / video-details",
+      "followers / verified / id / secUid keys kept even when null",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "TikTok durationSeconds is always float",
+    description:
+      "top-search could return whole-second durations as JSON integers (47) while music-posts returned floats (29.534), breaking typed clients that expect one type. durationSeconds is now always a float rounded to 3 decimals (47.0) on video-details, channel-posts, music-posts, top-search, hashtag search, and trending feed.",
+    items: [
+      "durationSeconds always float (3 dp) across TikTok post endpoints",
+      "Whole seconds serialize as 47.0, not integer 47",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "TikTok hashtags from text_extra + mentions[] (no emoji bleed)",
+    description:
+      "List endpoints were regex-slicing hashtags out of captions, so trailing emoji stuck to tags (okaralover💪💪❤️), case variants doubled (Latinus + latinus), and @mentions were missing. Hashtags now prefer TikTok's text_extra[].hashtag_name / cha_list (caption regex only when structured data is absent, with emoji-trail stripping). Mentions arrive as mentions[{userId,secUid,username,start,end}] — same shape as video-details. Instagram channel-posts also dedupes identical hashtag doubles.",
+    items: [
+      "Canonical hashtags from text_extra (emoji / case / dupe fixed)",
+      "mentions[] with userId + secUid on music-posts / channel-posts / search",
+      "Instagram hashtag list dedupe (NASAHubble ×2)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "TikTok music-posts: author.verified is null when unknown",
+    description:
+      "TikTok's music feed (MUSIC_AWEME) often omits verification fields. We were defaulting missing badges to false, which falsely marked verified creators (e.g. Khaby Lame) as unverified. author.verified is now true/false only when TikTok exposes a badge signal; otherwise null. For definitive verification, use Channel Details.",
+    items: [
+      "author.verified null when MUSIC_AWEME omits the badge",
+      "false only means confirmed unverified — never invented",
+      "Docs note: use Channel Details for definitive verification",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "YouTube list publishedAt is ISO-8601 (not \"4 days ago\")",
+    description:
+      "channel-videos (and the shared channel-tab / search / hashtag / playlist card path) was putting YouTube's relative labels into publishedAt, which breaks typed SDKs, date sort/filter, and upload monitors. publishedAt is now always ISO-8601 (approximate from the relative label when YouTube does not expose an exact timestamp); the original string is kept as publishedTimeText — same pattern as ScrapeCreators' publishedTime + publishedTimeText.",
+    items: [
+      "publishedAt ISO on channel-videos / shorts / streams / search / hashtag / playlist",
+      "publishedTimeText retains \"4 days ago\" style labels",
+      "Comments + community posts get the same split",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "Instagram channel-posts: IG/FB view split + per-item fields + user{}",
+    description:
+      "channel-posts now matches ScrapeCreators' documented play split and list shape more closely. engagement.views is total plays; viewsInstagram is Instagram-only (exclude Facebook cross-post); viewsFacebook is the FB share — accounts that cross-post can look ~20% inflated if you only read views. Each item maps from its own feed row (shortcode/pk — never zip play_counts across Image/Sidecar gaps). GraphQL video_view_count undercounts are dropped when likes > views. Feed overlay also backfills productType, durationSeconds, hasAudio, music{}, isPaidPartnership. Response includes top-level user{} (profile) and hasMore so one call covers posts + account.",
+    items: [
+      "viewsInstagram / viewsFacebook on videos (use viewsInstagram for IG-only)",
+      "Per-item overlay; Image/Sidecar views: null",
+      "productType, durationSeconds, hasAudio, music{}, isPaidPartnership",
+      "Top-level user{} + hasMore (no second profile call)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
     category: "improvement",
     title: "TikTok comments: authorId, authorSecUid, commentLanguage",
     description:

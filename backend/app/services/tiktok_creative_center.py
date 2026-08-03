@@ -14,7 +14,7 @@ from urllib.parse import parse_qs, urlencode, urlparse
 
 import structlog
 
-from app.utils.formatters import safe_float, safe_int, safe_str
+from app.utils.formatters import duration_seconds, safe_float, safe_int, safe_str
 
 log = structlog.get_logger(__name__)
 
@@ -110,7 +110,7 @@ def _video_block(row: dict[str, Any]) -> dict[str, Any]:
         "url": url,
         "urlHd": url_hd,
         "cover": cover,
-        "durationSeconds": safe_float(
+        "durationSeconds": duration_seconds(
             row.get("video_duration_seconds")
             or row.get("durationSeconds")
             or info.get("duration")

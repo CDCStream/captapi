@@ -223,6 +223,30 @@ def dedupe_preserve(items: Iterable[Any] | None) -> list[str]:
     return out
 
 
+def feed_play_metrics(media: dict[str, Any] | None) -> tuple[int | None, int | None, int | None]:
+    """Per-item play metrics from one api/v1 feed media dict.
+
+    Never builds a parallel list of play_counts to zip onto posts — callers
+    must pass the same ``media`` row they are mapping. Image/Sidecar rows
+    (media_type ≠ 2) return ``(None, None, None)``.
+    """
+    if not isinstance(media, dict):
+        return None, None, None
+    media_type = safe_int(media.get("media_type"))
+    if media_type is not None and media_type != 2:
+        return None, None, None
+    play_count = safe_int(media.get("play_count"))
+    ig = safe_int(media.get("ig_play_count"))
+    fb = safe_int(media.get("fb_play_count") or media.get("fbPlayCount"))
+    # On clips feed, ``view_count`` is IG-only when total ``play_count`` exists.
+    # Never use bare ``view_count`` alone — that is the GraphQL undercount trap.
+    if ig is None and play_count is not None:
+        vc = safe_int(media.get("view_count"))
+        if vc is not None and 0 <= vc <= play_count:
+            ig = vc
+    return play_count, ig, fb
+
+
 def split_play_counts(
     *,
     play_count: int | None = None,
@@ -240,13 +264,15 @@ def split_play_counts(
       - ``fb_play_count`` — Facebook cross-post views
 
     Public shape:
-      - ``views`` — total (prefer ``play_count``)
+      - ``views`` — total (prefer ``play_count``, else IG-only)
       - ``viewsInstagram`` — IG-only (use this for Instagram performance)
       - ``viewsFacebook`` — FB cross-post (derived as total−IG when missing)
       - ``plays`` — backward-compat secondary when IG ≠ total
 
-    GraphQL ``video_view_count`` undercounts many Reels and can sit *below*
-    ``like_count`` — dropped rather than swapped when impossible.
+    GraphQL ``video_view_count`` undercounts many Reels (e.g. 112k vs 485k
+    likes) — last resort only when it passes ``likes <= views``. Prefer null
+    over a lie. Image/Sidecar always return null views (key kept by
+    strip_null_post_fields).
     """
     if not is_video:
         return {
@@ -266,22 +292,18 @@ def split_play_counts(
         if derived > 0:
             fb = derived
 
-    # Prefer total play_count; fall back to IG-only, then GraphQL.
-    views = total if total is not None else (ig if ig is not None else gql)
+    # Prefer total play_count; fall back to IG-only. GraphQL/Apify
+    # ``video_view_count`` is last resort only when it passes likes sanity
+    # (NASA reel: 112k views vs 485k likes must become null, not views).
+    views = total if total is not None else ig
+    if views is None and gql is not None and (likes is None or likes <= gql):
+        views = gql
     if likes is not None and views is not None and likes > views:
         views = None
 
     plays = None
     if ig is not None and views is not None and ig != views:
-        # Secondary metric: Instagram-only when it differs from total views.
         plays = ig
-    elif (
-        gql is not None
-        and total is not None
-        and gql != total
-        and views == total
-    ):
-        plays = gql
 
     return {
         "views": views,
@@ -302,14 +324,15 @@ def pick_video_views(
 ) -> tuple[int | None, int | None]:
     """Legacy ``(views, plays)`` helper — prefer :func:`split_play_counts`.
 
-    ``view_count`` is treated as IG-only when ``ig_play_count`` is omitted
-    (historical call sites passed ``ig_play_count`` as ``view_count``).
+    ``view_count`` is the GraphQL undercount field and is **not** used for
+    views (kept as a no-op parameter so old call sites keep compiling).
     """
+    _ = view_count
     split = split_play_counts(
         play_count=play_count,
-        ig_play_count=ig_play_count if ig_play_count is not None else view_count,
+        ig_play_count=ig_play_count,
         fb_play_count=fb_play_count,
-        video_view_count=view_count if ig_play_count is not None else None,
+        video_view_count=None,
         likes=likes,
         is_video=is_video,
     )
@@ -434,7 +457,8 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
     is_video = bool(node.get("is_video")) or typename == "GraphVideo"
     is_sidecar = typename == "GraphSidecar"
     caption = _caption(node) or ""
-    video_view_count = safe_int(node.get("video_view_count") or node.get("views"))
+    # GraphQL ``video_view_count`` undercounts Reels — never map it into views.
+    # Real plays come from api/v1 overlay (``play_count`` / ``ig_play_count``).
     play_count = safe_int(node.get("video_play_count") or node.get("play_count"))
     ig_play_count = safe_int(node.get("ig_play_count"))
     fb_play_count = safe_int(node.get("fb_play_count") or node.get("fbPlayCount"))
@@ -486,7 +510,6 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
             play_count=play_count,
             ig_play_count=ig_play_count,
             fb_play_count=fb_play_count,
-            video_view_count=video_view_count,
             likes=likes,
             is_video=is_video,
         ),
@@ -581,8 +604,26 @@ async def basic_profile(handle: str) -> dict[str, Any] | None:
     }
 
 
+def _channel_user_summary(user: dict[str, Any]) -> dict[str, Any]:
+    """Lean profile block returned with channel-posts/reels (SC ``user{}`` parity)."""
+    username = safe_str(user.get("username"))
+    out: dict[str, Any] = {
+        "id": safe_str(user.get("id") or user.get("pk")),
+        "username": username,
+        "displayName": safe_str(user.get("full_name")),
+        "url": f"https://instagram.com/{username}" if username else None,
+        "verified": user.get("is_verified"),
+        "private": user.get("is_private"),
+        "profileImage": _image_url(user),
+        "followers": _count(user.get("edge_followed_by")) or safe_int(user.get("follower_count")),
+        "postCount": _count(user.get("edge_owner_to_timeline_media"))
+        or safe_int(user.get("media_count")),
+    }
+    return {k: v for k, v in out.items() if v is not None}
+
+
 async def channel_posts(handle: str, limit: int) -> dict[str, Any] | None:
-    """First timeline page. Returns {"items", "userId", "hasMore", "followers"}
+    """First timeline page. Returns {"items", "userId", "hasMore", "followers", "user"}
     so the router can build a feed cursor (``<media pk>_<user id>``) and
     continue through Instagram's api/v1 feed endpoint."""
     user = await _profile(handle)
@@ -599,6 +640,7 @@ async def channel_posts(handle: str, limit: int) -> dict[str, Any] | None:
         "userId": safe_str(user.get("id")),
         "hasMore": has_more,
         "followers": _count(user.get("edge_followed_by")),
+        "user": _channel_user_summary(user),
     }
 
 
@@ -625,6 +667,7 @@ async def channel_reels(handle: str, limit: int) -> dict[str, Any] | None:
         "userId": safe_str(user.get("id")),
         "hasMore": has_more,
         "followers": _count(user.get("edge_followed_by")),
+        "user": _channel_user_summary(user),
     }
 
 

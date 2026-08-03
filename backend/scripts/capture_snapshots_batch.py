@@ -40,6 +40,48 @@ def _truncate(value: Any, depth: int = 0) -> Any:
     return value
 
 
+def _fold_other(items: list[Any], *, sample_size: int) -> tuple[list[Any], dict[str, Any] | None]:
+    """Keep top MAX_LIST buckets; fold the rest into other so % still sum."""
+    if not isinstance(items, list) or len(items) <= MAX_LIST:
+        return items, None
+    head = items[:MAX_LIST]
+    rest = sum(int((x or {}).get("count") or 0) for x in items[MAX_LIST:] if isinstance(x, dict))
+    if rest <= 0 or sample_size <= 0:
+        return head, None
+    pct = round(rest / sample_size * 100, 2)
+    return head, {"count": rest, "percentage": pct, "percentageText": f"{pct:.2f}%"}
+
+
+def _truncate_for_docs(slug: str, data: dict[str, Any]) -> dict[str, Any]:
+    """Truncate large arrays for docs without making percentage tallies look broken.
+
+    Generic list truncation of audienceLocations left sampleSize=269 but only
+    5 countries (~52%) — docs looked corrupt. Fold the remainder into ``other``.
+    """
+    if slug == "tiktok-audience-demographics":
+        out = dict(data)
+        locs = out.get("audienceLocations") if isinstance(out.get("audienceLocations"), list) else []
+        sample = int(out.get("sampleSize") or sum(int(x.get("count") or 0) for x in locs if isinstance(x, dict)))
+        head, other = _fold_other(locs, sample_size=sample)
+        out["audienceLocations"] = [_truncate(x, 1) for x in head]
+        if other is not None:
+            out["other"] = other
+        langs = out.get("audienceLanguages") if isinstance(out.get("audienceLanguages"), list) else []
+        lang_sample = int(
+            out.get("languageSampleSize")
+            or sum(int(x.get("count") or 0) for x in langs if isinstance(x, dict))
+        )
+        lhead, _ = _fold_other(langs, sample_size=lang_sample)
+        out["audienceLanguages"] = [_truncate(x, 1) for x in lhead]
+        # Keep scalar fields; don't deep-truncate nested cover blobs here.
+        for key in list(out.keys()):
+            if key in ("audienceLocations", "audienceLanguages", "other"):
+                continue
+            out[key] = _truncate(out[key], 1)
+        return out
+    return _truncate(data)
+
+
 async def call(client: httpx.AsyncClient, slug: str, path: str, params: dict) -> tuple[str, dict]:
     started = time.perf_counter()
     try:
@@ -715,7 +757,7 @@ async def main() -> None:
             "ok": True,
             "status": res["status"],
             "credits": (body.get("meta") or {}).get("creditsUsed"),
-            "data": _truncate(body["data"]),
+            "data": _truncate_for_docs(slug, body["data"]),
         }
         updated.append(slug)
     snap_path.write_text(json.dumps(snap, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

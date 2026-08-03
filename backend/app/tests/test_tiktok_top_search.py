@@ -1,10 +1,24 @@
 from __future__ import annotations
 
-from app.services.tiktok_native import _collect_hashtags, _map_aweme_post
+from app.services.tiktok_native import _collect_hashtags, _collect_mentions, _map_aweme_post
 from app.routers.tiktok import _tt_hashtags, _tt_finalize_post
 
 
-def test_hashtags_casefold_structured_plus_caption() -> None:
+def test_hashtags_prefer_text_extra_over_caption_emoji() -> None:
+    tags = _collect_hashtags(
+        {
+            "text_extra": [
+                {"hashtag_name": "okaralover"},
+                {"hashtag_name": "alichaiwala"},
+                {"hashtag_name": "latinus"},
+            ]
+        },
+        "Video #okaralover\U0001F4AA\U0001F4AA\u2764\ufe0f #alichaiwala\u2764\ufe0f\U0001F4AB #Latinus",
+    )
+    assert tags == ["okaralover", "alichaiwala", "latinus"]
+
+
+def test_hashtags_casefold_structured_only() -> None:
     tags = _collect_hashtags(
         {
             "text_extra": [
@@ -17,17 +31,49 @@ def test_hashtags_casefold_structured_plus_caption() -> None:
     assert tags == ["latinus", "informacionparati"]
 
 
+def test_hashtags_regex_fallback_strips_emoji() -> None:
+    tags = _collect_hashtags({}, "#okaralover\U0001F4AA\U0001F4AA\u2764\ufe0f #comedy")
+    assert tags == ["okaralover", "comedy"]
+
+
 def test_tt_hashtags_casefold() -> None:
     tags = _tt_hashtags(
         {"hashtags": ["Latinus", "latinus"]},
         "#Latinus #NASA",
     )
-    assert tags == ["latinus", "nasa"]
+    assert tags == ["latinus"]
 
 
-def test_finalize_keeps_empty_hashtags() -> None:
-    out = _tt_finalize_post({"id": "1", "caption": "hi", "hashtags": []})
+def test_collect_mentions_from_text_extra() -> None:
+    mentions = _collect_mentions(
+        {
+            "text_extra": [
+                {"hashtag_name": "comedy"},
+                {
+                    "user_id": "123",
+                    "sec_uid": "MS4wLjAB",
+                    "user_unique_id": "kanwal",
+                    "start": 10,
+                    "end": 20,
+                },
+                {
+                    "userId": "123",
+                    "secUid": "MS4wLjAB",
+                    "userUniqueId": "kanwal",
+                },
+            ]
+        }
+    )
+    assert len(mentions) == 1
+    assert mentions[0]["userId"] == "123"
+    assert mentions[0]["secUid"] == "MS4wLjAB"
+    assert mentions[0]["username"] == "kanwal"
+
+
+def test_finalize_keeps_empty_hashtags_and_mentions() -> None:
+    out = _tt_finalize_post({"id": "1", "caption": "hi", "hashtags": [], "mentions": []})
     assert out["hashtags"] == []
+    assert out["mentions"] == []
 
 
 def test_map_aweme_photo_carousel() -> None:
@@ -39,6 +85,10 @@ def test_map_aweme_photo_carousel() -> None:
             "create_time": 1_720_000_000,
             "author": {"unique_id": "nasa", "nickname": "NASA", "uid": "1", "sec_uid": "MS4"},
             "statistics": {"play_count": 100, "digg_count": 10},
+            "text_extra": [
+                {"hashtag_name": "nasa"},
+                {"user_id": "9", "sec_uid": "SEC", "user_unique_id": "esa"},
+            ],
             "image_post_info": {
                 "images": [
                     {"display_image": {"url_list": ["https://cdn.example/a.jpg"]}},
@@ -58,6 +108,7 @@ def test_map_aweme_photo_carousel() -> None:
     ]
     assert "/photo/" in row["url"]
     assert row["hashtags"] == ["nasa"]
+    assert row["mentions"][0]["username"] == "esa"
     assert row["isAd"] is False
     assert row["musicId"] == "123"
 
@@ -76,4 +127,5 @@ def test_map_aweme_video_has_content_type() -> None:
     assert row["mediaType"] == "video"
     assert row["contentType"] == "video"
     assert row["hashtags"] == []
+    assert row["mentions"] == []
     assert "images" not in row

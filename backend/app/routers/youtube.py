@@ -23,6 +23,7 @@ from app.services.cached_runner import cached_or_run
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.openai_client import summarize_transcript
 from app.services.youtube_native import (
+    coerce_published_fields,
     published_fields,
     build_youtube_video_details,
     channel_details_native,
@@ -352,6 +353,9 @@ def _reply_payload(r: dict) -> dict:
     author_name = safe_str(r.get("authorName") or r.get("author"))
     if isinstance(author, dict):
         author_name = safe_str(author.get("displayName") or author.get("name")) or author_name
+    published_iso, published_text = published_fields(
+        r.get("publishedTimeText") or r.get("publishedAt") or r.get("publishedTime")
+    )
     return {
         "id": safe_str(r.get("cid") or r.get("commentId") or r.get("id")),
         "author": author_name,
@@ -363,8 +367,9 @@ def _reply_payload(r: dict) -> dict:
         "text": (r.get("comment") or r.get("text") or r.get("content") or "").strip(),
         "likeCount": safe_int(r.get("voteCount") or r.get("votes") or r.get("likeCount")),
         "hasCreatorHeart": bool(r.get("hasCreatorHeart")),
-        "publishedTimeText": safe_str(r.get("publishedTimeText") or r.get("publishedAt")),
-        "publishedTime": safe_str(r.get("publishedTime")),
+        "publishedTimeText": published_text
+        or safe_str(r.get("publishedTimeText") or r.get("publishedAt")),
+        "publishedTime": published_iso or safe_str(r.get("publishedTime")),
         "authorChannelId": safe_str(r.get("authorChannelId") or r.get("channelId")),
     }
 
@@ -431,38 +436,40 @@ def _video_card(v: dict) -> dict:
         or v.get("publishedTimeText")
         or v.get("uploadDate")
     )
-    return strip_empty(
-        {
-            "id": video_id,
-            "url": url,
-            "title": safe_str(v.get("title") or v.get("videoTitle") or v.get("video_title") or v.get("name")) or "",
-            "publishedAt": published_at,
-            "publishedTimeText": published_text,
-            "viewCount": safe_int(
-                v.get("viewCount")
-                or v.get("views")
-                or v.get("view_count")
-                or v.get("view_count_text")
-                or v.get("numberOfViews")
-                or stats.get("viewCount")
-            ),
-            "durationSeconds": _duration_seconds(
-                v.get("duration")
-                or v.get("durationSeconds")
-                or v.get("duration_seconds")
-                or v.get("lengthSeconds")
-                or v.get("lengthText")
-                or v.get("durationText")
-                or v.get("timeText")
-                or content.get("duration")
-            ),
-            "thumbnailUrl": safe_str(
-                v.get("thumbnailUrl") or v.get("thumbnail") or v.get("thumbnail_url") or v.get("thumbnailUrlHigh")
-            ),
-            "channelName": safe_str(
-                v.get("channelName") or v.get("channel") or v.get("channelTitle") or v.get("channel_name")
-            ),
-        }
+    return coerce_published_fields(
+        strip_empty(
+            {
+                "id": video_id,
+                "url": url,
+                "title": safe_str(v.get("title") or v.get("videoTitle") or v.get("video_title") or v.get("name")) or "",
+                "publishedAt": published_at,
+                "publishedTimeText": published_text,
+                "viewCount": safe_int(
+                    v.get("viewCount")
+                    or v.get("views")
+                    or v.get("view_count")
+                    or v.get("view_count_text")
+                    or v.get("numberOfViews")
+                    or stats.get("viewCount")
+                ),
+                "durationSeconds": _duration_seconds(
+                    v.get("duration")
+                    or v.get("durationSeconds")
+                    or v.get("duration_seconds")
+                    or v.get("lengthSeconds")
+                    or v.get("lengthText")
+                    or v.get("durationText")
+                    or v.get("timeText")
+                    or content.get("duration")
+                ),
+                "thumbnailUrl": safe_str(
+                    v.get("thumbnailUrl") or v.get("thumbnail") or v.get("thumbnail_url") or v.get("thumbnailUrlHigh")
+                ),
+                "channelName": safe_str(
+                    v.get("channelName") or v.get("channel") or v.get("channelTitle") or v.get("channel_name")
+                ),
+            }
+        )
     )
 
 
@@ -512,12 +519,16 @@ def _community_post(p: dict) -> dict:
         url = f"https://www.youtube.com/post/{post_id}"
     media = p.get("images") or p.get("media") or p.get("media_urls") or []
     images = [safe_str(i) for i in media if isinstance(i, str) and i]
+    published_iso, published_text = published_fields(
+        p.get("publishedAt") or p.get("date") or p.get("published_time_text")
+    )
     return {
         "platform": "youtube",
         "id": post_id,
         "url": url,
         "text": safe_str(p.get("text") or p.get("content") or p.get("message") or p.get("content_text")),
-        "publishedAt": safe_str(p.get("publishedAt") or p.get("date") or p.get("published_time_text")),
+        "publishedAt": published_iso,
+        "publishedTimeText": published_text,
         "channelName": safe_str(p.get("channelName") or p.get("channel") or p.get("author_name")),
         "channelUrl": safe_str(p.get("channelUrl") or p.get("author_url")),
         "likes": safe_int(p.get("likes") or p.get("likeCount")) or safe_str(p.get("likes")),
@@ -782,9 +793,23 @@ async def youtube_transcript(
                 public_source = "fallback"
             else:
                 public_source = None
+            from app.utils.formatters import language_name_from_code
+
             available = item.get("availableLanguages")
             if not isinstance(available, list):
                 available = []
+            # Backfill languageName when YouTube omitted the track label
+            # (ANDROID player often sends languageCode without name.simpleText).
+            fixed_available: list[dict[str, Any]] = []
+            for row in available:
+                if not isinstance(row, dict):
+                    continue
+                row = dict(row)
+                if not row.get("languageName"):
+                    row["languageName"] = language_name_from_code(
+                        safe_str(row.get("languageCode"))
+                    )
+                fixed_available.append(row)
             return {
                 "url": norm_url,
                 "videoId": vid,
@@ -797,12 +822,12 @@ async def youtube_transcript(
                 "source": public_source,
                 "isAutoGenerated": item.get("isAutoGenerated"),
                 "isTranslated": item.get("isTranslated"),
-                "availableLanguages": available,
+                "availableLanguages": fixed_available,
             }
 
         data = await cached_or_run(
             endpoint="youtube.transcript",
-            params={"url": norm_url, "language": language or "", "v": 6},
+            params={"url": norm_url, "language": language or "", "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1274,7 +1299,7 @@ async def youtube_channel_videos(
 
         data = await cached_or_run(
             endpoint="youtube.channel-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 7},
+            params={"url": url, "limit": limit, "fast": fast, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1589,7 +1614,7 @@ async def youtube_search(
                 "uploadDate": upload_date or "",
                 "duration": duration or "",
                 "region": (region or "").upper(),
-                "v": 4,
+                "v": 5,
             },
             runner=_run,
             ctx=ctx,
@@ -1660,7 +1685,7 @@ async def youtube_trending_shorts(
 
         data = await cached_or_run(
             endpoint="youtube.trending-shorts",
-            params={"q": q, "limit": limit, "v": 6},
+            params={"q": q, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
             # Trending actor runs take minutes; serve the last list instantly
@@ -1709,7 +1734,7 @@ async def youtube_channel_shorts(
 
         data = await cached_or_run(
             endpoint="youtube.channel-shorts",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"url": url, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1755,7 +1780,7 @@ async def youtube_channel_streams(
 
         data = await cached_or_run(
             endpoint="youtube.channel-streams",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"url": url, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1764,7 +1789,56 @@ async def youtube_channel_streams(
         return ApiResponse(data=data)
 
 
-@router.get("/hashtag-search", summary="Search YouTube videos by hashtag")
+def _yt_hashtag_result_card(card: dict[str, Any]) -> dict[str, Any]:
+    """Normalize a hashtag-page card — always include type (video|short|live) + ids."""
+    url = safe_str(card.get("url")) or ""
+    rtype = safe_str(card.get("type"))
+    if not rtype:
+        if "/shorts/" in url:
+            rtype = "short"
+        elif card.get("durationSeconds") is not None and int(card["durationSeconds"] or 0) <= 60 and "/shorts/" in url:
+            rtype = "short"
+        else:
+            rtype = "video"
+    channel = card.get("channel") if isinstance(card.get("channel"), dict) else {}
+    channel_id = safe_str(card.get("channelId") or channel.get("id"))
+    channel_name = safe_str(card.get("channelName") or channel.get("title"))
+    video_id = safe_str(card.get("id"))
+    if rtype == "short" and video_id and "/shorts/" not in url:
+        url = f"https://www.youtube.com/shorts/{video_id}"
+    elif rtype != "short" and video_id and not url:
+        url = f"https://www.youtube.com/watch?v={video_id}"
+    out = {
+        "type": rtype,
+        "id": video_id,
+        "url": url,
+        "title": safe_str(card.get("title")) or "",
+        "publishedAt": card.get("publishedAt"),
+        "publishedTimeText": card.get("publishedTimeText"),
+        "viewCount": safe_int(card.get("viewCount")),
+        "durationSeconds": card.get("durationSeconds"),
+        "thumbnailUrl": safe_str(card.get("thumbnailUrl")),
+        "channelName": channel_name,
+        "channelId": channel_id,
+        "channel": channel or ({"id": channel_id, "title": channel_name} if channel_id or channel_name else None),
+        "badges": card.get("badges") if isinstance(card.get("badges"), list) else [],
+    }
+    if card.get("viewCountApproximate"):
+        out["viewCountApproximate"] = True
+    return coerce_published_fields(strip_empty(out))
+
+
+@router.get(
+    "/hashtag-search",
+    summary="YouTube videos from a hashtag page (/hashtag/{name})",
+    description=(
+        "Returns videos listed on youtube.com/hashtag/{name} — not a keyword "
+        "search. Titles often omit the #tag (hashtag may live only in the "
+        "description); membership is the hashtag page itself. Each result "
+        "includes type (video|short|live), id, and channelId when YouTube "
+        "exposes them."
+    ),
+)
 async def youtube_hashtag_search(
     q: str = Query(..., min_length=2, description="Hashtag (with or without #)"),
     limit: int = Query(20, ge=1, le=200),
@@ -1773,21 +1847,28 @@ async def youtube_hashtag_search(
 ):
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
+    tag = q.lstrip("#").strip()
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/hashtag-search",
         platform="youtube",
-        resource_url=None,
+        resource_url=f"https://www.youtube.com/hashtag/{tag}",
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            tag = q.lstrip("#")
             native_results = await hashtag_native(tag, limit)
             if native_results:
                 ctx["source"] = "direct"
-                return {"query": q, "totalReturned": len(native_results), "results": native_results}
+                results = [_yt_hashtag_result_card(v) for v in native_results]
+                return {
+                    "query": q,
+                    "hashtag": tag,
+                    "totalReturned": len(results),
+                    "results": results,
+                }
 
             apify = get_apify()
+            # Must open the hashtag page URL — never a search?q= keyword URL.
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_SEARCH,
                 {
@@ -1796,13 +1877,30 @@ async def youtube_hashtag_search(
                 },
                 max_items=limit,
             )
-            results = [_video_card(v) for v in items[:limit]]
+            results = []
+            for v in items[:limit]:
+                card = _video_card(v)
+                # Actors often omit type; recover from URL when possible.
+                if not card.get("type"):
+                    u = safe_str(card.get("url")) or ""
+                    card["type"] = "short" if "/shorts/" in u else "video"
+                if not card.get("channelId"):
+                    ch = v.get("channel") if isinstance(v.get("channel"), dict) else {}
+                    card["channelId"] = safe_str(
+                        v.get("channelId") or v.get("channel_id") or ch.get("id")
+                    )
+                results.append(_yt_hashtag_result_card(card))
             ctx["source"] = "apify"
-            return {"query": q, "totalReturned": len(results), "results": results}
+            return {
+                "query": q,
+                "hashtag": tag,
+                "totalReturned": len(results),
+                "results": results,
+            }
 
         data = await cached_or_run(
             endpoint="youtube.hashtag-search",
-            params={"q": q, "limit": limit, "v": 3},
+            params={"q": tag, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2215,12 +2313,14 @@ async def _fetch_community_post_page(url: str) -> dict[str, Any]:
         if thumbs:
             images.append(safe_str(thumbs[-1].get("url")))
     comments = await _community_post_comment_count(data)
+    published_iso, published_text = published_fields(_runs_text(post.get("publishedTimeText")))
     return {
         "platform": "youtube",
         "id": post_id,
         "url": f"https://www.youtube.com/post/{post_id}" if post_id else url,
         "text": safe_str(_runs_text(post.get("contentText"))),
-        "publishedAt": safe_str(_runs_text(post.get("publishedTimeText"))),
+        "publishedAt": published_iso,
+        "publishedTimeText": published_text,
         "channelName": safe_str(_runs_text(author)),
         "channelUrl": f"https://www.youtube.com{author_browse}" if author_browse else None,
         "likes": safe_str(_runs_text(post.get("voteCount"))),
