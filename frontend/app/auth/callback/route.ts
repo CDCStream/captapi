@@ -2,55 +2,24 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getServiceClient } from "@/lib/supabase/admin";
 import { ensureCreditBalance } from "@/lib/supabase/ensure-account";
+import { isDisposableEmail } from "@/lib/disposable-email";
 
 const INITIAL_CREDITS = 100;
 const ANON_TOOL_COOKIE = "captapi_tool_free";
 const NO_WELCOME_COOKIE = "captapi_no_welcome";
-const ANON_DAILY_LIMIT = 3;
 
-const DISPOSABLE_DOMAINS = new Set([
-  "web-library.net",
-  "mailinator.com",
-  "guerrillamail.com",
-  "tempmail.com",
-  "throwaway.email",
-  "temp-mail.org",
-  "10minutemail.com",
-  "trashmail.com",
-  "yopmail.com",
-  "sharklasers.com",
-  "guerrillamailblock.com",
-  "grr.la",
-  "dispostable.com",
-  "mailnesia.com",
-  "maildrop.cc",
-  "fakeinbox.com",
-  "mailcatch.com",
-  "tempail.com",
-  "tempr.email",
-  "discard.email",
-  "tmpmail.net",
-  "tmpmail.org",
-  "emailondeck.com",
-  "mohmal.com",
-  "getnada.com",
-  "burnermail.io",
-  "mailsac.com",
-  "inboxkitten.com",
-  "33mail.com",
-  "mytemp.email",
-  "spam4.me",
-  "tmail.ws",
-  "mt2015.com",
-  "jnxjn.com",
-  "mailforspam.com",
-  "mvrht.net",
-]);
-
-function isDisposableEmail(email: string): boolean {
-  const domain = email.split("@")[1]?.toLowerCase();
-  if (!domain) return false;
-  return DISPOSABLE_DOMAINS.has(domain);
+async function rejectDisposableSignup(userId: string, origin: string) {
+  const admin = getServiceClient();
+  if (admin) {
+    await admin.auth.admin.deleteUser(userId);
+  }
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  return NextResponse.redirect(
+    `${origin}/signup?error=${encodeURIComponent(
+      "Disposable email addresses are not allowed. Please use a real email.",
+    )}`,
+  );
 }
 
 function parseCookie(cookieHeader: string | null, name: string): string | null {
@@ -59,19 +28,23 @@ function parseCookie(cookieHeader: string | null, name: string): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
-/** Free-tool converters: exhausted daily tries or came from /signup?from=tools. */
+/** Free-tool converters: used a free tool, or came from /signup?from=tools. */
 function shouldSkipWelcome(
   request: Request,
   nextPath: string,
   fromParam: string | null,
+  userMeta?: Record<string, unknown> | null,
 ): boolean {
   if (fromParam === "tools") return true;
+  // Durable flag set on password signup from free tools (survives lost query params).
+  if (userMeta?.from_tools === true || userMeta?.from_tools === "true") return true;
   // Signup from tools sets next=/dashboard/billing
   if (nextPath.startsWith("/dashboard/billing")) return true;
   const cookieHeader = request.headers.get("cookie");
   if (parseCookie(cookieHeader, NO_WELCOME_COOKIE) === "1") return true;
   const tries = parseInt(parseCookie(cookieHeader, ANON_TOOL_COOKIE) || "0", 10);
-  if (tries >= ANON_DAILY_LIMIT) return true;
+  // Any prior free-tool try marks a converter (cookie may outlive the limit flag).
+  if (tries >= 1) return true;
   return false;
 }
 
@@ -173,7 +146,17 @@ export async function GET(request: Request) {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      const skipWelcome = shouldSkipWelcome(request, next, fromParam);
+
+      if (user?.email && isDisposableEmail(user.email)) {
+        return rejectDisposableSignup(user.id, origin);
+      }
+
+      const skipWelcome = shouldSkipWelcome(
+        request,
+        next,
+        fromParam,
+        (user?.user_metadata as Record<string, unknown> | null) ?? null,
+      );
 
       if (user?.id) {
         // Recreate credit_balances if Auth user survived a public-schema wipe.

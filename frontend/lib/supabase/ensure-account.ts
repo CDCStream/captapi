@@ -19,10 +19,11 @@ export async function ensureCreditBalance(userId: string): Promise<boolean> {
     .maybeSingle();
   if (data?.user_id) return true;
 
+  // Match signup trigger (0008): 0 until email verify grants welcome credits.
   const { error } = await sb.from("credit_balances").upsert(
     {
       user_id: userId,
-      subscription_credits: 100,
+      subscription_credits: 0,
       topup_credits: 0,
       plan: "free",
     },

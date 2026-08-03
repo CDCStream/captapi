@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, MailCheck } from "lucide-react";
 import { GoogleButton } from "@/components/auth/google-button";
@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
 import { adsSignupConversion } from "@/lib/gtag";
+import { isDisposableEmail } from "@/lib/disposable-email";
 
 function SignupForm() {
   const searchParams = useSearchParams();
@@ -28,11 +29,10 @@ function SignupForm() {
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
 
-  function isDisposableEmail(addr: string) {
-    const blocked = ["web-library.net","mailinator.com","guerrillamail.com","tempmail.com","throwaway.email","temp-mail.org","10minutemail.com","trashmail.com","yopmail.com","sharklasers.com","guerrillamailblock.com","grr.la","dispostable.com","mailnesia.com","maildrop.cc","fakeinbox.com","mailcatch.com","tempail.com","tempr.email","discard.email","tmpmail.net","tmpmail.org","emailondeck.com","mohmal.com","getnada.com","burnermail.io","mailsac.com","inboxkitten.com","mytemp.email","spam4.me","tmail.ws"];
-    const domain = addr.split("@")[1]?.toLowerCase();
-    return domain ? blocked.includes(domain) : false;
-  }
+  useEffect(() => {
+    const err = searchParams.get("error");
+    if (err) toast.error(err);
+  }, [searchParams]);
 
   function callbackUrl() {
     const params = new URLSearchParams({ next: afterAuth });
