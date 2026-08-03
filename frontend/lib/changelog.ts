@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "TikTok Top Search: photo carousels, hashtag dedupe, cursor",
+    description:
+      "Top Search claimed mixed results but mapped only video-shaped rows with no contentType — photo carousels were indistinguishable. Mapper now sets mediaType/contentType (video|photo|multi_photo) and images[] for carousels. Hashtags no longer double-count Latinus+latinus (casefold dedupe, always hashtags:[]). Cursor pagination + within-page id dedupe; docs note TikTok can still repeat across pages.",
+    items: [
+      "contentType + images[] for photo carousels",
+      "hashtags: lowercase-deduped, always an array",
+      "cursor / nextCursor / hasMore on top-search",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "YouTube Shorts endpoints reject long-form videos",
     description:
       "Shorts Stats / Transcript / Summarizer / Comments were aliases of the main video endpoints with no Short check — the docs example was a 49-minute MrBeast watch URL. All four now verify Shorts (≤3 minutes / shorts-eligibility) and return HTTP 422 for long-form. Shorts Stats stamps isShort:true and a canonical youtube.com/shorts/{id} URL. Same schema as Video Details, honestly scoped.",

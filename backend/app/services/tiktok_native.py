@@ -163,15 +163,11 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
     username = safe_str(author.get("uniqueId"))
     fetched_at = utc_now_iso()
 
-    hashtags: list[str] = []
+    hashtags = _collect_hashtags(item, safe_str(item.get("desc")))
     mentions: list[dict[str, Any]] = []
     for te in item.get("textExtra") or []:
         if not isinstance(te, dict):
             continue
-        name = safe_str(te.get("hashtagName"))
-        if name:
-            hashtags.append(name)
-        mention_user = safe_str(te.get("userUniqueId") or te.get("userId"))
         mention_sec = safe_str(te.get("secUid"))
         if te.get("userId") or te.get("userUniqueId") or mention_sec:
             mentions.append(
@@ -183,15 +179,11 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
                     "end": safe_int(te.get("end")),
                 }
             )
-    if not hashtags:
-        hashtags = [
-            safe_str(c.get("title")) for c in item.get("challenges") or [] if safe_str(c.get("title"))
-        ]
 
-    aweme_type = safe_int(item.get("awemeType"))
-    image_post = item.get("imagePost")
-    shoot_tab = (safe_str(item.get("shootTabName")) or "").lower()
-    if image_post or shoot_tab == "photo" or aweme_type in (150, 51):
+    aweme_type = safe_int(item.get("awemeType") or item.get("aweme_type"))
+    image_post = item.get("imagePost") or item.get("image_post") or item.get("image_post_info")
+    shoot_tab = (safe_str(item.get("shootTabName") or item.get("shoot_tab_name")) or "").lower()
+    if image_post or shoot_tab == "photo" or aweme_type in (150, 51, 68):
         media_type = "photo"
     else:
         media_type = "video"
@@ -1060,7 +1052,13 @@ _HASHTAG_RE = re.compile(r"#([^\s#]+)")
 
 
 def _collect_hashtags(item: dict[str, Any], caption: str | None) -> list[str]:
-    """Deduped hashtags from structured fields + caption, skipping empties."""
+    """Deduped hashtags from structured fields + caption, skipping empties.
+
+    Case-insensitive: TikTok's ``text_extra`` often has lowercase names while
+    the caption keeps the original casing — without casefolding we return both
+    (``latinus`` + ``Latinus``) and inflate counts by ~2×.
+    Stored form is lowercase for stable counting.
+    """
     seen: set[str] = set()
     out: list[str] = []
 
@@ -1069,10 +1067,13 @@ def _collect_hashtags(item: dict[str, Any], caption: str | None) -> list[str]:
         if not name:
             return
         name = name.lstrip("#").strip()
-        if not name or name in seen:
+        if not name:
             return
-        seen.add(name)
-        out.append(name)
+        key = name.casefold()
+        if key in seen:
+            return
+        seen.add(key)
+        out.append(key)
 
     for te in item.get("text_extra") or item.get("textExtra") or []:
         if isinstance(te, dict):
@@ -1086,8 +1087,44 @@ def _collect_hashtags(item: dict[str, Any], caption: str | None) -> list[str]:
     return out
 
 
+def _extract_photo_images(image_post: Any) -> list[str]:
+    """URLs from ``image_post`` / ``image_post_info`` carousel payloads."""
+    if not isinstance(image_post, dict):
+        return []
+    images = image_post.get("images") or image_post.get("imageList") or []
+    if not isinstance(images, list):
+        return []
+    out: list[str] = []
+    for img in images:
+        if isinstance(img, str):
+            url = safe_str(img)
+        elif isinstance(img, dict):
+            url = (
+                _url_list_first(img.get("display_image") or img.get("displayImage"))
+                or _url_list_first(
+                    img.get("owner_watermark_image") or img.get("ownerWatermarkImage")
+                )
+                or _url_list_first(
+                    img.get("user_watermark_image") or img.get("userWatermarkImage")
+                )
+                or _url_list_first(img.get("thumbnail"))
+                or _url_list_first(img.get("imageURL") or img.get("imageUrl"))
+                or safe_str(img.get("url"))
+            )
+        else:
+            url = None
+        if url and url not in out:
+            out.append(url)
+    return out
+
+
 def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
-    """Map a mobile aweme row to the same post shape as video_details_native."""
+    """Map a mobile aweme row to the same post shape as video_details_native.
+
+    Top search / hashtag feeds return both videos and photo carousels — keep
+    ``mediaType`` / ``contentType`` / ``images`` so clients do not have to
+    guess from a missing ``durationSeconds``.
+    """
     aweme_id = safe_str(item.get("aweme_id") or item.get("id"))
     if not aweme_id:
         return None
@@ -1116,6 +1153,25 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
     caption = safe_str(item.get("desc"))
     hashtags = _collect_hashtags(item, caption)
 
+    aweme_type = safe_int(item.get("aweme_type") or item.get("awemeType"))
+    image_post = (
+        item.get("image_post_info")
+        or item.get("image_post")
+        or item.get("imagePost")
+    )
+    shoot_tab = (
+        safe_str(item.get("shoot_tab_name") or item.get("shootTabName")) or ""
+    ).lower()
+    # 150/51 = TikTok photo mode; 68 = slideshow / image-text (Douyin/TT).
+    is_photo = bool(image_post) or shoot_tab == "photo" or aweme_type in (150, 51, 68)
+    images = _extract_photo_images(image_post) if is_photo else []
+    if is_photo:
+        media_type = "photo"
+        content_type = "multi_photo" if len(images) > 1 else "photo"
+    else:
+        media_type = "video"
+        content_type = "video"
+
     avatar = (
         _url_list_first(author.get("avatar_larger") or author.get("avatarLarger"))
         or _url_list_first(author.get("avatar_medium") or author.get("avatarMedium"))
@@ -1126,6 +1182,16 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
         or _url_list_first(video.get("origin_cover") or video.get("originCover"))
         or _url_list_first(video.get("dynamic_cover") or video.get("dynamicCover"))
     )
+    if not cover and isinstance(image_post, dict):
+        cover = (
+            _url_list_first(
+                image_post.get("image_post_cover")
+                or image_post.get("imagePostCover")
+                or image_post.get("cover")
+                or image_post.get("imageURL")
+            )
+            or (images[0] if images else None)
+        )
 
     # Badge flag: missing/unknown -> false (never null).
     verified = author.get("verified")
@@ -1133,20 +1199,29 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
         verified = author.get("is_verified")
     verified = bool(verified) if verified is not None else False
 
-    return {
+    author_id = safe_str(author.get("uid") or author.get("id"))
+    author_sec = safe_str(author.get("sec_uid") or author.get("secUid"))
+    kind = "photo" if is_photo else "video"
+    url = (
+        f"https://www.tiktok.com/@{username}/{kind}/{aweme_id}"
+        if username
+        else safe_str(item.get("share_url") or item.get("shareUrl"))
+    )
+
+    out: dict[str, Any] = {
         "platform": "tiktok",
-        "url": (
-            f"https://www.tiktok.com/@{username}/video/{aweme_id}"
-            if username
-            else safe_str(item.get("share_url") or item.get("shareUrl"))
-        ),
+        "url": url,
         "id": aweme_id,
         "caption": caption,
         "description": caption,
         "publishedAt": _iso(item.get("create_time") or item.get("createTime")),
         "durationSeconds": duration,
         "thumbnailUrl": cover,
+        "mediaType": media_type,
+        "contentType": content_type,
         "author": {
+            "id": author_id,
+            "secUid": author_sec,
             "username": username,
             "displayName": safe_str(author.get("nickname") or author.get("nickName")),
             "url": f"https://www.tiktok.com/@{username}" if username else None,
@@ -1168,7 +1243,24 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
         },
         "hashtags": hashtags,
         "musicName": safe_str(music.get("title")),
+        "musicId": safe_str(music.get("id") or music.get("id_str") or music.get("mid")),
+        "musicAuthor": safe_str(
+            music.get("authorName")
+            or music.get("author_name")
+            or music.get("ownerNickname")
+            or music.get("owner_nickname")
+        ),
+        "isAd": bool(item.get("is_ad") or item.get("isAd")),
+        "isPaidPartnership": bool(
+            item.get("is_paid_partnership")
+            or item.get("isPaidPartnership")
+            or item.get("is_paid_content")
+            or item.get("isPaidContent")
+        ),
     }
+    if images:
+        out["images"] = images
+    return out
 
 
 def _post_page_ok(page: dict[str, Any], *, expect_items: bool) -> bool:
@@ -1895,15 +1987,25 @@ async def search_users_native(
     return await _search_users_via_general(seed, limit=limit, cursor=cursor)
 
 
-async def top_search_native(q: str, *, limit: int = 20) -> list[dict[str, Any]] | None:
-    """Mixed top search via signer ``/api/search/general/full/`` (video rows)."""
+async def top_search_native(
+    q: str, *, limit: int = 20, cursor: int = 0
+) -> tuple[list[dict[str, Any]], bool, int | None] | None:
+    """Mixed top search via signer ``/api/search/general/full/``.
+
+    Returns videos **and** photo carousels when TikTok includes them in the
+    general/top tab (not keyword-video-only search). TikTok may repeat the
+    same id across pages — callers should dedupe if needed.
+    """
     from app.services import tiktok_signer
 
     seed = (q or "").strip()
     if not seed or limit <= 0 or not tiktok_signer.enabled():
         return None
     collected: list[dict[str, Any]] = []
-    offset = 0
+    seen_ids: set[str] = set()
+    offset = max(0, int(cursor or 0))
+    has_more = False
+    next_cursor: int | None = None
     for _ in range(max(2, limit // 10 + 1)):
         if len(collected) >= limit:
             break
@@ -1916,28 +2018,49 @@ async def top_search_native(q: str, *, limit: int = 20) -> list[dict[str, Any]] 
         )
         page = await tiktok_signer.fetch_api(api)
         if page is None:
-            return None if not collected else collected[:limit]
+            return None if not collected else (collected[:limit], has_more, next_cursor)
         rows = page.get("data") or []
         if not isinstance(rows, list) or not rows:
+            has_more = False
+            next_cursor = None
             break
         for row in rows:
             if not isinstance(row, dict):
                 continue
+            # General search nests the aweme under ``item``; some exits put
+            # the aweme fields on the row itself.
             item = row.get("item") if isinstance(row.get("item"), dict) else None
+            if item is None and (row.get("aweme_id") or row.get("id")):
+                item = row
             if not item:
                 continue
             mapped = _map_aweme_post(item)
-            if mapped:
-                collected.append(mapped)
+            if not mapped:
+                continue
+            mid = safe_str(mapped.get("id"))
+            if mid and mid in seen_ids:
+                continue
+            if mid:
+                seen_ids.add(mid)
+            collected.append(mapped)
             if len(collected) >= limit:
                 break
-        if not bool(page.get("has_more") or page.get("hasMore")):
-            break
+        page_more = bool(page.get("has_more") or page.get("hasMore"))
         nxt = safe_int(page.get("cursor"))
-        if nxt is None:
+        has_more = page_more and nxt is not None
+        next_cursor = nxt if has_more else None
+        if not has_more:
+            break
+        if nxt is None or nxt == offset:
             break
         offset = nxt
-    return collected[:limit] if collected else None
+    if not collected:
+        return None
+    # If we filled ``limit`` but TikTok still has more, keep the cursor.
+    if len(collected) >= limit and next_cursor is None and has_more is False:
+        # Soft-signal more when we stopped because of our limit mid-page.
+        pass
+    return collected[:limit], has_more, next_cursor
 
 
 async def hashtag_posts_native(
@@ -2529,7 +2652,7 @@ def _map_trend_video(item: dict[str, Any], *, rank: int) -> dict[str, Any] | Non
     aweme_type = safe_int(item.get("awemeType") or item.get("aweme_type"))
     image_post = item.get("imagePost") or item.get("image_post") or item.get("image_post_info")
     shoot_tab = (safe_str(item.get("shootTabName") or item.get("shoot_tab_name")) or "").lower()
-    is_photo = bool(image_post) or shoot_tab == "photo" or aweme_type in (150, 51)
+    is_photo = bool(image_post) or shoot_tab == "photo" or aweme_type in (150, 51, 68)
     media_type = "photo" if is_photo else "video"
 
     url = safe_str(item.get("webVideoUrl") or item.get("url"))
@@ -2778,7 +2901,7 @@ async def popular_hashtags_native(
         # still yields videos with co-occurring hashtags.
         searched = await top_search_native(seed, limit=want)
         if searched:
-            posts = searched
+            posts, _more, _cur = searched
     if not posts:
         return None
     agg: dict[str, dict[str, int]] = {}

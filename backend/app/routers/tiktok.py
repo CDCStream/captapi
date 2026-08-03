@@ -362,7 +362,10 @@ _TT_HASHTAG_RE = re.compile(r"#([^\s#]+)")
 
 
 def _tt_hashtags(item: dict, caption: str | None) -> list[str]:
-    """Deduped hashtags from actor fields + caption; drop empty strings."""
+    """Deduped hashtags from actor fields + caption; drop empty strings.
+
+    Case-insensitive (``Latinus`` / ``latinus`` collapse to one lowercase tag).
+    """
     seen: set[str] = set()
     out: list[str] = []
 
@@ -371,16 +374,27 @@ def _tt_hashtags(item: dict, caption: str | None) -> list[str]:
         if not name:
             return
         name = name.lstrip("#").strip()
-        if not name or name in seen:
+        if not name:
             return
-        seen.add(name)
-        out.append(name)
+        key = name.casefold()
+        if key in seen:
+            return
+        seen.add(key)
+        out.append(key)
 
     for h in safe_list(item.get("hashtags")):
         _add(h.get("name") if isinstance(h, dict) else h)
     if caption:
         for tag in _TT_HASHTAG_RE.findall(caption):
             _add(tag)
+    return out
+
+
+def _tt_finalize_post(post: dict[str, Any]) -> dict[str, Any]:
+    """strip_empty, but always keep ``hashtags`` (empty list when none)."""
+    out = strip_empty(post)
+    if not isinstance(out.get("hashtags"), list):
+        out["hashtags"] = []
     return out
 
 
@@ -561,7 +575,7 @@ def _normalize_aweme(item: dict) -> dict:
 
 def _normalize_music_post(item: dict) -> dict:
     is_aweme = bool(item.get("aweme_id") or ("digg_count" in item and "play_count" in item))
-    return strip_empty(_normalize_aweme(item) if is_aweme else _normalize(item))
+    return _tt_finalize_post(_normalize_aweme(item) if is_aweme else _normalize(item))
 
 
 def _tiktok_music_id(value: str) -> str | None:
@@ -1992,7 +2006,7 @@ async def tiktok_music_posts(
         async def _run() -> dict[str, Any]:
             native = await music_posts_native(url, limit)
             if native is not None:
-                posts = [strip_empty(p) for p in native]
+                posts = [_tt_finalize_post(p) for p in native]
                 sound_title = next((p.get("musicName") for p in posts if p.get("musicName")), None)
                 if not sound_title:
                     sound_title = _music_name_from_url(url)
@@ -2034,9 +2048,24 @@ async def tiktok_music_posts(
 async def tiktok_top_search(
     q: str = Query(..., min_length=2),
     limit: int = Query(20, ge=1, le=200),
+    cursor: int = Query(
+        0,
+        ge=0,
+        description=(
+            "Pagination cursor. Leave 0 for the first page; then pass the "
+            "nextCursor from the previous response. TikTok may return duplicates."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    """TikTok's Top/General search tab — videos and photo carousels when present.
+
+    Unlike hashtag/keyword video-only scrapers, results can include photo
+    carousels (``contentType: multi_photo`` + ``images[]``). Hashtags are
+    lowercase-deduped; ``hashtags`` is always an array (possibly empty).
+    TikTok itself may repeat items across pages.
+    """
     # Native-only search — flat fee (same model as channel-posts).
     async with billed_call(
         caller=caller,
@@ -2046,11 +2075,18 @@ async def tiktok_top_search(
         base_credits=CREDIT_SEARCH,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await top_search_native(q, limit=limit)
+            native = await top_search_native(q, limit=limit, cursor=cursor)
             if native is not None:
-                results = [strip_empty(p) for p in native]
+                rows, has_more, next_cursor = native
+                results = [_tt_finalize_post(p) for p in rows]
                 ctx["source"] = "direct"
-                return {"query": q, "totalReturned": len(results), "results": results}
+                return {
+                    "query": q,
+                    "totalReturned": len(results),
+                    "hasMore": has_more,
+                    "nextCursor": next_cursor,
+                    "results": results,
+                }
             raise HTTPException(
                 status_code=502,
                 detail="TikTok search temporarily unavailable",
@@ -2058,7 +2094,7 @@ async def tiktok_top_search(
 
         data = await cached_or_run(
             endpoint="tiktok.top-search",
-            params={"q": q, "limit": limit, "v": 3},
+            params={"q": q, "limit": limit, "cursor": cursor, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2102,7 +2138,7 @@ async def tiktok_search_by_hashtag(
                 native = await hashtag_posts_native(q, limit=limit)
                 if native is not None:
                     posts, has_more, _tt_cursor = native
-                    results = [strip_empty(p) for p in posts]
+                    results = [_tt_finalize_post(p) for p in posts]
                     ctx["source"] = "direct"
                     return {
                         "query": q,

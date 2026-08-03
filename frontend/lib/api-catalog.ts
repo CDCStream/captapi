@@ -348,7 +348,26 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-user-followers", name: "TikTok User Followers API", shortName: "User Followers", category: "list", method: "GET", path: "/v1/tiktok/user-followers", credits: 20, creditsPerResult: 0.4 },
   { slug: "tiktok-user-followings", name: "TikTok User Followings API", shortName: "User Followings", category: "list", method: "GET", path: "/v1/tiktok/user-followings", credits: 20, creditsPerResult: 0.4 },
   { slug: "tiktok-music-posts", name: "TikTok Music Posts API", shortName: "Music Posts", category: "list", method: "GET", path: "/v1/tiktok/music-posts", credits: 2, tagline: "List TikTok videos that use a specific sound — caption, author, and engagement for each post.", longDescription: "Paste a TikTok music/sound URL and get the public videos that use that sound as structured JSON. Each result includes caption, author, thumbnail, and engagement counts. Use Song Details first if you only need the sound's metadata. Flat 2 credits per call." },
-  { slug: "tiktok-top-search", name: "TikTok Top Search API", shortName: "Top Search", category: "search", method: "GET", path: "/v1/tiktok/top-search", credits: 2 , tagline: "Search TikTok's top mixed results for a keyword — videos and related hits ranked the way TikTok's search ranks them.", longDescription: "Pass a keyword and get TikTok's top mixed search results as structured JSON — the same style of ranked hits you see in TikTok search, not a single content type only. Each result includes the fields TikTok exposes for that hit (URL, caption or title, author, engagement when available). Flat 2 credits per call." },
+  {
+    slug: "tiktok-top-search",
+    name: "TikTok Top Search API",
+    shortName: "Top Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/tiktok/top-search",
+    credits: 2,
+    tagline:
+      "TikTok Top/General search — videos and photo carousels when TikTok includes them, with contentType + images[].",
+    longDescription:
+      "Hits TikTok's Top/General search tab (not video-only keyword search). Results can mix videos and photo carousels: each item has mediaType/contentType (video | photo | multi_photo); carousels include images[]. Hashtags are lowercase-deduped and always present as an array (empty when none). Supports cursor pagination via nextCursor. TikTok may return duplicate ids across pages — we drop duplicates within a page. Flat 2 credits. Not yet: sort_by / publish_time / region filters (use other endpoints or ask).",
+    delivers: [
+      "Videos + photo carousels (contentType, images[])",
+      "hashtags always present, casefold-deduped",
+      "cursor / nextCursor / hasMore",
+      "isAd + isPaidPartnership when TikTok exposes them",
+      "Flat 2 credits",
+    ],
+  },
   { slug: "tiktok-search-by-hashtag", name: "TikTok Search by Hashtag API", shortName: "Search by Hashtag", category: "search", method: "GET", path: "/v1/tiktok/search/hashtag", credits: 14, creditsPerResult: 0.7, tagline: "Search TikTok videos by hashtag — video URL, caption, author, and view / like / comment counts for each result, with cursor pagination to page through them all.", delivers: ["Public videos posted under your hashtag", "Video URL, caption, thumbnail, duration, and publish date", "Author profile plus view / like / comment / share / save counts", "Cursor pagination (nextCursor + hasMore) through every result"] , longDescription: "Pass a hashtag (with or without the #) and the TikTok Search by Hashtag API returns the videos posted under that tag as clean, structured JSON. Each result includes the video URL, caption, publish date, duration, thumbnail, the author's profile, and full engagement counts — views, likes, comments, shares, and saves — plus the hashtags and sound used. Need more than the first page? Pass the nextCursor value from the previous response to keep paging, and use hasMore to know when you've reached the end. An optional region parameter only chooses which country our request is sent from — it does not filter results by country. Use it to track a campaign or branded hashtag, discover trending content in a niche, or build a themed content feed. No TikTok login required. Billed per result — about 0.7 credits each." },
   {
     slug: "tiktok-search-users",
@@ -1945,7 +1964,17 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-user-followers": [up(TT_PROFILE), lp(50, 500)],
   "tiktok-user-followings": [up(TT_PROFILE), lp(50, 500)],
   "tiktok-music-posts": [up(TT_MUSIC), lpFlat(20, 200, 2)],
-  "tiktok-top-search": [qp(), lp(20, 200)],
+  "tiktok-top-search": [
+    qp(),
+    lp(20, 200),
+    {
+      name: "cursor",
+      type: "integer",
+      required: false,
+      description:
+        "Pagination cursor. Leave 0 for the first page; then pass nextCursor from the previous response. TikTok may return duplicates across pages.",
+    },
+  ],
   "tiktok-search-by-hashtag": [qp("Hashtag to search for, with or without the # (min 2 characters)."), lp(20, 100), { name: "cursor", type: "integer", required: false, description: "Pagination offset. Leave at 0 (or omit) for the first page; then pass the nextCursor value returned in the previous response. A null nextCursor means the end of the results." }, { name: "region", type: "string", required: false, description: "Two-letter ISO 3166-1 country our request is sent from. Default US. Does not filter results by country." }],
   "tiktok-search-users": [qp("Search query matched against usernames, display names and bios (min 2 characters)."), lp(20, 100), { name: "cursor", type: "integer", required: false, description: "Pagination offset. Leave at 0 (or omit) for the first page; then pass the nextCursor value returned in the previous response. A null nextCursor means the end of the results." }],
   "tiktok-song-details": [up(TT_MUSIC)],

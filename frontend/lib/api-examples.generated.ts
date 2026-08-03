@@ -11016,11 +11016,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [
           "latinus",
-          "informaciónparati",
-          "Latinus",
-          "InformaciónParaTi"
+          "informaciónparati"
         ],
-        "musicName": "original sound - Latinus"
+        "musicName": "original sound - Latinus",
+        "mediaType": "video",
+        "contentType": "video",
+        "isAd": false
       },
       {
         "platform": "tiktok",
@@ -11053,7 +11054,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "fyp",
           "fyptt"
         ],
-        "musicName": "sonido original"
+        "musicName": "sonido original",
+        "mediaType": "video",
+        "contentType": "video",
+        "isAd": false
       },
       {
         "platform": "tiktok",
@@ -11079,7 +11083,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "shares": 61,
           "saves": 539
         },
-        "musicName": "original sound"
+        "musicName": "original sound",
+        "hashtags": [],
+        "mediaType": "video",
+        "contentType": "video",
+        "isAd": false
       },
       {
         "platform": "tiktok",
@@ -11112,7 +11120,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "rocket",
           "astrokobi"
         ],
-        "musicName": "Everything In Its Right Place"
+        "musicName": "Everything In Its Right Place",
+        "mediaType": "video",
+        "contentType": "video",
+        "isAd": false
       },
       {
         "platform": "tiktok",
@@ -11138,9 +11149,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "shares": 6882,
           "saves": 25400
         },
-        "musicName": "original sound"
+        "musicName": "original sound",
+        "hashtags": [],
+        "mediaType": "video",
+        "contentType": "video",
+        "isAd": false
       }
-    ]
+    ],
+    "hasMore": true,
+    "nextCursor": 20
   },
   "tiktok-transcript": {
     "platform": "tiktok",
