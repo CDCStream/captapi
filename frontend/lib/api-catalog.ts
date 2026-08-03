@@ -628,7 +628,7 @@ const TWITCH: Spec[] = [
     longDescription:
       "Pass a Twitch channel URL or username and get a clean profile: id, login, displayName, description, followers, profileImage/bannerImage, isPartner/isAffiliate, createdAt, isLive, stream{title, game, gameBoxArtUrl, viewers, startedAt, thumbnail}, lastBroadcast{}, recentVideos[] (with embedUrl, language, animatedPreviewUrl, gameBoxArtUrl), topClips[], and schedule[]. Flat 1 credit. game stays the category name string; gameBoxArtUrl and animatedPreviewUrl are additive media fields (no GraphQL junk).",
   },
-  { slug: "twitch-user-videos", name: "Twitch User Videos API", shortName: "User Videos", category: "list", method: "GET", path: "/v1/twitch/user-videos", credits: 2 },
+  { slug: "twitch-user-videos", name: "Twitch User Videos API", shortName: "User Videos", category: "list", method: "GET", path: "/v1/twitch/user-videos", credits: 2, tagline: "Twitch channel VODs — filter ARCHIVE/HIGHLIGHT/UPLOAD, sort TIME/VIEWS, cursor, broadcaster id/followers. Flat 2 credits.", longDescription: "Pass a Twitch channel URL or username and get a clean videos[] list (not a full profile dump): id, url, embedUrl, title, createdAt, durationSeconds, views, thumbnail, animatedPreviewUrl, broadcastType, game (+ gameId/gameSlug/box art), language, and broadcaster string plus channel{id,username,displayName,followers,profileImage,isPartner}. Filter with filterBy=ARCHIVE|HIGHLIGHT|UPLOAD; sort with sortBy=TIME|VIEWS. Cursor pagination via nextCursor/hasMore over the first 100 matching videos. Flat 2 credits on the native path. Pass cache=true for the 24h shared cache." },
   { slug: "twitch-user-schedule", name: "Twitch User Schedule API", shortName: "User Schedule", category: "list", method: "GET", path: "/v1/twitch/user-schedule", credits: 1 },
   {
     slug: "twitch-clip",
@@ -1960,7 +1960,13 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "rumble-comments": [up("Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."), lpFlat(50, 500, 2)],
   // Twitch
   "twitch-profile": [up(TWITCH_PROFILE)],
-  "twitch-user-videos": [up(TWITCH_PROFILE), lpFlat(20, 30, 2)],
+  "twitch-user-videos": [
+    up(TWITCH_PROFILE),
+    lpFlat(20, 100, 2),
+    { name: "filterBy", type: "string", required: false, description: "ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types." },
+    { name: "sortBy", type: "string", required: false, description: "TIME (default, newest first) or VIEWS." },
+    CURSOR,
+  ],
   "twitch-user-schedule": [up(TWITCH_PROFILE)],
   "twitch-clip": [up("Twitch clip URL, channel URL, or username.")],
   // Spotify

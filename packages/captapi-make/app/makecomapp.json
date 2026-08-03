@@ -2180,7 +2180,7 @@
       },
       "twitchUserVideos": {
         "label": "Twitch User Videos",
-        "description": "Recent Twitch VODs for a channel. Costs ~34 credits (cached results free, failures never charged).",
+        "description": "Channel VODs with filterBy/sortBy, cursor, broadcaster id/followers. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

@@ -107,12 +107,15 @@ def _video_node(
     *,
     broadcaster: str | None = None,
     profile_image: str | None = None,
+    broadcaster_meta: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    game = node.get("game") if isinstance(node.get("game"), dict) else {}
     game_name, game_box = _game_fields(node.get("game"))
     video_id = safe_str(node.get("id"))
+    btype = safe_str(node.get("broadcastType") or node.get("broadcast_type"))
     # VODs have no clip slug and no public MP4 URL (tokenized). Omit those
     # keys rather than returning always-null placeholders; clips keep them.
-    return {
+    out: dict[str, Any] = {
         "platform": "twitch",
         "id": video_id,
         "url": (f"https://www.twitch.tv/videos/{video_id}" if video_id else None),
@@ -125,11 +128,159 @@ def _video_node(
         "views": safe_int(node.get("viewCount")),
         "thumbnail": safe_str(node.get("previewThumbnailURL")),
         "animatedPreviewUrl": safe_str(node.get("animatedPreviewURL") or node.get("animatedPreviewUrl")),
+        "broadcastType": btype,
         "game": game_name,
-        "gameBoxArtUrl": game_box,
+        "gameId": safe_str(game.get("id")),
+        "gameSlug": safe_str(game.get("slug")),
+        "gameBoxArtUrl": _box_art(game_box) if game_box and "{width}" in (game_box or "") else game_box,
         "language": safe_str(node.get("language")),
+        # Flat string kept for back-compat; structured channel is additive.
         "broadcaster": broadcaster,
         "broadcasterProfileImage": profile_image,
+        "channel": broadcaster_meta,
+    }
+    return strip_empty(out)
+
+
+_VIDEO_TYPES = {"ARCHIVE", "HIGHLIGHT", "UPLOAD"}
+_VIDEO_SORTS = {"TIME", "VIEWS"}
+
+_VIDEOS_QUERY = """
+query($login: String!, $first: Int!, $types: [BroadcastType!], $sort: VideoSort!) {
+  user(login: $login) {
+    id login displayName
+    profileImageURL(width: 300)
+    followers { totalCount }
+    roles { isPartner isAffiliate }
+    videos(first: $first, types: $types, sort: $sort) {
+      pageInfo { hasNextPage }
+      edges {
+        node {
+          id title lengthSeconds viewCount createdAt
+          previewThumbnailURL animatedPreviewURL language
+          broadcastType
+          game { id name slug boxArtURL(width: 144, height: 192) }
+        }
+      }
+    }
+  }
+}
+"""
+
+_VIDEOS_QUERY_ALL = """
+query($login: String!, $first: Int!, $sort: VideoSort!) {
+  user(login: $login) {
+    id login displayName
+    profileImageURL(width: 300)
+    followers { totalCount }
+    roles { isPartner isAffiliate }
+    videos(first: $first, sort: $sort) {
+      pageInfo { hasNextPage }
+      edges {
+        node {
+          id title lengthSeconds viewCount createdAt
+          previewThumbnailURL animatedPreviewURL language
+          broadcastType
+          game { id name slug boxArtURL(width: 144, height: 192) }
+        }
+      }
+    }
+  }
+}
+"""
+
+
+def _broadcaster_meta(u: dict[str, Any], login: str) -> dict[str, Any]:
+    login_val = safe_str(u.get("login")) or login
+    roles = u.get("roles") if isinstance(u.get("roles"), dict) else {}
+    followers = u.get("followers") if isinstance(u.get("followers"), dict) else {}
+    return strip_empty(
+        {
+            "id": safe_str(u.get("id")),
+            "username": login_val,
+            "displayName": safe_str(u.get("displayName")) or login_val,
+            "url": f"https://www.twitch.tv/{login_val}" if login_val else None,
+            "profileImage": safe_str(u.get("profileImageURL")),
+            "followers": safe_int(followers.get("totalCount")),
+            "isPartner": bool(roles.get("isPartner")) if roles.get("isPartner") is not None else None,
+            "isAffiliate": bool(roles.get("isAffiliate")) if roles.get("isAffiliate") is not None else None,
+        }
+    )
+
+
+async def user_videos_native(
+    login: str,
+    *,
+    limit: int = 20,
+    offset: int = 0,
+    filter_by: str | None = None,
+    sort_by: str = "TIME",
+) -> dict[str, Any] | None:
+    """Channel videos with type filter + sort. Returns None on failure.
+
+    Twitch anonymous GQL ``after`` cursors are unreliable, so we fetch up to
+    100 newest matching videos in one shot and slice by ``offset`` for paging.
+    """
+    login_key = (login or "").strip().lstrip("@")
+    if not login_key:
+        return None
+    sort_key = (sort_by or "TIME").strip().upper()
+    if sort_key not in _VIDEO_SORTS:
+        sort_key = "TIME"
+    types: list[str] | None = None
+    filter_key: str | None = None
+    if filter_by:
+        filter_key = filter_by.strip().upper()
+        if filter_key in _VIDEO_TYPES:
+            types = [filter_key]
+        else:
+            filter_key = None
+
+    offset = max(0, offset)
+    limit = min(max(limit, 1), 100)
+    # Fetch one extra when possible so hasMore/nextCursor are accurate.
+    fetch_n = min(100, offset + limit + 1)
+
+    if types:
+        data = await _gql(
+            _VIDEOS_QUERY,
+            {"login": login_key, "first": fetch_n, "types": types, "sort": sort_key},
+        )
+    else:
+        data = await _gql(
+            _VIDEOS_QUERY_ALL,
+            {"login": login_key, "first": fetch_n, "sort": sort_key},
+        )
+    u = (data or {}).get("user") if isinstance(data, dict) else None
+    if not isinstance(u, dict) or not u.get("id"):
+        return None
+
+    login_val = safe_str(u.get("login")) or login_key
+    profile_image = safe_str(u.get("profileImageURL"))
+    channel = _broadcaster_meta(u, login_val)
+    edges = ((u.get("videos") or {}).get("edges")) or []
+    mapped = [
+        _video_node(
+            e["node"],
+            broadcaster=login_val,
+            profile_image=profile_image,
+            broadcaster_meta=channel,
+        )
+        for e in edges
+        if isinstance(e, dict) and isinstance(e.get("node"), dict)
+    ]
+    page = mapped[offset : offset + limit]
+    next_offset = offset + len(page)
+    has_more = next_offset < len(mapped)
+    return {
+        "username": login_val,
+        "filterBy": filter_key,
+        "sortBy": sort_key,
+        "broadcaster": channel,
+        "videos": page,
+        "nextOffset": next_offset if has_more else None,
+        "hasMore": has_more,
+        "fetched": len(mapped),
     }
 
 

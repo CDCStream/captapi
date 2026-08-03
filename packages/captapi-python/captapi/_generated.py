@@ -2839,14 +2839,17 @@ class TwitchApi:
         """
         return self._t.get("/v1/twitch/profile", {"url": url, "cache": cache})
 
-    def user_videos(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Twitch User Videos — Recent Twitch VODs for a channel. (34 credits)
+    def user_videos(self, *, url: str, limit: float | None = None, filterBy: str | None = None, sortBy: str | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Twitch User Videos — Channel VODs with filterBy/sortBy, cursor, broadcaster id/followers. (2 credits)
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 30. Billed per result.
+        :param limit: Max items to return. Default 20, max 100. Flat 2 credits per call.
+        :param filterBy: ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types.
+        :param sortBy: TIME (default) or VIEWS.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass nextCursor from the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/twitch/user-videos", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/twitch/user-videos", {"url": url, "limit": limit, "filterBy": filterBy, "sortBy": sortBy, "cursor": cursor, "cache": cache})
 
     def user_schedule(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Twitch User Schedule — Upcoming Twitch schedule data when exposed on the public channel. (1 credit)
@@ -2877,14 +2880,17 @@ class AsyncTwitchApi:
         """
         return await self._t.get("/v1/twitch/profile", {"url": url, "cache": cache})
 
-    async def user_videos(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Twitch User Videos — Recent Twitch VODs for a channel. (34 credits)
+    async def user_videos(self, *, url: str, limit: float | None = None, filterBy: str | None = None, sortBy: str | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Twitch User Videos — Channel VODs with filterBy/sortBy, cursor, broadcaster id/followers. (2 credits)
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 30. Billed per result.
+        :param limit: Max items to return. Default 20, max 100. Flat 2 credits per call.
+        :param filterBy: ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types.
+        :param sortBy: TIME (default) or VIEWS.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass nextCursor from the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/twitch/user-videos", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/twitch/user-videos", {"url": url, "limit": limit, "filterBy": filterBy, "sortBy": sortBy, "cursor": cursor, "cache": cache})
 
     async def user_schedule(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Twitch User Schedule — Upcoming Twitch schedule data when exposed on the public channel. (1 credit)

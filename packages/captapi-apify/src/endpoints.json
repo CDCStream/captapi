@@ -3686,8 +3686,8 @@
     "platform": "twitch",
     "name": "Twitch User Videos",
     "path": "/v1/twitch/user-videos",
-    "credits": 34,
-    "summary": "Recent Twitch VODs for a channel.",
+    "credits": 2,
+    "summary": "Channel VODs with filterBy/sortBy, cursor, broadcaster id/followers.",
     "params": [
       {
         "name": "url",
@@ -3699,7 +3699,25 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 30. Billed per result."
+        "description": "Max items to return. Default 20, max 100. Flat 2 credits per call."
+      },
+      {
+        "name": "filterBy",
+        "type": "string",
+        "required": false,
+        "description": "ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types."
+      },
+      {
+        "name": "sortBy",
+        "type": "string",
+        "required": false,
+        "description": "TIME (default) or VIEWS."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass nextCursor from the previous response."
       },
       {
         "name": "cache",

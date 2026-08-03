@@ -2013,8 +2013,14 @@ export interface TwitchProfileParams {
 export interface TwitchUserVideosParams {
   /** Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 20, max 30. Billed per result. */
+  /** Max items to return. Default 20, max 100. Flat 2 credits per call. */
   limit?: number;
+  /** ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types. */
+  filterBy?: string;
+  /** TIME (default) or VIEWS. */
+  sortBy?: string;
+  /** Pagination cursor. Leave empty for the first page; then pass nextCursor from the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -2039,7 +2045,7 @@ export class TwitchApi {
   profile(params: TwitchProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitch/profile", params);
   }
-  /** Twitch User Videos — Recent Twitch VODs for a channel. (34 credits) */
+  /** Twitch User Videos — Channel VODs with filterBy/sortBy, cursor, broadcaster id/followers. (2 credits) */
   userVideos(params: TwitchUserVideosParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitch/user-videos", params);
   }

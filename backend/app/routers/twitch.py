@@ -17,6 +17,7 @@ from app.services.twitch_native import (
     channel_native,
     clip_native,
     schedule_native,
+    user_videos_native,
 )
 from app.utils.formatters import safe_int, safe_str, strip_empty
 from app.utils.url import detect_url_platform, platform_mismatch_detail
@@ -313,33 +314,86 @@ async def profile(
 @router.get("/user-videos", summary="Twitch channel videos")
 async def user_videos(
     url: str = Query(..., description="Twitch channel URL or username"),
-    limit: int = Query(20, ge=1, le=30),
+    limit: int = Query(20, ge=1, le=100),
+    filterBy: str | None = Query(
+        None,
+        description="Video type filter: ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types.",
+    ),
+    sortBy: str = Query(
+        "TIME",
+        description="Sort: TIME (default, newest first) or VIEWS.",
+    ),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor (offset into the first 100 matching videos). "
+            "Leave empty for the first page; then pass nextCursor from the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _target(url)
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Twitch channel")
+    sort_key = (sortBy or "TIME").strip().upper()
+    if sort_key not in {"TIME", "VIEWS"}:
+        raise HTTPException(status_code=400, detail="Invalid sortBy. Use TIME or VIEWS.")
+    filter_key: str | None = None
+    if filterBy:
+        filter_key = filterBy.strip().upper()
+        if filter_key not in {"ARCHIVE", "HIGHLIGHT", "UPLOAD"}:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid filterBy. Use ARCHIVE, HIGHLIGHT, or UPLOAD.",
+            )
+    offset = 0
+    if cursor:
+        try:
+            offset = max(0, int(str(cursor).strip()))
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid cursor. Pass the nextCursor integer from the previous response.",
+            ) from exc
+
     cost = _scaled(limit)
     async with billed_call(caller=caller, endpoint="/v1/twitch/user-videos", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=cost) as ctx:
         async def _run() -> dict[str, Any]:
             # 1) Public Twitch web GraphQL (datacenter) — no Apify.
-            native = await channel_native(username, video_limit=limit)
+            native = await user_videos_native(
+                username,
+                limit=limit,
+                offset=offset,
+                filter_by=filter_key,
+                sort_by=sort_key,
+            )
             if native is not None:
                 ctx["source"] = "direct"
-                videos = [strip_empty(v) for v in (native.get("recentVideos") or [])[:limit]]
+                videos = [strip_empty(v) for v in (native.get("videos") or [])]
+                next_off = native.get("nextOffset")
                 return {
                     "platform": "twitch",
-                    "username": username,
+                    "username": native.get("username") or username,
+                    "filterBy": native.get("filterBy"),
+                    "sortBy": native.get("sortBy") or sort_key,
+                    "broadcaster": native.get("broadcaster"),
                     "totalReturned": len(videos),
+                    "nextCursor": str(next_off) if next_off is not None else None,
+                    "hasMore": bool(native.get("hasMore")),
                     "videos": videos,
                 }
 
-            # 2) Apify fallback.
+            # 2) Apify fallback (first page only; no type/sort/cursor).
+            if offset or filter_key or sort_key != "TIME":
+                raise HTTPException(
+                    status_code=502,
+                    detail="Twitch videos temporarily unavailable for that filter/sort/page.",
+                )
             settings = get_settings()
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_TWITCH,
-                _run_input("channels", [username], limit),
+                _run_input("channels", [username], min(limit, 30)),
                 max_items=1,
             )
             videos = [
@@ -348,16 +402,29 @@ async def user_videos(
                 if isinstance(v, dict)
             ]
             ctx["source"] = "apify"
+            page = videos[:limit]
             return {
                 "platform": "twitch",
                 "username": username,
-                "totalReturned": len(videos),
-                "videos": videos[:limit],
+                "filterBy": None,
+                "sortBy": "TIME",
+                "broadcaster": None,
+                "totalReturned": len(page),
+                "nextCursor": None,
+                "hasMore": False,
+                "videos": page,
             }
 
         data = await cached_or_run(
             "twitch.user-videos",
-            {"username": username, "limit": limit, "v": 4},
+            {
+                "username": username,
+                "limit": limit,
+                "filterBy": filter_key or "",
+                "sortBy": sort_key,
+                "cursor": str(offset),
+                "v": 5,
+            },
             _run,
             ctx,
             use_cache=cache,

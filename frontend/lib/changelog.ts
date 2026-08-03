@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Twitch user videos: filterBy, sortBy, cursor, broadcaster object",
+    description:
+      "GET /v1/twitch/user-videos now supports filterBy=ARCHIVE|HIGHLIGHT|UPLOAD, sortBy=TIME|VIEWS, limit up to 100, and cursor pagination (nextCursor/hasMore) over the first 100 matches. Response adds top-level broadcaster{id,username,displayName,followers,profileImage,isPartner}, plus per-video broadcastType, gameId/gameSlug, animatedPreviewUrl, and channel{}. Still a clean videos[] list (not a profile dump). Flat 2 credits native.",
+    items: [
+      "filterBy ARCHIVE / HIGHLIGHT / UPLOAD",
+      "sortBy TIME | VIEWS; limit max 100",
+      "cursor pagination (offset into first 100)",
+      "broadcaster id + followers; broadcastType on each video",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "Reddit search: sort + timeframe, scores, authorFullname",
     description:
       "GET /v1/reddit/search and /subreddit-search now accept sort=relevance|new|top|hot|comments (alias comment_count) and timeframe=hour|day|week|month|year|all (default all for top/comments). Results already expose authorFullname (t2_…), name (t3_…), score/downs/upvoteRatio, subscriberCount, totalAwardsReceived, and isVideo — docs/examples refreshed. publishedAt normalized to ISO …Z across Reddit. Still 2 credits.",
