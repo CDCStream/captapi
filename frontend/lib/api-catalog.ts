@@ -243,11 +243,69 @@ const YOUTUBE: Spec[] = [
   { slug: "youtube-channel-videos", name: "YouTube Channel Videos API", shortName: "Channel Videos", category: "list", method: "GET", path: "/v1/youtube/channel-videos", credits: 2 },
   { slug: "youtube-playlist-videos", name: "YouTube Playlist Videos API", shortName: "Playlist Videos", category: "list", method: "GET", path: "/v1/youtube/playlist-videos", credits: 2 , tagline: "List videos in a YouTube playlist — id, ISO publishedAt, views, duration. Flat 2 credits.", longDescription: "Paste a YouTube playlist URL and get the videos as clean JSON: id, url, title, publishedAt (ISO-8601; approximate when derived from YouTube's relative label), publishedTimeText (e.g. \"1 year ago\"), viewCount (viewCountApproximate=true when YouTube only shows 2.5B-style compact counts), durationSeconds, thumbnailUrl, channelName. Also returns playlist id and totalVideos when available. Prefer Playlist when you also need owner metadata. Optional fast=true uses YouTube RSS (exact publishedAt, fewer items). Flat 2 credits on the native path." },
   { slug: "youtube-playlist", name: "YouTube Playlist API", shortName: "Playlist", category: "list", method: "GET", path: "/v1/youtube/playlist", credits: 2 , tagline: "YouTube playlist metadata + videos — owner{id,name,handle}, totalVideos, ISO publishedAt. Flat 2 credits.", longDescription: "Paste a YouTube playlist URL and get playlist id/title, channelName, owner{id,name,url,handle}, totalVideos (full playlist size), totalReturned (this page), and videos[] with id, url, title, publishedAt (ISO-8601; approximate from relative labels when YouTube doesn't expose an exact timestamp), publishedTimeText, viewCount (+ viewCountApproximate for compact K/M/B labels), durationSeconds, thumbnailUrl, and channel{}. Prefer this over Playlist Videos when you need owner + total size. Optional fast=true uses YouTube RSS. Flat 2 credits on the native path." },
-  { slug: "youtube-shorts-transcript", name: "YouTube Shorts Transcript API", shortName: "Shorts Transcript", category: "transcript", method: "GET", path: "/v1/youtube/shorts/transcript", credits: 1 },
-  { slug: "youtube-shorts-summarizer", name: "YouTube Shorts Summarizer API", shortName: "Shorts Summarizer", category: "summarize", method: "GET", path: "/v1/youtube/shorts/summarize", credits: 3 },
-  { slug: "youtube-shorts-stats", name: "YouTube Shorts Stats API", shortName: "Shorts Stats", category: "details", method: "GET", path: "/v1/youtube/shorts/video-details", credits: 1 },
-  { slug: "youtube-shorts-comments", name: "YouTube Shorts Comments API", shortName: "Shorts Comments", category: "comments", method: "GET", path: "/v1/youtube/shorts/comments", credits: 2 },
-  { slug: "youtube-channel-shorts", name: "YouTube Channel Shorts API", shortName: "Channel Shorts", category: "list", method: "GET", path: "/v1/youtube/channel-shorts", credits: 20, creditsPerResult: 1 },
+  {
+    slug: "youtube-shorts-transcript",
+    name: "YouTube Shorts Transcript API",
+    shortName: "Shorts Transcript",
+    category: "transcript",
+    method: "GET",
+    path: "/v1/youtube/shorts/transcript",
+    credits: 1,
+    tagline: "Transcript for a YouTube Short — rejects long-form videos (≤3 min only).",
+    longDescription: "Same transcript engine as YouTube Transcript, but scoped to Shorts. Pass a youtube.com/shorts/… URL (or a watch URL that is actually a Short). Videos longer than 3 minutes return HTTP 422 — use /v1/youtube/transcript for those. Flat 1 credit.",
+  },
+  {
+    slug: "youtube-shorts-summarizer",
+    name: "YouTube Shorts Summarizer API",
+    shortName: "Shorts Summarizer",
+    category: "summarize",
+    method: "GET",
+    path: "/v1/youtube/shorts/summarize",
+    credits: 3,
+    tagline: "AI summary of a YouTube Short — rejects long-form videos (≤3 min only).",
+    longDescription: "Same summarizer as YouTube Summarizer, scoped to Shorts (≤3 minutes). Longer videos return HTTP 422. Flat 3 credits.",
+  },
+  {
+    slug: "youtube-shorts-stats",
+    name: "YouTube Shorts Stats API",
+    shortName: "Shorts Stats",
+    category: "details",
+    method: "GET",
+    path: "/v1/youtube/shorts/video-details",
+    credits: 1,
+    tagline: "YouTube Short metadata — same schema as Video Details, with isShort:true; long-form videos get HTTP 422.",
+    longDescription: "Same field schema as YouTube Video Details (title, channel, duration, view/like/comment counts, tags, …) but scoped to Shorts: response always includes isShort:true and a youtube.com/shorts/{id} URL. Videos longer than 3 minutes — even if pasted as /shorts/{id} — return HTTP 422; use Video Details for those. Flat 1 credit.",
+    delivers: [
+      "Same schema as Video Details + isShort: true",
+      "Canonical shorts URL in the response",
+      "HTTP 422 for long-form videos (>3 min)",
+      "Flat 1 credit",
+    ],
+  },
+  {
+    slug: "youtube-shorts-comments",
+    name: "YouTube Shorts Comments API",
+    shortName: "Shorts Comments",
+    category: "comments",
+    method: "GET",
+    path: "/v1/youtube/shorts/comments",
+    credits: 2,
+    tagline: "Comments on a YouTube Short — rejects long-form videos (≤3 min only).",
+    longDescription: "Same comments engine as YouTube Comments, scoped to Shorts. Long-form videos return HTTP 422. Flat 2 credits with cursor pagination.",
+  },
+  {
+    slug: "youtube-channel-shorts",
+    name: "YouTube Channel Shorts API",
+    shortName: "Channel Shorts",
+    category: "list",
+    method: "GET",
+    path: "/v1/youtube/channel-shorts",
+    credits: 20,
+    creditsPerResult: 1,
+    tagline: "List videos from a channel's Shorts tab (not an alias of Video Details).",
+    longDescription:
+      "Returns the channel Shorts shelf — a real list endpoint, unlike Shorts Stats/Transcript/Summarizer/Comments which wrap the main video endpoints with Short validation. 1 credit per Short returned (min 2).",
+  },
   { slug: "youtube-trending-shorts", name: "YouTube Trending Shorts API", shortName: "Trending Shorts", category: "list", method: "GET", path: "/v1/youtube/trending-shorts", credits: 2 },
   { slug: "youtube-channel-streams", name: "YouTube Channel Streams API", shortName: "Channel Streams", category: "list", method: "GET", path: "/v1/youtube/channel-streams", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-hashtag-search", name: "YouTube Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/youtube/hashtag-search", credits: 20, creditsPerResult: 1 },
@@ -1796,7 +1854,8 @@ const CACHE_NOTE_DEFAULT_TRUE =
   "Cache is on by default (0 credits on hit); pass cache=false to always fetch fresh.";
 
 const YT_VIDEO = "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL.";
-const YT_SHORTS = "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL.";
+const YT_SHORTS =
+    "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID (≤3 min). Long-form videos return HTTP 422 — use the matching /v1/youtube/… endpoint instead.";
 const YT_CHANNEL = "YouTube channel URL, @handle, bare handle, or UC... channel ID, e.g. https://youtube.com/@handle or @mkbhd.";
 const TT_VIDEO = "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL.";
 const TT_PROFILE = "TikTok profile URL, @handle, or username, e.g. https://tiktok.com/@username. Not a YouTube channel URL.";

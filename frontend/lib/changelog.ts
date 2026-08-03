@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
+    category: "fix",
+    title: "YouTube Shorts endpoints reject long-form videos",
+    description:
+      "Shorts Stats / Transcript / Summarizer / Comments were aliases of the main video endpoints with no Short check — the docs example was a 49-minute MrBeast watch URL. All four now verify Shorts (≤3 minutes / shorts-eligibility) and return HTTP 422 for long-form. Shorts Stats stamps isShort:true and a canonical youtube.com/shorts/{id} URL. Same schema as Video Details, honestly scoped.",
+    items: [
+      "shorts/*: 422 when duration > 180s (even under /shorts/{id})",
+      "shorts/video-details: isShort:true + canonical Shorts URL",
+      "Docs: no more watch?v= long-form example for Shorts Stats",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
     category: "improvement",
     title: "TikTok Trending Feed: publishedAt, rank, mediaType, saves, isAd",
     description:

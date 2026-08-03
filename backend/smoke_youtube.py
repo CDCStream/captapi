@@ -19,6 +19,8 @@ from app.core.security import generate_api_key
 from app.services.supabase_client import get_supabase
 
 VIDEO_URL = "https://www.youtube.com/watch?v=gKHe12T6GMY&list=RDgKHe12T6GMY&start_radio=1"
+# Real Short (≤3 min). Long-form VIDEO_URL must not be used on shorts/* — those return 422.
+SHORT_URL = "https://www.youtube.com/shorts/egvLKQe6I4I"
 BASE = os.environ.get("SMOKE_BASE", "http://localhost:8000")
 
 
@@ -87,10 +89,10 @@ async def main() -> None:
         ("summarize",           "/v1/youtube/summarize",           {"url": VIDEO_URL}),
         ("comments",            "/v1/youtube/comments",            {"url": VIDEO_URL, "limit": 5}),
         ("search",              "/v1/youtube/search",              {"q": "tech tutorial", "limit": 5}),
-        ("shorts/transcript",   "/v1/youtube/shorts/transcript",   {"url": VIDEO_URL}),
-        ("shorts/summarize",    "/v1/youtube/shorts/summarize",    {"url": VIDEO_URL}),
-        ("shorts/video-details","/v1/youtube/shorts/video-details",{"url": VIDEO_URL}),
-        ("shorts/comments",     "/v1/youtube/shorts/comments",     {"url": VIDEO_URL, "limit": 5}),
+        ("shorts/transcript",   "/v1/youtube/shorts/transcript",   {"url": SHORT_URL}),
+        ("shorts/summarize",    "/v1/youtube/shorts/summarize",    {"url": SHORT_URL}),
+        ("shorts/video-details","/v1/youtube/shorts/video-details",{"url": SHORT_URL}),
+        ("shorts/comments",     "/v1/youtube/shorts/comments",     {"url": SHORT_URL, "limit": 5}),
     ]
 
     print(f"\nRunning {len(tests)} endpoints in parallel...\n")

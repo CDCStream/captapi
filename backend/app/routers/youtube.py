@@ -528,6 +528,11 @@ def _community_post(p: dict) -> dict:
 
 
 # ---------- helpers -------------------------------------------------------
+# YouTube Shorts hard cap is 3 minutes. Longer videos are never Shorts even
+# when someone pastes them under youtube.com/shorts/{id}.
+_YOUTUBE_SHORTS_MAX_SECONDS = 180
+
+
 def _require_youtube_url(url: str) -> tuple[str, str]:
     vid = extract_youtube_id(url)
     if not vid:
@@ -540,6 +545,62 @@ def _require_youtube_url(url: str) -> tuple[str, str]:
             ),
         )
     return vid, normalize_youtube_url(url)
+
+
+def _shorts_canonical_url(video_id: str) -> str:
+    return f"https://www.youtube.com/shorts/{video_id}"
+
+
+def _is_youtube_short_payload(details: dict[str, Any], *, input_url: str) -> bool:
+    """Decide whether a video-details payload is a Short.
+
+    Reject anything over 3 minutes. Accept YouTube's own shorts-eligibility
+    signals, ``/shorts/`` URLs (when duration is in range), or classic ≤60s
+    watch URLs.
+    """
+    duration = safe_int(details.get("durationSeconds"))
+    if duration is not None and duration > _YOUTUBE_SHORTS_MAX_SECONDS:
+        return False
+    if details.get("isShortsEligible") or details.get("isShort") or details.get("contentType") == "short":
+        return True
+    if "/shorts/" in (input_url or "").lower():
+        return duration is None or duration <= _YOUTUBE_SHORTS_MAX_SECONDS
+    # watch?v= under a minute is almost always a Short share link.
+    if duration is not None and duration <= 60:
+        return True
+    return False
+
+
+def _stamp_short_fields(details: dict[str, Any], video_id: str) -> dict[str, Any]:
+    out = dict(details)
+    out["isShort"] = True
+    out["contentType"] = "short"
+    out["url"] = _shorts_canonical_url(video_id)
+    return out
+
+
+async def _assert_youtube_short(url: str) -> tuple[str, str, dict[str, Any]]:
+    """Resolve ``url`` and ensure it is a Short. Returns (id, shortsUrl, details)."""
+    vid, norm_url = _require_youtube_url(url)
+    details = await _video_details_native(vid, norm_url)
+    if not isinstance(details, dict) or details.get("viewCount") is None:
+        # Duration-only fallback: still try to reject obvious long-form.
+        raise HTTPException(status_code=404, detail="Video not found")
+    if not _is_youtube_short_payload(details, input_url=url):
+        duration = safe_int(details.get("durationSeconds"))
+        if duration is not None and duration > _YOUTUBE_SHORTS_MAX_SECONDS:
+            detail = (
+                f"Not a YouTube Short — this video is {_format_duration(duration)} "
+                f"({duration}s). Shorts are {_YOUTUBE_SHORTS_MAX_SECONDS}s or less. "
+                "Use /v1/youtube/video-details for long-form videos."
+            )
+        else:
+            detail = (
+                "Not a YouTube Short. Pass a youtube.com/shorts/… URL, or use "
+                "/v1/youtube/video-details for regular videos."
+            )
+        raise HTTPException(status_code=422, detail=detail)
+    return vid, _shorts_canonical_url(vid), _stamp_short_fields(details, vid)
 
 
 def _ts_float(x: Any) -> float:
@@ -1752,36 +1813,76 @@ async def youtube_hashtag_search(
 
 @router.get("/shorts/transcript", summary="YouTube Shorts transcript")
 async def shorts_transcript(
-    url: str = Query(...),
+    url: str = Query(
+        ...,
+        description="YouTube Shorts URL (youtube.com/shorts/ID) or a watch URL that resolves to a Short (≤3 min).",
+    ),
     language: str | None = Query(None, description="ISO language code (en, tr, es...)"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    return await youtube_transcript(url=url, language=language, cache=cache, caller=caller)
+    _vid, shorts_url, _details = await _assert_youtube_short(url)
+    return await youtube_transcript(url=shorts_url, language=language, cache=cache, caller=caller)
 
 
 @router.get("/shorts/summarize", summary="YouTube Shorts AI summary")
 async def shorts_summarize(
-    url: str = Query(...),
+    url: str = Query(
+        ...,
+        description="YouTube Shorts URL (youtube.com/shorts/ID) or a watch URL that resolves to a Short (≤3 min).",
+    ),
     language: str | None = Query(None),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    return await youtube_summarize(url=url, language=language, cache=cache, caller=caller)
+    _vid, shorts_url, _details = await _assert_youtube_short(url)
+    return await youtube_summarize(url=shorts_url, language=language, cache=cache, caller=caller)
 
 
 @router.get("/shorts/video-details", summary="YouTube Shorts metadata")
 async def shorts_details(
-    url: str = Query(...),
+    url: str = Query(
+        ...,
+        description="YouTube Shorts URL (youtube.com/shorts/ID) or a watch URL that resolves to a Short (≤3 min).",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    return await youtube_video_details(url=url, cache=cache, caller=caller)
+    """Same schema as Video Details, but scoped to Shorts (≤3 min) with ``isShort: true``.
+
+    Long-form videos (including ones pasted under /shorts/{id}) return HTTP 422
+    before credits are charged.
+    """
+    # Validate Short first so long-form never burns a credit.
+    vid, shorts_url, stamped = await _assert_youtube_short(url)
+
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/youtube/shorts/video-details",
+        platform="youtube",
+        resource_url=shorts_url,
+        base_credits=CREDIT_VIDEO_DETAILS,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            ctx["source"] = "direct"
+            return stamped
+
+        data = await cached_or_run(
+            endpoint="youtube.shorts-video-details",
+            params={"url": shorts_url, "v": 3},
+            runner=_run,
+            ctx=ctx,
+            use_cache=cache,
+        )
+        return ApiResponse(data=data)
 
 
 @router.get("/shorts/comments", summary="YouTube Shorts comments")
 async def shorts_comments(
-    url: str = Query(...),
+    url: str = Query(
+        ...,
+        description="YouTube Shorts URL (youtube.com/shorts/ID) or a watch URL that resolves to a Short (≤3 min).",
+    ),
     limit: int = Query(50, ge=1, le=500),
     cursor: str | None = Query(
         None,
@@ -1793,7 +1894,8 @@ async def shorts_comments(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    return await youtube_comments(url=url, limit=limit, cursor=cursor, cache=cache, caller=caller)
+    _vid, shorts_url, _details = await _assert_youtube_short(url)
+    return await youtube_comments(url=shorts_url, limit=limit, cursor=cursor, cache=cache, caller=caller)
 
 
 # ---------- COMMENT REPLIES ----------------------------------------------

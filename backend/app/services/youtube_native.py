@@ -1911,11 +1911,15 @@ def build_youtube_video_details(
     owner_profile = safe_str(micro.get("ownerProfileUrl"))
     channel_handle = channel_handle_from_profile_url(owner_profile)
     live_status = live_status_from_youtube(details)
-    is_short = bool(
-        "/shorts/" in (norm_url or "")
-        or details.get("isShortsEligible")
-        or (duration_seconds is not None and duration_seconds <= 60 and "shorts" in (norm_url or "").lower())
-    )
+    # Shorts hard-cap is 180s. Prefer YouTube's isShortsEligible; also treat
+    # /shorts/ URLs and classic ≤60s watch links as Shorts when in range.
+    is_short = False
+    if duration_seconds is None or duration_seconds <= 180:
+        is_short = bool(
+            details.get("isShortsEligible")
+            or "/shorts/" in (norm_url or "")
+            or (duration_seconds is not None and duration_seconds <= 60)
+        )
     if live_status == "live":
         content_type = "live"
     elif is_short:

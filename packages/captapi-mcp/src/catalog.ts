@@ -120,7 +120,7 @@ const commentId = (): ToolParam => ({
 });
 
 const YT_VIDEO = "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL.";
-const YT_SHORTS = "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL.";
+const YT_SHORTS = "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID (<=3 min). Long-form videos return HTTP 422.";
 const YT_CHANNEL = "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC...";
 const TT_VIDEO = "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL.";
 const TT_PROFILE = "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL.";
@@ -175,7 +175,7 @@ const YOUTUBE: Omit<Endpoint, "platform">[] = [
   { tool: "youtube_playlist", name: "YouTube Playlist", path: "/v1/youtube/playlist", credits: 2, summary: "Playlist metadata plus videos from a YouTube playlist.", params: [url("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), limit(50, 500), fastRss()] },
   { tool: "youtube_shorts_transcript", name: "YouTube Shorts Transcript", path: "/v1/youtube/shorts/transcript", credits: 1, summary: "Transcript of a YouTube Short.", params: [url(YT_SHORTS), language(), cacheParam()] },
   { tool: "youtube_shorts_summarize", name: "YouTube Shorts Summarizer", path: "/v1/youtube/shorts/summarize", credits: 3, summary: "AI summary of a YouTube Short.", params: [url(YT_SHORTS), language(), cacheParam()] },
-  { tool: "youtube_shorts_details", name: "YouTube Shorts Stats", path: "/v1/youtube/shorts/video-details", credits: 1, summary: "Metadata + stats for a YouTube Short.", params: [url(YT_SHORTS)] },
+  { tool: "youtube_shorts_details", name: "YouTube Shorts Stats", path: "/v1/youtube/shorts/video-details", credits: 1, summary: "Same schema as Video Details for a Short (isShort:true); long-form returns 422.", params: [url(YT_SHORTS)] },
   { tool: "youtube_shorts_comments", name: "YouTube Shorts Comments", path: "/v1/youtube/shorts/comments", credits: 2, summary: "Comments on a YouTube Short.", params: [url(YT_SHORTS), limit(50, 500)] },
   { tool: "youtube_channel_shorts", name: "YouTube Channel Shorts", path: "/v1/youtube/channel-shorts", credits: 20, summary: "List a channel's Shorts.", params: [url(YT_CHANNEL), limit(20, 200)] },
   { tool: "youtube_trending_shorts", name: "YouTube Trending Shorts", path: "/v1/youtube/trending-shorts", credits: 28, summary: "Discover trending YouTube Shorts by seed keyword.", params: [{ name: "q", type: "string", required: false, description: "Seed keyword for trending Shorts. Default trending." }, limit(20, 100)] },

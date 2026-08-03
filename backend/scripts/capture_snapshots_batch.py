@@ -587,7 +587,10 @@ def batch_nullfix_phase1() -> list[tuple[str, str, dict]]:
         ("pinterest-board", "/v1/pinterest/board", {"url": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/", "limit": 5}),
         ("youtube-playlist-videos", "/v1/youtube/playlist-videos", {"url": "https://www.youtube.com/playlist?list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj", "limit": 5}),
         ("youtube-trending-shorts", "/v1/youtube/trending-shorts", {"q": "trending", "limit": 5}),
-        ("youtube-shorts-stats", "/v1/youtube/shorts/video-details", {"url": "https://www.youtube.com/shorts/DXVHmGoCTco"}),
+        ("youtube-shorts-stats", "/v1/youtube/shorts/video-details", {"url": "https://www.youtube.com/shorts/egvLKQe6I4I"}),
+        ("youtube-shorts-transcript", "/v1/youtube/shorts/transcript", {"url": "https://www.youtube.com/shorts/egvLKQe6I4I"}),
+        ("youtube-shorts-summarizer", "/v1/youtube/shorts/summarize", {"url": "https://www.youtube.com/shorts/egvLKQe6I4I"}),
+        ("youtube-shorts-comments", "/v1/youtube/shorts/comments", {"url": "https://www.youtube.com/shorts/egvLKQe6I4I", "limit": 5}),
         (
             "youtube-comment-replies",
             "/v1/youtube/comment-replies",
