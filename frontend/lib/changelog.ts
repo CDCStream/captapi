@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
+    category: "improvement",
+    title: "Instagram channel-reels: userId param + hasMore",
+    description:
+      "channel-reels now accepts optional userId (numeric Instagram ID) alongside url/@handle — skips the handle→ID resolve step when you already have the ID from basic-profile or another call. Response includes hasMore (boolean) with nextCursor so pagination loops don't have to infer end-of-list from a null cursor alone. No trim mode — Captapi responses stay lean by default.",
+    items: [
+      "Optional userId query param (faster path)",
+      "hasMore boolean alongside nextCursor",
+      "url remains optional when userId is set",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
     category: "fix",
     title: "Instagram Trending Reels: flat 1 credit, /reels only",
     description:

@@ -1151,8 +1151,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "description": "YouTube Shorts URL (youtube.com/shorts/ID) or a watch URL that resolves to a Short (≤3 min).",
               "title": "Url"
-            }
+            },
+            "description": "YouTube Shorts URL (youtube.com/shorts/ID) or a watch URL that resolves to a Short (≤3 min)."
           },
           {
             "name": "language",
@@ -1226,8 +1228,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "description": "YouTube Shorts URL (youtube.com/shorts/ID) or a watch URL that resolves to a Short (≤3 min).",
               "title": "Url"
-            }
+            },
+            "description": "YouTube Shorts URL (youtube.com/shorts/ID) or a watch URL that resolves to a Short (≤3 min)."
           },
           {
             "name": "language",
@@ -1286,6 +1290,7 @@
           "YouTube"
         ],
         "summary": "YouTube Shorts metadata",
+        "description": "Same schema as Video Details, but scoped to Shorts (≤3 min) with ``isShort: true``.\n\nLong-form videos (including ones pasted under /shorts/{id}) return HTTP 422\nbefore credits are charged.",
         "operationId": "shorts_details_v1_youtube_shorts_video_details_get",
         "security": [
           {
@@ -1299,8 +1304,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "description": "YouTube Shorts URL (youtube.com/shorts/ID) or a watch URL that resolves to a Short (≤3 min).",
               "title": "Url"
-            }
+            },
+            "description": "YouTube Shorts URL (youtube.com/shorts/ID) or a watch URL that resolves to a Short (≤3 min)."
           },
           {
             "name": "cache",
@@ -1356,8 +1363,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "description": "YouTube Shorts URL (youtube.com/shorts/ID) or a watch URL that resolves to a Short (≤3 min).",
               "title": "Url"
-            }
+            },
+            "description": "YouTube Shorts URL (youtube.com/shorts/ID) or a watch URL that resolves to a Short (≤3 min)."
           },
           {
             "name": "limit",
@@ -1612,6 +1621,24 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
           },
           {
             "name": "cache",
@@ -2971,6 +2998,7 @@
           "TikTok"
         ],
         "summary": "Top mixed TikTok search results for a keyword",
+        "description": "TikTok's Top/General search tab — videos and photo carousels when present.\n\nUnlike hashtag/keyword video-only scrapers, results can include photo\ncarousels (``contentType: multi_photo`` + ``images[]``). Hashtags are\nlowercase-deduped; ``hashtags`` is always an array (possibly empty).\nTikTok itself may repeat items across pages.",
         "operationId": "tiktok_top_search_v1_tiktok_top_search_get",
         "security": [
           {
@@ -2999,6 +3027,19 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Pagination cursor. Leave 0 for the first page; then pass the nextCursor from the previous response. TikTok may return duplicates.",
+              "default": 0,
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave 0 for the first page; then pass the nextCursor from the previous response. TikTok may return duplicates."
           },
           {
             "name": "cache",
@@ -3287,7 +3328,7 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "TikTok trending (For You) videos by region",
+        "summary": "TikTok trending (For You) feed by region",
         "operationId": "tiktok_trending_feed_v1_tiktok_trending_feed_get",
         "security": [
           {
@@ -3303,11 +3344,11 @@
               "type": "string",
               "minLength": 2,
               "maxLength": 2,
-              "description": "ISO country code",
+              "description": "ISO country code used as a region hint (e.g. US, TR). You see content available in that market — not only creators from that country.",
               "default": "US",
               "title": "Country"
             },
-            "description": "ISO country code"
+            "description": "ISO country code used as a region hint (e.g. US, TR). You see content available in that market — not only creators from that country."
           },
           {
             "name": "limit",
@@ -3317,9 +3358,11 @@
               "type": "integer",
               "maximum": 200,
               "minimum": 1,
+              "description": "Max items to return (default 20, max 200). Flat 2 credits per call.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "Max items to return (default 20, max 200). Flat 2 credits per call."
           },
           {
             "name": "cache",
@@ -4512,13 +4555,38 @@
           {
             "name": "url",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
-              "description": "Instagram profile URL, @handle, or username",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Instagram profile URL, @handle, or username. Omit when userId is set.",
               "title": "Url"
             },
-            "description": "Instagram profile URL, @handle, or username"
+            "description": "Instagram profile URL, @handle, or username. Omit when userId is set."
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Instagram numeric user ID (e.g. 173560420). Faster than url — skips handle→ID resolve. Prefer when you already have the ID from basic-profile or another call.",
+              "title": "Userid"
+            },
+            "description": "Instagram numeric user ID (e.g. 173560420). Faster than url — skips handle→ID resolve. Prefer when you already have the ID from basic-profile or another call."
           },
           {
             "name": "limit",
@@ -4545,10 +4613,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296",
+              "description": "Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296. Stop when hasMore is false.",
               "title": "Cursor"
             },
-            "description": "Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296"
+            "description": "Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296. Stop when hasMore is false."
           },
           {
             "name": "cache",
@@ -4681,7 +4749,8 @@
         "tags": [
           "Instagram"
         ],
-        "summary": "Instagram trending Reels / Explore posts",
+        "summary": "Instagram trending Reels from /reels",
+        "description": "Public Instagram Reels surface — videos only, flat 1 credit.\n\nInstagram only returns a small overlapping batch per request; call again\nfor more and expect some duplicates (same behaviour as the /reels page).",
         "operationId": "instagram_trending_reels_v1_instagram_trending_reels_get",
         "security": [
           {
@@ -4695,11 +4764,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "description": "Country name or ISO code (e.g. 'United States' or 'US') for Explore localization",
+              "description": "Country name or ISO code (e.g. 'United States' or 'US') for Reels localization",
               "default": "United States",
               "title": "Country"
             },
-            "description": "Country name or ISO code (e.g. 'United States' or 'US') for Explore localization"
+            "description": "Country name or ISO code (e.g. 'United States' or 'US') for Reels localization"
           },
           {
             "name": "limit",
@@ -4708,7 +4777,7 @@
             "schema": {
               "type": "integer",
               "maximum": 200,
-              "minimum": 10,
+              "minimum": 1,
               "default": 20,
               "title": "Limit"
             }
@@ -4855,6 +4924,24 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Leave empty for the first page; then pass the nextCursor value returned in the previous response."
           },
           {
             "name": "cache",
@@ -9418,6 +9505,36 @@
             }
           },
           {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Search sort: relevance|new|top|hot|comments (alias: comment_count). Default relevance.",
+              "default": "relevance",
+              "title": "Sort"
+            },
+            "description": "Search sort: relevance|new|top|hot|comments (alias: comment_count). Default relevance."
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Time window for sort=top or sort=comments: hour|day|week|month|year|all. Default all when those sorts are used and timeframe is omitted.",
+              "title": "Timeframe"
+            },
+            "description": "Time window for sort=top or sort=comments: hour|day|week|month|year|all. Default all when those sorts are used and timeframe is omitted."
+          },
+          {
             "name": "cursor",
             "in": "query",
             "required": false,
@@ -9506,6 +9623,36 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Search sort: relevance|new|top|hot|comments (alias: comment_count). Default relevance.",
+              "default": "relevance",
+              "title": "Sort"
+            },
+            "description": "Search sort: relevance|new|top|hot|comments (alias: comment_count). Default relevance."
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Time window for sort=top or sort=comments: hour|day|week|month|year|all. Default all when those sorts are used and timeframe is omitted. Example: sort=new for chronology, or sort=top&timeframe=week for last week.",
+              "title": "Timeframe"
+            },
+            "description": "Time window for sort=top or sort=comments: hour|day|week|month|year|all. Default all when those sorts are used and timeframe is omitted. Example: sort=new for chronology, or sort=top&timeframe=week for last week."
           },
           {
             "name": "cursor",
@@ -11719,11 +11866,59 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 30,
+              "maximum": 100,
               "minimum": 1,
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "filterBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Video type filter: ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types.",
+              "title": "Filterby"
+            },
+            "description": "Video type filter: ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types."
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Sort: TIME (default, newest first) or VIEWS.",
+              "default": "TIME",
+              "title": "Sortby"
+            },
+            "description": "Sort: TIME (default, newest first) or VIEWS."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor (offset into the first 100 matching videos). Leave empty for the first page; then pass nextCursor from the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor (offset into the first 100 matching videos). Leave empty for the first page; then pass nextCursor from the previous response."
           },
           {
             "name": "cache",

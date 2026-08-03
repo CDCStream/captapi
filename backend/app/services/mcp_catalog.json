@@ -361,7 +361,7 @@
     "name": "YouTube Shorts Stats",
     "path": "/v1/youtube/shorts/video-details",
     "credits": 1,
-    "summary": "Metadata + stats for a YouTube Short.",
+    "summary": "Same schema as Video Details for a Short (isShort:true); long-form returns 422.",
     "params": [
       {
         "name": "url",
@@ -597,7 +597,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Flat 1 credit on the native path."
+        "description": "Max items to return. Default 20, max 200. Flat 1 credit per call."
       },
       {
         "name": "cursor",
@@ -1039,7 +1039,7 @@
     "name": "TikTok Top Search",
     "path": "/v1/tiktok/top-search",
     "credits": 2,
-    "summary": "Top mixed TikTok results for a keyword.",
+    "summary": "Top/General search: videos + photo carousels (contentType/images), cursor pagination.",
     "params": [
       {
         "name": "q",
@@ -1119,7 +1119,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Flat 1 credit on the native path."
+        "description": "Max items to return. Default 20, max 100. Billed per result."
       },
       {
         "name": "cursor",
@@ -1465,13 +1465,19 @@
     "name": "Instagram Channel Reels",
     "path": "/v1/instagram/channel-reels",
     "credits": 6,
-    "summary": "Latest Reels from an Instagram profile.",
+    "summary": "Latest Reels from an Instagram profile — url or userId; nextCursor + hasMore.",
     "params": [
       {
         "name": "url",
         "type": "string",
-        "required": true,
-        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+        "required": false,
+        "description": "Instagram profile URL, @handle, or username. Omit when userId is set. The URL platform must match this tool's platform."
+      },
+      {
+        "name": "userId",
+        "type": "string",
+        "required": false,
+        "description": "Instagram numeric user ID (e.g. 173560420). Faster than url — skips handle→ID resolve."
       },
       {
         "name": "limit",
@@ -1483,7 +1489,7 @@
         "name": "cursor",
         "type": "string",
         "required": false,
-        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+        "description": "Pagination cursor. Leave empty for the first page; then pass nextCursor. Stop when hasMore is false."
       },
       {
         "name": "cache",
@@ -1533,7 +1539,7 @@
     "name": "Instagram Trending Reels",
     "path": "/v1/instagram/trending-reels",
     "credits": 1,
-    "summary": "Trending Reels from instagram.com/reels — videos only, flat 1 credit.",
+    "summary": "Trending Reels from instagram.com/reels — videos only, flat 1 credit. Duplicates across calls expected.",
     "params": [
       {
         "name": "country",
@@ -1573,7 +1579,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Flat 1 credit on the native path."
+        "description": "Max items to return. Default 20, max 200. Flat 1 credit per call."
       },
       {
         "name": "cursor",
@@ -1595,7 +1601,7 @@
     "name": "Instagram Reels By Audio ID",
     "path": "/v1/instagram/reels-by-audio-id",
     "credits": 28,
-    "summary": "Posts/Reels using an Instagram audio ID.",
+    "summary": "Reels by audio + isTrendingInClips / trendRank / music{}.",
     "params": [
       {
         "name": "audio_id",
@@ -1891,7 +1897,7 @@
         "name": "sortBy",
         "type": "string",
         "required": false,
-        "description": "TOP_POSTS | RECENT_ACTIVITY | CHRONOLOGICAL (default) | CHRONOLOGICAL_LISTINGS. Maps to Facebook sorting_setting."
+        "description": "TOP_POSTS | RECENT_ACTIVITY | CHRONOLOGICAL (default) | CHRONOLOGICAL_LISTINGS."
       },
       {
         "name": "cache",
@@ -4427,7 +4433,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 50."
+        "description": "Max items to return. Default 20, max 50. Billed per result."
       },
       {
         "name": "cache",

@@ -150,7 +150,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `instagram_comments` | `/v1/instagram/comments` | `url` (string), `limit`? (number), `cache`? (boolean) | 45 |
 | `instagram_channel_details` | `/v1/instagram/channel-details` | `url` (string), `cache`? (boolean) | 1 |
 | `instagram_channel_posts` | `/v1/instagram/channel-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 6 |
-| `instagram_channel_reels` | `/v1/instagram/channel-reels` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 6 |
+| `instagram_channel_reels` | `/v1/instagram/channel-reels` | `url`? (string), `userId`? (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 6 |
 | `instagram_reels_search` | `/v1/instagram/reels-search` | `q` (string), `limit`? (number), `datePosted`? (string), `cache`? (boolean) | 2 |
 | `instagram_trending_reels` | `/v1/instagram/trending-reels` | `country`? (string), `limit`? (number), `cache`? (boolean) | 28 |
 | `instagram_tagged_posts` | `/v1/instagram/tagged-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 1 |

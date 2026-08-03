@@ -1215,27 +1215,105 @@ async def instagram_channel_posts(
 
 @router.get("/channel-reels", summary="Latest Reels from an Instagram profile")
 async def instagram_channel_reels(
-    url: str = Query(..., description="Instagram profile URL, @handle, or username"),
+    url: str | None = Query(
+        None,
+        description="Instagram profile URL, @handle, or username. Omit when userId is set.",
+    ),
+    userId: str | None = Query(
+        None,
+        description=(
+            "Instagram numeric user ID (e.g. 173560420). Faster than url — skips "
+            "handle→ID resolve. Prefer when you already have the ID from basic-profile "
+            "or another call."
+        ),
+    ),
     limit: int = Query(20, ge=1, le=200),
-    cursor: str | None = Query(None, description="Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296"),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Leave empty for the first page; then pass the nextCursor value returned in "
+            "the previous response, e.g. 3937014945555313553_1697296. Stop when hasMore is false."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = _require_instagram_profile(url)
+    handle: str | None = None
+    known_user_id: str | None = None
+    if userId is not None and str(userId).strip():
+        uid = str(userId).strip()
+        if not uid.isdigit():
+            raise HTTPException(
+                status_code=400,
+                detail="userId must be a numeric Instagram user ID (e.g. 173560420).",
+            )
+        known_user_id = uid
+    if url is not None and str(url).strip():
+        handle = _require_instagram_profile(url)
+    if not known_user_id and not handle:
+        raise HTTPException(
+            status_code=400,
+            detail="Pass url (profile URL / @handle) or userId (numeric Instagram ID).",
+        )
+
     settings = get_settings()
     if cursor and not _IG_CURSOR_RE.match(cursor):
         raise HTTPException(status_code=400, detail="Invalid cursor. Pass the nextCursor value from a previous response.")
+    resource_url = (url.strip() if url and str(url).strip() else None) or f"instagram_user:{known_user_id}"
     cost = _scaled_credits(limit, RATE_IG_CHANNEL, 1)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/channel-reels",
         platform="instagram",
-        resource_url=url,
+        resource_url=resource_url,
         base_credits=cost,
     ) as ctx:
+        def _payload(
+            reels: list[dict[str, Any]],
+            next_cursor: str | None,
+            *,
+            user_id: str | None = None,
+            degraded: bool = False,
+            partial: bool = False,
+        ) -> dict[str, Any]:
+            uid = user_id or known_user_id
+            out: dict[str, Any] = {
+                "url": resource_url,
+                "totalReturned": len(reels),
+                "reels": reels,
+                "nextCursor": next_cursor,
+                "hasMore": False if degraded else (next_cursor is not None),
+            }
+            if uid:
+                out["userId"] = uid
+            if degraded:
+                out["degraded"] = True
+            if partial:
+                out["partial"] = True
+            return out
+
+        async def _ensure_handle() -> str:
+            nonlocal handle
+            if handle:
+                return handle
+            assert known_user_id
+            resolved = await instagram_native.resolve_username(known_user_id)
+            if not resolved:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Profile not found for that user ID.",
+                )
+            handle = resolved
+            return handle
+
         async def _run() -> dict[str, Any]:
             if cursor:
                 user_id = _IG_CURSOR_RE.match(cursor).group(1)
+                if known_user_id and known_user_id != user_id:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="userId does not match the user id embedded in cursor.",
+                    )
                 result = await retry_none(
                     lambda: _ig_feed_collect(user_id, cursor, limit, reels_only=True),
                     attempts=2,
@@ -1245,46 +1323,43 @@ async def instagram_channel_reels(
                     raise HTTPException(status_code=502, detail="Failed to fetch the next page. Retry shortly.")
                 reels, next_cursor = result
                 ctx["source"] = "direct"
-                return {
-                    "url": url,
-                    "totalReturned": len(reels),
-                    "reels": reels,
-                    "nextCursor": next_cursor,
-                    "hasMore": next_cursor is not None,
-                }
+                return _payload(reels, next_cursor, user_id=user_id)
 
             async def _apify() -> dict[str, Any]:
+                profile_handle = await _ensure_handle()
                 apify = get_apify()
                 items, _actor = await apify.run_with_fallback(
-                    _instagram_profile_candidates(settings, f"https://www.instagram.com/{handle}/", limit, "reels"),
+                    _instagram_profile_candidates(
+                        settings, f"https://www.instagram.com/{profile_handle}/", limit, "reels"
+                    ),
                     max_items=limit,
                 )
-                reels = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
-                return {
-                    "url": url,
-                    "totalReturned": len(reels),
-                    "reels": reels,
-                    "nextCursor": None,
-                    "hasMore": None,
-                    "degraded": True,
-                    "partial": True,
-                }
+                reels = [
+                    decodo.strip_null_post_fields(_normalize_post(i))
+                    for i in items[:limit]
+                    if not i.get("error")
+                ]
+                return _payload(reels, None, degraded=True, partial=True)
 
-            # Native-first: hardened web_profile_info (session / Decodo HTML) →
-            # api/v1 feed filtered to reels. Decodo GraphQL channel_reels next.
+            # Native-first. When userId is provided, skip handle→ID resolve and
+            # hit the feed API directly (faster; matches SC's user_id DX).
+            # Otherwise: web_profile_info → api/v1 feed → Decodo GraphQL.
             # Hard wall-clock budget: return what we have rather than sit to 180s.
             t0 = time.monotonic()
             budget_s = 45.0
 
-            user = await instagram_native.fetch_web_profile_info(handle)
-            user_id = safe_str((user or {}).get("pk") or (user or {}).get("id"))
+            user_id = known_user_id
             followers = None
-            if user:
-                followers = safe_int(
-                    (user.get("edge_followed_by") or {}).get("count")
-                    if isinstance(user.get("edge_followed_by"), dict)
-                    else user.get("follower_count")
-                )
+            if not user_id:
+                assert handle
+                user = await instagram_native.fetch_web_profile_info(handle)
+                user_id = safe_str((user or {}).get("pk") or (user or {}).get("id"))
+                if user:
+                    followers = safe_int(
+                        (user.get("edge_followed_by") or {}).get("count")
+                        if isinstance(user.get("edge_followed_by"), dict)
+                        else user.get("follower_count")
+                    )
             if user_id:
                 native = await _ig_feed_collect(
                     user_id, None, limit, reels_only=True, followers=followers
@@ -1292,13 +1367,7 @@ async def instagram_channel_reels(
                 if native is not None and native[0]:
                     reels, next_cursor = native
                     ctx["source"] = "direct"
-                    return {
-                        "url": url,
-                        "totalReturned": len(reels),
-                        "reels": reels,
-                        "nextCursor": next_cursor,
-                        "hasMore": next_cursor is not None,
-                    }
+                    return _payload(reels, next_cursor, user_id=user_id)
 
             if time.monotonic() - t0 >= budget_s:
                 raise HTTPException(
@@ -1309,7 +1378,8 @@ async def instagram_channel_reels(
             async def _decodo_run() -> dict[str, Any] | None:
                 if time.monotonic() - t0 >= budget_s:
                     return None
-                page = _ig_channel_page(await decodo.channel_reels(handle, limit), limit)
+                profile_handle = await _ensure_handle()
+                page = _ig_channel_page(await decodo.channel_reels(profile_handle, limit), limit)
                 if page is None:
                     return None
                 reels, next_cursor, uid, fol = page
@@ -1325,13 +1395,7 @@ async def instagram_channel_reels(
                         reels, next_cursor = native
                 if not reels:
                     return None
-                out = {
-                    "url": url,
-                    "totalReturned": len(reels),
-                    "reels": reels,
-                    "nextCursor": next_cursor,
-                    "hasMore": next_cursor is not None,
-                }
+                out = _payload(reels, next_cursor, user_id=uid or user_id)
                 if time.monotonic() - t0 >= budget_s:
                     out["partial"] = True
                 return out
@@ -1340,7 +1404,13 @@ async def instagram_channel_reels(
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 18},
+            params={
+                "url": (url or "").strip(),
+                "userId": known_user_id or "",
+                "limit": limit,
+                "cursor": cursor or "",
+                "v": 19,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,

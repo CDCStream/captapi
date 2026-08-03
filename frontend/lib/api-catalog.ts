@@ -478,14 +478,14 @@ const INSTAGRAM: Spec[] = [
     credits: 6,
     creditsPerResult: 0.3,
     tagline:
-      "Latest Reels from a public Instagram profile — views, viewsInstagram, viewsFacebook (IG vs FB cross-post).",
+      "Latest Reels from a public Instagram profile — pass userId for a faster lookup, paginate with nextCursor + hasMore.",
     longDescription:
-      "Send a profile URL or @handle and get that account's recent Reels (videos only). Each Reel includes video URL, caption, likes, comments, duration, and publish date. Play counts are split when Instagram exposes them: engagement.views = total (IG+FB), viewsInstagram = Instagram-only, viewsFacebook = Facebook cross-post. Instagram-only performance reports should use viewsInstagram — total views can be ~20% higher from Facebook. Cursor pagination via nextCursor. Pass cache=true for the 24h shared cache.",
+      "Send a profile URL/@handle or a numeric userId and get that account's recent Reels (videos only). Prefer userId when you already have it (from basic-profile or another call) — it skips handle→ID resolve and responds faster. Each Reel includes video URL, caption, likes, comments, duration, and publish date. Play counts are split when Instagram exposes them: engagement.views = total (IG+FB), viewsInstagram = Instagram-only, viewsFacebook = Facebook cross-post. Instagram-only performance reports should use viewsInstagram — total views can be ~20% higher from Facebook. Cursor pagination via nextCursor; hasMore is true until the end of the list. Pass cache=true for the 24h shared cache.",
     delivers: [
       "Reels only (photos/carousels filtered out)",
+      "url or userId input (userId skips handle resolve)",
       "views + viewsInstagram + viewsFacebook when available",
-      "Video URL, caption, likes, comments, duration",
-      "Cursor pagination",
+      "nextCursor + hasMore pagination",
     ],
   },
   { slug: "instagram-reels-search", name: "Instagram Reels Search API", shortName: "Reels Search", category: "search", method: "GET", path: "/v1/instagram/reels-search", credits: 2, tagline: "Native Instagram Reels hashtag search — views + plays, author verified/followers, audio, location. Flat 2 credits.", longDescription: "Send a hashtag (without the #) or keyword and get matching Reels from Instagram's native hashtag grid as clean JSON — videos only. Same enriched shape as Hashtag Search: author (verified, profileImage, followers, postCount), engagement.views plus engagement.plays when Instagram exposes both, music{}, location{}, paid/ad/affiliate flags, preview comments when present, duration, and publish date. Optional datePosted=last_24_hours|last_week|last_month|last_year. Flat 2 credits per call (same as hashtag-search). Pass cache=true for the 24h shared cache." },
@@ -2069,7 +2069,30 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "instagram-comments": [up(IG_POST), lp(50, 500)],
   "instagram-channel-details": [up(IG_PROFILE)],
   "instagram-channel-posts": [up(IG_PROFILE), lp(20, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (e.g. 3937014945555313553_1697296). A null nextCursor means the end of the list." }],
-  "instagram-channel-reels": [up(IG_PROFILE), lp(20, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (e.g. 3937158245004702478_12281817). A null nextCursor means the end of the list." }],
+  "instagram-channel-reels": [
+    {
+      name: "url",
+      type: "string",
+      required: false,
+      description:
+        "Instagram profile URL, @handle, or username. Omit when userId is set. The URL platform must match this endpoint's platform.",
+    },
+    {
+      name: "userId",
+      type: "string",
+      required: false,
+      description:
+        "Instagram numeric user ID (e.g. 173560420). Faster than url — skips handle→ID resolve. Prefer when you already have the ID from basic-profile or another call.",
+    },
+    lp(20, 200),
+    {
+      name: "cursor",
+      type: "string",
+      required: false,
+      description:
+        "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (e.g. 3937158245004702478_12281817). Stop when hasMore is false.",
+    },
+  ],
   "instagram-reels-search": [
     qp("Hashtag (without #) or keyword (min 2 characters)."),
     lp(20, 200),

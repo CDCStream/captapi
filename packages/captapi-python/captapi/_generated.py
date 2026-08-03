@@ -101,7 +101,7 @@ class YoutubeApi:
     def shorts_transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Transcript — Transcript of a YouTube Short. (1 credit)
 
-        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID (<=3 min). Long-form videos return HTTP 422. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -110,16 +110,16 @@ class YoutubeApi:
     def shorts_summarize(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Summarizer — AI summary of a YouTube Short. (3 credits)
 
-        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID (<=3 min). Long-form videos return HTTP 422. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/shorts/summarize", {"url": url, "language": language, "cache": cache})
 
     def shorts_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Shorts Stats — Metadata + stats for a YouTube Short. (1 credit)
+        """YouTube Shorts Stats — Same schema as Video Details for a Short (isShort:true); long-form returns 422. (1 credit)
 
-        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID (<=3 min). Long-form videos return HTTP 422. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/shorts/video-details", {"url": url, "cache": cache})
@@ -127,7 +127,7 @@ class YoutubeApi:
     def shorts_comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Comments — Comments on a YouTube Short. (2 credits)
 
-        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID (<=3 min). Long-form videos return HTTP 422. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -192,7 +192,7 @@ class YoutubeApi:
         """YouTube Community Posts — Community posts — numeric likes, ISO dates, channel{}, video{}; cursor pagination. (1 credit)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Flat 1 credit on the native path.
+        :param limit: Max items to return. Default 20, max 200. Flat 1 credit per call.
         :param cursor: Leave empty for the first page; then pass the nextCursor value from the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -311,7 +311,7 @@ class AsyncYoutubeApi:
     async def shorts_transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Transcript — Transcript of a YouTube Short. (1 credit)
 
-        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID (<=3 min). Long-form videos return HTTP 422. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -320,16 +320,16 @@ class AsyncYoutubeApi:
     async def shorts_summarize(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Summarizer — AI summary of a YouTube Short. (3 credits)
 
-        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID (<=3 min). Long-form videos return HTTP 422. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/shorts/summarize", {"url": url, "language": language, "cache": cache})
 
     async def shorts_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Shorts Stats — Metadata + stats for a YouTube Short. (1 credit)
+        """YouTube Shorts Stats — Same schema as Video Details for a Short (isShort:true); long-form returns 422. (1 credit)
 
-        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID (<=3 min). Long-form videos return HTTP 422. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/shorts/video-details", {"url": url, "cache": cache})
@@ -337,7 +337,7 @@ class AsyncYoutubeApi:
     async def shorts_comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Comments — Comments on a YouTube Short. (2 credits)
 
-        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID (<=3 min). Long-form videos return HTTP 422. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -402,7 +402,7 @@ class AsyncYoutubeApi:
         """YouTube Community Posts — Community posts — numeric likes, ISO dates, channel{}, video{}; cursor pagination. (1 credit)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Flat 1 credit on the native path.
+        :param limit: Max items to return. Default 20, max 200. Flat 1 credit per call.
         :param cursor: Leave empty for the first page; then pass the nextCursor value from the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -549,7 +549,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/music-posts", {"url": url, "limit": limit, "cache": cache})
 
     def top_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Top Search — Top mixed TikTok results for a keyword. (2 credits)
+        """TikTok Top Search — Top/General search: videos + photo carousels (contentType/images), cursor pagination. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -572,7 +572,7 @@ class TiktokApi:
         """TikTok Search Users — Search TikTok users — id, secUid, followers/following, verified, sample videos; cursor pagination. (1 credit)
 
         :param q: Search query matched against usernames, display names and bios.
-        :param limit: Max items to return. Default 20, max 100. Flat 1 credit on the native path.
+        :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cursor: Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -613,7 +613,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/live", {"url": url, "cache": cache})
 
     def live_info(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Live Info — Same as TikTok Live (status, room, stream qualities). (7 credits)
+        """TikTok Live Info — Same as TikTok Live (status, room, stream qualities) at 7 credits. (7 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -756,7 +756,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/music-posts", {"url": url, "limit": limit, "cache": cache})
 
     async def top_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Top Search — Top mixed TikTok results for a keyword. (2 credits)
+        """TikTok Top Search — Top/General search: videos + photo carousels (contentType/images), cursor pagination. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -779,7 +779,7 @@ class AsyncTiktokApi:
         """TikTok Search Users — Search TikTok users — id, secUid, followers/following, verified, sample videos; cursor pagination. (1 credit)
 
         :param q: Search query matched against usernames, display names and bios.
-        :param limit: Max items to return. Default 20, max 100. Flat 1 credit on the native path.
+        :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cursor: Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -820,7 +820,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/live", {"url": url, "cache": cache})
 
     async def live_info(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Live Info — Same as TikTok Live (status, room, stream qualities). (7 credits)
+        """TikTok Live Info — Same as TikTok Live (status, room, stream qualities) at 7 credits. (7 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -896,18 +896,19 @@ class InstagramApi:
         """
         return self._t.get("/v1/instagram/channel-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
-    def channel_reels(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Channel Reels — Latest Reels from an Instagram profile. (6 credits)
+    def channel_reels(self, *, url: str | None = None, userId: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Channel Reels — Latest Reels from an Instagram profile — url or userId; nextCursor + hasMore. (6 credits)
 
-        :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Instagram profile URL, @handle, or username. Omit when userId is set. The URL platform must match this tool's platform.
+        :param userId: Instagram numeric user ID (e.g. 173560420). Faster than url — skips handle→ID resolve.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass nextCursor. Stop when hasMore is false.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/instagram/channel-reels", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
+        return self._t.get("/v1/instagram/channel-reels", {"url": url, "userId": userId, "limit": limit, "cursor": cursor, "cache": cache})
 
     def reels_search(self, *, q: str, limit: float | None = None, datePosted: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Reels Search — Native Reels hashtag search with views/plays. (2 credits)
+        """Instagram Reels Search — Native Instagram Reels hashtag search — views/plays, author verified/followers, datePosted. Flat 2 credits. (2 credits)
 
         :param q: Hashtag (without #) or keyword (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
@@ -917,7 +918,7 @@ class InstagramApi:
         return self._t.get("/v1/instagram/reels-search", {"q": q, "limit": limit, "datePosted": datePosted, "cache": cache})
 
     def trending_reels(self, *, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Trending Reels — Trending Instagram Reels / Explore posts by country. (28 credits)
+        """Instagram Trending Reels — Trending Reels from instagram.com/reels — videos only, flat 1 credit. Duplicates across calls expected. (1 credit)
 
         :param country: Country name for Explore localization. Default United States.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -929,14 +930,14 @@ class InstagramApi:
         """Instagram Tagged Posts — Tagged posts — author id, views, hashtags/mentions; cursor pagination. (1 credit)
 
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Flat 1 credit on the native path.
+        :param limit: Max items to return. Default 20, max 200. Flat 1 credit per call.
         :param cursor: Leave empty for the first page; then pass the nextCursor value from the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/tagged-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def reels_by_audio_id(self, *, audio_id: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Reels By Audio ID — Posts/Reels using an Instagram audio ID. (28 credits)
+        """Instagram Reels By Audio ID — Reels by audio + isTrendingInClips / trendRank / music{}. (28 credits)
 
         :param audio_id: Instagram audio/music ID or full audio URL.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -955,7 +956,7 @@ class InstagramApi:
         return self._t.get("/v1/instagram/hashtag-search", {"q": q, "limit": limit, "mediaType": mediaType, "cache": cache})
 
     def profile_search(self, *, q: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Profile Search — Resolve a brand or @handle to one Instagram profile with id, bio, links, and stats (not niche discovery). (1 credit)
+        """Instagram Profile Search — Resolve a brand or @handle to one Instagram profile with id, bio, links, and stats (not niche discovery). Flat 1 credit. (1 credit)
 
         :param q: Search query or keywords (min 2 chars).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1036,18 +1037,19 @@ class AsyncInstagramApi:
         """
         return await self._t.get("/v1/instagram/channel-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
-    async def channel_reels(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Channel Reels — Latest Reels from an Instagram profile. (6 credits)
+    async def channel_reels(self, *, url: str | None = None, userId: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Channel Reels — Latest Reels from an Instagram profile — url or userId; nextCursor + hasMore. (6 credits)
 
-        :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Instagram profile URL, @handle, or username. Omit when userId is set. The URL platform must match this tool's platform.
+        :param userId: Instagram numeric user ID (e.g. 173560420). Faster than url — skips handle→ID resolve.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass nextCursor. Stop when hasMore is false.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/instagram/channel-reels", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
+        return await self._t.get("/v1/instagram/channel-reels", {"url": url, "userId": userId, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def reels_search(self, *, q: str, limit: float | None = None, datePosted: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Reels Search — Native Reels hashtag search with views/plays. (2 credits)
+        """Instagram Reels Search — Native Instagram Reels hashtag search — views/plays, author verified/followers, datePosted. Flat 2 credits. (2 credits)
 
         :param q: Hashtag (without #) or keyword (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
@@ -1057,7 +1059,7 @@ class AsyncInstagramApi:
         return await self._t.get("/v1/instagram/reels-search", {"q": q, "limit": limit, "datePosted": datePosted, "cache": cache})
 
     async def trending_reels(self, *, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Trending Reels — Trending Instagram Reels / Explore posts by country. (28 credits)
+        """Instagram Trending Reels — Trending Reels from instagram.com/reels — videos only, flat 1 credit. Duplicates across calls expected. (1 credit)
 
         :param country: Country name for Explore localization. Default United States.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -1069,14 +1071,14 @@ class AsyncInstagramApi:
         """Instagram Tagged Posts — Tagged posts — author id, views, hashtags/mentions; cursor pagination. (1 credit)
 
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Flat 1 credit on the native path.
+        :param limit: Max items to return. Default 20, max 200. Flat 1 credit per call.
         :param cursor: Leave empty for the first page; then pass the nextCursor value from the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/tagged-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def reels_by_audio_id(self, *, audio_id: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Reels By Audio ID — Posts/Reels using an Instagram audio ID. (28 credits)
+        """Instagram Reels By Audio ID — Reels by audio + isTrendingInClips / trendRank / music{}. (28 credits)
 
         :param audio_id: Instagram audio/music ID or full audio URL.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -1095,7 +1097,7 @@ class AsyncInstagramApi:
         return await self._t.get("/v1/instagram/hashtag-search", {"q": q, "limit": limit, "mediaType": mediaType, "cache": cache})
 
     async def profile_search(self, *, q: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Profile Search — Resolve a brand or @handle to one Instagram profile with id, bio, links, and stats (not niche discovery). (1 credit)
+        """Instagram Profile Search — Resolve a brand or @handle to one Instagram profile with id, bio, links, and stats (not niche discovery). Flat 1 credit. (1 credit)
 
         :param q: Search query or keywords (min 2 chars).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1149,7 +1151,7 @@ class FacebookApi:
         return self._t.get("/v1/facebook/comments", {"url": url, "limit": limit, "cache": cache})
 
     def page_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Page Details — Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. (2 credits)
+        """Facebook Page Details — Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. Flat 2 credits. (2 credits)
 
         :param url: Facebook page URL, e.g. https://facebook.com/PageName. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1175,7 +1177,7 @@ class FacebookApi:
         return self._t.get("/v1/facebook/profile-reels", {"url": url, "limit": limit, "cache": cache})
 
     def group_posts(self, *, url: str, limit: float | None = None, sortBy: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Group Posts — Public group posts with author IDs and sortBy. (2 credits)
+        """Facebook Group Posts — Public Facebook group posts — author IDs, permalink, sortBy, engagement (shares null when unknown). (2 credits)
 
         :param url: Public Facebook group URL, e.g. https://facebook.com/groups/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
@@ -1234,7 +1236,7 @@ class AsyncFacebookApi:
         return await self._t.get("/v1/facebook/comments", {"url": url, "limit": limit, "cache": cache})
 
     async def page_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Page Details — Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. (2 credits)
+        """Facebook Page Details — Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. Flat 2 credits. (2 credits)
 
         :param url: Facebook page URL, e.g. https://facebook.com/PageName. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1260,7 +1262,7 @@ class AsyncFacebookApi:
         return await self._t.get("/v1/facebook/profile-reels", {"url": url, "limit": limit, "cache": cache})
 
     async def group_posts(self, *, url: str, limit: float | None = None, sortBy: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Group Posts — Public group posts with author IDs and sortBy. (2 credits)
+        """Facebook Group Posts — Public Facebook group posts — author IDs, permalink, sortBy, engagement (shares null when unknown). (2 credits)
 
         :param url: Public Facebook group URL, e.g. https://facebook.com/groups/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
@@ -2938,10 +2940,10 @@ class SpotifyApi:
         return self._t.get("/v1/spotify/album", {"url": url, "cache": cache})
 
     def search(self, *, q: str, type_: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Spotify Search — Search Spotify by type (tracks/albums/artists/podcasts/episodes) - canonical URIs, explicit/playable, scrapedAt. (2 credits)
+        """Spotify Search — Search Spotify by type (tracks/albums/artists/podcasts/episodes) - canonical URIs, explicit/playable, scrapedAt. Flat 2 credits. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
-        :param type_: tracks, albums, artists, podcasts, or episodes. Default tracks.
+        :param type_: Result kind: tracks (default), albums, artists, podcasts, or episodes.
         :param limit: Max items to return. Default 20, max 50. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -2995,10 +2997,10 @@ class AsyncSpotifyApi:
         return await self._t.get("/v1/spotify/album", {"url": url, "cache": cache})
 
     async def search(self, *, q: str, type_: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Spotify Search — Search Spotify by type (tracks/albums/artists/podcasts/episodes) - canonical URIs, explicit/playable, scrapedAt. (2 credits)
+        """Spotify Search — Search Spotify by type (tracks/albums/artists/podcasts/episodes) - canonical URIs, explicit/playable, scrapedAt. Flat 2 credits. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
-        :param type_: tracks, albums, artists, podcasts, or episodes. Default tracks.
+        :param type_: Result kind: tracks (default), albums, artists, podcasts, or episodes.
         :param limit: Max items to return. Default 20, max 50. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """

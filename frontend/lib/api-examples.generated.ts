@@ -2833,6 +2833,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "instagram-channel-reels": {
     "url": "https://www.instagram.com/cristiano/",
+    "userId": "173560420",
     "totalReturned": 3,
     "reels": [
       {
