@@ -2512,7 +2512,10 @@ async def live_status_native(handle: str) -> dict[str, Any] | None:
 
 
 def _map_trend_video(item: dict[str, Any], *, rank: int) -> dict[str, Any] | None:
-    """Map ``/api/recommend/item_list/`` row → trending-feed public shape."""
+    """Map ``/api/recommend/item_list/`` row → trending-feed public shape.
+
+    ``rank`` is Captapi-specific (For You position) — keep it first-class.
+    """
     author = item.get("author") if isinstance(item.get("author"), dict) else {}
     stats = item.get("stats") if isinstance(item.get("stats"), dict) else {}
     stats_v2 = item.get("statsV2") if isinstance(item.get("statsV2"), dict) else {}
@@ -2521,27 +2524,66 @@ def _map_trend_video(item: dict[str, Any], *, rank: int) -> dict[str, Any] | Non
     vid = safe_str(item.get("id") or item.get("videoId") or item.get("aweme_id"))
     if not vid:
         return None
+
+    create_ts = safe_int(item.get("createTime") or item.get("create_time"))
+    aweme_type = safe_int(item.get("awemeType") or item.get("aweme_type"))
+    image_post = item.get("imagePost") or item.get("image_post") or item.get("image_post_info")
+    shoot_tab = (safe_str(item.get("shootTabName") or item.get("shoot_tab_name")) or "").lower()
+    is_photo = bool(image_post) or shoot_tab == "photo" or aweme_type in (150, 51)
+    media_type = "photo" if is_photo else "video"
+
     url = safe_str(item.get("webVideoUrl") or item.get("url"))
     if not url and uid:
-        url = f"https://www.tiktok.com/@{uid}/video/{vid}"
+        kind = "photo" if is_photo else "video"
+        url = f"https://www.tiktok.com/@{uid}/{kind}/{vid}"
+
     cover = video.get("cover") or video.get("originCover") or item.get("cover")
     if isinstance(cover, dict):
         cover = _url_list_first(cover) or safe_str(cover.get("url"))
     else:
         cover = safe_str(cover)
-    return {
+    if not cover and isinstance(image_post, dict):
+        cover = _url_list_first(image_post.get("cover") or image_post.get("imageURL"))
+
+    play_url = _url_list_first(video.get("playAddr") or video.get("play_addr"))
+    if not play_url and isinstance(video.get("playAddr"), str):
+        play_url = safe_str(video.get("playAddr"))
+    duration = safe_float(video.get("duration") or video.get("durationInSec"))
+    # Some feeds return duration in ms.
+    if duration is not None and duration > 1000:
+        duration = round(duration / 1000.0, 3)
+
+    author_id = safe_str(author.get("id") or author.get("uid"))
+    author_sec = safe_str(author.get("secUid") or author.get("sec_uid"))
+    caption = safe_str(item.get("desc") or item.get("title") or item.get("text"))
+
+    out: dict[str, Any] = {
+        "platform": "tiktok",
         "url": url,
         "id": vid,
-        "title": safe_str(item.get("desc") or item.get("title") or item.get("text")),
+        # Same field name as channel-posts / video-details (not ``title``).
+        "caption": caption,
+        "publishedAt": _iso(create_ts),
+        "createTime": create_ts,
+        "mediaType": media_type,
+        "durationSeconds": duration,
         "coverUrl": cover,
+        "thumbnailUrl": cover,
+        "videoUrl": play_url,
         "author": uid,
+        "authorId": author_id,
+        "secUid": author_sec,
         "authorName": safe_str(author.get("nickname") or author.get("nickName")),
         "views": _stat(stats_v2, stats, "playCount"),
         "likes": _stat(stats_v2, stats, "diggCount"),
         "comments": _stat(stats_v2, stats, "commentCount"),
         "shares": _stat(stats_v2, stats, "shareCount"),
+        "saves": _stat(stats_v2, stats, "collectCount"),
+        "isAd": bool(item.get("isAd") or item.get("is_ad")),
+        # For You position — Captapi-only signal vs SC.
         "rank": rank,
     }
+    return {k: v for k, v in out.items() if v is not None}
 
 
 async def trending_feed_native(
@@ -2549,9 +2591,10 @@ async def trending_feed_native(
 ) -> list[dict[str, Any]] | None:
     """For-You / recommend feed via signer ``/api/recommend/item_list/``.
 
-    ``country`` is passed as TikTok region hints; the browser session geo often
-    dominates, so results are best-effort localized. Returns ranked rows in the
-    ``/trending-feed`` shape, or ``None`` so the caller can fall back to Apify.
+    ``country`` is a region availability hint (content not banned in that
+    market) — it does **not** guarantee creators from that country. Returns
+    ranked rows in the ``/trending-feed`` shape, or ``None`` so the caller
+    can fall back.
     """
     from app.services import tiktok_signer
 

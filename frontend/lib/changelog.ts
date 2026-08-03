@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
+    category: "improvement",
+    title: "TikTok Trending Feed: publishedAt, rank, mediaType, saves, isAd",
+    description:
+      "Trending Feed now returns publishedAt + createTime (so you can tell fresh virals from weeks-old ones), keeps rank as a first-class For You position, renames title→caption to match other Captapi TikTok endpoints, and adds mediaType (video|photo), videoUrl, saves, isAd, authorId/secUid, and scrapedAt. Docs clarify flat 2 credits (not per-result) and that country is a region-availability hint — not “only creators from TR”.",
+    items: [
+      "publishedAt / createTime on every trending-feed item",
+      "caption (not title); mediaType, videoUrl, saves, isAd",
+      "authorId + secUid; country param honesty + lpFlat docs",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
     category: "fix",
     title: "Facebook profile-posts: one author identity + honest shares",
     description:

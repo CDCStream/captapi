@@ -2488,10 +2488,18 @@ async def tiktok_song_details(
         return ApiResponse(data=data)
 
 
-@router.get("/trending-feed", summary="TikTok trending (For You) videos by region")
+@router.get("/trending-feed", summary="TikTok trending (For You) feed by region")
 async def tiktok_trending_feed(
-    country: str = Query("US", min_length=2, max_length=2, description="ISO country code"),
-    limit: int = Query(20, ge=1, le=200),
+    country: str = Query(
+        "US",
+        min_length=2,
+        max_length=2,
+        description=(
+            "ISO country code used as a region hint (e.g. US, TR). "
+            "You see content available in that market — not only creators from that country."
+        ),
+    ),
+    limit: int = Query(20, ge=1, le=200, description="Max items to return (default 20, max 200). Flat 2 credits per call."),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -2507,10 +2515,12 @@ async def tiktok_trending_feed(
             native = await trending_feed_native(country.upper(), limit=limit)
             if native:
                 ctx["source"] = "direct"
+                scraped = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
                 return {
                     "country": country.upper(),
                     "totalReturned": len(native),
                     "results": native,
+                    "scrapedAt": scraped,
                 }
             raise HTTPException(
                 status_code=502,
@@ -2519,7 +2529,7 @@ async def tiktok_trending_feed(
 
         data = await cached_or_run(
             endpoint="tiktok.trending-feed",
-            params={"country": country.upper(), "limit": limit, "v": 3},
+            params={"country": country.upper(), "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
