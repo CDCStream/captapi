@@ -433,11 +433,61 @@ const TIKTOK: Spec[] = [
 const INSTAGRAM: Spec[] = [
   { slug: "instagram-transcript", name: "Instagram Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/instagram/transcript", credits: 2, tagline: "Turn any Instagram Reel's speech into text — the full transcript plus timestamped segments, ready for search, subtitles, or AI pipelines." , longDescription: "Send a Reel URL and the Instagram Transcript API returns everything spoken in the video as clean text: the full transcript, timestamped segments (start time and duration for each line), and word count. Auto-detects the spoken language, or pass an optional language code (like 'tr' or 'en') to pin it — recommended for short clips. Great for making Reels searchable, generating subtitles, feeding AI tools, or turning video into text. No Instagram login or OAuth required. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "instagram-summarizer", name: "Instagram Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/instagram/summarize", credits: 4, tagline: "Get an AI summary of any Instagram Reel — a short paragraph plus key points, without watching the video.", longDescription: "Send a Reel URL and the Instagram Summarizer API transcribes the video and returns an AI-written summary as clean JSON: a concise paragraph plus a list of key points. Pass an optional language code (like 'tr') to pin the speech language and get the summary in that language — otherwise it auto-detects and summarizes in English. Perfect for content research at scale, briefing tools, and AI agents that need to understand video content without processing media. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
-  { slug: "instagram-details", name: "Instagram Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/instagram/details", credits: 1 , tagline: "Get an Instagram post or Reel — caption, likes, comments, media URLs, author, and publish date.", longDescription: "Paste an Instagram post or Reel URL and get the item as clean JSON: caption, like and comment counts, media URLs (image or video), author profile, duration when it is a Reel, and publish date. Use it for analytics dashboards, content databases, or campaign tracking. Flat 1 credit per call — no Instagram login or OAuth. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Caption, media URLs, and publish date", "Like and comment counts", "Author profile fields", "Duration for Reels when available"] },
+  {
+    slug: "instagram-details",
+    name: "Instagram Post Details API",
+    shortName: "Post Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/instagram/details",
+    credits: 1,
+    tagline:
+      "Get an Instagram post or Reel — caption, likes, comments, media URLs, author, and split view counts on Reels.",
+    longDescription:
+      "Paste an Instagram post or Reel URL and get the item as clean JSON: caption, like and comment counts, media URLs, author profile, duration when it is a Reel, and publish date. On Reels, engagement.views is the total play count (Instagram + Facebook cross-post); use engagement.viewsInstagram for Instagram-only views and engagement.viewsFacebook for Facebook plays when Instagram exposes the split (~20% of plays can be FB). Flat 1 credit. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "Caption, media URLs, and publish date",
+      "views + viewsInstagram + viewsFacebook on Reels when available",
+      "Like and comment counts",
+      "Author profile fields",
+    ],
+  },
   { slug: "instagram-comments", name: "Instagram Post Comments API", shortName: "Post Comments", category: "comments", method: "GET", path: "/v1/instagram/comments", credits: 45, creditsPerResult: 0.9, tagline: "Get the comments on any Instagram post or Reel — text, author, avatar, likes, and timestamp for each comment.", longDescription: "Send a post or Reel URL and the Instagram Post Comments API returns its comments as clean, structured JSON. Each comment includes the text, author username and avatar, like count, and when it was posted. Use the limit parameter (up to 500) to control how many you fetch — billing scales with results returned. Ideal for sentiment analysis, social listening, comment moderation, and finding engaged fans or customer feedback. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "instagram-channel-details", name: "Instagram Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/instagram/channel-details", credits: 1, tagline: "Get any public Instagram profile's key stats in one call — followers, following, post count, bio, and verification status.", longDescription: "Send a profile URL or @handle and the Instagram Channel Details API returns the account's profile as clean, structured JSON: display name, bio, follower and following counts, total posts, profile image, and whether it's verified. It's the go-to endpoint for creator verification, competitor tracking, audience dashboards, and enriching user records with live Instagram stats. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
-  { slug: "instagram-channel-posts", name: "Instagram Channel Posts API", shortName: "Channel Posts", category: "list", method: "GET", path: "/v1/instagram/channel-posts", credits: 6, creditsPerResult: 0.3, tagline: "Get the latest posts from any public Instagram profile — caption, media URLs, likes, comments, and publish date for each post, with cursor pagination for older ones.", longDescription: "Send a profile URL or @handle and the Instagram Channel Posts API returns that account's most recent posts as clean, structured JSON. Each post includes the caption, image or video URLs, like and comment counts, post type, and publish date. Need more than the first page? Pass the nextCursor value from the previous response to keep paging through older posts. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
-  { slug: "instagram-channel-reels", name: "Instagram Channel Reels API", shortName: "Channel Reels", category: "list", method: "GET", path: "/v1/instagram/channel-reels", credits: 6, creditsPerResult: 0.3, tagline: "Get the latest Reels from any public Instagram profile — video URL, caption, views, likes, comments, and duration for each Reel, with cursor pagination for older ones.", longDescription: "Send a profile URL or @handle and the Instagram Channel Reels API returns that account's most recent Reels as clean, structured JSON. Photo and carousel posts are filtered out — you only get videos, each with its direct video URL, caption, view / like / comment counts, duration, and publish date. Need more than the first page? Pass the nextCursor value from the previous response to keep paging through older Reels. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
+  {
+    slug: "instagram-channel-posts",
+    name: "Instagram Channel Posts API",
+    shortName: "Channel Posts",
+    category: "list",
+    method: "GET",
+    path: "/v1/instagram/channel-posts",
+    credits: 6,
+    creditsPerResult: 0.3,
+    tagline:
+      "Latest posts from a public Instagram profile — on Reels, views splits IG vs Facebook plays.",
+    longDescription:
+      "Send a profile URL or @handle and get recent posts as JSON (caption, media, likes, comments, type, publish date). For video/Reels items, engagement.views is total plays; viewsInstagram excludes Facebook cross-post views and viewsFacebook is the FB share — use viewsInstagram for Instagram-only analytics. Cursor pagination via nextCursor. Pass cache=true for the 24h shared cache.",
+  },
+  {
+    slug: "instagram-channel-reels",
+    name: "Instagram Channel Reels API",
+    shortName: "Channel Reels",
+    category: "list",
+    method: "GET",
+    path: "/v1/instagram/channel-reels",
+    credits: 6,
+    creditsPerResult: 0.3,
+    tagline:
+      "Latest Reels from a public Instagram profile — views, viewsInstagram, viewsFacebook (IG vs FB cross-post).",
+    longDescription:
+      "Send a profile URL or @handle and get that account's recent Reels (videos only). Each Reel includes video URL, caption, likes, comments, duration, and publish date. Play counts are split when Instagram exposes them: engagement.views = total (IG+FB), viewsInstagram = Instagram-only, viewsFacebook = Facebook cross-post. Instagram-only performance reports should use viewsInstagram — total views can be ~20% higher from Facebook. Cursor pagination via nextCursor. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "Reels only (photos/carousels filtered out)",
+      "views + viewsInstagram + viewsFacebook when available",
+      "Video URL, caption, likes, comments, duration",
+      "Cursor pagination",
+    ],
+  },
   { slug: "instagram-reels-search", name: "Instagram Reels Search API", shortName: "Reels Search", category: "search", method: "GET", path: "/v1/instagram/reels-search", credits: 2, tagline: "Native Instagram Reels hashtag search — views + plays, author verified/followers, audio, location. Flat 2 credits.", longDescription: "Send a hashtag (without the #) or keyword and get matching Reels from Instagram's native hashtag grid as clean JSON — videos only. Same enriched shape as Hashtag Search: author (verified, profileImage, followers, postCount), engagement.views plus engagement.plays when Instagram exposes both, music{}, location{}, paid/ad/affiliate flags, preview comments when present, duration, and publish date. Optional datePosted=last_24_hours|last_week|last_month|last_year. Flat 2 credits per call (same as hashtag-search). Pass cache=true for the 24h shared cache." },
   {
     slug: "instagram-trending-reels",

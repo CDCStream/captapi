@@ -145,24 +145,18 @@ def _normalize_post(item: dict) -> dict:
     media_id = safe_str(item.get("id"))
     # Prefer shortcode as the public id (matches hashtag-search / details).
     public_id = shortcode or media_id
-    view_count = safe_int(item.get("videoViewCount") or item.get("video_view_count"))
+    video_view_count = safe_int(item.get("videoViewCount") or item.get("video_view_count"))
     play_count = safe_int(
         item.get("videoPlayCount")
         or item.get("video_play_count")
         or item.get("playCount")
         or item.get("play_count")
-        or item.get("igPlayCount")
-        or item.get("ig_play_count")
     )
+    ig_play_count = safe_int(item.get("igPlayCount") or item.get("ig_play_count"))
+    fb_play_count = safe_int(item.get("fbPlayCount") or item.get("fb_play_count"))
     likes = decodo.hidden_count(item.get("likesCount") or item.get("likeCount"))
     is_video = (post_type or "").lower() in {"video", "reel", "clips"} or bool(
         item.get("videoUrl") or item.get("video_url") or item.get("isVideo")
-    )
-    views, plays = decodo.pick_video_views(
-        view_count=view_count,
-        play_count=play_count,
-        likes=likes,
-        is_video=is_video,
     )
     product = safe_str(item.get("productType") or item.get("product_type")) or (
         "clips" if is_video else None
@@ -228,12 +222,18 @@ def _normalize_post(item: dict) -> dict:
                 owner.get("profilePicUrl") or owner.get("profile_pic_url") or item.get("ownerProfilePicUrl")
             ),
         },
-        "engagement": {
-            "views": views,
-            "plays": plays,
-            "likes": likes,
-            "comments": decodo.hidden_count(item.get("commentsCount") or item.get("commentCount")),
-        },
+        "engagement": decodo.engagement_with_play_split(
+            {
+                "likes": likes,
+                "comments": decodo.hidden_count(item.get("commentsCount") or item.get("commentCount")),
+            },
+            play_count=play_count,
+            ig_play_count=ig_play_count,
+            fb_play_count=fb_play_count,
+            video_view_count=video_view_count,
+            likes=likes,
+            is_video=is_video,
+        ),
         "hashtags": _clean_hashtags(item.get("hashtags")),
         "mentions": decodo.dedupe_preserve(mentions_raw),
         "isPaidPartnership": bool(item.get("isPaidPartnership") or item.get("is_paid_partnership"))
@@ -1028,7 +1028,7 @@ async def _overlay_feed_engagement(
 
     Decodo timeline nodes often expose a partial ``video_view_count`` that can
     sit below ``like_count`` on Reels. Feed ``play_count`` / ``ig_play_count``
-    are the trustworthy metrics.
+    / ``fb_play_count`` are the trustworthy split metrics.
     """
     if not posts or not user_id:
         return posts
@@ -1047,29 +1047,25 @@ async def _overlay_feed_engagement(
         raw = by_code.get(code or "")
         eng = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
         if raw:
-            plays = safe_int(raw.get("play_count"))
-            ig_plays = safe_int(raw.get("ig_play_count") or raw.get("view_count"))
             likes = decodo.hidden_count(raw.get("like_count"))
-            views, plays_field = decodo.pick_video_views(
-                view_count=ig_plays,
-                play_count=plays,
-                likes=likes if likes is not None else eng.get("likes"),
-                is_video=bool(
-                    post.get("postType") == "Video"
-                    or safe_str(post.get("productType")) in {"clips", "reel", "reels"}
-                    or raw.get("media_type") == 2
-                ),
-            )
-            if views is not None:
-                eng["views"] = views
-            if plays_field is not None:
-                eng["plays"] = plays_field
             if likes is not None:
                 eng["likes"] = likes
             comments = decodo.hidden_count(raw.get("comment_count"))
             if comments is not None:
                 eng["comments"] = comments
-            post["engagement"] = eng
+            is_video = bool(
+                post.get("postType") == "Video"
+                or safe_str(post.get("productType")) in {"clips", "reel", "reels"}
+                or raw.get("media_type") == 2
+            )
+            post["engagement"] = decodo.engagement_with_play_split(
+                eng,
+                play_count=safe_int(raw.get("play_count")),
+                ig_play_count=safe_int(raw.get("ig_play_count") or raw.get("view_count")),
+                fb_play_count=safe_int(raw.get("fb_play_count") or raw.get("fbPlayCount")),
+                likes=likes if likes is not None else eng.get("likes"),
+                is_video=is_video,
+            )
         mentions = post.get("mentions")
         if isinstance(mentions, list):
             post["mentions"] = decodo.dedupe_preserve(mentions)

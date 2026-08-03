@@ -25,7 +25,11 @@ import httpx
 import structlog
 
 from app.services.http_fetch import proxy_for
-from app.services.instagram_decodo import dedupe_preserve, hidden_count, pick_video_views
+from app.services.instagram_decodo import (
+    dedupe_preserve,
+    engagement_with_play_split,
+    hidden_count,
+)
 from app.utils.formatters import safe_float, safe_int, safe_str
 
 log = structlog.get_logger(__name__)
@@ -207,15 +211,10 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
     media_type = safe_int(media.get("media_type")) or 0
     is_video = media_type == 2
     product = safe_str(media.get("product_type")) or ("clips" if is_video else None)
-    plays = safe_int(media.get("play_count"))
-    ig_plays = safe_int(media.get("ig_play_count") or media.get("view_count"))
+    play_count = safe_int(media.get("play_count"))
+    ig_play_count = safe_int(media.get("ig_play_count") or media.get("view_count"))
+    fb_play_count = safe_int(media.get("fb_play_count") or media.get("fbPlayCount"))
     likes = hidden_count(media.get("like_count"))
-    views, plays_field = pick_video_views(
-        view_count=ig_plays,
-        play_count=plays,
-        likes=likes,
-        is_video=is_video,
-    )
 
     music = _music_from_media(media)
     location = _location_from_media(media)
@@ -268,12 +267,17 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
         "thumbnailUrl": safe_str(images[0].get("url")) if images else None,
         "videoUrl": safe_str(videos[0].get("url")) if videos else None,
         "author": author,
-        "engagement": {
-            "views": views,
-            "plays": plays_field,
-            "likes": likes,
-            "comments": hidden_count(media.get("comment_count")),
-        },
+        "engagement": engagement_with_play_split(
+            {
+                "likes": likes,
+                "comments": hidden_count(media.get("comment_count")),
+            },
+            play_count=play_count,
+            ig_play_count=ig_play_count,
+            fb_play_count=fb_play_count,
+            likes=likes,
+            is_video=is_video,
+        ),
         "hashtags": dedupe_preserve(_HASHTAG_RE.findall(caption or "")),
         "mentions": dedupe_preserve(_MENTION_RE.findall(caption or "")),
         "isPaidPartnership": bool(is_paid) if is_paid is not None else False,
@@ -863,15 +867,10 @@ def map_feed_post(
     ):
         author["followers"] = followers
 
-    plays = safe_int(media.get("play_count"))
-    ig_plays = safe_int(media.get("ig_play_count") or media.get("view_count"))
+    play_count = safe_int(media.get("play_count"))
+    ig_play_count = safe_int(media.get("ig_play_count") or media.get("view_count"))
+    fb_play_count = safe_int(media.get("fb_play_count") or media.get("fbPlayCount"))
     likes = hidden_count(media.get("like_count"))
-    views, plays_field = pick_video_views(
-        view_count=ig_plays,
-        play_count=plays,
-        likes=likes,
-        is_video=bool(is_video),
-    )
     product = safe_str(media.get("product_type")) or ("clips" if is_video else None)
 
     return strip_null_post_fields(
@@ -889,12 +888,17 @@ def map_feed_post(
             "thumbnailUrl": safe_str(images[0].get("url")) if images else None,
             "videoUrl": safe_str(videos[0].get("url")) if videos else None,
             "author": author,
-            "engagement": {
-                "views": views,
-                "plays": plays_field,
-                "likes": likes,
-                "comments": hidden_count(media.get("comment_count")),
-            },
+            "engagement": engagement_with_play_split(
+                {
+                    "likes": likes,
+                    "comments": hidden_count(media.get("comment_count")),
+                },
+                play_count=play_count,
+                ig_play_count=ig_play_count,
+                fb_play_count=fb_play_count,
+                likes=likes,
+                is_video=bool(is_video),
+            ),
             "hashtags": dedupe_preserve(_HASHTAG_RE.findall(caption)),
             "mentions": dedupe_preserve(_MENTION_RE.findall(caption)),
         }
@@ -2344,7 +2348,8 @@ async def enrich_posts_from_author_feeds(
         return posts
 
     sem = asyncio.Semaphore(3)
-    play_by_code: dict[str, tuple[int | None, int | None]] = {}
+    # shortcode -> (play_count, ig_play_count, fb_play_count)
+    play_by_code: dict[str, tuple[int | None, int | None, int | None]] = {}
     stats_by_user: dict[str, dict[str, Any]] = {}
 
     def _stats_from_profile(profile: dict[str, Any]) -> dict[str, Any]:
@@ -2375,6 +2380,7 @@ async def enrich_posts_from_author_feeds(
                         play_by_code[code] = (
                             safe_int(item.get("play_count")),
                             safe_int(item.get("ig_play_count") or item.get("view_count")),
+                            safe_int(item.get("fb_play_count") or item.get("fbPlayCount")),
                         )
             profile, _missing = await profile_task
             if isinstance(profile, dict):
@@ -2391,6 +2397,7 @@ async def enrich_posts_from_author_feeds(
                             play_by_code[code] = (
                                 safe_int(item.get("play_count")),
                                 safe_int(item.get("ig_play_count") or item.get("view_count")),
+                                safe_int(item.get("fb_play_count") or item.get("fbPlayCount")),
                             )
             elif username not in stats_by_user:
                 # Last resort — full WPI ladder (slow / rate-limited).
@@ -2417,20 +2424,21 @@ async def enrich_posts_from_author_feeds(
         # Prefer feed play counts whenever available — GraphQL video_view_count
         # often undercounts Reels and can sit below like_count.
         if code and code in play_by_code:
-            plays, ig_plays = play_by_code[code]
-            feed_views = plays or ig_plays
+            plays, ig_plays, fb_plays = play_by_code[code]
             likes = engagement.get("likes")
-            if feed_views is not None:
-                engagement["views"] = feed_views
-            if (
-                plays is not None
-                and ig_plays is not None
-                and plays != ig_plays
-            ):
-                engagement["plays"] = plays
-            if likes is not None and engagement.get("views") is not None and likes > engagement["views"]:
-                engagement["views"] = None
-            post["engagement"] = engagement
+            is_video = (
+                post.get("postType") == "Video"
+                or safe_str(post.get("productType")) in {"clips", "reel", "reels"}
+                or bool(post.get("videoUrl"))
+            )
+            post["engagement"] = engagement_with_play_split(
+                engagement,
+                play_count=plays,
+                ig_play_count=ig_plays,
+                fb_play_count=fb_plays,
+                likes=likes,
+                is_video=is_video,
+            )
         author = post.get("author") if isinstance(post.get("author"), dict) else {}
         username = safe_str(author.get("username"))
         stats = stats_by_user.get(username or "")

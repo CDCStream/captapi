@@ -2683,7 +2683,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "engagement": {
           "views": 51078,
           "likes": 10645,
-          "comments": 149
+          "comments": 149,
+          "viewsInstagram": 40862,
+          "viewsFacebook": 10216
         },
         "hashtags": [
           "NASA",
@@ -2780,7 +2782,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "engagement": {
           "views": null,
           "likes": 485567,
-          "comments": 2174
+          "comments": 2174,
+          "viewsInstagram": null,
+          "viewsFacebook": null
         },
         "hashtags": [
           "NASA",
@@ -2853,7 +2857,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "engagement": {
           "views": 130177231,
           "likes": 6373324,
-          "comments": 257545
+          "comments": 257545,
+          "viewsInstagram": 104141785,
+          "viewsFacebook": 26035446
         },
         "hashtags": [
           "VaiDarPortugal",
@@ -2884,7 +2890,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "engagement": {
           "views": 191553390,
           "likes": 17537560,
-          "comments": 341631
+          "comments": 341631,
+          "viewsInstagram": 153242712,
+          "viewsFacebook": 38310678
         },
         "hashtags": [],
         "mentions": []
@@ -2911,7 +2919,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "engagement": {
           "views": 103164783,
           "likes": 5014316,
-          "comments": 30005
+          "comments": 30005,
+          "viewsInstagram": 82531826,
+          "viewsFacebook": 20632957
         },
         "hashtags": [],
         "mentions": [
@@ -3245,7 +3255,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "engagement": {
           "views": 37937,
           "likes": 297,
-          "comments": 641
+          "comments": 641,
+          "viewsInstagram": 30350,
+          "viewsFacebook": 7587
         },
         "hashtags": [
           "reels",
@@ -3279,7 +3291,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "engagement": {
           "views": 5572,
           "likes": 378,
-          "comments": 12
+          "comments": 12,
+          "viewsInstagram": 4458,
+          "viewsFacebook": 1114
         },
         "hashtags": [
           "lanadelray",
@@ -3312,7 +3326,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "engagement": {
           "views": 5929,
           "likes": 570,
-          "comments": 50
+          "comments": 50,
+          "viewsInstagram": 4743,
+          "viewsFacebook": 1186
         },
         "hashtags": [],
         "mentions": [
@@ -3542,7 +3558,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "engagement": {
           "views": 51078,
           "likes": 10645,
-          "comments": 149
+          "comments": 149,
+          "viewsInstagram": 40862,
+          "viewsFacebook": 10216
         },
         "hashtags": [
           "NASA",
@@ -3573,7 +3591,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "engagement": {
           "views": null,
           "likes": 485567,
-          "comments": 2174
+          "comments": 2174,
+          "viewsInstagram": null,
+          "viewsFacebook": null
         },
         "hashtags": [
           "NASA",

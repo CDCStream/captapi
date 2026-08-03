@@ -223,38 +223,140 @@ def dedupe_preserve(items: Iterable[Any] | None) -> list[str]:
     return out
 
 
+def split_play_counts(
+    *,
+    play_count: int | None = None,
+    ig_play_count: int | None = None,
+    fb_play_count: int | None = None,
+    video_view_count: int | None = None,
+    likes: int | None = None,
+    is_video: bool = True,
+) -> dict[str, int | None]:
+    """Split Instagram's three play metrics into public engagement fields.
+
+    Instagram Reels (api/v1 feed) expose:
+      - ``play_count`` — total plays (Instagram + Facebook cross-post)
+      - ``ig_play_count`` — Instagram-only views
+      - ``fb_play_count`` — Facebook cross-post views
+
+    Public shape:
+      - ``views`` — total (prefer ``play_count``)
+      - ``viewsInstagram`` — IG-only (use this for Instagram performance)
+      - ``viewsFacebook`` — FB cross-post (derived as total−IG when missing)
+      - ``plays`` — backward-compat secondary when IG ≠ total
+
+    GraphQL ``video_view_count`` undercounts many Reels and can sit *below*
+    ``like_count`` — dropped rather than swapped when impossible.
+    """
+    if not is_video:
+        return {
+            "views": None,
+            "viewsInstagram": None,
+            "viewsFacebook": None,
+            "plays": None,
+        }
+
+    total = safe_int(play_count)
+    ig = safe_int(ig_play_count)
+    fb = safe_int(fb_play_count)
+    gql = safe_int(video_view_count)
+
+    if fb is None and total is not None and ig is not None and total >= ig:
+        derived = total - ig
+        if derived > 0:
+            fb = derived
+
+    # Prefer total play_count; fall back to IG-only, then GraphQL.
+    views = total if total is not None else (ig if ig is not None else gql)
+    if likes is not None and views is not None and likes > views:
+        views = None
+
+    plays = None
+    if ig is not None and views is not None and ig != views:
+        # Secondary metric: Instagram-only when it differs from total views.
+        plays = ig
+    elif (
+        gql is not None
+        and total is not None
+        and gql != total
+        and views == total
+    ):
+        plays = gql
+
+    return {
+        "views": views,
+        "viewsInstagram": ig,
+        "viewsFacebook": fb,
+        "plays": plays,
+    }
+
+
 def pick_video_views(
     *,
     view_count: int | None,
     play_count: int | None,
     likes: int | None,
     is_video: bool,
+    ig_play_count: int | None = None,
+    fb_play_count: int | None = None,
 ) -> tuple[int | None, int | None]:
-    """Pick ``(views, plays)`` for a post.
+    """Legacy ``(views, plays)`` helper — prefer :func:`split_play_counts`.
 
-    GraphQL ``video_view_count`` undercounts many Reels vs real ``play_count``
-    (and can sit *below* ``like_count`` — impossible for a real view metric).
-    Prefer play counts for video; drop views when likes > views rather than
-    inventing a swap.
+    ``view_count`` is treated as IG-only when ``ig_play_count`` is omitted
+    (historical call sites passed ``ig_play_count`` as ``view_count``).
     """
-    if not is_video:
-        return None, None
-    # Prefer play_count — GraphQL video_view_count undercounts many Reels.
-    views = play_count or view_count
-    plays = None
-    if view_count is not None and play_count is not None and view_count != play_count:
-        # Secondary metric = the one not chosen as views.
-        plays = view_count if views == play_count else play_count
-    if likes is not None and views is not None and likes > views:
-        views = None
-    return views, plays
+    split = split_play_counts(
+        play_count=play_count,
+        ig_play_count=ig_play_count if ig_play_count is not None else view_count,
+        fb_play_count=fb_play_count,
+        video_view_count=view_count if ig_play_count is not None else None,
+        likes=likes,
+        is_video=is_video,
+    )
+    return split["views"], split["plays"]
+
+
+def engagement_with_play_split(
+    engagement: dict[str, Any] | None,
+    *,
+    play_count: int | None = None,
+    ig_play_count: int | None = None,
+    fb_play_count: int | None = None,
+    video_view_count: int | None = None,
+    likes: int | None = None,
+    is_video: bool = True,
+) -> dict[str, Any]:
+    """Merge play-count split into an engagement dict."""
+    out = dict(engagement or {})
+    split = split_play_counts(
+        play_count=play_count,
+        ig_play_count=ig_play_count,
+        fb_play_count=fb_play_count,
+        video_view_count=video_view_count,
+        likes=likes if likes is not None else hidden_count(out.get("likes")),
+        is_video=is_video,
+    )
+    out["views"] = split["views"]
+    if is_video:
+        out["viewsInstagram"] = split["viewsInstagram"]
+        out["viewsFacebook"] = split["viewsFacebook"]
+        if split["plays"] is not None:
+            out["plays"] = split["plays"]
+        elif "plays" in out and out["plays"] is None:
+            out.pop("plays", None)
+    else:
+        out.pop("viewsInstagram", None)
+        out.pop("viewsFacebook", None)
+        out.pop("plays", None)
+    return out
 
 
 def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
     """Drop fields we can't fill instead of returning nulls: video-only
     fields (videoUrl, durationSeconds) on images/carousels, hidden engagement
     counts (None) except ``engagement.views`` (always present — null on
-    Image/Sidecar), and author fields the source doesn't provide.
+    Image/Sidecar) and ``viewsInstagram`` / ``viewsFacebook`` on videos, and
+    author fields the source doesn't provide.
     """
     if not post.get("videoUrl"):
         post.pop("videoUrl", None)
@@ -263,15 +365,32 @@ def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
     if post.get("productType") == "":
         post["productType"] = None
     engagement = post.get("engagement")
+    is_video = (
+        post.get("postType") == "Video"
+        or safe_str(post.get("productType")) in {"clips", "reel", "reels"}
+        or bool(post.get("videoUrl"))
+    )
     if isinstance(engagement, dict):
         likes = engagement.get("likes")
         views = engagement.get("views")
         if likes is not None and views is not None and likes > views:
             engagement["views"] = None
             views = None
-        cleaned = {k: v for k, v in engagement.items() if v is not None or k == "views"}
+        keep_null = {"views"}
+        if is_video:
+            keep_null |= {"viewsInstagram", "viewsFacebook"}
+        cleaned = {
+            k: v for k, v in engagement.items() if v is not None or k in keep_null
+        }
         # Typed clients always read engagement.views (null when unknown / N/A).
         cleaned["views"] = views
+        if is_video:
+            cleaned.setdefault("viewsInstagram", engagement.get("viewsInstagram"))
+            cleaned.setdefault("viewsFacebook", engagement.get("viewsFacebook"))
+        else:
+            cleaned.pop("viewsInstagram", None)
+            cleaned.pop("viewsFacebook", None)
+            cleaned.pop("plays", None)
         post["engagement"] = cleaned
     author = post.get("author")
     if isinstance(author, dict):
@@ -313,10 +432,10 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
     is_video = bool(node.get("is_video")) or typename == "GraphVideo"
     is_sidecar = typename == "GraphSidecar"
     caption = _caption(node) or ""
-    view_count = safe_int(node.get("video_view_count") or node.get("views"))
-    play_count = safe_int(
-        node.get("video_play_count") or node.get("play_count") or node.get("ig_play_count")
-    )
+    video_view_count = safe_int(node.get("video_view_count") or node.get("views"))
+    play_count = safe_int(node.get("video_play_count") or node.get("play_count"))
+    ig_play_count = safe_int(node.get("ig_play_count"))
+    fb_play_count = safe_int(node.get("fb_play_count") or node.get("fbPlayCount"))
     likes = hidden_count(
         first_present(
             _count(node.get("edge_media_preview_like")),
@@ -324,12 +443,6 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
             node.get("like_count"),
             node.get("likes"),
         )
-    )
-    views, plays = pick_video_views(
-        view_count=view_count,
-        play_count=play_count,
-        likes=likes,
-        is_video=is_video,
     )
     product = safe_str(node.get("product_type")) or ("clips" if is_video else None)
     # Prefer shortcode as id (matches Polaris hydrate + enrich_posts_from_author_feeds).
@@ -357,18 +470,24 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
             "verified": author.get("is_verified"),
             "profileImage": _image_url(author),
         },
-        "engagement": {
-            "views": views,
-            "plays": plays,
-            "likes": likes,
-            "comments": hidden_count(
-                first_present(
-                    _count(node.get("edge_media_to_comment")),
-                    node.get("comment_count"),
-                    node.get("num_comments"),
-                )
-            ),
-        },
+        "engagement": engagement_with_play_split(
+            {
+                "likes": likes,
+                "comments": hidden_count(
+                    first_present(
+                        _count(node.get("edge_media_to_comment")),
+                        node.get("comment_count"),
+                        node.get("num_comments"),
+                    )
+                ),
+            },
+            play_count=play_count,
+            ig_play_count=ig_play_count,
+            fb_play_count=fb_play_count,
+            video_view_count=video_view_count,
+            likes=likes,
+            is_video=is_video,
+        ),
         "hashtags": dedupe_preserve(_HASHTAG_RE.findall(caption)),
         "mentions": dedupe_preserve(_MENTION_RE.findall(caption)),
         "isPaidPartnership": bool(node.get("is_paid_partnership"))

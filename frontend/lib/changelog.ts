@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Instagram Reels: split views into IG vs Facebook plays",
+    description:
+      "Instagram exposes three play metrics on Reels (play_count total, ig_play_count, fb_play_count) — Captapi was collapsing them into a single engagement.views, so Instagram-only analytics silently included Facebook cross-post plays (~20% on some Reels). Engagement now returns views (total), viewsInstagram, and viewsFacebook. Docs warn to use viewsInstagram for IG performance.",
+    items: [
+      "engagement.viewsInstagram + viewsFacebook on Reels when available",
+      "views = total play_count (IG + Facebook)",
+      "Docs note on channel-reels / channel-posts / details",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "TikTok Top Search: photo carousels, hashtag dedupe, cursor",
     description:
       "Top Search claimed mixed results but mapped only video-shaped rows with no contentType — photo carousels were indistinguishable. Mapper now sets mediaType/contentType (video|photo|multi_photo) and images[] for carousels. Hashtags no longer double-count Latinus+latinus (casefold dedupe, always hashtags:[]). Cursor pagination + within-page id dedupe; docs note TikTok can still repeat across pages.",
