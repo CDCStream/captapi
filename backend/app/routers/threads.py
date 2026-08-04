@@ -168,6 +168,8 @@ def _bio_links(item: dict[str, Any]) -> list[dict[str, Any]]:
         verified = link.get("is_verified")
         if verified is None:
             verified = link.get("verified")
+        if verified is None:
+            verified = link.get("isVerified")
         out.append(
             {
                 "url": url,
@@ -175,6 +177,64 @@ def _bio_links(item: dict[str, Any]) -> list[dict[str, Any]]:
                 "linkId": safe_str(link.get("link_id") or link.get("linkId")),
             }
         )
+    return out
+
+
+def _bio_fragments(item: dict[str, Any]) -> list[dict[str, Any]]:
+    """Normalize Meta ``text_app_biography.text_fragments`` into a flat list."""
+    raw = item.get("text_app_biography")
+    if raw is None:
+        raw = item.get("textAppBiography")
+    if raw is None:
+        raw = item.get("bioFragments")
+    fragments: Any = None
+    if isinstance(raw, list):
+        fragments = raw
+    elif isinstance(raw, dict):
+        nested = raw.get("text_fragments") or raw.get("textFragments") or raw
+        if isinstance(nested, dict):
+            fragments = nested.get("fragments") or nested.get("text_fragments")
+        elif isinstance(nested, list):
+            fragments = nested
+    if not isinstance(fragments, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for frag in fragments:
+        if not isinstance(frag, dict):
+            continue
+        frag_type = safe_str(
+            frag.get("fragment_type") or frag.get("fragmentType") or frag.get("type")
+        )
+        plaintext = safe_str(
+            frag.get("plaintext") or frag.get("text") or frag.get("display_text")
+        )
+        link = frag.get("link_fragment") or frag.get("linkFragment") or frag.get("link")
+        href = None
+        display = None
+        if isinstance(link, dict):
+            href = safe_str(link.get("uri") or link.get("url") or link.get("href"))
+            display = safe_str(link.get("display_text") or link.get("displayText") or link.get("text"))
+        mention = frag.get("mention_fragment") or frag.get("mentionFragment") or frag.get("mention")
+        mention_user = None
+        if isinstance(mention, dict):
+            mention_user = safe_str(
+                mention.get("username") or mention.get("name") or mention.get("text")
+            )
+        tag = frag.get("tag_fragment") or frag.get("tagFragment") or frag.get("tag")
+        tag_name = None
+        if isinstance(tag, dict):
+            tag_name = safe_str(tag.get("name") or tag.get("tag_name") or tag.get("text"))
+        elif isinstance(tag, str):
+            tag_name = safe_str(tag)
+        row = {
+            "type": frag_type or "plaintext",
+            "text": plaintext or display or mention_user or tag_name,
+            "url": href,
+            "mention": mention_user,
+            "tag": tag_name,
+        }
+        if row["text"] or row["url"]:
+            out.append({k: v for k, v in row.items() if v is not None})
     return out
 
 
@@ -234,6 +294,14 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
         best = max(versions, key=lambda row: row.get("width") or 0)
         profile_image = best.get("url")
 
+    display_name = safe_str(
+        item.get("full_name")
+        or item.get("fullName")
+        or item.get("displayName")
+        or item.get("name")
+    )
+    private = _bool_or_none(is_private)
+
     # Legacy core fields still go through strip_empty; additive keys are always
     # present (null / []) so clients never special-case missing keys.
     out = strip_empty(
@@ -243,7 +311,9 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
             "url": safe_str(item.get("url"))
             or (f"https://www.threads.net/@{username}" if username else None),
             "id": safe_str(item.get("pk") or item.get("id") or item.get("userId") or item.get("user_id")),
-            "name": safe_str(item.get("full_name") or item.get("fullName") or item.get("name")),
+            # displayName matches TikTok/IG/YouTube; name kept for BC.
+            "displayName": display_name,
+            "name": display_name,
             "bio": safe_str(item.get("biography") or item.get("bio")),
             "verified": bool(verified) if verified is not None else None,
             "followers": safe_int(
@@ -252,11 +322,17 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
             "profileImage": profile_image,
         }
     )
+    if display_name:
+        out.setdefault("displayName", display_name)
+        out.setdefault("name", display_name)
     out.update(
         {
             "isThreadsOnlyUser": _bool_or_none(threads_only),
-            "isPrivate": _bool_or_none(is_private),
+            # private matches TikTok; isPrivate matches Instagram.
+            "private": private,
+            "isPrivate": private,
             "bioLinks": _bio_links(item),
+            "bioFragments": _bio_fragments(item),
             "transparencyLabel": transparency,
             "profileImageVersions": versions,
             "hasOnboarded": _bool_or_none(onboarded),
@@ -291,10 +367,11 @@ def _normalize_post_download(item: dict[str, Any]) -> dict[str, Any]:
     "/profile",
     summary="Threads profile details & stats",
     description=(
-        "Public Threads profile as clean JSON: username, name, bio, followers, "
-        "verified, profileImage, plus isThreadsOnlyUser, isPrivate, bioLinks[], "
-        "transparencyLabel, profileImageVersions[], and hasOnboarded. Flat 1 credit. "
-        "isThreadsOnlyUser is present when Meta exposes it (often null on web hydrate)."
+        "Public Threads profile as clean JSON: username, displayName (+ name), bio, "
+        "followers, verified, profileImage, plus isThreadsOnlyUser, private/isPrivate, "
+        "bioLinks[] (url + Meta verified + linkId), bioFragments[], transparencyLabel, "
+        "profileImageVersions[], and hasOnboarded. Flat 1 credit. "
+        "isThreadsOnlyUser / transparencyLabel are null when Meta omits them on web hydrate."
     ),
 )
 async def threads_profile(
@@ -333,7 +410,7 @@ async def threads_profile(
 
         data = await cached_or_run(
             endpoint="threads.profile",
-            params={"handle": handle, "v": 4},
+            params={"handle": handle, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

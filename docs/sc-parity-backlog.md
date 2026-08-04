@@ -1,6 +1,6 @@
 ﻿# SC parity backlog (Captapi)
 
-Last updated: 2026-08-04 (Field-doc platform-bleed lint + community ISO createdAt). Twitter block closed — next: Threads.
+Last updated: 2026-08-04 (Threads profile + platformLimits). Next: remaining Threads endpoints / A-type promise lint.
 
 Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` → `api-examples.generated.ts`) — ship code + refresh snapshot **with `ok: true`** or `gen_examples.py` skips the slug and the page looks broken.
 
@@ -32,18 +32,30 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - [x] Twitter shared tweet contract: `engagement` always 6 keys; ISO `publishedAt` on search + user-tweets + tweet-details; `hashtags[]` on search; TweetResultByRestId path for details
 - [x] Twitter `community-tweets`: flat 2 native / ~0.7 Apify; `url`+`communityName`+`memberCount`; cURL uses community URL; ISO+6-key tweets
 - [x] Field-doc platform bleed: slug overrides + `lint:field-descs` (sticky keys); community `createdAt` → `.000Z`
+- [x] Threads profile: `displayName` (+ `name`), `private`/`isPrivate`, `bioLinks`/`bioFragments`, `isThreadsOnlyUser`, `transparencyLabel`, HD versions (keys always present)
+- [x] `platformLimits` docs field + UI block (Threads posts, Twitter user-tweets, FB profile-posts, YT comments, Ad Library search, TT/IG transcript, hashtag region)
 
-## Next turn — Threads block + leftovers
+## Promise-gap taxonomy (do not conflate)
+
+| Type | Meaning | Fix |
+|------|---------|-----|
+| **A** | Hand-written promise on one endpoint (tagline / longDescription / delivers names a field that response lacks) | Add field or rewrite copy |
+| **B** | Generic category template (`delivers()` channel/search/…) mismatches a specific endpoint | Override `delivers` on that slug |
+
+Known A-type leftovers still open; B-type for `threads-profile` closed this turn.
+
+## Next turn
 
 | # | Work | Effort | Notes |
 |---|------|--------|-------|
-| 1 | Threads profile vs SC (`is_threads_only_user`, `bio_links[].is_verified`, `transparency_label`) | Med | First Threads audit |
-| 2 | Deploy stamp re-verify twitter/community creator field note + ISO createdAt | Low | |
-| 3 | Price-transparency pass: other 18/70/20/17 credit families | Low | |
-| 4 | Twitter search + community-tweets: cursor + sort + since/until | Med | |
-| 5 | User-tweets GraphQL path for real views/bookmarks | Med | |
-| 6 | Vaat/teslim lint (request≠response + longDescription ⊆ example keys) | Low | |
-| 7 | Broaden field-desc lint beyond sticky keys (optional) | Low | |
+| 1 | Live re-probe Threads profile (bioLinks + isThreadsOnlyUser on a non-zuck account) | Low | zuck often has empty links / null threads-only |
+| 2 | Remaining Threads endpoints vs SC (user-posts engagement shape, post-details) | Med | |
+| 3 | A-type vaat lint (5 known cases) | Low | song-details, comment-replies, … |
+| 4 | Price-transparency pass: other 18/70/20/17 credit families | Low | |
+| 5 | Twitter search + community-tweets: cursor + sort + since/until | Med | |
+| 6 | User-tweets GraphQL path for real views/bookmarks | Med | |
+| 7 | Catalog-wide `to_iso()` helper (7 date formats) | Low | |
+| 8 | Broaden field-desc lint beyond sticky keys (optional) | Low | |
 
 ## YouTube — open quality notes
 

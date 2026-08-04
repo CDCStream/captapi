@@ -15119,14 +15119,17 @@
       "username": "zuck",
       "url": "https://www.threads.net/@zuck",
       "id": "63055343223",
+      "displayName": "Mark Zuckerberg",
       "name": "Mark Zuckerberg",
       "bio": "Mostly superintelligence and MMA takes",
       "verified": true,
       "followers": 5691292,
       "profileImage": "https://scontent-lax3-2.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s640x640_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-lax3-2.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gEeXugh5SzVlR3-SM7yE5Ymx4mleUIUQVrFLOJAyo4Pai-q3Q4Babsn5npHNxps9Zg&_nc_ohc=2ejw17SwZhoQ7kNvwFX521e&_nc_gid=dmOcoQ5owB8qGvpTG7PZZA&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQGktZYLExtnyRLt29v5FtvhGpx_oXGGlsI4Dt45cx4yWA&oe=6A74FA7E&_nc_sid=10d13b",
       "isThreadsOnlyUser": null,
+      "private": false,
       "isPrivate": false,
       "bioLinks": [],
+      "bioFragments": [],
       "transparencyLabel": null,
       "profileImageVersions": [
         {

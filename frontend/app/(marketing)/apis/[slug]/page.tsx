@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, Coins } from "lucide-react";
+import { AlertTriangle, Check, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BugReportDialog } from "@/components/bug-report-dialog";
@@ -268,6 +268,27 @@ export default async function ApiDetailPage({
             ))}
           </ul>
         </section>
+
+        {ep.platformLimits && ep.platformLimits.length > 0 ? (
+          <section className="mt-12">
+            <h2 className="text-2xl font-semibold">Platform limits</h2>
+            <p className="mt-3 max-w-3xl text-sm text-muted-foreground">
+              Honest ceilings from the upstream platform surface — not Captapi
+              bugs. Unexpected truncation here is usually the platform, not us.
+            </p>
+            <ul className="mt-4 space-y-3">
+              {ep.platformLimits.map((limit) => (
+                <li
+                  key={limit}
+                  className="flex items-start gap-2.5 rounded-lg border bg-muted/30 px-4 py-3 text-sm"
+                >
+                  <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600" />
+                  <span>{limit}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {/* Interactive request builder */}
         <section className="mt-12">

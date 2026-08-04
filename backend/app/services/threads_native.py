@@ -201,12 +201,25 @@ def parse_profile_html(html: str, handle: str) -> dict[str, Any] | None:
         threads_only = user.get("is_threads_only_user")
         if threads_only is None:
             threads_only = user.get("isThreadsOnlyUser")
+        if threads_only is None and raw:
+            # Some hydrates bury the flag outside the first user{} keys we keep —
+            # recover from the raw object text when present.
+            m = re.search(r'"is_threads_only_user"\s*:\s*(true|false)', raw, re.I)
+            if m:
+                threads_only = m.group(1).lower() == "true"
         is_private = user.get("text_post_app_is_private")
         if is_private is None:
             is_private = user.get("isPrivate")
+        if is_private is None and raw:
+            m = re.search(r'"text_post_app_is_private"\s*:\s*(true|false)', raw, re.I)
+            if m:
+                is_private = m.group(1).lower() == "true"
         onboarded = user.get("has_onboarded_to_text_post_app")
         if onboarded is None:
             onboarded = user.get("hasOnboardedToTextPostApp")
+        bio_text = user.get("text_app_biography")
+        if bio_text is None:
+            bio_text = user.get("textAppBiography")
         return {
             "username": username,
             "pk": safe_str(user.get("pk") or user.get("id") or user.get("userId")),
@@ -230,6 +243,7 @@ def parse_profile_html(html: str, handle: str) -> dict[str, Any] | None:
             "bio_links": user.get("bio_links")
             if isinstance(user.get("bio_links"), list)
             else (user.get("bioLinks") if isinstance(user.get("bioLinks"), list) else []),
+            "text_app_biography": bio_text if isinstance(bio_text, (dict, list)) else None,
             "hd_profile_pic_versions": (
                 user.get("hd_profile_pic_versions")
                 if isinstance(user.get("hd_profile_pic_versions"), list)

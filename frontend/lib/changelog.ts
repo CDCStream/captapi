@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
+    category: "improvement",
+    title: "Threads profile cross-platform fields + platformLimits docs",
+    description:
+      "Threads profile now ships displayName (+ name BC), private/isPrivate (TikTok + Instagram keys), bioFragments from text_app_biography, and keeps isThreadsOnlyUser / bioLinks.verified / transparencyLabel always keyed. Docs add an optional platformLimits block (SC-style honest ceilings) on Threads user-posts, Twitter user-tweets, Facebook profile-posts, YouTube comments, Ad Library search, and TikTok/Instagram transcripts. threads-profile What you get is endpoint-specific (no more generic channel template promising vague external links).",
+    items: [
+      "threads/profile: displayName, private/isPrivate, bioFragments[]",
+      "platformLimits section on 8 high-traffic endpoints",
+      "threads-profile delivers override (B-type template gap closed)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
     category: "fix",
     title: "Field-doc platform bleed + twitter/community ISO createdAt",
     description:

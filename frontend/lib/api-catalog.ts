@@ -110,6 +110,11 @@ export interface ApiEndpoint {
   tagline?: string;
   /** Optional override for the generated "What is the X?" paragraph. */
   longDescription?: string;
+  /**
+   * Honest platform-surface ceilings (not Captapi bugs). Shown as a dedicated
+   * "Platform limits" block when set — omit when there is nothing worth warning.
+   */
+  platformLimits?: string[];
 }
 
 export interface PlatformGroup {
@@ -219,7 +224,20 @@ const YOUTUBE: Spec[] = [
   { slug: "youtube-transcript", name: "YouTube Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/youtube/transcript", credits: 1 },
   { slug: "youtube-summarizer", name: "YouTube Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/youtube/summarize", credits: 3 },
   { slug: "youtube-video-details", name: "YouTube Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/youtube/video-details", credits: 1 },
-  { slug: "youtube-comments", name: "YouTube Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/youtube/comments", credits: 2, tagline: "Get comments on any YouTube video — text, author, likes, and timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits per call." },
+  {
+    slug: "youtube-comments",
+    name: "YouTube Comments API",
+    shortName: "Comments",
+    category: "comments",
+    method: "GET",
+    path: "/v1/youtube/comments",
+    credits: 2,
+    tagline:
+      "Get comments on any YouTube video — text, author, likes, and timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits per call.",
+    platformLimits: [
+      "YouTube's public comment surface is soft-capped (~1,500 top / ~7,000 newest depending on sort). Cursor ends when YouTube stops — not a Captapi truncation.",
+    ],
+  },
   { slug: "youtube-channel-details", name: "YouTube Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/youtube/channel-details", credits: 1, tagline: "YouTube channel stats as real numbers plus handle, verified, banner, links, email, and SEO tags.", longDescription: "Pass a channel URL, handle, or UC id and get clean JSON: numeric subscriberCount / videoCount / viewCount, handle, verified, joinedDate, bannerUrl, structured links, plus additive email when present in About/description and tags from channel SEO keywords. Flat 1 credit per call." },
   {
     slug: "youtube-search",
@@ -453,7 +471,18 @@ const YOUTUBE: Spec[] = [
 ];
 
 const TIKTOK: Spec[] = [
-  { slug: "tiktok-transcript", name: "TikTok Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/tiktok/transcript", credits: 2 },
+  {
+    slug: "tiktok-transcript",
+    name: "TikTok Transcript API",
+    shortName: "Transcript",
+    category: "transcript",
+    method: "GET",
+    path: "/v1/tiktok/transcript",
+    credits: 2,
+    platformLimits: [
+      "Some TikTok caption surfaces only expose about the first ~2 minutes of speech. Longer clips may return a partial transcript when TikTok truncates captions upstream.",
+    ],
+  },
   { slug: "tiktok-summarizer", name: "TikTok Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/tiktok/summarize", credits: 4 },
   { slug: "tiktok-video-details", name: "TikTok Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/tiktok/video-details", credits: 1, tagline: "Get everything about one TikTok video from its URL — caption, view/like/comment/share/save counts, creator, sound, hashtags, and thumbnail.", longDescription: "Paste any public TikTok video URL and the TikTok Video Details API returns the full picture as clean JSON: the caption, when it was posted, how long it runs, and its engagement — views, likes, comments, shares, and saves. You also get the creator (username, display name, follower count, verified badge, and avatar), the sound/music name, the list of hashtags, and a thumbnail image. Use it to build analytics dashboards, track a campaign, or enrich a content database. This endpoint focuses on metadata and stats. No TikTok login and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Caption, publish date, and video duration", "Views, likes, comments, shares, and saves", "Creator profile — handle, name, followers, verified, avatar", "Sound name, hashtags, and thumbnail image"] },
   { slug: "tiktok-comments", name: "TikTok Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/tiktok/comments", credits: 2, tagline: "TikTok comments — clean schema plus stable authorId/authorSecUid and commentLanguage for listening loops.", longDescription: "Paste a public TikTok video URL and get comments as clean JSON (not TikTok's 40+ junk user fields). Each comment keeps username + avatar, and adds stable authorId (uid) and authorSecUid for repeat-commenter detection, plus commentLanguage for market listening without a separate language detector. replyCount when TikTok exposes it. totalComments + cursor pagination (nextCursor/hasMore). Flat 2 credits per call. Need replies? Use TikTok Comment Replies with the parent comment id.", delivers: ["Stable authorId + authorSecUid (not just username)", "commentLanguage for market listening", "replyCount when TikTok exposes it", "Like count, publish time, totalComments + cursor pagination", "limit up to 500 — flat 2 credits per call"] },
@@ -576,6 +605,9 @@ const TIKTOK: Spec[] = [
       "Videos from TikTok's /tag/{name} challenge feed — not keyword or username search. Cursor + hasMore.",
     longDescription:
       "Pass a hashtag (with or without #) and get videos from TikTok's /tag/{name} challenge feed (CHALLENGE_AWEME / api/challenge/item_list) as clean JSON — the same feed as the tag page in the app. This is not keyword search: an @comedy… account with no #comedy tag is dropped. Each result must carry the hashtag in structured tags or as #tag in the caption. Fields: url, id, caption, publishedAt, durationSeconds, thumbnail, author (+ author.region when present), engagement, hashtags, musicName, plus region / shopProductUrl / isPaidPartnership / descLanguage when TikTok exposes them. Cursor pagination via nextCursor + hasMore. The optional region query param only chooses the proxy exit country — it does not filter results by country. Billed per result — about 0.7 credits each.",
+    platformLimits: [
+      "The optional region query param only chooses the proxy exit country — it does not filter results by creator country.",
+    ],
     delivers: [
       "Real /tag/{name} challenge feed (CHALLENGE_AWEME — not keyword search)",
       "Hashtag required on every result (structured or #tag in caption)",
@@ -734,7 +766,22 @@ const TIKTOK: Spec[] = [
 ];
 
 const INSTAGRAM: Spec[] = [
-  { slug: "instagram-transcript", name: "Instagram Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/instagram/transcript", credits: 2, tagline: "Turn any Instagram Reel's speech into text — the full transcript plus timestamped segments, ready for search, subtitles, or AI pipelines." , longDescription: "Send a Reel URL and the Instagram Transcript API returns everything spoken in the video as clean text: the full transcript, timestamped segments (start time and duration for each line), and word count. Auto-detects the spoken language, or pass an optional language code (like 'tr' or 'en') to pin it — recommended for short clips. Great for making Reels searchable, generating subtitles, feeding AI tools, or turning video into text. No Instagram login or OAuth required. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
+  {
+    slug: "instagram-transcript",
+    name: "Instagram Transcript API",
+    shortName: "Transcript",
+    category: "transcript",
+    method: "GET",
+    path: "/v1/instagram/transcript",
+    credits: 2,
+    tagline:
+      "Turn any Instagram Reel's speech into text — the full transcript plus timestamped segments, ready for search, subtitles, or AI pipelines.",
+    longDescription:
+      "Send a Reel URL and the Instagram Transcript API returns everything spoken in the video as clean text: the full transcript, timestamped segments (start time and duration for each line), and word count. Auto-detects the spoken language, or pass an optional language code (like 'tr' or 'en') to pin it — recommended for short clips. Great for making Reels searchable, generating subtitles, feeding AI tools, or turning video into text. No Instagram login or OAuth required. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
+    platformLimits: [
+      "Some Instagram caption surfaces only expose about the first ~2 minutes of speech. Longer Reels may return a partial transcript when Meta truncates captions upstream.",
+    ],
+  },
   { slug: "instagram-summarizer", name: "Instagram Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/instagram/summarize", credits: 4, tagline: "Get an AI summary of any Instagram Reel — a short paragraph plus key points, without watching the video.", longDescription: "Send a Reel URL and the Instagram Summarizer API transcribes the video and returns an AI-written summary as clean JSON: a concise paragraph plus a list of key points. Pass an optional language code (like 'tr') to pin the speech language and get the summary in that language — otherwise it auto-detects and summarizes in English. Perfect for content research at scale, briefing tools, and AI agents that need to understand video content without processing media. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   {
     slug: "instagram-details",
@@ -1023,6 +1070,9 @@ const FACEBOOK: Spec[] = [
       "scrapedAt on the response for freshness vs profile-reels",
       "Flat 2 credits native",
     ],
+    platformLimits: [
+      "Facebook's public page feed typically returns about 3 posts per page/cursor hop. Use nextCursor/hasMore to walk further — not a full dump in one call.",
+    ],
   },
   { slug: "facebook-profile-reels", name: "Facebook Profile Reels API", shortName: "Profile Reels", category: "list", method: "GET", path: "/v1/facebook/profile-reels", credits: 2, tagline: "Latest Facebook page Reels — views, likes, comments, shares; newest-first without archive padding.", longDescription: "Pass a Facebook page or profile URL and get that account's recent Reels as clean JSON: caption, publishedAt, duration, thumbnail / video URL, author, and full engagement (views, likes, comments, shares). Results are newest-first. Listing uses the Reels tab when available (else Videos), with a shallow scroll so years-old archive videos from deep /videos history are not mixed in; a >1 year gap between consecutive items stops the page (recency cliff). Includes scrapedAt so you can compare counts with Profile Posts from the same moment. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "facebook-group-posts", name: "Facebook Group Posts API", shortName: "Group Posts", category: "list", method: "GET", path: "/v1/facebook/group-posts", credits: 2 },
@@ -1111,6 +1161,9 @@ const TWITTER: Spec[] = [
       "Most popular public tweets from a Twitter/X profile (~100 cap) — not chronological. Text, author, engagement, hashtags, media. Flat 2 credits.",
     longDescription:
       "Pass a profile URL or @handle and get the tweets Twitter's public timeline embed exposes as clean JSON. Important: this is not a chronological or latest feed — Twitter publicly returns on the order of ~100 of the account's most popular posts (same limit ScrapeCreators documents). Do not use this endpoint to detect new tweets. Each result uses the same tweet contract as Search / Tweet Details: ISO-8601 publishedAt, author (id when exposed, username, displayName, followers, verified, avatar), engagement always shaped as {views,likes,replies,retweets,quotes,bookmarks} (the timeline embed usually leaves views and bookmarks null), isReply / isRetweet / isQuote, conversationId, source when present, hashtags[] (always present, may be empty), and media[]. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
+    platformLimits: [
+      "Twitter's public timeline embed returns on the order of ~100 of the account's most popular tweets — not a chronological or latest feed. Do not use this endpoint to detect new tweets.",
+    ],
     delivers: [
       "Most popular public tweets (~100 Twitter cap) — not latest/chronological",
       "ISO-8601 publishedAt (same parser as tweet-details)",
@@ -1212,11 +1265,37 @@ const THREADS: Spec[] = [
     path: "/v1/threads/profile",
     credits: 1,
     tagline:
-      "Threads profile — bio, followers, verified, isPrivate, bioLinks, transparencyLabel, and HD avatar versions (1 credit).",
+      "Threads profile — displayName, private/isPrivate, bioLinks (Meta verified), isThreadsOnlyUser, transparencyLabel, bioFragments, HD avatars (1 credit).",
     longDescription:
-      "Pass a Threads profile URL or @handle and get the public profile as clean JSON: id, username, name, bio, followers, verified, profileImage, plus isThreadsOnlyUser (Threads-only vs Instagram-linked when Meta exposes it), isPrivate, bioLinks[], transparencyLabel, profileImageVersions[] ({url,width,height}), and hasOnboarded. Flat 1 credit. following and post counts are not publicly exposed on this surface (same gap as ScrapeCreators).",
+      "Pass a Threads profile URL or @handle and get the public profile as clean JSON: id, username, displayName (+ name for compatibility), bio, followers, verified, profileImage, plus isThreadsOnlyUser (Threads-only vs Instagram-linked — pair with Instagram fbid for an IG↔FB↔Threads identity chain when Meta exposes it), private/isPrivate, bioLinks[] ({url, verified, linkId} — verified means Meta confirmed the bio link), bioFragments[] (parsed plaintext/link/mention/tag pieces from text_app_biography), transparencyLabel (state-affiliated media etc.), profileImageVersions[] ({url,width,height}), and hasOnboarded. Flat 1 credit. following and post counts are not publicly exposed on this surface (same gap as ScrapeCreators).",
+    delivers: [
+      "displayName (+ name), bio, followers, verified, profileImage",
+      "private / isPrivate always present when Meta exposes privacy",
+      "bioLinks[] with Meta verified + linkId; bioFragments[] when hydrated",
+      "isThreadsOnlyUser + transparencyLabel for cross-platform / brand-safety signals",
+    ],
+    platformLimits: [
+      "following and postCount are not publicly exposed on Threads profile hydrate (same gap ScrapeCreators documents).",
+      "isThreadsOnlyUser and transparencyLabel are often null on logged-out web hydrate even when the account has a value in Meta's app GraphQL.",
+    ],
   },
-  { slug: "threads-user-posts", name: "Threads User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/threads/user-posts", credits: 14, creditsPerResult: 0.7 },
+  {
+    slug: "threads-user-posts",
+    name: "Threads User Posts API",
+    shortName: "User Posts",
+    category: "list",
+    method: "GET",
+    path: "/v1/threads/user-posts",
+    credits: 14,
+    creditsPerResult: 0.7,
+    tagline:
+      "Recent public Threads posts from a profile — text, author, likes, replies, media. Soft-capped by Meta (~20–30).",
+    longDescription:
+      "Pass a Threads profile URL or @handle and get recent public posts as clean JSON: id, code, url, text, publishedAt, author, engagement, and media when present. Billed per result — about 0.7 credits each. Pass cache=true for the 24h shared cache.",
+    platformLimits: [
+      "Only the last ~20–30 posts are publicly visible on this surface (Meta soft-cap on profile hydrate / logged-out feeds). Not a full archive.",
+    ],
+  },
   { slug: "threads-post-details", name: "Threads Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/threads/post-details", credits: 1 , tagline: "Get a Threads post — text, author, likes, replies, and media as structured JSON." },
   { slug: "threads-search", name: "Threads Post Search API", shortName: "Post Search", category: "search", method: "GET", path: "/v1/threads/search", credits: 18, creditsPerResult: 0.7, tagline: "Search public Threads posts by keyword — text, author, likes, replies, and media for each matching post.", longDescription: "Pass a keyword or phrase and the Threads Post Search API returns matching public posts as clean JSON. Each result includes the post URL and id, the text, when it was published, the author (username, display name, verified), engagement (likes, replies, reposts, quotes), and media URLs when the post has images or video. Use it for topic monitoring, brand listening, or content discovery on Threads. Path stays /v1/threads/search. Billed per result — about 0.7 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Public Threads posts matching your keyword", "Post URL, text, and publish time", "Author username, display name, and verified flag", "Likes, replies, reposts, quotes, and media URLs"] },
   { slug: "threads-search-users", name: "Threads Search Users API", shortName: "Search Users", category: "search", method: "GET", path: "/v1/threads/search-users", credits: 14, creditsPerResult: 0.7, tagline: "Find Threads profiles by keyword — username, display name, profile URL, and verified flag for each match.", longDescription: "Pass a keyword and the Threads Search Users API returns distinct Threads profiles related to that topic as clean JSON. Each result includes username, display name, a ready-to-open profile URL (threads.net/@handle), and whether the account is verified. This endpoint does not include follower counts or avatars — call Threads Profile with the returned URL or @handle for full profile stats. Use it to discover creators in a niche, turn a name into a confirmed @handle, or seed a lead list. Billed per result — about 0.7 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Distinct Threads users matching your keyword", "Username, display name, and verified flag", "Canonical profile URL for each user", "Pair with Threads Profile for followers and avatar"] },
@@ -1633,6 +1712,9 @@ const FACEBOOK_AD_LIBRARY: Spec[] = [
       "Search Meta Ad Library by keyword — active/inactive, media type, date range, platforms, cursor, and spend/impressions when Meta publishes them.",
     longDescription:
       "Search Meta's Ad Library and get competitor creatives as clean JSON — SC filter set: status (default ACTIVE), media_type, platforms, ad_type, search_type (exact phrase), sort_by (total_impressions|relevancy_monthly_grouped), start_date/end_date, cursor, trim. Cursor pages the current HTML result batch via nextCursor (not Meta's multi-thousand POST cursor). Same advertiser id collapses to one name within a response. Each ad: text/headline/cta/ctaType/landingUrl, media[] plus typed images/videos + cards[], isActive, publisherPlatforms, pageLikeCount/pageCategories/pageEntityType, politicalCountries, reachEstimate, spend/impressions when Meta publishes them (political/issue ads — commercial usually null). searchResultsCount is best-effort. Flat 2 credits on the native path.",
+    platformLimits: [
+      "Meta's Ad Library GET/HTML search surface soft-caps around ~1,500 results. Cursor ends when Meta stops — deeper archives need Meta's authenticated POST library tools, not this endpoint.",
+    ],
   },
   { slug: "facebook-ad-library-company-ads", name: "Facebook Company Ads API", shortName: "Company Ads", category: "list", method: "GET", path: "/v1/ad-library/facebook/company-ads", credits: 2 },
   {
@@ -4665,6 +4747,8 @@ const FIELD_DESCS: Record<string, string> = {
   profileImage: "Profile image URL.",
   isThreadsOnlyUser:
     "Whether the account exists only on Threads (not auto-created from Instagram). Often null on web hydrate when Meta omits the flag.",
+  bioFragments:
+    "Parsed bio fragments (plaintext / link / mention / tag) when Meta exposes text_app_biography.",
   profileImageVersions: "Profile image URLs at multiple resolutions ({url, width, height}).",
   hasOnboarded: "Whether the account has onboarded to Threads (text post app).",
   linkId: "Stable id for a bio link when Meta exposes one.",
@@ -5018,6 +5102,20 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   "twitter-profile": {
     verified: "Aggregate verification flag (blue, legacy, identity, or affiliate) — always present.",
     displayName: "Profile display name (same concept as other platforms; name kept for compatibility).",
+  },
+  "threads-profile": {
+    displayName: "Profile display name (same concept as TikTok/IG/YouTube; name kept for compatibility).",
+    name: "Alias of displayName (kept for older clients).",
+    private: "Whether the Threads account is private (same signal as isPrivate; TikTok-style key).",
+    isPrivate: "Whether the Threads account is private (same signal as private; Instagram-style key).",
+    bioLinks:
+      "External links from the Threads bio. Each item is {url, verified, linkId} — verified means Meta confirmed the link (fake/impersonation signal).",
+    bioFragments:
+      "Parsed bio pieces from Meta text_app_biography (plaintext / link / mention / tag) when the web hydrate exposes them.",
+    isThreadsOnlyUser:
+      "true when the account exists only on Threads (no Instagram twin). Pair with Instagram fbid for an IG↔FB↔Threads identity chain when all three are present.",
+    transparencyLabel:
+      "Meta transparency / state-affiliated media label when exposed — brand-safety signal. Often null on logged-out hydrate.",
   },
   "kick-clip": {
     creator: "Who created/cut the Kick clip (distinct from the broadcaster channel).",
