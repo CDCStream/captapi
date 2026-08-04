@@ -139,12 +139,90 @@ async def board_pins_native(board_url: str, limit: int = 25) -> list[dict[str, A
     return out[:capped]
 
 
-def parse_boards_html(html: str, username: str, limit: int = 25) -> list[dict[str, Any]]:
-    """Extract board cards embedded in a profile ``/_boards/`` page."""
+def _board_url_key(url: str | None) -> str | None:
+    u = safe_str(url)
+    if not u:
+        return None
+    if u.startswith("/"):
+        return u if u.endswith("/") else f"{u}/"
+    path = urlparse(u).path or ""
+    if not path:
+        return None
+    return path if path.endswith("/") else f"{path}/"
+
+
+def _is_profile_board_url(url: str | None, username: str) -> bool:
+    key = _board_url_key(url)
+    if not key:
+        return False
+    parts = [p for p in key.split("/") if p]
+    if len(parts) != 2:
+        return False
+    return parts[0].lower() == username.lower() and not parts[1].startswith("_")
+
+
+def _parse_boards_redux_map(html: str, username: str, limit: int) -> list[dict[str, Any]]:
+    """Extract rich board objects from the Redux ``boards`` id→board map."""
     if not html or not username:
         return []
-    needle = f"/{username.strip().lower().strip('/')}/"
     capped = max(1, min(int(limit or 25), 200))
+    # Prefer maps whose first entry looks like a numeric board id.
+    for m in re.finditer(r'"boards"\s*:\s*\{\s*"(\d{10,})"', html):
+        key_at = html.rfind('"boards"', max(0, m.start() - 12), m.start() + 8)
+        if key_at < 0:
+            continue
+        colon = html.find(":", key_at)
+        brace = html.find("{", colon)
+        if brace < 0:
+            continue
+        raw = _extract_json_object(html, brace)
+        if not raw:
+            continue
+        try:
+            obj = json.loads(raw)
+        except ValueError:
+            continue
+        if not isinstance(obj, dict) or not obj:
+            continue
+        boards: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        for board_id, board in obj.items():
+            if not isinstance(board, dict):
+                continue
+            if not board.get("url") and board.get("name"):
+                # Some map entries omit url; synthesize from username + slug-ish name is unsafe.
+                pass
+            if not _is_profile_board_url(board.get("url"), username):
+                continue
+            key = _board_url_key(board.get("url"))
+            if not key or key in seen:
+                continue
+            # Ensure id is present for stable clients.
+            if not board.get("id") and str(board_id).isdigit():
+                board = {**board, "id": str(board_id)}
+            # Pinterest's board.follower_count on this hydrate is account-scoped
+            # (identical across every board). Drop it so mappers cannot echo it.
+            if "follower_count" in board:
+                board = {k: v for k, v in board.items() if k != "follower_count"}
+            seen.add(key)
+            boards.append(board)
+            if len(boards) >= capped:
+                break
+        if boards:
+            return boards
+    return []
+
+
+def parse_boards_html(html: str, username: str, limit: int = 25) -> list[dict[str, Any]]:
+    """Extract boards from a profile ``/_boards/`` page (rich Redux map, then sparse cards)."""
+    if not html or not username:
+        return []
+    capped = max(1, min(int(limit or 25), 200))
+    rich = _parse_boards_redux_map(html, username, capped)
+    if rich:
+        return rich
+
+    needle = f"/{username.strip().lower().strip('/')}/"
     boards: list[dict[str, Any]] = []
     seen: set[str] = set()
     for m in re.finditer(r'"url"\s*:\s*"(/[^"]+/)"', html):
@@ -172,11 +250,31 @@ def parse_boards_html(html: str, username: str, limit: int = 25) -> list[dict[st
             continue
         if url in seen:
             continue
+        # Sparse cards sometimes still carry the poisoned account-scale count.
+        if "follower_count" in obj:
+            obj = {k: v for k, v in obj.items() if k != "follower_count"}
         seen.add(url)
         boards.append(obj)
         if len(boards) >= capped:
             break
     return boards[:capped]
+
+
+def _merge_board_rows(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
+    """Merge board rows; prefer non-empty incoming fields, never restore follower_count."""
+    out = dict(existing)
+    for key, value in incoming.items():
+        if key == "follower_count":
+            continue
+        if value is None or value == "" or value == {}:
+            continue
+        if key == "owner" and isinstance(value, dict):
+            prev = out.get("owner") if isinstance(out.get("owner"), dict) else {}
+            out["owner"] = {**prev, **{k: v for k, v in value.items() if v not in (None, "", {})}}
+            continue
+        out[key] = value
+    out.pop("follower_count", None)
+    return out
 
 
 async def user_boards_native(username: str, limit: int = 25) -> list[dict[str, Any]] | None:
@@ -185,10 +283,26 @@ async def user_boards_native(username: str, limit: int = 25) -> list[dict[str, A
         return None
     capped = max(1, min(int(limit or 25), 200))
 
-    # Fast path: unique boards from the public user-pins pidgets payload.
-    data = await _pidgets_get(f"users/{quote(user)}/pins/")
     boards: list[dict[str, Any]] = []
     seen: set[str] = set()
+
+    # Primary: Decodo ``/_boards/`` page — rich Redux map has pin_count, cover HD,
+    # privacy, sections, created_at, owner. (follower_count is stripped — account-scoped.)
+    if decodo_fetch.enabled():
+        page = f"https://www.pinterest.com/{user}/_boards/"
+        got = await decodo_fetch.fetch_url(page, timeout=90.0, headless="html")
+        if got and got[0] == 200 and got[1]:
+            for board in parse_boards_html(got[1], user, limit=capped):
+                key = _board_url_key(board.get("url"))
+                if not key or key in seen:
+                    continue
+                seen.add(key)
+                boards.append(board)
+                if len(boards) >= capped:
+                    break
+
+    # Optional enrich: pin_count / thumbnail from user-pins pidgets (never followers).
+    data = await _pidgets_get(f"users/{quote(user)}/pins/")
     if data:
         for pin in data.get("pins") or []:
             if not isinstance(pin, dict):
@@ -196,45 +310,21 @@ async def user_boards_native(username: str, limit: int = 25) -> list[dict[str, A
             board = pin.get("board") if isinstance(pin.get("board"), dict) else None
             if not board:
                 continue
-            url = safe_str(board.get("url"))
-            if not url:
+            key = _board_url_key(board.get("url"))
+            if not key or not _is_profile_board_url(key, user):
                 continue
-            if url.startswith("/"):
-                key = url
-            else:
-                key = urlparse(url).path or url
-            parts = [p for p in (key or "").split("/") if p]
-            if len(parts) >= 2 and parts[1].startswith("_"):
-                continue
+            # Strip poisoned account-scale follower_count before any merge.
+            safe_board = {k: v for k, v in board.items() if k != "follower_count"}
             if key in seen:
+                for i, existing in enumerate(boards):
+                    if _board_url_key(existing.get("url")) == key:
+                        boards[i] = _merge_board_rows(existing, safe_board)
+                        break
+                continue
+            if len(boards) >= capped:
                 continue
             seen.add(key)
-            boards.append(board)
-            if len(boards) >= capped:
-                break
-
-    # Enrich / extend via Decodo boards tab when available.
-    if decodo_fetch.enabled():
-        page = f"https://www.pinterest.com/{user}/_boards/"
-        got = await decodo_fetch.fetch_url(page, timeout=90.0, headless="html")
-        if got and got[0] == 200 and got[1]:
-            html_boards = parse_boards_html(got[1], user, limit=capped)
-            for board in html_boards:
-                url = safe_str(board.get("url"))
-                key = url if url and url.startswith("/") else (urlparse(url or "").path if url else None)
-                if not key or key in seen:
-                    # Prefer HTML board when we already have a sparse pidgets board.
-                    if key and key in seen:
-                        for i, existing in enumerate(boards):
-                            eu = safe_str(existing.get("url"))
-                            ek = eu if eu and eu.startswith("/") else (urlparse(eu or "").path if eu else None)
-                            if ek == key and board.get("id") and not existing.get("id"):
-                                boards[i] = {**existing, **board}
-                    continue
-                seen.add(key)
-                boards.append(board)
-                if len(boards) >= capped:
-                    break
+            boards.append(safe_board)
 
     if not boards:
         return None

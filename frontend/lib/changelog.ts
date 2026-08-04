@@ -50,6 +50,114 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
+    category: "improvement",
+    title: "TikTok Shop reviews docs + showcase PDP hydrate",
+    description:
+      "Product Reviews drops the dead Comment Replies hop and likes promise (Shop reviews are not video comments), overrides rating as per-review stars (not average) and country as reviewer market (not popular-creators), and serializes createdAt as UTC Z with milliseconds. User Showcase — already the best scope copy in the catalog — now PDP-hydrates each shelf row so sold, rating/reviews, originalPrice/discount, seller.name/url, and slug match the rest of the Shop product shape. cURL/example username aligned to jeffreestar. Affiliate commissionRate still upstream-dependent.",
+    items: [
+      "Reviews: no Comment Replies / likes A-type promises",
+      "Reviews: rating + country field overrides + createdAt Z",
+      "Showcase: sold / rating / originalPrice / seller.name+url",
+      "Showcase example username = jeffreestar (matches response)",
+      "Commerce use cases for reviews + showcase",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
+    title: "TikTok Shop search: region docs, rating keys, canonical price rule",
+    description:
+      "Shop Search's region field docs were bleeding TikTok Profile Region's AI-inference copy onto a deterministic request-param echo — fixed with an explicit market-echo description and a lint that fails AI-inferred/regionSource language on tiktok_shop region fields. Search hits always key rating/reviews (null when the PDP has no score). price/originalPrice use the same promotion-min rule as Product Details (documented); Shop Products limit copy stays flat-2 (not per-result). Commerce use cases replace hashtag/playlist boilerplate.",
+    items: [
+      "region = request market echo (not AI / no regionSource)",
+      "rating + reviews always keyed on search hits",
+      "Canonical promo-min price documented across Shop trio",
+      "Shop Search commerce use cases (not content/playlist)",
+      "Lint: block profile-region AI copy on Shop region fields",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "improvement",
+    title: "TikTok Shop product-details: SSR product_info parity + 2-credit native",
+    description:
+      "Product Details was a 14-credit thin shell missing originalPrice/discount/seller.id that Shop Products (2 credits) already returned — customers would skip it. Native path now parses TikTok's PDP product_info blob: price/originalPrice/discount/savings, images[], categories[], saleProperties[], skus[] with per-variant stock + saleProps + warehouseId, and seller{id,name,url,rating,productCount,logo}. Bills flat 2 credits on native (14 only on Apify fallback). Shop Products limit copy is flat-2 (not “billed per result”). relatedVideos[] still absent from US PDP SSR — documented as a platform limit.",
+    items: [
+      "Native product-details = 2 credits (was advertised 14)",
+      "originalPrice/discount/savings + seller.id/url always keyed",
+      "skus[] with saleProps + per-variant stock",
+      "images[] / categories[] / saleProperties[] from SSR",
+      "shop-products limit: Flat 2 credits per call",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "improvement",
+    title: "TikTok Shop products: shopInfo rollup + savings/slug on each SKU",
+    description:
+      "Store catalog returns top-level shopInfo from the same SSR call as products (sold/formatSold, reviews, followers, rating, productCount, videoCount, isOfficial, region, storeScores[]) — so a store URL no longer answers with products-only. Per-product rows keep unmasked numeric prices plus discount/savings/slug. Optional region param documents US-first coverage honestly. Docs drop list-template “sound/engagement” use cases. Cursor/sort_by still open; shop_slogan often absent on US SSR.",
+    items: [
+      "shopInfo on every store catalog response",
+      "isOfficial + formatSold + region on shopInfo",
+      "Unmasked price/discount/savings + product slug",
+      "region param + non-US platformLimits warning",
+      "Commerce use cases (not sound/trend boilerplate)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
+    title: "LinkedIn company-posts: engagement{likes,comments,reposts} always keyed",
+    description:
+      "Docs promised engagement while homepage JSON-LD rows shipped text-only (empty interactionStatistic) and the mapper dropped empty engagement objects. Permalink hydrate now fills likes/comments when LD omits them; every post always keys engagement{likes,comments,reposts} (null when unknown — never invented zeros). Closes the A-type headline gap on the 16-credit analytics surface.",
+    items: [
+      "Permalink enrich when LD has text but no counts",
+      "engagement always keyed on every post row",
+      "Docs/platformLimits: reaction breakdown + postType still open",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "improvement",
+    title: "LinkedIn company: specialties, similarPages, size/founded, slogan, cover",
+    description:
+      "Company was an 11-field shell. Guest About HTML now yields specialties[], organizationType, founded, size, location{}, and similarPages[] (Stripe/Airbnb-style discovery graph). Apify enrich (fixed identifier:[slug] input — wrong shapes could return YouTube for any slug) fills slogan + coverImage. employeeCount is headcount; employees[] is featured people (usually [] on guest). funding stays null until upstream exposes rounds — documented vs ScrapeCreators.",
+    items: [
+      "specialties + organizationType + founded + size from About",
+      "similarPages[] discovery graph",
+      "employeeCount + employees[] (SC-aligned names)",
+      "Apify identifier:[slug] fix; slogan/cover hybrid enrich",
+      "Honest funding/employees[] platformLimits",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
+    title: "Pinterest user-boards: stop echoing account followers as board followers",
+    description:
+      "Every board on a profile was returning the same ~1M followers — that value is Pinterest's account-scale board.follower_count on logged-out hydrates, not per-board popularity. followers is now null unless a board-scoped source is present. Rows share one stable shape (privacy, sectionCount, coverImage 474x, ISO createdAt, owner.displayName) instead of a sparse first item and rich siblings.",
+    items: [
+      "followers = board-scoped only (never account twin)",
+      "Stable keys on every board row",
+      "coverImage prefers 474x HD; createdAt ISO-8601",
+      "Redux /_boards/ map is the primary native source",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "improvement",
+    title: "Pinterest board: saves, imageOriginal, board cURL, hoisted author",
+    description:
+      "Board docs cURL was pasting a pin URL (platform exampleUrl fallback) while the response board was a different lookbook — fourth request≠response case. exampleValue now reads ex.board and pins pinterest-board to a real board URL. Pins always key saves (aggregated_pin_data), imageOriginal (/originals/), and images{}; top-level author{} hoists the pinner card so followers are not repeated on every row. destinationUrl field-doc no longer says “ad creative” on Pinterest pages.",
+    items: [
+      "cURL/Try-it uses board URL (not /pin/…)",
+      "saves + imageOriginal + images{} always keyed",
+      "Top-level author{}; slim per-pin author",
+      "destinationUrl slug overrides (Pinterest vs ad libraries)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
     category: "fix",
     title: "Reddit search: authoritative score + scoreHidden (not ups−downs)",
     description:

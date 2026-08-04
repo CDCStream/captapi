@@ -613,7 +613,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/popular-hashtags", {"query": query, "limit": limit, "cache": cache})
 
     def live(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Live — Authoritative isLive/status, last room, creator id/secUid, parsed stream qualities. (1 credit)
+        """TikTok Live — isLive/status, creator.id/secUid, streamQualities with flv/hls/cmaf/dash. Flat 1 credit. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -621,7 +621,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/live", {"url": url, "cache": cache})
 
     def live_info(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Live Info — Same as TikTok Live (status, room, stream qualities) at 7 credits. (7 credits)
+        """TikTok Live Info — True alias of /live (same payload) at 7 credits for SC path compatibility. (7 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -822,7 +822,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/popular-hashtags", {"query": query, "limit": limit, "cache": cache})
 
     async def live(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Live — Authoritative isLive/status, last room, creator id/secUid, parsed stream qualities. (1 credit)
+        """TikTok Live — isLive/status, creator.id/secUid, streamQualities with flv/hls/cmaf/dash. Flat 1 credit. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -830,7 +830,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/live", {"url": url, "cache": cache})
 
     async def live_info(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Live Info — Same as TikTok Live (status, room, stream qualities) at 7 credits. (7 credits)
+        """TikTok Live Info — True alias of /live (same payload) at 7 credits for SC path compatibility. (7 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1358,7 +1358,7 @@ class TwitterApi:
         return self._t.get("/v1/twitter/community", {"url": url, "cache": cache})
 
     def community_tweets(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Twitter/X Community Tweets — Tweets posted in an X community. (18 credits)
+        """Twitter/X Community Tweets — Community posts — flat 2 native; ~0.7/tweet Apify fallback. (2 credits)
 
         :param url: X community URL (x.com/i/communities/ID) or community ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1422,7 +1422,7 @@ class AsyncTwitterApi:
         return await self._t.get("/v1/twitter/community", {"url": url, "cache": cache})
 
     async def community_tweets(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Twitter/X Community Tweets — Tweets posted in an X community. (18 credits)
+        """Twitter/X Community Tweets — Community posts — flat 2 native; ~0.7/tweet Apify fallback. (2 credits)
 
         :param url: X community URL (x.com/i/communities/ID) or community ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1486,7 +1486,7 @@ class RedditApi:
         return self._t.get("/v1/reddit/search", {"q": q, "sort": sort, "timeframe": timeframe, "limit": limit, "cursor": cursor, "cache": cache})
 
     def subreddit_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Details — Info & member stats for a subreddit. (1 credit)
+        """Reddit Subreddit Details — Subreddit card — t5_ id, members, activeUsers, rules[], ISO createdAt. (1 credit)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1562,7 +1562,7 @@ class AsyncRedditApi:
         return await self._t.get("/v1/reddit/search", {"q": q, "sort": sort, "timeframe": timeframe, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def subreddit_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Details — Info & member stats for a subreddit. (1 credit)
+        """Reddit Subreddit Details — Subreddit card — t5_ id, members, activeUsers, rules[], ISO createdAt. (1 credit)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1596,7 +1596,7 @@ class ThreadsApi:
         return self._t.get("/v1/threads/profile", {"url": url, "cache": cache})
 
     def user_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads User Posts — Recent posts from a Threads profile. (14 credits)
+        """Threads User Posts — Recent Threads posts — views+engagement, threadId/isReply. Flat 2 native. (2 credits)
 
         :param url: Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
@@ -1613,7 +1613,7 @@ class ThreadsApi:
         return self._t.get("/v1/threads/post-details", {"url": url, "cache": cache})
 
     def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Post Search — Search public Threads posts by keyword — text, author, engagement, and media. (18 credits)
+        """Threads Post Search — Threads keyword search — flat 2 native (~0.7/post Apify). Meta Top SERP; no sort/date. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1622,7 +1622,7 @@ class ThreadsApi:
         return self._t.get("/v1/threads/search", {"q": q, "limit": limit, "cache": cache})
 
     def search_users(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Search Users — Find Threads users by keyword — username, display name, profile URL, verified. (14 credits)
+        """Threads Search Users — Distinct authors from keyword search — id, avatar, verified. Flat 1 native. (1 credit)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 100. Billed per result.
@@ -1644,7 +1644,7 @@ class AsyncThreadsApi:
         return await self._t.get("/v1/threads/profile", {"url": url, "cache": cache})
 
     async def user_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads User Posts — Recent posts from a Threads profile. (14 credits)
+        """Threads User Posts — Recent Threads posts — views+engagement, threadId/isReply. Flat 2 native. (2 credits)
 
         :param url: Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
@@ -1661,7 +1661,7 @@ class AsyncThreadsApi:
         return await self._t.get("/v1/threads/post-details", {"url": url, "cache": cache})
 
     async def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Post Search — Search public Threads posts by keyword — text, author, engagement, and media. (18 credits)
+        """Threads Post Search — Threads keyword search — flat 2 native (~0.7/post Apify). Meta Top SERP; no sort/date. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1670,7 +1670,7 @@ class AsyncThreadsApi:
         return await self._t.get("/v1/threads/search", {"q": q, "limit": limit, "cache": cache})
 
     async def search_users(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Search Users — Find Threads users by keyword — username, display name, profile URL, verified. (14 credits)
+        """Threads Search Users — Distinct authors from keyword search — id, avatar, verified. Flat 1 native. (1 credit)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 100. Billed per result.
@@ -1772,7 +1772,7 @@ class PinterestApi:
         return self._t.get("/v1/pinterest/search", {"q": q, "limit": limit, "cache": cache})
 
     def board(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Pinterest Board — List pins inside a Pinterest board. (13 credits)
+        """Pinterest Board — Board pins — saves, imageOriginal, destinationUrl, top-level author. Board URL only. (13 credits)
 
         :param url: Pinterest board URL, e.g. https://pinterest.com/username/board-name/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1821,7 +1821,7 @@ class AsyncPinterestApi:
         return await self._t.get("/v1/pinterest/search", {"q": q, "limit": limit, "cache": cache})
 
     async def board(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Pinterest Board — List pins inside a Pinterest board. (13 credits)
+        """Pinterest Board — Board pins — saves, imageOriginal, destinationUrl, top-level author. Board URL only. (13 credits)
 
         :param url: Pinterest board URL, e.g. https://pinterest.com/username/board-name/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.

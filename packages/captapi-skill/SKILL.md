@@ -252,7 +252,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | --- | --- | --- | --- |
 | `tiktok_shop_search` | `/v1/tiktok-shop/shop-search` | `q` (string), `region`? (string), `limit`? (number), `cache`? (boolean) | 56 |
 | `tiktok_shop_products` | `/v1/tiktok-shop/shop-products` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
-| `tiktok_shop_product_details` | `/v1/tiktok-shop/product-details` | `url` (string), `region`? (string), `cache`? (boolean) | 14 |
+| `tiktok_shop_product_details` | `/v1/tiktok-shop/product-details` | `url` (string), `region`? (string), `cache`? (boolean) | 2 |
 | `tiktok_shop_product_reviews` | `/v1/tiktok-shop/product-reviews` | `url` (string), `limit`? (number), `cache`? (boolean) | 45 |
 | `tiktok_shop_user_showcase` | `/v1/tiktok-shop/user-showcase` | `username` (string), `limit`? (number), `cache`? (boolean) | 45 |
 

@@ -523,33 +523,283 @@ def _profile_needs_enrichment(profile: dict[str, Any] | None) -> bool:
     return not profile.get("experience") and not profile.get("education")
 
 
+def _company_size_label(info: dict[str, Any], stats: dict[str, Any]) -> str | None:
+    """LinkedIn size band, e.g. ``10,001+ employees``."""
+    labeled = safe_str(info.get("company_size_label") or info.get("companySize") or stats.get("size"))
+    if labeled:
+        return labeled
+    rng = stats.get("employee_count_range") if isinstance(stats.get("employee_count_range"), dict) else {}
+    start = safe_int(rng.get("start"))
+    end = safe_int(rng.get("end"))
+    if start is not None and end is not None:
+        return f"{start:,}-{end:,} employees"
+    if start is not None:
+        return f"{start:,}+ employees"
+    return None
+
+
+def _map_company_funding(raw: Any) -> dict[str, Any] | None:
+    """Normalize funding blob; return None when LinkedIn/Apify expose nothing useful."""
+    if not isinstance(raw, dict) or not raw:
+        return None
+    latest = raw.get("latest_round") if isinstance(raw.get("latest_round"), dict) else {}
+    last_round_in = raw.get("lastRound") if isinstance(raw.get("lastRound"), dict) else latest
+    investors_in = raw.get("investors") if isinstance(raw.get("investors"), list) else []
+    investors: list[dict[str, Any]] = []
+    for inv in investors_in:
+        if not isinstance(inv, dict):
+            continue
+        name = safe_str(inv.get("name"))
+        if not name:
+            continue
+        investors.append(
+            {
+                "name": name,
+                "crunchbaseUrl": safe_str(inv.get("crunchbaseUrl") or inv.get("crunchbase_url") or inv.get("url")),
+            }
+        )
+    last_round = None
+    lr_type = safe_str(last_round_in.get("type"))
+    lr_date = safe_str(last_round_in.get("date"))
+    lr_amount = safe_str(last_round_in.get("amount"))
+    if lr_type or lr_date or lr_amount:
+        last_round = {"type": lr_type, "date": lr_date, "amount": lr_amount}
+    rounds = safe_int(
+        raw.get("numberOfRounds") or raw.get("total_rounds") or raw.get("totalRounds")
+    )
+    crunchbase = safe_str(raw.get("crunchbase_url") or raw.get("crunchbaseUrl"))
+    if rounds is None and not last_round and not investors and not crunchbase:
+        return None
+    return {
+        "numberOfRounds": rounds,
+        "lastRound": last_round,
+        "investors": investors,
+        "crunchbaseUrl": crunchbase,
+    }
+
+
+def _map_company_similar(raw: Any) -> list[dict[str, Any]]:
+    if not isinstance(raw, list):
+        return []
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for item in raw:
+        if isinstance(item, str):
+            # Apify often ships bare company URN/ids — skip unresolvable ids.
+            if item.isdigit() or item.startswith("urn:"):
+                continue
+            link = (
+                item
+                if item.startswith("http")
+                else f"https://www.linkedin.com/company/{item.strip('/')}"
+            )
+            slug = item.rstrip("/").split("/")[-1]
+            if slug.lower() in seen:
+                continue
+            seen.add(slug.lower())
+            out.append({"name": slug.replace("-", " ").title(), "link": link, "image": None})
+            continue
+        if not isinstance(item, dict):
+            continue
+        link = safe_str(item.get("link") or item.get("url") or item.get("linkedin_url"))
+        name = safe_str(item.get("name") or item.get("companyName"))
+        if not link and not name:
+            continue
+        key = (link or name or "").lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(
+            {
+                "name": name,
+                "link": link,
+                "image": safe_str(item.get("image") or item.get("logo") or item.get("logoUrl")),
+            }
+        )
+    return out
+
+
+def _map_company_employees(raw: Any) -> list[dict[str, Any]]:
+    """Featured employees (name/title/link) when upstream exposes them."""
+    if not isinstance(raw, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        name = safe_str(item.get("name") or item.get("fullName"))
+        link = safe_str(item.get("link") or item.get("url") or item.get("profileUrl"))
+        if not name and not link:
+            continue
+        out.append(
+            {
+                "name": name,
+                "title": safe_str(item.get("title") or item.get("headline") or item.get("occupation")),
+                "link": link,
+            }
+        )
+    return out
+
+
 def _normalize_company(c: dict[str, Any]) -> dict[str, Any]:
     # apimaestro/linkedin-company-detail splits data across basic_info /
-    # stats / media / locations.
+    # stats / media / locations. Native fetch_company uses the same shape.
     info = c.get("basic_info") if isinstance(c.get("basic_info"), dict) else c
     stats = c.get("stats") if isinstance(c.get("stats"), dict) else {}
     media = c.get("media") if isinstance(c.get("media"), dict) else {}
-    hq = ((c.get("locations") or {}).get("headquarters") or {}) if isinstance(c.get("locations"), dict) else {}
+    hq = (
+        ((c.get("locations") or {}).get("headquarters") or {})
+        if isinstance(c.get("locations"), dict)
+        else {}
+    )
+    if not isinstance(hq, dict):
+        hq = {}
     industries = info.get("industries")
     industry = industries[0] if isinstance(industries, list) and industries else info.get("industry")
-    hq_text = ", ".join(x for x in [hq.get("city"), hq.get("state"), hq.get("country")] if x) or None
-    # Public company pages don't expose a reliable verified flag or cover URL
-    # in our native/Apify shapes — omit those fields.
-    return {
+    loc_city = safe_str(hq.get("city"))
+    loc_state = safe_str(hq.get("state") or hq.get("geographicArea"))
+    loc_country = safe_str(hq.get("country"))
+    # Native sometimes packs "Ottawa, ON, CA" into city alone — split lightly.
+    if loc_city and not loc_state and "," in loc_city:
+        parts = [p.strip() for p in loc_city.split(",") if p.strip()]
+        if parts:
+            loc_city = safe_str(parts[0])
+        if len(parts) >= 2:
+            loc_state = safe_str(parts[1])
+        if len(parts) >= 3:
+            loc_country = safe_str(parts[2])
+    hq_text = ", ".join(x for x in [loc_city, loc_state, loc_country] if x) or None
+    founded_info = info.get("founded_info") if isinstance(info.get("founded_info"), dict) else {}
+    founded = safe_int(
+        founded_info.get("year")
+        or info.get("founded")
+        or c.get("founded")
+        or c.get("foundedYear")
+    )
+    specialties_raw = info.get("specialties") or c.get("specialties") or []
+    if isinstance(specialties_raw, str):
+        specialties = linkedin_native._specialties_list(specialties_raw)
+    elif isinstance(specialties_raw, list):
+        specialties = [s for s in (safe_str(x) for x in specialties_raw) if s]
+    else:
+        specialties = []
+    similar = _map_company_similar(
+        c.get("similar_pages")
+        or c.get("similarPages")
+        or c.get("similar_companies")
+        or c.get("similarCompanies")
+    )
+    employees_people = _map_company_employees(
+        c.get("employees_sample")
+        or c.get("employees")
+        or c.get("featured_employees")
+        or c.get("employeeHighlights")
+    )
+    # If `employees` was a bare count (legacy actor), don't treat it as people.
+    if employees_people and all(e.get("name") is None and e.get("link") is None for e in employees_people):
+        employees_people = []
+    employee_count = safe_int(
+        stats.get("employee_count")
+        or c.get("employeeCount")
+        or c.get("staffCount")
+        or (c.get("employees") if not isinstance(c.get("employees"), list) else None)
+    )
+    funding = _map_company_funding(c.get("funding") or info.get("funding"))
+    slogan = safe_str(c.get("tagline") or c.get("slogan") or info.get("tagline") or info.get("slogan"))
+    organization_type = safe_str(
+        info.get("organization_type")
+        or info.get("organizationType")
+        or c.get("organizationType")
+        or c.get("companyType")
+    )
+    size = _company_size_label(info, stats)
+    # Core identity; additive B2B keys always present so clients get one shape.
+    out: dict[str, Any] = {
         "platform": "linkedin",
         "type": "company",
         "url": safe_str(info.get("linkedin_url") or c.get("url") or c.get("linkedinUrl")),
         "name": safe_str(info.get("name") or c.get("companyName")),
         "industry": safe_str(industry),
-        "description": safe_str(info.get("description") or c.get("about") or c.get("tagline")),
+        "description": safe_str(info.get("description") or c.get("about")),
         "website": safe_str(info.get("website") or c.get("websiteUrl")),
         "followers": safe_int(stats.get("follower_count") or c.get("followers") or c.get("followerCount")),
-        "employees": safe_int(
-            stats.get("employee_count") or c.get("employeeCount") or c.get("staffCount") or c.get("companySize")
-        ),
+        # employeeCount is the headcount; employees[] is featured people (SC shape).
+        "employeeCount": employee_count,
+        "employees": employees_people,
+        # BC: legacy numeric `employees` readers should migrate to employeeCount.
+        "size": size,
+        "founded": founded,
+        "organizationType": organization_type,
+        "specialties": specialties,
         "headquarters": safe_str(hq_text or c.get("headquarters") or c.get("location")),
+        "location": {
+            "city": loc_city,
+            "state": loc_state,
+            "country": loc_country,
+        },
+        "slogan": slogan,
+        "coverImage": safe_str(
+            media.get("cover_url") or c.get("coverImage") or c.get("cover_url") or c.get("backgroundUrl")
+        ),
         "logo": safe_str(media.get("logo_url") or c.get("logo") or c.get("logoUrl")),
+        "funding": funding,
+        "similarPages": similar,
     }
+    return out
+
+
+def _company_needs_enrichment(company: dict[str, Any] | None) -> bool:
+    if not company:
+        return True
+    # Native guest HTML already covers specialties/similar/size/founded for many
+    # pages; Apify still fills slogan/cover and (rarely) funding.
+    return not (
+        company.get("slogan")
+        and company.get("coverImage")
+        and company.get("organizationType")
+        and company.get("specialties")
+    )
+
+
+def _merge_company(base: dict[str, Any], rich: dict[str, Any]) -> dict[str, Any]:
+    """Prefer native identity; fill missing B2B fields from Apify."""
+    out = dict(base)
+    for key in (
+        "industry",
+        "description",
+        "website",
+        "followers",
+        "employeeCount",
+        "size",
+        "founded",
+        "organizationType",
+        "headquarters",
+        "slogan",
+        "coverImage",
+        "logo",
+        "funding",
+    ):
+        if out.get(key) in (None, "", []) and rich.get(key) not in (None, "", []):
+            out[key] = rich[key]
+    if not out.get("specialties") and rich.get("specialties"):
+        out["specialties"] = rich["specialties"]
+    if not out.get("similarPages") and rich.get("similarPages"):
+        out["similarPages"] = rich["similarPages"]
+    if not out.get("employees") and rich.get("employees"):
+        out["employees"] = rich["employees"]
+    loc = out.get("location") if isinstance(out.get("location"), dict) else {}
+    rich_loc = rich.get("location") if isinstance(rich.get("location"), dict) else {}
+    out["location"] = {
+        "city": loc.get("city") or rich_loc.get("city"),
+        "state": loc.get("state") or rich_loc.get("state"),
+        "country": loc.get("country") or rich_loc.get("country"),
+    }
+    if not out.get("headquarters"):
+        hq = ", ".join(
+            x for x in [out["location"].get("city"), out["location"].get("state"), out["location"].get("country")] if x
+        ) or None
+        out["headquarters"] = hq
+    return out
 
 
 def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
@@ -570,31 +820,44 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
         or p.get("authorHeadline")
         or p.get("author_headline")
     )
+    # Always key engagement — null when LinkedIn omits a metric (never invent 0).
     # Use first_present — `or` drops real zeros (shares/comments often 0).
     engagement = {
-        k: v
-        for k, v in {
-            "likes": safe_int(
-                first_present(
-                    stats.get("likes"),
-                    stats.get("total_reactions"),
-                    p.get("numLikes"),
-                    p.get("reactionsCount"),
-                )
-            ),
-            "comments": safe_int(
-                first_present(stats.get("comments"), p.get("numComments"), p.get("commentsCount"))
-            ),
-            "reposts": safe_int(
-                first_present(
-                    stats.get("shares"),
-                    p.get("reposts"),
-                    p.get("numShares"),
-                    p.get("repostsCount"),
-                )
-            ),
-        }.items()
-        if v is not None
+        "likes": safe_int(
+            first_present(
+                stats.get("likes"),
+                stats.get("total_reactions"),
+                stats.get("reactions"),
+                p.get("numLikes"),
+                p.get("num_likes"),
+                p.get("likes"),
+                p.get("reactionsCount"),
+                p.get("reaction_count"),
+                p.get("totalReactionCount"),
+            )
+        ),
+        "comments": safe_int(
+            first_present(
+                stats.get("comments"),
+                p.get("numComments"),
+                p.get("num_comments"),
+                p.get("comments"),
+                p.get("commentsCount"),
+                p.get("comment_count"),
+            )
+        ),
+        "reposts": safe_int(
+            first_present(
+                stats.get("shares"),
+                stats.get("reposts"),
+                p.get("reposts"),
+                p.get("numShares"),
+                p.get("num_shares"),
+                p.get("repostsCount"),
+                p.get("repost_count"),
+                p.get("share_count"),
+            )
+        ),
     }
     author_out: dict[str, Any] = {
         "name": safe_str(author.get("name") or p.get("authorName") or p.get("companyName")),
@@ -605,7 +868,7 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
     # Public post HTML rarely exposes author job title — omit when unknown.
     if author_headline:
         author_out["headline"] = author_headline
-    out: dict[str, Any] = {
+    return {
         "platform": "linkedin",
         "type": "post",
         "url": safe_str(post.get("url") or p.get("url") or p.get("postUrl") or p.get("post_url")),
@@ -619,10 +882,8 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
             or p.get("date")
         ),
         "author": author_out,
+        "engagement": engagement,
     }
-    if engagement:
-        out["engagement"] = engagement
-    return out
 
 
 _LI_ACTIVITY_RE = re.compile(r"activity[:-](\d{10,25})")
@@ -758,7 +1019,7 @@ async def linkedin_profile(
         return ApiResponse(data=data)
 
 
-@router.get("/company", summary="LinkedIn company page details")
+@router.get("/company", summary="LinkedIn company page — funding, similarPages, specialties")
 async def linkedin_company(
     url: str = Query(..., description="LinkedIn company URL, e.g. https://linkedin.com/company/slug"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -766,32 +1027,61 @@ async def linkedin_company(
 ):
     slug = _require_linkedin_company_url(url)
     settings = get_settings()
+    company_url = f"https://www.linkedin.com/company/{slug}"
+
+    async def _apify_company() -> dict[str, Any] | None:
+        # apimaestro/linkedin-company-detail requires identifier: string[].
+        # Wrong shapes silently scrape a default company (observed: YouTube).
+        try:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_LINKEDIN_COMPANY,
+                {"identifier": [slug]},
+                max_items=1,
+            )
+        except Exception:  # noqa: BLE001
+            return None
+        if not items or not isinstance(items[0], dict):
+            return None
+        item = items[0]
+        # Guard against actor default-company bleed.
+        input_id = safe_str(item.get("input_identifier") or "").lower()
+        uni = safe_str(((item.get("basic_info") or {}) if isinstance(item.get("basic_info"), dict) else {}).get("universal_name"))
+        if input_id and input_id not in {slug.lower(), company_url.lower(), f"{company_url.lower()}/"}:
+            if uni and uni.lower() != slug.lower():
+                return None
+        return _normalize_company(item)
+
     async with billed_call(
         caller=caller,
         endpoint="/v1/linkedin/company",
         platform="linkedin",
-        resource_url=f"https://www.linkedin.com/company/{slug}",
+        resource_url=company_url,
         base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await linkedin_native.fetch_company(slug)
-            if native:
-                ctx["source"] = "direct"
-                return _require_company(_normalize_company(native))
+            native_raw = await linkedin_native.fetch_company(slug)
+            base = _normalize_company(native_raw) if native_raw else None
+            used_apify = False
 
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_LINKEDIN_COMPANY,
-                {"company": slug, "url": f"https://www.linkedin.com/company/{slug}"},
-                max_items=1,
-            )
-            ctx["source"] = "apify"
-            ctx["credits_override"] = CREDIT_PROFILE
-            return _require_company(_normalize_company(_first(items)))
+            if _company_needs_enrichment(base):
+                rich = await _apify_company()
+                if rich and rich.get("name"):
+                    used_apify = True
+                    base = _merge_company(base, rich) if base else rich
+
+            if not base:
+                raise HTTPException(status_code=404, detail="Company not found")
+
+            if used_apify:
+                ctx["source"] = "apify" if not native_raw else "hybrid"
+                ctx["credits_override"] = CREDIT_PROFILE
+            else:
+                ctx["source"] = "direct"
+            return _require_company(base)
 
         data = await cached_or_run(
             endpoint="linkedin.company",
-            params={"slug": slug, "v": 5},
+            params={"slug": slug, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1061,7 +1351,7 @@ async def linkedin_company_posts(
         # Cursor pages reuse the same batch (even when cache=false on page 1).
         batch = await cached_or_run(
             endpoint="linkedin.company-posts",
-            params={"slug": slug, "batch": batch_target, "v": 11},
+            params={"slug": slug, "batch": batch_target, "v": 12},
             runner=_fetch_batch,
             ctx=ctx,
             use_cache=cache or bool(cursor),

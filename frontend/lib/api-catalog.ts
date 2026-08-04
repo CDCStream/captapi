@@ -172,6 +172,12 @@ export function creditLabel(
   if (e.slug === "video-transcript") return "1 credit/min";
   if (e.slug === "video-summarize") return "1 credit/min +1";
   // Native flat + Apify per-result dual pricing (document both, not "~2 (0.7/result)").
+  if (e.slug === "tiktok-shop-product-details") {
+    return "2 credits native (14 Apify)";
+  }
+  if (e.slug === "tiktok-shop-search") {
+    return "2 credits native (~2.8/result Apify)";
+  }
   if (
     (e.slug === "twitter-community-tweets" ||
       e.slug === "threads-user-posts" ||
@@ -1459,8 +1465,57 @@ const PINTEREST: Spec[] = [
   { slug: "pinterest-pin-details", name: "Pinterest Pin Details API", shortName: "Pin Details", category: "details", method: "GET", path: "/v1/pinterest/pin-details", credits: 1, tagline: "Get a Pinterest pin — title, description, link, board, origin creator, and engagement as structured JSON.", longDescription: "Pass a Pinterest pin URL and get clean JSON: title, description, seoAltText, link/destinationUrl, createdAt (ISO-8601), board{name,url,pinCount,followers}, author (board pinner), originAuthor (native creator / original uploader), saves plus repinCount/shareCount/reactionCount, image plus images{236x,564x,originals}. Flat 1 credit. Fields Pinterest does not expose on a given pin stay omitted/null." },
   { slug: "pinterest-user-pins", name: "Pinterest User Pins API", shortName: "User Pins", category: "list", method: "GET", path: "/v1/pinterest/user-pins", credits: 13, creditsPerResult: 0.5 },
   { slug: "pinterest-search", name: "Pinterest Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/pinterest/search", credits: 13, creditsPerResult: 0.5 },
-  { slug: "pinterest-board", name: "Pinterest Board API", shortName: "Board", category: "list", method: "GET", path: "/v1/pinterest/board", credits: 13, creditsPerResult: 0.5 },
-  { slug: "pinterest-user-boards", name: "Pinterest User Boards API", shortName: "User Boards", category: "list", method: "GET", path: "/v1/pinterest/user-boards", credits: 13, creditsPerResult: 0.5 },
+  {
+    slug: "pinterest-board",
+    name: "Pinterest Board API",
+    shortName: "Board",
+    category: "list",
+    method: "GET",
+    path: "/v1/pinterest/board",
+    credits: 13,
+    creditsPerResult: 0.5,
+    tagline:
+      "Pins on a Pinterest board — saves, imageOriginal, destinationUrl, top-level author. ~0.5 credits/pin.",
+    longDescription:
+      "Pass a Pinterest board URL (.../username/board-name/ — not a /pin/ URL) and get that board's public pins as clean JSON. Response includes board + boardName, a top-level author{} (pinner card with followers, once), and pins[] with id/url, title when Pinterest exposes it, description, destinationUrl (outbound link), domain, saves (the primary Pinterest engagement metric from aggregated_pin_data), image (display CDN size) + imageOriginal (/originals/) + images{236x,564x,originals,…}, and a slim per-pin author{username,displayName}. Billed about 0.5 credits per returned pin (min 2). Native pidgets soft-caps around 50–100 pins with no cursor yet — larger boards need a follow-up surface.",
+    delivers: [
+      "saves (repin metric) + destinationUrl + domain",
+      "image + imageOriginal + images{} size map",
+      "Top-level author{} (followers); slim per-pin author",
+      "title when exposed; board + boardName",
+    ],
+    platformLimits: [
+      "Pass a board URL (.../user/board-slug/), not a pin URL. Pin URLs belong on /pinterest/pin-details.",
+      "Native board hydrate soft-caps ~50–100 pins. No cursor/hasMore yet — limit alone cannot page a 500+ pin board.",
+      "title / richPinType are often null on the board pidgets list; pin-details hydrates richer pin metadata.",
+    ],
+  },
+  {
+    slug: "pinterest-user-boards",
+    name: "Pinterest User Boards API",
+    shortName: "User Boards",
+    category: "list",
+    method: "GET",
+    path: "/v1/pinterest/user-boards",
+    credits: 13,
+    creditsPerResult: 0.5,
+    tagline:
+      "Boards on a Pinterest profile — pinCount, coverImage (474x), privacy, sections. Board followers when scoped.",
+    longDescription:
+      "Pass a Pinterest profile URL or username and get that profile's public boards as clean JSON. Every board row uses the same shape: id, name, url, description, privacy, pinCount, followers, sectionCount, coverImage (prefers Pinterest's 474x HD cover), createdAt (ISO-8601 UTC), and owner{username,displayName}. followers is the board-scoped follower count when available — Pinterest's logged-out board.follower_count is account-scale (identical on every board) and is never echoed here (null until a board-scoped source is wired). Billed about 0.5 credits per returned board (min 2). No cursor yet.",
+    delivers: [
+      "Stable board row shape (same keys on every item)",
+      "pinCount + sectionCount + privacy + description",
+      "coverImage (474x HD when Redux exposes it)",
+      "createdAt ISO-8601 + owner{username,displayName}",
+      "followers only when board-scoped (else null — never account count)",
+    ],
+    platformLimits: [
+      "Board-scoped followers are not on the logged-out /_boards/ hydrate — followers is null rather than a misleading account twin. ScrapeCreators exposes follower_count per board from a different path.",
+      "No cursor/hasMore yet — limit alone cannot page a profile with hundreds of boards.",
+      "Catalog list price is ~0.5 credits/board (min 2); ScrapeCreators bills 1 credit flat for this surface.",
+    ],
+  },
 ];
 
 const LINKEDIN: Spec[] = [
@@ -1483,10 +1538,60 @@ const LINKEDIN: Spec[] = [
       "SEO-clean about + honest connections nullability",
     ],
   },
-  { slug: "linkedin-company", name: "LinkedIn Company API", shortName: "Company", category: "channel", method: "GET", path: "/v1/linkedin/company", credits: 2 },
+  {
+    slug: "linkedin-company",
+    name: "LinkedIn Company API",
+    shortName: "Company",
+    category: "channel",
+    method: "GET",
+    path: "/v1/linkedin/company",
+    credits: 2,
+    tagline:
+      "Company page for B2B intel — specialties, similarPages, size/founded, slogan, cover. Native 1 / enrich 2.",
+    longDescription:
+      "Pass a LinkedIn company URL and get B2B-ready JSON: name, industry, description, website, followers, employeeCount, size (e.g. 10,001+ employees), founded, organizationType (Public Company / …), specialties[], headquarters + location{city,state,country}, slogan, coverImage, logo, similarPages[{name,link,image}] (discovery graph — same pattern as profile similarProfiles), funding when upstream exposes rounds/investors, and employees[] for featured people when LinkedIn exposes them (guest pages usually return []). type stays the entity discriminator \"company\" — organizationType is the About \"Type\" field. Native guest HTML bills 1 credit; Apify enrich for slogan/cover (and rare funding) bills 2. Recent posts live on /linkedin/company-posts, not inlined here.",
+    delivers: [
+      "specialties[] + organizationType + founded + size",
+      "similarPages[] discovery graph (name/link)",
+      "location{city,state,country} + headquarters string",
+      "slogan + coverImage when enrich fills them",
+      "employeeCount (headcount); employees[] featured people when exposed",
+      "funding object when LinkedIn/Apify expose rounds — else null",
+    ],
+    platformLimits: [
+      "Guest /company/{slug}/ does not expose funding rounds or featured employee cards — funding and employees[] stay null/[] unless an enrich path fills them. ScrapeCreators often ships both.",
+      "similarPages images are often omitted on guest HTML (name + link still return).",
+      "Inline posts[] are not on this endpoint — use /v1/linkedin/company-posts.",
+      "Apify input must be identifier:[slug]. Legacy company/url shapes could scrape the wrong company.",
+    ],
+  },
   { slug: "linkedin-post-details", name: "LinkedIn Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/linkedin/post-details", credits: 1 , tagline: "Get a LinkedIn post — text, author, reactions, and comments count as structured JSON." },
   { slug: "linkedin-post-transcript", name: "LinkedIn Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/linkedin/post-transcript", credits: 1 },
-  { slug: "linkedin-company-posts", name: "LinkedIn Company Posts API", shortName: "Company Posts", category: "list", method: "GET", path: "/v1/linkedin/company-posts", credits: 16, creditsPerResult: 0.8, tagline: "Get recent public posts from any LinkedIn company page — text, author, engagement, and publish time — with cursor pagination (nextCursor + hasMore) up to 100 posts.", longDescription: "Pass a LinkedIn company URL and get that page's recent public posts as structured JSON. Each post includes the LinkedIn URL and activity id, text, publish time, the company author, and engagement when available. Need more than the first page? Pass the nextCursor value from the previous response to keep paging (numeric offset), and use hasMore to know when you've reached the end — up to 100 posts total. Billed per result. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
+  {
+    slug: "linkedin-company-posts",
+    name: "LinkedIn Company Posts API",
+    shortName: "Company Posts",
+    category: "list",
+    method: "GET",
+    path: "/v1/linkedin/company-posts",
+    credits: 16,
+    creditsPerResult: 0.8,
+    tagline:
+      "Company posts with engagement{likes,comments,reposts} — cursor pages up to 100.",
+    longDescription:
+      "Pass a LinkedIn company URL and get recent public posts as clean JSON. Each row always includes id, url, text, publishedAt, author{name,url}, and engagement{likes,comments,reposts} (null only when LinkedIn omits that metric — never invented zeros). Homepage JSON-LD often ships text without counts; we hydrate each permalink for reaction/comment totals so analytics and competitor content scoring work. Cursor pagination via nextCursor + hasMore (numeric offset); a null nextCursor means the end of the list (max 100 posts). Native path bills 1 credit; Apify deepen stays ~0.8/result. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "engagement{likes,comments,reposts} always keyed",
+      "Permalink hydrate when homepage LD omits counts",
+      "author{name,url} + activity id",
+      "nextCursor + hasMore (hard max 100, documented)",
+    ],
+    platformLimits: [
+      "Reaction breakdown (like/celebrate/love/…) and postType/media carousels are not on this surface yet.",
+      "reposts is often null on guest hydrates even when likes/comments fill.",
+      "A null nextCursor means the end of the list (max 100 posts).",
+    ],
+  },
   { slug: "linkedin-search-posts", name: "LinkedIn Search Posts API", shortName: "Search Posts", category: "search", method: "GET", path: "/v1/linkedin/search-posts", credits: 16, creditsPerResult: 0.8 },
 ];
 
@@ -1526,16 +1631,47 @@ const TIKTOK_SHOP: Spec[] = [
     credits: 56,
     creditsPerResult: 2.8,
     tagline:
-      "TikTok Shop keyword search — price, originalPrice/discount, sold, rating/reviews, and seller id.",
+      "TikTok Shop keyword search — priced products with sold, rating/reviews, originalPrice/discount, seller id.",
     longDescription:
-      "Search TikTok Shop by keyword and get products as clean JSON: id, url, title, price + originalPrice/discount, currency, sold, rating + reviews when TikTok exposes them, image, and seller{id,name,url}. Pass region (default US). Native path bills a flat 2 credits when it succeeds; Apify fallback is about 2.8 credits per result (e.g. ~56 for limit=20). String fields are HTML-entity decoded (&amp; → &). Pass cache=true for the 24h shared cache.",
+      "Search TikTok Shop by keyword and get products as clean JSON: id, url, title, price + originalPrice/discount/savings, currency, sold, rating + reviews (always keyed; null when the PDP has no score yet), image, and seller{id,name,url}. top-level region is an echo of the region query param you sent (default US) — market selection, not a creator country and not AI-inferred. price uses the same canonical rule as Product Details: TikTok's promotion minimum sale price across SKUs at fetch time (promos can move between calls). Native SERP→PDP path bills flat 2 credits; Apify fallback is billed per result (~2.8 each, e.g. ~56 for limit=20). Pass cache=true for the 24h shared cache.",
     delivers: [
-      "rating + reviews on search hits when available",
-      "originalPrice + discount alongside sale price",
-      "seller.id / name / url",
+      "rating + reviews always keyed on every hit",
+      "originalPrice + discount + savings (same price rule as Product Details)",
+      "seller{id,name,url}",
+      "region = request param echo (not AI / no regionSource)",
+      "Flat 2 credits native; ~2.8/result Apify",
+    ],
+    platformLimits: [
+      "Native path hydrates each hit via PDP SSR (Shop search HTML is WAF-gated). rating/reviews come from the PDP review_model — new products often have null until TikTok publishes a score.",
+      "No page/cursor yet — soft-cap is whatever the SERP+hydrate window returns (limit max 200; you usually get fewer).",
+      "TikTok promotion prices are point-in-time; the same product_id can show a different sale price minutes later on Search vs Product Details.",
     ],
   },
-  { slug: "tiktok-shop-products", name: "TikTok Shop Products API", shortName: "Shop Products", category: "list", method: "GET", path: "/v1/tiktok-shop/shop-products", credits: 2 },
+  {
+    slug: "tiktok-shop-products",
+    name: "TikTok Shop Products API",
+    shortName: "Shop Products",
+    category: "list",
+    method: "GET",
+    path: "/v1/tiktok-shop/shop-products",
+    credits: 2,
+    tagline:
+      "Store catalog with shopInfo (sold/followers/rating) + products priced with sold, rating, savings.",
+    longDescription:
+      "Pass a TikTok Shop store URL and get that shop's public catalog as clean JSON — products and the store card from the same SSR call. Top-level shopInfo: sold + formatSold (e.g. 5.6M), reviews, followers, rating, productCount, videoCount, isOfficial + identityLabel (OFFICIAL SHOP), region, logo, storeScores[]. Each products[] row: id/url/slug, title, numeric price + originalPrice + discount + savings (unmasked — not TikTok's $3? strings), currency, sold, rating, reviews, image, seller{id,name,url}. Optional region (default US). Billing: flat 2 credits per call on native SSR (limit does not multiply credits — a 200-cap request that returns ~30 SSR rows still costs 2). Apify fallback (rare) scales ~2.8/result. No cursor/sort_by yet. Non-US coverage depends on TikTok exposing that shop in the selected region — empty results outside the US are often a platform limit, not a Captapi bug.",
+    delivers: [
+      "shopInfo{sold,formatSold,followers,rating,productCount,isOfficial,…}",
+      "Unmasked numeric price / originalPrice / discount / savings",
+      "products with sold + rating + reviews always keyed",
+      "SEO slug per product",
+      "Flat 2 credits on native SSR",
+    ],
+    platformLimits: [
+      "Native soft-caps around ~30 products per store page. No cursor / sort_by (top|new_releases) yet — productCount on shopInfo shows how much of the catalog you are missing.",
+      "shop_slogan is often omitted on US store SSR even when ScrapeCreators fills it.",
+      "Non-US shop catalog coverage depends on TikTok exposing that shop in the selected region — some shops return empty outside the US even when they appear in shop search. Sorry: this is a TikTok exposure limit we document rather than hide.",
+    ],
+  },
   {
     slug: "tiktok-shop-product-details",
     name: "TikTok Shop Product Details API",
@@ -1543,14 +1679,76 @@ const TIKTOK_SHOP: Spec[] = [
     category: "details",
     method: "GET",
     path: "/v1/tiktok-shop/product-details",
-    credits: 14,
+    credits: 2,
     tagline:
-      "TikTok Shop product — float price + currency, seller id, originalPrice/discount, SKUs, and region.",
+      "PDP — price/originalPrice/discount, images[], skus[] with per-variant stock + saleProps, seller id/url, categories (2 credits native).",
     longDescription:
-      "Get a TikTok Shop PDP as structured JSON: title, numeric price + currency, originalPrice/discount when unmasked, stock, rating/reviews, seller id/url/rating, skus[], and images. Pass region (default US) for the Apify fallback market. Native HTML path bills 2 credits when it succeeds; Apify fallback is 14. Related affiliate videos are included when upstream provides them.",
+      "Pass a TikTok Shop product URL and get the PDP as clean JSON from the same SSR product_info blob TikTok ships: title, rich description, numeric price + originalPrice + discount + savings (when a seller deduction exists), currency, sold, stock (sum of SKUs), rating/reviews, images[] gallery, categories[{id,name}], saleProperties[] (Color/Size axes), and skus[{id,stock,price,warehouseId,saleProps[]}]. seller includes id, name, url, rating, productCount, and logo when present. Native SSR bills flat 2 credits — same as Shop Products — so this is no longer a 14-credit tax for a thinner payload. Apify fallback (rare) bills 14. region (default US) selects the Apify market when native misses. relatedVideos[] (affiliate creator bridge) and seller.tiktokUrl are not in US PDP SSR today — returned when an upstream path provides them; use Product Reviews for sample review text.",
+    delivers: [
+      "Flat 2 credits on native SSR (14 only on Apify fallback)",
+      "originalPrice / discount / savings always keyed (null when no promo)",
+      "skus[] with per-variant stock + saleProps (e.g. Phone Models)",
+      "images[] gallery + categories[{id,name}]",
+      "seller{id,name,url,rating,productCount,logo}",
+    ],
+    platformLimits: [
+      "relatedVideos[] (creator↔product affiliate bridge) is not embedded in US PDP SSR — Captapi returns it only when an upstream path provides it. ScrapeCreators documents US-only coverage for that block.",
+      "seller.tiktokUrl / tiktokId are often absent from PDP SSR (shop catalog shopInfo is richer for store-level signals).",
+      "Sample review text lives on Product Reviews — not duplicated here.",
+    ],
   },
-  { slug: "tiktok-shop-product-reviews", name: "TikTok Shop Product Reviews API", shortName: "Product Reviews", category: "comments", method: "GET", path: "/v1/tiktok-shop/product-reviews", credits: 45, creditsPerResult: 2.25 },
-  { slug: "tiktok-shop-user-showcase", name: "TikTok Shop User Showcase API", shortName: "User Showcase", category: "list", method: "GET", path: "/v1/tiktok-shop/user-showcase", credits: 45, creditsPerResult: 2.25, tagline: "List products a TikTok creator is promoting in their Shop showcase — product URL, title, price, image, and seller shop id for each item.", longDescription: "Pass a TikTok username (with or without @, or a profile URL) and the TikTok Shop User Showcase API returns the products that creator is featuring in their TikTok Shop showcase as clean JSON. This is the affiliate / creator storefront shelf — not the full inventory of a brand store. Each product includes the product URL and id, title, price, currency, thumbnail image, and the seller's shop id when available. For a brand's full catalog, use TikTok Shop Products with a store URL instead. For deeper product fields (stock, seller rating), call Product Details with a product URL. Billed per result — about 2.25 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Products a TikTok creator is promoting in their Shop showcase", "Product URL, id, title, price, currency, and image", "Seller shop id when TikTok exposes it", "Useful for affiliate tracking and creator commerce research", "Not a full brand store catalog — use Shop Products for that"] },
+  {
+    slug: "tiktok-shop-product-reviews",
+    name: "TikTok Shop Product Reviews API",
+    shortName: "Product Reviews",
+    category: "comments",
+    method: "GET",
+    path: "/v1/tiktok-shop/product-reviews",
+    credits: 45,
+    creditsPerResult: 2.25,
+    tagline:
+      "TikTok Shop product reviews — star rating, text, SKU variant, verified purchase, country, and review photos.",
+    longDescription:
+      "Pass a TikTok Shop product URL and get customer reviews as clean JSON — not a video comment thread. Each review includes the per-review star rating (1–5), review text, createdAt (UTC ISO with Z), verifiedPurchase, the SKU / variant label the buyer selected (e.g. \"Thicc 16oz | Ice Cream\"), review country, masked author name when TikTok exposes one, and images[] of photos the reviewer attached. Native PDP SSR returns a short preview (~3) for 2 credits; deeper pages use Apify and bill about 2.25 credits per review returned (e.g. ~45 for limit=20). There is no Comment Replies endpoint for Shop reviews — these are product reviews, not nested social comments, and like counts are not exposed. For sample reviews inside a single PDP call, competitors often stop at 2–3 embedded quotes; this endpoint can page up to 200.",
+    delivers: [
+      "Per-review star rating + text + createdAt (UTC Z)",
+      "verifiedPurchase + review country + SKU variant label",
+      "images[] — photos shoppers attached to the review",
+      "Up to 200 reviews (SSR preview ~3 for 2 credits native)",
+      "Not video comments — no likes / no Comment Replies hop",
+    ],
+    platformLimits: [
+      "Reviewer identity is usually TikTok-masked (e.g. \"C**e\") — full handle/avatar/profile URL are often omitted on public Shop surfaces.",
+      "Shop reviews are not a threaded comment system — there is no TikTok Shop Comment Replies endpoint and no like count on review rows.",
+      "Native SSR typically embeds ~3 reviews; higher limits use Apify and scale per returned review.",
+    ],
+  },
+  {
+    slug: "tiktok-shop-user-showcase",
+    name: "TikTok Shop User Showcase API",
+    shortName: "User Showcase",
+    category: "list",
+    method: "GET",
+    path: "/v1/tiktok-shop/user-showcase",
+    credits: 45,
+    creditsPerResult: 2.25,
+    tagline:
+      "Creator Shop showcase — affiliate shelf products with sold, rating, originalPrice/discount, and seller name/url.",
+    longDescription:
+      "Pass a TikTok username (with or without @, or a profile URL) and the TikTok Shop User Showcase API returns the products that creator is featuring in their TikTok Shop showcase as clean JSON. This is the affiliate / creator storefront shelf — not the full inventory of a brand store. Each product includes id/url/slug, title, price + originalPrice/discount/savings (same canonical promo-min rule as Shop Search / Product Details), currency, sold, rating/reviews, image, and seller{id,name,url}. For a brand's full catalog, use TikTok Shop Products with a store URL instead. For stock / skus[] / categories, call Product Details with a product URL. Billed per result — about 2.25 credits each. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "Affiliate / creator storefront shelf (not a brand catalog)",
+      "sold + rating/reviews always keyed (PDP-hydrated)",
+      "originalPrice / discount / savings + seller{id,name,url}",
+      "SEO slug when the PDP URL includes one",
+      "Cross-links: Shop Products for full store · Product Details for SKUs",
+    ],
+    platformLimits: [
+      "Affiliate commission rate is not in the public Apify showcase payload today — commissionRate is returned only when upstream exposes it.",
+      "Showcase shelf rows are hydrated via PDP SSR for commerce fields; empty sold/rating means the PDP omitted them, not that Captapi dropped the keys.",
+      "ScrapeCreators has no showcase endpoint — this surface is Captapi-only.",
+    ],
+  },
 ];
 
 const GITHUB: Spec[] = [
@@ -3318,11 +3516,16 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "pinterest-pin-details": [up("Pinterest pin URL, e.g. https://pinterest.com/pin/ID/.")],
   "pinterest-user-pins": [up("Pinterest profile URL or username."), lp(25, 200)],
   "pinterest-search": [qp("Keywords or search query (min 2 characters)."), lp(25, 200)],
-  "pinterest-board": [up("Pinterest board URL, e.g. https://pinterest.com/username/board-name/."), lp(25, 200)],
+  "pinterest-board": [
+    up(
+      "Pinterest board URL (.../username/board-name/), not a /pin/ URL. Example: https://www.pinterest.com/potterybarn/rustic-lodge-lookbook/.",
+    ),
+    lp(25, 200),
+  ],
   "pinterest-user-boards": [up("Pinterest profile URL or username."), lp(25, 200)],
   // LinkedIn
   "linkedin-profile": [up("LinkedIn profile URL, e.g. https://www.linkedin.com/in/paul-martin-a5aa98.")],
-  "linkedin-company": [up("LinkedIn company URL, e.g. https://linkedin.com/company/slug.")],
+  "linkedin-company": [up("LinkedIn company URL, e.g. https://www.linkedin.com/company/shopify.")],
   "linkedin-post-details": [up("LinkedIn post or activity URL.")],
   "linkedin-post-transcript": [up("LinkedIn post or activity URL.")],
   "linkedin-company-posts": [
@@ -3449,19 +3652,52 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "github-trending-repositories": [{ name: "q", type: "string", required: false, description: "GitHub search query. Default stars:>1000." }, lp(20, 100)],
   "github-trending-developers": [{ name: "q", type: "string", required: false, description: "GitHub user search query. Default followers:>1000." }, lp(20, 100)],
   // TikTok Shop
-  "tiktok-shop-search": [qp("Product search query (min 2 characters)."), { name: "region", type: "string", required: false, description: "Two-letter ISO region code. Default US." }, lp(20, 200)],
-  "tiktok-shop-products": [up("TikTok Shop store URL."), lp(20, 200)],
-  "tiktok-shop-product-details": [
-    up("TikTok Shop product URL."),
+  "tiktok-shop-search": [
+    qp("Product search query (min 2 characters), e.g. phone case."),
     {
       name: "region",
       type: "string",
       required: false,
-      description: "Market region ISO code for the Apify fallback path (default US).",
+      description:
+        "Two-letter market region for the search (default US). Echoed on the response as data.region — not a creator home country.",
+    },
+    lp(20, 200),
+  ],
+  "tiktok-shop-products": [
+    up("TikTok Shop store URL, e.g. https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079."),
+    {
+      name: "region",
+      type: "string",
+      required: false,
+      description:
+        "Two-letter market region (default US). Non-US coverage depends on TikTok exposing that shop in the selected region — empty results outside the US are often a platform limit, not a Captapi bug.",
+    },
+    lpFlat(20, 200, 2),
+  ],
+  "tiktok-shop-product-details": [
+    up("TikTok Shop product URL, e.g. https://www.tiktok.com/shop/pdp/1731098552908944370."),
+    {
+      name: "region",
+      type: "string",
+      required: false,
+      description:
+        "Two-letter market region for the Apify fallback path (default US). Native SSR uses the product URL's market; empty/partial non-US results are often a TikTok exposure limit.",
     },
   ],
-  "tiktok-shop-product-reviews": [up("TikTok Shop product URL."), lp(20, 200)],
-  "tiktok-shop-user-showcase": [{ name: "username", type: "string", required: true, description: "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug." }, lp(20, 200)],
+  "tiktok-shop-product-reviews": [
+    up("TikTok Shop product URL, e.g. https://www.tiktok.com/shop/pdp/1731962298839634826."),
+    lp(20, 200),
+  ],
+  "tiktok-shop-user-showcase": [
+    {
+      name: "username",
+      type: "string",
+      required: true,
+      description:
+        "TikTok username, @handle, or profile URL, e.g. jeffreestar or https://www.tiktok.com/@jeffreestar.",
+    },
+    lp(20, 200),
+  ],
   // Ad Library
   "facebook-ad-library-search": [
     qp("Keyword, brand, or advertiser to search Meta Ad Library (min 2 characters)."),
@@ -4128,6 +4364,7 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       const ex = API_EXAMPLES[ep.slug];
       const captured =
         (typeof ex?.url === "string" && ex.url) ||
+        (typeof ex?.board === "string" && ex.board) ||
         (typeof ex?.artistUrl === "string" && ex.artistUrl) ||
         null;
       if (typeof captured === "string" && /^https?:\/\//.test(captured)) return captured;
@@ -4138,6 +4375,10 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       // X Communities — never fall through to the platform tweet exampleUrl.
       if (ep.slug === "twitter-community" || ep.slug === "twitter-community-tweets") {
         return "https://x.com/i/communities/1493446837214187523";
+      }
+      // Pinterest board — never fall through to the platform pin exampleUrl.
+      if (ep.slug === "pinterest-board") {
+        return "https://www.pinterest.com/potterybarn/rustic-lodge-lookbook/";
       }
       if (ep.slug === "facebook-marketplace-item" || d.includes("marketplace item"))
         return "https://www.facebook.com/marketplace/item/2228870800986975/";
@@ -4158,7 +4399,7 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       if (d.includes("subreddit"))
         return "https://www.reddit.com/r/technology/";
       if (d.includes("company"))
-        return "https://www.linkedin.com/company/microsoft";
+        return "https://www.linkedin.com/company/shopify";
       // Creator-page platforms: never treat "page" in the description as Facebook.
       if (creatorPagePlatforms.includes(ep.platform))
         return PROFILE_URL[ep.platform];
@@ -4576,6 +4817,20 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       a: `Not on this endpoint — results are posts only (kind=t3). For discussion text under a known post, use Post Comments. Site-wide comment search (ScrapeCreators-style comments[]) is a separate surface on the backlog.`,
     });
   }
+  if (ep.slug === "pinterest-board") {
+    list.push({
+      q: `Why did my request fail with a pin URL?`,
+      a: `This endpoint requires a board URL (.../username/board-name/). Pin URLs go to /v1/pinterest/pin-details. The docs cURL uses a board URL — do not paste a /pin/… link here.`,
+    });
+    list.push({
+      q: `Where is the save/repin count?`,
+      a: `On each pin as saves (from Pinterest aggregated_pin_data). That is the primary engagement metric on Pinterest — not likes.`,
+    });
+    list.push({
+      q: `How do I get the full-resolution image?`,
+      a: `Use imageOriginal or images.originals.url. Top-level image is a display CDN size (often 564x).`,
+    });
+  }
   if (ep.slug === "tiktok-ad-library-search") {
     list.push({
       q: `Is this TikTok Creative Center (CTR / Top Ads)?`,
@@ -4953,7 +5208,7 @@ const FIELD_DESCS: Record<string, string> = {
   endDate: "Ad end date (YYYY-MM-DD) when LinkedIn exposes a ran-from range.",
   totalImpressions: "Estimated total impressions band from LinkedIn Ad Library (e.g. 1k-5k).",
   impressionsByCountry: "Per-country impression share rows ({country, impressions}).",
-  destinationUrl: "Click-through / landing URL from the ad creative.",
+  destinationUrl: "Outbound click-through / landing URL when the platform exposes one.",
   carouselImages: "Ordered carousel creative image URLs when the ad is a carousel.",
   paidForBy: "Payer entity string from LinkedIn's 'Paid for by' line.",
   totalAds: "Total ads matching the LinkedIn Ad Library search criteria.",
@@ -5405,7 +5660,18 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     region: "Artist region/country when Spotify exposes it.",
   },
   "tiktok-shop-search": {
-    region: "Shop or product region when TikTok Shop exposes it.",
+    region:
+      "Echo of the region query parameter you sent (default US) — the market used for this search. Not a creator country, not AI-inferred, and there is no regionSource on this endpoint.",
+    price:
+      "Current promotion minimum sale price across SKUs at fetch time (promotion_product_price.min_price). Same rule as Product Details — TikTok may change promos between calls.",
+    originalPrice:
+      "Pre-discount price when TikTok exposes an origin price or seller deduction; null when there is no promo. Same rule as Product Details.",
+    discount: 'Percent off vs originalPrice when a promo exists (e.g. "55%"); null otherwise.',
+    rating: "Product star score from the PDP when TikTok exposes one; null when the product has no reviews yet.",
+    reviews: "Product review count from the PDP when exposed; null when unknown/zero with no score.",
+    sold: "Units sold for this product (product_model.sold_count) — not the shop's aggregate sold.",
+    image: "Primary product image URL (TikTok Shop search has no separate thumbnail field).",
+    seller: "Seller shop card: id, name, and store url — not a content author.",
   },
   "youtube-search": {
     channel: "YouTube channel object for the result when present.",
@@ -5491,17 +5757,136 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     status: "Ad delivery filter/status: ACTIVE, INACTIVE, or ALL.",
     videos: "Typed video assets ({url, sdUrl, previewUrl}). media[] remains the flat URL list.",
     images: "Typed image assets when Meta exposes them ({url, resizedUrl}).",
+    destinationUrl: "Click-through / landing URL from the ad creative.",
   },
   "facebook-ad-library-ad-details": {
     videos: "Typed video assets ({url, sdUrl, previewUrl}). media[] remains the flat URL list.",
     images: "Typed image assets when Meta exposes them ({url, resizedUrl}).",
+    destinationUrl: "Click-through / landing URL from the ad creative.",
+  },
+  "pinterest-board": {
+    destinationUrl: "Outbound link on the pin (product/article URL). Not an ad creative field.",
+    saves: "How many times the pin was saved/repinned — Pinterest's primary engagement metric.",
+    imageOriginal:
+      "Full-resolution pin image via i.pinimg.com/originals/… (derived when Pinterest only ships sized CDN URLs).",
+    image: "Display image URL (typically 564x or 736x CDN size). Prefer imageOriginal for archival/analysis.",
+    author:
+      "Top-level: full pinner card (username, displayName, followers). Per-pin author is slim (username/displayName) to avoid repeating followers on every row.",
+    title: "Pin title when Pinterest exposes it on the board hydrate (often null on promotional pins).",
+  },
+  "pinterest-pin-details": {
+    destinationUrl: "Outbound link on the pin (product/article URL). Not an ad creative field.",
+    saves: "How many times the pin was saved/repinned — Pinterest's primary engagement metric.",
+    imageOriginal:
+      "Full-resolution pin image via i.pinimg.com/originals/… when available under images.originals.",
+  },
+  "pinterest-user-pins": {
+    destinationUrl: "Outbound link on the pin (product/article URL). Not an ad creative field.",
+    saves: "How many times the pin was saved/repinned — Pinterest's primary engagement metric.",
+  },
+  "pinterest-user-boards": {
+    followers:
+      "Board-scoped follower count when available. Null on the logged-out hydrate — Pinterest's board.follower_count there is account-scale (same value on every board) and is never returned.",
+    coverImage:
+      "Board cover image URL. Prefers Pinterest's image_cover_hd_url (474x) when present; may fall back to 200x150.",
+    createdAt: "Board creation time as ISO-8601 UTC (normalized from Pinterest's RFC 2822).",
+    privacy: "Board privacy: public or secret when exposed.",
+    sectionCount: "Number of sections on the board.",
+    pinCount: "Number of pins on the board.",
+    description: "Board description text when the owner set one (often empty).",
+    owner: "Board owner card: username + displayName.",
+  },
+  "linkedin-company": {
+    type: 'Entity discriminator — always "company". Organization legal/type label is organizationType.',
+    industry: "LinkedIn industry from the About section (e.g. Software Development).",
+    employees:
+      "Featured employees [{name,title,link}] when LinkedIn exposes them. Guest pages usually return []. Not the headcount — use employeeCount.",
+    employeeCount: "LinkedIn headcount estimate for the company.",
+    size: 'Company size band from About (e.g. "10,001+ employees").',
+    founded: "Founding year when present on the About section.",
+    organizationType: 'About "Type" (e.g. Public Company). Distinct from type:"company".',
+    specialties: "About specialties list.",
+    similarPages: "Companies LinkedIn lists under Similar pages — discovery graph ({name,link,image}).",
+    funding:
+      "Funding rounds/investors when upstream exposes them; null on guest HTML / empty Apify funding blobs. ScrapeCreators often fills this.",
+    slogan: "Company tagline.",
+    coverImage: "Company cover/background image URL.",
+    location: "Structured HQ {city,state,country}. headquarters is the joined string.",
+  },
+  "linkedin-company-posts": {
+    engagement:
+      "Always keyed {likes,comments,reposts}. Counts from permalink hydrate when homepage JSON-LD omits them; null only when LinkedIn omits that metric.",
+    likes: "Total reactions on the post (LinkedIn's public reaction count).",
+    comments: "Public comment count.",
+    reposts: "Repost/share count when LinkedIn exposes it (often null on guest hydrates).",
+  },
+  "tiktok-shop-products": {
+    platform: 'Always "tiktok_shop" on this endpoint (not youtube/instagram).',
+    shopInfo:
+      "Store rollup from the same SSR call as products: sold, formatSold, reviews, followers, rating, productCount, videoCount, isOfficial, identityLabel, region, logo, storeScores[].",
+    sold: "Units sold (product row) or lifetime shop sold (inside shopInfo).",
+    rating: "Star rating (product or shop).",
+    reviews: "Review count (product or shop).",
+    savings: 'Human discount copy from TikTok (e.g. "Saving $4.02").',
+    discount: 'Percent off string (e.g. "21%").',
+    slug: "SEO slug from seo_url.slug (also embedded in the product URL).",
+    storeScores: "TikTok store sub-scores [{score, scorePercentage, type}].",
+    isOfficial: 'true when identityLabel indicates an official shop (e.g. "OFFICIAL SHOP").',
+    formatSold: 'Compact shop sold string from TikTok (e.g. "5.6M").',
+    region:
+      "Echo of the region query parameter you sent (default US) — the market used for this catalog fetch. Not a creator country, not AI-inferred, and there is no regionSource here.",
+    price:
+      "Current promotion minimum sale price across SKUs at fetch time — same canonical rule as Shop Search and Product Details.",
+  },
+  "pinterest-search": {
+    destinationUrl: "Outbound link on the pin (product/article URL). Not an ad creative field.",
+    saves: "How many times the pin was saved/repinned — Pinterest's primary engagement metric.",
+  },
+  "linkedin-ad-library-search-ads": {
+    destinationUrl: "Click-through / landing URL from the ad creative.",
   },
   "tiktok-ad-library-search": {
     videos: "Typed video assets for the ad creative when present.",
     status: "Ad delivery status when the library exposes it.",
   },
   "tiktok-shop-product-details": {
-    images: "Product gallery image URLs.",
+    platform: "Always tiktok_shop for this endpoint.",
+    region:
+      "Echo of the region query parameter (default US) used for Apify fallback market selection. Native SSR follows the product URL's market. Not a creator country and not AI-inferred.",
+    price:
+      "Current promotion minimum sale price across SKUs (promotion_product_price.min_price.sale_price_decimal). Canonical across Shop Search / Shop Products / Product Details — point-in-time; TikTok promos can move between calls.",
+    images: "Product gallery image URLs from the PDP (not a single OG thumbnail).",
+    originalPrice: "List / pre-discount price when TikTok exposes a seller deduction or origin price; null when the PDP has no promo.",
+    discount: 'Percent off string (e.g. "13%") when originalPrice > price; null otherwise.',
+    savings: 'Human discount copy (e.g. "Saving $3.60") when a promo exists.',
+    skus: "Per-variant rows: id, stock, price, warehouseId, purchaseLimit, saleProps[{propName,propValue}].",
+    saleProperties: "Variant axes for the product (e.g. Phone Models / Color) with value ids.",
+    categories: "Category tree crumbs [{id, name}] from TikTok's recommended_categories.",
+    seller: "Shop card: id, name, store url, rating, productCount, logo — not the product title.",
+    relatedVideos: "Affiliate / related creator videos when upstream provides them (often absent from US PDP SSR).",
+    descVideo: "Product description video URL + durationMs when TikTok embeds one.",
+    stock: "Sum of available_quantity across skus[] (use skus[].stock for per-variant inventory).",
+  },
+  "tiktok-shop-product-reviews": {
+    rating: "This review's star score (1–5). Not the product's average rating — that lives on Product Details / Shop Search as products[].rating.",
+    country: "ISO country of the reviewer when TikTok exposes it (e.g. US). Not a request-market param and not related to popular-creators feeds.",
+    createdAt: "When the review was posted, UTC ISO-8601 with milliseconds and Z (e.g. 2026-05-15T21:49:56.991Z).",
+    verifiedPurchase: "true when TikTok marks the reviewer as a verified buyer.",
+    sku: "Variant / SKU label the buyer selected (e.g. \"Thicc 16oz | Ice Cream\").",
+    images: "Photo URLs the reviewer attached to this review (empty/omitted when none).",
+    author: "Reviewer display — often TikTok-masked (e.g. \"C**e\"). Full handle/avatar/profile URL are usually unavailable on public Shop reviews.",
+    text: "Review body text.",
+  },
+  "tiktok-shop-user-showcase": {
+    sold: "Units sold for the showcased product (from PDP hydrate).",
+    rating: "Product star score when the PDP exposes one; null otherwise.",
+    reviews: "Product review count when exposed; null otherwise.",
+    originalPrice: "Pre-discount price when a promo exists — same canonical rule as Shop Search / Product Details.",
+    discount: "Percent off vs originalPrice when a promo exists.",
+    seller: "Seller shop card {id,name,url} — id from the showcase shelf, name/url from PDP hydrate when available.",
+    commissionRate: "Affiliate commission when upstream exposes it; omitted when the public showcase payload has no rate.",
+    slug: "SEO slug from the hydrated PDP URL when present.",
+    image: "Product image from the showcase shelf (or PDP when the shelf omits one).",
   },
   "analytics-compare": {
     status: "Row status: ok when the URL resolved, error when it failed.",
@@ -5602,6 +5987,16 @@ export function lintFieldDescPlatformBleed(): string[] {
           }
           errors.push(
             `${ep.slug}.${field.name}: description mentions ${tok.platform} but endpoint is ${ep.platform} — "${field.desc.slice(0, 140)}"`,
+          );
+        }
+        // Deterministic request echoes must never inherit profile-region AI copy.
+        if (
+          field.name === "region" &&
+          ep.platform === "tiktok_shop" &&
+          /AI-inferred|regionSource|creator'?s country/i.test(field.desc)
+        ) {
+          errors.push(
+            `${ep.slug}.region: TikTok Shop region must describe the request market echo, not profile-region AI inference — "${field.desc.slice(0, 140)}"`,
           );
         }
       }
@@ -5884,6 +6279,96 @@ const VIDEO_DETAILS_USE_CASES: UseCase[] = [
 
 /** Slug-specific use cases when category defaults would mislead. */
 const SLUG_USE_CASES: Record<string, UseCase[]> = {
+  "tiktok-shop-search": [
+    {
+      title: "Product Discovery",
+      desc: "Find TikTok Shop listings by keyword with price, sold, and rating in one call.",
+    },
+    {
+      title: "Promo & Price Screening",
+      desc: "Filter hits by originalPrice/discount/savings before opening a PDP.",
+    },
+    {
+      title: "Quality Ranking",
+      desc: "Sort or threshold on rating/reviews without a second Product Details hop.",
+    },
+    {
+      title: "Seller Follow-up",
+      desc: "Take seller.id / seller.url into Shop Products for the full store catalog.",
+    },
+  ],
+  "tiktok-shop-product-reviews": [
+    {
+      title: "Quality Signals",
+      desc: "Read verified reviews + attached photos before stocking or promoting a SKU.",
+    },
+    {
+      title: "Variant Complaints",
+      desc: "Group review text by sku to see which Color/Size draws issues.",
+    },
+    {
+      title: "Market Mix",
+      desc: "Use review country to see where buyers are writing from.",
+    },
+    {
+      title: "UGC Sampling",
+      desc: "Pull images[] as real shopper photos for creative research.",
+    },
+  ],
+  "tiktok-shop-user-showcase": [
+    {
+      title: "Affiliate Shelf Audit",
+      desc: "See which products a creator is actively promoting in their Shop showcase.",
+    },
+    {
+      title: "Creator Commerce Intel",
+      desc: "Rank showcase SKUs by sold / rating without scraping the profile UI.",
+    },
+    {
+      title: "Store Handoff",
+      desc: "Take seller.url into Shop Products when you need the brand's full catalog.",
+    },
+    {
+      title: "PDP Deep Dive",
+      desc: "Pass a product URL to Product Details for skus[] / stock / categories.",
+    },
+  ],
+  "tiktok-shop-products": [
+    {
+      title: "Competitor Store Intel",
+      desc: "Read shopInfo sold/followers/rating alongside the priced catalog in one call.",
+    },
+    {
+      title: "Price & Discount Monitoring",
+      desc: "Track numeric price/originalPrice/discount/savings without TikTok's masked $3? strings.",
+    },
+    {
+      title: "Official Shop Vetting",
+      desc: "Check isOfficial / identityLabel before featuring a store in a campaign.",
+    },
+    {
+      title: "Catalog Sampling",
+      desc: "Pull up to ~30 SSR products with sold + rating for assortment research (no cursor yet).",
+    },
+  ],
+  "tiktok-shop-product-details": [
+    {
+      title: "Variant Stock Tracking",
+      desc: "Watch skus[].stock + saleProps so you know which Color/Size is actually depleting.",
+    },
+    {
+      title: "Price & Promo Truth",
+      desc: "Read price/originalPrice/discount/savings on the PDP — same commerce fields as the catalog row.",
+    },
+    {
+      title: "Assortment & Categories",
+      desc: "Use categories[] and saleProperties[] to classify SKUs without scraping the storefront UI.",
+    },
+    {
+      title: "Seller Join",
+      desc: "Take seller.id / seller.url into Shop Products for the full store catalog.",
+    },
+  ],
   "twitter-user-tweets": [
     {
       title: "Top-Post Analysis",

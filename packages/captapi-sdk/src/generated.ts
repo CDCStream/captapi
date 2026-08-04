@@ -599,11 +599,11 @@ export class TiktokApi {
   popularHashtags(params: TiktokPopularHashtagsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/popular-hashtags", params);
   }
-  /** TikTok Live — Authoritative isLive/status, last room, creator id/secUid, parsed stream qualities. (1 credit) */
+  /** TikTok Live — isLive/status, creator.id/secUid, streamQualities with flv/hls/cmaf/dash. Flat 1 credit. (1 credit) */
   live(params: TiktokLiveParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/live", params);
   }
-  /** TikTok Live Info — Same as TikTok Live (status, room, stream qualities) at 7 credits. (7 credits) */
+  /** TikTok Live Info — True alias of /live (same payload) at 7 credits for SC path compatibility. (7 credits) */
   liveInfo(params: TiktokLiveInfoParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/live-info", params);
   }
@@ -1016,7 +1016,7 @@ export class TwitterApi {
   community(params: TwitterCommunityParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitter/community", params);
   }
-  /** Twitter/X Community Tweets — Tweets posted in an X community. (18 credits) */
+  /** Twitter/X Community Tweets — Community posts — flat 2 native; ~0.7/tweet Apify fallback. (2 credits) */
   communityTweets(params: TwitterCommunityTweetsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitter/community-tweets", params);
   }
@@ -1123,7 +1123,7 @@ export class RedditApi {
   search(params: RedditSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/search", params);
   }
-  /** Reddit Subreddit Details — Info & member stats for a subreddit. (1 credit) */
+  /** Reddit Subreddit Details — Subreddit card — t5_ id, members, activeUsers, rules[], ISO createdAt. (1 credit) */
   subredditDetails(params: RedditSubredditDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/subreddit-details", params);
   }
@@ -1180,7 +1180,7 @@ export class ThreadsApi {
   profile(params: ThreadsProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/threads/profile", params);
   }
-  /** Threads User Posts — Recent posts from a Threads profile. (14 credits) */
+  /** Threads User Posts — Recent Threads posts — views+engagement, threadId/isReply. Flat 2 native. (2 credits) */
   userPosts(params: ThreadsUserPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/threads/user-posts", params);
   }
@@ -1188,11 +1188,11 @@ export class ThreadsApi {
   postDetails(params: ThreadsPostDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/threads/post-details", params);
   }
-  /** Threads Post Search — Search public Threads posts by keyword — text, author, engagement, and media. (18 credits) */
+  /** Threads Post Search — Threads keyword search — flat 2 native (~0.7/post Apify). Meta Top SERP; no sort/date. (2 credits) */
   search(params: ThreadsSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/threads/search", params);
   }
-  /** Threads Search Users — Find Threads users by keyword — username, display name, profile URL, verified. (14 credits) */
+  /** Threads Search Users — Distinct authors from keyword search — id, avatar, verified. Flat 1 native. (1 credit) */
   searchUsers(params: ThreadsSearchUsersParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/threads/search-users", params);
   }
@@ -1296,7 +1296,7 @@ export class PinterestApi {
   search(params: PinterestSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/pinterest/search", params);
   }
-  /** Pinterest Board — List pins inside a Pinterest board. (13 credits) */
+  /** Pinterest Board — Board pins — saves, imageOriginal, destinationUrl, top-level author. Board URL only. (13 credits) */
   board(params: PinterestBoardParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/pinterest/board", params);
   }

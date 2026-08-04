@@ -80,6 +80,139 @@ def extract_products_from_html(html: str) -> list[dict[str, Any]]:
     return best
 
 
+def _find_shop_info_dicts(obj: Any, *, depth: int = 0) -> list[dict[str, Any]]:
+    """Walk SSR JSON for ``shopInfo`` / ``shop_info`` objects with sold_count."""
+    found: list[dict[str, Any]] = []
+    if depth > 12:
+        return found
+    if isinstance(obj, dict):
+        for key in ("shopInfo", "shop_info"):
+            cand = obj.get(key)
+            if isinstance(cand, dict) and (
+                cand.get("sold_count") is not None or cand.get("shop_rating") is not None
+            ):
+                found.append(cand)
+        for v in obj.values():
+            found.extend(_find_shop_info_dicts(v, depth=depth + 1))
+    elif isinstance(obj, list):
+        for v in obj[:60]:
+            found.extend(_find_shop_info_dicts(v, depth=depth + 1))
+    return found
+
+
+def extract_shop_info_from_html(html: str) -> dict[str, Any] | None:
+    """Parse store-page ``shopInfo`` (sold/followers/rating/productCount/…)."""
+    best: dict[str, Any] | None = None
+    best_score = -1
+    for m in _SCRIPT_RE.finditer(html or ""):
+        blob = (m.group(1) or "").strip()
+        if not blob.startswith("{"):
+            continue
+        if "shop_rating" not in blob and "sold_count" not in blob:
+            continue
+        try:
+            data = json.loads(blob)
+        except ValueError:
+            continue
+        for info in _find_shop_info_dicts(data):
+            score = sum(
+                1
+                for k in (
+                    "sold_count",
+                    "shop_rating",
+                    "followers_count",
+                    "on_sell_product_count",
+                    "review_count",
+                    "shop_name",
+                )
+                if info.get(k) not in (None, "", [])
+            )
+            if score > best_score:
+                best = info
+                best_score = score
+    return best
+
+
+def normalize_shop_info(
+    raw: dict[str, Any] | None,
+    *,
+    shop_id: str | None = None,
+    shop_slug: str | None = None,
+    store_url: str | None = None,
+    region: str | None = None,
+) -> dict[str, Any] | None:
+    """Map SSR shopInfo → Captapi shopInfo card."""
+    if not isinstance(raw, dict) or not raw:
+        return None
+    sid = str(raw.get("seller_id") or raw.get("global_seller_id") or shop_id or "").strip() or None
+    name = raw.get("shop_name") or raw.get("name")
+    logo = _image_url(raw.get("shop_logo") or raw.get("logo"))
+    scores_raw = raw.get("store_sub_score") or raw.get("storeSubScore") or []
+    scores: list[dict[str, Any]] = []
+    if isinstance(scores_raw, list):
+        for row in scores_raw:
+            if not isinstance(row, dict):
+                continue
+            scores.append(
+                {
+                    "score": row.get("score"),
+                    "scorePercentage": str(row.get("score_percentage") or row.get("scorePercentage") or "")
+                    or None,
+                    "type": row.get("type"),
+                }
+            )
+    rating = raw.get("shop_rating") or raw.get("rating")
+    try:
+        rating_f = float(rating) if rating not in (None, "") else None
+    except (TypeError, ValueError):
+        rating_f = None
+    url = store_url
+    if not url and sid and (shop_slug or name):
+        slug = shop_slug or re.sub(r"[^a-z0-9]+", "-", str(name).lower()).strip("-")
+        if slug:
+            url = f"https://www.tiktok.com/shop/store/{slug}/{sid}"
+    identity = (
+        (raw.get("shop_identity_label") or {}).get("identity_label_text")
+        if isinstance(raw.get("shop_identity_label"), dict)
+        else raw.get("identity_label_text") or raw.get("identityLabel")
+    )
+    identity_s = str(identity or "").strip()
+    region_out = (
+        region
+        or raw.get("region")
+        or raw.get("path_region")
+        or raw.get("sale_region")
+    )
+    out = {
+        "id": sid,
+        "name": name,
+        "url": url,
+        "logo": logo,
+        "sold": int(raw["sold_count"])
+        if str(raw.get("sold_count") or "").isdigit()
+        else raw.get("sold_count"),
+        "formatSold": raw.get("format_sold_count") or raw.get("formatSold"),
+        "reviews": int(raw["review_count"])
+        if str(raw.get("review_count") or "").isdigit()
+        else raw.get("review_count"),
+        "followers": int(raw["followers_count"])
+        if str(raw.get("followers_count") or "").isdigit()
+        else raw.get("followers_count"),
+        "rating": rating_f,
+        "productCount": raw.get("on_sell_product_count"),
+        "videoCount": int(raw["video_count"])
+        if str(raw.get("video_count") or "").isdigit()
+        else raw.get("video_count"),
+        "slogan": raw.get("shop_slogan") or raw.get("slogan"),
+        "identityLabel": identity_s or None,
+        "isOfficial": bool(identity_s and "official" in identity_s.lower()) if identity_s else None,
+        "region": str(region_out).upper() if region_out else None,
+        "storeScores": scores or None,
+    }
+    # Drop empty slogan/storeScores shells but keep numeric nulls via caller always-key.
+    return {k: v for k, v in out.items() if v not in (None, "", [])}
+
+
 def _image_url(image: Any) -> str | None:
     if isinstance(image, str) and image.strip():
         return image.strip()
@@ -154,16 +287,19 @@ def normalize_raw_product(
         original = float(origin) if origin not in (None, "") else None
     except (TypeError, ValueError):
         original = origin
+    seo = raw.get("seo_url") if isinstance(raw.get("seo_url"), dict) else {}
 
     return {
         "id": product_id or None,
         "productId": product_id or None,
         "title": raw.get("title") or raw.get("name"),
         "url": _product_url(raw, product_id),
+        "slug": seo.get("slug"),
         "price": price,
         "originalPrice": original,
         "currency": price_info.get("currency_name") or price_info.get("currency"),
         "discount": price_info.get("discount_format") or price_info.get("discount_decimal"),
+        "savings": price_info.get("reduce_price_format"),
         "sold": sold_info.get("sold_count"),
         "rating": rate_info.get("score"),
         "reviewCount": rate_info.get("review_count"),
@@ -175,6 +311,10 @@ def normalize_raw_product(
         },
         "shopId": seller_id,
         "shopName": seller_name,
+        "rate_info": rate_info,
+        "sold_info": sold_info,
+        "product_price_info": price_info,
+        "seo_url": seo,
     }
 
 
@@ -203,35 +343,68 @@ async def _fetch_html(url: str) -> str | None:
     return None
 
 
-async def fetch_shop_products(url: str, *, limit: int = 20) -> list[dict[str, Any]] | None:
-    """Fetch store catalog products natively.
+async def fetch_shop_products(
+    url: str,
+    *,
+    limit: int = 20,
+    region: str | None = "US",
+) -> dict[str, Any] | None:
+    """Fetch store catalog + shopInfo natively.
 
-    Returns Apify-shaped raw product dicts, or ``None`` when the page could not
-    be fetched/parsed (caller should fall back to Apify).
+    Returns ``{"products": [...], "shopInfo": {...}|None}``, or ``None`` when
+    the page could not be fetched/parsed (caller should fall back to Apify).
     """
     if limit <= 0:
-        return []
+        return {"products": [], "shopInfo": None}
     shop_id, shop_slug = parse_shop_url(url)
+    geo = (region or "US").strip().upper() or "US"
     fetch_url = url.strip()
     if shop_id and shop_slug:
-        fetch_url = f"https://www.tiktok.com/shop/store/{shop_slug}/{shop_id}"
+        # Prefer regional shop host when caller asks for a market; US SSR is the
+        # reliable path. Non-US may 404/empty even when search lists the shop.
+        if geo == "US":
+            fetch_url = f"https://www.tiktok.com/shop/store/{shop_slug}/{shop_id}"
+        else:
+            fetch_url = f"https://shop.tiktok.com/{geo.lower()}/store/{shop_slug}/{shop_id}"
 
     html = await _fetch_html(fetch_url)
+    if not html and geo != "US" and shop_id and shop_slug:
+        # Honest fallthrough: try the US store page rather than silent empty.
+        fetch_url = f"https://www.tiktok.com/shop/store/{shop_slug}/{shop_id}"
+        html = await _fetch_html(fetch_url)
+        geo = "US"
     if not html:
         return None
     raw_products = extract_products_from_html(html)
+    shop_info = normalize_shop_info(
+        extract_shop_info_from_html(html),
+        shop_id=shop_id,
+        shop_slug=shop_slug,
+        store_url=f"https://www.tiktok.com/shop/store/{shop_slug}/{shop_id}"
+        if shop_id and shop_slug
+        else fetch_url,
+        region=geo,
+    )
     if not raw_products:
         log.info("tiktok_shop_native_no_products", url=fetch_url[:120])
+        # Still useful when shop card parsed but product list empty.
+        if shop_info:
+            return {"products": [], "shopInfo": shop_info}
         return None
     out = [
         normalize_raw_product(p, shop_id=shop_id, shop_slug=shop_slug)
         for p in raw_products[:limit]
     ]
     out = [p for p in out if p.get("id") or p.get("title")]
-    if not out:
+    if not out and not shop_info:
         return None
-    log.info("tiktok_shop_native_ok", url=fetch_url[:120], n=len(out))
-    return out
+    log.info(
+        "tiktok_shop_native_ok",
+        url=fetch_url[:120],
+        n=len(out),
+        shop_sold=(shop_info or {}).get("sold"),
+    )
+    return {"products": out, "shopInfo": shop_info}
 
 
 _PDP_URL_RE = re.compile(
@@ -385,10 +558,381 @@ async def _fetch_pdp_html(url: str) -> str | None:
     return None
 
 
-async def fetch_product_details(url: str) -> dict[str, Any] | None:
-    """PDP via HTML (OG + SSR hints). Prices are often masked as ``*`` in SSR.
+def _extract_balanced_json(s: str, start: int) -> str | None:
+    """Return the JSON object starting at/after ``start`` (first ``{``)."""
+    i = s.find("{", start)
+    if i < 0:
+        return None
+    depth = 0
+    in_str = False
+    esc = False
+    for j in range(i, len(s)):
+        ch = s[j]
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return s[i : j + 1]
+    return None
 
-    Returns Apify-like product dict for ``_normalize_product(..., details_mode)``.
+
+def _image_urls(block: Any) -> list[str]:
+    out: list[str] = []
+    if isinstance(block, dict):
+        urls = block.get("url_list")
+        if isinstance(urls, list):
+            for u in urls:
+                if isinstance(u, str) and u.startswith("http") and u not in out:
+                    out.append(u)
+        elif isinstance(block.get("url"), str) and block["url"].startswith("http"):
+            out.append(block["url"])
+    elif isinstance(block, str) and block.startswith("http"):
+        out.append(block)
+    return out
+
+
+def _parse_rich_description(raw: Any) -> str | None:
+    """product_model.description is often a JSON array of text/ul blocks."""
+    if isinstance(raw, str) and raw.strip().startswith("["):
+        try:
+            raw = json.loads(raw)
+        except ValueError:
+            return raw.strip() or None
+    if isinstance(raw, str):
+        return raw.strip() or None
+    if not isinstance(raw, list):
+        return None
+    parts: list[str] = []
+    for block in raw:
+        if not isinstance(block, dict):
+            continue
+        if block.get("type") == "text" and block.get("text"):
+            parts.append(str(block["text"]).strip())
+        elif block.get("type") == "ul":
+            for item in block.get("content") or []:
+                if isinstance(item, str) and item.strip():
+                    parts.append(f"• {item.strip()}")
+    text = "\n".join(p for p in parts if p)
+    return text or None
+
+
+def _parse_product_info_blob(html: str) -> dict[str, Any] | None:
+    """Pull ``component_data.product_info`` (product_model + promotion + seller)."""
+    m = re.search(
+        r'"component_data"\s*:\s*\{\s*"error_code"\s*:\s*0\s*,\s*"error_message"\s*:\s*"success"\s*,\s*"product_info"\s*:',
+        html or "",
+    )
+    if not m:
+        m = re.search(r'"product_info"\s*:\s*\{"product_model"', html or "")
+        if not m:
+            return None
+        blob = _extract_balanced_json(html, m.end() - 1)
+    else:
+        blob = _extract_balanced_json(html, m.end() - 1)
+    if not blob:
+        return None
+    try:
+        data = json.loads(blob)
+    except ValueError:
+        return None
+    return data if isinstance(data, dict) and isinstance(data.get("product_model"), dict) else None
+
+
+def _promotion_pricing(promo: dict[str, Any] | None) -> dict[str, Any]:
+    """Map promotion_product_price → price / originalPrice / discount / savings / sku prices."""
+    out: dict[str, Any] = {
+        "price": None,
+        "originalPrice": None,
+        "currency": None,
+        "discount": None,
+        "savings": None,
+        "skuPrices": {},
+    }
+    if not isinstance(promo, dict):
+        return out
+    min_price = (promo.get("promotion_product_price") or {}).get("min_price")
+    if not isinstance(min_price, dict):
+        min_price = {}
+    sale_raw = min_price.get("sale_price_decimal") or min_price.get("single_product_price_decimal")
+    try:
+        sale = float(sale_raw) if sale_raw not in (None, "", "*") else None
+    except (TypeError, ValueError):
+        sale = None
+    out["price"] = sale
+    out["currency"] = min_price.get("currency_name") or min_price.get("currency")
+    ded = (min_price.get("promotion_deduction_details") or {}) if isinstance(
+        min_price.get("promotion_deduction_details"), dict
+    ) else {}
+    ded_raw = ded.get("seller_subtotal_deduction_decimal") or ded.get("seller_subtotal_deduction")
+    try:
+        deduction = float(ded_raw) if ded_raw not in (None, "", "0", "0.0") else None
+    except (TypeError, ValueError):
+        deduction = None
+    origin_raw = min_price.get("origin_price_decimal") or min_price.get("origin_price")
+    try:
+        origin = float(origin_raw) if origin_raw not in (None, "", "*") else None
+    except (TypeError, ValueError):
+        origin = None
+    if origin is None and sale is not None and deduction is not None and deduction > 0:
+        origin = round(sale + deduction, 2)
+    out["originalPrice"] = origin
+    if sale is not None and origin is not None and origin > sale:
+        pct = round((1 - sale / origin) * 100)
+        if pct > 0:
+            out["discount"] = f"{pct}%"
+        saved = round(origin - sale, 2)
+        if saved > 0:
+            out["savings"] = f"Saving ${saved:.2f}"
+    dm = min_price.get("discount_format")
+    if isinstance(dm, str) and dm.strip() and "*" not in dm:
+        out["discount"] = dm.strip()
+    skus_price = (promo.get("promotion_product_price") or {}).get("skus_price")
+    if isinstance(skus_price, dict):
+        for sid, row in skus_price.items():
+            if not isinstance(row, dict):
+                continue
+            try:
+                sp = float(row.get("sale_price_decimal")) if row.get("sale_price_decimal") not in (None, "", "*") else None
+            except (TypeError, ValueError):
+                sp = None
+            out["skuPrices"][str(sid)] = sp
+    return out
+
+
+def _map_skus_from_model(
+    skus_raw: list[Any],
+    *,
+    sku_prices: dict[str, Any] | None = None,
+) -> tuple[list[dict[str, Any]], int | None]:
+    skus_out: list[dict[str, Any]] = []
+    stock_total = 0
+    prices = sku_prices or {}
+    for sku in skus_raw:
+        if not isinstance(sku, dict):
+            continue
+        sid = str(sku.get("sku_id") or sku.get("id") or "")
+        if not sid:
+            continue
+        qty_block = sku.get("sku_quantity") if isinstance(sku.get("sku_quantity"), dict) else {}
+        try:
+            qty = int(qty_block.get("available_quantity") if qty_block else sku.get("available_quantity") or 0)
+        except (TypeError, ValueError):
+            qty = 0
+        stock_total += qty
+        sale_props: list[dict[str, str]] = []
+        for pair in sku.get("property_pairs") or []:
+            if not isinstance(pair, dict):
+                continue
+            name = pair.get("sku_property_name") or pair.get("prop_name")
+            value = pair.get("sku_property_value_name") or pair.get("prop_value")
+            if name and value:
+                sale_props.append({"propName": str(name), "propValue": str(value)})
+        row: dict[str, Any] = {
+            "id": sid,
+            "stock": qty,
+            "warehouseId": qty_block.get("warehouse_id") or sku.get("warehouse_id"),
+            "status": sku.get("sku_status") or sku.get("status"),
+            "saleProps": sale_props,
+        }
+        if sid in prices and prices[sid] is not None:
+            row["price"] = prices[sid]
+        limit = sku.get("purchase_limit") or sku.get("purchaseLimit")
+        if limit is not None:
+            row["purchaseLimit"] = limit
+        skus_out.append(row)
+    return skus_out, (stock_total if skus_out else None)
+
+
+def _categories_from_html(html: str) -> list[dict[str, str]]:
+    cats: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for cid, name in re.findall(
+        r'"category_id"\s*:\s*"(\d+)"\s*,\s*"category_name"\s*:\s*"((?:\\.|[^"\\])+)"',
+        html or "",
+    ):
+        if cid in seen:
+            continue
+        seen.add(cid)
+        try:
+            label = json.loads(f'"{name}"')
+        except ValueError:
+            label = name
+        cats.append({"id": cid, "name": label})
+    return cats
+
+
+def _product_from_info_blob(
+    info: dict[str, Any],
+    *,
+    html: str,
+    product_id: str,
+    fetch_url: str,
+) -> dict[str, Any] | None:
+    pm = info.get("product_model") or {}
+    if not isinstance(pm, dict):
+        return None
+    title = (pm.get("name") or "").strip() or None
+    description = _parse_rich_description(pm.get("description"))
+    images: list[str] = []
+    for img in pm.get("images") or []:
+        # Prefer the first CDN mirror per image object (url_list often repeats p16/p19).
+        urls = _image_urls(img)
+        if urls and urls[0] not in images:
+            images.append(urls[0])
+    pricing = _promotion_pricing(info.get("promotion_model") if isinstance(info.get("promotion_model"), dict) else None)
+    skus, stock = _map_skus_from_model(pm.get("skus") or [], sku_prices=pricing.get("skuPrices"))
+    review = info.get("review_model") if isinstance(info.get("review_model"), dict) else {}
+    try:
+        rating = float(review["product_overall_score"]) if review.get("product_overall_score") is not None else None
+    except (TypeError, ValueError):
+        rating = None
+    try:
+        review_count = int(review["product_review_count"]) if review.get("product_review_count") not in (None, "") else None
+    except (TypeError, ValueError):
+        review_count = None
+    if rating == 0 and not review_count:
+        rating = None
+    try:
+        sold = int(pm.get("sold_count")) if pm.get("sold_count") not in (None, "") else None
+    except (TypeError, ValueError):
+        sold = None
+
+    seller_model = info.get("seller_model") if isinstance(info.get("seller_model"), dict) else {}
+    seller_name = seller_model.get("shop_name")
+    seller_id = str(pm.get("seller_id") or "") or None
+    shop_link = None
+    sl_m = re.search(r'"shop_link"\s*:\s*"((?:\\.|[^"\\])+)"', html)
+    if sl_m:
+        try:
+            shop_link = json.loads(f'"{sl_m.group(1)}"')
+        except ValueError:
+            shop_link = sl_m.group(1).encode().decode("unicode_escape")
+    shop_rating = None
+    sr_m = re.search(r'"shop_rating"\s*:\s*"([0-9.]+)"', html)
+    if sr_m:
+        try:
+            shop_rating = float(sr_m.group(1))
+        except ValueError:
+            shop_rating = None
+    product_count = None
+    pc_m = re.search(r'"on_sell_product_count"\s*:\s*(\d+)', html)
+    if pc_m:
+        product_count = int(pc_m.group(1))
+
+    seller: dict[str, Any] = {}
+    if seller_name:
+        seller["name"] = seller_name
+    if seller_id:
+        seller["id"] = seller_id
+        if shop_link and "http" in shop_link:
+            seller["url"] = shop_link.replace("shop.tiktok.com/us/store", "www.tiktok.com/shop/store")
+        elif seller_name:
+            seller["url"] = f"https://www.tiktok.com/shop/store/{quote(str(seller_name))}/{seller_id}"
+        else:
+            seller["url"] = f"https://www.tiktok.com/shop/store/{seller_id}"
+    if shop_rating is not None:
+        seller["rating"] = shop_rating
+    if product_count is not None:
+        seller["productCount"] = product_count
+    logo_urls = _image_urls(seller_model.get("shop_logo"))
+    if logo_urls:
+        seller["logo"] = logo_urls[0]
+
+    sale_properties: list[dict[str, Any]] = []
+    for prop in pm.get("sale_properties") or []:
+        if not isinstance(prop, dict):
+            continue
+        values = []
+        for v in prop.get("property_values") or []:
+            if isinstance(v, dict) and v.get("property_value_name"):
+                values.append(
+                    {
+                        "id": str(v.get("property_value_id") or ""),
+                        "name": str(v["property_value_name"]),
+                    }
+                )
+        sale_properties.append(
+            {
+                "id": str(prop.get("property_id") or ""),
+                "name": str(prop.get("property_name") or ""),
+                "values": values,
+            }
+        )
+
+    # Desc / product video when TikTok embeds a non-empty videos object/list.
+    desc_video = None
+    videos = pm.get("videos")
+    if isinstance(videos, dict) and videos:
+        for u in _image_urls(videos) or []:
+            desc_video = {"url": u}
+            break
+        if videos.get("duration") is not None:
+            desc_video = desc_video or {}
+            desc_video["durationMs"] = videos.get("duration")
+        if isinstance(videos.get("url_list"), list) and videos["url_list"]:
+            desc_video = {"url": videos["url_list"][0], "durationMs": videos.get("duration")}
+    elif isinstance(videos, list) and videos:
+        first = videos[0] if isinstance(videos[0], dict) else {}
+        urls = _image_urls(first)
+        if urls:
+            desc_video = {"url": urls[0], "durationMs": first.get("duration")}
+
+    categories = _categories_from_html(html)
+    og_title = _og(html, "og:title")
+    if og_title:
+        og_title = re.sub(r"\s*[-|]\s*TikTok Shop\s*$", "", og_title, flags=re.I).strip()
+    title = title or og_title
+    image = images[0] if images else _og(html, "og:image")
+    if not title and not image:
+        return None
+    if (title or "").strip().lower() in {"security check", "tiktok shop", "tiktok"}:
+        return None
+
+    canonical = _og(html, "og:url") or fetch_url
+    out: dict[str, Any] = {
+        "id": product_id,
+        "productId": product_id,
+        "title": title,
+        "description": description or _og(html, "og:description"),
+        "url": canonical if canonical and "http" in canonical else f"https://www.tiktok.com/shop/pdp/{product_id}",
+        "price": pricing["price"],
+        "originalPrice": pricing["originalPrice"],
+        "currency": pricing["currency"] or "USD",
+        "discount": pricing["discount"],
+        "savings": pricing["savings"],
+        "sold": sold,
+        "stock": stock,
+        "rating": rating,
+        "reviewCount": review_count,
+        "image": image,
+        "images": images or ([image] if image else []),
+        "seller": seller,
+        "skus": skus,
+        "saleProperties": sale_properties,
+        "categories": categories,
+    }
+    if desc_video:
+        out["descVideo"] = desc_video
+    return out
+
+
+async def fetch_product_details(url: str) -> dict[str, Any] | None:
+    """PDP via SSR ``product_info`` JSON (preferred) or OG/regex fallback.
+
+    Returns a dict shaped for ``_normalize_product(..., details_mode=True)``.
+    Related affiliate videos are not embedded in US PDP SSR — omitted unless
+    an upstream path fills ``relatedVideos``.
     """
     product_id = parse_product_id(url)
     if not product_id:
@@ -410,14 +954,25 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
     if not html:
         return None
 
+    info = _parse_product_info_blob(html)
+    if info:
+        rich = _product_from_info_blob(info, html=html, product_id=product_id, fetch_url=fetch_url)
+        if rich:
+            log.info(
+                "tiktok_shop_native_details_ok",
+                product_id=product_id,
+                path="product_info",
+                has_price=rich.get("price") is not None,
+                has_original=rich.get("originalPrice") is not None,
+                skus=len(rich.get("skus") or []),
+                images=len(rich.get("images") or []),
+            )
+            return rich
+
+    # --- OG / regex fallback (thin PDPs / partial SSR) ---
     title = _og(html, "og:title") or _og(html, "twitter:title")
     if not title:
-        # React-helmet sometimes emits content before property.
-        m = re.search(
-            r'<title[^>]*>\s*([^<]+?)\s*</title>',
-            html,
-            re.I,
-        )
+        m = re.search(r"<title[^>]*>\s*([^<]+?)\s*</title>", html, re.I)
         if m:
             title = m.group(1).strip()
     if title:
@@ -434,7 +989,6 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
             image = im.group(1)
     canonical = _og(html, "og:url") or fetch_url
 
-    # Best-effort seller / sold from nearby SSR text (when not masked).
     seller_name = None
     sm = re.search(r'"shop_name"\s*:\s*"((?:\\.|[^"\\])+)"', html)
     if sm:
@@ -456,7 +1010,6 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
             break
 
     sold = None
-    # Prefer bare integers (product aggregate) over quoted SKU stubs ("5").
     sold_m = re.search(r'"sold_count"\s*:\s*(\d+)\s*[,}]', html) or re.search(
         r'"sold_count"\s*:\s*"(\d+)"', html
     )
@@ -475,8 +1028,10 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
         except ValueError:
             return raw
 
-    # Unmasked price if present (masked values use "*").
-    price = _decimal(r'"sale_price_decimal"\s*:\s*"([0-9.]+)"')
+    # Prefer promotion min_price (avoid shipping origin_price / SKU noise).
+    price = _decimal(
+        r'"promotion_product_price"\s*:\s*\{[^}]{0,400}?"sale_price_decimal"\s*:\s*"([0-9.]+)"'
+    ) or _decimal(r'"sale_price_decimal"\s*:\s*"([0-9.]+)"')
     original_price = _decimal(r'"origin_price_decimal"\s*:\s*"([0-9.]+)"')
     currency = None
     cm = re.search(r'"currency_name"\s*:\s*"([A-Z]{3})"', html)
@@ -487,7 +1042,6 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
     if dm:
         discount = dm.group(1).strip() or None
 
-    # Sum unique SKU warehouse quantities (HTML often repeats the sku list).
     stock: int | None = None
     sku_qty: dict[str, int] = {}
     for sid, qty in re.findall(
@@ -499,13 +1053,11 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
     if sku_qty:
         stock = sum(sku_qty.values())
 
-    # Product star score; treat 0 + zero reviews as unknown.
     rating: float | None = None
     for pat in (
         r'"product_overall_score"\s*:\s*([0-9.]+)',
         r'"product_rating"\s*:\s*"?([0-9.]+)"?',
         r'"average_rating"\s*:\s*"?([0-9.]+)"?',
-        r'"score"\s*:\s*"?([0-9.]+)"?\s*,\s*"review_count"',
     ):
         score_m = re.search(pat, html)
         if not score_m:
@@ -519,7 +1071,6 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
     for pat in (
         r'"product_review_count"\s*:\s*"?(\d+)"?',
         r'"review_count"\s*:\s*"?(\d+)"?',
-        r'"reviewCount"\s*:\s*"?(\d+)"?',
     ):
         rc_m = re.search(pat, html)
         if rc_m:
@@ -540,7 +1091,6 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
 
     if not title and not image:
         return None
-    # Captcha / WAF interstitial — treat as miss so search can skip.
     if (title or "").strip().lower() in {"security check", "tiktok shop", "tiktok"}:
         return None
 
@@ -558,10 +1108,7 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
     if shop_rating is not None:
         seller["rating"] = shop_rating
 
-    skus = [
-        {"id": sid, "stock": qty}
-        for sid, qty in sorted(sku_qty.items(), key=lambda kv: kv[0])
-    ]
+    skus = [{"id": sid, "stock": qty} for sid, qty in sorted(sku_qty.items(), key=lambda kv: kv[0])]
     out = {
         "id": product_id,
         "productId": product_id,
@@ -580,10 +1127,12 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
         "images": [image] if image else [],
         "seller": seller,
         "skus": skus,
+        "categories": _categories_from_html(html),
     }
     log.info(
         "tiktok_shop_native_details_ok",
         product_id=product_id,
+        path="og_fallback",
         has_price=price is not None,
         has_original=original_price is not None,
         has_stock=stock is not None,

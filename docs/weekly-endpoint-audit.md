@@ -130,15 +130,15 @@ Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: do
 - [ ] User Pins — `GET /v1/pinterest/user-pins`
 - [ ] Search — `GET /v1/pinterest/search`
 - [ ] Board — `GET /v1/pinterest/board`
-- [ ] User Boards — `GET /v1/pinterest/user-boards`
+- [x] User Boards — `GET /v1/pinterest/user-boards` (account-followers twin fixed; stable row shape)
 
 ## LinkedIn (6)
 
 - [ ] Profile — `GET /v1/linkedin/profile`
-- [ ] Company — `GET /v1/linkedin/company`
+- [x] Company — `GET /v1/linkedin/company` (specialties/similarPages/size; funding+employees[] people still SC-gap)
 - [ ] Post Details — `GET /v1/linkedin/post-details`
 - [ ] Post Transcript — `GET /v1/linkedin/post-transcript`
-- [ ] Company Posts — `GET /v1/linkedin/company-posts`
+- [x] Company Posts — `GET /v1/linkedin/company-posts` (engagement keyed; reaction breakdown open)
 - [ ] Search Posts — `GET /v1/linkedin/search-posts`
 
 ## Rumble (4)
@@ -151,7 +151,7 @@ Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: do
 ## TikTok Shop (5)
 
 - [ ] Shop Search — `GET /v1/tiktok-shop/shop-search`
-- [ ] Shop Products — `GET /v1/tiktok-shop/shop-products`
+- [x] Shop Products — `GET /v1/tiktok-shop/shop-products` (shopInfo + sold/rating/savings; cursor/sort open)
 - [ ] Product Details — `GET /v1/tiktok-shop/product-details`
 - [ ] Product Reviews — `GET /v1/tiktok-shop/product-reviews`
 - [ ] User Showcase — `GET /v1/tiktok-shop/user-showcase`

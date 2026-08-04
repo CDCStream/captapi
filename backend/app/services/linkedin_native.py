@@ -59,6 +59,14 @@ _INDUSTRY_HEADLINE_RE = re.compile(
     r'class=["\'][^"\']*top-card-layout__headline[^"\']*["\'][^>]*>\s*([^<]+?)\s*</h2>',
     re.I,
 )
+_ABOUT_DD_RE = re.compile(
+    r'data-test-id=["\']about-us__([^"\']+)["\'][\s\S]*?<dd[^>]*>([\s\S]*?)</dd>',
+    re.I,
+)
+_SIMILAR_PAGE_HREF_RE = re.compile(
+    r'href=["\'](https://(?:[a-z]+\.)?linkedin\.com/company/([^"\'?]+))\?trk=similar-pages["\']',
+    re.I,
+)
 
 
 def _og_map(html: str) -> dict[str, str]:
@@ -120,8 +128,82 @@ async def _fetch_html(url: str) -> str | None:
     return body
 
 
+def _strip_tags(raw: str | None) -> str | None:
+    if not raw:
+        return None
+    text = re.sub(r"<[^>]+>", " ", raw)
+    text = _unescape_html(re.sub(r"\s+", " ", text).strip())
+    return safe_str(text)
+
+
+def _about_us_fields(html: str) -> dict[str, str]:
+    """Parse guest About section ``data-test-id="about-us__…"`` dd values."""
+    out: dict[str, str] = {}
+    for m in _ABOUT_DD_RE.finditer(html or ""):
+        key = (m.group(1) or "").strip()
+        val = _strip_tags(m.group(2))
+        if key and val:
+            out[key] = val
+    return out
+
+
+def _specialties_list(raw: str | None) -> list[str]:
+    text = safe_str(raw)
+    if not text:
+        return []
+    # "a, b, c, and d" → list
+    cleaned = re.sub(r"\s+and\s+", ", ", text, flags=re.I)
+    parts = [safe_str(p) for p in cleaned.split(",")]
+    return [p for p in parts if p]
+
+
+def _similar_pages_from_html(html: str, *, limit: int = 12) -> list[dict[str, Any]]:
+    """Similar-pages discovery graph from the guest company page."""
+    section_m = re.search(r"Similar pages([\s\S]{0,20000})", html or "", re.I)
+    chunk = section_m.group(0) if section_m else (html or "")
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for m in _SIMILAR_PAGE_HREF_RE.finditer(chunk):
+        link = safe_str(m.group(1))
+        slug = safe_str(m.group(2))
+        if not link or not slug or slug.lower() in seen:
+            continue
+        seen.add(slug.lower())
+        block = chunk[m.start() : m.start() + 1500]
+        # Card title is usually the first substantial text node after the href.
+        name = None
+        for tm in re.finditer(r">\s*([^<]{2,80})\s*<", block):
+            cand = safe_str(tm.group(1))
+            if not cand:
+                continue
+            low = cand.lower()
+            if low in {"similar pages", "follow", "following"}:
+                continue
+            if "follower" in low or "employee" in low:
+                continue
+            name = cand
+            break
+        img = None
+        im = re.search(r'<img[^>]+src=["\'](https://media\.licdn\.com[^"\']+)["\']', block, re.I)
+        if im:
+            img = safe_str(im.group(1))
+        out.append(
+            {
+                "name": name or slug.replace("-", " ").title(),
+                "link": link,
+                "image": img,
+            }
+        )
+        if len(out) >= limit:
+            break
+    return out
+
+
 def _industry_from_html(html: str) -> str | None:
     """Extract company industry from guest HTML when JSON-LD omits it."""
+    about = _about_us_fields(html)
+    if about.get("industry"):
+        return safe_str(about["industry"])
     m = _INDUSTRY_ABOUT_RE.search(html or "")
     if m:
         return safe_str(m.group(1))
@@ -381,6 +463,7 @@ async def fetch_company(slug: str) -> dict[str, Any] | None:
             org = block
             break
 
+    about = _about_us_fields(html)
     name = safe_str(org.get("name"))
     if not name and og.get("og:title"):
         name = og["og:title"].split(" | LinkedIn", 1)[0].strip()
@@ -399,36 +482,57 @@ async def fetch_company(slug: str) -> dict[str, Any] | None:
 
     if not name:
         return None
-    industry = None
+    industry = safe_str(about.get("industry"))
     inds = org.get("industry") or org.get("knowsAbout")
-    if isinstance(inds, list) and inds:
+    if not industry and isinstance(inds, list) and inds:
         industry = safe_str(inds[0] if not isinstance(inds[0], dict) else inds[0].get("name"))
-    elif isinstance(inds, str):
+    elif not industry and isinstance(inds, str):
         industry = safe_str(inds)
     if not industry:
         industry = _industry_from_html(html)
-    hq = None
+
+    website = None
+    if about.get("website"):
+        # "https://… External link for …" → first URL token
+        wm = re.search(r"https?://\S+", about["website"])
+        website = safe_str(wm.group(0) if wm else about["website"])
+    if not website and isinstance(org.get("sameAs"), str):
+        website = safe_str(org.get("sameAs"))
+
+    hq_city = hq_state = hq_country = None
     addr = org.get("address")
     if isinstance(addr, dict):
-        hq = ", ".join(
-            x
-            for x in (
-                safe_str(addr.get("addressLocality")),
-                safe_str(addr.get("addressRegion")),
-                safe_str(addr.get("addressCountry")),
-            )
-            if x
-        ) or None
+        hq_city = safe_str(addr.get("addressLocality"))
+        hq_state = safe_str(addr.get("addressRegion"))
+        hq_country = safe_str(addr.get("addressCountry"))
+    # About "Ottawa, ON" — city + region; country often omitted on guest HTML.
+    if about.get("headquarters") and not (hq_city and hq_state):
+        parts = [p.strip() for p in about["headquarters"].split(",") if p.strip()]
+        if parts:
+            hq_city = hq_city or safe_str(parts[0])
+        if len(parts) >= 2:
+            hq_state = hq_state or safe_str(parts[1])
+        if len(parts) >= 3:
+            hq_country = hq_country or safe_str(parts[2])
+
+    founded_year = safe_int(about.get("foundedOn"))
+    specialties = _specialties_list(about.get("specialties"))
+    organization_type = safe_str(about.get("organizationType"))
+    size = safe_str(about.get("size"))
+    similar_pages = _similar_pages_from_html(html)
+
     out = {
         "basic_info": {
             "name": name,
             "linkedin_url": safe_str(org.get("url")) or url.rstrip("/"),
             "description": safe_str(org.get("description")) or og.get("og:description"),
-            "website": safe_str(org.get("sameAs"))
-            if isinstance(org.get("sameAs"), str)
-            else None,
+            "website": website,
             "industry": industry,
             "industries": [industry] if industry else None,
+            "specialties": specialties,
+            "founded_info": {"year": founded_year} if founded_year is not None else {},
+            "organization_type": organization_type,
+            "company_size_label": size,
         },
         "stats": {
             "follower_count": _parse_count(followers_m.group(1) if followers_m else None),
@@ -436,11 +540,31 @@ async def fetch_company(slug: str) -> dict[str, Any] | None:
         },
         "media": {
             "logo_url": _logo_url(org) or og.get("og:image"),
-            "cover_url": og.get("twitter:image") if og.get("twitter:image") != og.get("og:image") else None,
+            "cover_url": og.get("twitter:image")
+            if og.get("twitter:image") and og.get("twitter:image") != og.get("og:image")
+            else None,
         },
-        "locations": {"headquarters": {"city": hq}} if hq else {},
+        "locations": {
+            "headquarters": {
+                "city": hq_city,
+                "state": hq_state,
+                "country": hq_country,
+            }
+        }
+        if (hq_city or hq_state or hq_country)
+        else {},
+        "similar_pages": similar_pages,
+        "tagline": None,
+        "funding": {},
+        "employees_sample": [],
     }
-    log.info("linkedin_native_company_ok", slug=handle)
+    log.info(
+        "linkedin_native_company_ok",
+        slug=handle,
+        specialties=len(specialties),
+        similar=len(similar_pages),
+        founded=founded_year,
+    )
     return out
 
 
@@ -630,7 +754,12 @@ async def fetch_company_posts(slug: str, *, limit: int = 20) -> list[dict[str, A
         log.info("linkedin_native_company_posts_empty", slug=handle)
         return None
 
-    planned: list[tuple[str, dict[str, Any] | str]] = []
+    def _has_engagement(row: dict[str, Any]) -> bool:
+        stats = row.get("stats") if isinstance(row.get("stats"), dict) else {}
+        return stats.get("likes") is not None or stats.get("comments") is not None
+
+    # kind: ready | enrich(url, ld_row) | fetch(url)
+    planned: list[tuple[str, Any]] = []
     for post_url in ordered_urls:
         activity = None
         m = _ACTIVITY_RE.search(post_url)
@@ -639,14 +768,23 @@ async def fetch_company_posts(slug: str, *, limit: int = 20) -> list[dict[str, A
         ready = ld_by_url.get(post_url) or (
             ld_by_activity.get(activity) if activity else None
         )
-        if ready and ready.get("text"):
+        if ready and ready.get("text") and _has_engagement(ready):
             planned.append(("ready", ready))
+        elif ready and ready.get("text"):
+            # Homepage JSON-LD often has text but empty interactionStatistic —
+            # still hydrate the permalink for likes/comments (analytics use case).
+            planned.append(("enrich", (post_url, ready)))
         else:
             planned.append(("fetch", post_url))
         if len(planned) >= limit:
             break
 
-    fetch_urls = [u for kind, u in planned if kind == "fetch" and isinstance(u, str)]
+    fetch_urls = sorted(
+        {
+            *(u for kind, u in planned if kind == "fetch" and isinstance(u, str)),
+            *(pair[0] for kind, pair in planned if kind == "enrich"),
+        }
+    )
     fetched: dict[str, dict[str, Any]] = {}
     if fetch_urls:
         sem = asyncio.Semaphore(3)
@@ -656,14 +794,38 @@ async def fetch_company_posts(slug: str, *, limit: int = 20) -> list[dict[str, A
                 return post_url, await fetch_post(post_url)
 
         for post_url, row in await asyncio.gather(*[_one(u) for u in fetch_urls]):
-            if row and row.get("text"):
+            if row and (row.get("text") or _has_engagement(row)):
                 fetched[post_url] = row
+
+    def _merge_ld_and_fetch(
+        ld: dict[str, Any], hydrated: dict[str, Any] | None
+    ) -> dict[str, Any]:
+        if not hydrated:
+            return ld
+        out = dict(ld)
+        out["url"] = hydrated.get("url") or ld.get("url")
+        out["id"] = hydrated.get("id") or ld.get("id")
+        out["text"] = ld.get("text") or hydrated.get("text")
+        out["datePublished"] = ld.get("datePublished") or hydrated.get("datePublished")
+        ld_stats = ld.get("stats") if isinstance(ld.get("stats"), dict) else {}
+        hy_stats = hydrated.get("stats") if isinstance(hydrated.get("stats"), dict) else {}
+        out["stats"] = {**ld_stats, **{k: v for k, v in hy_stats.items() if v is not None}}
+        ld_author = ld.get("author") if isinstance(ld.get("author"), dict) else {}
+        hy_author = hydrated.get("author") if isinstance(hydrated.get("author"), dict) else {}
+        out["author"] = {**hy_author, **{k: v for k, v in ld_author.items() if v}}
+        return out
 
     company_url = url.rstrip("/")
     out: list[dict[str, Any]] = []
     seen: set[str] = set()
     for kind, val in planned:
-        row = val if kind == "ready" and isinstance(val, dict) else fetched.get(str(val))
+        if kind == "ready" and isinstance(val, dict):
+            row = val
+        elif kind == "enrich" and isinstance(val, tuple):
+            post_url, ld = val
+            row = _merge_ld_and_fetch(ld, fetched.get(post_url))
+        else:
+            row = fetched.get(str(val))
         if not row or not row.get("text"):
             continue
         key = safe_str(row.get("url") or row.get("id") or row.get("text"))

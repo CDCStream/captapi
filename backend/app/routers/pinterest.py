@@ -105,6 +105,20 @@ def _created_at_iso(value: Any) -> str | None:
         return s
 
 
+def _board_scoped_followers(item: dict[str, Any]) -> int | None:
+    """Board follower count — never Pinterest's account-scoped board.follower_count.
+
+    Logged-out board blobs (pidgets pin.board, Redux boards map) expose
+    ``follower_count`` that is identical across every board on a profile
+    (account-scale). Only explicitly board-scoped keys are trusted.
+    """
+    return safe_int(
+        item.get("boardFollowerCount")
+        or item.get("board_follower_count")
+        or item.get("boardFollowers")
+    )
+
+
 def _synthesize_originals_url(image_url: str | None) -> str | None:
     """Rewrite a sized pinimg URL to /originals/ when possible."""
     u = safe_str(image_url)
@@ -284,7 +298,31 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
         or item.get("repin_count")
         or item.get("repinCount")
     )
-    return strip_empty(
+    # Ensure originals variant exists (deterministic pinimg /originals/ rewrite).
+    if images and "originals" not in images and "orig" not in images and image:
+        orig_u = _synthesize_originals_url(image)
+        if orig_u:
+            images["originals"] = {"url": orig_u}
+    elif not images and image:
+        orig_u = _synthesize_originals_url(image)
+        images = {"originals": {"url": orig_u}} if orig_u else {}
+    image_original = None
+    if isinstance(images.get("originals"), dict):
+        image_original = safe_str(images["originals"].get("url"))
+    elif isinstance(images.get("orig"), dict):
+        image_original = safe_str(images["orig"].get("url"))
+    if not image_original:
+        image_original = _synthesize_originals_url(image)
+
+    rich = item.get("rich_summary") if isinstance(item.get("rich_summary"), dict) else {}
+    rich_type = _html_text(
+        rich.get("type_name")
+        or rich.get("typeName")
+        or item.get("richPinType")
+        or item.get("rich_pin_type")
+    )
+
+    out = strip_empty(
         {
             "platform": "pinterest",
             "id": safe_str(pin_id),
@@ -296,6 +334,8 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
                 or item.get("closeup_unified_title")
                 or item.get("gridTitle")
                 or item.get("headline")
+                or rich.get("display_name")
+                or rich.get("title")
             ),
             "description": _html_text(
                 item.get("description")
@@ -307,6 +347,7 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
             "seoAltText": _html_text(
                 item.get("seoAltText") or item.get("seo_alt_text") or item.get("auto_alt_text")
             ),
+            "richPinType": rich_type,
             "link": link,
             "destinationUrl": link,
             "domain": _html_text(item.get("domain")),
@@ -316,7 +357,6 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
             if item.get("is_video") is not None or item.get("isVideo") is not None
             else None,
             "dominantColor": safe_str(item.get("dominant_color") or item.get("dominantColor")),
-            "saves": saves,
             "repinCount": safe_int(item.get("repin_count") or item.get("repinCount")),
             "shareCount": safe_int(item.get("share_count") or item.get("shareCount")),
             "reactionCount": safe_int(
@@ -336,12 +376,26 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
                 "name": _html_text(item.get("boardName") or board.get("name")),
                 "url": board_url,
                 "pinCount": safe_int(board.get("pin_count") or board.get("pinCount")),
-                "followers": safe_int(board.get("follower_count") or board.get("followerCount")),
+                # Not board.follower_count — that field is account-scoped on logged-out hydrates.
+                "followers": _board_scoped_followers(board),
+                "privacy": _html_text(board.get("privacy") or board.get("board_privacy")),
+                "collaborative": (
+                    bool(board.get("collaborative") or board.get("is_collaborative"))
+                    if board.get("collaborative") is not None
+                    or board.get("is_collaborative") is not None
+                    else None
+                ),
             },
             "author": author,
             "originAuthor": origin or None,
         }
     )
+    # Always key primary engagement + full-res image (list clients depend on them).
+    out["saves"] = saves
+    out["imageOriginal"] = image_original
+    if images:
+        out["images"] = images
+    return out
 
 
 # The router's run-input format (mode/keywords/usernames/boardUrls) targets
@@ -377,9 +431,25 @@ def _prefer_enriched(pins: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return enriched + sparse
 
 
+def _slim_list_author(author: Any) -> dict[str, Any]:
+    """Per-pin author on board/user-pins lists (full card hoisted to top-level)."""
+    if not isinstance(author, dict):
+        return {}
+    return strip_empty(
+        {
+            "username": author.get("username"),
+            "displayName": author.get("displayName"),
+        }
+    )
+
+
 async def _enrich_sparse_pins(pins: list[dict[str, Any]], *, max_enrich: int = 10) -> list[dict[str, Any]]:
     """Fill title/saves/etc for stub actor rows via Pinterest's public pidgets API."""
-    to_enrich = [p for p in pins if p.get("id") and not p.get("title")][:max_enrich]
+    to_enrich = [
+        p
+        for p in pins
+        if p.get("id") and (not p.get("title") or p.get("saves") is None or not p.get("imageOriginal"))
+    ][:max_enrich]
     if not to_enrich:
         return pins
     details = await asyncio.gather(
@@ -401,6 +471,7 @@ async def _enrich_sparse_pins(pins: list[dict[str, Any]], *, max_enrich: int = 1
             "title",
             "description",
             "seoAltText",
+            "richPinType",
             "link",
             "destinationUrl",
             "domain",
@@ -412,12 +483,13 @@ async def _enrich_sparse_pins(pins: list[dict[str, Any]], *, max_enrich: int = 1
             "createdAt",
             "publishedAt",
             "image",
+            "imageOriginal",
             "images",
             "isVideo",
             "dominantColor",
             "originAuthor",
         ):
-            if not merged.get(key) and detail.get(key):
+            if merged.get(key) in (None, "", {}, []) and detail.get(key) not in (None, "", {}, []):
                 merged[key] = detail[key]
         if isinstance(merged.get("author"), dict) and isinstance(detail.get("author"), dict):
             for key, value in detail["author"].items():
@@ -673,7 +745,8 @@ async def _fetch_pin_pidgets(pin_id: str) -> dict[str, Any] | None:
                 "name": _html_text(board.get("name")),
                 "url": board_url,
                 "pinCount": safe_int(board.get("pin_count")),
-                "followers": safe_int(board.get("follower_count")),
+                # Not board.follower_count — account-scoped on logged-out hydrates.
+                "followers": _board_scoped_followers(board),
             },
             "author": author,
             "originAuthor": origin or None,
@@ -867,43 +940,67 @@ def _normalize_board(item: dict[str, Any], username: str | None = None) -> dict[
     cover = item.get("cover") if isinstance(item.get("cover"), dict) else {}
     cover_images = cover.get("images") if isinstance(cover.get("images"), dict) else {}
     cover_orig = cover_images.get("orig") if isinstance(cover_images.get("orig"), dict) else {}
-    return strip_empty(
+    cover_hd = cover_images.get("474x") if isinstance(cover_images.get("474x"), dict) else {}
+    # Prefer HD cover (474x) over 200x150 thumbnail.
+    cover_image = safe_str(
+        item.get("image_cover_hd_url")
+        or item.get("coverImageHdUrl")
+        or item.get("image_cover_url")
+        or item.get("coverImageUrl")
+        or item.get("coverImage")
+        or cover_hd.get("url")
+        or cover.get("url")
+        or cover_orig.get("url")
+        or item.get("image_thumbnail_url")
+    )
+    owner_username = safe_str(
+        owner.get("username")
+        or item.get("ownerUsername")
+        or item.get("creator")
+        or username
+    )
+    owner_display = safe_str(
+        owner.get("full_name")
+        or owner.get("fullName")
+        or owner.get("displayName")
+        or item.get("ownerName")
+        or item.get("creatorFullName")
+    )
+    # Core identity through strip_empty; additive analytics keys always present
+    # so list clients never see two shapes in one response.
+    out = strip_empty(
         {
             "platform": "pinterest",
             "id": board_id,
             "name": safe_str(item.get("boardName") or item.get("name") or item.get("title")),
             "slug": slug,
             "url": url,
+        }
+    )
+    out.update(
+        {
+            "description": safe_str(item.get("description") or item.get("boardDescription")),
             "privacy": safe_str(item.get("privacy") or item.get("boardPrivacy")),
             "pinCount": safe_int(
-                item.get("pinCount") or item.get("pin_count") or item.get("pinsCount") or item.get("pin_count_mod")
+                item.get("pinCount")
+                or item.get("pin_count")
+                or item.get("pinsCount")
+                or item.get("pin_count_mod")
             ),
-            "followers": safe_int(
-                item.get("followerCount") or item.get("follower_count") or item.get("followers")
-            ),
+            # Board-scoped followers only — never account-scale board.follower_count.
+            "followers": _board_scoped_followers(item),
             "sectionCount": safe_int(item.get("sectionCount") or item.get("section_count")),
-            "coverImage": safe_str(
-                item.get("coverImageHdUrl")
-                or item.get("coverImageUrl")
-                or item.get("image_cover_url")
-                or item.get("coverImage")
-                or cover.get("url")
-                or cover_orig.get("url")
+            "coverImage": cover_image,
+            "createdAt": _created_at_iso(
+                item.get("createdDate") or item.get("created_at") or item.get("createdAt")
             ),
-            "createdAt": safe_str(item.get("createdDate") or item.get("created_at") or item.get("createdAt")),
             "owner": {
-                "username": safe_str(
-                    owner.get("username")
-                    or item.get("ownerUsername")
-                    or item.get("creator")
-                    or username
-                ),
-                "displayName": safe_str(
-                    owner.get("full_name") or item.get("ownerName") or item.get("creatorFullName")
-                ),
+                "username": owner_username,
+                "displayName": owner_display,
             },
         }
     )
+    return out
 
 
 @router.get("/user-boards", summary="List the boards on a Pinterest profile")
@@ -941,7 +1038,7 @@ async def pinterest_user_boards(
 
         data = await cached_or_run(
             endpoint="pinterest.user-boards",
-            params={"username": username, "limit": limit, "v": 5},
+            params={"username": username, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -960,9 +1057,52 @@ def _is_board_url(url: str) -> bool:
     )
 
 
-@router.get("/board", summary="List pins inside a Pinterest board")
+def _board_list_payload(board_url: str, pins: list[dict[str, Any]]) -> dict[str, Any]:
+    """Board list response: hoist full author once; slim per-pin author."""
+    top_author: dict[str, Any] | None = None
+    board_name: str | None = None
+    board_canonical = board_url
+    for pin in pins:
+        if top_author is None and isinstance(pin.get("author"), dict) and pin["author"].get("username"):
+            top_author = dict(pin["author"])
+        b = pin.get("board") if isinstance(pin.get("board"), dict) else {}
+        if not board_name and b.get("name"):
+            board_name = safe_str(b.get("name"))
+        if b.get("url"):
+            board_canonical = safe_str(b.get("url")) or board_canonical
+    slim_pins: list[dict[str, Any]] = []
+    for pin in pins:
+        row = dict(pin)
+        if isinstance(row.get("author"), dict):
+            row["author"] = _slim_list_author(row["author"])
+        slim_pins.append(row)
+    out: dict[str, Any] = {
+        "board": board_canonical,
+        "totalReturned": len(slim_pins),
+        "pins": slim_pins,
+    }
+    if board_name:
+        out["boardName"] = board_name
+    if top_author:
+        out["author"] = top_author
+    return out
+
+
+@router.get(
+    "/board",
+    summary="List pins inside a Pinterest board",
+    description=(
+        "Pins on a public board: saves (repin metric), title when exposed, "
+        "image + imageOriginal + images{}, destinationUrl, top-level author{} "
+        "(pinner) with slim per-pin author. Flat ~0.5 credits/pin (min 2). "
+        "Native pidgets soft-cap ~50–100 pins; no cursor yet."
+    ),
+)
 async def pinterest_board(
-    url: str = Query(..., description="Pinterest board URL (.../username/board-name/)"),
+    url: str = Query(
+        ...,
+        description="Pinterest board URL (.../username/board-name/), not a /pin/ URL.",
+    ),
     limit: int = Query(25, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
@@ -984,22 +1124,22 @@ async def pinterest_board(
             if native_items:
                 ctx["source"] = "direct"
                 pins = _prefer_enriched([_normalize_pin(i) for i in native_items])[:limit]
-                pins = await _enrich_sparse_pins(pins)
-                return {"board": url, "totalReturned": len(pins), "pins": pins}
+                pins = await _enrich_sparse_pins(pins, max_enrich=min(limit, 15))
+                return _board_list_payload(url, pins)
 
             items = await _run_pinterest_actor(
                 {"mode": "boardPins", "boardUrls": [url], "maxItems": limit}, limit
             )
             pins = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
-            pins = await _enrich_sparse_pins(pins)
+            pins = await _enrich_sparse_pins(pins, max_enrich=min(limit, 15))
             if not pins:
                 raise HTTPException(status_code=404, detail="No pins found")
             ctx["source"] = "apify"
-            return {"board": url, "totalReturned": len(pins), "pins": pins}
+            return _board_list_payload(url, pins)
 
         data = await cached_or_run(
             endpoint="pinterest.board",
-            params={"url": url, "limit": limit, "v": 5},
+            params={"url": url, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

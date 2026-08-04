@@ -1,6 +1,6 @@
 ﻿# SC parity backlog (Captapi)
 
-Last updated: 2026-08-04 (Reddit search score/scoreHidden honesty). Next: Reddit search comments[] + remaining price anomalies.
+Last updated: 2026-08-04 (Pinterest board saves/imageOriginal/cURL). Next: Pinterest board cursor + remaining price anomalies.
 
 Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` → `api-examples.generated.ts`) — ship code + refresh snapshot **with `ok: true`** or `gen_examples.py` skips the slug and the page looks broken.
 
@@ -39,6 +39,10 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - [x] Threads `search` / `search-users`: flat native 2 / 1 (was ~18 / ~14 Apify-priced); search-users `id` + `profileImage` + `followers` key; honest Top-SERP / non-semantic people-search docs; verified false≠null fix
 - [x] Reddit `subreddit-details`: ISO `createdAt` (was float-string epoch); `id`/`rules[]`/`activeUsers`/`submitText`; category field-doc + sticky lint; case-insensitive param docs
 - [x] Reddit search/list score honesty: authoritative `score` (not ups−downs doc lie); `scoreHidden` from `hide_score`; posts-only vs SC comments[]/media[] documented
+- [x] Pinterest `board`: cURL board URL (not pin); `saves` + `imageOriginal` + `images{}`; top-level `author{}`; destinationUrl field-doc overrides
+- [x] Pinterest `user-boards`: stop account-scoped `followers` twin; stable row shape; Redux map + 474x cover + ISO `createdAt`; docs two-way (undocumented fields)
+- [x] LinkedIn `company`: About specialties/size/founded/organizationType + similarPages[]; employeeCount vs employees[]; Apify `identifier:[slug]` fix; slogan/cover enrich; funding/employees[] people documented gaps
+- [x] LinkedIn `company-posts`: always-key `engagement{likes,comments,reposts}`; permalink hydrate when homepage LD omits counts (A-type headline fix)
 
 ## Promise-gap taxonomy (do not conflate)
 
@@ -46,24 +50,34 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 |------|---------|-----|
 | **A** | Hand-written promise on one endpoint (tagline / longDescription / delivers names a field that response lacks) | Add field or rewrite copy |
 | **B** | Generic category template (`delivers()` channel/search/…) mismatches a specific endpoint | Override `delivers` on that slug |
+| **C** | Response ships fields the docs never name (inverse of A) | Document or strip — two-way promise lint |
 
-Known A-type leftovers still open; B-type for `threads-profile` closed this turn.
+Known A-type leftovers still open; B-type for `threads-profile` closed this turn. C-type caught on `pinterest-user-boards` (privacy/sectionCount/coverImage/createdAt were live but undocumented).
+
+## Cross-cutting (auditor meta-finding)
+
+| # | Work | Effort | Notes |
+|---|------|--------|-------|
+| ★ | **Canonical mapper per platform** — wire every sibling endpoint to the platform's richest normalize (engagement / author / dates). Validated on 8 platforms: X, YT, TT, Reddit, IG, Threads, LI, … | Med / highest ROI | Most backlog items are "connect existing code", not greenfield |
+| | LinkedIn: `search-posts` engagement → `company-posts` (shipped hydrate+always-key; confirm deploy) | | |
+| | Same pattern: TT followers←followings; YT videos←streams; IG hashtag←reels-search; … | | |
 
 ## Next turn
 
 | # | Work | Effort | Notes |
 |---|------|--------|-------|
-| 1 | Reddit search `comments[]` (+ optional `media[]`) — brand listening | Med | posts-only today; SC ships three arrays |
-| 2 | Propagate Reddit sort+timeframe+cursor pattern to TT/X/Threads/IG search | Med | Reddit search is the reference implementation |
-| 3 | Catalog-wide `to_iso()` helper (remaining date-format variants) | Low | |
-| 4 | Price-anomaly pass (remaining — trending-reels / popular-creators / shorts / ad-details …) | Low | Threads search trio closed |
-| 5 | `views` consistency — Twitter (non-search) + Instagram hashtag-search | Low | |
-| 6 | Threads search: sort / since-until if Meta exposes a path | Med | |
-| 7 | Threads comments GraphQL path (SC fills where logged-out HTML is `[]`) | Med | |
-| 8 | Entity-search quality (Threads/FB/Google people-or-company match) | Med | |
-| 9 | A-type vaat lint (remaining cases) | Low | |
-| 10 | Twitter search + community-tweets: cursor + sort + since/until | Med | |
-| 11 | Threads search-users: Users-tab GraphQL + `is_active_on_text_post_app` | Med | |
+| 1 | TikTok Shop: relatedVideos[] + commissionRate on showcase; cursor/page; shop_slogan | Med | reviews docs + showcase PDP hydrate shipped; masked reviewer handles still a platform limit |
+| 2 | LinkedIn company `funding` + featured `employees[]` people (SC-rich) | Med | guest HTML empty; Apify funding blob empty for Shopify |
+| 3 | LinkedIn company-posts: reaction breakdown + postType/media carousels | Med | totals ship; SC-style reactions{} still open |
+| 3 | LinkedIn company similarPages `image` fill rate | Low | guest cards often omit media.licdn logos |
+| 5 | Pinterest board-scoped followers (SC path) | Med | still null after account-twin fix |
+| 6 | Pinterest board + user-boards cursor | Med | saves already on board/user-pins mapper |
+| 7 | Reddit search `comments[]` (+ optional `media[]`) | Med | |
+| 8 | Catalog-wide `to_iso()` + price-anomaly pass (Pinterest 13 vs SC 1) | Low | |
+| 9 | Two-way promise lint (A missing + C undocumented) | Low | |
+| 10 | Propagate Reddit sort+timeframe+cursor to TT/X/Threads/IG search | Med | |
+| 11 | Threads comments GraphQL + search sort/since-until | Med | |
+| 12 | Entity-search quality (Threads/FB/Google) | Med | |
 
 ## YouTube — open quality notes
 

@@ -2359,7 +2359,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Subreddit URL, r/name, or bare name (case-insensitive), e.g. r/technology or AskReddit. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2449,7 +2449,7 @@
     "name": "Threads User Posts",
     "path": "/v1/threads/user-posts",
     "credits": 2,
-    "summary": "Recent Threads posts - engagement views+4 metrics, threadId/isReply. Flat 2 native; ~0.7/post Apify.",
+    "summary": "Recent Threads posts — views+engagement, threadId/isReply. Flat 2 native.",
     "params": [
       {
         "name": "url",
@@ -2477,7 +2477,7 @@
     "name": "Threads Post Details",
     "path": "/v1/threads/post-details",
     "credits": 1,
-    "summary": "Threads post card plus comments[] and relatedPosts[] (views when Meta exposes them).",
+    "summary": "Metadata + engagement for a Threads post.",
     "params": [
       {
         "name": "url",
@@ -2511,7 +2511,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 25, max 200. Flat 2 native; Apify ~0.7/result."
+        "description": "Max items to return. Default 25, max 200. Billed per result."
       },
       {
         "name": "cache",
@@ -2539,7 +2539,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Flat 1 native; Apify ~0.7/result."
+        "description": "Max items to return. Default 20, max 100. Billed per result."
       },
       {
         "name": "cache",
@@ -2711,7 +2711,7 @@
     "name": "Pinterest Board",
     "path": "/v1/pinterest/board",
     "credits": 13,
-    "summary": "List pins inside a Pinterest board.",
+    "summary": "Board pins — saves, imageOriginal, destinationUrl, top-level author. Board URL only.",
     "params": [
       {
         "name": "url",
@@ -3063,7 +3063,7 @@
     "name": "TikTok Shop Products",
     "path": "/v1/tiktok-shop/shop-products",
     "credits": 2,
-    "summary": "List products from a TikTok Shop store.",
+    "summary": "Store catalog + shopInfo. Flat 2 credits on native SSR (limit does not multiply).",
     "params": [
       {
         "name": "url",
@@ -3075,7 +3075,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -3090,8 +3090,8 @@
     "platform": "tiktok_shop",
     "name": "TikTok Shop Product Details",
     "path": "/v1/tiktok-shop/product-details",
-    "credits": 14,
-    "summary": "TikTok Shop product details with seller id, pricing, SKUs, and region.",
+    "credits": 2,
+    "summary": "PDP with price/originalPrice/discount, skus[]+saleProps, images, categories. 2 credits native.",
     "params": [
       {
         "name": "url",
@@ -3119,7 +3119,7 @@
     "name": "TikTok Shop Product Reviews",
     "path": "/v1/tiktok-shop/product-reviews",
     "credits": 45,
-    "summary": "Customer reviews for a TikTok Shop product.",
+    "summary": "Shop product reviews — stars, text, SKU, verified, country, review photos. Not video comments.",
     "params": [
       {
         "name": "url",
@@ -3147,13 +3147,13 @@
     "name": "TikTok Shop User Showcase",
     "path": "/v1/tiktok-shop/user-showcase",
     "credits": 45,
-    "summary": "Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id.",
+    "summary": "Creator affiliate shelf — sold, rating, originalPrice, seller name/url (PDP-hydrated).",
     "params": [
       {
         "name": "username",
         "type": "string",
         "required": true,
-        "description": "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug."
+        "description": "TikTok username, @handle, or profile URL, e.g. jeffreestar or https://www.tiktok.com/@jeffreestar."
       },
       {
         "name": "limit",

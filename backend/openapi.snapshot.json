@@ -2330,7 +2330,7 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "TikTok live room info for a creator",
+        "summary": "TikTok live room info for a creator (alias of /live)",
         "operationId": "tiktok_live_info_v1_tiktok_live_info_get",
         "security": [
           {
@@ -2716,7 +2716,7 @@
           "TikTok"
         ],
         "summary": "Latest videos from a TikTok profile (cursor-paginated)",
-        "description": "Returns a creator's most recent public videos as structured JSON — caption, engagement (views/likes/comments/shares/saves), thumbnail, hashtags, sound name, and author profile. Accepts a profile URL, @handle, or username. Prefers TikTok's native mobile post API (cursor pagination via nextCursor / hasMore); falls back to our data-collection pool on the first page if every residential exit is soft-blocked. Flat 2 credits per call.",
+        "description": "Returns a creator's most recent public videos as structured JSON — caption, engagement (views/likes/comments/shares/saves), playable videoUrl / downloadUrl (CDN-signed; see mediaUrlsExpireAt), thumbnail, hashtags, sound name, shop/ad flags, and author profile (including id/secUid). Accepts a profile URL, @handle, or username. Prefers TikTok's native mobile post API (cursor pagination via nextCursor / hasMore); falls back to our data-collection pool on the first page if every residential exit is soft-blocked. Flat 2 credits per call.",
         "operationId": "tiktok_channel_posts_v1_tiktok_channel_posts_get",
         "security": [
           {
@@ -4015,7 +4015,7 @@
         "tags": [
           "TikTok Shop"
         ],
-        "summary": "List products from a TikTok Shop store",
+        "summary": "TikTok Shop store catalog — shopInfo + products with sold/rating",
         "operationId": "shop_products_v1_tiktok_shop_shop_products_get",
         "security": [
           {
@@ -4033,6 +4033,20 @@
               "title": "Url"
             },
             "description": "TikTok Shop store URL"
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 2,
+              "description": "Two-letter market region (default US). Non-US catalog coverage depends on TikTok exposing that shop in the selected region — empty results outside the US are often a platform limit, not a Captapi bug.",
+              "default": "US",
+              "title": "Region"
+            },
+            "description": "Two-letter market region (default US). Non-US catalog coverage depends on TikTok exposing that shop in the selected region — empty results outside the US are often a platform limit, not a Captapi bug."
           },
           {
             "name": "limit",
@@ -9411,7 +9425,8 @@
         "tags": [
           "Twitter"
         ],
-        "summary": "Tweet metadata + engagement stats",
+        "summary": "Tweet metadata + engagement (likes/replies/retweets/quotes when exposed)",
+        "description": "Public tweet as clean JSON: text, author (followers when exposed), engagement (likes, replies, retweets, quotes; views/bookmarks when Twitter exposes them), isReply / isRetweet, hashtags[], media[], ISO-8601 publishedAt. Flat 1 credit.",
         "operationId": "twitter_tweet_details_v1_twitter_tweet_details_get",
         "security": [
           {
@@ -9606,7 +9621,8 @@
         "tags": [
           "Twitter"
         ],
-        "summary": "List recent tweets for a profile",
+        "summary": "Most popular public tweets for a profile (not chronological)",
+        "description": "Returns the tweets Twitter's public timeline embed exposes for a profile — typically up to ~100 of the account's most popular posts, not a chronological / latest feed. Do not use this endpoint to detect new tweets. publishedAt is ISO-8601 UTC. Flat 2 credits per call.",
         "operationId": "twitter_user_tweets_v1_twitter_user_tweets_get",
         "security": [
           {
@@ -9633,9 +9649,11 @@
               "type": "integer",
               "maximum": 200,
               "minimum": 1,
+              "description": "Max tweets to return (default 20, max 200). Twitter's public surface usually caps around ~100 popular posts — not latest.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "Max tweets to return (default 20, max 200). Twitter's public surface usually caps around ~100 popular posts — not latest."
           },
           {
             "name": "cache",
@@ -9678,6 +9696,7 @@
           "Twitter"
         ],
         "summary": "Search public tweets on X by keyword",
+        "description": "Public keyword search via guest SearchTimeline. Each result uses the same tweet contract as user-tweets / tweet-details: ISO-8601 publishedAt, engagement{views,likes,replies,retweets,quotes,bookmarks} (null when omitted upstream), hashtags[], media[]. Flat 2 credits.",
         "operationId": "twitter_search_v1_twitter_search_get",
         "security": [
           {
@@ -9809,6 +9828,7 @@
           "Twitter"
         ],
         "summary": "Tweets posted in an X community",
+        "description": "List recent posts in a public X Community. Same tweet contract as search (ISO publishedAt, engagement 6-key shape, hashtags[]). Flat 2 credits on the native GraphQL path; Apify fallback bills about 0.7 credits per returned tweet (min 2).",
         "operationId": "twitter_community_tweets_v1_twitter_community_tweets_get",
         "security": [
           {
@@ -9822,10 +9842,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Community URL (x.com/i/communities/ID) or community ID",
+              "description": "X community URL (x.com/i/communities/ID) or community ID — not a tweet/status URL",
               "title": "Url"
             },
-            "description": "Community URL (x.com/i/communities/ID) or community ID"
+            "description": "X community URL (x.com/i/communities/ID) or community ID — not a tweet/status URL"
           },
           {
             "name": "limit",
@@ -9998,7 +10018,8 @@
         "tags": [
           "Reddit"
         ],
-        "summary": "Subreddit info & member stats",
+        "summary": "Subreddit info, rules, and member stats",
+        "description": "Public subreddit card: id (t5_…), title, description, members, activeUsers (currently online), rules[], submitText, ISO createdAt, nsfw/type/language/category, icon/banner. Flat 1 credit. Subreddit names are case-insensitive (AskReddit and askreddit both resolve).",
         "operationId": "subreddit_details_v1_reddit_subreddit_details_get",
         "security": [
           {
@@ -10012,10 +10033,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Subreddit URL, r/name, or bare name",
+              "description": "Subreddit URL, r/name, or bare name (case-insensitive), e.g. r/technology or AskReddit.",
               "title": "Url"
             },
-            "description": "Subreddit URL, r/name, or bare name"
+            "description": "Subreddit URL, r/name, or bare name (case-insensitive), e.g. r/technology or AskReddit."
           },
           {
             "name": "cache",
@@ -10512,7 +10533,7 @@
           "Threads"
         ],
         "summary": "Threads profile details & stats",
-        "description": "Public Threads profile as clean JSON: username, name, bio, followers, verified, profileImage, plus isThreadsOnlyUser, isPrivate, bioLinks[], transparencyLabel, profileImageVersions[], and hasOnboarded. Flat 1 credit. isThreadsOnlyUser is present when Meta exposes it (often null on web hydrate).",
+        "description": "Public Threads profile as clean JSON: username, displayName (+ name), bio, followers, verified, profileImage, plus isThreadsOnlyUser, private/isPrivate, bioLinks[] (url + Meta verified + linkId), bioFragments[], transparencyLabel, profileImageVersions[], and hasOnboarded. Flat 1 credit. isThreadsOnlyUser / transparencyLabel are null when Meta omits them on web hydrate.",
         "operationId": "threads_profile_v1_threads_profile_get",
         "security": [
           {
@@ -10572,6 +10593,7 @@
           "Threads"
         ],
         "summary": "List recent posts for a Threads profile",
+        "description": "Recent public Threads posts for a profile. Native hydrate is flat 2 credits; Apify fallback is ~0.7/post (min 2). Meta only exposes the last ~20–30 posts on this surface. Response includes top-level author{}, engagement.views when Meta exposes it, and threadId/replyToId/isReply/isQuote for multi-part threads.",
         "operationId": "threads_user_posts_v1_threads_user_posts_get",
         "security": [
           {
@@ -10598,9 +10620,11 @@
               "type": "integer",
               "maximum": 100,
               "minimum": 1,
+              "description": "Max items to return (default 20, max 100). Threads only exposes the last ~20–30 public posts on this surface — asking for 100 will not return 100.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "Max items to return (default 20, max 100). Threads only exposes the last ~20–30 public posts on this surface — asking for 100 will not return 100."
           },
           {
             "name": "cache",
@@ -10643,6 +10667,7 @@
           "Threads"
         ],
         "summary": "Search public Threads posts by keyword",
+        "description": "Public Threads post search via Meta Top SERP hydrate. Flat 2 credits on the native path; Apify fallback ~0.7/post (min 2). No sort or date filter — Meta ranks the page.",
         "operationId": "threads_search_v1_threads_search_get",
         "security": [
           {
@@ -10715,6 +10740,7 @@
           "Threads"
         ],
         "summary": "Find Threads users / creators by keyword",
+        "description": "Distinct authors from Threads keyword search hydrate. Flat 1 credit on the native path (TikTok/SC parity); Apify fallback ~0.7/user (min 2). Returns id + profileImage when Meta embeds them; followers is usually null on this surface.",
         "operationId": "threads_search_users_v1_threads_search_users_get",
         "security": [
           {
@@ -10786,7 +10812,8 @@
         "tags": [
           "Threads"
         ],
-        "summary": "Threads post metadata + engagement",
+        "summary": "Threads post metadata, related posts, and comments when exposed",
+        "description": "Public Threads post as clean JSON: same card as user-posts (text, author, engagement with views when Meta exposes them, threadId/isReply/isQuote, media) plus comments[] and relatedPosts[]. Flat 1 credit. Logged-out Meta hydrate usually embeds related posts (BarcelonaLoggedOutRelatedPosts) but omits the reply tree — comments[] is then an empty array, not a missing key.",
         "operationId": "threads_post_details_v1_threads_post_details_get",
         "security": [
           {
@@ -11256,6 +11283,7 @@
           "Pinterest"
         ],
         "summary": "List pins inside a Pinterest board",
+        "description": "Pins on a public board: saves (repin metric), title when exposed, image + imageOriginal + images{}, destinationUrl, top-level author{} (pinner) with slim per-pin author. Flat ~0.5 credits/pin (min 2). Native pidgets soft-cap ~50–100 pins; no cursor yet.",
         "operationId": "pinterest_board_v1_pinterest_board_get",
         "security": [
           {
@@ -11269,10 +11297,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Pinterest board URL (.../username/board-name/)",
+              "description": "Pinterest board URL (.../username/board-name/), not a /pin/ URL.",
               "title": "Url"
             },
-            "description": "Pinterest board URL (.../username/board-name/)"
+            "description": "Pinterest board URL (.../username/board-name/), not a /pin/ URL."
           },
           {
             "name": "limit",
@@ -11457,7 +11485,7 @@
         "tags": [
           "LinkedIn"
         ],
-        "summary": "LinkedIn company page details",
+        "summary": "LinkedIn company page — funding, similarPages, specialties",
         "operationId": "linkedin_company_v1_linkedin_company_get",
         "security": [
           {

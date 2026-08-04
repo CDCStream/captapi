@@ -354,7 +354,7 @@ const PINTEREST: Omit<Endpoint, "platform">[] = [
   { tool: "pinterest_pin_details", name: "Pinterest Pin Details", path: "/v1/pinterest/pin-details", credits: 1, summary: "Pin title, description, link, board, originAuthor, images, and engagement (1 credit).", params: [url(PIN_PIN)] },
   { tool: "pinterest_user_pins", name: "Pinterest User Pins", path: "/v1/pinterest/user-pins", credits: 13, summary: "Pins from a Pinterest profile.", params: [url(PIN_PROFILE), limit(25, 200)] },
   { tool: "pinterest_search", name: "Pinterest Search", path: "/v1/pinterest/search", credits: 13, summary: "Search Pinterest pins by keyword.", params: [q(), limit(25, 200)] },
-  { tool: "pinterest_board", name: "Pinterest Board", path: "/v1/pinterest/board", credits: 13, summary: "List pins inside a Pinterest board.", params: [url(PIN_BOARD), limit(25, 200)] },
+  { tool: "pinterest_board", name: "Pinterest Board", path: "/v1/pinterest/board", credits: 13, summary: "Board pins — saves, imageOriginal, destinationUrl, top-level author. Board URL only.", params: [url(PIN_BOARD), limit(25, 200)] },
   { tool: "pinterest_user_boards", name: "Pinterest User Boards", path: "/v1/pinterest/user-boards", credits: 13, summary: "List the boards on a Pinterest profile.", params: [url(PIN_PROFILE), limit(25, 200)] },
 ];
 
@@ -376,20 +376,20 @@ const RUMBLE: Omit<Endpoint, "platform">[] = [
 
 const TIKTOK_SHOP: Omit<Endpoint, "platform">[] = [
   { tool: "tiktok_shop_search", name: "TikTok Shop Search", path: "/v1/tiktok-shop/shop-search", credits: 56, summary: "TikTok Shop keyword search with price, sold, rating/reviews, seller id (HTML entities decoded).", params: [q("Product search query."), { name: "region", type: "string", required: false, description: "Two-letter TikTok Shop region. Default US." }, limit(20, 200)] },
-  { tool: "tiktok_shop_products", name: "TikTok Shop Products", path: "/v1/tiktok-shop/shop-products", credits: 2, summary: "List products from a TikTok Shop store.", params: [url("TikTok Shop store URL."), limit(20, 200)] },
+  { tool: "tiktok_shop_products", name: "TikTok Shop Products", path: "/v1/tiktok-shop/shop-products", credits: 2, summary: "Store catalog + shopInfo. Flat 2 credits on native SSR (limit does not multiply).", params: [url("TikTok Shop store URL."), limitFlat(20, 200, 2)] },
   {
     tool: "tiktok_shop_product_details",
     name: "TikTok Shop Product Details",
     path: "/v1/tiktok-shop/product-details",
-    credits: 14,
-    summary: "TikTok Shop product details with seller id, pricing, SKUs, and region.",
+    credits: 2,
+    summary: "PDP with price/originalPrice/discount, skus[]+saleProps, images, categories. 2 credits native.",
     params: [
       url("TikTok Shop product URL."),
       { name: "region", type: "string", required: false, description: "Market region ISO code for Apify fallback (default US)." },
     ],
   },
-  { tool: "tiktok_shop_product_reviews", name: "TikTok Shop Product Reviews", path: "/v1/tiktok-shop/product-reviews", credits: 45, summary: "Customer reviews for a TikTok Shop product.", params: [url("TikTok Shop product URL."), limit(20, 200)] },
-  { tool: "tiktok_shop_user_showcase", name: "TikTok Shop User Showcase", path: "/v1/tiktok-shop/user-showcase", credits: 45, summary: "Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id.", params: [{ name: "username", type: "string", required: true, description: "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug." }, limit(20, 200)] },
+  { tool: "tiktok_shop_product_reviews", name: "TikTok Shop Product Reviews", path: "/v1/tiktok-shop/product-reviews", credits: 45, summary: "Shop product reviews — stars, text, SKU, verified, country, review photos. Not video comments.", params: [url("TikTok Shop product URL."), limit(20, 200)] },
+  { tool: "tiktok_shop_user_showcase", name: "TikTok Shop User Showcase", path: "/v1/tiktok-shop/user-showcase", credits: 45, summary: "Creator affiliate shelf — sold, rating, originalPrice, seller name/url (PDP-hydrated).", params: [{ name: "username", type: "string", required: true, description: "TikTok username, @handle, or profile URL, e.g. jeffreestar or https://www.tiktok.com/@jeffreestar." }, limit(20, 200)] },
 ];
 
 const GITHUB: Omit<Endpoint, "platform">[] = [
