@@ -1132,6 +1132,80 @@ async def linkedin_post_details(
         return ApiResponse(data=data)
 
 
+_PARAGRAPH_SPLIT_RE = re.compile(r"\n[\s\u00a0\u2007\u202f]*\n+")
+_POST_VANITY_RE = re.compile(
+    r"linkedin\.com/posts/([A-Za-z0-9%.-]+?)(?:_|-activity|-ugcPost)",
+    re.I,
+)
+# ~180 wpm estimated reading cues for paragraph segments (not ASR media time).
+_READ_WPM = 180.0
+
+
+def _format_cue_timestamp(seconds: float) -> str:
+    total = max(0, int(seconds))
+    mm, ss = divmod(total, 60)
+    hh, mm = divmod(mm, 60)
+    if hh:
+        return f"{hh:02d}:{mm:02d}:{ss:02d}"
+    return f"{mm:02d}:{ss:02d}"
+
+
+def _paragraph_transcript_segments(text: str) -> list[dict[str, Any]]:
+    """Split LinkedIn post body into paragraph segments.
+
+    This endpoint extracts post text (not speech-to-text). Segments follow
+    blank-line paragraphs — including LinkedIn's NBSP-only blank lines.
+    ``start`` / ``duration`` / ``timestamp`` are estimated reading cues
+    (~180 wpm) so UIs can order blocks; they are not video timestamps.
+    """
+    cleaned = (text or "").replace("\r\n", "\n").replace("\r", "\n")
+    cleaned = cleaned.replace("\u00a0", " ").strip()
+    if not cleaned:
+        return []
+
+    parts = [p.strip() for p in _PARAGRAPH_SPLIT_RE.split(cleaned) if p.strip()]
+    if len(parts) <= 1:
+        # Soft breaks: several substantial lines without a blank line between.
+        lines = [ln.strip() for ln in cleaned.split("\n") if ln.strip()]
+        substantial = [ln for ln in lines if len(ln.split()) >= 6]
+        if len(substantial) >= 2:
+            parts = substantial
+        else:
+            parts = [cleaned]
+
+    segments: list[dict[str, Any]] = []
+    cursor = 0.0
+    for part in parts:
+        words = max(1, len(part.split()))
+        duration = round(words / _READ_WPM * 60.0, 3)
+        segments.append(
+            {
+                "text": part,
+                "start": round(cursor, 3),
+                "duration": duration,
+                "timestamp": _format_cue_timestamp(cursor),
+            }
+        )
+        cursor += duration
+    return segments
+
+
+def _author_url_from_post_url(post_url: str | None) -> str | None:
+    """Best-effort /in/{vanity} from personal ugcPost URLs when author.url is missing.
+
+    Skips activity/company posts — vanity there is often a company slug, not /in/.
+    """
+    if not post_url or "ugcPost-" not in post_url:
+        return None
+    match = _POST_VANITY_RE.search(post_url)
+    if not match:
+        return None
+    vanity = match.group(1).strip()
+    if not vanity or vanity.lower() in {"feed", "news"}:
+        return None
+    return f"https://www.linkedin.com/in/{vanity}"
+
+
 @router.get("/post-transcript", summary="LinkedIn post transcript / text extraction")
 async def linkedin_post_transcript(
     url: str = Query(..., description="LinkedIn post/activity URL"),
@@ -1166,20 +1240,27 @@ async def linkedin_post_transcript(
             text = (post.get("text") or "").strip()
             if not text:
                 raise HTTPException(status_code=422, detail="No transcript text available for this LinkedIn post")
+            segments = _paragraph_transcript_segments(text)
+            author = post.get("author") if isinstance(post.get("author"), dict) else {}
+            author_out = dict(author) if author else {}
+            if not author_out.get("url"):
+                derived = _author_url_from_post_url(post.get("url") or url)
+                if derived:
+                    author_out["url"] = derived
             return {
                 "platform": "linkedin",
                 "url": post.get("url") or url,
                 "transcript": text,
-                "transcriptSegments": [{"text": text, "start": 0, "duration": 0, "timestamp": "00:00"}],
+                "transcriptSegments": segments,
                 "wordCount": len(text.split()),
-                "segments": 1,
-                "author": post.get("author"),
+                "segments": len(segments),
+                "author": author_out or None,
                 "publishedAt": post.get("publishedAt"),
             }
 
         data = await cached_or_run(
             endpoint="linkedin.post-transcript",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

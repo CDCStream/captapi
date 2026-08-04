@@ -484,7 +484,9 @@ def apply_embedjs(card: dict[str, Any], payload: dict[str, Any]) -> dict[str, An
     dur = safe_int(payload.get("duration"))
     if dur is not None and dur > 0:
         card["durationSeconds"] = dur
-        card["duration"] = card.get("duration") or _seconds_to_clock(dur)
+        card["durationText"] = _seconds_to_clock(dur)
+        # Legacy alias — prefer durationSeconds / durationText.
+        card["duration"] = card["durationText"]
 
     live_raw = payload.get("live")
     if live_raw is not None:
@@ -607,14 +609,19 @@ def parse_video_html(html: str, url: str | None = None) -> dict[str, Any] | None
     streams = _streams_from_html(html)
     likes, dislikes = _votes_from_html(html)
     iso_dur = safe_str((video or {}).get("duration"))
-    duration_str = _parse_iso_duration(iso_dur)
-    duration_seconds = _iso_duration_seconds(iso_dur) or _clock_to_seconds(duration_str)
+    duration_seconds = _iso_duration_seconds(iso_dur)
+    duration_text = _seconds_to_clock(duration_seconds) if duration_seconds is not None else _parse_iso_duration(iso_dur)
     embed_id = _embed_id_from_html(html, embed)
-    if embed_id and not embed:
+    # Only trust embed URLs that use the page's real embed id — never the
+    # permalink slug (channel lists used to fabricate /embed/{permalink}/ → 404).
+    if embed_id:
         embed = f"https://rumble.com/embed/{embed_id}/"
+    elif embed and video_id and f"/embed/{video_id}" in embed:
+        embed = None
     numeric_id = _numeric_id_from_html(html)
     captions = _captions_from_html(html)
     is_live = _is_live_from_html(html)
+    content_type = "live" if is_live else ("short" if (canonical or url or "") and "/shorts/" in (canonical or url or "").lower() else "video")
 
     return {
         "platform": "rumble",
@@ -622,6 +629,7 @@ def parse_video_html(html: str, url: str | None = None) -> dict[str, Any] | None
         "numericId": numeric_id,
         "embedId": embed_id,
         "url": canonical,
+        "type": content_type,
         "embedUrl": embed,
         "shareUrl": f"https://rumble.com/share/{video_id}" if video_id else None,
         "title": title,
@@ -636,8 +644,9 @@ def parse_video_html(html: str, url: str | None = None) -> dict[str, Any] | None
         "likes": likes,
         "dislikes": dislikes,
         "comments": _comments_from_html(html),
-        "duration": duration_str,
         "durationSeconds": duration_seconds,
+        "durationText": duration_text,
+        "duration": duration_text,
         "publishedAt": safe_str((video or {}).get("uploadDate")),
         "thumbnail": thumbnail,
         "width": None,

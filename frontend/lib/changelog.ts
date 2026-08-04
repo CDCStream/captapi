@@ -51,6 +51,58 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
     category: "fix",
+    title: "LinkedIn post-transcript: paragraph transcriptSegments",
+    description:
+      "GET /v1/linkedin/post-transcript no longer returns the entire post body as one segment with duration 0. transcriptSegments splits on blank-line paragraphs (including LinkedIn NBSP-only gaps). start/duration/timestamp are estimated reading cues (~180 wpm) — this endpoint is post-text extraction, not video ASR. Personal ugcPost URLs also backfill author.url from /posts/{vanity}_… when LinkedIn omits it.",
+    items: [
+      "Paragraph split for transcriptSegments (NBSP-safe)",
+      "Estimated reading cues instead of a single 00:00 blob",
+      "author.url from ugcPost vanity when missing",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
+    title: "Truth Social: unbroken URLs, links[], slim author, Rumble bridge",
+    description:
+      "HTML→text no longer inserts spaces inside Truth Social <span>-soft-wrapped URLs; links[] carries authoritative <a href> targets. user-posts returns full author{} once at the top and slim {id,username,displayName,avatar,verified} per post. Posts add engagement.upvotes/downvotes, card link previews, media.meta (+ durationSeconds), and externalVideoId → Rumble. missing.png previews become null. Limit max 80 documented; use cases are public-figure/link/Rumble — not video-library boilerplate.",
+    items: [
+      "Fix span-broken URLs + links[] from href",
+      "Top-level author; slim per-post author",
+      "externalVideoId Rumble bridge",
+      "upvotes/downvotes, card, media.meta; missing.png→null",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
+    title: "Truth Social: prominent-only warning, locked/fields, 1-credit post",
+    description:
+      "All three Truth Social endpoints now lead with the platform limit: as of late 2025 only prominent public figures (e.g. Trump, Vance) are reachable without auth — most other accounts 404. Profile/post are flat 1 credit; user-posts is 2 native (~0.85/post Apify). Rich accounts expose locked (+ isPrivate), bot, group, location, acct, emojis[], and fields[] with verifiedAt. lastStatusAt normalizes YYYY-MM-DD to ISO midnight UTC. Use cases no longer imply influencer discovery.",
+    items: [
+      "Auth-gated warning on profile, user-posts, and post",
+      "locked/bot/group/location + fields[].verifiedAt",
+      "Post 5→1 credit; user-posts flat 2 native",
+      "ISO lastStatusAt; slug field docs + honest use cases",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
+    title: "Rumble embedUrl + engagement; field-doc bleed sealed",
+    description:
+      "Rumble channel-videos no longer fabricates /embed/{permalink}/ (those 404 — real embed ids differ, e.g. v7cv2cc → v7aoh22). video-details keeps real embedId + live likes/comments. durationSeconds (int) + durationText everywhere; type video|short|live. Shared FIELD_DESCS no longer carries Instagram/TikTok/YouTube/Twitch notes onto every page — platform-specific copy lives only in SLUG_FIELD_DESCS.",
+    items: [
+      "embedUrl only when a real embed id is known",
+      "durationSeconds + durationText; type video|short|live",
+      "video-details engagement from page chrome (not silent zeros)",
+      "FIELD_DESCS sanitized; sticky lint covers views/isLive/streams/…",
+      "Rumble channel field docs: string name, not Twitch object",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
     title: "Facebook Events: one Event shape across details/search/profile",
     description:
       "All three Facebook Event endpoints now share local-offset startDate/endDate + timezone (evening CDT no longer rolls to the next UTC day). Profile Events parses yearless cards (Tue, Aug 4 at 8:00 PM EDT → 2026-08-04T20:00:00-04:00). Event Search drops cache-unsafe \"Happening now\", requires topic+city tokens, adds location/from/to filters, bills flat 2 on native, and the docs example is real Chicago comedy (not unrelated worship feed). Field docs, use cases, and lpFlat billing aligned.",

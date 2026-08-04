@@ -4628,14 +4628,32 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "transcript": "The most meaningful breakthroughs happen when technology is built with people in mind.\n \nThat was the message at Microsoft Build this month, where we announced a host of new tools to help developers build, dream and create. \n \nIn June’s edition of The Monthly Tech-In, we’re sharing stories from Build and beyond about the developers, founders and communities who are using AI to tackle real-world challenges, from helping creators protect their work to advancing more inclusive AI systems.\n \nRead more about the people and innovations who are shaping what's next:",
     "transcriptSegments": [
       {
-        "text": "The most meaningful breakthroughs happen when technology is built with people in mind.\n \nThat was the message at Microsoft Build this month, where we announced a host of new tools to help developers build, dream and create. \n \nIn June’s edition of The Monthly Tech-In, we’re sharing stories from Build and beyond about the developers, founders and communities who are using AI to tackle real-world challenges, from helping creators protect their work to advancing more inclusive AI systems.\n \nRead more about the people and innovations who are shaping what's next:",
-        "start": 0,
-        "duration": 0,
+        "text": "The most meaningful breakthroughs happen when technology is built with people in mind.",
+        "start": 0.0,
+        "duration": 4.333,
         "timestamp": "00:00"
+      },
+      {
+        "text": "That was the message at Microsoft Build this month, where we announced a host of new tools to help developers build, dream and create.",
+        "start": 4.333,
+        "duration": 8.0,
+        "timestamp": "00:04"
+      },
+      {
+        "text": "In June’s edition of The Monthly Tech-In, we’re sharing stories from Build and beyond about the developers, founders and communities who are using AI to tackle real-world challenges, from helping creators protect their work to advancing more inclusive AI systems.",
+        "start": 12.333,
+        "duration": 13.333,
+        "timestamp": "00:12"
+      },
+      {
+        "text": "Read more about the people and innovations who are shaping what's next:",
+        "start": 25.666,
+        "duration": 4.0,
+        "timestamp": "00:25"
       }
     ],
     "wordCount": 89,
-    "segments": 1,
+    "segments": 4,
     "author": {
       "name": "Microsoft",
       "headline": "28,652,029 followers",
@@ -5925,16 +5943,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "rumble",
         "id": "v7dfegc",
         "url": "https://rumble.com/v7dfegc-the-democrat-civil-war-is-getting-intense-ep.-2563-07292026.html",
-        "embedUrl": "https://rumble.com/embed/v7dfegc/",
+        "type": "video",
         "title": "The Democrat Civil War Is Getting Intense (Ep. 2563) - 07/29/2026",
         "channel": "The Dan Bongino Show",
         "channelUrl": "https://rumble.com/c/bongino",
+        "channelHandle": "bongino",
         "channelFollowers": 3661298,
         "channelVerified": true,
         "views": 230174,
         "likes": 4178,
         "dislikes": 43,
-        "duration": "5456",
+        "durationSeconds": 5456,
+        "durationText": "1:30:56",
         "publishedAt": "2026-07-29T12:29:52+00:00",
         "thumbnail": "https://1a-1791.com/video/fwe2/83/s8/1/S/_/P/K/S_PKA.OvCc-small-The-Democrat-Civil-War-Is-G..jpg",
         "comments": 91,
@@ -5945,22 +5965,25 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "type": "hls",
             "quality": "auto"
           }
-        ]
+        ],
+        "shareUrl": "https://rumble.com/share/v7dfegc"
       },
       {
         "platform": "rumble",
         "id": "v7det4g",
         "url": "https://rumble.com/shorts/v7det4g",
-        "embedUrl": "https://rumble.com/embed/v7det4g/",
+        "type": "short",
         "title": "Just Wait Until You Read TRUMP’S Diary...",
         "channel": "The Dan Bongino Show",
         "channelUrl": "https://rumble.com/c/bongino",
+        "channelHandle": "bongino",
         "channelFollowers": 3661298,
         "channelVerified": true,
         "views": 8242,
         "likes": 234,
         "dislikes": 7,
-        "duration": "55",
+        "durationSeconds": 55,
+        "durationText": "0:55",
         "publishedAt": "2026-07-29T02:21:55+00:00",
         "thumbnail": "https://1a-1791.com/video/fwe2/b4/s8/1/W/p/J/K/WpJKA.OvCc-small-Just-Wait-Until-You-Read-TR..jpg",
         "comments": 11,
@@ -5986,22 +6009,25 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "type": "mp4",
             "quality": "360p"
           }
-        ]
+        ],
+        "shareUrl": "https://rumble.com/share/v7det4g"
       },
       {
         "platform": "rumble",
         "id": "v7defpc",
         "url": "https://rumble.com/shorts/v7defpc",
-        "embedUrl": "https://rumble.com/embed/v7defpc/",
+        "type": "short",
         "title": "How Communists Collapse the Food Supply in 5 Easy Steps",
         "channel": "The Dan Bongino Show",
         "channelUrl": "https://rumble.com/c/bongino",
+        "channelHandle": "bongino",
         "channelFollowers": 3661298,
         "channelVerified": true,
         "views": 6422,
         "likes": 186,
         "dislikes": 4,
-        "duration": "74",
+        "durationSeconds": 74,
+        "durationText": "1:14",
         "publishedAt": "2026-07-28T21:35:04+00:00",
         "thumbnail": "https://1a-1791.com/video/fww1/cb/s8/1/a/a/F/K/aaFKA.OvCc-small-How-Communists-Collapse-the..jpg",
         "comments": 18,
@@ -6027,22 +6053,25 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "type": "mp4",
             "quality": "360p"
           }
-        ]
+        ],
+        "shareUrl": "https://rumble.com/share/v7defpc"
       },
       {
         "platform": "rumble",
         "id": "v7deb7m",
         "url": "https://rumble.com/shorts/v7deb7m",
-        "embedUrl": "https://rumble.com/embed/v7deb7m/",
+        "type": "short",
         "title": "Fauci’s Biggest Lies EXPOSED in His Own Diary",
         "channel": "The Dan Bongino Show",
         "channelUrl": "https://rumble.com/c/bongino",
+        "channelHandle": "bongino",
         "channelFollowers": 3661300,
         "channelVerified": true,
         "views": 6186,
         "likes": 178,
         "dislikes": 4,
-        "duration": "64",
+        "durationSeconds": 64,
+        "durationText": "1:04",
         "publishedAt": "2026-07-28T20:02:09+00:00",
         "thumbnail": "https://1a-1791.com/video/fww1/8b/s8/6/c/L/D/K/cLDKA.O-xb.jpg",
         "comments": 8,
@@ -6068,22 +6097,25 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "type": "mp4",
             "quality": "360p"
           }
-        ]
+        ],
+        "shareUrl": "https://rumble.com/share/v7deb7m"
       },
       {
         "platform": "rumble",
         "id": "v7ddmnm",
         "url": "https://rumble.com/v7ddmnm-dear-diary-they-lied-about-everything-ep.-2562-07282026.html",
-        "embedUrl": "https://rumble.com/embed/v7ddmnm/",
+        "type": "video",
         "title": "Dear Diary, They Lied About Everything (Ep. 2562) - 07/28/2026",
         "channel": "The Dan Bongino Show",
         "channelUrl": "https://rumble.com/c/bongino",
+        "channelHandle": "bongino",
         "channelFollowers": 3661300,
         "channelVerified": true,
         "views": 478253,
         "likes": 7946,
         "dislikes": 95,
-        "duration": "4861",
+        "durationSeconds": 4861,
+        "durationText": "1:21:01",
         "publishedAt": "2026-07-28T12:27:49+00:00",
         "thumbnail": "https://1a-1791.com/video/fww1/c6/s8/1/Y/Z/v/K/YZvKA.OvCc-small-Dear-Diary-They-Lied-About-..jpg",
         "comments": 812,
@@ -6091,11 +6123,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "streams": [
           {
             "url": "https://1a-1791.com/video/fww1/c6/s8/2/Y/Z/v/K/YZvKA.aaa.rec.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "1080p"
-          },
-          {
-            "url": "https://1a-1791.com/video/fww1/c6/s8/2/Y/Z/v/K/YZvKA.haa.rec.mp4?b=1&u=6",
             "type": "mp4",
             "quality": "1080p"
           },
@@ -6114,7 +6141,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "type": "mp4",
             "quality": "360p"
           }
-        ]
+        ],
+        "shareUrl": "https://rumble.com/share/v7ddmnm"
       }
     ]
   },
@@ -6197,13 +6225,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "rumble",
         "id": "v7dbdz0",
         "url": "https://rumble.com/v7dbdz0-flat-earth-fake-space.html",
+        "type": "video",
         "title": "FLAT EARTH - FAKE SPACE",
         "channel": "Flat Earth Clock app",
         "channelUrl": "https://rumble.com/c/flatearthclock",
         "views": 954,
         "likes": 17,
-        "dislikes": 0,
-        "duration": "8:05",
+        "dislikes": null,
+        "durationSeconds": 485,
+        "durationText": "8:05",
         "publishedAt": "2026-07-27T08:08:00-04:00",
         "thumbnail": "https://1a-1791.com/video/fwe2/96/s8/1/8/r/8/J/8r8JA.oq1b-small-FLAT-EARTH-FAKE-SPACE..jpg",
         "comments": 1
@@ -6212,13 +6242,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "rumble",
         "id": "v7dbg7s",
         "url": "https://rumble.com/v7dbg7s-dummyvision-2-just-asking-questions-and-closing-arguments-from-baron-colema.html",
+        "type": "video",
         "title": "SUNDAY SLOWS - Listening To a Special Spaces on Tyler Robinson - Misunderstanding Trial 101",
         "channel": "Rekieta Law",
         "channelUrl": "https://rumble.com/c/RekietaLaw",
         "views": 7720,
         "likes": 113,
         "dislikes": 6,
-        "duration": "3:55:39",
+        "durationSeconds": 14139,
+        "durationText": "3:55:39",
         "publishedAt": "2026-07-27T00:18:40-04:00",
         "thumbnail": "https://1a-1791.com/video/fww1/89/s8/6/y/_/8/J/y_8JA.oq1b.37.jpg",
         "comments": 7
@@ -6227,13 +6259,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "rumble",
         "id": "v7dcipw",
         "url": "https://rumble.com/v7dcipw-planet-earth-is-under-attack-by-space-demons.html",
+        "type": "video",
         "title": "PLANET EARTH IS UNDER ATTACK BY SPACE DEMONS",
         "channel": "STRANGER THAN FICTION NEWS",
         "channelUrl": "https://rumble.com/c/c-360794",
         "views": 1240,
         "likes": 23,
         "dislikes": 1,
-        "duration": "18:54",
+        "durationSeconds": 1134,
+        "durationText": "18:54",
         "publishedAt": "2026-07-27T16:34:03-04:00",
         "thumbnail": "https://1a-1791.com/video/fwe2/97/s8/6/e/l/j/K/eljKA.oq1b.4.jpg",
         "comments": 12
@@ -6242,13 +6276,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "rumble",
         "id": "v7dci9i",
         "url": "https://rumble.com/v7dci9i-dont-force-yourself-to-be-good-twitterx-space.html",
+        "type": "video",
         "title": "Don't Force Yourself to be GOOD! Twitter/X Space",
         "channel": "Freedomain",
         "channelUrl": "https://rumble.com/c/freedomain",
         "views": 841,
         "likes": 9,
-        "dislikes": 0,
-        "duration": "1:04:44",
+        "dislikes": null,
+        "durationSeconds": 3884,
+        "durationText": "1:04:44",
         "publishedAt": "2026-07-27T15:26:25-04:00",
         "thumbnail": "https://1a-1791.com/video/fww1/25/s8/1/2/b/j/K/2bjKA.oq1b-small-Dont-Force-Yourself-to-be-G..jpg",
         "comments": null
@@ -6257,13 +6293,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "rumble",
         "id": "v7ddi44",
         "url": "https://rumble.com/v7ddi44-patriot-pals-ep.8-lets-go-to-space.html",
+        "type": "video",
         "title": "Patriot Pals Ep.#8: Let's Go To Space!",
         "channel": "Patriot Pals",
         "channelUrl": "https://rumble.com/c/PatriotPals",
         "views": 1380,
         "likes": 20,
-        "dislikes": 0,
-        "duration": "6:26",
+        "dislikes": null,
+        "durationSeconds": 386,
+        "durationText": "6:26",
         "publishedAt": "2026-07-28T06:39:28-04:00",
         "thumbnail": "https://1a-1791.com/video/fwe2/36/s8/6/0/x/u/K/0xuKA.oq1b.jpg",
         "comments": 2
@@ -6276,8 +6314,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "numericId": 441201242,
     "embedId": "v7aoh22",
     "url": "https://rumble.com/v7cv2cc-now-i-can-finally-talk-about-it-ep.-2555-07172026.html",
+    "type": "video",
     "embedUrl": "https://rumble.com/embed/v7aoh22/",
-    "shareUrl": "https://rumble.com/share/v7cv2cc?src=J1c68WSr8AsehcaSzlyz2fgeg8DoMr_YAh20afx-dezbwbz0_kJtdA",
+    "shareUrl": "https://rumble.com/share/v7cv2cc?src=pEKvigixSA18kCOHqJfLmJzJ7JBZcpQdtcNMOQ_0_L2s9WPwl09OdA",
     "title": "Now I Can Finally Talk About It (Ep. 2555) - 07/17/2026",
     "description": "In this episode, I'll discuss the groundbreaking information President Trump revealed in his speech last night and what it means for our elections movingforward. 1776 Live Club: No purchase necessary.",
     "channel": "The Dan Bongino Show",
@@ -6285,12 +6324,13 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "channelHandle": "bongino",
     "channelFollowers": 3660000,
     "channelVerified": true,
-    "views": 940965,
+    "views": 943676,
     "likes": 15500,
     "dislikes": 194,
     "comments": 1050,
-    "duration": "1:26:25",
     "durationSeconds": 5185,
+    "durationText": "1:26:25",
+    "duration": "1:26:25",
     "publishedAt": "2026-07-17T12:18:39+00:00",
     "thumbnail": "https://1a-1791.com/video/fwe2/7c/s8/1/C/w/c/H/CwcHA.qR4e-small-Now-I-Can-Finally-Talk-Abou..jpg",
     "width": 1920,
@@ -6384,16 +6424,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "isLive": false,
     "streams": [
       {
-        "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.caa.rec.mp4",
-        "type": "mp4",
-        "quality": "480p"
-      },
-      {
-        "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.Faa.rec.mp4",
-        "type": "mp4",
-        "quality": "180p"
-      },
-      {
         "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.aaa.rec.mp4",
         "type": "mp4",
         "quality": "1081p"
@@ -6409,6 +6439,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "quality": "720p"
       },
       {
+        "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.caa.rec.mp4",
+        "type": "mp4",
+        "quality": "480p"
+      },
+      {
         "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.baa.rec.mp4",
         "type": "mp4",
         "quality": "360p"
@@ -6417,6 +6452,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.oaa.rec.mp4",
         "type": "mp4",
         "quality": "240p"
+      },
+      {
+        "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.Faa.rec.mp4",
+        "type": "mp4",
+        "quality": "180p"
       },
       {
         "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.Gaa.rec.aac",
@@ -13683,13 +13723,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "postCount": 35050,
       "website": "www.DonaldJTrump.com",
       "createdAt": "2022-02-11T16:16:57.705Z",
-      "lastStatusAt": "2026-07-18",
-      "fields": []
+      "lastStatusAt": "2026-07-18T00:00:00.000Z",
+      "fields": [],
+      "locked": false,
+      "isPrivate": false,
+      "bot": false,
+      "group": false,
+      "location": null
     },
     "engagement": {
       "replies": 827,
       "reblogs": 2586,
-      "likes": 8328
+      "likes": 8328,
+      "upvotes": null,
+      "downvotes": null
     },
     "language": "fy",
     "sensitive": false,
@@ -13700,7 +13747,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "previewUrl": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/files/116/938/578/476/026/646/small/5b31cf2bfc5bfa22.jpg",
         "description": null
       }
-    ]
+    ],
+    "links": []
   },
   "truth-social-profile": {
     "platform": "truth_social",
@@ -13718,12 +13766,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "followers": 12956933,
     "following": 69,
     "postCount": 35371,
+    "location": null,
     "website": "www.DonaldJTrump.com",
     "createdAt": "2022-02-11T16:16:57.705Z",
-    "lastStatusAt": "2026-08-02",
+    "lastStatusAt": "2026-08-02T00:00:00.000Z",
     "emojis": [],
     "fields": [],
     "bot": false,
+    "locked": false,
     "isPrivate": false,
     "group": false,
     "discoverable": null,
@@ -13733,6 +13783,37 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "truth-social-user-posts": {
     "username": "realDonaldTrump",
+    "author": {
+      "platform": "truth_social",
+      "id": "107780257626128497",
+      "username": "realDonaldTrump",
+      "acct": "realDonaldTrump",
+      "url": "https://truthsocial.com/@realDonaldTrump",
+      "displayName": "Donald J. Trump",
+      "bio": "",
+      "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
+      "avatarStatic": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
+      "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
+      "headerStatic": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
+      "verified": true,
+      "followers": 12956933,
+      "following": 69,
+      "postCount": 35371,
+      "location": null,
+      "website": "www.DonaldJTrump.com",
+      "createdAt": "2022-02-11T16:16:57.705Z",
+      "lastStatusAt": "2026-08-02T00:00:00.000Z",
+      "emojis": [],
+      "fields": [],
+      "bot": false,
+      "locked": false,
+      "isPrivate": false,
+      "group": false,
+      "discoverable": null,
+      "acceptingMessages": false,
+      "chatsOnboarded": true,
+      "tvAccount": false
+    },
     "totalReturned": 5,
     "nextCursor": "116936997445912023",
     "hasMore": true,
@@ -13744,27 +13825,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "Tim Sheehy is GREAT. A Winner!!! President DJT",
         "publishedAt": "2026-07-18T02:18:32.394Z",
         "author": {
-          "platform": "truth_social",
           "id": "107780257626128497",
           "username": "realDonaldTrump",
-          "url": "https://truthsocial.com/@realDonaldTrump",
           "displayName": "Donald J. Trump",
-          "bio": "",
           "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
-          "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
-          "verified": true,
-          "followers": 12908901,
-          "following": 69,
-          "postCount": 35050,
-          "website": "www.DonaldJTrump.com",
-          "createdAt": "2022-02-11T16:16:57.705Z",
-          "lastStatusAt": "2026-07-18",
-          "fields": []
+          "verified": true
         },
         "engagement": {
           "replies": 827,
           "reblogs": 2584,
-          "likes": 8321
+          "likes": 8321,
+          "upvotes": null,
+          "downvotes": null
         },
         "language": "fy",
         "sensitive": false,
@@ -13775,7 +13847,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "previewUrl": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/files/116/938/578/476/026/646/small/5b31cf2bfc5bfa22.jpg",
             "description": null
           }
-        ]
+        ],
+        "links": []
       },
       {
         "platform": "truth_social",
@@ -13784,27 +13857,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "Ensuring the integrity of our elections is fundamental to preserving trust in American democracy. Following the 2020 presidential election, concerns about potential irregularities prompted detailed examinations of voting processes, data security, and registration practices across multiple states… Download documents and reports addressing key areas of election integrity, here: https://www. whitehouse.gov/election-integr ity/",
         "publishedAt": "2026-07-18T02:13:21.858Z",
         "author": {
-          "platform": "truth_social",
           "id": "107780257626128497",
           "username": "realDonaldTrump",
-          "url": "https://truthsocial.com/@realDonaldTrump",
           "displayName": "Donald J. Trump",
-          "bio": "",
           "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
-          "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
-          "verified": true,
-          "followers": 12908901,
-          "following": 69,
-          "postCount": 35050,
-          "website": "www.DonaldJTrump.com",
-          "createdAt": "2022-02-11T16:16:57.705Z",
-          "lastStatusAt": "2026-07-18",
-          "fields": []
+          "verified": true
         },
         "engagement": {
           "replies": 1388,
           "reblogs": 3509,
-          "likes": 11543
+          "likes": 11543,
+          "upvotes": null,
+          "downvotes": null
         },
         "language": "en",
         "sensitive": false,
@@ -13812,10 +13876,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "type": "video",
             "url": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/files/116/938/518/347/491/612/original/9bb622c2a7cb73f9.mp4",
-            "previewUrl": "https://truthsocial.com/icons/missing.png",
+            "previewUrl": null,
             "description": null
           }
-        ]
+        ],
+        "links": []
       },
       {
         "platform": "truth_social",
@@ -13824,27 +13889,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "Newly declassified documents show that over a period of years starting during the 2020 election cycle, the People’s Republic of China carried out what is believed to be the largest compromise of election data in history — resulting in China’s illicit acquisition of 220 million U.S. voter files. That information includes names, addresses, phone numbers, political party preferences, and other sensitive data that would be needed to register to vote, and engage in other nefarious activities. This data loss presents an unprecedented election security nightmare. The intelligence even shows that China assigned a data exploitation unit specifically to this new project. https://www. whitehouse.gov/election-integr ity/",
         "publishedAt": "2026-07-18T02:01:14.258Z",
         "author": {
-          "platform": "truth_social",
           "id": "107780257626128497",
           "username": "realDonaldTrump",
-          "url": "https://truthsocial.com/@realDonaldTrump",
           "displayName": "Donald J. Trump",
-          "bio": "",
           "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
-          "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
-          "verified": true,
-          "followers": 12908901,
-          "following": 69,
-          "postCount": 35050,
-          "website": "www.DonaldJTrump.com",
-          "createdAt": "2022-02-11T16:16:57.705Z",
-          "lastStatusAt": "2026-07-18",
-          "fields": []
+          "verified": true
         },
         "engagement": {
           "replies": 1029,
           "reblogs": 3493,
-          "likes": 10641
+          "likes": 10641,
+          "upvotes": null,
+          "downvotes": null
         },
         "language": "en",
         "sensitive": false,
@@ -13855,7 +13911,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "previewUrl": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/thumbnails/116/938/510/857/791/371/original/ba6946cca1174f7c.jpg",
             "description": null
           }
-        ]
+        ],
+        "links": []
       },
       {
         "platform": "truth_social",
@@ -13864,27 +13921,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "For many years, I have called for bold, swift, and decisive action to protect the integrity of America’s elections. Every American deserves to know that when they cast their vote, that vote will be counted accurately in a system that is secure—one where cheating and interference are not just difficult, but virtually impossible. Unfortunately, the system we have today falls catastrophically short of that standard. Tonight, I am announcing the immediate declassification and release of critical intelligence revealing shocking vulnerabilities in our election infrastructure. This evidence shows that the election system we have is dangerously exposed to hacking, exploitation, and foreign interference. Just as disturbingly, this vital information has for many years been covered up and hidden from you, the American People, and that changes right now. The documents we will release starting tonight have been gathered by the White House Government Transparency Task Force, along with the staff of the President’s Intelligence Advisory Board—supported by our top intelligence agency chiefs, who have all personally reviewed the findings we are presenting this evening, and fully confirmed their authenticity. You can see these documents for yourself at: https://www. whitehouse.gov/election-integr ity/",
         "publishedAt": "2026-07-18T01:59:50.365Z",
         "author": {
-          "platform": "truth_social",
           "id": "107780257626128497",
           "username": "realDonaldTrump",
-          "url": "https://truthsocial.com/@realDonaldTrump",
           "displayName": "Donald J. Trump",
-          "bio": "",
           "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
-          "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
-          "verified": true,
-          "followers": 12908901,
-          "following": 69,
-          "postCount": 35050,
-          "website": "www.DonaldJTrump.com",
-          "createdAt": "2022-02-11T16:16:57.705Z",
-          "lastStatusAt": "2026-07-18",
-          "fields": []
+          "verified": true
         },
         "engagement": {
           "replies": 583,
           "reblogs": 3027,
-          "likes": 10091
+          "likes": 10091,
+          "upvotes": null,
+          "downvotes": null
         },
         "language": "en",
         "sensitive": false,
@@ -13895,7 +13943,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "previewUrl": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/thumbnails/116/938/499/738/796/668/original/467606ed8b25347a.jpg",
             "description": null
           }
-        ]
+        ],
+        "links": []
       },
       {
         "platform": "truth_social",
@@ -13904,27 +13953,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "",
         "publishedAt": "2026-07-17T19:36:17.631Z",
         "author": {
-          "platform": "truth_social",
           "id": "107780257626128497",
           "username": "realDonaldTrump",
-          "url": "https://truthsocial.com/@realDonaldTrump",
           "displayName": "Donald J. Trump",
-          "bio": "",
           "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
-          "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
-          "verified": true,
-          "followers": 12908901,
-          "following": 69,
-          "postCount": 35050,
-          "website": "www.DonaldJTrump.com",
-          "createdAt": "2022-02-11T16:16:57.705Z",
-          "lastStatusAt": "2026-07-18",
-          "fields": []
+          "verified": true
         },
         "engagement": {
           "replies": 1272,
           "reblogs": 3647,
-          "likes": 14375
+          "likes": 14375,
+          "upvotes": null,
+          "downvotes": null
         },
         "language": null,
         "sensitive": false,
@@ -13935,7 +13975,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "previewUrl": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/files/116/936/996/952/219/927/small/0ffeda9e1e02a6aa.png",
             "description": null
           }
-        ]
+        ],
+        "links": []
       }
     ]
   },

@@ -182,7 +182,8 @@ export function creditLabel(
     (e.slug === "twitter-community-tweets" ||
       e.slug === "threads-user-posts" ||
       e.slug === "threads-search" ||
-      e.slug === "threads-search-users") &&
+      e.slug === "threads-search-users" ||
+      e.slug === "truth-social-user-posts") &&
     e.creditsPerResult
   ) {
     const unit = e.credits === 1 ? "credit" : "credits";
@@ -1590,7 +1591,19 @@ const LINKEDIN: Spec[] = [
     ],
   },
   { slug: "linkedin-post-details", name: "LinkedIn Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/linkedin/post-details", credits: 1 , tagline: "Get a LinkedIn post — text, author, reactions, and comments count as structured JSON." },
-  { slug: "linkedin-post-transcript", name: "LinkedIn Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/linkedin/post-transcript", credits: 1 },
+  {
+    slug: "linkedin-post-transcript",
+    name: "LinkedIn Post Transcript API",
+    shortName: "Post Transcript",
+    category: "transcript",
+    method: "GET",
+    path: "/v1/linkedin/post-transcript",
+    credits: 1,
+    tagline:
+      "LinkedIn post text as a transcript — paragraph transcriptSegments (not speech-to-text). Flat 1 credit.",
+    longDescription:
+      "Paste a LinkedIn post/activity URL and get the public post body as structured text: full transcript, wordCount, author, publishedAt, and transcriptSegments split on blank-line paragraphs (including LinkedIn NBSP blank lines). This is post-text extraction, not video ASR — start/duration/timestamp are estimated reading cues (~180 wpm) for ordering blocks. Flat 1 credit.",
+  },
   {
     slug: "linkedin-company-posts",
     name: "LinkedIn Company Posts API",
@@ -1903,6 +1916,9 @@ const SNAPCHAT: Spec[] = [
   { slug: "snapchat-user-profile", name: "Snapchat User Profile API", shortName: "User Profile", category: "channel", method: "GET", path: "/v1/snapchat/user-profile", credits: 1, tagline: "Public Snapchat profile — subscribers, highlights with full snap lists, Spotlight engagement, and related accounts. Flat 1 credit.", longDescription: "Pass a Snapchat username or profile URL and get the public profile as clean JSON: display name, bio, human-readable category, numeric subscriberCount, badge/verified, avatar + hero image, snapcode, website, businessProfileId, and account createdAt. Curated highlights include every snap's mediaUrl and timestamp (not just the first). Spotlight highlights carry video metadata plus engagement (views/shares/comments). Also returns the active story snap list and related accounts. Flat 1 credit." },
 ];
 
+const TRUTH_AUTH_LIMIT =
+  "As of late 2025, Truth Social only lets you view public profiles/posts of prominent users (e.g. Trump, Vance) without authentication; most other accounts require auth and will 404 here.";
+
 const TRUTH_SOCIAL: Spec[] = [
   {
     slug: "truth-social-profile",
@@ -1912,12 +1928,51 @@ const TRUTH_SOCIAL: Spec[] = [
     method: "GET",
     path: "/v1/truth-social/profile",
     credits: 1,
-    tagline: "Public Truth Social profile — stats, bot/private flags, static media. Flat 1 credit.",
+    tagline:
+      "Prominent public Truth Social profiles — locked/bot/group flags, fields[], static media. Flat 1 credit.",
     longDescription:
-      "Pass a Truth Social @username or profile URL and get the public account as clean JSON: display name, HTML-stripped bio, avatar/banner plus avatarStatic/headerStatic, verified/bot/isPrivate/group, discoverable, followers/following/postCount, location/website, createdAt/lastStatusAt, emojis[], and profile fields[]. Important limitation: as of late 2025 Truth Social typically only exposes public profiles/posts for prominent accounts without login — most other accounts require auth and return 404 here. Flat 1 credit.",
+      `Pass a Truth Social @username or profile URL and get the public account as clean JSON: display name, HTML-stripped bio, avatar/banner plus avatarStatic/headerStatic, verified/bot/locked (+ isPrivate alias)/group, discoverable, followers/following/postCount, location/website, createdAt, ISO lastStatusAt, emojis[], and profile fields[] with verifiedAt for confirmed links. ${TRUTH_AUTH_LIMIT} Flat 1 credit.`,
+    delivers: [
+      "locked / bot / group classification flags",
+      "fields[] with verifiedAt for confirmed profile links",
+      "HTML-stripped bio + static avatar/banner URLs",
+      "Honest prominent-only access limit (most accounts 404)",
+    ],
   },
-  { slug: "truth-social-user-posts", name: "Truth Social User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/truth-social/user-posts", credits: 17, creditsPerResult: 0.85 },
-  { slug: "truth-social-post", name: "Truth Social Post API", shortName: "Post", category: "details", method: "GET", path: "/v1/truth-social/post", credits: 5 , tagline: "Get a Truth Social post — text, author, and engagement fields as structured JSON." },
+  {
+    slug: "truth-social-user-posts",
+    name: "Truth Social User Posts API",
+    shortName: "User Posts",
+    category: "list",
+    method: "GET",
+    path: "/v1/truth-social/user-posts",
+    credits: 2,
+    creditsPerResult: 0.85,
+    tagline:
+      "Recent Truths from a prominent public account — cursor, links[], top-level author. 2 credits native.",
+    longDescription:
+      `Pass a Truth Social @username or profile URL and get recent public posts as clean JSON. Full author{} once at the top (same shape as Profile); each post keeps a slim author {id,username,displayName,avatar,verified}. text preserves real URLs (Truth Social <span> soft-wraps are not turned into spaces) and links[] lists authoritative <a href> targets. Also: engagement (replies/reblogs/likes/upvotes/downvotes), card link previews, media.meta (width/height/duration/blurhash), externalVideoId → Rumble when present, nextCursor/hasMore. Max limit 80 (upstream page ~40 — page with cursor). ${TRUTH_AUTH_LIMIT} Native path flat 2 credits; Apify fallback ~0.85/post (min 2).`,
+    delivers: [
+      "Top-level author{} once — no 80× repeated profile blobs",
+      "links[] from <a href> (usable URLs, not span-broken text)",
+      "externalVideoId bridge to Captapi Rumble endpoints",
+      "Cursor pagination (nextCursor / hasMore)",
+      "Honest prominent-only access limit",
+    ],
+  },
+  {
+    slug: "truth-social-post",
+    name: "Truth Social Post API",
+    shortName: "Post",
+    category: "details",
+    method: "GET",
+    path: "/v1/truth-social/post",
+    credits: 1,
+    tagline:
+      "One Truth — text, links[], card, media.meta, externalVideoId. Flat 1 credit.",
+    longDescription:
+      `Pass a Truth Social post URL or numeric ID and get the public status as clean JSON: text with unbroken URLs, links[] from <a href>, full author{}, engagement (incl. upvotes/downvotes), card link preview, media[] with meta/durationSeconds, externalVideoId when the clip is on Rumble. ${TRUTH_AUTH_LIMIT} Flat 1 credit.`,
+  },
 ];
 
 const KICK: Spec[] = [
@@ -2482,7 +2537,8 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "truth_social",
     name: "Truth Social",
-    blurb: "Public Truth Social profiles/posts for prominent accounts (most others require auth).",
+    blurb:
+      "Prominent public Truth Social profiles/posts only — as of late 2025 most accounts require auth and will 404. Flat 1 credit on profile/post.",
     icon: "threads",
     color: "text-red-700",
     exampleUrl: "https://truthsocial.com/@realDonaldTrump",
@@ -2735,9 +2791,9 @@ export const AGENT_ROUTING_EXAMPLES: AgentRoutingExample[] = [
       "Rumble channel videos",
       "Monitor emerging social platforms",
     ],
-    prefer: "Use platform-specific Truth Social, Kick, or Rumble endpoints instead of generic web search.",
+    prefer: "Use Truth Social endpoints only for prominent public accounts — most handles require auth and 404.",
     endpointSlug: "truth-social-user-posts",
-    why: "Fetches public Truth Social posts for monitoring and research workflows.",
+    why: "Fetches public Truths for prominent accounts that Truth Social still exposes without login.",
   },
 ];
 
@@ -3628,7 +3684,17 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "snapchat-user-profile": [up(SNAPCHAT_PROFILE)],
   // Truth Social / Kick / Amazon / Age-Gender
   "truth-social-profile": [up(TRUTH_PROFILE)],
-  "truth-social-user-posts": [up(TRUTH_PROFILE), lp(20, 80), CURSOR],
+  "truth-social-user-posts": [
+    up(TRUTH_PROFILE),
+    {
+      name: "limit",
+      type: "integer",
+      required: false,
+      description:
+        "Max posts to return (default 20, max 80). Capped at 80 because Truth Social's statuses page is ~40 items — use nextCursor for more pages. Native path is flat 2 credits.",
+    },
+    CURSOR,
+  ],
   "truth-social-post": [up(TRUTH_POST)],
   "kick-clip": [up(KICK_CLIP), lpFlat(30, 100, 1)],
   "amazon-shop-page": [
@@ -4982,7 +5048,7 @@ export function platformFaqs(group: PlatformGroup): FaqItem[] {
 /** Human descriptions for well-known response fields. */
 const FIELD_DESCS: Record<string, string> = {
   // Identity / linking
-  platform: "Platform identifier (e.g. youtube, instagram).",
+  platform: "Platform identifier for this response (matches the endpoint's platform).",
   id: "Stable platform ID for the item.",
   url: "Canonical URL of the item.",
   uri: "Platform URI for the item.",
@@ -5008,6 +5074,13 @@ const FIELD_DESCS: Record<string, string> = {
   totalClipsCount: "Total Reels/clips count when Instagram exposes it.",
   hasClips: "Whether the account has Reels/clips.",
   isPrivate: "Whether the account is private.",
+  locked: "Whether the account is locked / follow-gated (Mastodon locked).",
+  bot: "Whether the account is marked as a bot.",
+  group: "Whether the account is a group account.",
+  acct: "Federation handle (may differ from username for remote accounts).",
+  lastStatusAt: "When the account last posted (ISO-8601 UTC).",
+  emojis: "Custom emoji shortcodes used in the display name ({shortcode, url, staticUrl}).",
+  fields: "Profile metadata rows ({name, value, verifiedAt}) — verified links land here.",
   isBusinessAccount: "Whether the account is a business account.",
   isProfessionalAccount: "Whether the account is a professional (creator/business) account.",
   isMemorialized: "Whether the account is memorialized.",
@@ -5075,7 +5148,7 @@ const FIELD_DESCS: Record<string, string> = {
   proUnlimited: "Whether the account has SoundCloud Pro Unlimited.",
   pro: "Whether the account has SoundCloud Pro.",
   curator: "Who created/cut the Twitch clip (distinct from the broadcaster channel).",
-  channel: "Channel or broadcaster object for this item (shape depends on the endpoint).",
+  channel: "Channel name or channel object — shape depends on the endpoint (see that page's field notes).",
   videoQualities: "Available clip MP4 qualities ({quality, frameRate, url}).",
   playbackAccessToken: "Twitch playback token ({signature, value, expires, expiresAt}).",
   videoOffsetSeconds: "Seconds into the source VOD where the clip starts.",
@@ -5129,8 +5202,7 @@ const FIELD_DESCS: Record<string, string> = {
   text: "Text content.",
   description: "Description text.",
   caption: "Post or creative caption when the platform exposes one.",
-  publishedAt:
-    "Publish date (ISO 8601). On YouTube list cards that only expose relative labels (e.g. \"1 year ago\"), this is an approximate timestamp derived from that label — see publishedTimeText for the original string.",
+  publishedAt: "Publish date (ISO 8601) when the platform exposes an absolute timestamp.",
   publishedTimeText: "Original relative publish label from the platform when an exact timestamp was not available (e.g. \"1 year ago\").",
   totalVideos: "Total videos in the playlist (full size). Differs from totalReturned, which is this response's page length.",
   viewCountApproximate:
@@ -5216,10 +5288,9 @@ const FIELD_DESCS: Record<string, string> = {
   topics: "Detected topics and themes.",
   nsfw: "Whether the content is marked NSFW.",
   sensitive: "Whether the content is flagged sensitive.",
-  isLive: "Whether the account/channel is currently live. For TikTok Live, true only when status === 2 — a non-empty room does not mean live.",
-  streamQualities:
-    "Parsed TikTok live pull qualities ({quality, codec, resolution, bitrate, flv, hls, cmaf, dash, lls}). Prefer hls/cmaf for browsers — FLV is not web-playable. Unwrapped from TikTok's nested stream_data JSON.",
-  streams: "TikTok live pull URLs keyed by quality (hd/sd/ld/origin/ao/…); h264 preferred when both codecs exist.",
+  isLive: "Whether the item or channel is currently live.",
+  streamQualities: "Parsed live stream qualities when the endpoint exposes a quality ladder.",
+  streams: "Playable stream rows or quality-keyed pull URLs — shape depends on the endpoint.",
   liveSubOnly: "Whether the TikTok live is subscribers-only.",
   gameTagId: "TikTok live game category id when the room is a gaming broadcast (0 / omitted when not).",
   hashTagId: "TikTok live topic/hashtag category id when present.",
@@ -5290,7 +5361,7 @@ const FIELD_DESCS: Record<string, string> = {
   feedbackId: "Facebook feedback id for the post (useful for comments threading).",
   downloadUrl: "CDN media URL when present (not a dedicated download API).",
   noWatermarkUrl: "Watermark-free variant of the video URL.",
-  embedUrl: "Embed page URL — load it directly in an <iframe src>.",
+  embedUrl: "Platform embed URL when a real embed id is known. Do not invent from a page/permalink id.",
   animatedPreviewUrl: "Storyboard strip / animated preview image for a VOD.",
   brandName: "Advertiser / brand name when Creative Center exposes one.",
   ctrTier: "CTR performance band (e.g. top_10%, top_25%, below_50%).",
@@ -5309,7 +5380,8 @@ const FIELD_DESCS: Record<string, string> = {
   photos: "Photo URLs attached to the item.",
 
   // Duration
-  duration: "Length in seconds (alias of durationSeconds on song-details).",
+  duration: "Duration when present — prefer durationSeconds (number) and durationText on endpoints that expose both.",
+  durationText: "Human-readable duration (e.g. 1:26:25).",
   durationMs: "Length in milliseconds.",
   durationFormatted: "Human-readable duration.",
   start: "Start time in seconds.",
@@ -5318,11 +5390,9 @@ const FIELD_DESCS: Record<string, string> = {
 
   // Engagement
   engagement: "Engagement metrics for the item.",
-  views:
-    "On Instagram Reels: video_view_count (reach-style) when exposed; otherwise falls back to total plays. Not the same as plays — the gap can be ~2×.",
+  views: "View count when the platform exposes one.",
   viewCount: "View count.",
-  plays:
-    "On Instagram Reels: total play count including replays (video_play_count / play_count). Often higher than views. Instagram-only analytics should use viewsInstagram.",
+  plays: "Play count when the platform exposes one (may include replays).",
   viewsInstagram:
     "Instagram-only play count (excludes Facebook cross-post plays). Prefer this for Instagram performance reports.",
   viewsFacebook: "Facebook cross-post play count when Instagram exposes the split.",
@@ -5567,10 +5637,18 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   "tiktok-live": {
     status:
       "TikTok liveRoom/user status enum. 2 = currently live (isLive true). Other codes (commonly 4) mean the last room payload is ended/stale — still may include title, enter counts, and pull URLs.",
+    isLive: "true only when status === 2 — a non-empty room payload does not mean the creator is live.",
+    streamQualities:
+      "Parsed TikTok live pull qualities ({quality, codec, resolution, bitrate, flv, hls, cmaf, dash, lls}). Prefer hls/cmaf for browsers — FLV is not web-playable.",
+    streams: "TikTok live pull URLs keyed by quality (hd/sd/ld/origin/ao/…); h264 preferred when both codecs exist.",
   },
   "tiktok-live-info": {
     status:
       "TikTok liveRoom/user status enum. 2 = currently live (isLive true). Other codes (commonly 4) mean the last room payload is ended/stale — still may include title, enter counts, and pull URLs.",
+    isLive: "true only when status === 2 — a non-empty room payload does not mean the creator is live.",
+    streamQualities:
+      "Parsed TikTok live pull qualities ({quality, codec, resolution, bitrate, flv, hls, cmaf, dash, lls}). Prefer hls/cmaf for browsers — FLV is not web-playable.",
+    streams: "TikTok live pull URLs keyed by quality (hd/sd/ld/origin/ao/…); h264 preferred when both codecs exist.",
   },
   "tiktok-profile-region": {
     videos: "Total public video count on the profile (integer). Not a typed media asset list.",
@@ -5720,21 +5798,146 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "youtube-search": {
     channel: "YouTube channel object for the result when present.",
+    publishedAt:
+      "Publish time as ISO-8601 when YouTube exposes an absolute timestamp; approximate when derived from a relative label — see publishedTimeText.",
   },
   "youtube-playlist": {
     channel: "YouTube channel that owns the playlist.",
   },
   "youtube-playlist-videos": {
     channel: "YouTube channel for the playlist/video when present.",
+    publishedAt:
+      "ISO-8601 when available; approximate from relative labels on list cards — see publishedTimeText.",
+  },
+  "youtube-channel-videos": {
+    publishedAt:
+      "ISO-8601 when available; approximate from relative labels on list cards — see publishedTimeText.",
+  },
+  "youtube-channel-shorts": {
+    publishedAt:
+      "ISO-8601 when available; approximate from relative labels on list cards — see publishedTimeText.",
+  },
+  "instagram-channel-reels": {
+    views:
+      "video_view_count (reach-style) when exposed; otherwise falls back to total plays. Not the same as plays — the gap can be ~2×.",
+    plays:
+      "Total play count including replays (video_play_count). Often higher than views. Prefer viewsInstagram for Instagram-only reports.",
+  },
+  "instagram-reels-search": {
+    views:
+      "video_view_count (reach-style) when exposed; otherwise falls back to total plays. Not the same as plays — the gap can be ~2×.",
+    plays:
+      "Total play count including replays (video_play_count). Often higher than views. Prefer viewsInstagram for Instagram-only reports.",
+  },
+  "instagram-details": {
+    views:
+      "video_view_count (reach-style) when exposed; otherwise falls back to total plays. Not the same as plays.",
+    plays: "Total play count including replays when Instagram exposes it.",
+  },
+  "tiktok-song-details": {
+    duration: "Alias of durationSeconds on this endpoint (length in seconds).",
+    durationSeconds: "Track length in seconds.",
   },
   "rumble-video-details": {
-    channel: "Rumble channel object for the video.",
+    channel: "Channel display name (string), e.g. The Dan Bongino Show — not an object.",
+    embedUrl:
+      "Real Rumble embed URL (/embed/{embedId}/). embedId is often different from the page permalink id — never invent from id alone.",
+    embedId: "Rumble's player embed id (may differ from the /v… page id).",
+    durationSeconds: "Length in seconds (integer).",
+    durationText: "Human clock duration (e.g. 1:26:25).",
+    duration: "Legacy alias of durationText on this endpoint — prefer durationSeconds for math.",
+    type: 'Content kind: "video" | "short" | "live".',
+    likes: "Rumble upvotes when the vote UI is present; null when unknown (never invent 0).",
+    dislikes: "Rumble downvotes when present; null when unknown.",
+    comments: "Public comment count when Rumble exposes it; null when unknown.",
+    views: "View count from JSON-LD / page chrome.",
+    streams: "Playable mp4/hls rows ({url, type, quality}) for this video.",
   },
   "rumble-channel-videos": {
-    channel: "Rumble channel object.",
+    channel: "Top-level: channel slug you queried. Per-video channel is the display name string.",
+    embedUrl:
+      "Present only when Rumble exposes a real embed id. Omitted when unknown — page permalink ids are not embed ids.",
+    durationSeconds: "Length in seconds (integer).",
+    durationText: "Human clock duration (e.g. 1:30:56).",
+    type: 'Content kind: "video" | "short" | "live" (from /shorts/ URL or isLive).',
+    likes: "Upvotes when the channel scrape exposes rumbleVotes; null when unknown.",
+    views: "View count for the upload.",
+    streams: "Playable stream rows when the channel scrape includes media URLs.",
   },
   "rumble-search": {
-    channel: "Rumble channel for the result when present.",
+    channel: "Channel display name string when present.",
+    durationSeconds: "Length in seconds when known.",
+    durationText: "Human clock duration when known.",
+    type: 'Content kind: "video" | "short" | "live".',
+  },
+  "linkedin-post-transcript": {
+    transcript: "Full LinkedIn post body text (not speech-to-text from a video).",
+    transcriptSegments:
+      "Paragraph blocks split on blank lines (incl. NBSP-only gaps). start/duration/timestamp are estimated reading cues (~180 wpm), not media ASR timestamps.",
+    segments: "Number of paragraph segments in transcriptSegments.",
+    wordCount: "Whitespace-separated word count of the full transcript.",
+    duration: "Per-segment estimated reading seconds (~180 wpm) — not video duration.",
+    start: "Per-segment cumulative estimated reading offset in seconds.",
+    timestamp: "MM:SS (or HH:MM:SS) for the segment's estimated reading offset.",
+    author: "Post author {name, url, headline?}. url may be derived from /posts/{vanity}_…ugcPost-… when LinkedIn omits it.",
+  },
+  "truth-social-profile": {
+    platform: 'Always "truth_social" on this endpoint.',
+    locked: "Whether the account is locked (follow approval required). Same signal as isPrivate.",
+    isPrivate: "Alias of locked for Captapi consistency with Instagram/Threads.",
+    bot: "Whether Truth Social marks the account as a bot — filter before creator metrics.",
+    group: "Whether this is a Truth Social group account (not a personal creator).",
+    location: "Profile location string when Truth Social exposes one; null when empty.",
+    acct: "Mastodon acct handle (local username, or user@domain for remote accounts).",
+    lastStatusAt:
+      "Last status day from Truth Social, normalized to ISO-8601 UTC midnight (e.g. 2026-08-02T00:00:00.000Z). Upstream often sends YYYY-MM-DD only.",
+    fields:
+      "Profile label/value rows ({name, value, verifiedAt}). verifiedAt is set when Truth Social confirmed the link; empty array when none.",
+    emojis: "Custom emojis in the display name ({shortcode, url, staticUrl}).",
+  },
+  "truth-social-user-posts": {
+    platform: 'Always "truth_social" on this endpoint (posts[].platform).',
+    author:
+      "Top-level: full profile card (same shape as Profile). On each post: slim {id, username, displayName, avatar, verified} only — stats live once at the top.",
+    text:
+      "Plain text from the status HTML. <a href> is replaced by the real URL so Truth Social span soft-wraps do not insert spaces into links.",
+    links: "Authoritative http(s) URLs from <a href> attributes (deduped). Prefer this over regex on text.",
+    language:
+      "Language code from Truth Social/Mastodon auto-detect — often wrong on short posts (e.g. fy for English). Not a Captapi detection.",
+    locked: "Top-level author locked flag when the account payload is rich.",
+    isPrivate: "Alias of author.locked on the top-level author card.",
+    bot: "Top-level author bot flag when present.",
+    group: "Top-level author group flag when present.",
+    lastStatusAt:
+      "Top-level author's last status time as ISO-8601 UTC (date-only upstream → midnight Z).",
+    fields: "Top-level author profile fields ({name, value, verifiedAt}).",
+    upvotes: "Truth Social upvotes (separate from favourites/likes) when exposed.",
+    downvotes: "Truth Social downvotes when exposed.",
+    card: "Link preview card ({url, title, description, image, type, providerName}) when the status has one.",
+    externalVideoId:
+      "Rumble video id when Truth Social hosts the clip on Rumble — pass to /v1/rumble/video-details.",
+    previewUrl: "Media thumbnail URL, or null when Truth Social returns the missing.png placeholder.",
+  },
+  "truth-social-post": {
+    platform: 'Always "truth_social" on this endpoint.',
+    text:
+      "Plain text from the status HTML with unbroken URLs (href preferred over span-broken visible text).",
+    links: "Authoritative http(s) URLs from <a href> attributes (deduped).",
+    language:
+      "Language code from Truth Social/Mastodon auto-detect — unreliable on short posts. Not Captapi-detected.",
+    locked: "Author locked flag when the embedded account is rich.",
+    isPrivate: "Alias of author.locked.",
+    bot: "Author bot flag when present.",
+    group: "Author group flag when present.",
+    lastStatusAt:
+      "Author's last status time as ISO-8601 UTC (date-only upstream → midnight Z).",
+    fields: "Author profile fields ({name, value, verifiedAt}) when present.",
+    upvotes: "Truth Social upvotes (separate from favourites/likes) when exposed.",
+    downvotes: "Truth Social downvotes when exposed.",
+    card: "Link preview card when the status has one.",
+    externalVideoId:
+      "Rumble video id when present — bridge to Captapi's Rumble video-details / comments.",
+    previewUrl: "Media thumbnail URL, or null for Truth Social's missing.png placeholder.",
   },
   "youtube-community-posts": {
     likes:
@@ -6041,13 +6244,27 @@ const FIELD_DESC_STICKY_KEYS = new Set([
   "videos",
   "likes",
   "verified",
+  "duration",
   "durationSeconds",
+  "durationText",
   "images",
   "status",
   "region",
   "mediaType",
   "channel",
   "category",
+  "views",
+  "plays",
+  "isLive",
+  "publishedAt",
+  "embedUrl",
+  "streams",
+  "streamQualities",
+  "locked",
+  "bot",
+  "group",
+  "fields",
+  "lastStatusAt",
 ]);
 
 /**
@@ -6083,7 +6300,9 @@ export function lintFieldDescPlatformBleed(): string[] {
         if (
           field.name === "region" &&
           ep.platform === "tiktok_shop" &&
-          /AI-inferred|regionSource|creator'?s country/i.test(field.desc)
+          ((/\bAI-inferred\b/i.test(field.desc) && !/not\s+AI-inferred/i.test(field.desc)) ||
+            (/\bregionSource\b/i.test(field.desc) && !/no regionSource/i.test(field.desc)) ||
+            (/creator'?s country/i.test(field.desc) && !/not a creator/i.test(field.desc)))
         ) {
           errors.push(
             `${ep.slug}.region: TikTok Shop region must describe the request market echo, not profile-region AI inference — "${field.desc.slice(0, 140)}"`,
@@ -6330,6 +6549,7 @@ const PROFILE_CHANNEL_SLUGS = new Set([
   "linkedin-company",
   "github-user",
   "snapchat-user-profile",
+  "truth-social-profile",
   "komi-page",
   "pillar-page",
   "linkbio-page",
@@ -6545,6 +6765,52 @@ const SLUG_USE_CASES: Record<string, UseCase[]> = {
     { title: "Venue Calendar", desc: "Pull a Page's upcoming shows with sortable startDate (year included)." },
     { title: "Tour Tracking", desc: "Monitor Madison Square Garden / club pages without scraping HTML." },
   ],
+  "truth-social-profile": [
+    {
+      title: "Public-Figure Enrichment",
+      desc: "Pull stats and locked/bot/group flags for prominent accounts that Truth Social still exposes without login.",
+    },
+    {
+      title: "Verified-Link Capture",
+      desc: "Read fields[].verifiedAt for confirmed profile links when the account publishes them.",
+    },
+    {
+      title: "Auth-Gated Awareness",
+      desc: "Expect 404 for non-prominent handles — Truth Social gates most profiles behind login.",
+    },
+  ],
+  "truth-social-user-posts": [
+    {
+      title: "Public-Figure Monitoring",
+      desc: "Track posting cadence for prominent Truth Social accounts that remain public.",
+    },
+    {
+      title: "Link Extraction",
+      desc: "Use links[] (and card.url) for real destinations — not span-broken text URLs.",
+    },
+    {
+      title: "Rumble Handoff",
+      desc: "When externalVideoId is set, call Captapi Rumble video-details for streams and comments.",
+    },
+    {
+      title: "Auth-Gated Awareness",
+      desc: "Most non-prominent handles require auth and 404 — not a general creator catalog.",
+    },
+  ],
+  "truth-social-post": [
+    {
+      title: "Single-Truth Lookup",
+      desc: "Resolve a post URL/ID to text, links[], author, and engagement when still public.",
+    },
+    {
+      title: "Rumble Handoff",
+      desc: "externalVideoId bridges into Captapi Rumble endpoints (SC has no Rumble).",
+    },
+    {
+      title: "Auth-Gated Awareness",
+      desc: "Most non-prominent posts require auth and return 404 — same platform limit as profile.",
+    },
+  ],
   "youtube-video-sponsors": [
     { title: "Sponsorship Detection", desc: "Surface sponsor segments disclosed on a YouTube video." },
     { title: "Brand Safety", desc: "See which brands appear alongside a creator's content." },
@@ -6619,7 +6885,6 @@ const CHANNEL_CATALOG_LIST_SLUGS = new Set([
   "soundcloud-artist-tracks",
   "spotify-podcast-episodes",
   "kwai-user-posts",
-  "truth-social-user-posts",
   "github-repositories",
   "github-followers",
   "github-following",
