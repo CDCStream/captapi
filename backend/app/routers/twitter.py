@@ -21,6 +21,7 @@ from app.services import twitter_native as native
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import first_present, safe_int, safe_list, safe_str, strip_empty
+from app.utils.text_transcript import TIMING_NONE, paragraph_text_segments
 from app.utils.url import (
     detect_url_platform,
     extract_tweet_id,
@@ -688,14 +689,18 @@ async def twitter_transcript(
         base_credits=CREDIT_TWEET_DETAILS,
     ) as ctx:
         def _payload(text: str, tweet_url: str, tid: str | None, author: dict[str, Any] | None, published: str | None) -> dict[str, Any]:
+            # Tweet text only (not Whisper/captions) — null timings, not 0/"00:00".
+            transcript, segments, read_secs = paragraph_text_segments(text)
             return {
                 "platform": "twitter",
                 "url": tweet_url or url,
                 "tweetId": tid,
-                "transcript": text,
-                "transcriptSegments": [{"text": text, "start": 0, "duration": 0, "timestamp": "00:00"}],
-                "wordCount": len(text.split()),
-                "segments": 1,
+                "transcript": transcript,
+                "timingSource": TIMING_NONE,
+                "estimatedReadSeconds": read_secs,
+                "transcriptSegments": segments,
+                "wordCount": len(transcript.split()),
+                "segments": len(segments),
                 "author": _author_transcript(author),
                 "publishedAt": published,
             }
@@ -724,7 +729,7 @@ async def twitter_transcript(
 
         data = await cached_or_run(
             endpoint="twitter.transcript",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

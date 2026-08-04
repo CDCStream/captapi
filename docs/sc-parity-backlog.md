@@ -1,6 +1,6 @@
 ﻿# SC parity backlog (Captapi)
 
-Last updated: 2026-08-04 (Truth Social URL/links/author/Rumble bridge). Next: Cursor pattern copy from truth-social-user-posts · TikTok Shop relatedVideos.
+Last updated: 2026-08-04 (text transcript timingSource=none contract). Next: Cursor pattern copy from truth-social-user-posts · TikTok Shop relatedVideos.
 
 Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` · `api-examples.generated.ts`) · ship code + refresh snapshot **with `ok: true`** or `gen_examples.py` skips the slug and the page looks broken.
 
@@ -48,6 +48,7 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - [x] Rumble: real embedId only (no permalink fabricate); durationSeconds+durationText; type video|short|live; FIELD_DESCS platform bleed sealed into SLUG_FIELD_DESCS
 - [x] Truth Social (3 endpoints): prominent-only auth warning + honest use cases; `locked`/`bot`/`group`/`location`/`acct`/`emojis`/`fields[].verifiedAt`; ISO `lastStatusAt`; profile/post flat 1 credit; user-posts 2 native (~0.85 Apify); slug field docs
 - [x] Truth Social posts: HTML→text no longer breaks span-soft-wrapped URLs; `links[]` from `<a href>`; top-level `author{}` + slim per-post author; `externalVideoId`→Rumble; upvotes/downvotes; `card`; `media.meta`/`durationSeconds`; `missing.png`→null; limit-80 docs; use cases not video-library boilerplate
+- [x] Text transcripts (`linkedin/post-transcript`, `reddit/post-transcript`, `twitter/transcript`): `timingSource=none`, null `start`/`duration`/`timestamp`, segment `index`/`wordCount`/`charStart`/`charEnd`, top-level `estimatedReadSeconds` @ 200 wpm
 - [ ] **Cursor pattern rollout** — reference ready on `truth-social-user-posts` (`nextCursor` + `hasMore` + `cursor` param + honest null docs). Effort dropped to Low: copy this shape to ~35 list endpoints that still invent offsets or omit hasMore.
 
 ## Promise-gap taxonomy (do not conflate)

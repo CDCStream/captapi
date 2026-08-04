@@ -1171,7 +1171,19 @@ const TWITTER: Spec[] = [
       "Flat 1 credit per call",
     ],
   },
-  { slug: "twitter-transcript", name: "Twitter/X Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/twitter/transcript", credits: 1 },
+  {
+    slug: "twitter-transcript",
+    name: "Twitter/X Transcript API",
+    shortName: "Transcript",
+    category: "transcript",
+    method: "GET",
+    path: "/v1/twitter/transcript",
+    credits: 1,
+    tagline:
+      "Tweet text as a transcript — timingSource none (not Whisper). Flat 1 credit.",
+    longDescription:
+      "Paste a public tweet URL and get the tweet body as structured text. timingSource is always \"none\" today — syndication text only, not Whisper/captions. Segment start/duration/timestamp stay null (keys kept). Do not branch on \"captions\"; nothing emits it on this endpoint yet. Paragraph-split transcriptSegments include index, wordCount, charStart/charEnd; estimatedReadSeconds is a top-level 200 wpm estimate — never inside duration. Flat 1 credit.",
+  },
   {
     slug: "twitter-profile",
     name: "Twitter/X Profile API",
@@ -1291,7 +1303,19 @@ const REDDIT: Spec[] = [
     longDescription:
       "Fetch comments on a Reddit post as a flat list with depth and parentId (easy to store, rebuild the tree when you need it). publishedAt is ISO 8601 UTC. Each comment includes score/downs and authorFullname (t2_…) when Reddit exposes them. The response also includes the parent post (title, score, upvoteRatio, subscriberCount) plus hasMore when more comments exist beyond the limit. Flat 2 credits per call. Max 500 comments per request.",
   },
-  { slug: "reddit-post-transcript", name: "Reddit Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/reddit/post-transcript", credits: 2 , tagline: "Get a Reddit post's discussion as readable text — title, body, and comments in one transcript-style payload. Flat 2 credits per call.", longDescription: "Paste a Reddit post URL and get the discussion as structured text: the post title and body plus comments flattened into a transcript-style response. This is discussion text, not speech-to-text from a video. Flat 2 credits per call." },
+  {
+    slug: "reddit-post-transcript",
+    name: "Reddit Post Transcript API",
+    shortName: "Post Transcript",
+    category: "transcript",
+    method: "GET",
+    path: "/v1/reddit/post-transcript",
+    credits: 2,
+    tagline:
+      "Reddit discussion as text — title/body/comments segments, timingSource none. Flat 2 credits.",
+    longDescription:
+      "Paste a Reddit post URL and get the discussion as structured text: title, body, and comments as transcriptSegments (speaker labeled). timingSource is always \"none\" today — discussion text has no caption track. Segment start/duration/timestamp stay null (keys kept). Do not branch on \"captions\"; nothing emits it here yet. Each segment has index, wordCount, charStart/charEnd into transcript. estimatedReadSeconds is a top-level 200 wpm estimate only — never inside duration. Flat 2 credits.",
+  },
   {
     slug: "reddit-search",
     name: "Reddit Search API",
@@ -1600,9 +1624,9 @@ const LINKEDIN: Spec[] = [
     path: "/v1/linkedin/post-transcript",
     credits: 1,
     tagline:
-      "LinkedIn post text as a transcript — paragraph transcriptSegments (not speech-to-text). Flat 1 credit.",
+      "LinkedIn post text as a transcript — paragraph segments, timingSource none. Flat 1 credit.",
     longDescription:
-      "Paste a LinkedIn post/activity URL and get the public post body as structured text: full transcript, wordCount, author, publishedAt, and transcriptSegments split on blank-line paragraphs (including LinkedIn NBSP blank lines). This is post-text extraction, not video ASR — start/duration/timestamp are estimated reading cues (~180 wpm) for ordering blocks. Flat 1 credit.",
+      "Paste a LinkedIn post/activity URL and get the public post body as structured text: transcript, wordCount, author, publishedAt, and transcriptSegments split on blank-line paragraphs (including NBSP gaps). timingSource is always \"none\" today (native and Apify) — no caption track or Whisper. Segment start/duration/timestamp stay null (keys kept for a stable schema). Do not branch on \"captions\"; nothing emits it on this endpoint yet. Each segment has index, wordCount, charStart/charEnd into transcript. estimatedReadSeconds is a single top-level 200 wpm estimate — never inside duration. Flat 1 credit.",
   },
   {
     slug: "linkedin-company-posts",
@@ -5872,14 +5896,46 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "linkedin-post-transcript": {
     transcript: "Full LinkedIn post body text (not speech-to-text from a video).",
+    timingSource:
+      'Always "none" on this endpoint today (native and Apify). "captions" is reserved for future cue support — do not branch on it; nothing emits it yet.',
+    estimatedReadSeconds: "Whole-transcript reading-time estimate at 200 wpm. Not per-segment duration.",
     transcriptSegments:
-      "Paragraph blocks split on blank lines (incl. NBSP-only gaps). start/duration/timestamp are estimated reading cues (~180 wpm), not media ASR timestamps.",
+      "Paragraph blocks for search/AI chunking. Each has index, wordCount, charStart/charEnd (transcript.slice(charStart,charEnd)===text). start/duration/timestamp are null.",
     segments: "Number of paragraph segments in transcriptSegments.",
     wordCount: "Whitespace-separated word count of the full transcript.",
-    duration: "Per-segment estimated reading seconds (~180 wpm) — not video duration.",
-    start: "Per-segment cumulative estimated reading offset in seconds.",
-    timestamp: "MM:SS (or HH:MM:SS) for the segment's estimated reading offset.",
+    index: "0-based segment order within transcriptSegments.",
+    charStart: "Start offset into transcript (transcript.slice(charStart, charEnd) === text).",
+    charEnd: "End offset into transcript (exclusive).",
+    duration: "Always null on this endpoint today (text extraction — no cue length).",
+    start: "Always null on this endpoint today (text extraction — no cue start).",
+    timestamp: "Always null on this endpoint today (text extraction — no cue clock).",
     author: "Post author {name, url, headline?}. url may be derived from /posts/{vanity}_…ugcPost-… when LinkedIn omits it.",
+  },
+  "reddit-post-transcript": {
+    timingSource:
+      'Always "none" today. "captions" is reserved — do not branch on it; nothing emits it yet.',
+    estimatedReadSeconds: "Whole-transcript reading-time estimate at 200 wpm. Not per-segment duration.",
+    transcriptSegments:
+      "Title / body / comment blocks with speaker. index/wordCount/charStart/charEnd for chunking; start/duration/timestamp are null.",
+    duration: "Always null on this endpoint today.",
+    start: "Always null on this endpoint today.",
+    timestamp: "Always null on this endpoint today.",
+    index: "0-based segment order.",
+    charStart: "Start offset into transcript (transcript.slice(charStart, charEnd) === text).",
+    charEnd: "End offset into transcript (exclusive).",
+  },
+  "twitter-transcript": {
+    timingSource:
+      'Always "none" today. "captions" is reserved — do not branch on it; nothing emits it yet.',
+    estimatedReadSeconds: "Whole-transcript reading-time estimate at 200 wpm. Not per-segment duration.",
+    transcriptSegments:
+      "Paragraph-split tweet text. index/wordCount/charStart/charEnd for chunking; start/duration/timestamp are null.",
+    duration: "Always null on this endpoint today.",
+    start: "Always null on this endpoint today.",
+    timestamp: "Always null on this endpoint today.",
+    index: "0-based segment order.",
+    charStart: "Start offset into transcript (transcript.slice(charStart, charEnd) === text).",
+    charEnd: "End offset into transcript (exclusive).",
   },
   "truth-social-profile": {
     platform: 'Always "truth_social" on this endpoint.',

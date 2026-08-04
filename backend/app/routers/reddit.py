@@ -22,6 +22,7 @@ from app.services import decodo_fetch
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import first_present, safe_float, safe_int, safe_str
+from app.utils.text_transcript import TIMING_NONE, finalize_text_segments
 from app.utils.url import (
     detect_url_platform,
     extract_reddit_post_id,
@@ -988,32 +989,34 @@ async def post_transcript(
                         detail="No transcript text available for this Reddit post",
                     ) from exc
                 raise
-            segments: list[dict[str, Any]] = []
-            parts: list[str] = []
+            # Discussion text only — no media timeline. Segment text must be an
+            # exact substring of transcript (charStart:charEnd == text).
+            raw_segments: list[dict[str, Any]] = []
             title = (post.get("title") or "").strip()
             body = (post.get("text") or "").strip()
             if title:
-                parts.append(f"Title: {title}")
-                segments.append({"speaker": "post", "text": title, "start": 0, "duration": 0, "timestamp": "00:00"})
+                raw_segments.append({"speaker": "post", "text": f"Title: {title}"})
             if body:
-                parts.append(body)
-                segments.append({"speaker": post.get("author") or "post", "text": body, "start": 0, "duration": 0, "timestamp": "00:00"})
+                raw_segments.append(
+                    {"speaker": post.get("author") or "post", "text": body}
+                )
             for c in comments:
                 text = (c.get("text") or "").strip()
                 if not text:
                     continue
                 speaker = c.get("author") or "comment"
-                line = f"{speaker}: {text}"
-                parts.append(line)
-                segments.append({"speaker": speaker, "text": text, "start": 0, "duration": 0, "timestamp": "00:00"})
-            transcript = "\n\n".join(parts).strip()
+                raw_segments.append({"speaker": speaker, "text": f"{speaker}: {text}"})
+            transcript = "\n\n".join(s["text"] for s in raw_segments).strip()
             if not transcript:
                 raise HTTPException(status_code=422, detail="No transcript text available for this Reddit post")
+            segments, read_secs = finalize_text_segments(transcript, raw_segments)
             return {
                 "platform": "reddit",
                 "url": post.get("url") or url,
                 "post": post,
                 "transcript": transcript,
+                "timingSource": TIMING_NONE,
+                "estimatedReadSeconds": read_secs,
                 "transcriptSegments": segments,
                 "wordCount": len(transcript.split()),
                 "segments": len(segments),
@@ -1022,7 +1025,7 @@ async def post_transcript(
 
         data = await cached_or_run(
             endpoint="reddit.post-transcript",
-            params={"url": url, "limit": limit, "v": 5},
+            params={"url": url, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

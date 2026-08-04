@@ -51,12 +51,24 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
     category: "fix",
+    title: "Text transcripts: timingSource none — no fake start/duration",
+    description:
+      "LinkedIn/Reddit/Twitter text transcript endpoints now set timingSource=\"none\" and leave segment start/duration/timestamp null (keys kept). Paragraph/discussion segmentation stays; each segment adds index, wordCount, charStart/charEnd. Reading time is only top-level estimatedReadSeconds at 200 wpm — never stuffed into duration. Same contract on linkedin/post-transcript, reddit/post-transcript, and twitter/transcript.",
+    items: [
+      "timingSource none + null cue fields (not 0 / 00:00)",
+      "index / wordCount / charStart / charEnd per segment",
+      "estimatedReadSeconds at top level (200 wpm)",
+      "LinkedIn + Reddit + Twitter text transcripts aligned",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
     title: "LinkedIn post-transcript: paragraph transcriptSegments",
     description:
-      "GET /v1/linkedin/post-transcript no longer returns the entire post body as one segment with duration 0. transcriptSegments splits on blank-line paragraphs (including LinkedIn NBSP-only gaps). start/duration/timestamp are estimated reading cues (~180 wpm) — this endpoint is post-text extraction, not video ASR. Personal ugcPost URLs also backfill author.url from /posts/{vanity}_… when LinkedIn omits it.",
+      "GET /v1/linkedin/post-transcript no longer returns the entire post body as one segment with duration 0. transcriptSegments splits on blank-line paragraphs (including LinkedIn NBSP-only gaps). Personal ugcPost URLs also backfill author.url from /posts/{vanity}_… when LinkedIn omits it.",
     items: [
       "Paragraph split for transcriptSegments (NBSP-safe)",
-      "Estimated reading cues instead of a single 00:00 blob",
       "author.url from ugcPost vanity when missing",
     ],
   },

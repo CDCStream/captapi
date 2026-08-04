@@ -4625,31 +4625,47 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "linkedin-post-transcript": {
     "platform": "linkedin",
     "url": "https://www.linkedin.com/posts/microsoft_the-most-meaningful-breakthroughs-happen-activity-7477715981667086336-x68i",
-    "transcript": "The most meaningful breakthroughs happen when technology is built with people in mind.\n \nThat was the message at Microsoft Build this month, where we announced a host of new tools to help developers build, dream and create. \n \nIn June’s edition of The Monthly Tech-In, we’re sharing stories from Build and beyond about the developers, founders and communities who are using AI to tackle real-world challenges, from helping creators protect their work to advancing more inclusive AI systems.\n \nRead more about the people and innovations who are shaping what's next:",
+    "transcript": "The most meaningful breakthroughs happen when technology is built with people in mind.\n \nThat was the message at Microsoft Build this month, where we announced a host of new tools to help developers build, dream and create. \n \nIn June’s edition of The Monthly Tech-In, we’re sharing stories from Build and beyond about the developers, founders and communities who are using AI to tackle real-world challenges, from helping creators protect their work to advancing more inclusive AI systems.\n \nRead more about the people and innovations who are shaping what's next:",
     "transcriptSegments": [
       {
         "text": "The most meaningful breakthroughs happen when technology is built with people in mind.",
-        "start": 0.0,
-        "duration": 4.333,
-        "timestamp": "00:00"
+        "index": 0,
+        "wordCount": 13,
+        "start": null,
+        "duration": null,
+        "timestamp": null,
+        "charStart": 0,
+        "charEnd": 86
       },
       {
         "text": "That was the message at Microsoft Build this month, where we announced a host of new tools to help developers build, dream and create.",
-        "start": 4.333,
-        "duration": 8.0,
-        "timestamp": "00:04"
+        "index": 1,
+        "wordCount": 24,
+        "start": null,
+        "duration": null,
+        "timestamp": null,
+        "charStart": 89,
+        "charEnd": 223
       },
       {
         "text": "In June’s edition of The Monthly Tech-In, we’re sharing stories from Build and beyond about the developers, founders and communities who are using AI to tackle real-world challenges, from helping creators protect their work to advancing more inclusive AI systems.",
-        "start": 12.333,
-        "duration": 13.333,
-        "timestamp": "00:12"
+        "index": 2,
+        "wordCount": 40,
+        "start": null,
+        "duration": null,
+        "timestamp": null,
+        "charStart": 227,
+        "charEnd": 490
       },
       {
         "text": "Read more about the people and innovations who are shaping what's next:",
-        "start": 25.666,
-        "duration": 4.0,
-        "timestamp": "00:25"
+        "index": 3,
+        "wordCount": 12,
+        "start": null,
+        "duration": null,
+        "timestamp": null,
+        "charStart": 493,
+        "charEnd": 564
       }
     ],
     "wordCount": 89,
@@ -4659,7 +4675,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "headline": "28,652,029 followers",
       "url": "https://www.linkedin.com/company/microsoft/posts"
     },
-    "publishedAt": "2026-07-04 13:19:24"
+    "publishedAt": "2026-07-04 13:19:24",
+    "timingSource": "none",
+    "estimatedReadSeconds": 27
   },
   "linkedin-profile": {
     "platform": "linkedin",
@@ -5517,47 +5535,69 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "nsfw": false,
       "thumbnail": null
     },
-    "transcript": "Title: Radiation exposure may become the biggest challenge for future Moon and Mars missions\n\n[removed]\n\nEffingWasps: Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme\n\nb407driver: Become? It has always been the greatest (unsolved) challenge.\n\nWaarm: The current biggest challenge is funding.\n\nAdmirable_Site_8337: “…..seems to receive little public discussion……”\n\nSigh………………\n\n………….\n\n…………\n\nLioraB: Line the ships with astrophage.",
+    "transcript": "Title: Radiation exposure may become the biggest challenge for future Moon and Mars missions\n\n[removed]\n\nEffingWasps: Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme\n\nb407driver: Become? It has always been the greatest (unsolved) challenge.\n\nWaarm: The current biggest challenge is funding.",
     "transcriptSegments": [
       {
         "speaker": "post",
-        "text": "Radiation exposure may become the biggest challenge for future Moon and Mars missions",
-        "start": 0,
-        "duration": 0,
-        "timestamp": "00:00"
+        "text": "Title: Radiation exposure may become the biggest challenge for future Moon and Mars missions",
+        "index": 0,
+        "wordCount": 14,
+        "start": null,
+        "duration": null,
+        "timestamp": null,
+        "charStart": 0,
+        "charEnd": 92
       },
       {
         "speaker": "Low-Mathematician137",
         "text": "[removed]",
-        "start": 0,
-        "duration": 0,
-        "timestamp": "00:00"
+        "index": 1,
+        "wordCount": 1,
+        "start": null,
+        "duration": null,
+        "timestamp": null,
+        "charStart": 94,
+        "charEnd": 103
       },
       {
         "speaker": "EffingWasps",
-        "text": "Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme",
-        "start": 0,
-        "duration": 0,
-        "timestamp": "00:00"
+        "text": "EffingWasps: Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme",
+        "index": 2,
+        "wordCount": 19,
+        "start": null,
+        "duration": null,
+        "timestamp": null,
+        "charStart": 105,
+        "charEnd": 233
       },
       {
         "speaker": "b407driver",
-        "text": "Become? It has always been the greatest (unsolved) challenge.",
-        "start": 0,
-        "duration": 0,
-        "timestamp": "00:00"
+        "text": "b407driver: Become? It has always been the greatest (unsolved) challenge.",
+        "index": 3,
+        "wordCount": 10,
+        "start": null,
+        "duration": null,
+        "timestamp": null,
+        "charStart": 235,
+        "charEnd": 308
       },
       {
         "speaker": "Waarm",
-        "text": "The current biggest challenge is funding.",
-        "start": 0,
-        "duration": 0,
-        "timestamp": "00:00"
+        "text": "Waarm: The current biggest challenge is funding.",
+        "index": 4,
+        "wordCount": 7,
+        "start": null,
+        "duration": null,
+        "timestamp": null,
+        "charStart": 310,
+        "charEnd": 358
       }
     ],
-    "wordCount": 67,
-    "segments": 7,
-    "commentsIncluded": 5
+    "wordCount": 51,
+    "segments": 5,
+    "commentsIncluded": 5,
+    "timingSource": "none",
+    "estimatedReadSeconds": 15
   },
   "reddit-search": {
     "query": "james webb",
@@ -14731,14 +14771,38 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "transcript": "Full steam ahead this week at @NASA 🚀\n\n🧑‍🚀 @Astro_Anil arrives at the ISS\n🪐 Dragonfly progress\n✈️ Future of autonomous flight\n🤝 70 Artemis Accords signatories\n\nHere's your NASA Minute! https://t.co/GAZ4sUqfbZ",
     "transcriptSegments": [
       {
-        "text": "Full steam ahead this week at @NASA 🚀\n\n🧑‍🚀 @Astro_Anil arrives at the ISS\n🪐 Dragonfly progress\n✈️ Future of autonomous flight\n🤝 70 Artemis Accords signatories\n\nHere's your NASA Minute! https://t.co/GAZ4sUqfbZ",
-        "start": 0,
-        "duration": 0,
-        "timestamp": "00:00"
+        "text": "Full steam ahead this week at @NASA 🚀",
+        "index": 0,
+        "wordCount": 8,
+        "start": null,
+        "duration": null,
+        "timestamp": null,
+        "charStart": 0,
+        "charEnd": 37
+      },
+      {
+        "text": "🧑‍🚀 @Astro_Anil arrives at the ISS\n🪐 Dragonfly progress\n✈️ Future of autonomous flight\n🤝 70 Artemis Accords signatories",
+        "index": 1,
+        "wordCount": 19,
+        "start": null,
+        "duration": null,
+        "timestamp": null,
+        "charStart": 39,
+        "charEnd": 158
+      },
+      {
+        "text": "Here's your NASA Minute! https://t.co/GAZ4sUqfbZ",
+        "index": 2,
+        "wordCount": 5,
+        "start": null,
+        "duration": null,
+        "timestamp": null,
+        "charStart": 160,
+        "charEnd": 208
       }
     ],
     "wordCount": 32,
-    "segments": 1,
+    "segments": 3,
     "author": {
       "username": "NASASpox",
       "displayName": "Bethany Stevens",
@@ -14746,7 +14810,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "verified": false,
       "profileImage": "https://pbs.twimg.com/profile_images/2030158374625759233/3fWyLDjS_normal.jpg"
     },
-    "publishedAt": "2026-07-17T21:06:08.000Z"
+    "publishedAt": "2026-07-17T21:06:08.000Z",
+    "timingSource": "none",
+    "estimatedReadSeconds": 10
   },
   "twitter-tweet-details": {
     "platform": "twitter",

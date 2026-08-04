@@ -1,30 +1,33 @@
-"""LinkedIn post-transcript paragraph segmentation."""
+"""Text-only transcript contract: null timings + char offsets."""
 
-from app.routers.linkedin import (
-    _author_url_from_post_url,
-    _paragraph_transcript_segments,
+from app.routers.linkedin import _author_url_from_post_url
+from app.utils.text_transcript import (
+    TIMING_NONE,
+    finalize_text_segments,
+    paragraph_text_segments,
 )
 
 
-def test_splits_blank_line_paragraphs_including_nbsp():
+def test_paragraph_segments_null_timings_and_offsets():
     text = (
         "First paragraph with enough words here.\n"
         "\u00a0\n"
         "Second paragraph also has enough words.\n\n"
         "Third paragraph wraps the example up."
     )
-    segs = _paragraph_transcript_segments(text)
+    transcript, segs, read_secs = paragraph_text_segments(text)
     assert len(segs) == 3
-    assert segs[0]["text"].startswith("First")
-    assert segs[1]["text"].startswith("Second")
-    assert segs[2]["text"].startswith("Third")
-    assert segs[0]["start"] == 0
-    assert segs[1]["start"] > 0
-    assert segs[0]["duration"] > 0
-    assert segs[0]["timestamp"] == "00:00"
+    assert read_secs >= 1
+    for i, seg in enumerate(segs):
+        assert seg["index"] == i
+        assert seg["start"] is None
+        assert seg["duration"] is None
+        assert seg["timestamp"] is None
+        assert seg["wordCount"] >= 1
+        assert transcript[seg["charStart"] : seg["charEnd"]] == seg["text"]
 
 
-def test_bridgewater_style_post_splits():
+def test_bridgewater_style_splits():
     text = (
         "Instead of watching another Netflix series tonight, watch this talk from Bridgewater applied AI team.\n\n"
         "It is the clearest most practical look at how a top quant firm builds agents.\n\n"
@@ -32,10 +35,25 @@ def test_bridgewater_style_post_splits():
         "And together with this guide you can turn Claude into an analyst: https://lnkd.in/dCfFQXCh\n\n"
         "Bookmark it and watch the talk today."
     )
-    segs = _paragraph_transcript_segments(text)
+    transcript, segs, _ = paragraph_text_segments(text)
     assert len(segs) == 5
     assert "Netflix" in segs[0]["text"]
-    assert "lnkd.in" in segs[3]["text"]
+    assert transcript[segs[3]["charStart"] : segs[3]["charEnd"]] == segs[3]["text"]
+
+
+def test_finalize_reddit_style_segments():
+    raw = [
+        {"speaker": "post", "text": "Title: Hello there"},
+        {"speaker": "alice", "text": "Body text here"},
+        {"speaker": "bob", "text": "bob: A comment reply"},
+    ]
+    transcript = "\n\n".join(s["text"] for s in raw)
+    segs, read_secs = finalize_text_segments(transcript, raw)
+    assert TIMING_NONE == "none"
+    assert read_secs >= 1
+    assert segs[0]["speaker"] == "post"
+    assert segs[0]["start"] is None
+    assert transcript[segs[2]["charStart"] : segs[2]["charEnd"]] == "bob: A comment reply"
 
 
 def test_author_url_from_ugc_post_only():
