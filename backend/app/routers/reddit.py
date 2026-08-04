@@ -22,7 +22,7 @@ from app.services import decodo_fetch
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import first_present, safe_float, safe_int, safe_str
-from app.utils.text_transcript import TIMING_NONE, finalize_text_segments
+from app.utils.text_transcript import TIMING_NONE, count_words, finalize_text_segments
 from app.utils.url import (
     detect_url_platform,
     extract_reddit_post_id,
@@ -1018,14 +1018,14 @@ async def post_transcript(
                 "timingSource": TIMING_NONE,
                 "estimatedReadSeconds": read_secs,
                 "transcriptSegments": segments,
-                "wordCount": len(transcript.split()),
+                "wordCount": count_words(transcript),
                 "segments": len(segments),
                 "commentsIncluded": len(comments),
             }
 
         data = await cached_or_run(
             endpoint="reddit.post-transcript",
-            params={"url": url, "limit": limit, "v": 6},
+            params={"url": url, "limit": limit, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

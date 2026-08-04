@@ -20,7 +20,7 @@ from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.services import linkedin_native
 from app.utils.formatters import first_present, safe_int, safe_str
-from app.utils.text_transcript import TIMING_NONE, paragraph_text_segments
+from app.utils.text_transcript import TIMING_NONE, count_words, paragraph_text_segments
 from app.utils.url import (
     detect_url_platform,
     extract_linkedin_company,
@@ -821,6 +821,9 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
         or p.get("authorHeadline")
         or p.get("author_headline")
     )
+    # Guest HTML / SEO often stuffs "N followers" into headline — not a job title.
+    if author_headline and "follower" in author_headline.lower():
+        author_headline = None
     # Always key engagement — null when LinkedIn omits a metric (never invent 0).
     # Use first_present — `or` drops real zeros (shares/comments often 0).
     engagement = {
@@ -1186,10 +1189,10 @@ async def linkedin_post_transcript(
                 post = _normalize_post(_first(items))
                 ctx["source"] = "apify"
                 ctx["credits_override"] = CREDIT_DETAILS
-            text = (post.get("text") or "").strip()
-            if not text:
+            text = linkedin_native.strip_comments_on_linkedin_suffix(post.get("text") or "") or ""
+            if not text.strip():
                 raise HTTPException(status_code=422, detail="No transcript text available for this LinkedIn post")
-            # Text-only posts have no caption timeline — never invent start/duration.
+            # Text-only: omit start/duration/timestamp (timingSource is the discriminator).
             transcript, segments, read_secs = paragraph_text_segments(text)
             author = post.get("author") if isinstance(post.get("author"), dict) else {}
             author_out = dict(author) if author else {}
@@ -1197,6 +1200,8 @@ async def linkedin_post_transcript(
                 derived = _author_url_from_post_url(post.get("url") or url)
                 if derived:
                     author_out["url"] = derived
+            # headline: only when LinkedIn/Apify expose a real job title — omit when unknown
+            # (never invent from follower counts). Missing ≠ regression for guest ugcPost HTML.
             return {
                 "platform": "linkedin",
                 "url": post.get("url") or url,
@@ -1204,7 +1209,7 @@ async def linkedin_post_transcript(
                 "timingSource": TIMING_NONE,
                 "estimatedReadSeconds": read_secs,
                 "transcriptSegments": segments,
-                "wordCount": len(transcript.split()),
+                "wordCount": count_words(transcript),
                 "segments": len(segments),
                 "author": author_out or None,
                 "publishedAt": post.get("publishedAt"),
@@ -1212,7 +1217,7 @@ async def linkedin_post_transcript(
 
         data = await cached_or_run(
             endpoint="linkedin.post-transcript",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

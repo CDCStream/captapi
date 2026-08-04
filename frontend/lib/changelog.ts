@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
     category: "fix",
+    title: "Text transcripts: omit null cue fields; LinkedIn ugcPost dates",
+    description:
+      "When timingSource is \"none\", segment start/duration/timestamp are omitted entirely (returned only when timingSource is \"captions\"). wordCount treats emoji-only tokens as 0 and URLs as 1. LinkedIn post-transcript strips the \"| N comments on LinkedIn\" og:description trailer before segmenting, reads datePublished from VideoObject JSON-LD on ugcPost URLs, and omits author.headline when guest HTML only exposes follower-count SEO chrome.",
+    items: [
+      "Omit start/duration/timestamp when timingSource is none",
+      "Strip LinkedIn \"| N comments on LinkedIn\" trailer",
+      "ugcPost publishedAt from VideoObject datePublished",
+      "wordCount: emoji = 0, URL = 1",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
     title: "Text transcripts: timingSource none — no fake start/duration",
     description:
       "LinkedIn/Reddit/Twitter text transcript endpoints now set timingSource=\"none\" and leave segment start/duration/timestamp null (keys kept). Paragraph/discussion segmentation stays; each segment adds index, wordCount, charStart/charEnd. Reading time is only top-level estimatedReadSeconds at 200 wpm — never stuffed into duration. Same contract on linkedin/post-transcript, reddit/post-transcript, and twitter/transcript.",

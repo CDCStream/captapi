@@ -1,14 +1,19 @@
-"""Text-only transcript contract: null timings + char offsets."""
+"""Text-only transcript contract: omit cue keys + char offsets."""
 
-from app.routers.linkedin import _author_url_from_post_url
+from app.routers.linkedin import _author_url_from_post_url, _normalize_post
+from app.services.linkedin_native import (
+    _post_from_social_ld,
+    strip_comments_on_linkedin_suffix,
+)
 from app.utils.text_transcript import (
     TIMING_NONE,
+    count_words,
     finalize_text_segments,
     paragraph_text_segments,
 )
 
 
-def test_paragraph_segments_null_timings_and_offsets():
+def test_paragraph_segments_omit_cue_keys():
     text = (
         "First paragraph with enough words here.\n"
         "\u00a0\n"
@@ -20,9 +25,9 @@ def test_paragraph_segments_null_timings_and_offsets():
     assert read_secs >= 1
     for i, seg in enumerate(segs):
         assert seg["index"] == i
-        assert seg["start"] is None
-        assert seg["duration"] is None
-        assert seg["timestamp"] is None
+        assert "start" not in seg
+        assert "duration" not in seg
+        assert "timestamp" not in seg
         assert seg["wordCount"] >= 1
         assert transcript[seg["charStart"] : seg["charEnd"]] == seg["text"]
 
@@ -41,7 +46,7 @@ def test_bridgewater_style_splits():
     assert transcript[segs[3]["charStart"] : segs[3]["charEnd"]] == segs[3]["text"]
 
 
-def test_finalize_reddit_style_segments():
+def test_finalize_reddit_style_segments_omit_cues():
     raw = [
         {"speaker": "post", "text": "Title: Hello there"},
         {"speaker": "alice", "text": "Body text here"},
@@ -52,8 +57,57 @@ def test_finalize_reddit_style_segments():
     assert TIMING_NONE == "none"
     assert read_secs >= 1
     assert segs[0]["speaker"] == "post"
-    assert segs[0]["start"] is None
+    assert "start" not in segs[0]
+    assert "duration" not in segs[0]
+    assert "timestamp" not in segs[0]
     assert transcript[segs[2]["charStart"] : segs[2]["charEnd"]] == "bob: A comment reply"
+
+
+def test_count_words_emoji_zero_url_one():
+    # 17 words + 1 URL + 1 emoji → 18 (emoji is not a word; old split() reported 19).
+    words = " ".join(f"w{i}" for i in range(17))
+    text = f"{words} https://lnkd.in/dCfFQXCh 📊"
+    assert count_words(text) == 18
+    assert len(text.split()) == 19
+    assert count_words("📊:") == 0
+    assert count_words("hello 🚀 world") == 2
+
+
+def test_strip_comments_on_linkedin_suffix():
+    body = "Great post about agents and systems"
+    dirty = f"{body} | 10 comments on LinkedIn"
+    assert strip_comments_on_linkedin_suffix(dirty) == body
+    assert strip_comments_on_linkedin_suffix(f"{body} | 1 comment on LinkedIn") == body
+    assert strip_comments_on_linkedin_suffix(body) == body
+
+
+def test_video_object_ld_keeps_date_published():
+    block = {
+        "@type": "VideoObject",
+        "description": "Hello world from a ugcPost | 10 comments on LinkedIn",
+        "datePublished": "2026-08-04T19:14:43.873Z",
+        "creator": {"name": "Linas Beliūnas", "url": "https://www.linkedin.com/in/linasbeliunas"},
+        "url": "https://www.linkedin.com/posts/linasbeliunas_x-ugcPost-7490484891248291841-Nbnn/",
+    }
+    post = _post_from_social_ld(block, fallback_url=block["url"])
+    assert post is not None
+    assert post["datePublished"] == "2026-08-04T19:14:43.873Z"
+    assert post["text"] == "Hello world from a ugcPost"
+    assert "comments on LinkedIn" not in (post["text"] or "")
+    assert post["author"]["name"] == "Linas Beliūnas"
+    assert "headline" not in post["author"]
+
+
+def test_normalize_post_drops_followers_headline():
+    row = _normalize_post(
+        {
+            "text": "hi",
+            "datePublished": "2026-07-04T13:19:24Z",
+            "author": {"name": "Microsoft", "headline": "28,652,029 followers"},
+        }
+    )
+    assert "headline" not in row["author"]
+    assert row["publishedAt"] == "2026-07-04T13:19:24Z"
 
 
 def test_author_url_from_ugc_post_only():

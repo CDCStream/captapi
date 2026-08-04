@@ -47,8 +47,15 @@ _SEO_CONNECTIONS_ON_LI_RE = re.compile(
 _EXPERIENCE_RE = re.compile(r"Experience:\s*([^·\n|]{2,80})", re.I)
 _EMPLOYEES_RE = re.compile(r"([\d,.\s]+)\s+employees", re.I)
 _COMMENTS_OG_RE = re.compile(r"([\d,]+)\s+comments?", re.I)
+# og:description SEO trailer — never part of the post body.
+_COMMENTS_ON_LINKEDIN_SUFFIX_RE = re.compile(
+    r"\s*\|\s*\d+\s+comments?\s+on\s+LinkedIn\s*$",
+    re.I,
+)
+_DATE_PUBLISHED_RE = re.compile(r'"datePublished"\s*:\s*"([^"]+)"', re.I)
 _REACTIONS_RE = re.compile(r"([\d,.]+)\s+Reactions?", re.I)
 _ACTIVITY_RE = re.compile(r"activity[:-](\d{10,25})", re.I)
+_UGC_POST_RE = re.compile(r"ugcPost[:-](\d{10,25})", re.I)
 # Guest company pages often omit industry from JSON-LD; it's still in the
 # About section and the top-card headline (e.g. "Design Services").
 _INDUSTRY_ABOUT_RE = re.compile(
@@ -597,32 +604,73 @@ def _stats_from_interaction(block: dict[str, Any]) -> dict[str, int]:
     return out
 
 
-def _post_from_social_ld(block: dict[str, Any], *, fallback_url: str) -> dict[str, Any] | None:
-    text = safe_str(block.get("articleBody") or block.get("text") or block.get("headline"))
-    url = safe_str(block.get("url") or block.get("@id") or fallback_url)
-    if not text and not url:
-        return None
-    author = block.get("author") if isinstance(block.get("author"), dict) else {}
-    activity = None
-    m = _ACTIVITY_RE.search(url or "")
-    if m:
-        activity = m.group(1)
+def strip_comments_on_linkedin_suffix(text: str | None) -> str | None:
+    """Drop ``| N comments on LinkedIn`` SEO trailer from og:description."""
+    cleaned = safe_str(text)
+    if not cleaned:
+        return cleaned
+    return _COMMENTS_ON_LINKEDIN_SUFFIX_RE.sub("", cleaned).rstrip() or None
+
+
+def _author_from_ld(block: dict[str, Any]) -> dict[str, Any]:
+    author = block.get("author") if isinstance(block.get("author"), dict) else None
+    if author is None:
+        creator = block.get("creator")
+        if isinstance(creator, dict):
+            author = creator
+        elif isinstance(creator, list):
+            author = next((c for c in creator if isinstance(c, dict)), {})
+        else:
+            author = {}
     author_out: dict[str, Any] = {
         "name": safe_str(author.get("name")),
         "url": safe_str(author.get("url")),
     }
     # Public post LD almost never includes job title; keep when present.
+    # Do NOT invent headline from follower counts / SEO chrome.
     headline = safe_str(author.get("jobTitle") or author.get("description"))
-    if headline:
+    if headline and "follower" not in headline.lower():
         author_out["headline"] = headline
+    return author_out
+
+
+def _post_from_social_ld(block: dict[str, Any], *, fallback_url: str) -> dict[str, Any] | None:
+    text = strip_comments_on_linkedin_suffix(
+        safe_str(
+            block.get("articleBody")
+            or block.get("text")
+            or block.get("description")
+            or block.get("caption")
+            or block.get("headline")
+            or block.get("name")
+        )
+    )
+    url = safe_str(block.get("url") or block.get("@id") or fallback_url)
+    if not text and not url:
+        return None
+    activity = None
+    for pattern in (_ACTIVITY_RE, _UGC_POST_RE):
+        m = pattern.search(url or "") or pattern.search(fallback_url or "")
+        if m:
+            activity = m.group(1)
+            break
     return {
         "id": activity,
-        "url": url,
+        "url": url if "linkedin.com" in (url or "") else fallback_url,
         "text": text,
         "datePublished": safe_str(block.get("datePublished")),
-        "author": author_out,
+        "author": _author_from_ld(block),
         "stats": _stats_from_interaction(block),
     }
+
+
+def _date_published_from_html(html: str, og: dict[str, str]) -> str | None:
+    for key in ("article:published_time", "og:updated_time", "pubdate"):
+        got = safe_str(og.get(key))
+        if got:
+            return got
+    m = _DATE_PUBLISHED_RE.search(html or "")
+    return safe_str(m.group(1) if m else None)
 
 
 async def fetch_post(url: str) -> dict[str, Any] | None:
@@ -639,35 +687,46 @@ async def fetch_post(url: str) -> dict[str, Any] | None:
         return None
 
     chosen: dict[str, Any] | None = None
+    # ugcPost video shares often expose VideoObject (not SocialMediaPosting) —
+    # that LD still carries datePublished + description/caption.
+    _POST_LD_TYPES = {
+        "SocialMediaPosting",
+        "DiscussionForumPosting",
+        "Article",
+        "VideoObject",
+        "ImageObject",
+    }
     for block in _ld_blocks(html):
         if not isinstance(block, dict):
             continue
         t = block.get("@type")
         types = t if isinstance(t, list) else [t]
-        if any(
-            x in {"SocialMediaPosting", "DiscussionForumPosting", "Article"} for x in types
-        ):
+        if any(x in _POST_LD_TYPES for x in types):
             chosen = _post_from_social_ld(block, fallback_url=target)
             if chosen and chosen.get("text"):
                 break
             chosen = chosen or _post_from_social_ld(block, fallback_url=target)
 
     if chosen is None:
-        text = og.get("og:description")
+        text = strip_comments_on_linkedin_suffix(og.get("og:description"))
         title = og.get("og:title") or ""
         if not text and not title:
             return None
         comments_m = _COMMENTS_OG_RE.search(title)
         author_name = None
-        if " | " in title:
-            # "July | Microsoft | 39 comments"
-            parts = [p.strip() for p in title.split("|")]
-            if len(parts) >= 2 and "comment" not in parts[1].lower():
-                author_name = parts[1]
+        if "|" in title:
+            # Common: "snippet… | Linas Beliūnas | 10 comments on LinkedIn"
+            # Older company: "July | Microsoft | 39 comments"
+            parts = [p.strip() for p in title.split("|") if p.strip()]
+            non_comment = [p for p in parts if "comment" not in p.lower()]
+            if len(non_comment) >= 2:
+                author_name = non_comment[-1]
+            elif len(non_comment) == 1 and len(parts) >= 2:
+                author_name = non_comment[0] if "comment" in parts[-1].lower() else None
         chosen = {
             "url": target,
-            "text": text or title.split("|", 1)[0].strip(),
-            "datePublished": None,
+            "text": text or strip_comments_on_linkedin_suffix(title.split("|", 1)[0].strip()),
+            "datePublished": _date_published_from_html(html, og),
             "author": {"name": author_name, "url": None},
             "stats": {
                 "comments": _parse_count(comments_m.group(1) if comments_m else None),
@@ -685,10 +744,18 @@ async def fetch_post(url: str) -> dict[str, Any] | None:
             n = _parse_count(reactions_m.group(1) if reactions_m else None)
             if n is not None:
                 stats["likes"] = n
+        if not chosen.get("datePublished"):
+            chosen["datePublished"] = _date_published_from_html(html, og)
+        if chosen.get("text"):
+            chosen["text"] = strip_comments_on_linkedin_suffix(chosen.get("text"))
 
     if not chosen.get("text"):
         return None
-    log.info("linkedin_native_post_ok", url=target[:120])
+    log.info(
+        "linkedin_native_post_ok",
+        url=target[:120],
+        datePublished=bool(chosen.get("datePublished")),
+    )
     return chosen
 
 

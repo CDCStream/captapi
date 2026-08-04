@@ -21,7 +21,7 @@ from app.services import twitter_native as native
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import first_present, safe_int, safe_list, safe_str, strip_empty
-from app.utils.text_transcript import TIMING_NONE, paragraph_text_segments
+from app.utils.text_transcript import TIMING_NONE, count_words, paragraph_text_segments
 from app.utils.url import (
     detect_url_platform,
     extract_tweet_id,
@@ -699,7 +699,7 @@ async def twitter_transcript(
                 "timingSource": TIMING_NONE,
                 "estimatedReadSeconds": read_secs,
                 "transcriptSegments": segments,
-                "wordCount": len(transcript.split()),
+                "wordCount": count_words(transcript),
                 "segments": len(segments),
                 "author": _author_transcript(author),
                 "publishedAt": published,
@@ -729,7 +729,7 @@ async def twitter_transcript(
 
         data = await cached_or_run(
             endpoint="twitter.transcript",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

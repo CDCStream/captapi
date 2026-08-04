@@ -4631,9 +4631,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "The most meaningful breakthroughs happen when technology is built with people in mind.",
         "index": 0,
         "wordCount": 13,
-        "start": null,
-        "duration": null,
-        "timestamp": null,
         "charStart": 0,
         "charEnd": 86
       },
@@ -4641,9 +4638,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "That was the message at Microsoft Build this month, where we announced a host of new tools to help developers build, dream and create.",
         "index": 1,
         "wordCount": 24,
-        "start": null,
-        "duration": null,
-        "timestamp": null,
         "charStart": 89,
         "charEnd": 223
       },
@@ -4651,9 +4645,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "In June’s edition of The Monthly Tech-In, we’re sharing stories from Build and beyond about the developers, founders and communities who are using AI to tackle real-world challenges, from helping creators protect their work to advancing more inclusive AI systems.",
         "index": 2,
         "wordCount": 40,
-        "start": null,
-        "duration": null,
-        "timestamp": null,
         "charStart": 227,
         "charEnd": 490
       },
@@ -4661,9 +4652,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "Read more about the people and innovations who are shaping what's next:",
         "index": 3,
         "wordCount": 12,
-        "start": null,
-        "duration": null,
-        "timestamp": null,
         "charStart": 493,
         "charEnd": 564
       }
@@ -4672,7 +4660,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "segments": 4,
     "author": {
       "name": "Microsoft",
-      "headline": "28,652,029 followers",
       "url": "https://www.linkedin.com/company/microsoft/posts"
     },
     "publishedAt": "2026-07-04 13:19:24",
@@ -5538,57 +5525,42 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "transcript": "Title: Radiation exposure may become the biggest challenge for future Moon and Mars missions\n\n[removed]\n\nEffingWasps: Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme\n\nb407driver: Become? It has always been the greatest (unsolved) challenge.\n\nWaarm: The current biggest challenge is funding.",
     "transcriptSegments": [
       {
-        "speaker": "post",
         "text": "Title: Radiation exposure may become the biggest challenge for future Moon and Mars missions",
+        "speaker": "post",
         "index": 0,
         "wordCount": 14,
-        "start": null,
-        "duration": null,
-        "timestamp": null,
         "charStart": 0,
         "charEnd": 92
       },
       {
-        "speaker": "Low-Mathematician137",
         "text": "[removed]",
+        "speaker": "Low-Mathematician137",
         "index": 1,
         "wordCount": 1,
-        "start": null,
-        "duration": null,
-        "timestamp": null,
         "charStart": 94,
         "charEnd": 103
       },
       {
-        "speaker": "EffingWasps",
         "text": "EffingWasps: Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme",
+        "speaker": "EffingWasps",
         "index": 2,
         "wordCount": 19,
-        "start": null,
-        "duration": null,
-        "timestamp": null,
         "charStart": 105,
         "charEnd": 233
       },
       {
-        "speaker": "b407driver",
         "text": "b407driver: Become? It has always been the greatest (unsolved) challenge.",
+        "speaker": "b407driver",
         "index": 3,
         "wordCount": 10,
-        "start": null,
-        "duration": null,
-        "timestamp": null,
         "charStart": 235,
         "charEnd": 308
       },
       {
-        "speaker": "Waarm",
         "text": "Waarm: The current biggest challenge is funding.",
+        "speaker": "Waarm",
         "index": 4,
         "wordCount": 7,
-        "start": null,
-        "duration": null,
-        "timestamp": null,
         "charStart": 310,
         "charEnd": 358
       }
@@ -14773,20 +14745,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "text": "Full steam ahead this week at @NASA 🚀",
         "index": 0,
-        "wordCount": 8,
-        "start": null,
-        "duration": null,
-        "timestamp": null,
+        "wordCount": 7,
         "charStart": 0,
         "charEnd": 37
       },
       {
         "text": "🧑‍🚀 @Astro_Anil arrives at the ISS\n🪐 Dragonfly progress\n✈️ Future of autonomous flight\n🤝 70 Artemis Accords signatories",
         "index": 1,
-        "wordCount": 19,
-        "start": null,
-        "duration": null,
-        "timestamp": null,
+        "wordCount": 15,
         "charStart": 39,
         "charEnd": 158
       },
@@ -14794,14 +14760,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "Here's your NASA Minute! https://t.co/GAZ4sUqfbZ",
         "index": 2,
         "wordCount": 5,
-        "start": null,
-        "duration": null,
-        "timestamp": null,
         "charStart": 160,
         "charEnd": 208
       }
     ],
-    "wordCount": 32,
+    "wordCount": 27,
     "segments": 3,
     "author": {
       "username": "NASASpox",
@@ -14812,7 +14775,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     },
     "publishedAt": "2026-07-17T21:06:08.000Z",
     "timingSource": "none",
-    "estimatedReadSeconds": 10
+    "estimatedReadSeconds": 8
   },
   "twitter-tweet-details": {
     "platform": "twitter",

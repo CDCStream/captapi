@@ -1182,7 +1182,7 @@ const TWITTER: Spec[] = [
     tagline:
       "Tweet text as a transcript — timingSource none (not Whisper). Flat 1 credit.",
     longDescription:
-      "Paste a public tweet URL and get the tweet body as structured text. timingSource is always \"none\" today — syndication text only, not Whisper/captions. Segment start/duration/timestamp stay null (keys kept). Do not branch on \"captions\"; nothing emits it on this endpoint yet. Paragraph-split transcriptSegments include index, wordCount, charStart/charEnd; estimatedReadSeconds is a top-level 200 wpm estimate — never inside duration. Flat 1 credit.",
+      "Paste a public tweet URL and get the tweet body as structured text. timingSource is always \"none\" today — syndication text only, not Whisper/captions. When timingSource is \"none\", segment start/duration/timestamp are omitted (returned only when timingSource is \"captions\"). Paragraph-split transcriptSegments include index, wordCount, charStart/charEnd; estimatedReadSeconds is a top-level 200 wpm estimate — never inside duration. Flat 1 credit.",
   },
   {
     slug: "twitter-profile",
@@ -1314,7 +1314,7 @@ const REDDIT: Spec[] = [
     tagline:
       "Reddit discussion as text — title/body/comments segments, timingSource none. Flat 2 credits.",
     longDescription:
-      "Paste a Reddit post URL and get the discussion as structured text: title, body, and comments as transcriptSegments (speaker labeled). timingSource is always \"none\" today — discussion text has no caption track. Segment start/duration/timestamp stay null (keys kept). Do not branch on \"captions\"; nothing emits it here yet. Each segment has index, wordCount, charStart/charEnd into transcript. estimatedReadSeconds is a top-level 200 wpm estimate only — never inside duration. Flat 2 credits.",
+      "Paste a Reddit post URL and get the discussion as structured text: title, body, and comments as transcriptSegments (speaker labeled). timingSource is always \"none\" today — discussion text has no caption track. When timingSource is \"none\", segment start/duration/timestamp are omitted (returned only when timingSource is \"captions\"). Each segment has index, wordCount, charStart/charEnd into transcript. estimatedReadSeconds is a top-level 200 wpm estimate only — never inside duration. Flat 2 credits.",
   },
   {
     slug: "reddit-search",
@@ -1626,7 +1626,7 @@ const LINKEDIN: Spec[] = [
     tagline:
       "LinkedIn post text as a transcript — paragraph segments, timingSource none. Flat 1 credit.",
     longDescription:
-      "Paste a LinkedIn post/activity URL and get the public post body as structured text: transcript, wordCount, author, publishedAt, and transcriptSegments split on blank-line paragraphs (including NBSP gaps). timingSource is always \"none\" today (native and Apify) — no caption track or Whisper. Segment start/duration/timestamp stay null (keys kept for a stable schema). Do not branch on \"captions\"; nothing emits it on this endpoint yet. Each segment has index, wordCount, charStart/charEnd into transcript. estimatedReadSeconds is a single top-level 200 wpm estimate — never inside duration. Flat 1 credit.",
+      "Paste a LinkedIn post/activity URL and get the public post body as structured text: transcript, wordCount, author, publishedAt, and transcriptSegments split on blank-line paragraphs (including NBSP gaps). timingSource is always \"none\" today (native and Apify) — no caption track or Whisper. When timingSource is \"none\", segment start/duration/timestamp are omitted (returned only when timingSource is \"captions\"). Each segment has index, wordCount, charStart/charEnd into transcript. estimatedReadSeconds is a single top-level 200 wpm estimate — never inside duration. Flat 1 credit.",
   },
   {
     slug: "linkedin-company-posts",
@@ -5900,42 +5900,46 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
       'Always "none" on this endpoint today (native and Apify). "captions" is reserved for future cue support — do not branch on it; nothing emits it yet.',
     estimatedReadSeconds: "Whole-transcript reading-time estimate at 200 wpm. Not per-segment duration.",
     transcriptSegments:
-      "Paragraph blocks for search/AI chunking. Each has index, wordCount, charStart/charEnd (transcript.slice(charStart,charEnd)===text). start/duration/timestamp are null.",
+      "Paragraph blocks for search/AI chunking. Each has index, wordCount, charStart/charEnd (transcript.slice(charStart,charEnd)===text). start/duration/timestamp omitted when timingSource is none.",
     segments: "Number of paragraph segments in transcriptSegments.",
-    wordCount: "Whitespace-separated word count of the full transcript.",
+    wordCount: "Word count of the full transcript (emoji-only tokens count as 0; URLs count as 1).",
     index: "0-based segment order within transcriptSegments.",
     charStart: "Start offset into transcript (transcript.slice(charStart, charEnd) === text).",
     charEnd: "End offset into transcript (exclusive).",
-    duration: "Always null on this endpoint today (text extraction — no cue length).",
-    start: "Always null on this endpoint today (text extraction — no cue start).",
-    timestamp: "Always null on this endpoint today (text extraction — no cue clock).",
-    author: "Post author {name, url, headline?}. url may be derived from /posts/{vanity}_…ugcPost-… when LinkedIn omits it.",
+    duration: "Returned only when timingSource is 'captions'.",
+    start: "Returned only when timingSource is 'captions'.",
+    timestamp: "Returned only when timingSource is 'captions'.",
+    author:
+      "Post author {name, url, headline?}. headline only when LinkedIn exposes a real job title (not follower counts). url may be derived from /posts/{vanity}_…ugcPost-… when LinkedIn omits it.",
+    publishedAt: "ISO-8601 when guest HTML/JSON-LD exposes it (including VideoObject datePublished on ugcPost URLs).",
   },
   "reddit-post-transcript": {
     timingSource:
       'Always "none" today. "captions" is reserved — do not branch on it; nothing emits it yet.',
     estimatedReadSeconds: "Whole-transcript reading-time estimate at 200 wpm. Not per-segment duration.",
     transcriptSegments:
-      "Title / body / comment blocks with speaker. index/wordCount/charStart/charEnd for chunking; start/duration/timestamp are null.",
-    duration: "Always null on this endpoint today.",
-    start: "Always null on this endpoint today.",
-    timestamp: "Always null on this endpoint today.",
+      "Title / body / comment blocks with speaker. index/wordCount/charStart/charEnd for chunking; start/duration/timestamp omitted when timingSource is none.",
+    duration: "Returned only when timingSource is 'captions'.",
+    start: "Returned only when timingSource is 'captions'.",
+    timestamp: "Returned only when timingSource is 'captions'.",
     index: "0-based segment order.",
     charStart: "Start offset into transcript (transcript.slice(charStart, charEnd) === text).",
     charEnd: "End offset into transcript (exclusive).",
+    wordCount: "Word count (emoji-only tokens count as 0; URLs count as 1).",
   },
   "twitter-transcript": {
     timingSource:
       'Always "none" today. "captions" is reserved — do not branch on it; nothing emits it yet.',
     estimatedReadSeconds: "Whole-transcript reading-time estimate at 200 wpm. Not per-segment duration.",
     transcriptSegments:
-      "Paragraph-split tweet text. index/wordCount/charStart/charEnd for chunking; start/duration/timestamp are null.",
-    duration: "Always null on this endpoint today.",
-    start: "Always null on this endpoint today.",
-    timestamp: "Always null on this endpoint today.",
+      "Paragraph-split tweet text. index/wordCount/charStart/charEnd for chunking; start/duration/timestamp omitted when timingSource is none.",
+    duration: "Returned only when timingSource is 'captions'.",
+    start: "Returned only when timingSource is 'captions'.",
+    timestamp: "Returned only when timingSource is 'captions'.",
     index: "0-based segment order.",
     charStart: "Start offset into transcript (transcript.slice(charStart, charEnd) === text).",
     charEnd: "End offset into transcript (exclusive).",
+    wordCount: "Word count (emoji-only tokens count as 0; URLs count as 1).",
   },
   "truth-social-profile": {
     platform: 'Always "truth_social" on this endpoint.',
