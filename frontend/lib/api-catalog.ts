@@ -1148,13 +1148,13 @@ const TWITTER: Spec[] = [
     path: "/v1/twitter/community",
     credits: 1,
     tagline:
-      "X Community metadata — name, description, memberCount, joinPolicy, rules[], creator.",
+      "X Community metadata — ISO createdAt, flat creator handle, isNsfw + bannerImage (SC gaps), rules[].",
     longDescription:
-      "Paste an X community URL (x.com/i/communities/ID) or community ID — not a tweet URL — and get clean JSON: name, description, memberCount, createdAt, creator, joinPolicy, isNsfw, bannerImage, and rules[{name,description}]. Pair with Community Tweets to list posts. Flat 1 credit.",
+      "Paste an X community URL (x.com/i/communities/ID) or community ID — not a tweet URL — and get clean JSON: name, description, memberCount, ISO-8601 createdAt (.000Z), creator as a flat handle (not nested creator_results), joinPolicy, isNsfw, bannerImage, and rules[{name,description}]. isNsfw and bannerImage are Captapi extras vs ScrapeCreators. Pair with Community Tweets to list posts. Flat 1 credit.",
     delivers: [
-      "name + memberCount + joinPolicy",
-      "rules[] with name and description",
-      "creator handle + bannerImage when exposed",
+      "ISO createdAt + flat creator handle",
+      "isNsfw + bannerImage (not in SC)",
+      "rules[{name, description}] without GraphQL noise",
       "Flat 1 credit per call",
     ],
   },
@@ -4435,8 +4435,7 @@ const FIELD_DESCS: Record<string, string> = {
   author: "Author name or handle.",
   bio: "Profile bio or description.",
   headline: "Profile headline.",
-  verified:
-    "Whether the account/artist is verified (platform-specific; on Bluesky prefer verifiedStatus / verification).",
+  verified: "Whether the account is verified on this platform.",
   isVerified: "Whether the account is verified.",
   private: "Whether the account is private.",
   followers: "Follower count.",
@@ -4452,7 +4451,8 @@ const FIELD_DESCS: Record<string, string> = {
   verifiedDescription: "Kwai verification label (e.g. Conta Oficial).",
   verifiedNumber: "Kwai verification tier number when present.",
   eid: "Kwai opaque profile eid.",
-  creator: "Who created/cut the Kick clip (distinct from the broadcaster channel).",
+  creator:
+    "Creator handle or account for this item (platform-specific — e.g. who founded a community, or who cut a clip).",
   isMature: "Whether Kick marks the clip as mature content.",
   privacy: "Clip privacy (e.g. public).",
   startedAt: "When the stream, clip, or broadcast segment started (ISO 8601).",
@@ -4470,7 +4470,7 @@ const FIELD_DESCS: Record<string, string> = {
   proUnlimited: "Whether the account has SoundCloud Pro Unlimited.",
   pro: "Whether the account has SoundCloud Pro.",
   curator: "Who created/cut the Twitch clip (distinct from the broadcaster channel).",
-  channel: "Twitch broadcaster channel object (id, username, followers, isPartner, lastBroadcast).",
+  channel: "Channel or broadcaster object for this item (shape depends on the endpoint).",
   videoQualities: "Available clip MP4 qualities ({quality, frameRate, url}).",
   playbackAccessToken: "Twitch playback token ({signature, value, expires, expiresAt}).",
   videoOffsetSeconds: "Seconds into the source VOD where the clip starts.",
@@ -4488,7 +4488,7 @@ const FIELD_DESCS: Record<string, string> = {
   artistItems: "Structured Spotify artists ({id, uri, name, url}) for chaining.",
   albumInfo: "Structured Spotify album ({id, uri, name, url, releaseDate}).",
   previewUrl: "30s MP3 preview URL when Spotify exposes one.",
-  mediaType: "Spotify media type (e.g. AUDIO).",
+  mediaType: "Media type label for this item (platform-specific enum).",
   playable: "Whether the track is playable in the web player.",
   scrapedAt:
     "When this result was collected (ISO 8601). On Spotify Search, Apify may stamp each hit a few hundred ms apart; native Pathfinder uses the request fetch time.",
@@ -4565,7 +4565,7 @@ const FIELD_DESCS: Record<string, string> = {
   likeCountApproximate:
     "True when likeCount was parsed from a compact K/M/B label rather than an exact integer.",
   language: "Detected or requested language code.",
-  region: "Creator's country as an ISO code (e.g. IT, US). TikTok's authoritative value when it exposes one (rare); otherwise an AI-inferred guess from public profile cues (bio, display name, language). Check regionSource. Can be null when there is no usable signal.",
+  region: "Region or country code for this result (meaning depends on the endpoint — market vs creator home).",
   regionConfidence: 'For an inferred region, confidence of the guess: "high", "medium", or "low". Null when the region came from TikTok.',
   regionSource: 'Where region came from: "tiktok" (authoritative, reported by TikTok) or "inferred" (best-effort estimate from public signals).',
   audienceLocations:
@@ -4602,8 +4602,7 @@ const FIELD_DESCS: Record<string, string> = {
   videosSampled: "How many of the creator's recent videos were sampled to build the breakdown.",
   usageCount:
     "How many TikTok videos use this sound when TikTok exposes the total. Null when the music/aweme embed and music page omit it — never a fake zero.",
-  durationSeconds:
-    "Length in seconds. On video-sponsors this is the segment span (end − start); on videos/audio it is the full item length.",
+  durationSeconds: "Length in seconds for this item (full media length, or a segment span when the endpoint documents a start/end).",
   artistId: "Primary artist / sound-owner user id when TikTok exposes one.",
   authorSecUid: "Primary artist / sound-owner secUid when TikTok exposes one.",
   lang: "Language code of the content.",
@@ -4700,8 +4699,7 @@ const FIELD_DESCS: Record<string, string> = {
   playUrl: "Playback URL.",
   audioUrl: "Audio file URL.",
   media: "Media attached to the item.",
-  images:
-    "Attached image URL list (YouTube community / most feeds). Ad Library may use typed {url,resizedUrl}; TikTok Shop uses gallery URLs.",
+  images: "Attached image URL list for this item.",
   photos: "Photo URLs attached to the item.",
 
   // Duration
@@ -4722,7 +4720,7 @@ const FIELD_DESCS: Record<string, string> = {
   viewsInstagram:
     "Instagram-only play count (excludes Facebook cross-post plays). Prefer this for Instagram performance reports.",
   viewsFacebook: "Facebook cross-post play count when Instagram exposes the split.",
-  likes: "Like count (number). Prefer likeCount on YouTube community endpoints.",
+  likes: "Like count (number).",
   likeCount:
     "Like count as an integer. Compact UI labels (\"727K\") are expanded here; see likeCountText for the original string.",
   comments: "Comment count.",
@@ -4779,14 +4777,14 @@ const FIELD_DESCS: Record<string, string> = {
   pageCategories: "Advertiser Page categories from Meta.",
   pageEntityType: "Advertiser entity type (e.g. PERSON_PROFILE, PAGE).",
   cards: "Carousel cards with per-card text, CTA, landing URL, and media.",
-  videos: "Typed video assets ({url, sdUrl, previewUrl}). media[] remains the flat URL list.",
+  videos:
+    "Videos related to this result — meaning depends on the endpoint (integer count vs typed asset list). Prefer the field note on this page.",
   spendRange:
     "Parsed spend as {min, max, currency, raw}. Prefer this for sorting; spend stays the Meta display string. Usually null for commercial ads.",
   impressionsRange:
     "Parsed impressions as {min, max, raw}. Prefer this for sorting; impressions stays the Meta display string. Usually null for commercial ads.",
   searchResultsCount: "Best-effort total hits Meta reports for the query (not just this page).",
-  status:
-    "Context-dependent: TikTok Live uses the room/user status enum (2 = currently live — see isLive); analytics/compare rows use ok|error; ad-library search uses ACTIVE|INACTIVE|ALL.",
+  status: "Status value for this endpoint (see the field note on this page for enum meaning).",
   limit: "Requested max items for this call.",
   authorFullname: "Stable Reddit account fullname (t2_…). Prefer this over author for joins.",
   downs: "Downvote count when Reddit exposes it (often 0 on public JSON).",
@@ -4968,9 +4966,8 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
       "TikTok liveRoom/user status enum. 2 = currently live (isLive true). Other codes (commonly 4) mean the last room payload is ended/stale — still may include title, enter counts, and pull URLs.",
   },
   "tiktok-profile-region": {
-    videos:
-      "Total public video count on the profile (integer). Not a typed media asset list — ignore any Ad Library video-object wording.",
-    likes: "Lifetime likes across the creator's videos (TikTok heartCount).",
+    videos: "Total public video count on the profile (integer). Not a typed media asset list.",
+    likes: "Total likes across the creator's videos (TikTok heartCount).",
     verified: "Whether TikTok shows a verified badge on this profile.",
     region:
       "Creator's country as an ISO code (e.g. IT, US). TikTok's authoritative value when it exposes one (rare); otherwise an AI-inferred guess from public profile cues. Check regionSource / regionConfidence.",
@@ -4981,27 +4978,134 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     language:
       "Interface language used to localize suggestions (from the language query param, e.g. en-US).",
   },
+  "tiktok-channel-details": {
+    likes: "Total likes across the creator's videos (TikTok heartCount).",
+    verified: "Whether TikTok shows a verified badge on this profile.",
+    videos: "Not returned here — use postCount for the profile's public video count.",
+  },
+  "twitter-community": {
+    creator:
+      "X handle of the community founder (normalized from GraphQL creator_results).",
+    createdAt: "When the community was created (ISO-8601 UTC, e.g. 2022-02-15T04:47:27.000Z).",
+    memberCount: "How many members the community has.",
+    joinPolicy: 'Who can join (e.g. "Open").',
+    isNsfw: "Whether X marks the community as NSFW.",
+    bannerImage: "Community banner image URL when exposed.",
+    rules: "Community moderation rules as {name, description}.",
+  },
+  "twitter-community-tweets": {
+    communityName: "Display name of the X Community.",
+    memberCount: "How many members the community has (same signal as /community).",
+    publishedAt: "Tweet publish time as ISO-8601 UTC.",
+  },
   "twitter-user-tweets": {
-    publishedAt: "Tweet publish time as ISO-8601 UTC (e.g. 2022-04-28T00:56:58.000Z). Not Twitter's raw created_at string.",
+    publishedAt:
+      "Tweet publish time as ISO-8601 UTC (e.g. 2022-04-28T00:56:58.000Z). Not Twitter's raw created_at string.",
     hashtags: "Hashtag texts without #. Always an array (empty when the tweet has none).",
     media: "Media image/video preview URLs when present. Always an array (empty when none).",
-    source: "Client app that posted the tweet (e.g. Twitter for iPhone) when Twitter exposes it — useful for bot signals. Often omitted on the public timeline embed.",
+    source:
+      "Client app that posted the tweet (e.g. Twitter for iPhone) when Twitter exposes it — useful for bot signals. Often omitted on the public timeline embed.",
     conversationId: "Thread root id (conversation_id_str) for grouping replies.",
   },
-  "tiktok-channel-details": {
-    likes: "Lifetime likes across the creator's videos (TikTok heartCount).",
-    verified: "Whether TikTok shows a verified badge on this profile.",
-    videos:
-      "Not returned here — use postCount for the profile's public video count.",
+  "twitter-search": {
+    publishedAt: "Tweet publish time as ISO-8601 UTC.",
+    hashtags: "Hashtag texts without #. Always an array (empty when none).",
+  },
+  "twitter-tweet-details": {
+    publishedAt: "Tweet publish time as ISO-8601 UTC.",
+    hashtags: "Hashtag texts without #. Always an array (empty when none).",
+  },
+  "twitter-profile": {
+    verified: "Aggregate verification flag (blue, legacy, identity, or affiliate) — always present.",
+    displayName: "Profile display name (same concept as other platforms; name kept for compatibility).",
+  },
+  "kick-clip": {
+    creator: "Who created/cut the Kick clip (distinct from the broadcaster channel).",
+    channel: "Kick broadcaster channel for the clip.",
+  },
+  "twitch-clip": {
+    curator: "Who created/cut the Twitch clip (distinct from the broadcaster channel).",
+    channel: "Twitch broadcaster channel object (id, username, followers, isPartner, lastBroadcast).",
+  },
+  "spotify-track": {
+    mediaType: "Spotify media type (e.g. AUDIO).",
+  },
+  "spotify-artist": {
+    region: "Artist region/country when Spotify exposes it.",
+  },
+  "tiktok-shop-search": {
+    region: "Shop or product region when TikTok Shop exposes it.",
+  },
+  "youtube-search": {
+    channel: "YouTube channel object for the result when present.",
+  },
+  "youtube-playlist": {
+    channel: "YouTube channel that owns the playlist.",
+  },
+  "youtube-playlist-videos": {
+    channel: "YouTube channel for the playlist/video when present.",
+  },
+  "rumble-video-details": {
+    channel: "Rumble channel object for the video.",
+  },
+  "rumble-channel-videos": {
+    channel: "Rumble channel object.",
+  },
+  "rumble-search": {
+    channel: "Rumble channel for the result when present.",
+  },
+  "youtube-community-posts": {
+    likes:
+      "Like count as a number when YouTube exposes it — prefer likeCount + likeCountText on this endpoint.",
+    images: "Image URLs attached to the community post.",
+    channel: "YouTube channel that authored the community post.",
+  },
+  "youtube-community-post-details": {
+    likes:
+      "Like count as a number when YouTube exposes it — prefer likeCount + likeCountText on this endpoint.",
+    images: "Image URLs attached to the community post.",
+  },
+  "youtube-channel-streams": {
+    durationSeconds: "Live stream or VOD length in seconds when YouTube exposes it.",
+  },
+  "youtube-video-sponsors": {
+    durationSeconds: "Sponsor segment length in seconds (end - start).",
+  },
+  "bluesky-profile": {
+    verified:
+      "Prefer verifiedStatus / verification on Bluesky — this boolean is a coarse summary when present.",
+  },
+  "facebook-ad-library-search": {
+    status: "Ad delivery filter/status: ACTIVE, INACTIVE, or ALL.",
+    videos: "Typed video assets ({url, sdUrl, previewUrl}). media[] remains the flat URL list.",
+    images: "Typed image assets when Meta exposes them ({url, resizedUrl}).",
+  },
+  "facebook-ad-library-ad-details": {
+    videos: "Typed video assets ({url, sdUrl, previewUrl}). media[] remains the flat URL list.",
+    images: "Typed image assets when Meta exposes them ({url, resizedUrl}).",
+  },
+  "tiktok-ad-library-search": {
+    videos: "Typed video assets for the ad creative when present.",
+    status: "Ad delivery status when the library exposes it.",
+  },
+  "tiktok-shop-product-details": {
+    images: "Product gallery image URLs.",
+  },
+  "analytics-compare": {
+    status: "Row status: ok when the URL resolved, error when it failed.",
+  },
+  "analytics-post": {
+    status: "Request status: ok when the post resolved, error when it failed.",
   },
 };
 
 /** Description for a single field, preferring the curated dictionary. */
 function describeField(name: string, value: unknown, slug?: string): string {
   if (RAW_KEYS.has(name)) return FIELD_DESCS.raw;
+  // Slug overrides always win — shared dictionary text must not leak across platforms.
   const slugDesc = slug ? SLUG_FIELD_DESCS[slug]?.[name] : undefined;
+  if (slugDesc) return slugDesc;
   if (isScalarValue(value)) {
-    if (slugDesc) return slugDesc;
     if (FIELD_DESCS[name]) return FIELD_DESCS[name];
     if (typeof value === "string" && value.startsWith("http"))
       return `${humanizeField(name)} URL.`;
@@ -5012,20 +5116,85 @@ function describeField(name: string, value: unknown, slug?: string): string {
       | Record<string, unknown>
       | undefined;
     if (first) {
-      return `Array of objects with ${Object.keys(first).slice(0, 6).join(", ")}.`;
+      return FIELD_DESCS[name] ?? `Array of objects with ${Object.keys(first).slice(0, 6).join(", ")}.`;
     }
-    return slugDesc ?? FIELD_DESCS[name] ?? `${humanizeField(name)} (array).`;
+    return FIELD_DESCS[name] ?? `${humanizeField(name)} (array).`;
   }
   if (value && typeof value === "object") {
     const keys = Object.keys(value as Record<string, unknown>);
-    if (keys.length === 0) return slugDesc ?? FIELD_DESCS[name] ?? `${humanizeField(name)}.`;
-    return `Object with ${keys.slice(0, 6).join(", ")}.`;
+    if (keys.length === 0) return FIELD_DESCS[name] ?? `${humanizeField(name)}.`;
+    return FIELD_DESCS[name] ?? `Object with ${keys.slice(0, 6).join(", ")}.`;
   }
-  return slugDesc ?? FIELD_DESCS[name] ?? `${humanizeField(name)}.`;
+  return FIELD_DESCS[name] ?? `${humanizeField(name)}.`;
 }
 
 function fieldsFromObject(obj: Record<string, unknown>, slug?: string): ResponseField[] {
   return Object.entries(obj).map(([k, v]) => ({ name: k, desc: describeField(k, v, slug) }));
+}
+
+/** Foreign platform tokens that must not appear in another platform's field notes. */
+const FIELD_DESC_PLATFORM_TOKENS: { re: RegExp; platform: PlatformId }[] = [
+  { re: /\bKick\b/i, platform: "kick" },
+  { re: /\bTwitch\b/i, platform: "twitch" },
+  { re: /\bYouTube\b/i, platform: "youtube" },
+  { re: /\bTikTok\b/i, platform: "tiktok" },
+  { re: /\bBluesky\b/i, platform: "bluesky" },
+  { re: /\bInstagram\b/i, platform: "instagram" },
+  { re: /\bSpotify\b/i, platform: "spotify" },
+  { re: /\bSoundCloud\b/i, platform: "soundcloud" },
+];
+
+/**
+ * Keys where a shared FIELD_DESCS string has already been proven to leak the
+ * wrong platform into unrelated endpoint pages (Kick clip → twitter/community, …).
+ */
+const FIELD_DESC_STICKY_KEYS = new Set([
+  "creator",
+  "curator",
+  "videos",
+  "likes",
+  "verified",
+  "durationSeconds",
+  "images",
+  "status",
+  "region",
+  "mediaType",
+  "channel",
+]);
+
+/**
+ * Fail when a sticky field's rendered description names a different platform
+ * than the endpoint (shared dictionary bleed).
+ */
+export function lintFieldDescPlatformBleed(): string[] {
+  const errors: string[] = [];
+  for (const ep of ALL_ENDPOINTS) {
+    if (ep.platform === "account" || ep.platform === "utilities") continue;
+    const groups = responseStructure(ep);
+    for (const group of groups) {
+      for (const field of group.fields) {
+        if (!FIELD_DESC_STICKY_KEYS.has(field.name)) continue;
+        for (const tok of FIELD_DESC_PLATFORM_TOKENS) {
+          if (!tok.re.test(field.desc)) continue;
+          if (tok.platform === ep.platform) continue;
+          if (
+            (ep.platform === "facebook" ||
+              ep.platform === "instagram" ||
+              ep.platform === "facebook_ad_library" ||
+              ep.platform === "tiktok_ad_library" ||
+              ep.platform === "tiktok_shop") &&
+            (tok.platform === "facebook" || tok.platform === "instagram" || tok.platform === "tiktok")
+          ) {
+            continue;
+          }
+          errors.push(
+            `${ep.slug}.${field.name}: description mentions ${tok.platform} but endpoint is ${ep.platform} — "${field.desc.slice(0, 140)}"`,
+          );
+        }
+      }
+    }
+  }
+  return errors;
 }
 
 /** Build the documented response structure from a real example payload. */

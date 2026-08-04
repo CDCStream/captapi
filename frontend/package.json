@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "lint:field-descs": "tsx ../scripts/lint-field-descs.mts",
     "check:parity": "tsx ../scripts/check-catalog-parity.mts",
     "audit:credits": "tsx ../scripts/audit-endpoint-credits.mts",
     "sync:api-surface": "tsx ../scripts/sync-api-surface.mts"
@@ -53,3 +54,4 @@
     "typescript": "^5.6.3"
   }
 }
+

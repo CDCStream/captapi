@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
     category: "fix",
+    title: "Field-doc platform bleed + twitter/community ISO createdAt",
+    description:
+      "Shared FIELD_DESCS was leaking wrong-platform copy into sibling pages (worst case: creator on twitter/community said \"Kick clip\"). Sticky keys now have slug overrides; describeField prefers slug overrides for all value shapes; npm run lint:field-descs fails the build when a sticky field description names another platform. twitter/community createdAt normalized to catalog ISO (.000Z) instead of Python isoformat with microseconds/+00:00.",
+    items: [
+      "twitter/community creator field note is X founder handle (not Kick)",
+      "Slug overrides for the 8 audited sticky fields + lint:field-descs",
+      "community createdAt → YYYY-MM-DDTHH:MM:SS.000Z",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
     title: "Twitter community-tweets: flat 2 native, community meta, fixed cURL URL",
     description:
       "community-tweets was billed ~0.7/tweet (18 credits at default limit) even on the free guest GraphQL path — same surface as search (flat 2). Native path is now flat 2; Apify fallback stays ~0.7/tweet (min 2), documented like search-users. Response adds url + communityName + memberCount. Docs/cURL no longer use a tweet/status URL (request≠response); Try-it uses x.com/i/communities/…. Tweets use the shared ISO + 6-key engagement contract. Cache v5.",

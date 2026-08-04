@@ -751,12 +751,20 @@ async def _load_user_meta(
 
 
 def _twitter_created_at_iso(value: Any) -> str | None:
-    """Normalize X ``created_at`` (RFC 2822 or ISO) to ISO-8601 UTC."""
+    """Normalize X ``created_at`` (RFC 2822 or ISO) to ``YYYY-MM-DDTHH:MM:SS.000Z``."""
     text = safe_str(value)
     if not text:
         return None
     if re.match(r"^\d{4}-\d{2}-\d{2}T", text):
-        return text if text.endswith("Z") or "+" in text[10:] else f"{text}Z"
+        try:
+            # Handle both Z and +00:00 / microseconds from Python isoformat().
+            normalized = text.replace("Z", "+00:00") if text.endswith("Z") else text
+            dt = datetime.fromisoformat(normalized)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        except ValueError:
+            return text if text.endswith("Z") else f"{text}Z"
     try:
         from email.utils import parsedate_to_datetime
 
@@ -1279,16 +1287,21 @@ async def _gql_post(
 
 
 def _ms_to_iso(value: Any) -> str | None:
+    """Unix ms/seconds → catalog ISO-8601 UTC (``YYYY-MM-DDTHH:MM:SS.000Z``)."""
     try:
         ms = int(value)
     except (TypeError, ValueError):
-        return safe_str(value)
+        text = safe_str(value)
+        if not text:
+            return None
+        # Already-ISO strings (Apify / Python isoformat) → normalize to .000Z.
+        return _twitter_created_at_iso(text) or text
     if ms <= 0:
         return None
     # X ships community created_at in milliseconds.
     if ms > 10_000_000_000:
         ms = ms / 1000
-    return datetime.fromtimestamp(ms, tz=timezone.utc).isoformat()
+    return datetime.fromtimestamp(ms, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
 def _community_banner(result: dict[str, Any]) -> str | None:
