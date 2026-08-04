@@ -162,6 +162,34 @@ def _resolve_search_sort_timeframe(
     return reddit_sort, resolved_t
 
 
+def _reddit_vote_fields(item: dict[str, Any]) -> dict[str, Any]:
+    """Map Reddit vote fields without inventing score from ups/downs.
+
+    Public JSON almost always sends ``downs: 0`` (fuzzing). ``score`` is the
+    authoritative net score when Reddit exposes it. New posts with
+    ``hide_score`` return score/ups as 0 while ``upvote_ratio`` may still be set
+    — that is Reddit, not ``ups - downs``.
+    """
+    score = safe_int(item.get("score"))
+    ups = safe_int(first_present(item.get("ups"), item.get("upVotes")))
+    # Mirror score only when ups is omitted — never overwrite a real 0.
+    if ups is None:
+        ups = score
+    downs = safe_int(item.get("downs"))
+    hide = first_present(
+        item.get("hide_score"),
+        item.get("scoreHidden"),
+        item.get("score_hidden"),
+    )
+    return {
+        "upvotes": ups,
+        "score": score,
+        "downs": downs,
+        "upvoteRatio": safe_float(item.get("upvoteRatio") or item.get("upvote_ratio")),
+        "scoreHidden": bool(hide) if hide is not None else None,
+    }
+
+
 def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
     thumbnail = safe_str(item.get("thumbnailUrl") or item.get("thumbnail"))
     if thumbnail in _THUMB_PLACEHOLDERS:
@@ -169,8 +197,7 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
     published = _epoch_to_iso(item.get("createdAt") or item.get("created") or item.get("created_utc"))
     if not isinstance(published, str):
         published = safe_str(published)
-    ups = safe_int(first_present(item.get("ups"), item.get("upVotes"), item.get("score")))
-    score = safe_int(first_present(item.get("score"), ups))
+    votes = _reddit_vote_fields(item)
     is_video = first_present(item.get("isVideo"), item.get("is_video"))
     post_id = safe_str(item.get("id") or item.get("parsedId"))
     fullname = safe_str(item.get("name"))
@@ -186,10 +213,7 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
         "subreddit": safe_str(item.get("communityName") or item.get("subreddit") or item.get("parsedCommunityName")),
         "author": safe_str(item.get("username") or item.get("author")),
         "authorFullname": safe_str(item.get("authorFullname") or item.get("author_fullname")),
-        "upvotes": ups,
-        "score": score,
-        "downs": safe_int(item.get("downs")),
-        "upvoteRatio": safe_float(item.get("upvoteRatio") or item.get("upvote_ratio")),
+        **votes,
         "comments": safe_int(
             first_present(item.get("numberOfComments"), item.get("numComments"), item.get("num_comments"))
         ),
@@ -336,10 +360,12 @@ def _parse_reddit_post_payload(
         "subreddit": raw_post.get("subreddit"),
         "author": raw_post.get("author"),
         "author_fullname": raw_post.get("author_fullname"),
-        "score": raw_post.get("score") or raw_post.get("ups"),
+        # Prefer Reddit's score key even when 0 (hide_score) — never ``or ups``.
+        "score": raw_post.get("score"),
         "ups": raw_post.get("ups"),
         "downs": raw_post.get("downs"),
         "upvote_ratio": raw_post.get("upvote_ratio"),
+        "hide_score": raw_post.get("hide_score"),
         "numComments": raw_post.get("num_comments"),
         "subreddit_subscribers": raw_post.get("subreddit_subscribers"),
         "created": created,
@@ -582,6 +608,7 @@ async def _reddit_listing_json(
                         "ups": raw.get("ups"),
                         "downs": raw.get("downs"),
                         "upvote_ratio": raw.get("upvote_ratio"),
+                        "hide_score": raw.get("hide_score"),
                         "numComments": raw.get("num_comments"),
                         "subreddit_subscribers": raw.get("subreddit_subscribers"),
                         "total_awards_received": raw.get("total_awards_received"),
@@ -1170,7 +1197,7 @@ async def reddit_search(
                 "sort": sort_key,
                 "timeframe": resolved_t or "",
                 "cursor": cursor or "",
-                "v": 4,
+                "v": 5,
             },
             runner=_run,
             ctx=ctx,

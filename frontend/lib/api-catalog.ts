@@ -1261,7 +1261,29 @@ const REDDIT: Spec[] = [
       "Fetch comments on a Reddit post as a flat list with depth and parentId (easy to store, rebuild the tree when you need it). publishedAt is ISO 8601 UTC. Each comment includes score/downs and authorFullname (t2_…) when Reddit exposes them. The response also includes the parent post (title, score, upvoteRatio, subscriberCount) plus hasMore when more comments exist beyond the limit. Flat 2 credits per call. Max 500 comments per request.",
   },
   { slug: "reddit-post-transcript", name: "Reddit Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/reddit/post-transcript", credits: 2 , tagline: "Get a Reddit post's discussion as readable text — title, body, and comments in one transcript-style payload. Flat 2 credits per call.", longDescription: "Paste a Reddit post URL and get the discussion as structured text: the post title and body plus comments flattened into a transcript-style response. This is discussion text, not speech-to-text from a video. Flat 2 credits per call." },
-  { slug: "reddit-search", name: "Reddit Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/reddit/search", credits: 2, tagline: "Search Reddit site-wide — sort (relevance/new/top/comments), timeframe, full scores, authorFullname, cursor. Flat 2 credits.", longDescription: "Pass a keyword or phrase and get matching public posts across Reddit as clean JSON. Sort with sort=relevance|new|top|hot|comments (alias comment_count); for top/comments use timeframe=hour|day|week|month|year|all (default all). Each result includes id/name (t3_…), title, text, subreddit, author + authorFullname (t2_…), upvotes/score/downs/upvoteRatio, comments, subscriberCount, totalAwardsReceived, isVideo, ISO publishedAt, flair, nsfw, and thumbnail. Cursor pagination via nextCursor/hasMore. Example: sort=new for chronology, or sort=top&timeframe=week for last week's top mentions. Flat 2 credits. Pass cache=true for the 24h shared cache.", delivers: ["sort + timeframe (relevance/new/top/comments × hour…all)", "authorFullname, score/downs/upvoteRatio, subscriberCount", "isVideo + totalAwardsReceived; flair/nsfw/thumbnail", "Cursor pagination; ISO publishedAt"] },
+  {
+    slug: "reddit-search",
+    name: "Reddit Search API",
+    shortName: "Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/reddit/search",
+    credits: 2,
+    tagline:
+      "Reddit site-wide post search — sort + timeframe + cursor, score/upvoteRatio, authorFullname. Flat 2 credits.",
+    longDescription:
+      "Pass a keyword and get matching public posts across Reddit as clean JSON. Sort with sort=relevance|new|top|hot|comments (alias comment_count); for top/comments use timeframe=hour|day|week|month|year|all (default all). The response echoes sort and timeframe. Each result includes id/name (t3_…), title, text, subreddit, author + authorFullname (t2_…), Reddit's authoritative score (not ups−downs), upvotes/downs/upvoteRatio, scoreHidden when Reddit hides the score, comments, subscriberCount, totalAwardsReceived, isVideo, ISO publishedAt, flair, nsfw, and thumbnail. Cursor pagination via nextCursor/hasMore. This endpoint returns posts only — not a comments[] or media[] search surface. Flat 2 credits. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "sort + timeframe echo (relevance/new/top/hot/comments × hour…all)",
+      "authorFullname (t2_…) + authoritative score + upvoteRatio + scoreHidden",
+      "isVideo + totalAwardsReceived; flair/nsfw/thumbnail; subscriberCount",
+      "Cursor pagination (nextCursor + hasMore); ISO publishedAt",
+    ],
+    platformLimits: [
+      "Posts only (kind=t3). ScrapeCreators returns posts + comments[] + media[] from a richer search surface — comment brand listening needs a separate comments path (not this endpoint).",
+      "Public JSON almost always zeros downs. New posts with hide_score can show score/upvotes 0 while upvoteRatio is still set — use scoreHidden and do not treat score 0 as worthless until the hide window ends.",
+    ],
+  },
   {
     slug: "reddit-subreddit-details",
     name: "Reddit Subreddit Details API",
@@ -4544,6 +4566,16 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       a: `From Reddit's /r/{name}/about/rules endpoint as a structured array (name, description, kind, …). The short public_description stays in description; submitText is the compose-box guidelines when set.`,
     });
   }
+  if (ep.slug === "reddit-search" || ep.slug === "reddit-subreddit-search") {
+    list.push({
+      q: `Why can score be 0 when upvoteRatio is 0.36?`,
+      a: `score is Reddit's own score field — Captapi does not compute ups−downs (public JSON almost always sends downs: 0). New posts often have hide_score: score/upvotes stay 0 while upvoteRatio is still filled. Check scoreHidden; do not treat a zero score as worthless until the hide window ends.`,
+    });
+    list.push({
+      q: `Can I search comments, not just posts?`,
+      a: `Not on this endpoint — results are posts only (kind=t3). For discussion text under a known post, use Post Comments. Site-wide comment search (ScrapeCreators-style comments[]) is a separate surface on the backlog.`,
+    });
+  }
   if (ep.slug === "tiktok-ad-library-search") {
     list.push({
       q: `Is this TikTok Creative Center (CTR / Top Ads)?`,
@@ -5012,7 +5044,8 @@ const FIELD_DESCS: Record<string, string> = {
   interactions: "Sum of available engagement counts (likes + comments + shares + saves). Null when none of those are present.",
   upvotes: "Upvote count.",
   dislikes: "Dislike count.",
-  score: "Vote score (Reddit: ups − downs when both are exposed).",
+  score:
+    "Vote score. On Reddit this is the platform's authoritative score field (not ups−downs — public JSON almost always zeros downs). Prefer score over upvotes when both are present.",
   rank: "Rank position in the list.",
   engagementRate:
     "Engagement rate. Meaning depends on engagementRateBasis — never compare values across different bases. Post/compare analytics: interactions/views (ratio 0–1+). TikTok popular-creators: Creative Center interact rate (percent) or avgLikesPerVideo/followers × 100.",
@@ -5424,6 +5457,31 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     id: "Stable Reddit fullname (t5_…). Prefer this over name for joins.",
     type: 'Subreddit access type: "public" | "restricted" | "private" | "archived" when Reddit exposes it.',
     nsfw: "Whether Reddit marks the community over-18.",
+  },
+  "reddit-search": {
+    score:
+      "Reddit's authoritative post score field (not ups−downs). Public JSON almost always zeros downs; when scoreHidden is true Reddit may return 0 here while upvoteRatio is still set.",
+    upvotes:
+      "Reddit ups when present (usually equals score). Not a substitute for score when hide_score zeros both.",
+    downs: "Downvote count when Reddit exposes it (almost always 0 on public JSON).",
+    upvoteRatio: "Upvote ratio 0–1 when Reddit exposes it — useful controversy signal even when score is hidden.",
+    scoreHidden:
+      "true when Reddit hide_score is set (new posts). score/upvotes may be 0 until the hide window ends.",
+    authorFullname: "Stable Reddit account fullname (t2_…). Prefer this over author for joins.",
+  },
+  "reddit-subreddit-search": {
+    score:
+      "Reddit's authoritative post score field (not ups−downs). See scoreHidden when score is temporarily zeroed.",
+    scoreHidden:
+      "true when Reddit hide_score is set (new posts). score/upvotes may be 0 until the hide window ends.",
+    authorFullname: "Stable Reddit account fullname (t2_…). Prefer this over author for joins.",
+  },
+  "reddit-subreddit-posts": {
+    score:
+      "Reddit's authoritative post score field (not ups−downs). See scoreHidden when score is temporarily zeroed.",
+    scoreHidden:
+      "true when Reddit hide_score is set (new posts). score/upvotes may be 0 until the hide window ends.",
+    authorFullname: "Stable Reddit account fullname (t2_…). Prefer this over author for joins.",
   },
   "bluesky-profile": {
     verified:

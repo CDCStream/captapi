@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
     category: "fix",
+    title: "Reddit search: authoritative score + scoreHidden (not ups−downs)",
+    description:
+      "Field docs claimed score was ups−downs, which misled readers when public JSON zeros downs and hide_score zeros score while upvoteRatio stays set. Mapper now always reads Reddit's score field (never invents from ups/downs), passes scoreHidden from hide_score, and fixes post-details' score or ups falsy collapse. Docs + FAQ cover the hide window and the posts-only limit vs ScrapeCreators comments[]/media[].",
+    items: [
+      "score = Reddit score field; scoreHidden from hide_score",
+      "post-details: stop score or ups (0 is valid)",
+      "FAQ: score 0 + upvoteRatio ≠ worthless; posts-only search",
+      "platformLimits: no comments[]/media[] on this surface yet",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
     title: "Reddit subreddit-details: ISO createdAt, rules[], t5_ id",
     description:
       "Docs example showed createdAt as a float-string Unix epoch (\"1201327674.0\") while FIELD_DESCS promised ISO 8601 — the worst date-format variant in the catalog. Mapper now never echoes raw epochs; live about.json + about/rules fill id (t5_…), activeUsers (currently online — not mislabeled weekly actives), rules[], and submitText. category field-doc no longer leaks YouTube SponsorBlock enums onto Reddit; sticky lint covers category. Param copy documents case-insensitive names (Captapi advantage vs ScrapeCreators' case-sensitive warning).",
