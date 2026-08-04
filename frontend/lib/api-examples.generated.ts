@@ -9983,9 +9983,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 223,
         "publishedAt": "2026-06-02T16:23:41.000Z",
         "authorId": "6958917445306926086",
-        "authorSecUid": "MS4wLjABAAAA9rB4k_Ei3NexA5p2exampleSecUid",
         "commentLanguage": "en",
-        "replyCount": 14
+        "replyCount": 14,
+        "authorSecUid": null
       },
       {
         "id": "7647102586621297429",
@@ -9995,9 +9995,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 635,
         "publishedAt": "2026-06-03T09:43:54.000Z",
         "authorId": "6958917445306926086",
-        "authorSecUid": "MS4wLjABAAAA9rB4k_Ei3NexA5p2exampleSecUid",
         "commentLanguage": "ru",
-        "replyCount": 0
+        "replyCount": 0,
+        "authorSecUid": null
       },
       {
         "id": "7646848703109612308",
@@ -10007,9 +10007,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 405,
         "publishedAt": "2026-06-02T17:18:38.000Z",
         "authorId": "6958917445306926086",
-        "authorSecUid": "MS4wLjABAAAA9rB4k_Ei3NexA5p2exampleSecUid",
         "commentLanguage": "ar",
-        "replyCount": 0
+        "replyCount": 0,
+        "authorSecUid": null
       },
       {
         "id": "7646829101696795412",
@@ -10019,9 +10019,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 9613,
         "publishedAt": "2026-06-02T16:02:29.000Z",
         "authorId": "6958917445306926086",
-        "authorSecUid": "MS4wLjABAAAA9rB4k_Ei3NexA5p2exampleSecUid",
         "commentLanguage": "ar",
-        "replyCount": 0
+        "replyCount": 0,
+        "authorSecUid": null
       },
       {
         "id": "7646812491309564673",
@@ -10031,9 +10031,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 2365,
         "publishedAt": "2026-06-02T14:58:21.000Z",
         "authorId": "6958917445306926086",
-        "authorSecUid": "MS4wLjABAAAA9rB4k_Ei3NexA5p2exampleSecUid",
         "commentLanguage": "en",
-        "replyCount": 0
+        "replyCount": 0,
+        "authorSecUid": null
       },
       {
         "id": "7648688233429566225",
@@ -10043,9 +10043,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 539,
         "publishedAt": "2026-06-07T16:16:53.000Z",
         "authorId": "6958917445306926086",
-        "authorSecUid": "MS4wLjABAAAA9rB4k_Ei3NexA5p2exampleSecUid",
         "commentLanguage": "en",
-        "replyCount": 0
+        "replyCount": 0,
+        "authorSecUid": null
       }
     ],
     "nextCursor": "6",
@@ -10853,78 +10853,72 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "query": "khaby",
     "totalReturned": 5,
     "hasMore": true,
-    "nextCursor": 10,
+    "nextCursor": 30,
     "users": [
       {
         "id": "127905465618821121",
         "secUid": "MS4wLjABAAAAwAg0rSzO65WQfz4RzQgGv2Xdv108BgPXhRrrmNVIHQZ9PO8-flwwRtEppYTS0OjA",
         "username": "khaby.lame",
         "displayName": "Khabane lame",
-        "bio": "Se vuoi ridere sei nel posto giusto?? If u wanna laugh u r in the right place??",
+        "bio": "Se vuoi ridere sei nel posto giusto😎 If u wanna laugh u r in the right place😎",
         "url": "https://www.tiktok.com/@khaby.lame",
-        "followers": 162500000,
+        "followers": 162476412,
         "following": 81,
-        "videos": 1343,
-        "likes": 2642875898,
+        "likes": 2650481169,
         "verified": true,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:100:100.webp",
-        "items": [
-          {
-            "id": "7123456789012345678",
-            "url": "https://www.tiktok.com/@khaby.lame/video/7123456789012345678",
-            "caption": "Sample video from search payload",
-            "views": 1200000,
-            "likes": 98000
-          }
-        ]
+        "profileImage": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=ef0e9f02&x-expires=1786006800&x-signature=7Mx8iglAOcSlnXlc8QyIBifQV0M%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
       },
       {
-        "id": "7000000000000000001",
-        "secUid": "MS4wLjABAAAAexampleSecUidKhabylam206",
-        "username": "khabylam206",
-        "displayName": "khaby lame",
-        "bio": "Content Creator",
-        "url": "https://www.tiktok.com/@khabylam206",
-        "followers": 316400,
-        "following": 120,
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/3dd8c5e3598ec508f5768144e7338d10~tplv-tiktokx-cropcenter:100:100.webp"
+        "id": "6663294979903422470",
+        "secUid": "MS4wLjABAAAAbq-1Yqpp1a6u5KbV_sMg93_FK7AN3d6MJeZ3H0Yj3vZXOtqFXXjc2TIkMW7flCxX",
+        "username": "espn",
+        "displayName": "ESPN",
+        "bio": "Serving Sports Fans. Anytime. Anywhere.",
+        "url": "https://www.tiktok.com/@espn",
+        "followers": 60100768,
+        "following": 657,
+        "likes": 5769632093,
+        "verified": true,
+        "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=7e4745a7&x-expires=1786006800&x-signature=cJrkoOAcA8KBqdaAWgBgeaE6f6w%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
       },
       {
-        "id": "7000000000000000002",
-        "secUid": "MS4wLjABAAAAexampleSecUidFanDute",
-        "username": "khaby_official_dute_",
-        "displayName": "khaby official fan dute",
-        "bio": "This is fan dutes account",
-        "url": "https://www.tiktok.com/@khaby_official_dute_",
-        "followers": 450300,
-        "following": 45,
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-useast2a-avt-0068-giso/ca094640e72bce422d1828e2309cbc63~tplv-tiktokx-cropcenter:100:100.webp"
+        "id": "6727327145951183878",
+        "secUid": "MS4wLjABAAAA8ezUaW4ecJX222ObGXxt07F9BIh4QH3-g1P1DHyChT2LLi2cn-vAE2R53-H672ZO",
+        "username": "willsmith",
+        "displayName": "Will Smith",
+        "bio": "Same kid from West Philly.",
+        "url": "https://www.tiktok.com/@willsmith",
+        "followers": 78072574,
+        "following": 51,
+        "likes": 668719165,
+        "verified": true,
+        "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/c76a0af4944c0724130deae566637458~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=7330eb92&x-expires=1786006800&x-signature=NMfaeL%2BXxxMTn8b6FXOn4RFzyoc%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
       },
       {
-        "id": "7000000000000000003",
-        "secUid": "MS4wLjABAAAAexampleSecUidDianis",
-        "username": "dianiskhaby",
-        "displayName": "dianis.khaby",
-        "bio": "Recilencia",
-        "url": "https://www.tiktok.com/@dianiskhaby",
-        "followers": 37400,
-        "following": 210,
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/92da10b46e4e7ce6f456a633bd7b9f61~tplv-tiktokx-cropcenter:100:100.webp"
+        "id": "134941634731003904",
+        "secUid": "MS4wLjABAAAAsny0dcfyctb1_fdyyiu7JOLnblf8y3jd64yTHQLQoc9O5m57HhjT94OdgfSmNgaG",
+        "username": "nba",
+        "displayName": "NBA",
+        "bio": "Home of NBA Hoops on TikTok 🏀",
+        "url": "https://www.tiktok.com/@nba",
+        "followers": 27157447,
+        "following": 267,
+        "likes": 1134973794,
+        "verified": true,
+        "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/8beb8b849e725f2776a11575b1e7aebf~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=2b85f252&x-expires=1786006800&x-signature=zfgWYt1dWPRNrAwTprWk1kgtowY%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
       },
       {
-        "id": "7000000000000000004",
-        "secUid": "MS4wLjABAAAAexampleSecUidNews",
-        "username": "esultareallakhaby",
-        "displayName": "Khaby Lame news and edits",
-        "bio": "FAN page of @Khabane lame",
-        "url": "https://www.tiktok.com/@esultareallakhaby",
-        "followers": 310600,
-        "following": 88,
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/7a149e5d55f6c0f769c387cc46cb9eeb~tplv-tiktokx-cropcenter:100:100.webp"
+        "id": "6614519312189947909",
+        "secUid": "MS4wLjABAAAABKjQkOz_IIzXXzEAl_9LGsWhvK-gBnlczwRPXK8EmxAp6K3X0qiaP5_OEqmm0XwG",
+        "username": "mrbeast",
+        "displayName": "MrBeast",
+        "bio": "Checkout My New Book!👇",
+        "url": "https://www.tiktok.com/@mrbeast",
+        "followers": 131127372,
+        "following": 354,
+        "likes": 1342163330,
+        "verified": true,
+        "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/1e2348ca19d394037718e3b1d3fc2958~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=8f3e1cdd&x-expires=1786006800&x-signature=skRnoQMZIE9cc9jUHrACaGsWVqM%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
       }
     ]
   },
@@ -11725,7 +11719,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "followers": 17500,
         "following": 6,
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/ff95fdfeca275eed2d2984d618a10530~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=d7015725&x-expires=1785405600&x-signature=Zs92egTgumV89yLzYImuFHbHTrI%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2"
+        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/ff95fdfeca275eed2d2984d618a10530~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=d7015725&x-expires=1785405600&x-signature=Zs92egTgumV89yLzYImuFHbHTrI%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
+        "id": "7084524072541307910",
+        "secUid": "MS4wLjABAAAAU2DhFzvcREPkAwTEDm5wYxPFCSf7l7g0GSQHY3rFZCBY1IlFORcpPL4TMDaxjNUq",
+        "createTime": "2022-04-09T09:37:50.000Z",
+        "createTimeUnix": 1649497070,
+        "language": "en"
       },
       {
         "username": "hawulet97",
@@ -11735,7 +11734,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "followers": 41,
         "following": 1239,
         "verified": false,
-        "profileImage": "https://p19-common-sign.tiktokcdn.com/tos-alisg-avt-0068/5acdd487480e04ffe37f451a62fa134d~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=9e5f5d27&x-expires=1785405600&x-signature=r06fBPyezVcEOXYXR%2Fn5PrC0kQc%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2"
+        "profileImage": "https://p19-common-sign.tiktokcdn.com/tos-alisg-avt-0068/5acdd487480e04ffe37f451a62fa134d~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=9e5f5d27&x-expires=1785405600&x-signature=r06fBPyezVcEOXYXR%2Fn5PrC0kQc%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
+        "id": "7636369819877950485",
+        "secUid": "MS4wLjABAAAA-iwqiDRUYsYB6EPWLtkKC7LnR81u_bnHPwV2hjD_6vvHCV5WRlc5imKT_JYNVLCl",
+        "createTime": "2026-05-05T11:35:24.000Z",
+        "createTimeUnix": 1777980924,
+        "language": "en"
       },
       {
         "username": "junaid_jutt924",
@@ -11745,7 +11749,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "followers": 3043,
         "following": 3112,
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/6508ca9751f0e8020ec9fb28eb06e5d8~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=f71c169a&x-expires=1785405600&x-signature=vnT49tPcbFXKRRKIbNvOzcLpiQ4%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2"
+        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/6508ca9751f0e8020ec9fb28eb06e5d8~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=f71c169a&x-expires=1785405600&x-signature=vnT49tPcbFXKRRKIbNvOzcLpiQ4%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
+        "id": "7074230742838379546",
+        "secUid": "MS4wLjABAAAAhxdZnpCTdh5qPQsMdpwxyUA3krVWlqY9G6G2QmEqKs6pkZYyevBlBHjfH0HdA4RM",
+        "createTime": "2022-10-25T14:43:39.000Z",
+        "createTimeUnix": 1666709019,
+        "language": "en"
       },
       {
         "username": "kingllamadas2",
@@ -11755,7 +11764,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "followers": 25,
         "following": 20,
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/34ffc6b458ca7d2fbbaf2c5c99df5136~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=94dc3240&x-expires=1785405600&x-signature=maO7t5UP5bAof%2BIztbSx2q7XAj8%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2"
+        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/34ffc6b458ca7d2fbbaf2c5c99df5136~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=94dc3240&x-expires=1785405600&x-signature=maO7t5UP5bAof%2BIztbSx2q7XAj8%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
+        "id": "7667457811018089490",
+        "secUid": "MS4wLjABAAAA1QXpCRqsxFvrPFGQk9aDNzJNx4prZziUd8UG_hHFay9Crar_WV97Ks73KJo-DF5b",
+        "createTime": "2026-07-28T06:12:50.000Z",
+        "createTimeUnix": 1785219170,
+        "language": "es"
       },
       {
         "username": "farukkolapo",
@@ -11767,7 +11781,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "verified": false,
         "profileImage": "https://p19-common-sign.tiktokcdn.com/tos-alisg-avt-0068/e0b764c22fe648efa6bfba4c91bfac13~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=4b0219f8&x-expires=1785405600&x-signature=AM%2F90JOcGDiKecFfy8sHawPF3pw%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2"
       }
-    ]
+    ],
+    "total": 162476412,
+    "hasMore": true,
+    "nextCursor": "1680000000000"
   },
   "tiktok-user-followings": {
     "url": "https://www.tiktok.com/@khaby.lame",
@@ -11781,7 +11798,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "followers": 9282,
         "following": 4,
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/c70537d713e096c514e7e8e27be0cf39~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=616e8df2&x-expires=1785405600&x-signature=w%2BadFFsdbgxPDur8Y6yIeu5%2FYU8%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2"
+        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/c70537d713e096c514e7e8e27be0cf39~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=616e8df2&x-expires=1785405600&x-signature=w%2BadFFsdbgxPDur8Y6yIeu5%2FYU8%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
+        "id": "7221286453480817706",
+        "secUid": "MS4wLjABAAAAg4rTr5twSx0cDvC90WsFq6Zk2HpEcyOVjWMV1rb37RyZkyjSMTpnHzCTsTU2UObL",
+        "createTime": "2023-04-12T22:02:13.000Z",
+        "createTimeUnix": 1681336933,
+        "language": "en"
       },
       {
         "username": "fifaworldcup",
@@ -11791,7 +11813,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "followers": 86600000,
         "following": 93,
         "verified": true,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-useast2a-avt-0068-euttp/d260685754e3ae8139f47e7ec9fda7e9~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=4d3bd79a&x-expires=1785405600&x-signature=UpkTTNy5CO1ckN0jnBQ1jrq4nRo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2"
+        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-useast2a-avt-0068-euttp/d260685754e3ae8139f47e7ec9fda7e9~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=4d3bd79a&x-expires=1785405600&x-signature=UpkTTNy5CO1ckN0jnBQ1jrq4nRo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
+        "id": "7059636734342038534",
+        "secUid": "MS4wLjABAAAApf8MKCE246Q60LYymhpec5wPGF-uaGZgzl7W19U-AxtzHzeydNdE8xZedO_gUWDL",
+        "createTime": "2022-02-01T16:22:46.000Z",
+        "createTimeUnix": 1643732566,
+        "language": "en"
       },
       {
         "username": "tiktokcreators",
@@ -11801,7 +11828,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "followers": 8500000,
         "following": 568,
         "verified": true,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/7310199914919673862~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=1e72a8a7&x-expires=1785405600&x-signature=LMjOcpQXxIoqMurpObGJ%2FP7QjsQ%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2"
+        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/7310199914919673862~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=1e72a8a7&x-expires=1785405600&x-signature=LMjOcpQXxIoqMurpObGJ%2FP7QjsQ%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
+        "id": "6551237489917432832",
+        "secUid": "MS4wLjABAAAAXqqA-cLDC0hfQPIrS5APYNsg04zkl-socWCkqkI3UIOaEe6_Qnokg0GcWpLnMNQP",
+        "createTime": "2018-05-03T06:27:21.000Z",
+        "createTimeUnix": 1525328841,
+        "language": "en"
       },
       {
         "username": "christianzammataro",
@@ -11811,7 +11843,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "followers": 13000,
         "following": 209,
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/acdcc4d8e8390e04aa827d01f0ec161f~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=d646a014&x-expires=1785405600&x-signature=3Tp8hVjMxhKPOKseqAQJwZRde10%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2"
+        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/acdcc4d8e8390e04aa827d01f0ec161f~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=d646a014&x-expires=1785405600&x-signature=3Tp8hVjMxhKPOKseqAQJwZRde10%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
+        "id": "222838918348439552",
+        "secUid": "MS4wLjABAAAAZUDexX-Wq7YFVG8V5DCx40AnohGQorRgMT_4xd3fvfFjJjc3TNZUjCTq-izbWsH5",
+        "createTime": "2017-04-29T13:14:13.000Z",
+        "createTimeUnix": 1493471653,
+        "language": "it"
       },
       {
         "username": "mouhamed.mamba",
@@ -11821,9 +11858,17 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "followers": 15300,
         "following": 121,
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/e4933cfd8c6de6ab18e4ae1fea6e12cb~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=1bcb3898&x-expires=1785405600&x-signature=6fpMDSKVNCJE%2FpikJbVXEryrtfk%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2"
+        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/e4933cfd8c6de6ab18e4ae1fea6e12cb~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=1bcb3898&x-expires=1785405600&x-signature=6fpMDSKVNCJE%2FpikJbVXEryrtfk%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
+        "id": "7136282086625117190",
+        "secUid": "MS4wLjABAAAAOxGQ-KTYr2jnwUcZFdxSWDgaue4batLT1piAMbu_PAsjkzo9Buxw5wiVloPtEwBw",
+        "createTime": "2022-08-27T08:15:26.000Z",
+        "createTimeUnix": 1661588126,
+        "language": "it"
       }
-    ]
+    ],
+    "total": 81,
+    "hasMore": true,
+    "nextCursor": "1680000000000"
   },
   "tiktok-video-details": {
     "platform": "tiktok",

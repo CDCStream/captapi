@@ -1,11 +1,11 @@
 ---
 name: captapi
-description: Use when extracting public social-media and web data from YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, public Ad Libraries, or Captapi account usage — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, commerce data, credit balance, and request history. Captapi is one REST API (and MCP server) covering all 28 data platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
+description: Use when extracting public social-media and web data from YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, public Ad Libraries, or Captapi account usage — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, commerce data, credit balance, and request history. Captapi is one REST API (and MCP server) covering all 33 data platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
 ---
 
 # Captapi
 
-Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, public Ad Libraries, and account usage utilities**. One key works across all 28 data platforms. No OAuth, no per-platform SDKs. Responses are clean JSON. Pass cache=true for the 24h response cache (repeat hits cost 0 credits); default is cache=false (always fresh). 174 endpoints total.
+Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, public Ad Libraries, and account usage utilities**. One key works across all 33 data platforms. No OAuth, no per-platform SDKs. Responses are clean JSON. Pass cache=true for the 24h response cache (repeat hits cost 0 credits); default is cache=false (always fresh). 174 endpoints total.
 
 - Base URL: `https://api.captapi.com`
 - Docs: https://captapi.com/docs · Full machine reference: https://captapi.com/llms-full.txt
@@ -93,25 +93,25 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `youtube_transcript` | `/v1/youtube/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 1 |
 | `youtube_summarize` | `/v1/youtube/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 3 |
 | `youtube_video_details` | `/v1/youtube/video-details` | `url` (string), `cache`? (boolean) | 1 |
-| `youtube_comments` | `/v1/youtube/comments` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 20 |
+| `youtube_comments` | `/v1/youtube/comments` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
 | `youtube_channel_details` | `/v1/youtube/channel-details` | `url` (string), `cache`? (boolean) | 1 |
 | `youtube_search` | `/v1/youtube/search` | `q` (string), `limit`? (number), `cursor`? (string), `type`? (string), `sortBy`? (string), `uploadDate`? (string), `duration`? (string), `region`? (string), `cache`? (boolean) | 2 |
-| `youtube_channel_videos` | `/v1/youtube/channel-videos` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 20 |
+| `youtube_channel_videos` | `/v1/youtube/channel-videos` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 2 |
 | `youtube_playlist_videos` | `/v1/youtube/playlist-videos` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 2 |
 | `youtube_playlist` | `/v1/youtube/playlist` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 2 |
 | `youtube_shorts_transcript` | `/v1/youtube/shorts/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 1 |
 | `youtube_shorts_summarize` | `/v1/youtube/shorts/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 3 |
 | `youtube_shorts_details` | `/v1/youtube/shorts/video-details` | `url` (string), `cache`? (boolean) | 1 |
-| `youtube_shorts_comments` | `/v1/youtube/shorts/comments` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `youtube_shorts_comments` | `/v1/youtube/shorts/comments` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
 | `youtube_channel_shorts` | `/v1/youtube/channel-shorts` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `youtube_trending_shorts` | `/v1/youtube/trending-shorts` | `q`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `youtube_channel_streams` | `/v1/youtube/channel-streams` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `youtube_hashtag_search` | `/v1/youtube/hashtag-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 20 |
-| `youtube_comment_replies` | `/v1/youtube/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number), `cache`? (boolean) | 20 |
-| `youtube_channel_playlists` | `/v1/youtube/channel-playlists` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
+| `youtube_comment_replies` | `/v1/youtube/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `youtube_channel_playlists` | `/v1/youtube/channel-playlists` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `youtube_community_posts` | `/v1/youtube/community-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 1 |
 | `youtube_community_post_details` | `/v1/youtube/community-post-details` | `url` (string), `cache`? (boolean) | 1 |
-| `youtube_video_sponsors` | `/v1/youtube/video-sponsors` | `url` (string), `cache`? (boolean) | 1 |
+| `youtube_video_sponsors` | `/v1/youtube/video-sponsors` | `url` (string), `minVotes`? (number), `categories`? (string), `cache`? (boolean) | 1 |
 
 ### TikTok
 
@@ -127,14 +127,14 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `tiktok_search_suggestions` | `/v1/tiktok/search-suggestions` | `q` (string), `country`? (string), `language`? (string), `limit`? (number), `cache`? (boolean) | 28 |
 | `tiktok_channel_posts` | `/v1/tiktok/channel-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
 | `tiktok_comment_replies` | `/v1/tiktok/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
-| `tiktok_user_followers` | `/v1/tiktok/user-followers` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
-| `tiktok_user_followings` | `/v1/tiktok/user-followings` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
+| `tiktok_user_followers` | `/v1/tiktok/user-followers` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 1 |
+| `tiktok_user_followings` | `/v1/tiktok/user-followings` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 1 |
 | `tiktok_music_posts` | `/v1/tiktok/music-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 32 |
-| `tiktok_top_search` | `/v1/tiktok/top-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 14 |
+| `tiktok_top_search` | `/v1/tiktok/top-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `tiktok_search_by_hashtag` | `/v1/tiktok/search/hashtag` | `q` (string), `limit`? (number), `cursor`? (number), `region`? (string), `cache`? (boolean) | 14 |
 | `tiktok_search_users` | `/v1/tiktok/search/users` | `q` (string), `limit`? (number), `cursor`? (number), `cache`? (boolean) | 1 |
 | `tiktok_song_details` | `/v1/tiktok/song-details` | `url` (string), `cache`? (boolean) | 1 |
-| `tiktok_trending_feed` | `/v1/tiktok/trending-feed` | `country`? (string), `limit`? (number), `cache`? (boolean) | 14 |
+| `tiktok_trending_feed` | `/v1/tiktok/trending-feed` | `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `tiktok_popular_hashtags` | `/v1/tiktok/popular-hashtags` | `query`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `tiktok_live` | `/v1/tiktok/live` | `url` (string), `cache`? (boolean) | 1 |
 | `tiktok_live_info` | `/v1/tiktok/live-info` | `url` (string), `cache`? (boolean) | 7 |
@@ -155,7 +155,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `instagram_trending_reels` | `/v1/instagram/trending-reels` | `country`? (string), `limit`? (number), `cache`? (boolean) | 1 |
 | `instagram_tagged_posts` | `/v1/instagram/tagged-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 1 |
 | `instagram_reels_by_audio_id` | `/v1/instagram/reels-by-audio-id` | `audio_id` (string), `limit`? (number), `cache`? (boolean) | 28 |
-| `instagram_hashtag_search` | `/v1/instagram/hashtag-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 12 |
+| `instagram_hashtag_search` | `/v1/instagram/hashtag-search` | `q` (string), `limit`? (number), `mediaType`? (string), `cache`? (boolean) | 2 |
 | `instagram_profile_search` | `/v1/instagram/profile-search` | `q` (string), `cache`? (boolean) | 1 |
 | `instagram_embed` | `/v1/instagram/embed` | `url` (string), `cache`? (boolean) | 1 |
 | `instagram_basic_profile` | `/v1/instagram/basic-profile` | `userId` (string), `cache`? (boolean) | 1 |
@@ -164,21 +164,15 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `facebook_details` | `/v1/facebook/details` | `url` (string), `cache`? (boolean) | 1 |
+| `facebook_details` | `/v1/facebook/details` | `url` (string), `cache`? (boolean) | 2 |
 | `facebook_summarize` | `/v1/facebook/summarize` | `url` (string), `cache`? (boolean) | 4 |
 | `facebook_comments` | `/v1/facebook/comments` | `url`? (string), `feedbackId`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `facebook_page_details` | `/v1/facebook/page-details` | `url` (string), `cache`? (boolean) | 2 |
 | `facebook_profile_posts` | `/v1/facebook/profile-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 12 |
-| `facebook_profile_reels` | `/v1/facebook/profile-reels` | `url` (string), `limit`? (number), `cache`? (boolean) | 36 |
+| `facebook_profile_reels` | `/v1/facebook/profile-reels` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `facebook_group_posts` | `/v1/facebook/group-posts` | `url` (string), `limit`? (number), `sortBy`? (string), `cache`? (boolean) | 2 |
 | `facebook_comment_replies` | `/v1/facebook/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number), `cache`? (boolean) | 2 |
-| `facebook_marketplace_search` | `/v1/facebook/marketplace-search` | `q` (string), `location` (string), `limit`? (number), `details`? (string), `cache`? (boolean) | 28 |
-| `facebook_marketplace_location_search` | `/v1/facebook/marketplace-location-search` | `q` (string), `limit`? (number), `details`? (string), `cache`? (boolean) | 17 |
-| `facebook_event_search` | `/v1/facebook/event-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 40 |
-| `facebook_event_details` | `/v1/facebook/event-details` | `url` (string), `cache`? (boolean) | 2 |
 | `facebook_profile_photos` | `/v1/facebook/profile-photos` | `url` (string), `limit`? (number), `cache`? (boolean) | 12 |
-| `facebook_profile_events` | `/v1/facebook/profile-events` | `url` (string), `limit`? (number), `cache`? (boolean) | 40 |
-| `facebook_marketplace_item` | `/v1/facebook/marketplace-item` | `url` (string), `cache`? (boolean) | 1 |
 
 ### Twitter / X
 
@@ -187,8 +181,8 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `twitter_tweet_details` | `/v1/twitter/tweet-details` | `url` (string), `cache`? (boolean) | 1 |
 | `twitter_transcript` | `/v1/twitter/transcript` | `url` (string), `cache`? (boolean) | 1 |
 | `twitter_profile` | `/v1/twitter/profile` | `url` (string), `cache`? (boolean) | 1 |
-| `twitter_user_tweets` | `/v1/twitter/user-tweets` | `url` (string), `limit`? (number), `cache`? (boolean) | 14 |
-| `twitter_search` | `/v1/twitter/search` | `q` (string), `limit`? (number), `cache`? (boolean) | 14 |
+| `twitter_user_tweets` | `/v1/twitter/user-tweets` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `twitter_search` | `/v1/twitter/search` | `q` (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `twitter_community` | `/v1/twitter/community` | `url` (string), `cache`? (boolean) | 1 |
 | `twitter_community_tweets` | `/v1/twitter/community-tweets` | `url` (string), `limit`? (number), `cache`? (boolean) | 18 |
 
@@ -196,13 +190,13 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `reddit_subreddit_posts` | `/v1/reddit/subreddit-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 10 |
+| `reddit_subreddit_posts` | `/v1/reddit/subreddit-posts` | `url` (string), `limit`? (number), `sort`? (string), `timeframe`? (string), `cursor`? (string), `cache`? (boolean) | 2 |
 | `reddit_post_details` | `/v1/reddit/post-details` | `url` (string), `cache`? (boolean) | 1 |
-| `reddit_post_comments` | `/v1/reddit/post-comments` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
-| `reddit_post_transcript` | `/v1/reddit/post-transcript` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
-| `reddit_search` | `/v1/reddit/search` | `q` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 10 |
+| `reddit_post_comments` | `/v1/reddit/post-comments` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `reddit_post_transcript` | `/v1/reddit/post-transcript` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `reddit_search` | `/v1/reddit/search` | `q` (string), `sort`? (string), `timeframe`? (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
 | `reddit_subreddit_details` | `/v1/reddit/subreddit-details` | `url` (string), `cache`? (boolean) | 1 |
-| `reddit_subreddit_search` | `/v1/reddit/subreddit-search` | `url` (string), `q` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 10 |
+| `reddit_subreddit_search` | `/v1/reddit/subreddit-search` | `url` (string), `q` (string), `sort`? (string), `timeframe`? (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
 
 ### Threads
 
@@ -240,7 +234,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `linkedin_company` | `/v1/linkedin/company` | `url` (string), `cache`? (boolean) | 2 |
 | `linkedin_post_details` | `/v1/linkedin/post-details` | `url` (string), `cache`? (boolean) | 1 |
 | `linkedin_post_transcript` | `/v1/linkedin/post-transcript` | `url` (string), `cache`? (boolean) | 1 |
-| `linkedin_company_posts` | `/v1/linkedin/company-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 16 |
+| `linkedin_company_posts` | `/v1/linkedin/company-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 16 |
 | `linkedin_search_posts` | `/v1/linkedin/search-posts` | `q` (string), `sort`? (string), `limit`? (number), `cache`? (boolean) | 16 |
 
 ### Rumble
@@ -258,9 +252,64 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | --- | --- | --- | --- |
 | `tiktok_shop_search` | `/v1/tiktok-shop/shop-search` | `q` (string), `region`? (string), `limit`? (number), `cache`? (boolean) | 56 |
 | `tiktok_shop_products` | `/v1/tiktok-shop/shop-products` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
-| `tiktok_shop_product_details` | `/v1/tiktok-shop/product-details` | `url` (string), `cache`? (boolean) | 14 |
+| `tiktok_shop_product_details` | `/v1/tiktok-shop/product-details` | `url` (string), `region`? (string), `cache`? (boolean) | 14 |
 | `tiktok_shop_product_reviews` | `/v1/tiktok-shop/product-reviews` | `url` (string), `limit`? (number), `cache`? (boolean) | 45 |
 | `tiktok_shop_user_showcase` | `/v1/tiktok-shop/user-showcase` | `username` (string), `limit`? (number), `cache`? (boolean) | 45 |
+
+### Facebook Marketplace
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `facebook_marketplace_search` | `/v1/facebook/marketplace-search` | `q` (string), `location` (string), `limit`? (number), `minPrice`? (number), `maxPrice`? (number), `sortBy`? (string), `daysSinceListed`? (string), `condition`? (string), `deliveryMethod`? (string), `availability`? (string), `radiusMiles`? (number), `category`? (string), `cursor`? (string), `details`? (string), `cache`? (boolean) | 2 |
+| `facebook_marketplace_location_search` | `/v1/facebook/marketplace-location-search` | `q` (string), `limit`? (number), `details`? (string), `cache`? (boolean) | 17 |
+| `facebook_marketplace_item` | `/v1/facebook/marketplace-item` | `url` (string), `cache`? (boolean) | 1 |
+
+### Facebook Events
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `facebook_event_search` | `/v1/facebook/event-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 40 |
+| `facebook_event_details` | `/v1/facebook/event-details` | `url` (string), `cache`? (boolean) | 2 |
+| `facebook_profile_events` | `/v1/facebook/profile-events` | `url` (string), `limit`? (number), `cache`? (boolean) | 40 |
+
+### Facebook Ad Library
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `facebook_ad_library_search` | `/v1/ad-library/facebook/search` | `q` (string), `country`? (string), `limit`? (number), `status`? (string), `media_type`? (string), `ad_type`? (string), `search_type`? (string), `sort_by`? (string), `start_date`? (string), `end_date`? (string), `cache`? (boolean) | 2 |
+| `facebook_ad_library_company_ads` | `/v1/ad-library/facebook/company-ads` | `url` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `facebook_ad_library_search_companies` | `/v1/ad-library/facebook/search-companies` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `facebook_ad_library_ad_details` | `/v1/ad-library/facebook/ad-details` | `url` (string), `cache`? (boolean) | 2 |
+| `facebook_ad_library_ad_transcript` | `/v1/ad-library/facebook/ad-transcript` | `url` (string), `cache`? (boolean) | 17 |
+
+### TikTok Ad Library
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `tiktok_ad_library_search` | `/v1/ad-library/tiktok/search` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `tiktok_ad_library_top_ads` | `/v1/ad-library/tiktok/top-ads` | `q`? (string), `country`? (string), `period`? (number), `orderBy`? (string), `industry`? (string), `objective`? (string), `adFormat`? (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `tiktok_ad_library_ad_details` | `/v1/ad-library/tiktok/ad-details` | `url` (string), `country`? (string), `cache`? (boolean) | 2 |
+
+### Google Ad Library
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `google_ad_library_company_ads` | `/v1/ad-library/google/company-ads` | `advertiser` (string), `country`? (string), `region`? (string), `start_date`? (string), `end_date`? (string), `cursor`? (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `google_ad_library_ad_details` | `/v1/ad-library/google/ad-details` | `creative_id` (string), `country`? (string), `cache`? (boolean) | 2 |
+| `google_ad_library_advertiser_search` | `/v1/ad-library/google/advertiser-search` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 1 |
+
+### LinkedIn Ad Library
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `linkedin_ad_library_search_ads` | `/v1/ad-library/linkedin/search-ads` | `q`? (string), `keyword`? (string), `companyId`? (string), `country`? (string), `countries`? (string), `startDate`? (string), `endDate`? (string), `cursor`? (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `linkedin_ad_library_ad_details` | `/v1/ad-library/linkedin/ad-details` | `url` (string), `cache`? (boolean) | 2 |
+
+### Amazon Shop
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `amazon_shop_page` | `/v1/amazon-shop/page` | `url` (string), `marketplace`? (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 1 |
 
 ### GitHub
 
@@ -282,7 +331,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `twitch_profile` | `/v1/twitch/profile` | `url` (string), `cache`? (boolean) | 1 |
-| `twitch_user_videos` | `/v1/twitch/user-videos` | `url` (string), `limit`? (number), `cache`? (boolean) | 34 |
+| `twitch_user_videos` | `/v1/twitch/user-videos` | `url` (string), `limit`? (number), `filterBy`? (string), `sortBy`? (string), `cursor`? (string), `cache`? (boolean) | 2 |
 | `twitch_user_schedule` | `/v1/twitch/user-schedule` | `url` (string), `cache`? (boolean) | 1 |
 | `twitch_clip` | `/v1/twitch/clip` | `url` (string), `cache`? (boolean) | 1 |
 
@@ -315,7 +364,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `snapchat_user_profile` | `/v1/snapchat/user-profile` | `url` (string), `cache`? (boolean) | 11 |
+| `snapchat_user_profile` | `/v1/snapchat/user-profile` | `url` (string), `cache`? (boolean) | 1 |
 
 ### Truth Social
 
@@ -330,12 +379,6 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `kick_clip` | `/v1/kick/clip` | `url` (string), `limit`? (number), `cache`? (boolean) | 1 |
-
-### Amazon Shop
-
-| Tool / endpoint | REST path | Parameters | Credits |
-| --- | --- | --- | --- |
-| `amazon_shop_page` | `/v1/amazon-shop/page` | `url` (string), `marketplace`? (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 1 |
 
 ### Kwai
 
@@ -369,7 +412,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | --- | --- | --- | --- |
 | `linkme_profile` | `/v1/linkme/profile` | `url` (string), `cache`? (boolean) | 4 |
 
-### Account
+### CaptAPI Account
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
@@ -377,24 +420,6 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `account_request_history` | `/v1/account/request-history` | `limit`? (number) | 0 |
 | `account_daily_usage` | `/v1/account/daily-usage` | `days`? (number) | 0 |
 | `account_most_used_routes` | `/v1/account/most-used-routes` | `days`? (number), `limit`? (number) | 0 |
-
-### Public Ad Libraries
-
-| Tool / endpoint | REST path | Parameters | Credits |
-| --- | --- | --- | --- |
-| `facebook_ad_library_search` | `/v1/ad-library/facebook/search` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
-| `facebook_ad_library_company_ads` | `/v1/ad-library/facebook/company-ads` | `url` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
-| `facebook_ad_library_search_companies` | `/v1/ad-library/facebook/search-companies` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
-| `facebook_ad_library_ad_details` | `/v1/ad-library/facebook/ad-details` | `url` (string), `cache`? (boolean) | 2 |
-| `facebook_ad_library_ad_transcript` | `/v1/ad-library/facebook/ad-transcript` | `url` (string), `cache`? (boolean) | 2 |
-| `tiktok_ad_library_search` | `/v1/ad-library/tiktok/search` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
-| `tiktok_ad_library_top_ads` | `/v1/ad-library/tiktok/top-ads` | `q`? (string), `country`? (string), `period`? (number), `orderBy`? (string), `industry`? (string), `objective`? (string), `adFormat`? (string), `limit`? (number), `cache`? (boolean) | 2 |
-| `tiktok_ad_library_ad_details` | `/v1/ad-library/tiktok/ad-details` | `url` (string), `country`? (string), `cache`? (boolean) | 2 |
-| `google_ad_library_company_ads` | `/v1/ad-library/google/company-ads` | `advertiser` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
-| `google_ad_library_ad_details` | `/v1/ad-library/google/ad-details` | `creative_id` (string), `country`? (string), `cache`? (boolean) | 2 |
-| `google_ad_library_advertiser_search` | `/v1/ad-library/google/advertiser-search` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 1 |
-| `linkedin_ad_library_search_ads` | `/v1/ad-library/linkedin/search-ads` | `q`? (string), `keyword`? (string), `companyId`? (string), `country`? (string), `countries`? (string), `startDate`? (string), `endDate`? (string), `cursor`? (string), `limit`? (number), `cache`? (boolean) | 2 |
-| `linkedin_ad_library_ad_details` | `/v1/ad-library/linkedin/ad-details` | `url` (string), `cache`? (boolean) | 2 |
 
 ---
 Generated from the Captapi catalog. Do not edit by hand — run `node generate.mjs`.

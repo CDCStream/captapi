@@ -1,6 +1,6 @@
 ﻿# SC parity backlog (Captapi)
 
-Last updated: 2026-08-03 (after YouTube block audit + `310b2c8`).
+Last updated: 2026-08-04 (TikTok user-followers/followings + search-users examples).
 
 Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` → `api-examples.generated.ts`) — ship code + refresh snapshot or the docs still look broken.
 
@@ -15,21 +15,23 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - [x] `channel-videos` / `channel-streams` / `channel-shorts`: player enrich path in code
 - [x] `popular-hashtags`: Creative Center population videoCount vs sampleVideoCount (verify on current docs stamp)
 - [x] Community post details: likeCount int + likeCountText (example may lag — re-check stamp)
+- [x] TikTok `user-followers` / `user-followings`: id + secUid + createTime/region/language + total + nextCursor; native flat 1 credit
+- [x] TikTok `search-users` docs example: live profiles (no `exampleSecUid` / filler ids)
+- [x] Price transparency on followers (Apify ~0.4/user) — same honesty as search-users; Ad Library 17/70 already documented as capped
 
 ## Next turn — priority order
 
 | # | Work | Effort | Notes |
 |---|------|--------|-------|
-| 1 | Re-verify build stamp + examples after deploy | Low | Footer must show latest docs date on /apis, playlist, comments, community-post-details |
-| 2 | totalVideos / universe size on list endpoints | Low | SC pattern; exists on youtube/comments + playlist; spread where promised |
-| 3 | trending-shorts → real trend source (not keyword search) | Medium | Marked broken in YouTube block closeout |
-| 4 | channel-shorts / shorts-comments pricing (20 vs flat 2) | Low | Confirm live billing + docs |
-| 5 | channel-streams Live tab only (not Videos bleed) | Medium | Live-tab gate in code — confirm prod + docs |
-| 6 | comment-replies: nextCursor + hasMore (SC embeds repliesContinuationToken on comments) | Medium | Max 500 without cursor loses deep threads |
-| 7 | video-sponsors: overlap + minVotes (confirm live/docs) | Low | |
-| 8 | viewCountApproximate shape consistency across list endpoints | Very low | |
-| 9 | Ad Library filters + LinkedIn targeting{} | Medium | |
-| 10 | Remaining platforms (TikTok 9, Twitter 5, Threads 5, …) | Medium | Continue SC-first audit |
+| 1 | Re-verify TT followers live on prod (signer on) | Low | Confirm id/secUid/total/nextCursor + 1 credit billing |
+| 2 | Remaining TikTok endpoints (trend trio, shop leftovers, …) | Medium | Continue SC-first |
+| 3 | totalVideos / universe size on list endpoints | Low | SC pattern; exists on youtube/comments + playlist + TT followers |
+| 4 | trending-shorts → real trend source (not keyword search) | Medium | Marked broken in YouTube block closeout |
+| 5 | channel-shorts / shorts-comments pricing (20 vs flat 2) | Low | Confirm live billing + docs |
+| 6 | channel-streams Live tab only (not Videos bleed) | Medium | Live-tab gate in code — confirm prod + docs |
+| 7 | comment-replies: nextCursor + hasMore | Medium | Max 500 without cursor loses deep threads |
+| 8 | Ad Library filters + LinkedIn targeting{} | Medium | |
+| 9 | Remaining platforms (Twitter 5, Threads 5, …) | Medium | Continue SC-first audit |
 
 ## YouTube — open quality notes
 
@@ -39,11 +41,6 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - author.channelId still often missing on comments (recurring).
 - order (top/newest) missing on comments.
 - publishedTime ISO on replies: confirm live.
-
-## SC reference (auditor has payloads)
-
-- Playlist: SC `/v1/youtube/playlist` (totalVideos, owner{}, video id, channel{}; no viewCount on SC playlist).
-- Comment replies: SC has no separate replies endpoint — repliesContinuationToken on `/v1/youtube/video/comments`.
 
 ## Process
 

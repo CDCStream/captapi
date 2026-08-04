@@ -50,6 +50,19 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
+    category: "improvement",
+    title: "TikTok user-followers/followings: secUid, cursor, total — search-users parity",
+    description:
+      "GET /v1/tiktok/user-followers and /user-followings now return the same identity fields as search-users (id + secUid), plus createTime/createTimeUnix, region, and language when TikTok exposes them. Responses include total (profile followerCount/followingCount), hasMore, and nextCursor (TikTok minCursor). Native path is flat 1 credit (was ~20 Apify); Apify fallback stays ~0.4/user (min 5). Docs examples: search-users fake exampleSecUid rows replaced with live profiles; followers/followings snapshots show id/secUid + total.",
+    items: [
+      "user-followers/followings: id + secUid + createTime/region/language",
+      "total + nextCursor/hasMore (minCursor) — page mega audiences",
+      "Native flat 1 credit (SC parity); Apify ~0.4/user documented",
+      "search-users docs example: real secUid (no exampleSecUid filler)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
     category: "fix",
     title: "hasCreatorHeart false positives; refresh playlist examples + totalVideos",
     description:

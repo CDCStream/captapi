@@ -128,6 +128,8 @@ export interface YoutubeShortsCommentsParams {
   url: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -142,7 +144,7 @@ export interface YoutubeChannelShortsParams {
 }
 
 export interface YoutubeTrendingShortsParams {
-  /** Seed keyword for trending Shorts. Default trending. */
+  /** Optional topic seed for the reel sequence. Omit for default trending feed. */
   q?: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
@@ -153,7 +155,7 @@ export interface YoutubeTrendingShortsParams {
 export interface YoutubeChannelStreamsParams {
   /** YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
+  /** Max items to return. Default 20, max 200. Flat 2 credits per call. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -209,6 +211,10 @@ export interface YoutubeCommunityPostDetailsParams {
 export interface YoutubeVideoSponsorsParams {
   /** Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Minimum votes (default 0; drops votes < 0). */
+  minVotes?: number;
+  /** Comma-separated categories (default sponsor,selfpromo,interaction). */
+  categories?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -263,19 +269,19 @@ export class YoutubeApi {
   shortsDetails(params: YoutubeShortsDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/shorts/video-details", params);
   }
-  /** YouTube Shorts Comments — Comments on a YouTube Short. (2 credits) */
+  /** YouTube Shorts Comments — Comments on a YouTube Short — same engine as /comments (flat 2 credits). (2 credits) */
   shortsComments(params: YoutubeShortsCommentsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/shorts/comments", params);
   }
-  /** YouTube Channel Shorts — List a channel's Shorts. (20 credits) */
+  /** YouTube Channel Shorts — List a channel's Shorts with player-enriched fields. (2 credits) */
   channelShorts(params: YoutubeChannelShortsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-shorts", params);
   }
-  /** YouTube Trending Shorts — Discover trending YouTube Shorts by seed keyword. (28 credits) */
+  /** YouTube Trending Shorts — YouTube Shorts reel/trending feed (not a keyword search). (2 credits) */
   trendingShorts(params: YoutubeTrendingShortsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/trending-shorts", params);
   }
-  /** YouTube Channel Streams — List a channel's live/past streams. (20 credits) */
+  /** YouTube Channel Streams — Channel Live tab only (empty when hasLiveTab=false) — player-enriched streams. (2 credits) */
   channelStreams(params: YoutubeChannelStreamsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-streams", params);
   }
@@ -287,19 +293,19 @@ export class YoutubeApi {
   commentReplies(params: YoutubeCommentRepliesParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/comment-replies", params);
   }
-  /** YouTube Channel Playlists — List a channel's playlists. (2 credits) */
+  /** YouTube Channel Playlists — List a channel's playlists — id, title, videoCount, thumbnailUrl. (2 credits) */
   channelPlaylists(params: YoutubeChannelPlaylistsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-playlists", params);
   }
-  /** YouTube Community Posts — Community posts — numeric likes, ISO dates, channel{}, video{}; cursor pagination. (1 credit) */
+  /** YouTube Community Posts — Community posts — likeCount+likeCountText, pollOptions, ISO dates, channel{}, cursor. (1 credit) */
   communityPosts(params: YoutubeCommunityPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/community-posts", params);
   }
-  /** YouTube Community Post Details — Details for a single YouTube community post. (1 credit) */
+  /** YouTube Community Post Details — One community post — same schema as list + comments (pollOptions, numeric likeCount). (1 credit) */
   communityPostDetails(params: YoutubeCommunityPostDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/community-post-details", params);
   }
-  /** YouTube Video Sponsors — Sponsor / self-promo / interaction segments in a YouTube video (via SponsorBlock). (1 credit) */
+  /** YouTube Video Sponsors — SponsorBlock segments — sorted, overlapsWith, minVotes, coverageSeconds. (1 credit) */
   videoSponsors(params: YoutubeVideoSponsorsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/video-sponsors", params);
   }
@@ -402,8 +408,10 @@ export interface TiktokCommentRepliesParams {
 export interface TiktokUserFollowersParams {
   /** TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 50, max 500. Billed per result. */
+  /** Max items to return. Default 50, max 500. Flat 1 credit per call. */
   limit?: number;
+  /** Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -411,8 +419,10 @@ export interface TiktokUserFollowersParams {
 export interface TiktokUserFollowingsParams {
   /** TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 50, max 500. Billed per result. */
+  /** Max items to return. Default 50, max 500. Flat 1 credit per call. */
   limit?: number;
+  /** Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -476,7 +486,7 @@ export interface TiktokTrendingFeedParams {
 }
 
 export interface TiktokPopularHashtagsParams {
-  /** Topic or keyword to discover trending hashtags for. Default "trending". */
+  /** Optional niche seed for related-tag co-occurrence. Omit/trending for Creative Center chart. */
   query?: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
@@ -553,11 +563,11 @@ export class TiktokApi {
   commentReplies(params: TiktokCommentRepliesParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/comment-replies", params);
   }
-  /** TikTok User Followers — List a TikTok user's followers. (20 credits) */
+  /** TikTok User Followers — Followers — id, secUid, createTime, region, language; total + nextCursor. Flat 1 credit native. (1 credit) */
   userFollowers(params: TiktokUserFollowersParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/user-followers", params);
   }
-  /** TikTok User Followings — List who a TikTok user follows. (20 credits) */
+  /** TikTok User Followings — Followings — id, secUid, createTime, region, language; total + nextCursor. Flat 1 credit native. (1 credit) */
   userFollowings(params: TiktokUserFollowingsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/user-followings", params);
   }
@@ -585,7 +595,7 @@ export class TiktokApi {
   trendingFeed(params: TiktokTrendingFeedParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/trending-feed", params);
   }
-  /** TikTok Popular Hashtags — Trending TikTok hashtags for a topic/keyword. (14 credits) */
+  /** TikTok Popular Hashtags — TikTok Creative Center hashtag chart (population videoCount). (2 credits) */
   popularHashtags(params: TiktokPopularHashtagsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/popular-hashtags", params);
   }
@@ -1682,7 +1692,7 @@ export class FacebookAdLibraryApi {
   searchCompanies(params: FacebookAdLibrarySearchCompaniesParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/facebook/search-companies", params);
   }
-  /** Facebook Ad Details — Meta/Facebook ad details. (17 credits) */
+  /** Facebook Ad Details — Meta/Facebook ad details. (2 credits) */
   adDetails(params: FacebookAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/facebook/ad-details", params);
   }
@@ -1743,7 +1753,7 @@ export class TiktokAdLibraryApi {
   topAds(params: TiktokAdLibraryTopAdsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/tiktok/top-ads", params);
   }
-  /** TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits) */
+  /** TikTok Ad Details — TikTok ad details by ad URL or ID. (2 credits) */
   adDetails(params: TiktokAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/tiktok/ad-details", params);
   }
@@ -1794,7 +1804,7 @@ export class GoogleAdLibraryApi {
   companyAds(params: GoogleAdLibraryCompanyAdsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/google/company-ads", params);
   }
-  /** Google Ad Details — Google ad details by Transparency Center URL. (17 credits) */
+  /** Google Ad Details — Google ad details by Transparency Center URL. (2 credits) */
   adDetails(params: GoogleAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/google/ad-details", params);
   }
@@ -1840,7 +1850,7 @@ export class LinkedinAdLibraryApi {
   searchAds(params: LinkedinAdLibrarySearchAdsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/linkedin/search-ads", params);
   }
-  /** LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits) */
+  /** LinkedIn Ad Details — LinkedIn ad details by URL or ID. (2 credits) */
   adDetails(params: LinkedinAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/linkedin/ad-details", params);
   }

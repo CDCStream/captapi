@@ -482,8 +482,47 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-search-suggestions", name: "TikTok Search Suggestions API", shortName: "Search Suggestions", category: "search", method: "GET", path: "/v1/tiktok/search-suggestions", credits: 2, tagline: "Get the autocomplete terms TikTok suggests in its search bar for a keyword — the real phrases people search, ranked, so you can find trending queries and long-tail keyword ideas.", delivers: ["The autocomplete terms TikTok suggests for your keyword", "Each suggestion with its rank — the order it appears in the search bar", "A ready-to-open searchUrl that runs that exact search on TikTok", "The seed keyword plus the region and language it was localized for", "Localize by country + language to see what a specific market searches"] , longDescription: "Give the TikTok Search Suggestions API a seed keyword and it returns the autocomplete phrases TikTok shows in its search bar as clean JSON — the actual phrases people search for. Each suggestion includes the search term, its rank (1 = top of the list), a ready-to-open search URL, the seed keyword it came from, and the country and language it was localized for. Use the country and language parameters to see what a specific market is searching (for example US in English, or DE in German). Great for TikTok keyword research, trending queries, and content planning. No TikTok login required. Billed per suggestion returned. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "tiktok-channel-posts", name: "TikTok Channel Posts API", shortName: "Channel Posts", category: "list", method: "GET", path: "/v1/tiktok/channel-posts", credits: 2, tagline: "Get the latest videos from any public TikTok profile — caption, view / like / comment counts, thumbnail, sound, and hashtags for each post, with cursor pagination to page through them all." , longDescription: "Send a profile URL, @handle, or username and the TikTok Channel Posts API returns that creator's most recent videos as clean, structured JSON. If TikTok blocks a direct fetch, the first page automatically retries through a backup path so you still get a response. Each post includes the TikTok page URL and video ID, caption, publish date, duration, thumbnail, hashtags, and the sound/music name, plus full engagement — views, likes, comments, shares, and saves — and the author's profile (username, display name, followers, verified badge, avatar). Fetch up to 200 posts per call with the limit parameter, then pass the returned nextCursor value back in to page through older videos (hasMore tells you when you've reached the end) — a flat 2 credits per call, no matter how many posts you fetch. Ideal for creator monitoring, content calendars, competitor tracking, and feeding analytics or influencer tools. This endpoint focuses on metadata and stats. No TikTok login and no infrastructure to maintain on your side.", delivers: ["Latest public videos from any TikTok profile", "Caption, publish date, duration, thumbnail, hashtags, and sound name", "Views, likes, comments, shares, and saves per video", "Author profile — handle, name, followers, verified, avatar", "Cursor pagination (nextCursor + hasMore) — flat 2 credits per call", "Automatic first-page backup if the direct fetch fails"] },
   { slug: "tiktok-comment-replies", name: "TikTok Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/tiktok/comment-replies", credits: 2, tagline: "Replies under a TikTok comment — same authorId/authorSecUid/commentLanguage shape as comments.", longDescription: "Pass a TikTok video URL and a parent comment id and get that comment's replies as clean JSON. Each reply includes text, author username, stable authorId/authorSecUid when TikTok exposes them, commentLanguage, like count, and publish time. Fetch up to 500 replies per call, then pass nextCursor to page through the rest — a flat 2 credits per call.", delivers: ["Reply text + authorId/authorSecUid", "commentLanguage when available", "Like count and publish time per reply", "Cursor pagination (nextCursor + hasMore)", "Flat 2 credits per call"] },
-  { slug: "tiktok-user-followers", name: "TikTok User Followers API", shortName: "User Followers", category: "list", method: "GET", path: "/v1/tiktok/user-followers", credits: 20, creditsPerResult: 0.4 },
-  { slug: "tiktok-user-followings", name: "TikTok User Followings API", shortName: "User Followings", category: "list", method: "GET", path: "/v1/tiktok/user-followings", credits: 20, creditsPerResult: 0.4 },
+  {
+    slug: "tiktok-user-followers",
+    name: "TikTok User Followers API",
+    shortName: "User Followers",
+    category: "list",
+    method: "GET",
+    path: "/v1/tiktok/user-followers",
+    credits: 1,
+    creditsPerResult: 0.4,
+    tagline:
+      "List a TikTok user's followers — id, secUid, createTime, region, language, cursor pagination. Flat 1 credit native.",
+    longDescription:
+      "Pass a TikTok profile URL or @handle and get followers as clean JSON: id + secUid (stable identity — same fields search-users documents), username, displayName, bio, url, followers, following, verified, profileImage, plus createTime/createTimeUnix, region, and language when TikTok exposes them (audience quality / bot signals). total is the profile's followerCount (universe size); totalReturned is this page. Cursor pagination via nextCursor + hasMore (TikTok minCursor). Flat 1 credit on the native path; Apify fallback bills about 0.4 credits per returned user (min 5).",
+    delivers: [
+      "id + secUid on every follower row",
+      "createTime, region, language when TikTok exposes them",
+      "total (profile followerCount) + nextCursor / hasMore",
+      "Flat 1 credit native; Apify ~0.4/user (min 5)",
+    ],
+  },
+  {
+    slug: "tiktok-user-followings",
+    name: "TikTok User Followings API",
+    shortName: "User Followings",
+    category: "list",
+    method: "GET",
+    path: "/v1/tiktok/user-followings",
+    credits: 1,
+    creditsPerResult: 0.4,
+    tagline:
+      "List who a TikTok user follows — id, secUid, createTime, region, language, cursor pagination. Flat 1 credit native.",
+    longDescription:
+      "Pass a TikTok profile URL or @handle and get followings as clean JSON: id + secUid, username, displayName, bio, url, followers, following, verified, profileImage, plus createTime/createTimeUnix, region, and language when TikTok exposes them. total is the profile's followingCount; cursor pagination via nextCursor + hasMore. Flat 1 credit on the native path; Apify fallback bills about 0.4 credits per returned user (min 5).",
+    delivers: [
+      "id + secUid on every following row",
+      "createTime, region, language when TikTok exposes them",
+      "total (profile followingCount) + nextCursor / hasMore",
+      "Flat 1 credit native; Apify ~0.4/user (min 5)",
+    ],
+  },
+
   { slug: "tiktok-music-posts", name: "TikTok Music Posts API", shortName: "Music Posts", category: "list", method: "GET", path: "/v1/tiktok/music-posts", credits: 2, tagline: "List TikTok videos that use a specific sound — caption, author, engagement, canonical hashtags, and mentions.", longDescription: "Paste a TikTok music/sound URL and get the public videos that use that sound as structured JSON. Each result includes caption, author (same shape as top-search / channel-posts: username, displayName, url, profileImage, id, secUid, followers, verified), thumbnail, engagement, canonical hashtags (from TikTok text_extra — not caption regex), and mentions[{userId,secUid,username}] when TikTok exposes them. On MUSIC_AWEME, followers and verified are often null (unknown — not zero/false); use Channel Details for definitive profile stats. Flat 2 credits per call." },
   {
     slug: "tiktok-top-search",
@@ -2556,8 +2595,28 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     lpFlat(50, 500, 2),
     { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value from the previous response." },
   ],
-  "tiktok-user-followers": [up(TT_PROFILE), lp(50, 500)],
-  "tiktok-user-followings": [up(TT_PROFILE), lp(50, 500)],
+  "tiktok-user-followers": [
+    up(TT_PROFILE),
+    lpFlat(50, 500, 1),
+    {
+      name: "cursor",
+      type: "string",
+      required: false,
+      description:
+        "Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response.",
+    },
+  ],
+  "tiktok-user-followings": [
+    up(TT_PROFILE),
+    lpFlat(50, 500, 1),
+    {
+      name: "cursor",
+      type: "string",
+      required: false,
+      description:
+        "Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response.",
+    },
+  ],
   "tiktok-music-posts": [up(TT_MUSIC), lpFlat(20, 200, 2)],
   "tiktok-top-search": [
     qp(),
@@ -3997,6 +4056,16 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `Why do I need secUid if I already have the @handle?`,
       a: `Handles change; id and secUid do not. TikTok's follower lists, video lists, and many internal calls require secUid. Prefer id/secUid for CRM joins and chaining — use username for display.`,
+    });
+  }
+  if (ep.slug === "tiktok-user-followers" || ep.slug === "tiktok-user-followings") {
+    list.push({
+      q: `Do follower rows include secUid?`,
+      a: `Yes — same identity fields as search-users (id + secUid) on every row when TikTok exposes them, plus createTime/createTimeUnix, region, and language for audience-quality signals. total is the profile's followerCount/followingCount; page with nextCursor + hasMore.`,
+    });
+    list.push({
+      q: `Why is this 1 credit when older docs said ~20?`,
+      a: `Native signer path (/api/user/list/) is flat 1 credit — ScrapeCreators parity. The old ~20 figure was Apify billed at ~0.4 credits per returned user (min 5). Apify fallback still uses that per-result rate when the native path is unavailable.`,
     });
   }
   if (ep.slug === "tiktok-audience-demographics") {

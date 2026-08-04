@@ -124,17 +124,18 @@ class YoutubeApi:
         """
         return self._t.get("/v1/youtube/shorts/video-details", {"url": url, "cache": cache})
 
-    def shorts_comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Shorts Comments — Comments on a YouTube Short. (2 credits)
+    def shorts_comments(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Shorts Comments — Comments on a YouTube Short — same engine as /comments (flat 2 credits). (2 credits)
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID (<=3 min). Long-form videos return HTTP 422. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/youtube/shorts/comments", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/youtube/shorts/comments", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def channel_shorts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Shorts — List a channel's Shorts. (20 credits)
+        """YouTube Channel Shorts — List a channel's Shorts with player-enriched fields. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -143,19 +144,19 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/channel-shorts", {"url": url, "limit": limit, "cache": cache})
 
     def trending_shorts(self, *, q: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Trending Shorts — Discover trending YouTube Shorts by seed keyword. (28 credits)
+        """YouTube Trending Shorts — YouTube Shorts reel/trending feed (not a keyword search). (2 credits)
 
-        :param q: Seed keyword for trending Shorts. Default trending.
+        :param q: Optional topic seed for the reel sequence. Omit for default trending feed.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/trending-shorts", {"q": q, "limit": limit, "cache": cache})
 
     def channel_streams(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Streams — List a channel's live/past streams. (20 credits)
+        """YouTube Channel Streams — Channel Live tab only (empty when hasLiveTab=false) — player-enriched streams. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/channel-streams", {"url": url, "limit": limit, "cache": cache})
@@ -180,7 +181,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
     def channel_playlists(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Playlists — List a channel's playlists. (2 credits)
+        """YouTube Channel Playlists — List a channel's playlists — id, title, videoCount, thumbnailUrl. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -189,7 +190,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/channel-playlists", {"url": url, "limit": limit, "cache": cache})
 
     def community_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Community Posts — Community posts — numeric likes, ISO dates, channel{}, video{}; cursor pagination. (1 credit)
+        """YouTube Community Posts — Community posts — likeCount+likeCountText, pollOptions, ISO dates, channel{}, cursor. (1 credit)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Flat 1 credit per call.
@@ -199,20 +200,22 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/community-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def community_post_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Community Post Details — Details for a single YouTube community post. (1 credit)
+        """YouTube Community Post Details — One community post — same schema as list + comments (pollOptions, numeric likeCount). (1 credit)
 
         :param url: YouTube community post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/community-post-details", {"url": url, "cache": cache})
 
-    def video_sponsors(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Video Sponsors — Sponsor / self-promo / interaction segments in a YouTube video (via SponsorBlock). (1 credit)
+    def video_sponsors(self, *, url: str, minVotes: float | None = None, categories: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Video Sponsors — SponsorBlock segments — sorted, overlapsWith, minVotes, coverageSeconds. (1 credit)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param minVotes: Minimum votes (default 0; drops votes < 0).
+        :param categories: Comma-separated categories (default sponsor,selfpromo,interaction).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/youtube/video-sponsors", {"url": url, "cache": cache})
+        return self._t.get("/v1/youtube/video-sponsors", {"url": url, "minVotes": minVotes, "categories": categories, "cache": cache})
 
 
 class AsyncYoutubeApi:
@@ -334,17 +337,18 @@ class AsyncYoutubeApi:
         """
         return await self._t.get("/v1/youtube/shorts/video-details", {"url": url, "cache": cache})
 
-    async def shorts_comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Shorts Comments — Comments on a YouTube Short. (2 credits)
+    async def shorts_comments(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Shorts Comments — Comments on a YouTube Short — same engine as /comments (flat 2 credits). (2 credits)
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID (<=3 min). Long-form videos return HTTP 422. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/youtube/shorts/comments", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/youtube/shorts/comments", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def channel_shorts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Shorts — List a channel's Shorts. (20 credits)
+        """YouTube Channel Shorts — List a channel's Shorts with player-enriched fields. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -353,19 +357,19 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/channel-shorts", {"url": url, "limit": limit, "cache": cache})
 
     async def trending_shorts(self, *, q: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Trending Shorts — Discover trending YouTube Shorts by seed keyword. (28 credits)
+        """YouTube Trending Shorts — YouTube Shorts reel/trending feed (not a keyword search). (2 credits)
 
-        :param q: Seed keyword for trending Shorts. Default trending.
+        :param q: Optional topic seed for the reel sequence. Omit for default trending feed.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/trending-shorts", {"q": q, "limit": limit, "cache": cache})
 
     async def channel_streams(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Streams — List a channel's live/past streams. (20 credits)
+        """YouTube Channel Streams — Channel Live tab only (empty when hasLiveTab=false) — player-enriched streams. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/channel-streams", {"url": url, "limit": limit, "cache": cache})
@@ -390,7 +394,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
     async def channel_playlists(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Playlists — List a channel's playlists. (2 credits)
+        """YouTube Channel Playlists — List a channel's playlists — id, title, videoCount, thumbnailUrl. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -399,7 +403,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/channel-playlists", {"url": url, "limit": limit, "cache": cache})
 
     async def community_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Community Posts — Community posts — numeric likes, ISO dates, channel{}, video{}; cursor pagination. (1 credit)
+        """YouTube Community Posts — Community posts — likeCount+likeCountText, pollOptions, ISO dates, channel{}, cursor. (1 credit)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Flat 1 credit per call.
@@ -409,20 +413,22 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/community-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def community_post_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Community Post Details — Details for a single YouTube community post. (1 credit)
+        """YouTube Community Post Details — One community post — same schema as list + comments (pollOptions, numeric likeCount). (1 credit)
 
         :param url: YouTube community post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/community-post-details", {"url": url, "cache": cache})
 
-    async def video_sponsors(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Video Sponsors — Sponsor / self-promo / interaction segments in a YouTube video (via SponsorBlock). (1 credit)
+    async def video_sponsors(self, *, url: str, minVotes: float | None = None, categories: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Video Sponsors — SponsorBlock segments — sorted, overlapsWith, minVotes, coverageSeconds. (1 credit)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param minVotes: Minimum votes (default 0; drops votes < 0).
+        :param categories: Comma-separated categories (default sponsor,selfpromo,interaction).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/youtube/video-sponsors", {"url": url, "cache": cache})
+        return await self._t.get("/v1/youtube/video-sponsors", {"url": url, "minVotes": minVotes, "categories": categories, "cache": cache})
 
 
 class TiktokApi:
@@ -521,23 +527,25 @@ class TiktokApi:
         """
         return self._t.get("/v1/tiktok/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cursor": cursor, "cache": cache})
 
-    def user_followers(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok User Followers — List a TikTok user's followers. (20 credits)
+    def user_followers(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok User Followers — Followers — id, secUid, createTime, region, language; total + nextCursor. Flat 1 credit native. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max items to return. Default 50, max 500. Flat 1 credit per call.
+        :param cursor: Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/tiktok/user-followers", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/tiktok/user-followers", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
-    def user_followings(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok User Followings — List who a TikTok user follows. (20 credits)
+    def user_followings(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok User Followings — Followings — id, secUid, createTime, region, language; total + nextCursor. Flat 1 credit native. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max items to return. Default 50, max 500. Flat 1 credit per call.
+        :param cursor: Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/tiktok/user-followings", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/tiktok/user-followings", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def music_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Music Posts — Posts using a specific TikTok sound/music. (32 credits)
@@ -596,9 +604,9 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/trending-feed", {"country": country, "limit": limit, "cache": cache})
 
     def popular_hashtags(self, *, query: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Popular Hashtags — Trending TikTok hashtags for a topic/keyword. (14 credits)
+        """TikTok Popular Hashtags — TikTok Creative Center hashtag chart (population videoCount). (2 credits)
 
-        :param query: Topic or keyword to discover trending hashtags for. Default "trending".
+        :param query: Optional niche seed for related-tag co-occurrence. Omit/trending for Creative Center chart.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -728,23 +736,25 @@ class AsyncTiktokApi:
         """
         return await self._t.get("/v1/tiktok/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cursor": cursor, "cache": cache})
 
-    async def user_followers(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok User Followers — List a TikTok user's followers. (20 credits)
+    async def user_followers(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok User Followers — Followers — id, secUid, createTime, region, language; total + nextCursor. Flat 1 credit native. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max items to return. Default 50, max 500. Flat 1 credit per call.
+        :param cursor: Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/tiktok/user-followers", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/tiktok/user-followers", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
-    async def user_followings(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok User Followings — List who a TikTok user follows. (20 credits)
+    async def user_followings(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok User Followings — Followings — id, secUid, createTime, region, language; total + nextCursor. Flat 1 credit native. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max items to return. Default 50, max 500. Flat 1 credit per call.
+        :param cursor: Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/tiktok/user-followings", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/tiktok/user-followings", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def music_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Music Posts — Posts using a specific TikTok sound/music. (32 credits)
@@ -803,9 +813,9 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/trending-feed", {"country": country, "limit": limit, "cache": cache})
 
     async def popular_hashtags(self, *, query: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Popular Hashtags — Trending TikTok hashtags for a topic/keyword. (14 credits)
+        """TikTok Popular Hashtags — TikTok Creative Center hashtag chart (population videoCount). (2 credits)
 
-        :param query: Topic or keyword to discover trending hashtags for. Default "trending".
+        :param query: Optional niche seed for related-tag co-occurrence. Omit/trending for Creative Center chart.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -2317,7 +2327,7 @@ class FacebookAdLibraryApi:
         return self._t.get("/v1/ad-library/facebook/search-companies", {"q": q, "country": country, "limit": limit, "cache": cache})
 
     def ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Details — Meta/Facebook ad details. (17 credits)
+        """Facebook Ad Details — Meta/Facebook ad details. (2 credits)
 
         :param url: Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2375,7 +2385,7 @@ class AsyncFacebookAdLibraryApi:
         return await self._t.get("/v1/ad-library/facebook/search-companies", {"q": q, "country": country, "limit": limit, "cache": cache})
 
     async def ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Details — Meta/Facebook ad details. (17 credits)
+        """Facebook Ad Details — Meta/Facebook ad details. (2 credits)
 
         :param url: Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2421,7 +2431,7 @@ class TiktokAdLibraryApi:
         return self._t.get("/v1/ad-library/tiktok/top-ads", {"q": q, "country": country, "period": period, "orderBy": orderBy, "industry": industry, "objective": objective, "adFormat": adFormat, "limit": limit, "cache": cache})
 
     def ad_details(self, *, url: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits)
+        """TikTok Ad Details — TikTok ad details by ad URL or ID. (2 credits)
 
         :param url: TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param country: ISO country code. Default GB.
@@ -2460,7 +2470,7 @@ class AsyncTiktokAdLibraryApi:
         return await self._t.get("/v1/ad-library/tiktok/top-ads", {"q": q, "country": country, "period": period, "orderBy": orderBy, "industry": industry, "objective": objective, "adFormat": adFormat, "limit": limit, "cache": cache})
 
     async def ad_details(self, *, url: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits)
+        """TikTok Ad Details — TikTok ad details by ad URL or ID. (2 credits)
 
         :param url: TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param country: ISO country code. Default GB.
@@ -2488,7 +2498,7 @@ class GoogleAdLibraryApi:
         return self._t.get("/v1/ad-library/google/company-ads", {"advertiser": advertiser, "country": country, "region": region, "start_date": start_date, "end_date": end_date, "cursor": cursor, "limit": limit, "cache": cache})
 
     def ad_details(self, *, creative_id: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Ad Details — Google ad details by Transparency Center URL. (17 credits)
+        """Google Ad Details — Google ad details by Transparency Center URL. (2 credits)
 
         :param creative_id: Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID.
         :param country: ISO country code. Default US.
@@ -2526,7 +2536,7 @@ class AsyncGoogleAdLibraryApi:
         return await self._t.get("/v1/ad-library/google/company-ads", {"advertiser": advertiser, "country": country, "region": region, "start_date": start_date, "end_date": end_date, "cursor": cursor, "limit": limit, "cache": cache})
 
     async def ad_details(self, *, creative_id: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Ad Details — Google ad details by Transparency Center URL. (17 credits)
+        """Google Ad Details — Google ad details by Transparency Center URL. (2 credits)
 
         :param creative_id: Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID.
         :param country: ISO country code. Default US.
@@ -2566,7 +2576,7 @@ class LinkedinAdLibraryApi:
         return self._t.get("/v1/ad-library/linkedin/search-ads", {"q": q, "keyword": keyword, "companyId": companyId, "country": country, "countries": countries, "startDate": startDate, "endDate": endDate, "cursor": cursor, "limit": limit, "cache": cache})
 
     def ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits)
+        """LinkedIn Ad Details — LinkedIn ad details by URL or ID. (2 credits)
 
         :param url: LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2595,7 +2605,7 @@ class AsyncLinkedinAdLibraryApi:
         return await self._t.get("/v1/ad-library/linkedin/search-ads", {"q": q, "keyword": keyword, "companyId": companyId, "country": country, "countries": countries, "startDate": startDate, "endDate": endDate, "cursor": cursor, "limit": limit, "cache": cache})
 
     async def ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits)
+        """LinkedIn Ad Details — LinkedIn ad details by URL or ID. (2 credits)
 
         :param url: LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

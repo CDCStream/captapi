@@ -142,6 +142,7 @@ RATE_COMMENTS = 0.2        # clockworks comments-scraper   $0.50/1k ($0.0005)
 RATE_CHANNEL_POSTS = 0.7   # clockworks tiktok-scraper     $1.70/1k ($0.0017)
 RATE_USER_SEARCH = 0.4     # clockworks user search (per profile) — Apify fallback only
 CREDIT_USER_SEARCH_NATIVE = 1  # signer /api/search/user/full/ — SC parity
+CREDIT_FOLLOWERS_NATIVE = 1  # signer /api/user/list/ — SC parity (was ~20 Apify)
 # Trending/popular endpoints hit a third-party HTTP actor; cost not yet verified
 # in the Apify console, so rates are conservative until confirmed.
 RATE_TREND = 0.7
@@ -276,21 +277,40 @@ def _normalize_connection(item: dict) -> dict:
     """Map a Clockworks follower/following relationship row to our user shape.
 
     Each row exposes the connected profile under ``authorMeta`` plus a
-    ``connectionType`` ("follower" / "following").
+    ``connectionType`` ("follower" / "following"). Aligns with native
+    ``_map_connection_user`` (id / secUid / createTime / region / language).
     """
     a = item.get("authorMeta") or {}
     username = a.get("name") or a.get("uniqueId")
-    return {
+    uid = safe_str(a.get("id") or a.get("uid") or a.get("userId"))
+    sec_uid = safe_str(a.get("secUid") or a.get("sec_uid"))
+    create_unix = safe_int(a.get("createTime") or a.get("create_time"))
+    create_iso = None
+    if create_unix:
+        create_iso = datetime.fromtimestamp(create_unix, tz=timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%S.000Z"
+        )
+    out = {
+        "id": uid,
+        "secUid": sec_uid,
         "username": safe_str(username),
         "displayName": safe_str(a.get("nickName") or a.get("nickname")),
         "bio": safe_str(a.get("signature")),
         "url": safe_str(a.get("profileUrl"))
         or (f"https://www.tiktok.com/@{username}" if username else None),
-        "followers": safe_int(a.get("fans")),
-        "following": safe_int(a.get("following")),
+        "followers": safe_int(a.get("fans") or a.get("followers") or a.get("followerCount")),
+        "following": safe_int(a.get("following") or a.get("followingCount")),
         "verified": a.get("verified"),
         "profileImage": safe_str(a.get("avatar") or a.get("originalAvatarUrl")),
+        "region": safe_str(a.get("region") or a.get("regionCode")),
+        "language": safe_str(a.get("language") or a.get("lang")),
+        "createTime": create_iso,
+        "createTimeUnix": create_unix,
     }
+    for key in ("id", "secUid", "bio", "region", "language", "createTime", "createTimeUnix"):
+        if out.get(key) in (None, ""):
+            out.pop(key, None)
+    return out
 
 
 def _normalize_user(item: dict) -> dict:
@@ -2159,11 +2179,19 @@ async def tiktok_comment_replies(
 async def tiktok_user_followers(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     limit: int = Query(50, ge=1, le=500),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor (TikTok minCursor). Leave empty for the first page; "
+            "then pass nextCursor from the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
     settings = get_settings()
+    # Reserve Apify worst-case; native path overrides to flat 1 credit.
     cost = _scaled_credits(limit, RATE_FOLLOWERS, 5)
     async with billed_call(
         caller=caller,
@@ -2173,10 +2201,20 @@ async def tiktok_user_followers(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await user_connections_native(handle, mode="followers", limit=limit)
+            native = await user_connections_native(
+                handle, mode="followers", limit=limit, cursor=cursor
+            )
             if native is not None:
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(native), "followers": native}
+                users = native["users"]
+                return {
+                    "url": url,
+                    "total": native.get("total"),
+                    "totalReturned": len(users),
+                    "hasMore": native.get("hasMore"),
+                    "nextCursor": native.get("nextCursor"),
+                    "followers": users,
+                }
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -2194,16 +2232,26 @@ async def tiktok_user_followers(
                 if i.get("connectionType") == "follower"
             ][:limit]
             ctx["source"] = "apify"
-            return {"url": url, "totalReturned": len(users), "followers": users}
+            return {
+                "url": url,
+                "total": None,
+                "totalReturned": len(users),
+                "hasMore": None,
+                "nextCursor": None,
+                "followers": users,
+            }
 
         data = await cached_or_run(
             endpoint="tiktok.user-followers",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["followers"]), RATE_FOLLOWERS, 5)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_FOLLOWERS_NATIVE
+        else:
+            ctx["credits_override"] = _scaled_credits(len(data["followers"]), RATE_FOLLOWERS, 5)
         return ApiResponse(data=data)
 
 
@@ -2211,6 +2259,13 @@ async def tiktok_user_followers(
 async def tiktok_user_followings(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     limit: int = Query(50, ge=1, le=500),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor (TikTok minCursor). Leave empty for the first page; "
+            "then pass nextCursor from the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -2225,10 +2280,20 @@ async def tiktok_user_followings(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await user_connections_native(handle, mode="followings", limit=limit)
+            native = await user_connections_native(
+                handle, mode="followings", limit=limit, cursor=cursor
+            )
             if native is not None:
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(native), "followings": native}
+                users = native["users"]
+                return {
+                    "url": url,
+                    "total": native.get("total"),
+                    "totalReturned": len(users),
+                    "hasMore": native.get("hasMore"),
+                    "nextCursor": native.get("nextCursor"),
+                    "followings": users,
+                }
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -2246,16 +2311,26 @@ async def tiktok_user_followings(
                 if i.get("connectionType") == "following"
             ][:limit]
             ctx["source"] = "apify"
-            return {"url": url, "totalReturned": len(users), "followings": users}
+            return {
+                "url": url,
+                "total": None,
+                "totalReturned": len(users),
+                "hasMore": None,
+                "nextCursor": None,
+                "followings": users,
+            }
 
         data = await cached_or_run(
             endpoint="tiktok.user-followings",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["followings"]), RATE_FOLLOWERS, 5)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_FOLLOWERS_NATIVE
+        else:
+            ctx["credits_override"] = _scaled_credits(len(data["followings"]), RATE_FOLLOWERS, 5)
         return ApiResponse(data=data)
 
 

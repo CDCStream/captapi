@@ -2107,7 +2107,11 @@ async def _sec_uid_for_handle(handle: str) -> str | None:
 
 
 def _map_connection_user(row: dict[str, Any]) -> dict[str, Any] | None:
-    """Map ``/api/user/list/`` userList row → followers/followings shape."""
+    """Map ``/api/user/list/`` userList row → followers/followings shape.
+
+    Same identity fields as search-users (id + secUid) plus analysis signals
+    TikTok exposes on the list payload (createTime, region, language).
+    """
     user = row.get("user") if isinstance(row.get("user"), dict) else row
     if not isinstance(user, dict):
         return None
@@ -2121,7 +2125,14 @@ def _map_connection_user(row: dict[str, Any]) -> dict[str, Any] | None:
         or _url_list_first(user.get("avatarThumb") or user.get("avatar_thumb"))
         or safe_str(user.get("avatarLarger") or user.get("avatarMedium"))
     )
-    return {
+    uid = safe_str(
+        user.get("id") or user.get("uid") or user.get("user_id") or user.get("userId")
+    )
+    sec_uid = safe_str(user.get("secUid") or user.get("sec_uid"))
+    create_unix = safe_int(user.get("createTime") or user.get("create_time"))
+    out: dict[str, Any] = {
+        "id": uid,
+        "secUid": sec_uid,
         "username": username,
         "displayName": safe_str(user.get("nickname") or user.get("nickName")),
         "bio": safe_str(user.get("signature")),
@@ -2130,23 +2141,52 @@ def _map_connection_user(row: dict[str, Any]) -> dict[str, Any] | None:
             stats.get("followerCount")
             or stats.get("follower_count")
             or user.get("followerCount")
+            or user.get("follower_count")
         ),
         "following": safe_int(
             stats.get("followingCount")
             or stats.get("following_count")
             or user.get("followingCount")
+            or user.get("following_count")
         ),
         "verified": bool(user.get("verified")) if user.get("verified") is not None else None,
         "profileImage": avatar,
+        "region": safe_str(user.get("region") or user.get("regionCode")),
+        "language": safe_str(user.get("language") or user.get("lang")),
+        "createTime": _iso(create_unix),
+        "createTimeUnix": create_unix,
     }
+    # Keep keys with null counts (SC-style) but drop empty identity / empty strings.
+    for key in ("id", "secUid", "bio", "region", "language", "createTime", "createTimeUnix"):
+        if out.get(key) in (None, ""):
+            out.pop(key, None)
+    return out
+
+
+async def _profile_connection_total(handle: str, *, mode: str) -> int | None:
+    """Universe size: followerCount or followingCount from the public profile."""
+    scope = await _fetch_scope(f"https://www.tiktok.com/@{handle.lstrip('@')}")
+    stats = (((scope or {}).get("webapp.user-detail") or {}).get("userInfo") or {}).get(
+        "stats"
+    ) or {}
+    if not isinstance(stats, dict):
+        return None
+    if mode == "followers":
+        return safe_int(stats.get("followerCount") or stats.get("follower_count"))
+    return safe_int(stats.get("followingCount") or stats.get("following_count"))
 
 
 async def user_connections_native(
-    handle: str, *, mode: str, limit: int
-) -> list[dict[str, Any]] | None:
+    handle: str,
+    *,
+    mode: str,
+    limit: int,
+    cursor: str | int | None = None,
+) -> dict[str, Any] | None:
     """Followers (scene=67) or followings (scene=21) via the signer sidecar.
 
-    Returns mapped user rows, or ``None`` when the signer is unset / blocked.
+    Returns ``{users, hasMore, nextCursor, total}`` or ``None`` when the signer
+    is unset / blocked. ``cursor`` is TikTok's ``minCursor`` (SC ``min_time``).
     """
     from app.services import tiktok_signer
 
@@ -2156,9 +2196,12 @@ async def user_connections_native(
     sec = await _sec_uid_for_handle(handle)
     if not sec:
         return None
+    total = await _profile_connection_total(handle, mode=mode)
 
     collected: list[dict[str, Any]] = []
-    min_cursor = "0"
+    min_cursor = str(cursor if cursor not in (None, "") else "0")
+    has_more = False
+    next_cursor: str | None = None
     for _ in range(max(3, limit // 15 + 2)):
         if len(collected) >= limit:
             break
@@ -2171,9 +2214,13 @@ async def user_connections_native(
         )
         page = await tiktok_signer.fetch_api(api)
         if page is None:
-            return None if not collected else collected[:limit]
+            if not collected:
+                return None
+            break
         rows = page.get("userList") or []
         if not isinstance(rows, list) or not rows:
+            has_more = False
+            next_cursor = None
             break
         for row in rows:
             if not isinstance(row, dict):
@@ -2183,13 +2230,28 @@ async def user_connections_native(
                 collected.append(mapped)
             if len(collected) >= limit:
                 break
-        if not bool(page.get("hasMore")):
-            break
+        has_more = bool(page.get("hasMore") or page.get("has_more"))
         nxt = page.get("minCursor")
         if nxt is None:
+            has_more = False
+            next_cursor = None
             break
-        min_cursor = str(nxt)
-    return collected[:limit] if collected else None
+        next_cursor = str(nxt)
+        min_cursor = next_cursor
+        if not has_more:
+            next_cursor = None
+            break
+    if not collected:
+        return None
+    # If we stopped because of limit while TikTok still has more, keep cursor.
+    if len(collected) >= limit and next_cursor:
+        has_more = True
+    return {
+        "users": collected[:limit],
+        "hasMore": bool(has_more and next_cursor),
+        "nextCursor": next_cursor if (has_more and next_cursor) else None,
+        "total": total,
+    }
 
 
 def _map_search_sample_item(

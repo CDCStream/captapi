@@ -861,13 +861,19 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
-              "minLength": 2,
-              "description": "Seed keyword for trending Shorts",
-              "default": "trending",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional topic seed for the Shorts reel sequence (not a keyword search). Omit for the default trending/recommendation feed — same surface as ScrapeCreators GET /v1/youtube/shorts/trending.",
               "title": "Q"
             },
-            "description": "Seed keyword for trending Shorts"
+            "description": "Optional topic seed for the Shorts reel sequence (not a keyword search). Omit for the default trending/recommendation feed — same surface as ScrapeCreators GET /v1/youtube/shorts/trending."
           },
           {
             "name": "limit",
@@ -924,6 +930,7 @@
           "YouTube"
         ],
         "summary": "List Shorts for a YouTube channel",
+        "description": "Channel Shorts shelf + player enrich (SC ``/v1/youtube/channel/shorts`` parity).\n\nFlat 2 credits on the native path — shelf cards alone omit publish/duration/\nthumbnail nesting; we fill those (and exact viewCount) via InnerTube player.",
         "operationId": "youtube_channel_shorts_v1_youtube_channel_shorts_get",
         "security": [
           {
@@ -995,6 +1002,7 @@
           "YouTube"
         ],
         "summary": "List live/past streams for a YouTube channel",
+        "description": "Channel Live tab only — not Videos.\n\nChannels without a Live tab (e.g. MrBeast) used to return Videos content\nbecause InnerTube still accepts the streams ``params``. We gate on the tab\nlist and return an empty page instead. Flat 2 credits on the native path.",
         "operationId": "youtube_channel_streams_v1_youtube_channel_streams_get",
         "security": [
           {
@@ -1065,7 +1073,8 @@
         "tags": [
           "YouTube"
         ],
-        "summary": "Search YouTube videos by hashtag",
+        "summary": "YouTube videos from a hashtag page (/hashtag/{name})",
+        "description": "Returns videos listed on youtube.com/hashtag/{name} — not a keyword search. Titles often omit the #tag (hashtag may live only in the description); membership is the hashtag page itself. Each result includes type (video|short|live), id, and channelId when YouTube exposes them.",
         "operationId": "youtube_hashtag_search_v1_youtube_hashtag_search_get",
         "security": [
           {
@@ -1759,6 +1768,38 @@
             "description": "YouTube video URL or ID"
           },
           {
+            "name": "minVotes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": -10,
+              "description": "Minimum SponsorBlock votes to keep a segment. Default 0 drops community-rejected rows (votes < 0). Raise to require verified segments.",
+              "default": 0,
+              "title": "Minvotes"
+            },
+            "description": "Minimum SponsorBlock votes to keep a segment. Default 0 drops community-rejected rows (votes < 0). Raise to require verified segments."
+          },
+          {
+            "name": "categories",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Comma-separated SponsorBlock categories. Default: sponsor,selfpromo,interaction. Also: intro,outro,preview,music_offtopic,poi_highlight,filler.",
+              "title": "Categories"
+            },
+            "description": "Comma-separated SponsorBlock categories. Default: sponsor,selfpromo,interaction. Also: intro,outro,preview,music_offtopic,poi_highlight,filler."
+          },
+          {
             "name": "cache",
             "in": "query",
             "required": false,
@@ -2094,7 +2135,7 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "TikTok profile / channel info",
+        "summary": "TikTok profile — createTime, bioLink.risk, Shop/commerce, contact",
         "operationId": "tiktok_channel_details_v1_tiktok_channel_details_get",
         "security": [
           {
@@ -2119,11 +2160,29 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to use the default cache TTL. Default false — always fetch fresh.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to use the default cache TTL. Default false — always fetch fresh."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits."
           }
         ],
         "responses": {
@@ -2430,7 +2489,8 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "Popular TikTok creators by country",
+        "summary": "Popular TikTok creators (Creative Center)",
+        "description": "TikTok Creative Center creator chart (ads.tiktok.com/business/creativecenter/inspiration/popular/creator). engagementRate is TikTok's official interact rate when exposed (engagementRateBasis=creative_center). Falls back to For You feed hydrate, then Apify. Flat 2 credits on Creative Center / FYP native.",
         "operationId": "tiktok_popular_creators_v1_tiktok_popular_creators_get",
         "security": [
           {
@@ -2474,10 +2534,24 @@
                   "type": "null"
                 }
               ],
-              "description": "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m",
+              "description": "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m (FYP/Apify fallthrough)",
               "title": "Follower Count"
             },
-            "description": "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m"
+            "description": "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m (FYP/Apify fallthrough)"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 20,
+              "minimum": 1,
+              "description": "Creative Center page (default 1).",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "Creative Center page (default 1)."
           },
           {
             "name": "limit",
@@ -2497,11 +2571,29 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to use the default cache TTL. Default false — always fetch fresh.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to use the default cache TTL. Default false — always fetch fresh."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits."
           }
         ],
         "responses": {
@@ -2531,7 +2623,8 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "TikTok audience countries (by engaged commenters)",
+        "summary": "TikTok commenter countries + languages (engagement sample)",
+        "description": "TikTok does not publish follower geography. This endpoint samples people commenting on the creator's recent videos and tallies commenter country (user.region) and comment language. Percentages are numeric and sum to ~100% across audienceLocations (+ other when countriesLimit truncates). Use videos=12|30|60 for sample depth (credits 3/5/8). Reflects who engages — not a full follower census.",
         "operationId": "tiktok_audience_demographics_v1_tiktok_audience_demographics_get",
         "security": [
           {
@@ -2549,6 +2642,38 @@
               "title": "Url"
             },
             "description": "TikTok profile URL, @handle, or username"
+          },
+          {
+            "name": "videos",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "How many recent videos to sample comments from (12, 30, or 60). Credits: 3 / 5 / 8.",
+              "default": 12,
+              "title": "Videos"
+            },
+            "description": "How many recent videos to sample comments from (12, 30, or 60). Credits: 3 / 5 / 8."
+          },
+          {
+            "name": "countriesLimit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 100,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max countries to return in audienceLocations. Remainder is folded into other{count,percentage}. Omit to return every country in the sample.",
+              "title": "Countrieslimit"
+            },
+            "description": "Max countries to return in audienceLocations. Remainder is folded into other{count,percentage}. Omit to return every country in the sample."
           },
           {
             "name": "cache",
@@ -2814,6 +2939,24 @@
             }
           },
           {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response."
+          },
+          {
             "name": "cache",
             "in": "query",
             "required": false,
@@ -2883,6 +3026,24 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response."
           },
           {
             "name": "cache",
@@ -3081,7 +3242,8 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "Search TikTok videos by hashtag",
+        "summary": "TikTok videos posted under a hashtag (tag/challenge feed)",
+        "description": "Returns videos from TikTok's /tag/{name} challenge feed — not keyword or username search. Each result must carry the requested hashtag in structured tags or as #tag in the caption; @comedy… accounts without #comedy are dropped. region only chooses the proxy exit country — it does not filter results by country. Cursor pagination via nextCursor / hasMore (nextCursor null = last page).",
         "operationId": "tiktok_search_by_hashtag_v1_tiktok_search_hashtag_get",
         "security": [
           {
@@ -3328,7 +3490,8 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "TikTok trending (For You) feed by region",
+        "summary": "TikTok trending feed (For You or Creative Center popular)",
+        "description": "Default: For You / recommend feed with engagement, rank, and author. Pass orderBy, period, page, or countryCode to switch to TikTok Creative Center popular videos (SC videos/popular filters) — same rich item shape when hydration succeeds, plus pagination.totalCount (typically 500).",
         "operationId": "tiktok_trending_feed_v1_tiktok_trending_feed_get",
         "security": [
           {
@@ -3344,11 +3507,31 @@
               "type": "string",
               "minLength": 2,
               "maxLength": 2,
-              "description": "ISO country code used as a region hint (e.g. US, TR). You see content available in that market — not only creators from that country.",
+              "description": "ISO country code (alias of countryCode). For You: region-availability hint. Creative Center mode: chart market.",
               "default": "US",
               "title": "Country"
             },
-            "description": "ISO country code used as a region hint (e.g. US, TR). You see content available in that market — not only creators from that country."
+            "description": "ISO country code (alias of countryCode). For You: region-availability hint. Creative Center mode: chart market."
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 2
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Alias of country (SC-compatible). Wins when both are set.",
+              "title": "Countrycode"
+            },
+            "description": "Alias of country (SC-compatible). Wins when both are set."
           },
           {
             "name": "limit",
@@ -3358,11 +3541,61 @@
               "type": "integer",
               "maximum": 200,
               "minimum": 1,
-              "description": "Max items to return (default 20, max 200). Flat 2 credits per call.",
+              "description": "Max items (default 20). Creative Center caps at 20/page. Flat 2 credits.",
               "default": 20,
               "title": "Limit"
             },
-            "description": "Max items to return (default 20, max 200). Flat 2 credits per call."
+            "description": "Max items (default 20). Creative Center caps at 20/page. Flat 2 credits."
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Creative Center sort: hot (views), like, comment, repost. When set (or period/page>1), uses the popular-videos chart instead of For You.",
+              "title": "Orderby"
+            },
+            "description": "Creative Center sort: hot (views), like, comment, repost. When set (or period/page>1), uses the popular-videos chart instead of For You."
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Creative Center lookback days: 7, 30, or 120 (180→120). Triggers chart mode.",
+              "title": "Period"
+            },
+            "description": "Creative Center lookback days: 7, 30, or 120 (180→120). Triggers chart mode."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 25,
+              "minimum": 1,
+              "description": "Creative Center page (default 1). page>1 triggers chart mode.",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "Creative Center page (default 1). page>1 triggers chart mode."
           },
           {
             "name": "cache",
@@ -3404,7 +3637,8 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "Trending TikTok hashtags for a topic/keyword",
+        "summary": "TikTok Creative Center popular hashtags",
+        "description": "Official TikTok Creative Center hashtag chart (ads.tiktok.com/business/creativecenter/inspiration/popular/hashtag). videoCount / totalPlays are Creative Center population totals — not sample tallies. Also returns rankDiff, trend[] time series, and growthRate derived from trend. Pass query for legacy co-occurrence related-tag discovery (challenge/detail enrich). Flat 2 credits on the Creative Center path.",
         "operationId": "tiktok_popular_hashtags_v1_tiktok_popular_hashtags_get",
         "security": [
           {
@@ -3413,17 +3647,104 @@
         ],
         "parameters": [
           {
-            "name": "query",
+            "name": "country",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string",
-              "minLength": 1,
-              "description": "Topic or keyword to discover trending hashtags for",
-              "default": "trending",
+              "minLength": 2,
+              "maxLength": 2,
+              "description": "Two-letter ISO country code for the Creative Center chart. Default US.",
+              "default": "US",
+              "title": "Country"
+            },
+            "description": "Two-letter ISO country code for the Creative Center chart. Default US."
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Lookback window in days: 7, 30, or 120 (180 maps to 120). Default 7.",
+              "default": 7,
+              "title": "Period"
+            },
+            "description": "Lookback window in days: 7, 30, or 120 (180 maps to 120). Default 7."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 20,
+              "minimum": 1,
+              "description": "Creative Center page (default 1).",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "Creative Center page (default 1)."
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Chart sort: popular (default).",
+              "default": "popular",
+              "title": "Sortby"
+            },
+            "description": "Chart sort: popular (default)."
+          },
+          {
+            "name": "newOnBoard",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If true, only hashtags newly on the Top 100 board.",
+              "default": false,
+              "title": "Newonboard"
+            },
+            "description": "If true, only hashtags newly on the Top 100 board."
+          },
+          {
+            "name": "industryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional Creative Center industry_id filter.",
+              "title": "Industryid"
+            },
+            "description": "Optional Creative Center industry_id filter."
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional niche seed for legacy co-occurrence discovery. When set (and not \"trending\"), skips the Creative Center chart and finds related tags from seed videos + challenge/detail enrich.",
               "title": "Query"
             },
-            "description": "Topic or keyword to discover trending hashtags for"
+            "description": "Optional niche seed for legacy co-occurrence discovery. When set (and not \"trending\"), skips the Creative Center chart and finds related tags from seed videos + challenge/detail enrich."
           },
           {
             "name": "limit",
@@ -3432,6 +3753,139 @@
             "schema": {
               "type": "integer",
               "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
+              "title": "Cache"
+            },
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tiktok/popular-songs": {
+      "get": {
+        "tags": [
+          "TikTok"
+        ],
+        "summary": "TikTok Creative Center popular / surging songs",
+        "description": "Official TikTok Creative Center sound chart (ads.tiktok.com/business/creativecenter/inspiration/popular/music). Filters: rankType=popular|surging, newOnBoard, commercialMusic (Commercial Music Library / ifCml), country, period (7/30/120), page. Each song includes rankDiff, trend[] time series, and growthRate. Can take up to ~30 seconds. Flat 2 credits.",
+        "operationId": "tiktok_popular_songs_v1_tiktok_popular_songs_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 2,
+              "default": "US",
+              "title": "Country"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Lookback days: 7, 30, or 120 (180→120).",
+              "default": 7,
+              "title": "Period"
+            },
+            "description": "Lookback days: 7, 30, or 120 (180→120)."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 20,
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "rankType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "popular (chart) or surging (rising).",
+              "default": "popular",
+              "title": "Ranktype"
+            },
+            "description": "popular (chart) or surging (rising)."
+          },
+          {
+            "name": "newOnBoard",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Only sounds newly on the Top 100 board.",
+              "default": false,
+              "title": "Newonboard"
+            },
+            "description": "Only sounds newly on the Top 100 board."
+          },
+          {
+            "name": "commercialMusic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Only Commercial Music Library–cleared sounds (brand-safe).",
+              "default": false,
+              "title": "Commercialmusic"
+            },
+            "description": "Only Commercial Music Library–cleared sounds (brand-safe)."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 20,
               "minimum": 1,
               "default": 20,
               "title": "Limit"
@@ -4362,11 +4816,29 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to use the default cache TTL. Default false — always fetch fresh.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to use the default cache TTL. Default false — always fetch fresh."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL. Envelope includes cached + cachedAt.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL. Envelope includes cached + cachedAt."
           }
         ],
         "responses": {
@@ -4421,11 +4893,29 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to use the default cache TTL. Default false — always fetch fresh.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to use the default cache TTL. Default false — always fetch fresh."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL. Envelope includes cached + cachedAt.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL. Envelope includes cached + cachedAt."
           }
         ],
         "responses": {
@@ -4744,6 +5234,151 @@
         }
       }
     },
+    "/v1/instagram/highlights": {
+      "get": {
+        "tags": [
+          "Instagram"
+        ],
+        "summary": "List Instagram Story Highlights for a profile",
+        "description": "Persistent Story Highlight albums (not live 24h Stories). Flat 1 credit.",
+        "operationId": "instagram_highlights_v1_instagram_highlights_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Profile URL or @handle (e.g. https://instagram.com/nasa or @nasa)",
+              "title": "Url"
+            },
+            "description": "Profile URL or @handle (e.g. https://instagram.com/nasa or @nasa)"
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Numeric Instagram user id (skips handle→ID resolve when known)",
+              "title": "Userid"
+            },
+            "description": "Numeric Instagram user id (skips handle→ID resolve when known)"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
+              "title": "Cache"
+            },
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/instagram/highlights-details": {
+      "get": {
+        "tags": [
+          "Instagram"
+        ],
+        "summary": "Instagram Story Highlight album details",
+        "description": "Items inside one persistent Highlight album. Flat 1 credit.",
+        "operationId": "instagram_highlights_details_v1_instagram_highlights_details_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Highlight id from /v1/instagram/highlights (no highlight: prefix)",
+              "title": "Id"
+            },
+            "description": "Highlight id from /v1/instagram/highlights (no highlight: prefix)"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
+              "title": "Cache"
+            },
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/instagram/trending-reels": {
       "get": {
         "tags": [
@@ -4983,7 +5618,8 @@
         "tags": [
           "Instagram"
         ],
-        "summary": "Search Instagram posts by hashtag",
+        "summary": "Instagram hashtag Explore posts (not keyword search)",
+        "description": "Returns posts from Instagram's hashtag Explore surface (top/recent tag page — Reels-heavy; not keyword or username search). engagement.likes is like_count; play totals go to engagement.views. Optional mediaType=reels filters to Reels only.",
         "operationId": "instagram_hashtag_search_v1_instagram_hashtag_search_get",
         "security": [
           {
@@ -5772,6 +6408,7 @@
           "Facebook"
         ],
         "summary": "Photos from a Facebook profile/page",
+        "description": "Returns photo grid items with image URL and accessibilityCaption (Facebook alt-text — not a user-written post caption). Publish time and engagement are usually absent on this surface.",
         "operationId": "facebook_profile_photos_v1_facebook_profile_photos_get",
         "security": [
           {
@@ -6551,6 +7188,24 @@
             "description": "Creative media filter (Meta Ad Library media_type)."
           },
           {
+            "name": "platforms",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Comma-separated publisher platforms to keep: FACEBOOK, INSTAGRAM, MESSENGER, AUDIENCE_NETWORK, THREADS. Filters the returned page (Meta's HTML search does not always honor this server-side).",
+              "title": "Platforms"
+            },
+            "description": "Comma-separated publisher platforms to keep: FACEBOOK, INSTAGRAM, MESSENGER, AUDIENCE_NETWORK, THREADS. Filters the returned page (Meta's HTML search does not always honor this server-side)."
+          },
+          {
             "name": "ad_type",
             "in": "query",
             "required": false,
@@ -6643,6 +7298,36 @@
             "description": "Only ads with delivery start on/before this date (YYYY-MM-DD)."
           },
           {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor from a previous nextCursor. Pages through the current Meta HTML result batch (same filters). When nextCursor is null, refine with start_date/status or a narrower query.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor from a previous nextCursor. Pages through the current Meta HTML result batch (same filters). When nextCursor is null, refine with start_date/status or a narrower query."
+          },
+          {
+            "name": "trim",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "SC-compatible. Captapi payloads are already lean vs Meta nested snapshots; when true, omit cards/images/videos typed arrays (media[] stays).",
+              "default": false,
+              "title": "Trim"
+            },
+            "description": "SC-compatible. Captapi payloads are already lean vs Meta nested snapshots; when true, omit cards/images/videos typed arrays (media[] stays)."
+          },
+          {
             "name": "cache",
             "in": "query",
             "required": false,
@@ -6683,6 +7368,7 @@
           "Ad Library"
         ],
         "summary": "Meta/Facebook ads for a page or advertiser",
+        "description": "List ads for one Meta page/advertiser. Prefer pageId (or libraryUrl) from /facebook/search-companies — that id is view_all_page_id. A facebook.com/{digits}/ profileId in the page URL is a different namespace and may 404 or miss ads if used alone; vanity URLs (facebook.com/nike/) work when Meta resolves them.",
         "operationId": "facebook_company_ads_v1_ad_library_facebook_company_ads_get",
         "security": [
           {
@@ -6696,10 +7382,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Facebook page URL or Meta Ad Library URL",
+              "description": "Page id from search-companies (pageId), libraryUrl, Facebook page URL, or Ad Library URL with view_all_page_id.",
               "title": "Url"
             },
-            "description": "Facebook page URL or Meta Ad Library URL"
+            "description": "Page id from search-companies (pageId), libraryUrl, Facebook page URL, or Ad Library URL with view_all_page_id."
           },
           {
             "name": "country",
@@ -6766,6 +7452,7 @@
           "Ad Library"
         ],
         "summary": "Find advertisers/pages in Meta Ad Library",
+        "description": "Find Meta Ad Library advertisers/pages by brand name. Results are relevance-filtered so the query must appear in the page name (empty beats off-brand pages that merely ran ads near the keyword). Each company exposes pageId / advertiserId (same value — pass to /facebook/company-ads as url=) and profileId when the facebook.com/{digits}/ URL uses a different numeric identity. libraryUrl is the ready view_all_page_id link. Flat 2 credits native.",
         "operationId": "facebook_search_companies_v1_ad_library_facebook_search_companies_get",
         "security": [
           {
@@ -6850,6 +7537,7 @@
           "Ad Library"
         ],
         "summary": "Meta/Facebook ad details",
+        "description": "Fetch one Meta Ad Library ad by URL or archive ID. Creative fields (text/headline/cta/landingUrl/media/advertiser) match a search hit for the same id — use this endpoint for ID lookup without paging search. Delivery extras are returned when Meta publishes them (mostly political/issue and EU AAA ads): platforms / publisherPlatforms, demographicDistribution[], regionDistribution[], ageCountryGenderReachBreakdown / euTransparency, variantCount (collation), isAaaEligible. On commercial ads Meta often withholds those breakdowns — keys stay present as null so the schema is stable. Flat 2 credits on the native path.",
         "operationId": "facebook_ad_details_v1_ad_library_facebook_ad_details_get",
         "security": [
           {
@@ -6968,7 +7656,7 @@
           "Ad Library"
         ],
         "summary": "Search TikTok Ad Library",
-        "description": "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) as clean JSON. Flat 2 credits on the native path. firstShown/lastShown are ISO-8601. Default country is GB (this library is EU-led; region=US is often empty). This is not TikTok Creative Center — CTR / play-rate ranking metrics live on Creative Center, a different public surface.",
+        "description": "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) as clean JSON. Flat 2 credits on the native path (Apify fallback capped at 5 — never the old ~70-credit per-result trap). Results are relevance-filtered so keyword tokens must appear in advertiser or ad copy. Schema keeps nulls for headline/cta/landingUrl/spend/advertiser.id when TikTok withholds them (DSA library does not publish Meta-style spend). firstShown/lastShown are ISO-8601. Default country is GB (EU-led; US often empty). For Creative Center Top Ads (CTR, likes, brand ranking), use /v1/ad-library/tiktok/top-ads.",
         "operationId": "tiktok_search_v1_ad_library_tiktok_search_get",
         "security": [
           {
@@ -6996,11 +7684,11 @@
               "type": "string",
               "minLength": 2,
               "maxLength": 2,
-              "description": "Two-letter ISO country code. Default GB (EU Commercial Content Library; US often empty).",
+              "description": "Two-letter ISO country code (e.g. GB, DE, FR). Default GB — EU Commercial Content Library; US often empty.",
               "default": "GB",
               "title": "Country"
             },
-            "description": "Two-letter ISO country code. Default GB (EU Commercial Content Library; US often empty)."
+            "description": "Two-letter ISO country code (e.g. GB, DE, FR). Default GB — EU Commercial Content Library; US often empty."
           },
           {
             "name": "limit",
@@ -7226,6 +7914,7 @@
           "Ad Library"
         ],
         "summary": "TikTok ad details",
+        "description": "Fetch one TikTok Commercial Content Library ad by URL or ad ID. Same schema as search hits (text/cta/landingUrl/impressions/advertiser.* with nulls when DSA withholds). Useful for ID lookup without a search page. Flat 2 credits on the native path; Apify fallback capped at 5 (not 17). Default country GB.",
         "operationId": "tiktok_ad_details_v1_ad_library_tiktok_ad_details_get",
         "security": [
           {
@@ -7313,10 +8002,10 @@
             "schema": {
               "type": "string",
               "minLength": 2,
-              "description": "Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…).",
+              "description": "Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…). Prefer AR… from /google/advertiser-search for a deterministic entity.",
               "title": "Advertiser"
             },
-            "description": "Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…)."
+            "description": "Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…). Prefer AR… from /google/advertiser-search for a deterministic entity."
           },
           {
             "name": "country",
@@ -7419,6 +8108,28 @@
             "description": "Optional YYYY-MM-DD — keep creatives whose shown window overlaps this end."
           },
           {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "last_shown",
+                    "first_shown"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client-side sort before slicing: last_shown (recent activity first) or first_shown. Default is ATC order (often oldest creatives first).",
+              "title": "Sort"
+            },
+            "description": "Client-side sort before slicing: last_shown (recent activity first) or first_shown. Default is ATC order (often oldest creatives first)."
+          },
+          {
             "name": "topic",
             "in": "query",
             "required": false,
@@ -7471,6 +8182,7 @@
           "Ad Library"
         ],
         "summary": "Google ad details",
+        "description": "Fetch one Google Ads Transparency creative by AR… + CR… URL. Adds text/headline/landingUrl/impressions when ATC publishes them (beyond company-ads list rows). Response id + advertiser.id always match the request — different Nike legal entities (Inc. vs Retail BV vs SRL) are not interchangeable. countries[] is ISO-3166 alpha-2; country is a single ISO when unambiguous. textIsTemplate marks Google Ads Dynamic Keyword Insertion macros ({KeyWord:…}). Flat 2 credits native; Apify fallback capped at 5.",
         "operationId": "google_ad_details_v1_ad_library_google_ad_details_get",
         "security": [
           {
@@ -7542,6 +8254,7 @@
           "Ad Library"
         ],
         "summary": "Search Google Ads advertisers",
+        "description": "Search Google Ads Transparency advertisers and return ranked AR… entities. Brand queries are expanded (e.g. nike → Nike, Inc. + NIKE SRL) so country=US surfaces the parent company first. Pass advertisers[].id into /v1/ad-library/google/company-ads?advertiser=AR… for a deterministic creatives chain. Flat 1 credit.",
         "operationId": "google_advertiser_search_v1_ad_library_google_advertiser_search_get",
         "security": [
           {
@@ -7556,8 +8269,10 @@
             "schema": {
               "type": "string",
               "minLength": 2,
+              "description": "Brand, domain, or advertiser name (min 2 characters).",
               "title": "Q"
-            }
+            },
+            "description": "Brand, domain, or advertiser name (min 2 characters)."
           },
           {
             "name": "country",
@@ -7567,9 +8282,11 @@
               "type": "string",
               "minLength": 2,
               "maxLength": 2,
+              "description": "Two-letter ISO country code used to rank entities (e.g. US prefers Inc. over SRL).",
               "default": "US",
               "title": "Country"
-            }
+            },
+            "description": "Two-letter ISO country code used to rank entities (e.g. US prefers Inc. over SRL)."
           },
           {
             "name": "limit",
@@ -7649,6 +8366,24 @@
               "title": "Q"
             },
             "description": "Advertiser / account owner name (LinkedIn accountOwner). Min 2 chars when used."
+          },
+          {
+            "name": "company",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "SC alias of q — advertiser / account owner name.",
+              "title": "Company"
+            },
+            "description": "SC alias of q — advertiser / account owner name."
           },
           {
             "name": "keyword",
@@ -7773,6 +8508,24 @@
             "description": "Pagination token from a previous response (paginationToken / nextCursor)."
           },
           {
+            "name": "paginationToken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "SC alias of cursor — pagination token from a previous response.",
+              "title": "Paginationtoken"
+            },
+            "description": "SC alias of cursor — pagination token from a previous response."
+          },
+          {
             "name": "limit",
             "in": "query",
             "required": false,
@@ -7825,6 +8578,7 @@
           "Ad Library"
         ],
         "summary": "LinkedIn ad details",
+        "description": "Fetch one LinkedIn Ad Library ad by URL or ID. Adds headline, destination/landingUrl, targeting{}, impressionsByCountry[], and advertiser.url when the detail page publishes them. advertiser.id is extracted from /company/{id} for joins with LinkedIn Company endpoints. Schema keeps null keys for fields search may have (country, logo) so details is never thinner by omission. Flat 2 credits native; Apify fallback capped at 5.",
         "operationId": "linkedin_ad_details_v1_ad_library_linkedin_ad_details_get",
         "security": [
           {
@@ -8775,7 +9529,7 @@
         "tags": [
           "Twitter"
         ],
-        "summary": "Twitter/X profile — verification triad, listed/media/likes, banner",
+        "summary": "Twitter/X profile — blue/legacy/identity verification, tipjar, fastFollowers",
         "operationId": "twitter_profile_v1_twitter_profile_get",
         "security": [
           {
@@ -8800,11 +9554,29 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to use the default cache TTL. Default false — always fetch fresh.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to use the default cache TTL. Default false — always fetch fresh."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL. Envelope includes cached + cachedAt.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL. Envelope includes cached + cachedAt."
           }
         ],
         "responses": {
@@ -10626,7 +11398,7 @@
         "tags": [
           "LinkedIn"
         ],
-        "summary": "LinkedIn person profile details",
+        "summary": "LinkedIn person profile — experience, education, similarProfiles",
         "operationId": "linkedin_profile_v1_linkedin_profile_get",
         "security": [
           {
@@ -10651,11 +11423,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to use the default cache TTL. Default false — always fetch fresh.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to use the default cache TTL. Default false — always fetch fresh."
           }
         ],
         "responses": {
@@ -12938,7 +13710,7 @@
           "Analytics"
         ],
         "summary": "Cross-platform post analytics (unified metrics)",
-        "description": "Detects the platform from the URL (YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble) and returns one normalized metrics object. Costs 1 credit.",
+        "description": "Detects the platform from the URL (YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble) and returns one normalized metrics object including engagementRate with engagementRateBasis=interactions/views. Costs 1 credit.",
         "operationId": "post_analytics_v1_analytics_post_get",
         "security": [
           {
@@ -12998,7 +13770,7 @@
           "Analytics"
         ],
         "summary": "Compare metrics across multiple posts and platforms",
-        "description": "Fetches the same unified metrics object as /v1/analytics/post for up to 10 comma-separated URLs in one call (any mix of platforms). Each result includes metrics.views/likes/comments/shares/saves/interactions/engagementRate — fields a platform does not expose stay null. Bills 1 credit per successfully resolved URL that is not served from cache (same per-URL cache as post analytics). No bulk discount vs calling /post N times — the win is one HTTP round-trip.",
+        "description": "Fetches the same unified metrics object as /v1/analytics/post for up to 10 comma-separated URLs in one call (any mix of platforms). Each result includes platform, status (ok|error), and metrics.views/likes/comments/shares/saves/interactions/engagementRate (engagementRateBasis=interactions/views). Failed URLs also appear in failed[] with a reason. Bills 1 credit per successfully resolved URL that is not served from cache (same per-URL cache as post analytics). No bulk discount vs calling /post N times — the win is one HTTP round-trip.",
         "operationId": "compare_analytics_v1_analytics_compare_get",
         "security": [
           {

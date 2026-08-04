@@ -383,7 +383,7 @@
     "name": "YouTube Shorts Comments",
     "path": "/v1/youtube/shorts/comments",
     "credits": 2,
-    "summary": "Comments on a YouTube Short.",
+    "summary": "Comments on a YouTube Short — same engine as /comments (flat 2 credits).",
     "params": [
       {
         "name": "url",
@@ -396,6 +396,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -411,7 +417,7 @@
     "name": "YouTube Channel Shorts",
     "path": "/v1/youtube/channel-shorts",
     "credits": 2,
-    "summary": "List a channel Shorts with player-enriched fields.",
+    "summary": "List a channel's Shorts with player-enriched fields.",
     "params": [
       {
         "name": "url",
@@ -439,7 +445,7 @@
     "name": "YouTube Trending Shorts",
     "path": "/v1/youtube/trending-shorts",
     "credits": 2,
-    "summary": "YouTube Shorts reel/trending sequence (not keyword search).",
+    "summary": "YouTube Shorts reel/trending feed (not a keyword search).",
     "params": [
       {
         "name": "q",
@@ -479,7 +485,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -557,7 +563,7 @@
     "name": "YouTube Channel Playlists",
     "path": "/v1/youtube/channel-playlists",
     "credits": 2,
-    "summary": "List a channel's playlists.",
+    "summary": "List a channel's playlists — id, title, videoCount, thumbnailUrl.",
     "params": [
       {
         "name": "url",
@@ -585,7 +591,7 @@
     "name": "YouTube Community Posts",
     "path": "/v1/youtube/community-posts",
     "credits": 1,
-    "summary": "Community posts — numeric likes, ISO dates, channel{}, video{}; cursor pagination.",
+    "summary": "Community posts — likeCount+likeCountText, pollOptions, ISO dates, channel{}, cursor.",
     "params": [
       {
         "name": "url",
@@ -619,7 +625,7 @@
     "name": "YouTube Community Post Details",
     "path": "/v1/youtube/community-post-details",
     "credits": 1,
-    "summary": "Details for a single YouTube community post.",
+    "summary": "One community post — same schema as list + comments (pollOptions, numeric likeCount).",
     "params": [
       {
         "name": "url",
@@ -641,13 +647,25 @@
     "name": "YouTube Video Sponsors",
     "path": "/v1/youtube/video-sponsors",
     "credits": 1,
-    "summary": "Sponsor / self-promo / interaction segments in a YouTube video (via SponsorBlock).",
+    "summary": "SponsorBlock segments — sorted, overlapsWith, minVotes, coverageSeconds.",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
         "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "minVotes",
+        "type": "number",
+        "required": false,
+        "description": "Minimum votes (default 0; drops votes < 0)."
+      },
+      {
+        "name": "categories",
+        "type": "string",
+        "required": false,
+        "description": "Comma-separated categories (default sponsor,selfpromo,interaction)."
       },
       {
         "name": "cache",
@@ -954,8 +972,8 @@
     "platform": "tiktok",
     "name": "TikTok User Followers",
     "path": "/v1/tiktok/user-followers",
-    "credits": 20,
-    "summary": "List a TikTok user's followers.",
+    "credits": 1,
+    "summary": "Followers — id, secUid, createTime, region, language; total + nextCursor. Flat 1 credit native.",
     "params": [
       {
         "name": "url",
@@ -967,7 +985,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Billed per result."
+        "description": "Max items to return. Default 50, max 500. Flat 1 credit per call."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response."
       },
       {
         "name": "cache",
@@ -982,8 +1006,8 @@
     "platform": "tiktok",
     "name": "TikTok User Followings",
     "path": "/v1/tiktok/user-followings",
-    "credits": 20,
-    "summary": "List who a TikTok user follows.",
+    "credits": 1,
+    "summary": "Followings — id, secUid, createTime, region, language; total + nextCursor. Flat 1 credit native.",
     "params": [
       {
         "name": "url",
@@ -995,7 +1019,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Billed per result."
+        "description": "Max items to return. Default 50, max 500. Flat 1 credit per call."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor (TikTok minCursor). Leave empty for the first page; then pass nextCursor from the previous response."
       },
       {
         "name": "cache",
@@ -1190,14 +1220,14 @@
     "platform": "tiktok",
     "name": "TikTok Popular Hashtags",
     "path": "/v1/tiktok/popular-hashtags",
-    "credits": 14,
-    "summary": "Trending TikTok hashtags for a topic/keyword.",
+    "credits": 2,
+    "summary": "TikTok Creative Center hashtag chart (population videoCount).",
     "params": [
       {
         "name": "query",
         "type": "string",
         "required": false,
-        "description": "Topic or keyword to discover trending hashtags for. Default \"trending\"."
+        "description": "Optional niche seed for related-tag co-occurrence. Omit/trending for Creative Center chart."
       },
       {
         "name": "limit",
@@ -4655,7 +4685,7 @@
     "platform": "ad_library",
     "name": "Facebook Ad Details",
     "path": "/v1/ad-library/facebook/ad-details",
-    "credits": 17,
+    "credits": 2,
     "summary": "Meta/Facebook ad details.",
     "params": [
       {
@@ -4797,7 +4827,7 @@
     "platform": "ad_library",
     "name": "TikTok Ad Details",
     "path": "/v1/ad-library/tiktok/ad-details",
-    "credits": 17,
+    "credits": 2,
     "summary": "TikTok ad details by ad URL or ID.",
     "params": [
       {
@@ -4883,7 +4913,7 @@
     "platform": "ad_library",
     "name": "Google Ad Details",
     "path": "/v1/ad-library/google/ad-details",
-    "credits": 17,
+    "credits": 2,
     "summary": "Google ad details by Transparency Center URL.",
     "params": [
       {
@@ -5015,7 +5045,7 @@
     "platform": "ad_library",
     "name": "LinkedIn Ad Details",
     "path": "/v1/ad-library/linkedin/ad-details",
-    "credits": 17,
+    "credits": 2,
     "summary": "LinkedIn ad details by URL or ID.",
     "params": [
       {
