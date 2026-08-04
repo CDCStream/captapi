@@ -201,6 +201,19 @@ def extract_instagram_shortcode(url: str) -> str | None:
     return m.group(1) if m else None
 
 
+def canonical_instagram_media_url(url: str) -> str:
+    """Strip share junk (``igsh=``, tracking) and return a clean /reel|p/ URL.
+
+    Apify and some GraphQL paths choke on share links with query strings even
+    when the shortcode is valid.
+    """
+    shortcode = extract_instagram_shortcode(url)
+    if not shortcode:
+        return (url or "").strip()
+    kind = "reel" if re.search(r"/reels?/", url or "", re.I) else "p"
+    return f"https://www.instagram.com/{kind}/{shortcode}/"
+
+
 def extract_instagram_username(url: str) -> str | None:
     m = INSTAGRAM_USER_RE.search(url or "")
     if m:

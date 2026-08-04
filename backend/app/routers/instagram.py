@@ -33,6 +33,7 @@ from app.utils.formatters import (
 from app.utils.retry import retry_none
 from app.utils.url import (
     detect_url_platform,
+    canonical_instagram_media_url,
     extract_instagram_shortcode,
     extract_instagram_username,
     platform_mismatch_detail,
@@ -348,13 +349,25 @@ def _instagram_hashtag_candidates(
 
 
 def _instagram_reel_candidates(settings: Any, url: str, *, subtitles: bool = False) -> list[tuple[str, dict[str, Any]]]:
-    payload: dict[str, Any] = {"directUrls": [url], "resultsLimit": 1}
+    # Share links (?igsh=…) break some actor runs; also try /p/ when /reel/ 404s.
+    clean = canonical_instagram_media_url(url)
+    shortcode = extract_instagram_shortcode(clean) or extract_instagram_shortcode(url)
+    urls = [clean]
+    if shortcode:
+        alt = f"https://www.instagram.com/p/{shortcode}/"
+        if alt not in urls:
+            urls.append(alt)
+        reel = f"https://www.instagram.com/reel/{shortcode}/"
+        if reel not in urls:
+            urls.append(reel)
+    payload: dict[str, Any] = {"directUrls": urls[:2], "resultsLimit": 1}
     if subtitles:
         payload["shouldDownloadSubtitles"] = True
     return _dedupe_candidates(
         [
             (settings.APIFY_ACTOR_INSTAGRAM_REEL, payload),
-            (settings.APIFY_ACTOR_INSTAGRAM_REEL_FALLBACK, payload),
+            (settings.APIFY_ACTOR_INSTAGRAM_REEL_FALLBACK, {**payload, "directUrls": urls[:1]}),
+            (settings.APIFY_ACTOR_INSTAGRAM, {**payload, "directUrls": urls[:1], "resultsType": "posts"}),
         ]
     )
 
@@ -486,9 +499,14 @@ async def _fetch_instagram_transcript(
         heard_empty = True
         return None
 
+    # Clean share junk (?igsh=…) — shortcode is fine, but actors + some IG
+    # edges 404 the dirty URL even when the reel is public and active.
+    clean_url = canonical_instagram_media_url(url)
+    shortcode = _require_instagram_post_url(clean_url)
+
     # Fast path: native GraphQL resolver gets the MP4 URL in ~1-2s.
     reel_item: dict[str, Any] | None = None
-    native = await instagram_native.fetch_reel_media(_require_instagram_post_url(url))
+    native = await instagram_native.fetch_reel_media(shortcode)
     if native and safe_str(native.get("videoUrl")):
         result = await _whisper(safe_str(native.get("videoUrl")))
         if result:
@@ -499,7 +517,7 @@ async def _fetch_instagram_transcript(
     # still fit.
     try:
         items, _actor = await apify.run_with_fallback(
-            _instagram_reel_candidates(settings, url), max_items=1
+            _instagram_reel_candidates(settings, clean_url), max_items=1
         )
     except Exception:  # noqa: BLE001
         items = []
@@ -518,7 +536,7 @@ async def _fetch_instagram_transcript(
         items = await apify.run_actor_sync(
             settings.APIFY_ACTOR_INSTAGRAM_TRANSCRIPT,
             {
-                "videoUrls": [url],
+                "videoUrls": [clean_url],
                 "transcriptionMethod": settings.APIFY_INSTAGRAM_TRANSCRIPT_METHOD,
                 "includeSegments": True,
             },
@@ -537,7 +555,7 @@ async def _fetch_instagram_transcript(
     try:
         items = await apify.run_actor_sync(
             settings.APIFY_ACTOR_INSTAGRAM_TRANSCRIPT_FAST,
-            {"instagramUrl": url, "wordLevelTimestamps": False, "fastProcessing": True},
+            {"instagramUrl": clean_url, "wordLevelTimestamps": False, "fastProcessing": True},
             max_items=1,
         )
     except Exception:  # noqa: BLE001
@@ -551,7 +569,7 @@ async def _fetch_instagram_transcript(
             return full, segments, "apify", detected
 
     if reel_item is None and native is None:
-        raise HTTPException(status_code=404, detail="Reel not found")
+        raise HTTPException(status_code=404, detail="Post not found")
     if heard_empty:
         raise HTTPException(status_code=422, detail="No speech found in this Reel")
     raise HTTPException(status_code=422, detail="No transcript available")
@@ -608,18 +626,32 @@ async def instagram_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Native-only: Instagram's own GraphQL (~3-4s).
-            shortcode = extract_instagram_shortcode(url)
+            clean = canonical_instagram_media_url(url)
+            shortcode = extract_instagram_shortcode(clean)
             if shortcode:
                 native = await instagram_native.fetch_post_details(shortcode)
                 if native:
                     ctx["source"] = "direct"
                     return native
+                # Same public post — GraphQL soft-blocks are intermittent; Apify
+                # recovers without changing the response field set.
+                try:
+                    items, _actor = await get_apify().run_with_fallback(
+                        _instagram_reel_candidates(get_settings(), clean),
+                        max_items=1,
+                    )
+                except Exception:  # noqa: BLE001
+                    items = []
+                if items:
+                    mapped = decodo.strip_null_post_fields(_normalize_post(items[0]))
+                    if mapped.get("id") or mapped.get("shortcode") or mapped.get("url"):
+                        ctx["source"] = "apify"
+                        return mapped
             raise HTTPException(status_code=404, detail="Post not found")
 
         data = await cached_or_run(
             endpoint="instagram.details",
-            params={"url": url, "v": 12},
+            params={"url": url, "v": 13},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -668,7 +700,7 @@ async def instagram_transcript(
 
         data = await cached_or_run(
             endpoint="instagram.transcript",
-            params={"url": url, "language": lang, "v": 10},
+            params={"url": url, "language": lang, "v": 11},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -56,21 +56,37 @@ async def fetch_reel_media(shortcode: str) -> dict[str, Any] | None:
     """
     media = await _fetch_item(shortcode)
     if media is None:
-        media = await _fetch_item_with_session(shortcode)
+        # Fail-fast session: dead cookies redirect-loop for minutes and starve
+        # the Apify fallback used by /transcript. Prefer embed, then one session.
+        media = await _fetch_reel_media_dict_from_embed(shortcode)
+        if media and media.get("videoUrl"):
+            return media
+        media = await _fetch_item_with_session(shortcode, max_sessions=1)
     if media is None:
-        return None
+        return await _fetch_reel_media_dict_from_embed(shortcode)
     # Reels can be carousels; the playable video lives on the cover child.
     cover = (media.get("carousel_media") or [media])[0]
     videos = media.get("video_versions") or cover.get("video_versions") or []
     images = (media.get("image_versions2") or {}).get("candidates") or []
     caption = media.get("caption")
-    return {
+    out = {
         "videoUrl": safe_str(videos[0].get("url")) if videos else None,
         "thumbnailUrl": safe_str(images[0].get("url")) if images else None,
         "duration": _video_duration(media, cover),
         "caption": safe_str(caption.get("text")) if isinstance(caption, dict) else None,
         "username": safe_str((media.get("user") or {}).get("username")),
     }
+    if out.get("videoUrl"):
+        return out
+    # GraphQL sometimes returns the item without video_versions (rate-limit /
+    # soft block). Embed page often still has video_url.
+    embed = await _fetch_reel_media_dict_from_embed(shortcode)
+    if embed and embed.get("videoUrl"):
+        for key in ("thumbnailUrl", "duration", "caption", "username"):
+            if not out.get(key) and embed.get(key):
+                out[key] = embed[key]
+        out["videoUrl"] = embed["videoUrl"]
+    return out if out.get("videoUrl") or out.get("thumbnailUrl") else None
 
 
 _MEDIA_TYPE_NAMES = {1: "Image", 2: "Video", 8: "Sidecar"}
@@ -477,8 +493,8 @@ async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
     """
     media = await _fetch_item(shortcode)
     if media is None:
-        # Railway/datacenter often 401s Polaris; session GraphQL recovers.
-        media = await _fetch_item_with_session(shortcode)
+        # Prefer one quick session; full pool redirect-loops starve Apify.
+        media = await _fetch_item_with_session(shortcode, max_sessions=2)
     if media is None:
         return None
     return map_post_from_media(media, shortcode=shortcode)
@@ -649,14 +665,20 @@ def _pick_session() -> str | None:
 
 
 async def _fetch_item_with_session(
-    shortcode: str, session_id: str | None = None
+    shortcode: str,
+    session_id: str | None = None,
+    *,
+    max_sessions: int | None = None,
 ) -> dict[str, Any] | None:
     """Polaris shortcode media via GraphQL using session cookies (pool failover).
 
     Logged-out GraphQL often 401s on datacenter IPs (e.g. Railway); the same
     doc_id succeeds when a valid session cookie is attached.
     """
-    for sid in _sessions_rotated(session_id):
+    sessions = _sessions_rotated(session_id)
+    if max_sessions is not None:
+        sessions = sessions[: max(0, max_sessions)]
+    for sid in sessions:
         item = await _fetch_item_with_one_session(shortcode, sid)
         if item is not None:
             return item
@@ -671,9 +693,10 @@ async def _fetch_item_with_one_session(
     for tier in tiers:
         try:
             async with httpx.AsyncClient(
-                timeout=15,
+                timeout=12,
                 proxy=proxy_for(tier) if tier else None,
                 follow_redirects=True,
+                max_redirects=5,
                 cookies=cookies,
             ) as client:
                 await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
@@ -1409,20 +1432,81 @@ async def _fetch_usertags_once(
 
 
 async def _fetch_item(shortcode: str) -> dict[str, Any] | None:
-    for tier in _TIERS:
-        try:
-            media = await _fetch_via(tier, shortcode)
-        except (httpx.HTTPError, ValueError, KeyError) as exc:
-            log.info("ig_native_tier_failed", tier=tier, error=str(exc)[:120])
+    """Polaris shortcode lookup. Retry with reversed tiers — datacenter 401s are common."""
+    for tiers in (_TIERS, tuple(reversed(_TIERS))):
+        for tier in tiers:
+            try:
+                media = await _fetch_via(tier, shortcode)
+            except (httpx.HTTPError, ValueError, KeyError) as exc:
+                log.info("ig_native_tier_failed", tier=tier, error=str(exc)[:120])
+                continue
+            if media is not None:
+                return media
+    return None
+
+
+_EMBED_VIDEO_URL_RE = re.compile(
+    r'\\"video_url\\":\\"(https:(?:\\/\\/|//)[^\\"]+)',
+    re.IGNORECASE,
+)
+_EMBED_DISPLAY_URL_RE = re.compile(
+    r'\\"display_url\\":\\"(https:(?:\\/\\/|//)[^\\"]+)',
+    re.IGNORECASE,
+)
+_EMBED_USERNAME_RE = re.compile(
+    r'\\"username\\":\\"([A-Za-z0-9._]+)\\"',
+)
+
+
+def _unescape_ig_json_url(raw: str) -> str | None:
+    """Turn embed-escaped ``https:\\/\\/cdn...`` into a plain HTTPS URL."""
+    if not raw:
+        return None
+    # unicode_escape handles \\uXXXX; then collapse JSON \\/ to /.
+    try:
+        text = raw.encode("utf-8").decode("unicode_escape")
+    except UnicodeDecodeError:
+        text = raw
+    text = text.replace("\\/", "/").replace("\\/", "/")
+    if text.startswith("https://") or text.startswith("http://"):
+        return text
+    return None
+
+
+async def _fetch_reel_media_dict_from_embed(shortcode: str) -> dict[str, Any] | None:
+    """Last-resort video URL from the public /embed page (no login)."""
+    if not shortcode:
+        return None
+    for embed_url in (
+        f"https://www.instagram.com/p/{shortcode}/embed/captioned/",
+        f"https://www.instagram.com/reel/{shortcode}/embed/",
+    ):
+        html = await fetch_embed_html(embed_url)
+        if not html:
             continue
-        if media is not None:
-            return media
+        video = None
+        m = _EMBED_VIDEO_URL_RE.search(html)
+        if m:
+            video = _unescape_ig_json_url(m.group(1))
+        thumb = None
+        tm = _EMBED_DISPLAY_URL_RE.search(html)
+        if tm:
+            thumb = _unescape_ig_json_url(tm.group(1))
+        user_m = _EMBED_USERNAME_RE.search(html)
+        if video or thumb:
+            return {
+                "videoUrl": video,
+                "thumbnailUrl": thumb,
+                "duration": _duration_from_video_url(video or ""),
+                "caption": None,
+                "username": user_m.group(1) if user_m else None,
+            }
     return None
 
 
 async def _fetch_via(tier: str, shortcode: str) -> dict[str, Any] | None:
     async with httpx.AsyncClient(
-        timeout=10, proxy=proxy_for(tier), follow_redirects=True
+        timeout=10, proxy=proxy_for(tier), follow_redirects=True, max_redirects=5
     ) as client:
         # A GET to the homepage sets the csrftoken cookie the GraphQL
         # endpoint requires (cookie alone is rejected; header must match).
