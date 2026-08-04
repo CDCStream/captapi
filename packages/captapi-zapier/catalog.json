@@ -2682,8 +2682,8 @@
     "platform": "threads",
     "name": "Threads User Posts",
     "path": "/v1/threads/user-posts",
-    "credits": 14,
-    "summary": "Recent posts from a Threads profile.",
+    "credits": 2,
+    "summary": "Recent Threads posts - engagement views+4 metrics, threadId/isReply. Flat 2 native; ~0.7/post Apify.",
     "params": [
       {
         "name": "url",

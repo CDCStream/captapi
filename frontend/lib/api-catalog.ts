@@ -171,6 +171,13 @@ export function creditLabel(
   if (e.slug === "analytics-compare") return "1 credit/url";
   if (e.slug === "video-transcript") return "1 credit/min";
   if (e.slug === "video-summarize") return "1 credit/min +1";
+  // Native flat + Apify per-result dual pricing (document both, not "~2 (0.7/result)").
+  if (
+    (e.slug === "twitter-community-tweets" || e.slug === "threads-user-posts") &&
+    e.creditsPerResult
+  ) {
+    return `${e.credits} credits native (~${e.creditsPerResult}/result Apify)`;
+  }
   if (e.creditsPerResult) {
     return `~${e.credits} credits (${e.creditsPerResult}/result)`;
   }
@@ -1286,14 +1293,20 @@ const THREADS: Spec[] = [
     category: "list",
     method: "GET",
     path: "/v1/threads/user-posts",
-    credits: 14,
+    credits: 2,
     creditsPerResult: 0.7,
     tagline:
-      "Recent public Threads posts from a profile — text, author, likes, replies, media. Soft-capped by Meta (~20–30).",
+      "Recent Threads posts — engagement{views,likes,replies,reposts,quotes}, threadId/isReply. Flat 2 native; ~0.7/post Apify.",
     longDescription:
-      "Pass a Threads profile URL or @handle and get recent public posts as clean JSON: id, code, url, text, publishedAt, author, engagement, and media when present. Billed per result — about 0.7 credits each. Pass cache=true for the 24h shared cache.",
+      "Pass a Threads profile URL or @handle and get recent public posts as clean JSON: id, code, url, text, ISO publishedAt, threadId / replyToId / isReply / isQuote (rebuild multi-part Threads), top-level author{} (full card once — per-post rows keep slim author without repeating profileImage), engagement{views,likes,replies,reposts,quotes} (views null when Meta omits them on hydrate), and media[] (carousel-aware). Flat 2 credits on the native profile-hydrate path (same soft-cap surface ScrapeCreators uses); Apify fallback bills about 0.7 credits per returned post (min 2). Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "engagement with views + likes/replies/reposts/quotes",
+      "threadId / replyToId / isReply / isQuote for multi-part Threads",
+      "Top-level author{} once (no repeated CDN avatar on every row)",
+      "Flat 2 credits native; ~0.7/post Apify fallback (min 2)",
+    ],
     platformLimits: [
-      "Only the last ~20–30 posts are publicly visible on this surface (Meta soft-cap on profile hydrate / logged-out feeds). Not a full archive.",
+      "Only the last ~20–30 posts are publicly visible on this surface (Meta soft-cap on profile hydrate / logged-out feeds). limit=100 will not return 100 — asking above ~30 just returns what Meta exposes.",
     ],
   },
   { slug: "threads-post-details", name: "Threads Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/threads/post-details", credits: 1 , tagline: "Get a Threads post — text, author, likes, replies, and media as structured JSON." },
@@ -3163,7 +3176,16 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   ],
   // Threads
   "threads-profile": [up("Threads profile URL or @handle, e.g. https://threads.net/@username.")],
-  "threads-user-posts": [up("Threads profile URL or @handle."), lp(20, 100)],
+  "threads-user-posts": [
+    up("Threads profile URL or @handle."),
+    {
+      name: "limit",
+      type: "integer",
+      required: false,
+      description:
+        "Max items to return (default 20, max 100). Threads only exposes the last ~20–30 public posts on this surface — asking for 100 will not return 100. Flat 2 credits on the native path; Apify fallback ~0.7/post (min 2).",
+    },
+  ],
   "threads-post-details": [up("Threads post URL, e.g. https://threads.net/@user/post/CODE.")],
   "threads-search": [qp("Keyword or phrase to search public Threads posts (min 2 characters)."), lp(25, 200)],
   "threads-search-users": [qp("Keyword to find Threads users / creators (min 2 characters)."), lp(20, 100)],
@@ -4353,6 +4375,20 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       a: `When Meta exposes it, true means the account exists only on Threads (not an Instagram-linked auto-profile). On the public web hydrate this flag is often omitted — Captapi still returns the key as null so clients can rely on a stable schema.`,
     });
   }
+  if (ep.slug === "threads-user-posts") {
+    list.push({
+      q: `Why is this 2 credits when older docs said ~14?`,
+      a: `Native profile-hydrate path is flat 2 credits — same soft-cap surface ScrapeCreators uses, and parity with Twitter user-tweets. The old ~14 figure was Apify billed at ~0.7 credits per returned post (default limit 20). Apify fallback still uses that per-result rate when the native path is unavailable.`,
+    });
+    list.push({
+      q: `I set limit=100 but only got ~25 posts. Is the endpoint broken?`,
+      a: `No — Meta only exposes the last ~20–30 public posts on profile hydrate. limit is a client-side cap, not a promise that Threads has that many posts. See Platform limits on this page.`,
+    });
+    list.push({
+      q: `How do I rebuild a multi-part Thread?`,
+      a: `Group posts by threadId. Within a thread, replyToId points at the previous post's id (root has replyToId null / isReply false). isQuote + quoteId mark quote posts.`,
+    });
+  }
   if (ep.slug === "tiktok-ad-library-search") {
     list.push({
       q: `Is this TikTok Creative Center (CTR / Top Ads)?`,
@@ -5116,6 +5152,17 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
       "true when the account exists only on Threads (no Instagram twin). Pair with Instagram fbid for an IG↔FB↔Threads identity chain when all three are present.",
     transparencyLabel:
       "Meta transparency / state-affiliated media label when exposed — brand-safety signal. Often null on logged-out hydrate.",
+  },
+  "threads-user-posts": {
+    author:
+      "Top-level: full profile card for the requested handle (once). Per-post author is slim (username/displayName/verified, no profileImage) to avoid repeating CDN URLs.",
+    threadId:
+      "Id of the thread root post. Multi-part Threads share one threadId — group by this to rebuild the chain.",
+    replyToId: "Parent post id when this row is a reply in a multi-part Thread (null on the root).",
+    isReply: "true when the post replies to another post in a Thread chain.",
+    isQuote: "true when the post quotes another post.",
+    views:
+      "Public view count when Meta exposes view_counts on the hydrate (often null on logged-out profile feeds; richer on post-details when available).",
   },
   "kick-clip": {
     creator: "Who created/cut the Kick clip (distinct from the broadcaster channel).",

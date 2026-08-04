@@ -1,6 +1,6 @@
 ﻿# SC parity backlog (Captapi)
 
-Last updated: 2026-08-04 (Threads profile + platformLimits). Next: remaining Threads endpoints / A-type promise lint.
+Last updated: 2026-08-04 (Threads user-posts flat 2 + thread chain). Next: Threads post-details (views/comments/relatedPosts) + price-anomaly pass.
 
 Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` → `api-examples.generated.ts`) — ship code + refresh snapshot **with `ok: true`** or `gen_examples.py` skips the slug and the page looks broken.
 
@@ -34,6 +34,7 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - [x] Field-doc platform bleed: slug overrides + `lint:field-descs` (sticky keys); community `createdAt` → `.000Z`
 - [x] Threads profile: `displayName` (+ `name`), `private`/`isPrivate`, `bioLinks`/`bioFragments`, `isThreadsOnlyUser`, `transparencyLabel`, HD versions (keys always present)
 - [x] `platformLimits` docs field + UI block (Threads posts, Twitter user-tweets, FB profile-posts, YT comments, Ad Library search, TT/IG transcript, hashtag region)
+- [x] Threads `user-posts`: flat 2 native / ~0.7 Apify; `engagement.views`; `threadId`/`replyToId`/`isReply`/`isQuote`; top-level `author{}`; limit note (~20–30 Meta cap)
 
 ## Promise-gap taxonomy (do not conflate)
 
@@ -48,10 +49,10 @@ Known A-type leftovers still open; B-type for `threads-profile` closed this turn
 
 | # | Work | Effort | Notes |
 |---|------|--------|-------|
-| 1 | Live re-probe Threads profile (bioLinks + isThreadsOnlyUser on a non-zuck account) | Low | zuck often has empty links / null threads-only |
-| 2 | Remaining Threads endpoints vs SC (user-posts engagement shape, post-details) | Med | |
-| 3 | A-type vaat lint (5 known cases) | Low | song-details, comment-replies, … |
-| 4 | Price-transparency pass: other 18/70/20/17 credit families | Low | |
+| 1 | Price-anomaly pass (remaining 8 of 9 — followings-style FAQ or flatten) | Low | user-posts closed; trending-reels / popular-creators / shorts / ad-details still open |
+| 2 | Threads `post-details` vs SC (`view_counts`, `comments[]`, `relatedPosts[]`) | Med | |
+| 3 | Live re-probe Threads profile (bioLinks + isThreadsOnlyUser on a non-zuck account) | Low | |
+| 4 | A-type vaat lint (5 known cases) | Low | song-details, comment-replies, … |
 | 5 | Twitter search + community-tweets: cursor + sort + since/until | Med | |
 | 6 | User-tweets GraphQL path for real views/bookmarks | Med | |
 | 7 | Catalog-wide `to_iso()` helper (7 date formats) | Low | |

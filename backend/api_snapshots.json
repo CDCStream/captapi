@@ -15149,9 +15149,15 @@
   "threads-user-posts": {
     "ok": true,
     "status": 200,
-    "credits": null,
+    "credits": 2,
     "data": {
       "handle": "zuck",
+      "author": {
+        "username": "zuck",
+        "displayName": "Mark Zuckerberg",
+        "verified": true,
+        "profileImage": "https://scontent-cdg4-2.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-cdg4-2.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gHf4XJXymdRHno1xv4ZWDptPQ_F47AvofZR9ZypzIXJ5_ggqvnOJ4NFY10teCcuKSw&_nc_ohc=vLH8jAZMCqoQ7kNvwFFwBjL&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQBvZqkyiiQ8DOAXcD-rNsrA7GYbSMXCSzCPUIBJWAPwew&oe=6A6E2ABE&_nc_sid=10d13b"
+      },
       "totalReturned": 5,
       "posts": [
         {
@@ -15161,13 +15167,18 @@
           "url": "https://www.threads.net/@zuck/post/DakyAavlKLZ",
           "text": "Today we're releasing Muse Spark 1.1 -- a strong agentic and coding model at a very low price. It's available through our new Meta Model API and in Meta AI.",
           "publishedAt": "2026-07-09T14:00:34.000Z",
+          "threadId": "3937491905269768921",
+          "replyToId": null,
+          "quoteId": null,
+          "isReply": false,
+          "isQuote": false,
           "author": {
             "username": "zuck",
             "displayName": "Mark Zuckerberg",
-            "verified": true,
-            "profileImage": "https://scontent-cdg4-2.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-cdg4-2.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gHf4XJXymdRHno1xv4ZWDptPQ_F47AvofZR9ZypzIXJ5_ggqvnOJ4NFY10teCcuKSw&_nc_ohc=vLH8jAZMCqoQ7kNvwFFwBjL&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQBvZqkyiiQ8DOAXcD-rNsrA7GYbSMXCSzCPUIBJWAPwew&oe=6A6E2ABE&_nc_sid=10d13b"
+            "verified": true
           },
           "engagement": {
+            "views": null,
             "likes": 2852,
             "replies": 765,
             "reposts": 196,
@@ -15182,13 +15193,18 @@
           "url": "https://www.threads.net/@zuck/post/DakyAwYFK5X",
           "text": "Muse Spark 1.1 is strongest at agentic performance, tool use, and computer use. It does well on long-running tasks with 1M token context window, can delegate execution to sub-agents running in parallel, and is trained to use computer interfaces on desktop, mobile, or browser.",
           "publishedAt": "2026-07-09T14:00:37.000Z",
+          "threadId": "3937491905269768921",
+          "replyToId": "3937491905269768921",
+          "quoteId": null,
+          "isReply": true,
+          "isQuote": false,
           "author": {
             "username": "zuck",
             "displayName": "Mark Zuckerberg",
-            "verified": true,
-            "profileImage": "https://scontent-cdg4-2.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-cdg4-2.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gHf4XJXymdRHno1xv4ZWDptPQ_F47AvofZR9ZypzIXJ5_ggqvnOJ4NFY10teCcuKSw&_nc_ohc=vLH8jAZMCqoQ7kNvwFFwBjL&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQBvZqkyiiQ8DOAXcD-rNsrA7GYbSMXCSzCPUIBJWAPwew&oe=6A6E2ABE&_nc_sid=10d13b"
+            "verified": true
           },
           "engagement": {
+            "views": null,
             "likes": 912,
             "replies": 91,
             "reposts": 59,
@@ -15205,13 +15221,18 @@
           "url": "https://www.threads.net/@zuck/post/DakyAbpFA54",
           "text": "The Meta Model API allows developers to build using Muse Spark for the first time. Our focus is on delivering strong agentic and multimodal models at very low cost. More to come soon.",
           "publishedAt": "2026-07-09T14:00:34.000Z",
+          "threadId": "3937491905269768921",
+          "replyToId": "3937491928497827415",
+          "quoteId": null,
+          "isReply": true,
+          "isQuote": false,
           "author": {
             "username": "zuck",
             "displayName": "Mark Zuckerberg",
-            "verified": true,
-            "profileImage": "https://scontent-cdg4-2.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-cdg4-2.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gHf4XJXymdRHno1xv4ZWDptPQ_F47AvofZR9ZypzIXJ5_ggqvnOJ4NFY10teCcuKSw&_nc_ohc=vLH8jAZMCqoQ7kNvwFFwBjL&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQBvZqkyiiQ8DOAXcD-rNsrA7GYbSMXCSzCPUIBJWAPwew&oe=6A6E2ABE&_nc_sid=10d13b"
+            "verified": true
           },
           "engagement": {
+            "views": null,
             "likes": 231,
             "replies": 34,
             "reposts": 6,
@@ -15226,13 +15247,18 @@
           "url": "https://www.threads.net/@zuck/post/DZ7eGA1G7wU",
           "text": "Our new line of @metaglasses is available today. Three shapes, 26 style combos, with our most advanced Meta AI built in. Plus, three custom styles designed by @kyliejenner.",
           "publishedAt": "2026-06-23T12:57:42.000Z",
+          "threadId": "3925863854786722836",
+          "replyToId": null,
+          "quoteId": null,
+          "isReply": false,
+          "isQuote": false,
           "author": {
             "username": "zuck",
             "displayName": "Mark Zuckerberg",
-            "verified": true,
-            "profileImage": "https://scontent-cdg4-2.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-cdg4-2.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gHf4XJXymdRHno1xv4ZWDptPQ_F47AvofZR9ZypzIXJ5_ggqvnOJ4NFY10teCcuKSw&_nc_ohc=vLH8jAZMCqoQ7kNvwFFwBjL&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQBvZqkyiiQ8DOAXcD-rNsrA7GYbSMXCSzCPUIBJWAPwew&oe=6A6E2ABE&_nc_sid=10d13b"
+            "verified": true
           },
           "engagement": {
+            "views": null,
             "likes": 3620,
             "replies": 1403,
             "reposts": 237,
@@ -15254,13 +15280,18 @@
           "url": "https://www.threads.net/@zuck/post/DZpPDXbCeTt",
           "text": "500M monthly actives on Threads in less than 3 years. Thanks for making this platform what it is. 🙏",
           "publishedAt": "2026-06-16T10:59:56.000Z",
+          "threadId": "3920731152608519405",
+          "replyToId": null,
+          "quoteId": null,
+          "isReply": false,
+          "isQuote": false,
           "author": {
             "username": "zuck",
             "displayName": "Mark Zuckerberg",
-            "verified": true,
-            "profileImage": "https://scontent-cdg4-2.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-cdg4-2.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gHf4XJXymdRHno1xv4ZWDptPQ_F47AvofZR9ZypzIXJ5_ggqvnOJ4NFY10teCcuKSw&_nc_ohc=vLH8jAZMCqoQ7kNvwFFwBjL&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQBvZqkyiiQ8DOAXcD-rNsrA7GYbSMXCSzCPUIBJWAPwew&oe=6A6E2ABE&_nc_sid=10d13b"
+            "verified": true
           },
           "engagement": {
+            "views": null,
             "likes": 18057,
             "replies": 4770,
             "reposts": 586,

@@ -31,6 +31,8 @@ router = APIRouter()
 
 CREDIT_DETAILS = 1
 CREDIT_PROFILE = 1
+# Native profile-hydrate user-posts (same soft-cap surface as SC): flat 2.
+CREDIT_POST_LIST = 2
 RATE = 0.7
 
 
@@ -123,17 +125,61 @@ def _normalize_post(item: dict[str, Any], *, include_author_image: bool = True) 
         canonical = f"https://www.threads.net/t/{code}"
     else:
         canonical = None
+    post_id = safe_str(item.get("pk") or item.get("id") or item.get("post_id") or item.get("postId"))
+    thread_id = safe_str(item.get("thread_id") or item.get("threadId")) or post_id
+    reply_to_id = safe_str(
+        item.get("reply_to_id")
+        or item.get("replyToId")
+        or item.get("in_reply_to_id")
+        or item.get("replied_to_id")
+    )
+    quote_id = safe_str(item.get("quote_id") or item.get("quoteId"))
+    is_reply = item.get("is_reply")
+    if is_reply is None:
+        is_reply = item.get("isReply")
+    if is_reply is None:
+        is_reply = bool(reply_to_id) if reply_to_id else False
+    else:
+        is_reply = bool(is_reply)
+    is_quote = item.get("is_quote")
+    if is_quote is None:
+        is_quote = item.get("isQuote")
+    if is_quote is None:
+        is_quote = item.get("is_quote_post")
+    if is_quote is None:
+        is_quote = bool(quote_id) if quote_id else False
+    else:
+        is_quote = bool(is_quote)
+    views = safe_int(
+        item.get("view_count")
+        or item.get("viewCount")
+        or item.get("view_counts")
+        or item.get("views")
+        or ((item.get("engagement") or {}).get("views") if isinstance(item.get("engagement"), dict) else None)
+    )
+    if isinstance(item.get("view_counts"), dict):
+        views = safe_int(
+            item["view_counts"].get("count")
+            or item["view_counts"].get("views")
+            or item["view_counts"].get("value")
+        ) or views
     return {
         "platform": "threads",
-        "id": safe_str(item.get("pk") or item.get("id") or item.get("post_id") or item.get("postId")),
+        "id": post_id,
         "code": safe_str(code),
         "url": canonical or safe_str(item.get("url") or item.get("post_url")),
         "text": safe_str(item.get("caption") or item.get("text") or item.get("caption_text")),
         "publishedAt": safe_str(
             item.get("taken_at") or item.get("date") or item.get("published_on") or item.get("publishedAt")
         ),
+        "threadId": thread_id,
+        "replyToId": reply_to_id,
+        "quoteId": quote_id,
+        "isReply": is_reply,
+        "isQuote": is_quote,
         "author": _user(user, include_profile_image=include_author_image),
         "engagement": {
+            "views": views,
             "likes": safe_int(item.get("like_count") or item.get("likeCount") or item.get("likes")),
             "replies": safe_int(
                 item.get("reply_count")
@@ -358,7 +404,7 @@ def _normalize_post_download(item: dict[str, Any]) -> dict[str, Any]:
             "verified": None,
             "profileImage": None,
         },
-        "engagement": {"likes": 0, "replies": 0, "reposts": 0, "quotes": 0},
+        "engagement": {"views": None, "likes": 0, "replies": 0, "reposts": 0, "quotes": 0},
         "media": media,
     }
 
@@ -418,16 +464,35 @@ async def threads_profile(
         return ApiResponse(data=data)
 
 
-@router.get("/user-posts", summary="List recent posts for a Threads profile")
+@router.get(
+    "/user-posts",
+    summary="List recent posts for a Threads profile",
+    description=(
+        "Recent public Threads posts for a profile. Native hydrate is flat "
+        f"{CREDIT_POST_LIST} credits; Apify fallback is ~{RATE}/post (min 2). "
+        "Meta only exposes the last ~20–30 posts on this surface. Response includes "
+        "top-level author{}, engagement.views when Meta exposes it, and "
+        "threadId/replyToId/isReply/isQuote for multi-part threads."
+    ),
+)
 async def threads_user_posts(
     url: str = Query(..., description="Threads profile URL or @handle"),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(
+        20,
+        ge=1,
+        le=100,
+        description=(
+            "Max items to return (default 20, max 100). Threads only exposes the last "
+            "~20–30 public posts on this surface — asking for 100 will not return 100."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_threads_handle(url)
     settings = get_settings()
-    cost = _scaled(limit, RATE, 2)
+    # Reserve Apify worst-case; native path overrides to flat CREDIT_POST_LIST.
+    cost = _scaled(limit, RATE, CREDIT_POST_LIST)
     async with billed_call(
         caller=caller,
         endpoint="/v1/threads/user-posts",
@@ -440,8 +505,22 @@ async def threads_user_posts(
             native_items = await native.user_posts(handle, limit=limit)
             if native_items:
                 ctx["source"] = "direct"
-                posts = [_normalize_post(i) for i in native_items][:limit]
-                return {"handle": handle, "totalReturned": len(posts), "posts": posts}
+                posts = [
+                    _normalize_post(i, include_author_image=False) for i in native_items
+                ][:limit]
+                author = None
+                if posts:
+                    # Full author card once at the top; per-post rows keep slim identity
+                    # (no repeated multi-KB profileImage CDN URLs).
+                    first_user = native_items[0].get("user") or native_items[0].get("author") or {}
+                    if isinstance(first_user, dict):
+                        author = _user(first_user, include_profile_image=True)
+                return {
+                    "handle": handle,
+                    "author": author,
+                    "totalReturned": len(posts),
+                    "posts": posts,
+                }
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -452,17 +531,32 @@ async def threads_user_posts(
             if not items:
                 raise HTTPException(status_code=404, detail="No posts found")
             ctx["source"] = "apify"
-            posts = [_normalize_post(i) for i in items][:limit]
-            return {"handle": handle, "totalReturned": len(posts), "posts": posts}
+            posts = [_normalize_post(i, include_author_image=False) for i in items][:limit]
+            author = None
+            if items and isinstance(items[0], dict):
+                first_user = items[0].get("user") or items[0].get("author") or items[0]
+                if isinstance(first_user, dict):
+                    author = _user(first_user, include_profile_image=True)
+            return {
+                "handle": handle,
+                "author": author,
+                "totalReturned": len(posts),
+                "posts": posts,
+            }
 
         data = await cached_or_run(
             endpoint="threads.user-posts",
-            params={"handle": handle, "limit": limit, "v": 5},
+            params={"handle": handle, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(len(data["posts"]), RATE, 2)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_POST_LIST
+        else:
+            ctx["credits_override"] = _scaled(
+                len(data.get("posts") or []), RATE, CREDIT_POST_LIST
+            )
         return ApiResponse(data=data)
 
 

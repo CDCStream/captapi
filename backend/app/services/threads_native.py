@@ -402,7 +402,47 @@ def _caption_text(post: dict[str, Any]) -> str | None:
     return safe_str("".join(parts)) if parts else None
 
 
-def _normalize_relay_post(post: dict[str, Any]) -> dict[str, Any] | None:
+def _view_count(post: dict[str, Any], info: dict[str, Any]) -> int | None:
+    """Best-effort public view count (SC ``view_counts`` / Meta aliases)."""
+    for blob in (post, info):
+        for key in ("view_counts", "view_count", "viewCount", "viewCounts", "play_count"):
+            raw = blob.get(key)
+            if raw is None:
+                continue
+            if isinstance(raw, dict):
+                n = safe_int(
+                    raw.get("count")
+                    or raw.get("views")
+                    or raw.get("value")
+                    or raw.get("view_count")
+                )
+            else:
+                n = safe_int(raw)
+            if n is not None:
+                return n
+    return None
+
+
+def _nested_post_id(value: Any) -> str | None:
+    if isinstance(value, dict):
+        nested = value.get("post") if isinstance(value.get("post"), dict) else value
+        return safe_str(
+            nested.get("pk")
+            or nested.get("id")
+            or nested.get("post_id")
+            or nested.get("postId")
+            or value.get("pk")
+            or value.get("id")
+        )
+    return safe_str(value)
+
+
+def _normalize_relay_post(
+    post: dict[str, Any],
+    *,
+    thread_id: str | None = None,
+    reply_to_id: str | None = None,
+) -> dict[str, Any] | None:
     if not isinstance(post, dict):
         return None
     code = safe_str(post.get("code"))
@@ -412,6 +452,56 @@ def _normalize_relay_post(post: dict[str, Any]) -> dict[str, Any] | None:
     user = post.get("user") if isinstance(post.get("user"), dict) else {}
     info = post.get("text_post_app_info") if isinstance(post.get("text_post_app_info"), dict) else {}
     media = _media_urls(post)
+
+    reply_to = (
+        info.get("reply_to_post")
+        or info.get("reply_to")
+        or info.get("replied_to")
+        or post.get("reply_to")
+    )
+    reply_from_meta = _nested_post_id(reply_to)
+    if reply_from_meta is None:
+        reply_author = info.get("reply_to_author")
+        # reply_to_author alone is not a post id — keep chain id from thread walk.
+        if isinstance(reply_author, dict) and reply_author.get("post"):
+            reply_from_meta = _nested_post_id(reply_author.get("post"))
+
+    share = info.get("share_info") if isinstance(info.get("share_info"), dict) else {}
+    quoted = (
+        info.get("quoted_post")
+        or post.get("quoted_post")
+        or share.get("quoted_post")
+        or share.get("reposted_post")
+        or share
+        or None
+    )
+    if isinstance(quoted, dict) and not (
+        quoted.get("pk") or quoted.get("id") or quoted.get("code") or quoted.get("post")
+    ):
+        quoted = None
+    quote_id = _nested_post_id(quoted) if quoted else None
+
+    explicit_reply = info.get("is_reply")
+    if explicit_reply is None:
+        explicit_reply = post.get("is_reply")
+    is_reply: bool | None
+    if isinstance(explicit_reply, bool):
+        is_reply = explicit_reply
+    elif reply_from_meta or reply_to_id:
+        is_reply = True
+    else:
+        is_reply = False
+
+    explicit_quote = info.get("is_quote_post")
+    if explicit_quote is None:
+        explicit_quote = post.get("is_quote_post")
+    if isinstance(explicit_quote, bool):
+        is_quote = explicit_quote
+    elif quote_id:
+        is_quote = True
+    else:
+        is_quote = False
+
     return {
         "pk": pk,
         "code": code,
@@ -427,6 +517,12 @@ def _normalize_relay_post(post: dict[str, Any]) -> dict[str, Any] | None:
         "reply_count": safe_int(info.get("direct_reply_count") or info.get("reply_count")),
         "repost_count": safe_int(info.get("repost_count") or info.get("reshare_count")),
         "quote_count": safe_int(info.get("quote_count")),
+        "view_count": _view_count(post, info),
+        "thread_id": thread_id or pk,
+        "reply_to_id": reply_from_meta or reply_to_id,
+        "quote_id": quote_id,
+        "is_reply": is_reply,
+        "is_quote": is_quote,
         "media": [{"url": u} for u in media],
     }
 
@@ -441,6 +537,9 @@ def _posts_from_thread_items(
 
     When ``handle`` is set, keep only that author's posts (profile pages).
     When omitted, keep every post (search pages).
+
+    Posts that share one ``thread_items`` array get the same ``thread_id``
+    (root post pk) and chained ``reply_to_id`` so multi-part Threads rebuild.
     """
     if not html:
         return []
@@ -458,6 +557,8 @@ def _posts_from_thread_items(
             continue
         if not isinstance(items, list):
             continue
+        thread_root: str | None = None
+        prev_pk: str | None = None
         for item in items:
             if not isinstance(item, dict):
                 continue
@@ -469,7 +570,14 @@ def _posts_from_thread_items(
                 username = safe_str(user.get("username") or user.get("userName"))
                 if username and username.lower() != needle:
                     continue
-            normalized = _normalize_relay_post(post)
+            pk_hint = safe_str(post.get("pk") or post.get("id"))
+            if thread_root is None:
+                thread_root = pk_hint
+            normalized = _normalize_relay_post(
+                post,
+                thread_id=thread_root,
+                reply_to_id=prev_pk if prev_pk and prev_pk != pk_hint else None,
+            )
             if not normalized:
                 continue
             key = normalized.get("code") or normalized.get("pk")
@@ -477,6 +585,7 @@ def _posts_from_thread_items(
                 continue
             seen.add(str(key))
             posts.append(normalized)
+            prev_pk = safe_str(normalized.get("pk")) or prev_pk
             if len(posts) >= capped:
                 return posts
     return posts[:capped]

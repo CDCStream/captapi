@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
     category: "improvement",
+    title: "Threads user-posts: flat 2 native, views, thread chain",
+    description:
+      "threads/user-posts was still Apify-priced at ~0.7/post (~14 at default) even on the free native profile hydrate — same soft-cap surface as ScrapeCreators and Twitter user-tweets (flat 2). Native path is now flat 2; Apify fallback stays ~0.7/post (min 2), with a FAQ matching the user-followers pricing-honesty template. Posts gain engagement.views (when Meta exposes view_counts), threadId/replyToId/isReply/isQuote for multi-part Threads, and a top-level author{} so profileImage is not repeated on every row. limit param documents Meta's ~20–30 public-post ceiling.",
+    items: [
+      "Flat 2 credits native; ~0.7/post Apify fallback (min 2)",
+      "engagement.views + threadId/replyToId/isReply/isQuote",
+      "Top-level author{}; slim per-post author (no repeated avatar URL)",
+      "limit note: Meta only exposes ~20–30 public posts",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "improvement",
     title: "Threads profile cross-platform fields + platformLimits docs",
     description:
       "Threads profile now ships displayName (+ name BC), private/isPrivate (TikTok + Instagram keys), bioFragments from text_app_biography, and keeps isThreadsOnlyUser / bioLinks.verified / transparencyLabel always keyed. Docs add an optional platformLimits block (SC-style honest ceilings) on Threads user-posts, Twitter user-tweets, Facebook profile-posts, YouTube comments, Ad Library search, and TikTok/Instagram transcripts. threads-profile What you get is endpoint-specific (no more generic channel template promising vague external links).",
