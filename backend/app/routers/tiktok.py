@@ -364,7 +364,11 @@ def _normalize_user(item: dict) -> dict:
 
 
 def _normalize_profile_region(item: dict, handle: str) -> dict:
+    from app.services.tiktok_native import _profile_identity_fields
+
     user = item.get("user") or item.get("authorMeta") or item
+    if not isinstance(user, dict):
+        user = {}
     stats = item.get("stats") or item.get("authorStats") or {}
     raw = dict(item)
     if isinstance(raw.get("statsV2"), dict):
@@ -374,6 +378,7 @@ def _normalize_profile_region(item: dict, handle: str) -> dict:
         "username": safe_str(user.get("uniqueId") or user.get("name") or handle),
         "displayName": safe_str(user.get("nickname") or user.get("nickName")),
         "url": safe_str(user.get("profileUrl")) or f"https://www.tiktok.com/@{handle}",
+        **_profile_identity_fields(user),
         "region": safe_str(
             user.get("region")
             or user.get("country")
@@ -431,12 +436,21 @@ def _tt_mentions(item: dict) -> list[dict[str, Any]]:
 
 
 _ENGAGEMENT_COUNT_KEYS = ("views", "likes", "comments", "shares", "saves")
+_ENGAGEMENT_OPTIONAL_KEYS = ("downloads", "reposts")
 
 
 def _tt_coerce_engagement(eng: Any) -> dict[str, int]:
-    """Always emit the five engagement ints — missing/null → 0 (never omit shares)."""
+    """Always emit the five engagement ints — missing/null → 0 (never omit shares).
+
+    ``downloads`` / ``reposts`` are kept only when the upstream row exposed them
+    (TikTok often omits both).
+    """
     src = eng if isinstance(eng, dict) else {}
-    return {k: safe_int(src.get(k)) or 0 for k in _ENGAGEMENT_COUNT_KEYS}
+    out = {k: safe_int(src.get(k)) or 0 for k in _ENGAGEMENT_COUNT_KEYS}
+    for k in _ENGAGEMENT_OPTIONAL_KEYS:
+        if src.get(k) is not None:
+            out[k] = safe_int(src.get(k)) or 0
+    return out
 
 
 def _tt_finalize_post(post: dict[str, Any]) -> dict[str, Any]:
@@ -452,6 +466,8 @@ def _tt_finalize_post(post: dict[str, Any]) -> dict[str, Any]:
     raw_is_ad = post.get("isAd")
     raw_is_paid = post.get("isPaidPartnership")
     out = strip_empty(post)
+    # caption is canonical — never keep a duplicated description=caption twin.
+    out.pop("description", None)
     out["engagement"] = _tt_coerce_engagement(out.get("engagement") or raw_engagement)
     if not isinstance(out.get("hashtags"), list):
         out["hashtags"] = []
@@ -487,14 +503,45 @@ def _normalize(item: dict) -> dict:
     video_meta = item.get("videoMeta") or {}
     covers = safe_list(item.get("covers"))
     caption = safe_str(item.get("text") or item.get("desc"))
-    # Metadata+stats only — CDN play URLs are IP/cookie-bound (usually 403),
-    # so we omit videoUrl rather than always returning null.
+    # Surface CDN play/download URLs when the actor exposes them (same keys as
+    # native aweme). Links are signed / IP-bound — read mediaUrlsExpireAt.
     from app.services.tiktok_native import extract_shop_product_url
+    from app.utils.media_urls import earliest_cdn_expires_at
+
+    media_urls = safe_list(item.get("mediaUrls") or item.get("videoUrls"))
+    play_url = safe_str(
+        item.get("videoUrl")
+        or item.get("downloadAddr")
+        or video_meta.get("downloadAddr")
+        or (media_urls[0] if media_urls else None)
+    )
+    download_url = safe_str(item.get("downloadUrl") or item.get("download_url"))
+    download_no_wm = safe_str(
+        item.get("downloadUrlNoWatermark")
+        or item.get("download_url_no_watermark")
+        or item.get("downloadAddrNoWatermark")
+    )
+    thumb = safe_str(
+        video_meta.get("coverUrl")
+        or video_meta.get("originalCoverUrl")
+        or (covers[0] if covers else None)
+    )
 
     author_region = safe_str(author.get("region") or author.get("regionCode"))
     author_out = build_author(author, author_stats=stats if isinstance(stats, dict) else None)
     if author_region:
         author_out["region"] = author_region
+    eng_src = {
+        "views": item.get("playCount") or stats.get("playCount"),
+        "likes": item.get("diggCount") or stats.get("diggCount"),
+        "comments": item.get("commentCount") or stats.get("commentCount"),
+        "shares": item.get("shareCount") or stats.get("shareCount"),
+        "saves": item.get("collectCount") or stats.get("collectCount"),
+    }
+    if item.get("downloadCount") is not None or stats.get("downloadCount") is not None:
+        eng_src["downloads"] = item.get("downloadCount") or stats.get("downloadCount")
+    if item.get("repostCount") is not None or stats.get("repostCount") is not None:
+        eng_src["reposts"] = item.get("repostCount") or stats.get("repostCount")
     out = {
         "platform": "tiktok",
         "url": safe_str(item.get("webVideoUrl") or item.get("url")),
@@ -502,21 +549,16 @@ def _normalize(item: dict) -> dict:
         "caption": caption,
         "publishedAt": _tt_published_iso(item),
         "durationSeconds": duration_seconds(video_meta.get("duration") or item.get("duration")),
-        "thumbnailUrl": safe_str(
-            video_meta.get("coverUrl")
-            or video_meta.get("originalCoverUrl")
-            or (covers[0] if covers else None)
+        "thumbnailUrl": thumb,
+        "videoUrl": play_url,
+        "downloadUrl": download_url,
+        "downloadUrlNoWatermark": download_no_wm,
+        "hasWatermark": bool(download_url) and not download_no_wm,
+        "mediaUrlsExpireAt": earliest_cdn_expires_at(
+            play_url, download_url, download_no_wm, thumb
         ),
         "author": author_out,
-        "engagement": _tt_coerce_engagement(
-            {
-                "views": item.get("playCount") or stats.get("playCount"),
-                "likes": item.get("diggCount") or stats.get("diggCount"),
-                "comments": item.get("commentCount") or stats.get("commentCount"),
-                "shares": item.get("shareCount") or stats.get("shareCount"),
-                "saves": item.get("collectCount") or stats.get("collectCount"),
-            }
-        ),
+        "engagement": _tt_coerce_engagement(eng_src),
         "hashtags": _tt_hashtags(item, caption),
         "mentions": _tt_mentions(item),
         "musicName": _music_name(item, music),
@@ -638,7 +680,21 @@ def _normalize_aweme(item: dict) -> dict:
 
     These rows use snake_case TikTok-internal fields (digg_count, play_count,
     author.unique_id ...) instead of the clockworks shape `_normalize` expects.
+    Prefer full ``_map_aweme_post`` when the row looks like a real aweme blob
+    (has ``video.play_addr``); otherwise keep the flat powerai shape.
     """
+    from app.services.tiktok_native import _map_aweme_post
+
+    # Only the full mobile aweme blob (nested video.play_addr) — not flat
+    # powerai rows that also carry aweme_id + digg_count at the top level.
+    video_node = item.get("video")
+    if isinstance(video_node, dict) and (
+        video_node.get("play_addr") or video_node.get("playAddr")
+    ):
+        mapped = _map_aweme_post(item)
+        if mapped:
+            return mapped
+
     author = item.get("author") or {}
     username = safe_str(author.get("unique_id"))
     video_id = safe_str(item.get("video_id"))
@@ -647,6 +703,7 @@ def _normalize_aweme(item: dict) -> dict:
     if isinstance(create_time, (int, float)) and create_time > 0:
         published = datetime.fromtimestamp(int(create_time), tz=timezone.utc).isoformat()
     caption = safe_str(item.get("title"))
+    play_url = safe_str(item.get("play_url") or item.get("video_url") or item.get("videoUrl"))
     return {
         "platform": "tiktok",
         "url": f"https://www.tiktok.com/@{username}/video/{video_id}" if username and video_id else None,
@@ -655,6 +712,7 @@ def _normalize_aweme(item: dict) -> dict:
         "publishedAt": published,
         "durationSeconds": duration_seconds(item.get("duration")),
         "thumbnailUrl": safe_str(item.get("cover") or item.get("origin_cover")),
+        "videoUrl": play_url,
         "author": build_author(
             author if isinstance(author, dict) else None,
             profile_image=safe_str(author.get("avatar")) if isinstance(author, dict) else None,
@@ -1396,7 +1454,7 @@ async def tiktok_profile_region(
 
         data = await cached_or_run(
             endpoint="tiktok.profile-region",
-            params={"handle": handle, "v": 6},
+            params={"handle": handle, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1933,12 +1991,13 @@ async def tiktok_audience_demographics(
     summary="Latest videos from a TikTok profile (cursor-paginated)",
     description=(
         "Returns a creator's most recent public videos as structured JSON — "
-        "caption, engagement (views/likes/comments/shares/saves), thumbnail, "
-        "hashtags, sound name, and author profile. Accepts a profile URL, "
-        "@handle, or username. Prefers TikTok's native mobile post API "
-        "(cursor pagination via nextCursor / hasMore); falls back to our "
-        "data-collection pool on the first page if every residential exit is "
-        "soft-blocked. Flat 2 credits per call."
+        "caption, engagement (views/likes/comments/shares/saves), playable "
+        "videoUrl / downloadUrl (CDN-signed; see mediaUrlsExpireAt), thumbnail, "
+        "hashtags, sound name, shop/ad flags, and author profile (including "
+        "id/secUid). Accepts a profile URL, @handle, or username. Prefers "
+        "TikTok's native mobile post API (cursor pagination via nextCursor / "
+        "hasMore); falls back to our data-collection pool on the first page if "
+        "every residential exit is soft-blocked. Flat 2 credits per call."
     ),
 )
 async def tiktok_channel_posts(
@@ -1986,7 +2045,7 @@ async def tiktok_channel_posts(
                 return {
                     "url": url,
                     "totalReturned": len(posts),
-                    "posts": posts,
+                    "posts": [_tt_finalize_post(p) for p in posts],
                     "nextCursor": next_cursor,
                     "hasMore": next_cursor is not None,
                 }
@@ -1999,7 +2058,7 @@ async def tiktok_channel_posts(
 
         data = await cached_or_run(
             endpoint="tiktok.channel-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 10},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 11},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2109,7 +2168,14 @@ async def tiktok_comment_replies(
                                 "verified": False if verified is None else bool(verified),
                                 "profileImage": safe_str(child.get("replyAuthorAvatar") or child.get("avatar")),
                             }
-                            replies.append({k: v for k, v in reply_row.items() if v is not None})
+                            _keep = ("authorId", "authorSecUid", "commentLanguage")
+                            replies.append(
+                                {
+                                    k: v
+                                    for k, v in reply_row.items()
+                                    if v is not None or k in _keep
+                                }
+                            )
                             if len(replies) >= limit:
                                 break
                     continue
@@ -2127,7 +2193,10 @@ async def tiktok_comment_replies(
                     "verified": False if verified is None else bool(verified),
                     "profileImage": safe_str(r.get("replyAuthorAvatar") or r.get("avatar") or r.get("authorAvatarUrl")),
                 }
-                replies.append({k: v for k, v in reply_row.items() if v is not None})
+                _keep = ("authorId", "authorSecUid", "commentLanguage")
+                replies.append(
+                    {k: v for k, v in reply_row.items() if v is not None or k in _keep}
+                )
                 if len(replies) >= limit:
                     break
             ctx["source"] = "apify"
@@ -2144,7 +2213,7 @@ async def tiktok_comment_replies(
 
         data = await cached_or_run(
             endpoint="tiktok.comment-replies",
-            params={"url": url, "comment_id": comment_id, "limit": limit, "cursor": cursor or "", "v": 3},
+            params={"url": url, "comment_id": comment_id, "limit": limit, "cursor": cursor or "", "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

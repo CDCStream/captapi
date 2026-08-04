@@ -51,6 +51,43 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
     category: "fix",
+    title: "TikTok comment-replies: authorId / authorSecUid / commentLanguage in docs + shape",
+    description:
+      "Docs promised the same identity fields as /comments, but the example was an old Apify-shaped payload without authorId/authorSecUid/commentLanguage. Native _map_reply already mapped them; we now keep those keys even when null, Apify fallback keeps them too, cache bumped to v4, and the example was refreshed from a live reply page (distinct authorIds + commentLanguage).",
+    items: [
+      "authorId + authorSecUid + commentLanguage always present on replies",
+      "Docs example refreshed (totalReplies + live identity fields)",
+      "comment-replies cache v4",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "improvement",
+    title: "TikTok profile-region: id/secUid/createTime/ttSeller promoted from raw",
+    description:
+      "profile-region already fetched webapp.user-detail (same blob as channel-details) but left id, secUid, createTime, ttSeller, and isOrganization buried under raw.user. Those fields are now top-level — same names as channel-details — with no extra scrape. Docs also fix field-description leakage (videos is an integer count here, not Ad Library media objects; search-suggestions region is the request market) and correct search-suggestions billing copy to flat 2 credits.",
+    items: [
+      "profile-region: id, secUid, createTime, createTimeUnix, ttSeller, isOrganization",
+      "Slug field-doc overrides for videos / likes / verified / region",
+      "search-suggestions: flat 2 credits (not per suggestion)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "feature",
+    title: "TikTok list posts: videoUrl + download URLs (channel-posts / search / music)",
+    description:
+      "Instagram list endpoints already returned videoUrl; TikTok channel-posts (and other aweme-backed lists) only had thumbnails — so the Archiving use case could not pull media. Native aweme mapping now surfaces videoUrl, downloadUrl, downloadUrlNoWatermark when TikTok exposes them, plus mediaUrlsExpireAt for CDN expiry. author.id/secUid, isAd/isPaidPartnership, and shopProductUrl stay on the row; the caption/description twin is dropped. Docs example refreshed from a live @paw.dreams0 probe.",
+    items: [
+      "videoUrl / downloadUrl / downloadUrlNoWatermark + mediaUrlsExpireAt on aweme lists",
+      "author.id + secUid; isAd / isPaidPartnership kept after finalize",
+      "description=caption duplicate removed",
+      "channel-posts cache bump (v11) + docs stamp",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
     title: "TikTok user-followers docs stamp: same shape as followings (1 credit)",
     description:
       "user-followers already shared the native signer mapper with user-followings (id/secUid/createTime/language/total/nextCursor, flat 1 credit) — some /apis pages were stuck on an older SSG build showing 20 credits. Docs examples reordered (total/hasMore/nextCursor first), region kept as null when TikTok omits it, and the round filler nextCursor replaced. Deploy refreshes the followers stamp to match followings.",

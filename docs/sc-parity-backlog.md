@@ -1,6 +1,6 @@
 ﻿# SC parity backlog (Captapi)
 
-Last updated: 2026-08-04 (followers docs stamp + region key + live alias).
+Last updated: 2026-08-04 (comment-replies authorId parity + TikTok block close).
 
 Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` → `api-examples.generated.ts`) — ship code + refresh snapshot **with `ok: true`** or `gen_examples.py` skips the slug and the page looks broken.
 
@@ -21,20 +21,23 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - [x] TikTok `channel-details` docs: id + secUid + createTime + ttSeller + bioLink.risk (API already had them; snapshot `ok` was missing)
 - [x] TikTok `/live` ≡ `/live-info` (shared runner); streamQualities keep hls/cmaf/dash/lls; offline omits viewerCount
 - [x] TikTok user-followers/followings: keep `region` key (null when omitted); fix filler nextCursor; docs key order
+- [x] TikTok aweme lists (`channel-posts` / top-search / hashtag / music via mapper): `videoUrl` + `downloadUrl` (+ no-wm when present), `mediaUrlsExpireAt`; author id/secUid; drop `description`=`caption`; keep isAd/isPaidPartnership/shopProductUrl
+- [x] TikTok `profile-region`: promote `id` / `secUid` / `createTime` / `createTimeUnix` / `ttSeller` / `isOrganization` from `raw.user` (same upstream as channel-details)
+- [x] Field-doc slug overrides: profile-region `videos`/`likes`/`verified`/`region`; search-suggestions `region`/`language` (market, not creator)
+- [x] search-suggestions billing copy → flat 2 credits (aligned with param table + FAQ)
+- [x] TikTok `comment-replies`: authorId / authorSecUid / commentLanguage (same contract as comments; docs example was stale Apify shape)
 
-## Next turn — priority order
+## Next turn — priority order (Twitter block + leftover TikTok)
 
 | # | Work | Effort | Notes |
 |---|------|--------|-------|
-| 1 | Re-verify followers + followings + live on same docs stamp after deploy | Low | Must both show 1 credit + region key |
-| 2 | Docs lint: longDescription field names ⊆ example/field list | Low | Catch promise/delivery gaps pre-publish |
-| 3 | Marketing: streamQualities vs SC escaped stream_data | Low | alternatives/scrapecreators |
-| 4 | Remaining TikTok (trend trio, shop leftovers, …) | Medium | |
-| 5 | trending-shorts → real trend source | Medium | |
-| 6 | channel-streams Live tab only | Medium | |
-| 7 | comment-replies: nextCursor + hasMore | Medium | |
-| 8 | Ad Library filters + LinkedIn targeting{} | Medium | |
-| 9 | Remaining platforms (Twitter 5, Threads 5, …) | Medium | |
+| 1 | Deploy stamp re-verify: comment-replies + profile-region + channel-posts videoUrl | Low | Close “stale SSG” false failures |
+| 2 | Vaat/teslim lint (longDescription ⊆ example keys) | Low | 5 cases — automate |
+| 3 | Twitter user-tweets: SC ~100 popular-not-chrono warning + source/bookmarks | Med | Block opening |
+| 4 | `sort_by` + cursor type consistency notes | Medium | |
+| 5 | Creative Center: searchVolume + popular-* leftovers | Medium | |
+| 6 | Ad Library filters + price | Medium | |
+| 7 | Remaining platforms | Medium | |
 
 ## YouTube — open quality notes
 

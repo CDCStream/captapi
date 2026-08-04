@@ -954,8 +954,16 @@ _TT_REPLY_HOSTS = tuple(
 )
 
 
+_REPLY_IDENTITY_KEYS = ("authorId", "authorSecUid", "commentLanguage")
+
+
 def _map_reply(c: dict[str, Any]) -> dict[str, Any] | None:
-    """Map a mobile reply row to the public comment-replies shape."""
+    """Map a mobile reply row to the public comment-replies shape.
+
+    Always keeps ``authorId`` / ``authorSecUid`` / ``commentLanguage`` (null
+    when TikTok omits them) so the response matches the comments contract and
+    the docs promise — never drop the keys just because the value is missing.
+    """
     mapped = _map_comment(c)
     if mapped is None:
         return None
@@ -974,7 +982,10 @@ def _map_reply(c: dict[str, Any]) -> dict[str, Any] | None:
         "verified": False if verified is None else bool(verified),
         "profileImage": mapped.get("authorAvatarUrl"),
     }
-    return {k: v for k, v in out.items() if v is not None}
+    keep = {k: out.get(k) for k in _REPLY_IDENTITY_KEYS}
+    cleaned = {k: v for k, v in out.items() if v is not None}
+    cleaned.update(keep)
+    return cleaned
 
 
 async def _reply_page(
@@ -1050,6 +1061,23 @@ async def comment_replies_native(
     return collected[:limit], cur, total
 
 
+def _profile_identity_fields(user: dict[str, Any]) -> dict[str, Any]:
+    """Stable id / account-age / Shop flags already on ``webapp.user-detail``.
+
+    Same keys as ``channel_details_native`` so clients do not dig through ``raw``.
+    """
+    create_unix = safe_int(user.get("createTime"))
+    tt_seller = user.get("ttSeller")
+    return {
+        "id": safe_str(user.get("id") or user.get("uid") or user.get("user_id")),
+        "secUid": safe_str(user.get("secUid") or user.get("sec_uid")),
+        "createTime": _iso(create_unix),
+        "createTimeUnix": create_unix,
+        "ttSeller": bool(tt_seller) if tt_seller is not None else None,
+        "isOrganization": user.get("isOrganization"),
+    }
+
+
 async def profile_region_native(handle: str) -> dict[str, Any] | None:
     """Region/language signals from the profile page.
 
@@ -1072,6 +1100,7 @@ async def profile_region_native(handle: str) -> dict[str, Any] | None:
         "username": username,
         "displayName": safe_str(user.get("nickname")),
         "url": f"https://www.tiktok.com/@{username}",
+        **_profile_identity_fields(user),
         "region": region,
         "language": language,
         "followers": _stat(stats_v2, stats, "followerCount"),
@@ -1109,6 +1138,43 @@ def _url_list_first(node: Any) -> str | None:
         urls = node.get("url_list") or node.get("urlList") or []
         return safe_str(urls[0] if urls else None)
     return safe_str(node)
+
+
+def _aweme_media_urls(video: dict[str, Any]) -> dict[str, str | None]:
+    """Play / download URLs from a mobile aweme or web itemStruct video node.
+
+    Mirrors ScrapeCreators' ``play_addr`` / ``download_addr`` /
+    ``download_no_watermark_addr``. CDN links are signed and short-lived —
+    callers should also read ``mediaUrlsExpireAt`` when present.
+    """
+    play = (
+        _url_list_first(video.get("play_addr") or video.get("playAddr"))
+        or _url_list_first(video.get("play_addr_h264") or video.get("playAddrH264"))
+        or _url_list_first(
+            video.get("play_addr_bytevc1") or video.get("playAddrBytevc1")
+        )
+    )
+    if not play:
+        for br in video.get("bit_rate") or video.get("bitRate") or []:
+            if not isinstance(br, dict):
+                continue
+            play = _url_list_first(br.get("play_addr") or br.get("playAddr"))
+            if play:
+                break
+    download = _url_list_first(video.get("download_addr") or video.get("downloadAddr"))
+    no_wm = _url_list_first(
+        video.get("download_no_watermark_addr")
+        or video.get("downloadNoWatermarkAddr")
+        or video.get("download_addr_no_watermark")
+        or video.get("downloadAddrNoWatermark")
+        or video.get("play_addr_no_watermark")
+        or video.get("playAddrNoWatermark")
+    )
+    return {
+        "videoUrl": play,
+        "downloadUrl": download,
+        "downloadUrlNoWatermark": no_wm,
+    }
 
 
 # Caption fallback only when text_extra / cha_list are absent. Regex over
@@ -1560,6 +1626,34 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
         or item.get("text_language")
         or item.get("textLanguage")
     )
+    media_urls = _aweme_media_urls(video) if not is_photo else {
+        "videoUrl": None,
+        "downloadUrl": None,
+        "downloadUrlNoWatermark": None,
+    }
+    play_url = media_urls["videoUrl"]
+    download_url = media_urls["downloadUrl"]
+    download_no_wm = media_urls["downloadUrlNoWatermark"]
+    from app.utils.media_urls import earliest_cdn_expires_at
+
+    downloads = safe_int(stats.get("download_count") or stats.get("downloadCount"))
+    reposts = safe_int(
+        stats.get("repost_count")
+        or stats.get("repostCount")
+        or stats.get("forward_count")
+        or stats.get("forwardCount")
+    )
+    engagement: dict[str, Any] = {
+        "views": safe_int(stats.get("play_count") or stats.get("playCount")) or 0,
+        "likes": safe_int(stats.get("digg_count") or stats.get("diggCount")) or 0,
+        "comments": safe_int(stats.get("comment_count") or stats.get("commentCount")) or 0,
+        "shares": safe_int(stats.get("share_count") or stats.get("shareCount")) or 0,
+        "saves": safe_int(stats.get("collect_count") or stats.get("collectCount")) or 0,
+    }
+    if downloads is not None:
+        engagement["downloads"] = downloads
+    if reposts is not None:
+        engagement["reposts"] = reposts
 
     out: dict[str, Any] = {
         "platform": "tiktok",
@@ -1571,14 +1665,17 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
         "thumbnailUrl": cover,
         "mediaType": media_type,
         "contentType": content_type,
+        "width": safe_int(video.get("width")),
+        "height": safe_int(video.get("height")),
+        "videoUrl": play_url,
+        "downloadUrl": download_url,
+        "downloadUrlNoWatermark": download_no_wm,
+        "hasWatermark": bool(download_url) and not download_no_wm,
+        "mediaUrlsExpireAt": earliest_cdn_expires_at(
+            play_url, download_url, download_no_wm, cover, avatar
+        ),
         "author": author_out,
-        "engagement": {
-            "views": safe_int(stats.get("play_count") or stats.get("playCount")) or 0,
-            "likes": safe_int(stats.get("digg_count") or stats.get("diggCount")) or 0,
-            "comments": safe_int(stats.get("comment_count") or stats.get("commentCount")) or 0,
-            "shares": safe_int(stats.get("share_count") or stats.get("shareCount")) or 0,
-            "saves": safe_int(stats.get("collect_count") or stats.get("collectCount")) or 0,
-        },
+        "engagement": engagement,
         "hashtags": hashtags,
         "mentions": mentions,
         "musicName": safe_str(music.get("title")),
@@ -1599,6 +1696,11 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
             or item.get("is_paid_content")
             or item.get("isPaidContent")
         ),
+        "isLongVideo": bool(item.get("is_long_video") or item.get("isLongVideo"))
+        if (
+            item.get("is_long_video") is not None or item.get("isLongVideo") is not None
+        )
+        else None,
         "isEligibleForCommission": bool(
             item.get("is_eligible_for_commission")
             or item.get("isEligibleForCommission")
@@ -1615,9 +1717,13 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
         out["shopProductUrl"] = shop_url
     if images:
         out["images"] = images
-    # Drop null commission flag so strip_empty stays quiet.
+    # Drop null optional flags so strip_empty stays quiet.
     if out.get("isEligibleForCommission") is None:
         out.pop("isEligibleForCommission", None)
+    if out.get("isLongVideo") is None:
+        out.pop("isLongVideo", None)
+    # Never emit caption twice as description (legacy / Apify carry-over).
+    out.pop("description", None)
     return out
 
 

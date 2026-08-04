@@ -129,3 +129,57 @@ def test_map_aweme_video_has_content_type() -> None:
     assert row["hashtags"] == []
     assert row["mentions"] == []
     assert "images" not in row
+
+
+def test_map_aweme_video_urls_and_no_description_dup() -> None:
+    row = _map_aweme_post(
+        {
+            "aweme_id": "42",
+            "desc": "hello #cat",
+            "description": "should be dropped",
+            "is_ad": False,
+            "is_paid_partnership": True,
+            "author": {
+                "unique_id": "u",
+                "uid": "9",
+                "sec_uid": "SEC",
+                "follower_count": 100,
+            },
+            "statistics": {
+                "play_count": 10,
+                "digg_count": 2,
+                "download_count": 3,
+                "repost_count": 1,
+            },
+            "video": {
+                "duration": 12,
+                "width": 1080,
+                "height": 1920,
+                "cover": {"url_list": ["https://cdn.example/c.jpg"]},
+                "play_addr": {
+                    "url_list": [
+                        "https://v.example/play.mp4?x-expires=1893456000"
+                    ]
+                },
+                "download_addr": {"url_list": ["https://v.example/dl.mp4"]},
+                "download_no_watermark_addr": {
+                    "url_list": ["https://v.example/nowm.mp4"]
+                },
+            },
+            "shop_product_url": "https://www.tiktok.com/shop/pdp/1729494515984797858",
+        }
+    )
+    assert row is not None
+    assert row["videoUrl"] == "https://v.example/play.mp4?x-expires=1893456000"
+    assert row["downloadUrl"] == "https://v.example/dl.mp4"
+    assert row["downloadUrlNoWatermark"] == "https://v.example/nowm.mp4"
+    assert row["hasWatermark"] is False
+    assert row["mediaUrlsExpireAt"] == "2030-01-01T00:00:00.000Z"
+    assert row["author"]["id"] == "9"
+    assert row["author"]["secUid"] == "SEC"
+    assert row["isPaidPartnership"] is True
+    assert row["isAd"] is False
+    assert row["engagement"]["downloads"] == 3
+    assert row["engagement"]["reposts"] == 1
+    assert "description" not in row
+    assert row["shopProductUrl"] == "https://www.tiktok.com/shop/pdp/1729494515984797858"

@@ -9796,105 +9796,143 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "posts": [
       {
         "platform": "tiktok",
-        "url": "https://www.tiktok.com/@paw.dreams0/video/7662021590825061654",
-        "id": "7662021590825061654",
-        "caption": "kitten was teased for playing with a cardboard Motorbike  #catfunnyvideos #catcartoon #catcute #catstory #kitten",
-        "description": "kitten was teased for playing with a cardboard Motorbike  #catfunnyvideos #catcartoon #catcute #catstory #kitten",
-        "publishedAt": "2026-07-13T15:00:00.000Z",
-        "durationSeconds": 79.97,
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-no1a-p-0037-no/o8GAEB3hAPfJ9hQpWX4KWY5eeIgRQALTAFAUeG~tplv-tiktokx-cropcenter-q:300:400:q70.webp",
+        "url": "https://www.tiktok.com/@paw.dreams0/video/7656435976872512790",
+        "id": "7656435976872512790",
+        "caption": "The Kitten Was Teased For Playing With A Carboard Hedgehog Car #supercat #catfunnyvideos #unitedstates #funnyvideos #cat",
+        "publishedAt": "2026-06-28T15:30:00.000Z",
+        "durationSeconds": 103.0,
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-no1a-p-0037-no/oMvNfABQoHBF5iVXqnZKfAkCgEcBCcXIAA2Rik~tplv-tiktokx-origin.image?dr=9636&x-expires=1786014000&x-signature=7iKHuC9qK3jSvtrNhOUA%2Bp22FCE%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast8",
+        "mediaType": "video",
+        "contentType": "video",
+        "width": 576,
+        "height": 1024,
+        "videoUrl": "https://v16-webapp-prime.us.tiktok.com/video/tos/no1a/tos-no1a-ve-0068c001-no/oo0gFjfDkInJVIqCkI1etQVRBBCAFE7CFQJBEg/?a=1988&bti=ODszNWYuMDE6&&bt=714&ft=aEeq8qT0mIoPD12hRxRI3wURISAbMeF~O5&mime_type=video_mp4&rc=NWRnOjVkMzYzOzloPDs3OkBpM2Q5N205cmprPDMzbzgzNUAxNTAuYDEtXy8xXjJhYGNjYSNzNS9tMmRjcS1hLS1kLzFzcw%3D%3D&expire=1786015197&l=202608041118135C9F6414E9C9CE1EEA0A&ply_type=2&policy=2&signature=df687ad939be7ff96221abaf98d97f19&tk=tt_chain_token&btag=e00090000",
+        "downloadUrl": "https://v16-webapp-prime.us.tiktok.com/video/tos/no1a/tos-no1a-ve-0068c001-no/ooIjNVBqtQBI7FIaneZDNgQCkVFfABkwjEPgER/?a=1988&bti=ODszNWYuMDE6&&bt=1244&eid=5376&ft=aEeq8qT0mIoPD12hRxRI3wURISAbMeF~O5&mime_type=video_mp4&rc=OTs6PGg7ZDtnNGc6ZzdmO0BpM2Q5N205cmprPDMzbzgzNUBhLzYzYGBgNmExYDUzNGAxYSNzNS9tMmRjcS1hLS1kLzFzcw%3D%3D&expire=1786015197&l=202608041118135C9F6414E9C9CE1EEA0A&ply_type=2&policy=2&signature=558354d9fee7b2fc61bd2a464a45a073&tk=tt_chain_token&btag=e00090000",
+        "hasWatermark": true,
+        "mediaUrlsExpireAt": "2026-08-06T11:00:00.000Z",
         "author": {
+          "id": "7635116029405201410",
+          "secUid": "MS4wLjABAAAAvoNLKzifeDkHLRF2sTlYvhm39FAirS8996wURRRozsE-p7I6BMVYa6vsHFzYUe86",
           "username": "paw.dreams0",
           "displayName": "Paw Dreams",
           "url": "https://www.tiktok.com/@paw.dreams0",
-          "followers": 117886,
+          "followers": 147100,
           "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/14e5b5dbddf91912237e342a048afb2c~tplv-tiktokx-cropcenter-q:1080:1080:q70.webp"
+          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/14e5b5dbddf91912237e342a048afb2c~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=d3280f67&x-expires=1786014000&x-signature=Zq9ynnhU%2FSV7%2B1B2XFVOKSDO2xY%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
         },
         "engagement": {
-          "views": 253340,
-          "likes": 4607,
-          "comments": 116,
-          "shares": 327,
-          "saves": 949
+          "views": 458100,
+          "likes": 9227,
+          "comments": 177,
+          "shares": 522,
+          "saves": 1751
         },
         "hashtags": [
+          "supercat",
           "catfunnyvideos",
-          "catcartoon",
-          "catcute",
-          "catstory",
-          "kitten"
+          "unitedstates",
+          "funnyvideos",
+          "cat"
         ],
-        "musicName": "original sound - paw.dreams0"
+        "musicName": "original sound - Paw Dreams",
+        "musicId": "7656436046934182678",
+        "musicAuthor": "Paw Dreams",
+        "descLanguage": "en",
+        "isAd": false,
+        "isPaidPartnership": false,
+        "mentions": []
       },
       {
         "platform": "tiktok",
-        "url": "https://www.tiktok.com/@paw.dreams0/video/7661626147322547478",
-        "id": "7661626147322547478",
-        "caption": "The kitten was teased for playing with a cardboard Spoon shaped car #catfunnyvideos #catcartoon #catcute #catstory #kitten",
-        "description": "The kitten was teased for playing with a cardboard Spoon shaped car #catfunnyvideos #catcartoon #catcute #catstory #kitten",
-        "publishedAt": "2026-07-12T16:00:00.000Z",
-        "durationSeconds": 65.969,
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-no1a-p-0037-no/okepsDWBJhGTfTpIXjLeLEA8WMALIAKTjRAQeA~tplv-tiktokx-cropcenter-q:300:400:q70.webp",
+        "url": "https://www.tiktok.com/@paw.dreams0/video/7656002337634340118",
+        "id": "7656002337634340118",
+        "caption": "The Kitten Was Teased For Playing With A Carboard Lamborghini  #supercat #fifa #catfunnyvideos #unitedstates #funnyvideos #cat",
+        "publishedAt": "2026-06-27T15:00:00.000Z",
+        "durationSeconds": 95.0,
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-no1a-p-0037-no/ocUTZAkDqClnJhPFEAA58AIzCFtffP2gTVQMBN~tplv-tiktokx-origin.image?dr=9636&x-expires=1786014000&x-signature=0CqhY2mmleTu5hEnh5P90Plo7V4%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast8",
+        "mediaType": "video",
+        "contentType": "video",
+        "width": 576,
+        "height": 1024,
+        "videoUrl": "https://v16-webapp-prime.us.tiktok.com/video/tos/no1a/tos-no1a-ve-0068-no/oUJfPSgPfAQPySBQgDVqYcBulEFkFCKuu5QINy/?a=1988&bti=ODszNWYuMDE6&&bt=693&ft=aEeq8qT0mIoPD12hRxRI3wURISAbMeF~O5&mime_type=video_mp4&rc=aDgzNGg1OmY3ZGZnNWY5ZUBpajxtbXM5cjZzOzMzbzgzNUAwLjNgYi5hNi8xXl80NDJjYSNfYi1fMmRzNnNhLS1kLzFzcw%3D%3D&expire=1786015189&l=202608041118135C9F6414E9C9CE1EEA0A&ply_type=2&policy=2&signature=555986ea5b82112dd53636f8c7c52cdb&tk=tt_chain_token&btag=e000d0000",
+        "downloadUrl": "https://v16-webapp-prime.us.tiktok.com/video/tos/no1a/tos-no1a-ve-0068-no/ogCJdPQgkJAFuE5lJ8VSyPfYZSD3FBcIugbquf/?a=1988&bti=ODszNWYuMDE6&&bt=1218&eid=5376&ft=aEeq8qT0mIoPD12hRxRI3wURISAbMeF~O5&mime_type=video_mp4&rc=aDYzaDg8aWZmMzZnZztpZUBpajxtbXM5cjZzOzMzbzgzNUAxMS8tXmNfNWMxYWFgNTFiYSNfYi1fMmRzNnNhLS1kLzFzcw%3D%3D&expire=1786015189&l=202608041118135C9F6414E9C9CE1EEA0A&ply_type=2&policy=2&signature=0a2fc3a608ccdcbcee62160c40611a8b&tk=tt_chain_token&btag=e000d0000",
+        "hasWatermark": true,
+        "mediaUrlsExpireAt": "2026-08-06T11:00:00.000Z",
         "author": {
+          "id": "7635116029405201410",
+          "secUid": "MS4wLjABAAAAvoNLKzifeDkHLRF2sTlYvhm39FAirS8996wURRRozsE-p7I6BMVYa6vsHFzYUe86",
           "username": "paw.dreams0",
           "displayName": "Paw Dreams",
           "url": "https://www.tiktok.com/@paw.dreams0",
-          "followers": 117886,
+          "followers": 147100,
           "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/14e5b5dbddf91912237e342a048afb2c~tplv-tiktokx-cropcenter-q:1080:1080:q70.webp"
+          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/14e5b5dbddf91912237e342a048afb2c~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=d3280f67&x-expires=1786014000&x-signature=Zq9ynnhU%2FSV7%2B1B2XFVOKSDO2xY%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
         },
         "engagement": {
-          "views": 78897,
-          "likes": 1386,
-          "comments": 51,
-          "shares": 74,
-          "saves": 280
+          "views": 125800,
+          "likes": 2237,
+          "comments": 68,
+          "shares": 150,
+          "saves": 487
         },
         "hashtags": [
-          "catfunnyvideos",
-          "catcartoon",
-          "catcute",
-          "catstory",
-          "kitten"
+          "fifa",
+          "cat"
         ],
-        "musicName": "original sound - paw.dreams0"
+        "musicName": "original sound - Paw Dreams",
+        "musicId": "7656002370417052438",
+        "musicAuthor": "Paw Dreams",
+        "descLanguage": "en",
+        "isAd": false,
+        "isPaidPartnership": false,
+        "mentions": []
       },
       {
         "platform": "tiktok",
-        "url": "https://www.tiktok.com/@paw.dreams0/video/7661284651968859414",
-        "id": "7661284651968859414",
-        "caption": "Kitten Mocked For Playing With The Carboard Tortle Car   #catfunnyvideos #catcartoon #catcute #catstory #kitten",
-        "description": "Kitten Mocked For Playing With The Carboard Tortle Car   #catfunnyvideos #catcartoon #catcute #catstory #kitten",
-        "publishedAt": "2026-07-11T15:30:00.000Z",
-        "durationSeconds": 81.688,
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-no1a-p-0037-no/oYhfP5AcQI3DfUAWWYpJJGfKSgN1QuAeAA1LFW~tplv-tiktokx-cropcenter-q:300:400:q70.webp",
+        "url": "https://www.tiktok.com/@paw.dreams0/video/7655295012845964566",
+        "id": "7655295012845964566",
+        "caption": "Kitten was teased for playing with a cardboard campervan, #catfunnyvideos #catcartoon #catcute catlovers #catstory",
+        "publishedAt": "2026-06-26T15:00:00.000Z",
+        "durationSeconds": 114.0,
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-no1a-p-0037-no/oMPAjCERjDDAVogUIsAiFp9FfvkAAqICEeE6UG~tplv-tiktokx-origin.image?dr=9636&x-expires=1786014000&x-signature=%2B2x2ahedE2CfjX%2B3u2ytqj3%2BpuM%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast8",
+        "mediaType": "video",
+        "contentType": "video",
+        "width": 576,
+        "height": 1024,
+        "videoUrl": "https://v16-webapp-prime.us.tiktok.com/video/tos/no1a/tos-no1a-ve-0068c001-no/okfKIBikX49XYJ7992AnEzaEwQioC1AoHOBypi/?a=1988&bti=ODszNWYuMDE6&&bt=693&ft=aEeq8qT0mIoPD12hRxRI3wURISAbMeF~O5&mime_type=video_mp4&rc=NjlpMzppNDZlMzg1Ojs5N0Bpanc7aHI5cnhrOzMzbzgzNUBeYjA2LjEyXzIxNmMvMGNeYSNfcW9mMmRzL3JhLS1kLzFzcw%3D%3D&expire=1786015208&l=202608041118135C9F6414E9C9CE1EEA0A&ply_type=2&policy=2&signature=2900e4dfe028f47226e498011d91a780&tk=tt_chain_token&btag=e000d0000",
+        "downloadUrl": "https://v16-webapp-prime.us.tiktok.com/video/tos/no1a/tos-no1a-ve-0068c001-no/oUuBCH9ypEAo9QE7OAEi9fQrXwi4kABg1IaKui/?a=1988&bti=ODszNWYuMDE6&&bt=1201&eid=5376&ft=aEeq8qT0mIoPD12hRxRI3wURISAbMeF~O5&mime_type=video_mp4&rc=ZTY8Ojk1ODQ3ZzlpZGg0OEBpanc7aHI5cnhrOzMzbzgzNUAxLS8tYGJhNWIxYWAvYTUxYSNfcW9mMmRzL3JhLS1kLzFzcw%3D%3D&expire=1786015208&l=202608041118135C9F6414E9C9CE1EEA0A&ply_type=2&policy=2&signature=58be0e151827dd46edd7f6475b7ae4ad&tk=tt_chain_token&btag=e000d0000",
+        "hasWatermark": true,
+        "mediaUrlsExpireAt": "2026-08-06T11:00:00.000Z",
         "author": {
+          "id": "7635116029405201410",
+          "secUid": "MS4wLjABAAAAvoNLKzifeDkHLRF2sTlYvhm39FAirS8996wURRRozsE-p7I6BMVYa6vsHFzYUe86",
           "username": "paw.dreams0",
           "displayName": "Paw Dreams",
           "url": "https://www.tiktok.com/@paw.dreams0",
-          "followers": 117886,
+          "followers": 147100,
           "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/14e5b5dbddf91912237e342a048afb2c~tplv-tiktokx-cropcenter-q:1080:1080:q70.webp"
+          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/14e5b5dbddf91912237e342a048afb2c~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=d3280f67&x-expires=1786014000&x-signature=Zq9ynnhU%2FSV7%2B1B2XFVOKSDO2xY%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
         },
         "engagement": {
-          "views": 110306,
-          "likes": 1890,
-          "comments": 112,
-          "shares": 134,
-          "saves": 388
+          "views": 1100000,
+          "likes": 52100,
+          "comments": 3129,
+          "shares": 3755,
+          "saves": 8199
         },
         "hashtags": [
-          "catfunnyvideos",
-          "catcartoon",
-          "catcute",
-          "catstory",
-          "kitten"
+          "catstory"
         ],
-        "musicName": "original sound - paw.dreams0"
+        "musicName": "original sound - Paw Dreams",
+        "musicId": "7655295065816091395",
+        "musicAuthor": "Paw Dreams",
+        "descLanguage": "en",
+        "isAd": false,
+        "isPaidPartnership": false,
+        "mentions": []
       }
     ],
-    "nextCursor": "1781971200001",
+    "nextCursor": "1781133123000",
     "hasMore": true
   },
   "tiktok-comment-replies": {
@@ -9902,109 +9940,139 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.tiktok.com/@khaby.lame/video/7646812028874673439",
     "commentId": "7652622392003003157",
     "totalReturned": 10,
+    "totalReplies": 22,
     "replies": [
       {
         "id": "7652704280361403157",
         "text": "tinggal seribu lagi jadi 5jt😹",
         "author": "evan.gunawan2037",
+        "authorId": "7442964363847697409",
+        "authorSecUid": "MS4wLjABAAAA7ax_OCYs6_dYN6ecF_wfwrsx5MWfm6ZXPq1uBd7JxHRyQV11bE_95NMCWoPh6ryo",
         "authorName": "MAJIN_EVAN⚡",
-        "likeCount": 16,
+        "commentLanguage": "id",
+        "likeCount": 27,
         "publishedAt": "2026-06-18T12:01:20.000Z",
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/6ea4cabf09938d71804dd2b430afbdcb~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=595426e6&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1784541600&x-signature=54CztTw4VhDfCPIEK2C0yD%2FxFPg%3D"
+        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/6ea4cabf09938d71804dd2b430afbdcb~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=ac6fedfc&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=Zxy%2BmvMJIGVUUYEmnl00HSp3DAw%3D"
       },
       {
         "id": "7653041079252517640",
         "text": "jir Luh gimana pelenger itu nya kalau 1 rb?",
         "author": "oficial_tod",
+        "authorId": "7234539502412661762",
+        "authorSecUid": "MS4wLjABAAAA_P7z2-T5tb6-7diIytCkwubkz9X3aTjEJRTL3dyqKF4us7kTCfD4xLC-T0U5Y1_i",
         "authorName": "it's me Gung",
-        "likeCount": 31,
+        "commentLanguage": "id",
+        "likeCount": 36,
         "publishedAt": "2026-06-19T09:48:12.000Z",
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/34e550efa4bd9aec97d7de21011f1d5d~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=c2506938&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1784541600&x-signature=oIMo9aMYVCLKg1ft2YcXpaDO6NQ%3D"
+        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/34e550efa4bd9aec97d7de21011f1d5d~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=2a2de674&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=bQkU37mEQOdeUjb3fGbHZXwRf8g%3D"
       },
       {
         "id": "7655633248479200021",
         "text": "iya bro gw plenger 😹",
         "author": "evan.gunawan2037",
+        "authorId": "7442964363847697409",
+        "authorSecUid": "MS4wLjABAAAA7ax_OCYs6_dYN6ecF_wfwrsx5MWfm6ZXPq1uBd7JxHRyQV11bE_95NMCWoPh6ryo",
         "authorName": "MAJIN_EVAN⚡",
-        "likeCount": 4,
+        "commentLanguage": "id",
+        "likeCount": 5,
         "publishedAt": "2026-06-26T09:27:17.000Z",
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/6ea4cabf09938d71804dd2b430afbdcb~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=595426e6&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1784541600&x-signature=54CztTw4VhDfCPIEK2C0yD%2FxFPg%3D"
+        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/6ea4cabf09938d71804dd2b430afbdcb~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=ac6fedfc&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=Zxy%2BmvMJIGVUUYEmnl00HSp3DAw%3D"
+      },
+      {
+        "id": "7666686478793442069",
+        "text": "[Sticker]",
+        "author": "athenaaeonzystaria",
+        "authorId": "7618207766117434389",
+        "authorSecUid": "MS4wLjABAAAA1km3MGlfJPOAttnpyQleBltAOO_cioIJkdDiyAYrejuPd6RN3kIVPlyxRSY56oql",
+        "authorName": "𝙉𝙌𝙍 | 𝐀𝐞𝐨𝐧𝐳𝐲 𝐗𝐚𝐯.",
+        "commentLanguage": "un",
+        "likeCount": 0,
+        "publishedAt": "2026-07-26T04:19:24.000Z",
+        "verified": false,
+        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/4a961837c2ab8571b505214034a21245~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=af90b773&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=cJmwhIph9R8TXLe%2BH71RCWvkVUw%3D"
       },
       {
         "id": "7655391781529469716",
         "text": "100 sepereak doang itu mahkurang nya",
         "author": "ical_style1",
+        "authorId": "7393546184801666064",
+        "authorSecUid": "MS4wLjABAAAAljzoWtCHn_uzu5pVPlnZDvI05gsh48drXY95hfkGdD9bcjsbvIIkFQmVypvNIktT",
         "authorName": "Cal🦅",
+        "commentLanguage": "id",
         "likeCount": 1,
         "publishedAt": "2026-06-25T17:50:10.000Z",
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/a553573e0a120f841e441b1ff94db371~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=2a80f242&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1784541600&x-signature=xkI6rXm0K%2FLZ%2BFfSEwxFULxAtwE%3D"
+        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/a553573e0a120f841e441b1ff94db371~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=88e65905&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=ukWP3sjQ24RpcuQZ9wIFh996J00%3D"
       },
       {
         "id": "7655968916204978965",
         "text": "1 perak",
         "author": "oppai_fans",
+        "authorId": "7386610602779460614",
+        "authorSecUid": "MS4wLjABAAAA6MaYwaCn5BGY_01IGU29S96_0E0DkZzSkMnucC7nkt3mzCn5esZtkoJeEzpTzF7a",
         "authorName": "OPPAI FANS",
-        "likeCount": 1,
+        "commentLanguage": "ms",
+        "likeCount": 2,
         "publishedAt": "2026-06-27T07:09:58.000Z",
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/3e676fb527590bc4a3cdca6245dd36c3~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=4f8b4488&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1784541600&x-signature=2%2F99mmnsEJtLD%2F0BXeEjsbaWV%2Fs%3D"
+        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/3e676fb527590bc4a3cdca6245dd36c3~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=91fab469&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=uci5hG6Zk4gzQr%2F9sQtcrVTG%2BQ0%3D"
       },
       {
         "id": "7654669552286532360",
         "text": "emotnya si ini :😹\npemikirannya plenger",
         "author": "rpl_fall",
+        "authorId": "6956819041202914310",
+        "authorSecUid": "MS4wLjABAAAAdzFOecdP_RwHqbpr3LCjfmjjpoE2dq6TWfhS8IpU6AziHml-Iq-Jjdk8DAcwO-ZK",
         "authorName": "Fall",
+        "commentLanguage": "id",
         "likeCount": 3,
         "publishedAt": "2026-06-23T19:07:30.000Z",
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/e0101b36be56d56bf30e68797809e35a~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=8826d0f3&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1784541600&x-signature=5yNRPLUDjDNyJ5w70aRj8jj%2BLTU%3D"
+        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/e0101b36be56d56bf30e68797809e35a~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=7bb09b6f&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=tMnTzaJ%2BEHjBSqd%2Bv%2FgrZAppQC0%3D"
       },
       {
         "id": "7652718324300563221",
         "text": "1 rupiah kali bukan seribu",
         "author": "oppai_fans",
+        "authorId": "7386610602779460614",
+        "authorSecUid": "MS4wLjABAAAA6MaYwaCn5BGY_01IGU29S96_0E0DkZzSkMnucC7nkt3mzCn5esZtkoJeEzpTzF7a",
         "authorName": "OPPAI FANS",
+        "commentLanguage": "id",
         "likeCount": 14,
         "publishedAt": "2026-06-18T12:55:47.000Z",
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/3e676fb527590bc4a3cdca6245dd36c3~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=4f8b4488&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1784541600&x-signature=2%2F99mmnsEJtLD%2F0BXeEjsbaWV%2Fs%3D"
+        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/3e676fb527590bc4a3cdca6245dd36c3~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=91fab469&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=uci5hG6Zk4gzQr%2F9sQtcrVTG%2BQ0%3D"
       },
       {
         "id": "7654032829540270868",
         "text": "ga sekolah gini",
         "author": "zaaxz_renamamiya",
+        "authorId": "7482703678358684689",
+        "authorSecUid": "MS4wLjABAAAAKDGkOPExlauYhsZtoFg8x8Y5a3mC2f09-VwBsNzop0HsQPmW8hAWyYVVbcZCeSkh",
         "authorName": "𝙕𝙖𝙭𝙯 𝖋𝖙 𝙆𝙂𝙉",
+        "commentLanguage": "id",
         "likeCount": 2,
         "publishedAt": "2026-06-22T01:56:58.000Z",
         "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/cdbbf04e9282ba9b34596ca100fc73f3~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=4a3ae8bc&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1784541600&x-signature=12vLi7lJpjvEGMUnLqAUeKcgp74%3D"
+        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/cdbbf04e9282ba9b34596ca100fc73f3~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=2aad6fd8&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=juEt%2Bqu53b7EKE3G3ib7k3fDSUg%3D"
       },
       {
-        "id": "7663845732496343816",
-        "text": "Beli online nambah onkir 30 ribu🗿",
-        "author": "gemaprasetia",
-        "authorName": "Kapten.Rivaille",
+        "id": "7666445437457662738",
+        "text": "1rp bro ga ada 1ribu [Photo]",
+        "author": "arilgansss",
+        "authorId": "7085973726505059330",
+        "authorSecUid": "MS4wLjABAAAAmQtD0D_EAfzyj2jlGdjAbDlWXkU3IA8ggibxogwPTS_ZJ74rAyQ9qP8pCsfYHxpf",
+        "authorName": "Tukang mancing",
+        "commentLanguage": "id",
         "likeCount": 0,
-        "publishedAt": "2026-07-18T12:35:50.000Z",
+        "publishedAt": "2026-07-25T12:43:57.000Z",
         "verified": false,
-        "profileImage": "https://p19-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/0594a14c8e2b65bc68b5a08eb8ef194d~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=0b314880&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1784541600&x-signature=zaJrUEpoB%2FS7GgsHP4GkW2n6DcI%3D"
-      },
-      {
-        "id": "7654669373819486983",
-        "text": "dongo",
-        "author": "rpl_fall",
-        "authorName": "Fall",
-        "likeCount": 0,
-        "publishedAt": "2026-06-23T19:06:55.000Z",
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/e0101b36be56d56bf30e68797809e35a~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=8826d0f3&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1784541600&x-signature=5yNRPLUDjDNyJ5w70aRj8jj%2BLTU%3D"
+        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/198bd808654191b078ccc269ca90ddc7~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=bf981750&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=CcdWyXq6mMEHVwOMWvvL5okMF6g%3D"
       }
     ],
-    "totalReplies": 17,
     "nextCursor": "10",
     "hasMore": true
   },
@@ -10634,6 +10702,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "username": "khaby.lame",
     "displayName": "Khabane lame",
     "url": "https://www.tiktok.com/@khaby.lame",
+    "id": "127905465618821121",
+    "secUid": "MS4wLjABAAAAwAg0rSzO65WQfz4RzQgGv2Xdv108BgPXhRrrmNVIHQZ9PO8-flwwRtEppYTS0OjA",
+    "createTime": "2016-08-10T22:02:34.000Z",
+    "createTimeUnix": 1470866554,
+    "ttSeller": false,
+    "isOrganization": 0,
     "region": "IT",
     "language": "en",
     "followers": 162355782,

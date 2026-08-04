@@ -62,7 +62,14 @@ def test_finalize_engagement_defaults_missing_shares_to_zero() -> None:
     out = _tt_finalize_post(
         {
             "id": "1",
-            "engagement": {"views": 10, "likes": 2, "comments": 1, "saves": 0},
+            "description": "dup of caption",
+            "engagement": {
+                "views": 10,
+                "likes": 2,
+                "comments": 1,
+                "saves": 0,
+                "downloads": 4,
+            },
             "hashtags": None,
         }
     )
@@ -72,7 +79,9 @@ def test_finalize_engagement_defaults_missing_shares_to_zero() -> None:
         "comments": 1,
         "shares": 0,
         "saves": 0,
+        "downloads": 4,
     }
+    assert "description" not in out
     assert out["hashtags"] == []
     assert out["mentions"] == []
     assert out["isAd"] is False
