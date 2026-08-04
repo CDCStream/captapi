@@ -307,7 +307,8 @@ def _normalize_connection(item: dict) -> dict:
         "createTime": create_iso,
         "createTimeUnix": create_unix,
     }
-    for key in ("id", "secUid", "bio", "region", "language", "createTime", "createTimeUnix"):
+    # Keep region/language keys even when null (same contract as native mapper).
+    for key in ("id", "secUid", "bio", "createTime", "createTimeUnix"):
         if out.get(key) in (None, ""):
             out.pop(key, None)
     return out
@@ -1228,7 +1229,7 @@ async def tiktok_channel_details(
 
         data = await cached_or_run(
             endpoint="tiktok.channel-details",
-            params={"url": url, "v": 4, "cacheMaxAge": cacheMaxAge},
+            params={"url": url, "v": 5, "cacheMaxAge": cacheMaxAge},
             runner=_run,
             ctx=ctx,
             use_cache=use_cache,
@@ -1453,6 +1454,22 @@ def _normalize_live(item: dict[str, Any], handle: str) -> dict[str, Any]:
     )
     creator_id = safe_str(user.get("id") or user.get("uid") or item.get("uid") or item.get("user_id"))
     sec_uid = safe_str(user.get("secUid") or user.get("sec_uid") or item.get("secUid") or item.get("sec_uid"))
+    viewer = safe_int(
+        room.get("viewer_count") or item.get("viewer_count") or item.get("viewerCount")
+    )
+    paid_raw = room.get("paidEvent") if isinstance(room.get("paidEvent"), dict) else None
+    paid_event = None
+    if paid_raw:
+        paid_event = strip_empty(
+            {
+                "eventId": safe_int(paid_raw.get("event_id") or paid_raw.get("eventId")),
+                "paidType": safe_int(
+                    paid_raw.get("paid_type")
+                    if paid_raw.get("paid_type") is not None
+                    else paid_raw.get("paidType")
+                ),
+            }
+        )
 
     return strip_empty(
         {
@@ -1468,7 +1485,6 @@ def _normalize_live(item: dict[str, Any], handle: str) -> dict[str, Any]:
                 "displayName": safe_str(user.get("nickname") or item.get("nickname")),
                 "followers": safe_int(user.get("followerCount") or item.get("follower_count")),
                 "following": following,
-                "followingCount": following,
                 "verified": user.get("verified") if user.get("verified") is not None else item.get("verified"),
                 "avatar": safe_str(
                     user.get("avatarUrl")
@@ -1493,9 +1509,7 @@ def _normalize_live(item: dict[str, Any], handle: str) -> dict[str, Any]:
                 "status": room_status if room_status is not None else status,
                 "title": safe_str(room.get("title") or item.get("room_title") or item.get("title")),
                 "startedAt": safe_str(room.get("started_at") or item.get("started_at") or item.get("startedAt")),
-                "viewerCount": safe_int(
-                    room.get("viewer_count") or item.get("viewer_count") or item.get("viewerCount")
-                ),
+                "viewerCount": viewer if is_live else None,
                 "totalEnterCount": safe_int(
                     room.get("total_enter_count")
                     or item.get("total_enter_count")
@@ -1504,14 +1518,52 @@ def _normalize_live(item: dict[str, Any], handle: str) -> dict[str, Any]:
                 "likeCount": safe_int(room.get("like_count") or item.get("like_count") or item.get("likeCount")),
                 "coverUrl": safe_str(room.get("cover_url") or item.get("cover_url") or item.get("coverUrl")),
                 "liveSubOnly": live_sub_only,
-                "gameTagId": game_tag if game_tag else None,
-                "hashTagId": hash_tag if hash_tag else None,
+                "gameTagId": game_tag,
+                "hashTagId": hash_tag,
+                "paidEvent": paid_event,
                 "streamUrls": stream_urls or None,
                 "streamQualities": qualities or None,
                 "streams": streams_map,
             },
         }
     )
+
+
+async def _tiktok_live_payload(handle: str, ctx: dict[str, Any]) -> dict[str, Any]:
+    """Shared runner for /live and /live-info — same shape; routes differ only in credits."""
+    settings = get_settings()
+    native = await live_status_native(handle)
+    room = (native or {}).get("room") or {}
+    # Offline is complete natively. When live, ship native once we have room id
+    # and/or pull URLs (streamQualities with hls/cmaf when TikTok exposes them).
+    if native is not None and (
+        not native.get("isLive")
+        or room.get("id")
+        or room.get("streamUrls")
+        or room.get("streamQualities")
+    ):
+        ctx["source"] = "direct"
+        return native
+
+    apify = get_apify()
+    items = await apify.run_actor_sync(
+        settings.APIFY_ACTOR_TIKTOK_LIVE,
+        {"handles": [handle], "include_stream_urls": True},
+        max_items=1,
+    )
+    if not items:
+        if native is not None:
+            ctx["source"] = "direct"
+            return native
+        raise HTTPException(status_code=404, detail="Creator not found")
+    item = items[0]
+    if item.get("error"):
+        if native is not None:
+            ctx["source"] = "direct"
+            return native
+        raise HTTPException(status_code=404, detail="Creator not found")
+    ctx["source"] = "apify"
+    return _normalize_live(item, handle)
 
 
 @router.get("/live", summary="TikTok live status + room info for a creator")
@@ -1521,7 +1573,6 @@ async def tiktok_live(
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/live",
@@ -1529,50 +1580,25 @@ async def tiktok_live(
         resource_url=f"https://www.tiktok.com/@{handle}/live",
         base_credits=CREDIT_CHANNEL_DETAILS,
     ) as ctx:
-        async def _run() -> dict[str, Any]:
-            native = await live_status_native(handle)
-            # Offline status is complete natively. When live, prefer Apify only
-            # if we still lack a room id (shouldn't happen) — otherwise ship
-            # native isLive + creator (+ room.id / best-effort enrich).
-            if native is not None and (not native.get("isLive") or (native.get("room") or {}).get("id")):
-                ctx["source"] = "direct"
-                return native
-
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_LIVE,
-                {"handles": [handle], "include_stream_urls": True},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Creator not found")
-            item = items[0]
-            if item.get("error"):
-                raise HTTPException(status_code=404, detail="Creator not found")
-            ctx["source"] = "apify"
-            return _normalize_live(item, handle)
-
         data = await cached_or_run(
             endpoint="tiktok.live",
-            params={"handle": handle, "v": 6},
-            runner=_run,
+            params={"handle": handle, "v": 7},
+            runner=lambda: _tiktok_live_payload(handle, ctx),
             ctx=ctx,
             use_cache=cache,
         )
         return ApiResponse(data=data)
 
 
-@router.get("/live-info", summary="TikTok live room info for a creator")
+@router.get("/live-info", summary="TikTok live room info for a creator (alias of /live)")
 async def tiktok_live_info(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    # ScrapeCreators exposes both Live and Live Info. Our live endpoint already
-    # returns status plus full room details, so this route is an explicit alias
-    # with its own billing/cache key for compatibility.
+    # True alias of /live — identical payload via _tiktok_live_payload.
+    # Separate path / billing (7 credits) for ScrapeCreators compatibility.
     handle = _require_tiktok_profile(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/live-info",
@@ -1580,59 +1606,10 @@ async def tiktok_live_info(
         resource_url=f"https://www.tiktok.com/@{handle}/live",
         base_credits=7,
     ) as ctx:
-        async def _run() -> dict[str, Any]:
-            native = await live_status_native(handle)
-            # Prefer native whenever we have stream URLs (or a definitive offline).
-            native_streams = ((native or {}).get("room") or {}).get("streamUrls") or []
-            if native is not None and (not native.get("isLive") or native_streams):
-                ctx["source"] = "direct"
-                return strip_empty(
-                    {
-                        **native,
-                        "streamUrls": native_streams,
-                    }
-                )
-            # Still-live but no pull URLs yet — Apify for full room media.
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_LIVE,
-                {"handles": [handle], "include_stream_urls": True},
-                max_items=1,
-            )
-            if not items:
-                if native is not None:
-                    ctx["source"] = "direct"
-                    return strip_empty(
-                        {
-                            **native,
-                            "streamUrls": (native.get("room") or {}).get("streamUrls") or [],
-                        }
-                    )
-                raise HTTPException(status_code=404, detail="Creator not found")
-            item = items[0]
-            if item.get("error"):
-                if native is not None:
-                    ctx["source"] = "direct"
-                    return strip_empty(
-                        {
-                            **native,
-                            "streamUrls": (native.get("room") or {}).get("streamUrls") or [],
-                        }
-                    )
-                raise HTTPException(status_code=404, detail="Creator not found")
-            normalized = _normalize_live(item, handle)
-            ctx["source"] = "apify"
-            return strip_empty(
-                {
-                    **normalized,
-                    "streamUrls": (normalized.get("room") or {}).get("streamUrls") or [],
-                    "raw": item,
-                }
-            )
-
         data = await cached_or_run(
             endpoint="tiktok.live-info",
-            params={"handle": handle, "v": 6},
-            runner=_run,
+            params={"handle": handle, "v": 7},
+            runner=lambda: _tiktok_live_payload(handle, ctx),
             ctx=ctx,
             use_cache=cache,
         )

@@ -539,7 +539,7 @@ export class TiktokApi {
   comments(params: TiktokCommentsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/comments", params);
   }
-  /** TikTok Channel Details — Profile info & stats for a TikTok user. (1 credit) */
+  /** TikTok Channel Details — Resolve @handle → id + secUid; createTime, ttSeller, bioLink.risk, category, commerce flags. (1 credit) */
   channelDetails(params: TiktokChannelDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/channel-details", params);
   }

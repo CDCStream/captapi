@@ -50,6 +50,44 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
+    category: "fix",
+    title: "TikTok user-followers docs stamp: same shape as followings (1 credit)",
+    description:
+      "user-followers already shared the native signer mapper with user-followings (id/secUid/createTime/language/total/nextCursor, flat 1 credit) — some /apis pages were stuck on an older SSG build showing 20 credits. Docs examples reordered (total/hasMore/nextCursor first), region kept as null when TikTok omits it, and the round filler nextCursor replaced. Deploy refreshes the followers stamp to match followings.",
+    items: [
+      "user-followers example: total + hasMore + nextCursor + region key",
+      "region/language keys retained as null when upstream omits them",
+      "SSG/docs stamp alignment with user-followings (1 credit)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "improvement",
+    title: "TikTok Live: true /live ↔ /live-info alias + hls/cmaf in streamQualities",
+    description:
+      "GET /v1/tiktok/live and /live-info now share one runner (identical JSON). streamQualities keeps flv/hls/cmaf/dash/lls when TikTok exposes them (dash falls back to cmaf MPD); streamUrls prefers playable HLS/CMAF before FLV. Offline rooms omit stale viewerCount; totalEnterCount stays as last-known. paidEvent + gameTagId/hashTagId retained; duplicate followingCount dropped. Docs example uses a room with real HLS; status field copy is live-specific (2 = live).",
+    items: [
+      "/live and /live-info: same payload (prefer /live at 1 credit)",
+      "streamQualities: hls + cmaf/dash + lls (not FLV-only)",
+      "viewerCount omitted when isLive is false",
+      "Slug-specific status docs for TikTok Live",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
+    title: "TikTok channel-details docs: id + secUid + ttSeller example restored",
+    description:
+      "GET /v1/tiktok/channel-details already returned id, secUid, createTime, ttSeller, bioLink.risk, and commerce flags — but the docs example had dropped ok:true so gen_examples skipped the slug, leaving a thin pre-enrichment sample (no identity). Snapshot refreshed from live @natgeo; catalog/FAQ lead with handle→id/secUid resolve and the Shop bridge (ttSeller).",
+    items: [
+      "Docs example: id + secUid + createTime + ttSeller + bioLink.risk",
+      "region key added when TikTok exposes it",
+      "FAQ: resolve contract + ttSeller → Shop chain",
+      "Cache bump v=5",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
     category: "improvement",
     title: "TikTok user-followers/followings: secUid, cursor, total — search-users parity",
     description:

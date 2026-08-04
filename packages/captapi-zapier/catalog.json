@@ -793,7 +793,7 @@
     "name": "TikTok Channel Details",
     "path": "/v1/tiktok/channel-details",
     "credits": 1,
-    "summary": "Profile info & stats for a TikTok user.",
+    "summary": "Resolve @handle → id + secUid; createTime, ttSeller, bioLink.risk, category, commerce flags.",
     "params": [
       {
         "name": "url",
@@ -1249,7 +1249,7 @@
     "name": "TikTok Live",
     "path": "/v1/tiktok/live",
     "credits": 1,
-    "summary": "Authoritative isLive/status, last room, creator id/secUid, parsed stream qualities.",
+    "summary": "isLive/status, creator.id/secUid, streamQualities with flv/hls/cmaf/dash. Flat 1 credit.",
     "params": [
       {
         "name": "url",
@@ -1271,7 +1271,7 @@
     "name": "TikTok Live Info",
     "path": "/v1/tiktok/live-info",
     "credits": 7,
-    "summary": "Same as TikTok Live (status, room, stream qualities) at 7 credits.",
+    "summary": "True alias of /live (same payload) at 7 credits for SC path compatibility.",
     "params": [
       {
         "name": "url",

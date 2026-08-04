@@ -472,7 +472,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/comments", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def channel_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Channel Details — Profile info & stats for a TikTok user. (1 credit)
+        """TikTok Channel Details — Resolve @handle → id + secUid; createTime, ttSeller, bioLink.risk, category, commerce flags. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -681,7 +681,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/comments", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def channel_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Channel Details — Profile info & stats for a TikTok user. (1 credit)
+        """TikTok Channel Details — Resolve @handle → id + secUid; createTime, ttSeller, bioLink.risk, category, commerce flags. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

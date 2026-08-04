@@ -457,7 +457,25 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-summarizer", name: "TikTok Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/tiktok/summarize", credits: 4 },
   { slug: "tiktok-video-details", name: "TikTok Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/tiktok/video-details", credits: 1, tagline: "Get everything about one TikTok video from its URL — caption, view/like/comment/share/save counts, creator, sound, hashtags, and thumbnail.", longDescription: "Paste any public TikTok video URL and the TikTok Video Details API returns the full picture as clean JSON: the caption, when it was posted, how long it runs, and its engagement — views, likes, comments, shares, and saves. You also get the creator (username, display name, follower count, verified badge, and avatar), the sound/music name, the list of hashtags, and a thumbnail image. Use it to build analytics dashboards, track a campaign, or enrich a content database. This endpoint focuses on metadata and stats. No TikTok login and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Caption, publish date, and video duration", "Views, likes, comments, shares, and saves", "Creator profile — handle, name, followers, verified, avatar", "Sound name, hashtags, and thumbnail image"] },
   { slug: "tiktok-comments", name: "TikTok Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/tiktok/comments", credits: 2, tagline: "TikTok comments — clean schema plus stable authorId/authorSecUid and commentLanguage for listening loops.", longDescription: "Paste a public TikTok video URL and get comments as clean JSON (not TikTok's 40+ junk user fields). Each comment keeps username + avatar, and adds stable authorId (uid) and authorSecUid for repeat-commenter detection, plus commentLanguage for market listening without a separate language detector. replyCount when TikTok exposes it. totalComments + cursor pagination (nextCursor/hasMore). Flat 2 credits per call. Need replies? Use TikTok Comment Replies with the parent comment id.", delivers: ["Stable authorId + authorSecUid (not just username)", "commentLanguage for market listening", "replyCount when TikTok exposes it", "Like count, publish time, totalComments + cursor pagination", "limit up to 500 — flat 2 credits per call"] },
-  { slug: "tiktok-channel-details", name: "TikTok Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/tiktok/channel-details", credits: 1, tagline: "TikTok profile with createTime (account age), bioLink.risk, ttSeller, commerce flags, and contact{}.", longDescription: "Pass a profile URL or @handle and get clean JSON: followers/following/likes/postCount, verified, plus trust signals — createTime / createTimeUnix (account age for bot detection), bioLink{link,risk} (TikTok's own link risk score), ttSeller / isSeller (TikTok Shop), isCommerceUser, isOrganization, friendCount, diggCount, language, duet/stitch/download/comment settings, secUid, and contact{emails,links} from the bio. Pass cacheMaxAge=1d|3d|7d|14d|30d to reuse a cached copy (envelope cached + cachedAt). Flat 1 credit." },
+  {
+    slug: "tiktok-channel-details",
+    name: "TikTok Channel Details API",
+    shortName: "Channel Details",
+    category: "channel",
+    method: "GET",
+    path: "/v1/tiktok/channel-details",
+    credits: 1,
+    tagline:
+      "Resolve a TikTok @handle to id + secUid — createTime, ttSeller, bioLink.risk, category, commerce flags.",
+    longDescription:
+      "Pass a profile URL or @handle and get clean JSON for CRM joins and chaining: id + secUid (stable identity — handles change; follower/video lists need secUid), followers/following/likes/postCount, verified, category (commerce niche, when TikTok exposes it), createTime / createTimeUnix (account age), bioLink{link,risk} + bioLinkRisk, ttSeller / isSeller (TikTok Shop bridge), isCommerceUser, isOrganization, friendCount, diggCount, language/region, duet/stitch/download/comment settings, and contact{emails,links} from the bio. Pass cacheMaxAge=1d|3d|7d|14d|30d to reuse a cached copy (envelope cached + cachedAt). Flat 1 credit.",
+    delivers: [
+      "id + secUid for CRM joins and follower/video chaining",
+      "createTime / createTimeUnix (account age)",
+      "ttSeller / isSeller — bridge to TikTok Shop endpoints",
+      "bioLink.risk, category, commerce + remix settings",
+    ],
+  },
   { slug: "tiktok-profile-region", name: "TikTok Profile Region API", shortName: "Profile Region", category: "channel", method: "GET", path: "/v1/tiktok/profile-region", credits: 2 , tagline: "Find out where a TikTok creator is likely based and what language they use — country, language, and core profile stats.", longDescription: "Give the TikTok Profile Region API a profile URL, @handle, or username and it returns location and language as clean JSON. TikTok almost never shows an account's country publicly, so when that value is missing we estimate the country from public cues like the bio, display name, and language. The response tells you whether the country came from TikTok itself or from that estimate, and how confident the estimate is (high, medium, or low). You also get the interface language and core profile stats — followers, following, total likes, and video count — plus display name, verified and private flags, and the avatar. Use it for audience and geo analysis, content localization, compliance checks, or vetting creators before a partnership. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Creator country — TikTok's own when available, otherwise an AI estimate", "Whether the country came from TikTok or was estimated, plus confidence", "Interface language plus followers, following, likes, and video count", "Display name, verified and private flags, and avatar"] },
   {
     slug: "tiktok-audience-demographics",
@@ -662,8 +680,38 @@ const TIKTOK: Spec[] = [
       "Flat 2 credits",
     ],
   },
-  { slug: "tiktok-live", name: "TikTok Live API", shortName: "Live", category: "details", method: "GET", path: "/v1/tiktok/live", credits: 1 , tagline: "Is this TikTok creator live right now — authoritative isLive/status, last room, and parsed stream qualities.", longDescription: "Send a TikTok profile URL or @handle and learn if that creator is currently live. isLive is true only when TikTok's liveRoom.status is 2 (also exposed as top-level status and room.status). When offline, room may still describe the last broadcast (title, startedAt, viewer/enter counts, stream pull URLs) — trust isLive/status, not a non-empty room. Response also includes creator.id / secUid / following, liveSubOnly, gameTagId / hashTagId when set, streamUrls[], streamQualities[{quality,codec,resolution,bitrate,flv,hls,dash}], and streams{hd,sd,ld,origin,ao,…}. Flat 1 credit per call. Live Info is the same payload at 7 credits for SC compatibility." },
-  { slug: "tiktok-live-info", name: "TikTok Live Info API", shortName: "Live Info", category: "details", method: "GET", path: "/v1/tiktok/live-info", credits: 7 , tagline: "Same TikTok live payload as Live — status, room, parsed stream qualities — billed at 7 credits for SC compatibility.", longDescription: "Alias of TikTok Live with its own billing/cache key. Same authoritative isLive / status, creator.id/secUid, room fields, and parsed streamQualities / streams map. Prefer /live (1 credit) unless you need this path for compatibility. Flat 7 credits per call." },
+  {
+    slug: "tiktok-live",
+    name: "TikTok Live API",
+    shortName: "Live",
+    category: "details",
+    method: "GET",
+    path: "/v1/tiktok/live",
+    credits: 1,
+    tagline:
+      "Is this TikTok creator live — isLive/status, creator.id/secUid, room, streamQualities with flv/hls/cmaf/dash.",
+    longDescription:
+      "Send a profile URL or @handle. isLive is true only when TikTok liveRoom.status === 2 (also top-level status + room.status). A non-empty room does not mean live — offline responses may still include the last broadcast (title, startedAt, totalEnterCount, pull URLs). viewerCount is only set while live (stale concurrent counts are omitted when offline). Parsed streamQualities[{quality,codec,resolution,bitrate,flv,hls,cmaf,dash,lls}] unwrap TikTok's triple-escaped stream_data (prefer hls/cmaf for browsers — FLV will not play in a web player). Also: creator.id/secUid/following, liveSubOnly, gameTagId/hashTagId, paidEvent, streams{}. Flat 1 credit. /live-info is the identical payload at 7 credits for SC path compatibility — prefer /live.",
+    delivers: [
+      "Authoritative isLive (status === 2 only)",
+      "creator.id + secUid for chaining",
+      "streamQualities with flv + hls + cmaf/dash (when TikTok exposes them)",
+      "gameTagId / hashTagId / paidEvent when present",
+    ],
+  },
+  {
+    slug: "tiktok-live-info",
+    name: "TikTok Live Info API",
+    shortName: "Live Info",
+    category: "details",
+    method: "GET",
+    path: "/v1/tiktok/live-info",
+    credits: 7,
+    tagline:
+      "Identical to TikTok Live (isLive, creator.id/secUid, streamQualities hls/cmaf) — 7 credits for SC compatibility.",
+    longDescription:
+      "True alias of GET /v1/tiktok/live — same runner, same JSON (isLive/status, creator.id/secUid, room.streamQualities with flv/hls/cmaf/dash when TikTok exposes them). Own billing/cache key only. Prefer /live (1 credit) unless you need this path for ScrapeCreators-compatible routing. Flat 7 credits.",
+  },
   {
     slug: "tiktok-popular-creators",
     name: "TikTok Popular Creators API",
@@ -4058,6 +4106,26 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       a: `Handles change; id and secUid do not. TikTok's follower lists, video lists, and many internal calls require secUid. Prefer id/secUid for CRM joins and chaining — use username for display.`,
     });
   }
+  if (ep.slug === "tiktok-channel-details") {
+    list.push({
+      q: `Does channel-details return id and secUid?`,
+      a: `Yes. Resolving @handle → id + secUid is the main job of this endpoint. Prefer those for CRM joins and for chaining into user-followers, channel-posts, and other secUid-gated TikTok calls. Handles change; id/secUid do not.`,
+    });
+    list.push({
+      q: `What does ttSeller mean?`,
+      a: `ttSeller (alias isSeller) is TikTok's Shop seller flag on the profile. When true, chain into TikTok Shop endpoints (shop search / product details / user showcase) for that creator's commerce surface.`,
+    });
+  }
+  if (ep.slug === "tiktok-live" || ep.slug === "tiktok-live-info") {
+    list.push({
+      q: `Is /live-info richer than /live?`,
+      a: `No — they share one runner and return the same JSON (creator.id/secUid, room.streamQualities with flv/hls/cmaf/dash when TikTok exposes them). /live-info is only a billing/cache alias at 7 credits for ScrapeCreators path compatibility. Prefer /live (1 credit).`,
+    });
+    list.push({
+      q: `Why is isLive false when room has stream URLs?`,
+      a: `isLive is true only when status === 2. Ended rooms often keep title, totalEnterCount, and pull URLs — that is last-broadcast history, not a live session. viewerCount is omitted when offline so a stale concurrent count is not mistaken for live viewers.`,
+    });
+  }
   if (ep.slug === "tiktok-user-followers" || ep.slug === "tiktok-user-followings") {
     list.push({
       q: `Do follower rows include secUid?`,
@@ -4435,10 +4503,17 @@ const FIELD_DESCS: Record<string, string> = {
   nsfw: "Whether the content is marked NSFW.",
   sensitive: "Whether the content is flagged sensitive.",
   isLive: "Whether the account/channel is currently live. For TikTok Live, true only when status === 2 — a non-empty room does not mean live.",
-  streamQualities: "Parsed TikTok live pull qualities ({quality, codec, resolution, bitrate, flv, hls, dash, cmaf}).",
+  streamQualities:
+    "Parsed TikTok live pull qualities ({quality, codec, resolution, bitrate, flv, hls, cmaf, dash, lls}). Prefer hls/cmaf for browsers — FLV is not web-playable. Unwrapped from TikTok's nested stream_data JSON.",
   streams: "TikTok live pull URLs keyed by quality (hd/sd/ld/origin/ao/…); h264 preferred when both codecs exist.",
   liveSubOnly: "Whether the TikTok live is subscribers-only.",
-  gameTagId: "TikTok live game/category tag id when set.",
+  gameTagId: "TikTok live game category id when the room is a gaming broadcast (0 / omitted when not).",
+  hashTagId: "TikTok live topic/hashtag category id when present.",
+  paidEvent: "Paid-live metadata ({eventId, paidType}) when TikTok marks the room as a paid event.",
+  totalEnterCount:
+    "Lifetime total entries for the last/current room session. May remain on offline payloads as last-known; viewerCount is only set while isLive.",
+  viewerCount:
+    "Concurrent viewers while isLive. Omitted when offline — a leftover userCount on an ended room is not current.",
   hashTagId: "TikTok live hashtag/category id when set.",
   streamId: "TikTok live stream id (distinct from room id when both exist).",
   isVideo: "Whether the item is a video.",
@@ -4600,7 +4675,7 @@ const FIELD_DESCS: Record<string, string> = {
     "Parsed impressions as {min, max, raw}. Prefer this for sorting; impressions stays the Meta display string. Usually null for commercial ads.",
   searchResultsCount: "Best-effort total hits Meta reports for the query (not just this page).",
   status:
-    "Context-dependent: on analytics/compare rows, ok or error; on ad-library search, the delivery filter (ACTIVE, INACTIVE, or ALL).",
+    "Context-dependent: TikTok Live uses the room/user status enum (2 = currently live — see isLive); analytics/compare rows use ok|error; ad-library search uses ACTIVE|INACTIVE|ALL.",
   limit: "Requested max items for this call.",
   authorFullname: "Stable Reddit account fullname (t2_…). Prefer this over author for joins.",
   downs: "Downvote count when Reddit exposes it (often 0 on public JSON).",
@@ -4771,10 +4846,24 @@ function exampleHint(v: unknown): string {
   return "";
 }
 
+/** Per-slug overrides when a shared FIELD_DESCS key means something else elsewhere. */
+const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
+  "tiktok-live": {
+    status:
+      "TikTok liveRoom/user status enum. 2 = currently live (isLive true). Other codes (commonly 4) mean the last room payload is ended/stale — still may include title, enter counts, and pull URLs.",
+  },
+  "tiktok-live-info": {
+    status:
+      "TikTok liveRoom/user status enum. 2 = currently live (isLive true). Other codes (commonly 4) mean the last room payload is ended/stale — still may include title, enter counts, and pull URLs.",
+  },
+};
+
 /** Description for a single field, preferring the curated dictionary. */
-function describeField(name: string, value: unknown): string {
+function describeField(name: string, value: unknown, slug?: string): string {
   if (RAW_KEYS.has(name)) return FIELD_DESCS.raw;
+  const slugDesc = slug ? SLUG_FIELD_DESCS[slug]?.[name] : undefined;
   if (isScalarValue(value)) {
+    if (slugDesc) return slugDesc;
     if (FIELD_DESCS[name]) return FIELD_DESCS[name];
     if (typeof value === "string" && value.startsWith("http"))
       return `${humanizeField(name)} URL.`;
@@ -4787,22 +4876,22 @@ function describeField(name: string, value: unknown): string {
     if (first) {
       return `Array of objects with ${Object.keys(first).slice(0, 6).join(", ")}.`;
     }
-    return FIELD_DESCS[name] ?? `${humanizeField(name)} (array).`;
+    return slugDesc ?? FIELD_DESCS[name] ?? `${humanizeField(name)} (array).`;
   }
   if (value && typeof value === "object") {
     const keys = Object.keys(value as Record<string, unknown>);
-    if (keys.length === 0) return FIELD_DESCS[name] ?? `${humanizeField(name)}.`;
+    if (keys.length === 0) return slugDesc ?? FIELD_DESCS[name] ?? `${humanizeField(name)}.`;
     return `Object with ${keys.slice(0, 6).join(", ")}.`;
   }
-  return FIELD_DESCS[name] ?? `${humanizeField(name)}.`;
+  return slugDesc ?? FIELD_DESCS[name] ?? `${humanizeField(name)}.`;
 }
 
-function fieldsFromObject(obj: Record<string, unknown>): ResponseField[] {
-  return Object.entries(obj).map(([k, v]) => ({ name: k, desc: describeField(k, v) }));
+function fieldsFromObject(obj: Record<string, unknown>, slug?: string): ResponseField[] {
+  return Object.entries(obj).map(([k, v]) => ({ name: k, desc: describeField(k, v, slug) }));
 }
 
 /** Build the documented response structure from a real example payload. */
-function structureFromExample(data: Record<string, unknown>): ResponseGroup[] {
+function structureFromExample(data: Record<string, unknown>, slug?: string): ResponseGroup[] {
   const top: ResponseField[] = [];
   const nested: ResponseGroup[] = [];
 
@@ -4819,11 +4908,11 @@ function structureFromExample(data: Record<string, unknown>): ResponseGroup[] {
         nested.push({
           title: humanizeField(key),
           note: `Each item in ${key} contains:`,
-          fields: fieldsFromObject(first),
+          fields: fieldsFromObject(first, slug),
         });
         continue;
       }
-      top.push({ name: key, desc: describeField(key, value) });
+      top.push({ name: key, desc: describeField(key, value, slug) });
       continue;
     }
     if (value && typeof value === "object") {
@@ -4832,12 +4921,12 @@ function structureFromExample(data: Record<string, unknown>): ResponseGroup[] {
         nested.push({
           title: humanizeField(key),
           note: `The ${key} object contains:`,
-          fields: fieldsFromObject(inner),
+          fields: fieldsFromObject(inner, slug),
         });
         continue;
       }
     }
-    top.push({ name: key, desc: describeField(key, value) });
+    top.push({ name: key, desc: describeField(key, value, slug) });
   }
 
   const groups: ResponseGroup[] = [];
@@ -4849,7 +4938,7 @@ function structureFromExample(data: Record<string, unknown>): ResponseGroup[] {
 export function responseStructure(ep: ApiEndpoint): ResponseGroup[] {
   const real = API_EXAMPLES[ep.slug];
   if (real && Object.keys(real).length > 0) {
-    const derived = structureFromExample(real);
+    const derived = structureFromExample(real, ep.slug);
     if (derived.length > 0) return derived;
   }
   switch (ep.category) {

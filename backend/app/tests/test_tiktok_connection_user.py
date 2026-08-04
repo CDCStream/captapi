@@ -34,7 +34,7 @@ def test_map_connection_user_identity_and_analysis_fields() -> None:
     assert mapped["url"] == "https://www.tiktok.com/@abdullah007a3"
 
 
-def test_map_connection_user_drops_empty_optional_keys() -> None:
+def test_map_connection_user_keeps_null_region_language() -> None:
     mapped = _map_connection_user(
         {
             "user": {
@@ -48,7 +48,8 @@ def test_map_connection_user_drops_empty_optional_keys() -> None:
     assert mapped["username"] == "sparse"
     assert "id" not in mapped
     assert "secUid" not in mapped
-    assert "region" not in mapped
     assert "createTime" not in mapped
+    assert "region" in mapped and mapped["region"] is None
+    assert "language" in mapped and mapped["language"] is None
     assert mapped["followers"] is None
     assert mapped["following"] is None

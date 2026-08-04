@@ -1,8 +1,8 @@
 ﻿# SC parity backlog (Captapi)
 
-Last updated: 2026-08-04 (TikTok user-followers/followings + search-users examples).
+Last updated: 2026-08-04 (followers docs stamp + region key + live alias).
 
-Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` → `api-examples.generated.ts`) — ship code + refresh snapshot or the docs still look broken.
+Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` → `api-examples.generated.ts`) — ship code + refresh snapshot **with `ok: true`** or `gen_examples.py` skips the slug and the page looks broken.
 
 ## Done recently (do not re-queue without re-verify)
 
@@ -18,20 +18,23 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - [x] TikTok `user-followers` / `user-followings`: id + secUid + createTime/region/language + total + nextCursor; native flat 1 credit
 - [x] TikTok `search-users` docs example: live profiles (no `exampleSecUid` / filler ids)
 - [x] Price transparency on followers (Apify ~0.4/user) — same honesty as search-users; Ad Library 17/70 already documented as capped
+- [x] TikTok `channel-details` docs: id + secUid + createTime + ttSeller + bioLink.risk (API already had them; snapshot `ok` was missing)
+- [x] TikTok `/live` ≡ `/live-info` (shared runner); streamQualities keep hls/cmaf/dash/lls; offline omits viewerCount
+- [x] TikTok user-followers/followings: keep `region` key (null when omitted); fix filler nextCursor; docs key order
 
 ## Next turn — priority order
 
 | # | Work | Effort | Notes |
 |---|------|--------|-------|
-| 1 | Re-verify TT followers live on prod (signer on) | Low | Confirm id/secUid/total/nextCursor + 1 credit billing |
-| 2 | Remaining TikTok endpoints (trend trio, shop leftovers, …) | Medium | Continue SC-first |
-| 3 | totalVideos / universe size on list endpoints | Low | SC pattern; exists on youtube/comments + playlist + TT followers |
-| 4 | trending-shorts → real trend source (not keyword search) | Medium | Marked broken in YouTube block closeout |
-| 5 | channel-shorts / shorts-comments pricing (20 vs flat 2) | Low | Confirm live billing + docs |
-| 6 | channel-streams Live tab only (not Videos bleed) | Medium | Live-tab gate in code — confirm prod + docs |
-| 7 | comment-replies: nextCursor + hasMore | Medium | Max 500 without cursor loses deep threads |
+| 1 | Re-verify followers + followings + live on same docs stamp after deploy | Low | Must both show 1 credit + region key |
+| 2 | Docs lint: longDescription field names ⊆ example/field list | Low | Catch promise/delivery gaps pre-publish |
+| 3 | Marketing: streamQualities vs SC escaped stream_data | Low | alternatives/scrapecreators |
+| 4 | Remaining TikTok (trend trio, shop leftovers, …) | Medium | |
+| 5 | trending-shorts → real trend source | Medium | |
+| 6 | channel-streams Live tab only | Medium | |
+| 7 | comment-replies: nextCursor + hasMore | Medium | |
 | 8 | Ad Library filters + LinkedIn targeting{} | Medium | |
-| 9 | Remaining platforms (Twitter 5, Threads 5, …) | Medium | Continue SC-first audit |
+| 9 | Remaining platforms (Twitter 5, Threads 5, …) | Medium | |
 
 ## YouTube — open quality notes
 

@@ -638,8 +638,9 @@ async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None
         "externalUrl": external_url,
         "category": safe_str(commerce.get("category")),
         # --- additive identity / vetting / commerce ---
-        "id": safe_str(user.get("id")),
-        "secUid": safe_str(user.get("secUid")),
+        # id + secUid are the resolve contract (search-users FAQ): handles change.
+        "id": safe_str(user.get("id") or user.get("uid") or user.get("user_id")),
+        "secUid": safe_str(user.get("secUid") or user.get("sec_uid")),
         "createTime": _iso(create_unix),
         "createTimeUnix": create_unix,
         "friendCount": _stat(stats_v2, stats, "friendCount"),
@@ -665,6 +666,7 @@ async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None
             )
         ),
         "language": safe_str(user.get("language")),
+        "region": safe_str(user.get("region") or user.get("regionCode")),
         "commentSetting": user.get("commentSetting"),
         "duetSetting": user.get("duetSetting"),
         "stitchSetting": user.get("stitchSetting"),
@@ -2156,8 +2158,9 @@ def _map_connection_user(row: dict[str, Any]) -> dict[str, Any] | None:
         "createTime": _iso(create_unix),
         "createTimeUnix": create_unix,
     }
-    # Keep keys with null counts (SC-style) but drop empty identity / empty strings.
-    for key in ("id", "secUid", "bio", "region", "language", "createTime", "createTimeUnix"):
+    # Keep region/language keys even when null (docs promise + SC-style schema).
+    # Drop only empty identity / optional strings that add noise when absent.
+    for key in ("id", "secUid", "bio", "createTime", "createTimeUnix"):
         if out.get(key) in (None, ""):
             out.pop(key, None)
     return out
@@ -3046,26 +3049,33 @@ def _extract_stream_qualities(live_room: dict[str, Any]) -> list[dict[str, Any]]
             seen.add(key)
             resolution = safe_str(sdk.get("resolution"))
             bitrate = safe_int(sdk.get("vbitrate") if sdk.get("vbitrate") is not None else sdk.get("bitrate"))
+            flv = safe_str(main.get("flv"))
+            hls = safe_str(main.get("hls"))
+            cmaf = safe_str(main.get("cmaf"))
+            # TikTok often puts the MPD under cmaf and leaves dash empty.
+            dash = safe_str(main.get("dash")) or cmaf
+            lls = safe_str(main.get("lls"))
             row: dict[str, Any] = {
                 "quality": q,
                 "codec": codec,
                 "resolution": resolution or None,
                 "bitrate": bitrate,
-                "flv": safe_str(main.get("flv")),
-                "hls": safe_str(main.get("hls")),
-                "dash": safe_str(main.get("dash")),
-                "cmaf": safe_str(main.get("cmaf")),
+                "flv": flv,
+                "hls": hls,
+                "cmaf": cmaf,
+                "dash": dash,
+                "lls": lls,
             }
             rows.append({k: v for k, v in row.items() if v is not None and v != ""})
     return rows
 
 
 def _extract_stream_urls(live_room: dict[str, Any]) -> list[str]:
-    """Flat flv/hls/dash/cmaf URL list (compat); prefer ``streamQualities``."""
+    """Flat flv/hls/dash/cmaf/lls URL list (compat); prefer ``streamQualities``."""
     urls: list[str] = []
     seen: set[str] = set()
     for row in _extract_stream_qualities(live_room):
-        for k in ("flv", "hls", "dash", "cmaf"):
+        for k in ("hls", "cmaf", "dash", "flv", "lls"):  # playable web formats first
             u = safe_str(row.get(k))
             if u and u.startswith("http") and u not in seen:
                 seen.add(u)
@@ -3175,9 +3185,20 @@ async def live_status_native(handle: str) -> dict[str, Any] | None:
     if live_sub is None:
         live_sub = live_room.get("live_sub_only")
     live_sub_only = None if live_sub is None else bool(safe_int(live_sub) if not isinstance(live_sub, bool) else live_sub)
+    paid_raw = live_room.get("paidEvent") if isinstance(live_room.get("paidEvent"), dict) else None
+    paid_event: dict[str, Any] | None = None
+    if paid_raw:
+        paid_event = {
+            "eventId": safe_int(paid_raw.get("event_id") or paid_raw.get("eventId")),
+            "paidType": safe_int(paid_raw.get("paid_type") if paid_raw.get("paid_type") is not None else paid_raw.get("paidType")),
+        }
+        paid_event = {k: v for k, v in paid_event.items() if v is not None}
 
     room: dict[str, Any] = {}
     if live_room:
+        # Concurrent viewers on an ended room are stale — omit when not live.
+        # totalEnterCount stays as last-known session total when TikTok still sends it.
+        viewer_count = safe_int(room_stats.get("userCount") or live_room.get("userCount"))
         room = {
             "id": safe_str(
                 live_room.get("roomId")
@@ -3189,13 +3210,14 @@ async def live_status_native(handle: str) -> dict[str, Any] | None:
             "status": room_status if room_status is not None else status,
             "title": safe_str(live_room.get("title")),
             "startedAt": _iso(live_room.get("startTime")),
-            "viewerCount": safe_int(room_stats.get("userCount") or live_room.get("userCount")),
+            "viewerCount": viewer_count if is_live else None,
             "totalEnterCount": safe_int(room_stats.get("enterCount") or live_room.get("enterCount")),
             "coverUrl": safe_str(live_room.get("coverUrl") or live_room.get("squareCoverImg")),
             "liveSubOnly": live_sub_only,
-            "gameTagId": game_tag if game_tag else None,
-            "hashTagId": hash_tag if hash_tag else None,
+            "gameTagId": game_tag,
+            "hashTagId": hash_tag,
             "liveRoomMode": safe_int(live_room.get("liveRoomMode")),
+            "paidEvent": paid_event or None,
             "streamUrls": stream_urls or None,
             "streamQualities": stream_qualities or None,
             "streams": streams_map,
@@ -3217,7 +3239,6 @@ async def live_status_native(handle: str) -> dict[str, Any] | None:
         "followers": safe_int(api_stats.get("followerCount"))
         or _stat(stats_v2, stats, "followerCount"),
         "following": following,
-        "followingCount": following,
         "verified": (
             bool(api_user.get("verified"))
             if api_user.get("verified") is not None
