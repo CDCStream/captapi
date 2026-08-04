@@ -1081,7 +1081,27 @@ const TWITTER: Spec[] = [
       "bioUrls with expandedUrl (not t.co)",
     ],
   },
-  { slug: "twitter-user-tweets", name: "Twitter/X User Tweets API", shortName: "User Tweets", category: "list", method: "GET", path: "/v1/twitter/user-tweets", credits: 2, tagline: "List recent tweets from a Twitter/X profile — text, author, likes, reposts, hashtags, and media. Flat 2 credits per call.", longDescription: "Pass a profile URL or @handle and get recent public tweets as clean JSON. Each result includes the tweet URL and id, full text, language, publish time, the author (username, display name, followers, verified, avatar), engagement (likes, replies, retweets, quotes when available), reply/retweet flags, hashtags, and media URLs when present. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
+  {
+    slug: "twitter-user-tweets",
+    name: "Twitter/X User Tweets API",
+    shortName: "User Tweets",
+    category: "list",
+    method: "GET",
+    path: "/v1/twitter/user-tweets",
+    credits: 2,
+    tagline:
+      "Most popular public tweets from a Twitter/X profile (~100 cap) — not chronological. Text, author, engagement, hashtags, media. Flat 2 credits.",
+    longDescription:
+      "Pass a profile URL or @handle and get the tweets Twitter's public timeline embed exposes as clean JSON. Important: this is not a chronological or latest feed — Twitter publicly returns on the order of ~100 of the account's most popular posts (same limit ScrapeCreators documents). Do not use this endpoint to detect new tweets. Each result includes the tweet URL and id, full text, language, ISO-8601 publishedAt, author (id when exposed, username, display name, followers, verified, avatar), engagement (likes, replies, retweets, quotes; views and bookmarks when Twitter exposes them — the timeline embed often omits both), isReply / isRetweet / isQuote, conversationId, source (client app) when present, hashtags[] (always present, may be empty), and media[] URLs when present. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
+    delivers: [
+      "Most popular public tweets (~100 Twitter cap) — not latest/chronological",
+      "ISO-8601 publishedAt",
+      "Engagement: likes, replies, retweets, quotes (+ views/bookmarks when exposed)",
+      "hashtags[] + media[] (empty arrays when none)",
+      "conversationId / source / isQuote when Twitter exposes them",
+      "Flat 2 credits per call",
+    ],
+  },
   { slug: "twitter-search", name: "Twitter/X Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/twitter/search", credits: 2, tagline: "Search public tweets on X by keyword — text, author, likes, reposts, hashtags, and media for each matching post. Flat 2 credits per call.", longDescription: "Pass a keyword or phrase and the Twitter/X Search API returns matching public tweets as clean JSON. Each result includes the tweet URL and id, full text, language, publish time, the author (username, display name, followers, verified, avatar), engagement (views, likes, replies, retweets, quotes, bookmarks), reply/retweet flags, hashtags, and media URLs when present. Use it for topic monitoring, brand listening, or content discovery on X. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Public tweets matching your keyword", "Tweet URL, text, language, and publish time", "Author profile — handle, name, followers, verified, avatar", "Views, likes, replies, retweets, quotes, bookmarks, hashtags, and media"] },
   { slug: "twitter-community", name: "Twitter/X Community API", shortName: "Community", category: "details", method: "GET", path: "/v1/twitter/community", credits: 1 , tagline: "Get a Twitter/X Community — name, description, member count, and rules as structured JSON.", longDescription: "Paste a Twitter/X Community URL and get the community metadata as clean JSON: name, description, member count, and related fields when available. Pair with Community Tweets to list posts inside it." },
   { slug: "twitter-community-tweets", name: "Twitter/X Community Tweets API", shortName: "Community Tweets", category: "list", method: "GET", path: "/v1/twitter/community-tweets", credits: 18, creditsPerResult: 0.7, tagline: "List recent posts from a Twitter/X Community — text, author, engagement, and media.", longDescription: "Pass a Community URL or ID and get recent posts as clean JSON. Each result includes tweet text, author, engagement, and media when present. Billed per result — about 0.7 credits each." },
@@ -2941,7 +2961,16 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     cachePWithMaxAge(),
     cacheMaxAgeP(),
   ],
-  "twitter-user-tweets": [up("Twitter/X profile URL or @handle."), lp(20, 200)],
+  "twitter-user-tweets": [
+    up("Twitter/X profile URL or @handle."),
+    {
+      name: "limit",
+      type: "integer",
+      required: false,
+      description:
+        "Max tweets to return (default 20, max 200). Twitter's public surface usually caps around ~100 most popular posts — not chronological latest. Flat 2 credits per call.",
+    },
+  ],
   "twitter-search": [qp("Keyword or phrase to search public tweets on X (min 2 characters)."), lp(20, 200)],
   "twitter-community": [up("X community URL (x.com/i/communities/ID) or community ID.")],
   "twitter-community-tweets": [up("X community URL (x.com/i/communities/ID) or community ID."), lp(25, 200)],
@@ -4870,6 +4899,13 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     language:
       "Interface language used to localize suggestions (from the language query param, e.g. en-US).",
   },
+  "twitter-user-tweets": {
+    publishedAt: "Tweet publish time as ISO-8601 UTC (e.g. 2022-04-28T00:56:58.000Z). Not Twitter's raw created_at string.",
+    hashtags: "Hashtag texts without #. Always an array (empty when the tweet has none).",
+    media: "Media image/video preview URLs when present. Always an array (empty when none).",
+    source: "Client app that posted the tweet (e.g. Twitter for iPhone) when Twitter exposes it — useful for bot signals. Often omitted on the public timeline embed.",
+    conversationId: "Thread root id (conversation_id_str) for grouping replies.",
+  },
   "tiktok-channel-details": {
     likes: "Lifetime likes across the creator's videos (TikTok heartCount).",
     verified: "Whether TikTok shows a verified badge on this profile.",
@@ -5184,6 +5220,24 @@ const VIDEO_DETAILS_USE_CASES: UseCase[] = [
 
 /** Slug-specific use cases when category defaults would mislead. */
 const SLUG_USE_CASES: Record<string, UseCase[]> = {
+  "twitter-user-tweets": [
+    {
+      title: "Top-Post Analysis",
+      desc: "Study an account's highest-engagement public tweets (popularity-ranked, not latest).",
+    },
+    {
+      title: "Brand Safety Sampling",
+      desc: "Review viral posts and media from a profile before a partnership.",
+    },
+    {
+      title: "Engagement Benchmarks",
+      desc: "Compare likes/replies/retweets/quotes across an account's standout posts.",
+    },
+    {
+      title: "Not for New-Tweet Monitoring",
+      desc: "Twitter does not expose a public chronological feed here — use another signal for \"just posted\".",
+    },
+  ],
   "tiktok-audience-demographics": [
     { title: "Geo Targeting", desc: "See which countries commenters engage from before localizing creatives." },
     { title: "Market Sizing", desc: "Estimate which markets show up in a creator's engaged audience." },

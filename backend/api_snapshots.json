@@ -4558,27 +4558,61 @@
       "tweets": [
         {
           "platform": "twitter",
-          "url": "https://x.com/elonmusk/status/1519480761749016577",
-          "id": "1519480761749016577",
-          "text": "Next I’m buying Coca-Cola to put the cocaine back in",
+          "url": "https://x.com/elonmusk/status/2084274899065897011",
+          "id": "2084274899065897011",
+          "text": "Worth noting that any USAID funding that appeared to have the slightest merit whatsoever for helping people in need was moved to the State Department. \n\nOnly the funding where they provided no evidence at all for who would receive the money was stopped.\n\nhttps://t.co/qGUew8TyKD",
           "lang": "en",
-          "publishedAt": "Thu Apr 28 00:56:58 +0000 2022",
+          "publishedAt": "2026-08-03T13:47:14.000Z",
           "author": {
+            "id": "44196397",
             "username": "elonmusk",
             "displayName": "Elon Musk",
             "url": "https://x.com/elonmusk",
-            "followers": 241067682,
+            "followers": 241151429,
             "verified": true,
             "profileImage": "https://pbs.twimg.com/profile_images/2053244804520427520/m8mdWZCG_normal.jpg"
           },
           "engagement": {
-            "likes": 4212271,
-            "replies": 168116,
-            "retweets": 580111,
-            "quotes": 168166
+            "likes": 50220,
+            "replies": 2567,
+            "retweets": 6756,
+            "quotes": 337
           },
           "isReply": false,
-          "isRetweet": false
+          "isRetweet": false,
+          "possiblySensitive": false,
+          "conversationId": "2084274899065897011",
+          "hashtags": [],
+          "media": []
+        },
+        {
+          "platform": "twitter",
+          "url": "https://x.com/elonmusk/status/1519480761749016577",
+          "id": "1519480761749016577",
+          "text": "Next I’m buying Coca-Cola to put the cocaine back in",
+          "lang": "en",
+          "publishedAt": "2022-04-28T00:56:58.000Z",
+          "author": {
+            "id": "44196397",
+            "username": "elonmusk",
+            "displayName": "Elon Musk",
+            "url": "https://x.com/elonmusk",
+            "followers": 241151429,
+            "verified": true,
+            "profileImage": "https://pbs.twimg.com/profile_images/2053244804520427520/m8mdWZCG_normal.jpg"
+          },
+          "engagement": {
+            "likes": 4209995,
+            "replies": 168055,
+            "retweets": 579723,
+            "quotes": 168169
+          },
+          "isReply": false,
+          "isRetweet": false,
+          "possiblySensitive": false,
+          "conversationId": "1519480761749016577",
+          "hashtags": [],
+          "media": []
         },
         {
           "platform": "twitter",
@@ -4586,23 +4620,27 @@
           "id": "1812258574049157405",
           "text": "https://t.co/6eOgN9UdOy",
           "lang": "zxx",
-          "publishedAt": "Sat Jul 13 22:51:28 +0000 2024",
+          "publishedAt": "2024-07-13T22:51:28.000Z",
           "author": {
+            "id": "44196397",
             "username": "elonmusk",
             "displayName": "Elon Musk",
             "url": "https://x.com/elonmusk",
-            "followers": 241067682,
+            "followers": 241151429,
             "verified": true,
             "profileImage": "https://pbs.twimg.com/profile_images/2053244804520427520/m8mdWZCG_normal.jpg"
           },
           "engagement": {
-            "likes": 3186497,
-            "replies": 69142,
-            "retweets": 373339,
-            "quotes": 40417
+            "likes": 3184564,
+            "replies": 69129,
+            "retweets": 372783,
+            "quotes": 40415
           },
           "isReply": false,
           "isRetweet": false,
+          "possiblySensitive": false,
+          "conversationId": "1812258574049157405",
+          "hashtags": [],
           "media": [
             "https://pbs.twimg.com/media/GSZvkScbIAAwHQi.jpg"
           ]
@@ -4613,23 +4651,28 @@
           "id": "1518623997054918657",
           "text": "I hope that even my worst critics remain on Twitter, because that is what free speech means",
           "lang": "en",
-          "publishedAt": "Mon Apr 25 16:12:30 +0000 2022",
+          "publishedAt": "2022-04-25T16:12:30.000Z",
           "author": {
+            "id": "44196397",
             "username": "elonmusk",
             "displayName": "Elon Musk",
             "url": "https://x.com/elonmusk",
-            "followers": 241067682,
+            "followers": 241151429,
             "verified": true,
             "profileImage": "https://pbs.twimg.com/profile_images/2053244804520427520/m8mdWZCG_normal.jpg"
           },
           "engagement": {
-            "likes": 2852112,
-            "replies": 153311,
-            "retweets": 315117,
-            "quotes": 68462
+            "likes": 2850754,
+            "replies": 153260,
+            "retweets": 314887,
+            "quotes": 68461
           },
           "isReply": false,
-          "isRetweet": false
+          "isRetweet": false,
+          "possiblySensitive": false,
+          "conversationId": "1518623997054918657",
+          "hashtags": [],
+          "media": []
         },
         {
           "platform": "twitter",
@@ -4637,50 +4680,30 @@
           "id": "1854026234339938528",
           "text": "🇺🇸🇺🇸The future is gonna be so 🔥 🇺🇸🇺🇸 https://t.co/x56cqb6oT5",
           "lang": "en",
-          "publishedAt": "Wed Nov 06 05:01:15 +0000 2024",
+          "publishedAt": "2024-11-06T05:01:15.000Z",
           "author": {
+            "id": "44196397",
             "username": "elonmusk",
             "displayName": "Elon Musk",
             "url": "https://x.com/elonmusk",
-            "followers": 241067682,
+            "followers": 241151429,
             "verified": true,
             "profileImage": "https://pbs.twimg.com/profile_images/2053244804520427520/m8mdWZCG_normal.jpg"
           },
           "engagement": {
-            "likes": 2494169,
-            "replies": 56899,
-            "retweets": 194031,
+            "likes": 2492613,
+            "replies": 56889,
+            "retweets": 193730,
             "quotes": 12167
           },
           "isReply": false,
           "isRetweet": false,
+          "possiblySensitive": false,
+          "conversationId": "1854026234339938528",
+          "hashtags": [],
           "media": [
             "https://pbs.twimg.com/media/GbrTB8GXEAYrk2N.jpg"
           ]
-        },
-        {
-          "platform": "twitter",
-          "url": "https://x.com/elonmusk/status/1519495072802390016",
-          "id": "1519495072802390016",
-          "text": "Let’s make Twitter maximum fun!",
-          "lang": "en",
-          "publishedAt": "Thu Apr 28 01:53:50 +0000 2022",
-          "author": {
-            "username": "elonmusk",
-            "displayName": "Elon Musk",
-            "url": "https://x.com/elonmusk",
-            "followers": 241067682,
-            "verified": true,
-            "profileImage": "https://pbs.twimg.com/profile_images/2053244804520427520/m8mdWZCG_normal.jpg"
-          },
-          "engagement": {
-            "likes": 2331941,
-            "replies": 99683,
-            "retweets": 164577,
-            "quotes": 33693
-          },
-          "isReply": false,
-          "isRetweet": false
         }
       ]
     }

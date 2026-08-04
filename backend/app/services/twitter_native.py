@@ -419,7 +419,11 @@ def parse_timeline_html(html: str) -> list[dict[str, Any]]:
 
 
 async def user_tweets(handle: str, limit: int = 20) -> list[dict[str, Any]] | None:
-    """Recent public tweets via syndication timeline embed (direct → Decodo)."""
+    """Popular public tweets via syndication timeline embed (direct → Decodo).
+
+    Twitter's public ``timeline-profile`` surface returns on the order of ~100
+    high-engagement posts — **not** a chronological / latest timeline.
+    """
     raw = _normalize_handle(handle)
     if not raw:
         return None

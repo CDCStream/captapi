@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
     category: "fix",
+    title: "Twitter user-tweets: popular-not-latest warning + ISO publishedAt",
+    description:
+      "Docs said \"recent tweets\" while Twitter's public timeline embed returns ~100 most popular posts (not chronological) — same limit ScrapeCreators warns about. Copy, OpenAPI summary, use cases, and limit text now say so explicitly (not for new-tweet monitoring). publishedAt is ISO-8601 UTC (no raw \"Thu Apr 28…\"). hashtags[]/media[] always present; conversationId, source, isQuote, author.id, and engagement.views/bookmarks when the upstream row exposes them (timeline embed often omits views/source).",
+    items: [
+      "Docs: most popular ~100 — not chronological latest",
+      "publishedAt ISO-8601 UTC",
+      "hashtags[] + media[] always emitted",
+      "conversationId / source / isQuote / author.id when exposed",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
     title: "TikTok comment-replies: authorId / authorSecUid / commentLanguage in docs + shape",
     description:
       "Docs promised the same identity fields as /comments, but the example was an old Apify-shaped payload without authorId/authorSecUid/commentLanguage. Native _map_reply already mapped them; we now keep those keys even when null, Apify fallback keeps them too, cache bumped to v4, and the example was refreshed from a live reply page (distinct authorIds + commentLanguage).",

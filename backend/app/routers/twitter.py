@@ -84,6 +84,7 @@ def _author(a: dict[str, Any]) -> dict[str, Any]:
         a.get("verified"),
     )
     return {
+        "id": safe_str(a.get("id_str") or a.get("rest_id") or a.get("id") or a.get("userId")),
         "username": safe_str(username),
         "displayName": safe_str(a.get("name") or a.get("fullName")),
         "url": safe_str(a.get("url"))
@@ -170,6 +171,9 @@ def _raw_hashtags(item: dict[str, Any]) -> list[Any]:
     return safe_list(item.get("hashtags") or entities.get("hashtags"))
 
 
+_HASHTAG_FROM_TEXT = re.compile(r"(?<!\w)#([A-Za-z0-9_]+)")
+
+
 def _tweet_hashtags(item: dict[str, Any]) -> list[str]:
     raw = _raw_hashtags(item)
     if not raw:
@@ -177,10 +181,28 @@ def _tweet_hashtags(item: dict[str, Any]) -> list[str]:
         if nested:
             raw = _raw_hashtags(nested)
     tags: list[str] = []
+    seen: set[str] = set()
     for h in raw:
         tag = (h.get("text") or h.get("tag")) if isinstance(h, dict) else safe_str(h)
-        if tag:
-            tags.append(tag)
+        if not tag:
+            continue
+        key = tag.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        tags.append(tag.lstrip("#"))
+    if tags:
+        return tags
+    # Syndication timeline often omits entities.hashtags — recover from text.
+    text = safe_str(
+        item.get("fullText") or item.get("text") or item.get("full_text")
+    ) or ""
+    for tag in _HASHTAG_FROM_TEXT.findall(text):
+        key = tag.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        tags.append(tag)
     return tags
 
 
@@ -233,6 +255,15 @@ def _tweet_media(item: dict[str, Any]) -> list[str]:
     return urls
 
 
+def _strip_html_source(raw: Any) -> str | None:
+    """``<a href=...>Twitter for iPhone</a>`` → ``Twitter for iPhone``."""
+    text = safe_str(raw)
+    if not text:
+        return None
+    cleaned = re.sub(r"<[^>]+>", "", text).strip()
+    return cleaned or None
+
+
 def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
     author = item.get("author") or item.get("user") or {}
     if not author and item.get("username"):
@@ -252,20 +283,33 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
         tweet_id = item.get("id_str") or item.get("id")
         if username and tweet_id:
             url = f"https://x.com/{username}/status/{tweet_id}"
-    # Omit null engagement / author fields. Tweet-result syndication often lacks
-    # views/retweets/quotes/bookmarks; timeline-profile usually has likes/replies/
-    # retweets/quotes + author followers. Keep 0 when Apify provides it.
-    return strip_empty({
+    published_raw = first_present(item.get("createdAt"), item.get("created_at"))
+    published = native._twitter_created_at_iso(published_raw) or safe_str(published_raw)
+    hashtags = _tweet_hashtags(item)
+    media = _tweet_media(item)
+    is_quote = first_present(
+        _as_bool(item.get("isQuote")),
+        _as_bool(item.get("is_quote_status")),
+        _as_bool(item.get("isQuoteStatus")),
+    )
+    possibly_sensitive = first_present(
+        _as_bool(item.get("possiblySensitive")),
+        _as_bool(item.get("possibly_sensitive")),
+    )
+    # Omit null engagement / author fields. Timeline syndication usually has
+    # likes/replies/retweets/quotes; views/bookmarks/source often only on GraphQL
+    # rows (search/community). Keep 0 when a source provides it.
+    out = strip_empty({
         "platform": "twitter",
         "url": url,
         "id": safe_str(item.get("id_str") or item.get("id") or item.get("tweetId")),
         "text": safe_str(item.get("fullText") or item.get("text") or item.get("full_text")),
         "lang": safe_str(item.get("lang")),
-        "publishedAt": safe_str(item.get("createdAt") or item.get("created_at")),
-        "author": _author(author),
+        "publishedAt": published,
+        "author": _author(author) if isinstance(author, dict) else None,
         "engagement": {
-            # Community scraper (badger/twitter-communities-scraper) uses snake_case
-            # view_count / favorite_count; timeline actors use camelCase viewCount.
+            # Community scraper uses snake_case view_count; GQL uses view_count;
+            # timeline actors use camelCase viewCount.
             "views": safe_int(
                 first_present(item.get("viewCount"), item.get("views"), item.get("view_count"))
             ),
@@ -285,9 +329,19 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
         },
         "isReply": _tweet_is_reply(item),
         "isRetweet": _tweet_is_retweet(item),
-        "hashtags": _tweet_hashtags(item),
-        "media": _tweet_media(item),
+        "isQuote": is_quote,
+        "possiblySensitive": possibly_sensitive,
+        "conversationId": safe_str(
+            item.get("conversationId")
+            or item.get("conversation_id_str")
+            or item.get("conversation_id")
+        ),
+        "source": _strip_html_source(item.get("source")),
     })
+    # Always emit list keys so docs / clients see the contract (empty ≠ omitted).
+    out["hashtags"] = hashtags
+    out["media"] = media
+    return out
 
 
 def _entities_website(item: dict[str, Any]) -> str | None:
@@ -608,10 +662,27 @@ async def twitter_profile(
         return ApiResponse(data=data)
 
 
-@router.get("/user-tweets", summary="List recent tweets for a profile")
+@router.get(
+    "/user-tweets",
+    summary="Most popular public tweets for a profile (not chronological)",
+    description=(
+        "Returns the tweets Twitter's public timeline embed exposes for a "
+        "profile — typically up to ~100 of the account's most popular posts, "
+        "not a chronological / latest feed. Do not use this endpoint to detect "
+        "new tweets. publishedAt is ISO-8601 UTC. Flat 2 credits per call."
+    ),
+)
 async def twitter_user_tweets(
     url: str = Query(..., description="Profile URL or @handle"),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(
+        20,
+        ge=1,
+        le=200,
+        description=(
+            "Max tweets to return (default 20, max 200). Twitter's public "
+            "surface usually caps around ~100 popular posts — not latest."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -624,7 +695,7 @@ async def twitter_user_tweets(
         base_credits=CREDIT_TWEET_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Public syndication timeline embed (~20 recent posts, native-only).
+            # Public syndication timeline embed — popular posts (~100), not latest.
             native_items = await native.user_tweets(handle, limit=limit)
             if native_items:
                 ctx["source"] = "direct"
@@ -634,7 +705,7 @@ async def twitter_user_tweets(
 
         data = await cached_or_run(
             endpoint="twitter.user-tweets",
-            params={"handle": handle, "limit": limit, "v": 3},
+            params={"handle": handle, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

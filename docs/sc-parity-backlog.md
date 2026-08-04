@@ -1,6 +1,6 @@
 ﻿# SC parity backlog (Captapi)
 
-Last updated: 2026-08-04 (comment-replies authorId parity + TikTok block close).
+Last updated: 2026-08-04 (Twitter user-tweets popular-not-latest + ISO dates).
 
 Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` → `api-examples.generated.ts`) — ship code + refresh snapshot **with `ok: true`** or `gen_examples.py` skips the slug and the page looks broken.
 
@@ -26,16 +26,17 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - [x] Field-doc slug overrides: profile-region `videos`/`likes`/`verified`/`region`; search-suggestions `region`/`language` (market, not creator)
 - [x] search-suggestions billing copy → flat 2 credits (aligned with param table + FAQ)
 - [x] TikTok `comment-replies`: authorId / authorSecUid / commentLanguage (same contract as comments; docs example was stale Apify shape)
+- [x] Twitter `user-tweets`: docs say most popular ~100 (not recent/latest); ISO `publishedAt`; hashtags/media arrays; conversationId/source/isQuote/author.id; views/bookmarks when exposed
 
-## Next turn — priority order (Twitter block + leftover TikTok)
+## Next turn — priority order (Twitter block continued)
 
 | # | Work | Effort | Notes |
 |---|------|--------|-------|
-| 1 | Deploy stamp re-verify: comment-replies + profile-region + channel-posts videoUrl | Low | Close “stale SSG” false failures |
-| 2 | Vaat/teslim lint (longDescription ⊆ example keys) | Low | 5 cases — automate |
-| 3 | Twitter user-tweets: SC ~100 popular-not-chrono warning + source/bookmarks | Med | Block opening |
-| 4 | `sort_by` + cursor type consistency notes | Medium | |
-| 5 | Creative Center: searchVolume + popular-* leftovers | Medium | |
+| 1 | Deploy stamp re-verify user-tweets copy + ISO dates | Low | |
+| 2 | Twitter: GraphQL path for views/bookmarks/source on user-tweets (syndication omits) | Med | Real metric gap |
+| 3 | Twitter: sort=latest if a public chronological surface exists | Med | Monitoring use case |
+| 4 | Vaat/teslim lint (longDescription ⊆ example keys) | Low | Automate |
+| 5 | Remaining Twitter endpoints (profile, search, community, …) | Med | Continue SC audit |
 | 6 | Ad Library filters + price | Medium | |
 | 7 | Remaining platforms | Medium | |
 
