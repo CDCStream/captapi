@@ -1,6 +1,6 @@
 ﻿# SC parity backlog (Captapi)
 
-Last updated: 2026-08-04 (Twitter profile displayName/verified + tweet-details sibling hydrate).
+Last updated: 2026-08-04 (Twitter community-tweets pricing + meta + cURL URL).
 
 Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` → `api-examples.generated.ts`) — ship code + refresh snapshot **with `ok: true`** or `gen_examples.py` skips the slug and the page looks broken.
 
@@ -29,17 +29,19 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - [x] Twitter `user-tweets`: docs say most popular ~100 (not recent/latest); ISO `publishedAt`; hashtags/media arrays; conversationId/source/isQuote/author.id; views/bookmarks when exposed
 - [x] Twitter `profile`: `displayName` (+ `name` BC); `verified` always present; docs delivers no longer generic "when exposed"
 - [x] Twitter `tweet-details`: hydrate retweets/quotes/author.followers from user-tweets timeline (or profile fallback); `isRetweet` in example
+- [x] Twitter shared tweet contract: `engagement` always 6 keys; ISO `publishedAt` on search + user-tweets + tweet-details; `hashtags[]` on search; TweetResultByRestId path for details
+- [x] Twitter `community-tweets`: flat 2 native / ~0.7 Apify; `url`+`communityName`+`memberCount`; cURL uses community URL; ISO+6-key tweets
 
 ## Next turn — priority order (Twitter block continued)
 
 | # | Work | Effort | Notes |
 |---|------|--------|-------|
-| 1 | Deploy stamp re-verify profile `verified`/`displayName` + tweet-details engagement | Low | Footer stamp first |
-| 2 | Twitter: GraphQL path for views/bookmarks/source on user-tweets + tweet-details | Med | Syndication / popular-timeline still omit |
-| 3 | Twitter: sort=latest if a public chronological surface exists | Med | Monitoring use case |
-| 4 | Vaat/teslim lint (longDescription ⊆ example keys) — 7+ cases | Low | Automate |
-| 5 | Remaining Twitter (search date ISO, community, …) | Med | Continue SC audit |
-| 6 | Ad Library filters + pricing | Medium | |
+| 1 | Deploy stamp re-verify community-tweets cURL + pricing copy + meta fields | Low | Footer stamp first |
+| 2 | Price-transparency pass: other 18/70/20/17 credit families (same search-users sentence) | Low | Ad Library, shorts-comments, LinkedIn ad-details |
+| 3 | Twitter search + community-tweets: cursor + sort + since/until | Med | Brand listening / monitoring |
+| 4 | User-tweets GraphQL path so views/bookmarks fill (not just null keys) | Med | Syndication omits |
+| 5 | `professional.category` + `parody_commentary_fan_label` | Low | Brand safety |
+| 6 | Vaat/teslim lint (request≠response + longDescription ⊆ example keys) | Low | Automate |
 | 7 | Remaining platforms | Medium | |
 
 ## YouTube — open quality notes

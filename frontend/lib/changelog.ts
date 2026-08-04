@@ -51,6 +51,32 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
     category: "fix",
+    title: "Twitter community-tweets: flat 2 native, community meta, fixed cURL URL",
+    description:
+      "community-tweets was billed ~0.7/tweet (18 credits at default limit) even on the free guest GraphQL path — same surface as search (flat 2). Native path is now flat 2; Apify fallback stays ~0.7/tweet (min 2), documented like search-users. Response adds url + communityName + memberCount. Docs/cURL no longer use a tweet/status URL (request≠response); Try-it uses x.com/i/communities/…. Tweets use the shared ISO + 6-key engagement contract. Cache v5.",
+    items: [
+      "Flat 2 credits native; ~0.7/tweet Apify fallback (min 2)",
+      "communityName + memberCount + community url in response",
+      "cURL/Try-it use community URL (not a status URL)",
+      "ISO publishedAt + engagement 6-key shape on tweets[]",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
+    title: "Twitter tweet contract: one engagement shape + ISO dates everywhere",
+    description:
+      "search / user-tweets / tweet-details now share one mapper contract: engagement always emits views,likes,replies,retweets,quotes,bookmarks (null when the upstream surface omits a metric), publishedAt is ISO-8601 UTC on all three, and hashtags[] is always present. Search docs example was still shipping raw Twitter dates — refreshed. tweet-details tries guest GraphQL TweetResultByRestId (same surface as search) before popular-timeline hydrate. Cache bumps: search v4, user-tweets v5, tweet-details v6.",
+    items: [
+      "Shared engagement{} 6-key shape across search / user-tweets / tweet-details",
+      "ISO publishedAt on search (was raw RFC2822 in docs)",
+      "hashtags[] always present on search results",
+      "TweetResultByRestId path for views/bookmarks when guest GraphQL works",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
     title: "Twitter profile + tweet-details: sibling field parity",
     description:
       "twitter/profile already returned verified from GraphQL; docs example now also emits displayName (name kept for BC) so cross-platform clients use one key. tweet-details was thinner than user-tweets because syndication tweet-result omits retweet_count/quote_count/followers — we now hydrate those from the author's popular timeline (same surface as user-tweets) when the id matches, else profile for author.followers. Cache bumps: profile v8, tweet-details v5.",

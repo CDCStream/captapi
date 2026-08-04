@@ -1071,11 +1071,11 @@ const TWITTER: Spec[] = [
     tagline:
       "One tweet as JSON — text, author (followers), likes/replies/retweets/quotes, media, ISO publishedAt.",
     longDescription:
-      "Paste a tweet URL and get clean JSON: text, language, ISO-8601 publishedAt, author (username, displayName, verified, profileImage, followers when exposed), engagement (likes, replies, retweets, quotes; views and bookmarks when Twitter exposes them), isReply / isRetweet, hashtags[], and media[] URLs. Retweets/quotes/author.followers are filled from the same public timeline surface as User Tweets when that tweet appears there; otherwise those keys may be omitted. Flat 1 credit per call.",
+      "Paste a tweet URL and get clean JSON using the same tweet contract as Search and User Tweets: text, language, ISO-8601 publishedAt, author (username, displayName, verified, profileImage, followers when exposed), engagement always shaped as {views,likes,replies,retweets,quotes,bookmarks} (null when Twitter omits a metric), isReply / isRetweet, hashtags[], and media[]. Guest GraphQL TweetResultByRestId fills views/bookmarks when available; otherwise we hydrate retweets/quotes/followers from the popular timeline / profile. Flat 1 credit per call.",
     delivers: [
-      "Text, author, media[], hashtags[], ISO publishedAt",
-      "Engagement: likes, replies, retweets, quotes when exposed",
-      "author.followers + isRetweet when exposed",
+      "Same engagement{} shape as search (6 keys; null when omitted)",
+      "ISO-8601 publishedAt",
+      "author.followers + isRetweet / hashtags[] / media[]",
       "Flat 1 credit per call",
     ],
   },
@@ -1110,19 +1110,74 @@ const TWITTER: Spec[] = [
     tagline:
       "Most popular public tweets from a Twitter/X profile (~100 cap) — not chronological. Text, author, engagement, hashtags, media. Flat 2 credits.",
     longDescription:
-      "Pass a profile URL or @handle and get the tweets Twitter's public timeline embed exposes as clean JSON. Important: this is not a chronological or latest feed — Twitter publicly returns on the order of ~100 of the account's most popular posts (same limit ScrapeCreators documents). Do not use this endpoint to detect new tweets. Each result includes the tweet URL and id, full text, language, ISO-8601 publishedAt, author (id when exposed, username, display name, followers, verified, avatar), engagement (likes, replies, retweets, quotes; views and bookmarks when Twitter exposes them — the timeline embed often omits both), isReply / isRetweet / isQuote, conversationId, source (client app) when present, hashtags[] (always present, may be empty), and media[] URLs when present. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
+      "Pass a profile URL or @handle and get the tweets Twitter's public timeline embed exposes as clean JSON. Important: this is not a chronological or latest feed — Twitter publicly returns on the order of ~100 of the account's most popular posts (same limit ScrapeCreators documents). Do not use this endpoint to detect new tweets. Each result uses the same tweet contract as Search / Tweet Details: ISO-8601 publishedAt, author (id when exposed, username, displayName, followers, verified, avatar), engagement always shaped as {views,likes,replies,retweets,quotes,bookmarks} (the timeline embed usually leaves views and bookmarks null), isReply / isRetweet / isQuote, conversationId, source when present, hashtags[] (always present, may be empty), and media[]. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
     delivers: [
       "Most popular public tweets (~100 Twitter cap) — not latest/chronological",
-      "ISO-8601 publishedAt",
-      "Engagement: likes, replies, retweets, quotes (+ views/bookmarks when exposed)",
+      "ISO-8601 publishedAt (same parser as tweet-details)",
+      "engagement{} with 6 keys (views/bookmarks often null on this surface)",
       "hashtags[] + media[] (empty arrays when none)",
       "conversationId / source / isQuote when Twitter exposes them",
       "Flat 2 credits per call",
     ],
   },
-  { slug: "twitter-search", name: "Twitter/X Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/twitter/search", credits: 2, tagline: "Search public tweets on X by keyword — text, author, likes, reposts, hashtags, and media for each matching post. Flat 2 credits per call.", longDescription: "Pass a keyword or phrase and the Twitter/X Search API returns matching public tweets as clean JSON. Each result includes the tweet URL and id, full text, language, publish time, the author (username, display name, followers, verified, avatar), engagement (views, likes, replies, retweets, quotes, bookmarks), reply/retweet flags, hashtags, and media URLs when present. Use it for topic monitoring, brand listening, or content discovery on X. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Public tweets matching your keyword", "Tweet URL, text, language, and publish time", "Author profile — handle, name, followers, verified, avatar", "Views, likes, replies, retweets, quotes, bookmarks, hashtags, and media"] },
-  { slug: "twitter-community", name: "Twitter/X Community API", shortName: "Community", category: "details", method: "GET", path: "/v1/twitter/community", credits: 1 , tagline: "Get a Twitter/X Community — name, description, member count, and rules as structured JSON.", longDescription: "Paste a Twitter/X Community URL and get the community metadata as clean JSON: name, description, member count, and related fields when available. Pair with Community Tweets to list posts inside it." },
-  { slug: "twitter-community-tweets", name: "Twitter/X Community Tweets API", shortName: "Community Tweets", category: "list", method: "GET", path: "/v1/twitter/community-tweets", credits: 18, creditsPerResult: 0.7, tagline: "List recent posts from a Twitter/X Community — text, author, engagement, and media.", longDescription: "Pass a Community URL or ID and get recent posts as clean JSON. Each result includes tweet text, author, engagement, and media when present. Billed per result — about 0.7 credits each." },
+  {
+    slug: "twitter-search",
+    name: "Twitter/X Search API",
+    shortName: "Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/twitter/search",
+    credits: 2,
+    tagline:
+      "Search public tweets on X — SC has no search endpoint. Six engagement metrics + ISO dates. Flat 2 credits.",
+    longDescription:
+      "Pass a keyword or phrase and get matching public tweets as clean JSON. Captapi advantage: ScrapeCreators does not ship a Twitter search endpoint. Each result uses the shared tweet contract: ISO-8601 publishedAt, author (username, displayName, followers, verified, avatar), engagement{views,likes,replies,retweets,quotes,bookmarks}, isReply / isRetweet, hashtags[] (always present), and media[]. Ideal for topic monitoring and brand listening on the first page of Top results (limit up to 200; cursor / since-until filters are on the backlog). Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
+    delivers: [
+      "No SC equivalent — Captapi-only Twitter search",
+      "ISO-8601 publishedAt + engagement 6-key shape",
+      "hashtags[] always present (empty when none)",
+      "Flat 2 credits per call",
+    ],
+  },
+  {
+    slug: "twitter-community",
+    name: "Twitter/X Community API",
+    shortName: "Community",
+    category: "details",
+    method: "GET",
+    path: "/v1/twitter/community",
+    credits: 1,
+    tagline:
+      "X Community metadata — name, description, memberCount, joinPolicy, rules[], creator.",
+    longDescription:
+      "Paste an X community URL (x.com/i/communities/ID) or community ID — not a tweet URL — and get clean JSON: name, description, memberCount, createdAt, creator, joinPolicy, isNsfw, bannerImage, and rules[{name,description}]. Pair with Community Tweets to list posts. Flat 1 credit.",
+    delivers: [
+      "name + memberCount + joinPolicy",
+      "rules[] with name and description",
+      "creator handle + bannerImage when exposed",
+      "Flat 1 credit per call",
+    ],
+  },
+  {
+    slug: "twitter-community-tweets",
+    name: "Twitter/X Community Tweets API",
+    shortName: "Community Tweets",
+    category: "list",
+    method: "GET",
+    path: "/v1/twitter/community-tweets",
+    credits: 2,
+    creditsPerResult: 0.7,
+    tagline:
+      "Posts in an X Community — same 6-metric tweet shape as search. Flat 2 native; ~0.7/tweet on Apify fallback.",
+    longDescription:
+      "Pass an X community URL (x.com/i/communities/ID) or community ID — not a tweet/status URL — and get recent posts as clean JSON. Response includes url + communityId + communityName + memberCount (so you often skip a second Community call) plus tweets[] using the shared contract: ISO-8601 publishedAt, engagement{views,likes,replies,retweets,quotes,bookmarks}, hashtags[], media[]. Flat 2 credits on the native GraphQL path (same guest surface as Search); Apify fallback bills about 0.7 credits per returned tweet (min 2). Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "communityName + memberCount + community url/id",
+      "Same engagement 6-key shape + ISO publishedAt as search",
+      "Flat 2 credits native; ~0.7/tweet Apify fallback (min 2)",
+      "hashtags[] + media[] always present on each tweet",
+    ],
+  },
 ];
 
 const REDDIT: Spec[] = [
@@ -2990,8 +3045,13 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     },
   ],
   "twitter-search": [qp("Keyword or phrase to search public tweets on X (min 2 characters)."), lp(20, 200)],
-  "twitter-community": [up("X community URL (x.com/i/communities/ID) or community ID.")],
-  "twitter-community-tweets": [up("X community URL (x.com/i/communities/ID) or community ID."), lp(25, 200)],
+  "twitter-community": [
+    up("X community URL (x.com/i/communities/ID) or community ID — not a tweet/status URL."),
+  ],
+  "twitter-community-tweets": [
+    up("X community URL (x.com/i/communities/ID) or community ID — not a tweet/status URL."),
+    lp(25, 200),
+  ],
   // Reddit
   "reddit-subreddit-posts": [
     up("Subreddit URL, r/name, or bare name, e.g. r/technology."),
@@ -3850,6 +3910,10 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       const d = p.description.toLowerCase();
       const creatorPagePlatforms: PlatformId[] = ["komi", "pillar", "linkbio", "linkme"];
 
+      // X Communities — never fall through to the platform tweet exampleUrl.
+      if (ep.slug === "twitter-community" || ep.slug === "twitter-community-tweets") {
+        return "https://x.com/i/communities/1493446837214187523";
+      }
       if (ep.slug === "facebook-marketplace-item" || d.includes("marketplace item"))
         return "https://www.facebook.com/marketplace/item/2228870800986975/";
       if (d.includes("playlist"))

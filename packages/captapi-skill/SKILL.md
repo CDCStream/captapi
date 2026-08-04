@@ -184,7 +184,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `twitter_user_tweets` | `/v1/twitter/user-tweets` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `twitter_search` | `/v1/twitter/search` | `q` (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `twitter_community` | `/v1/twitter/community` | `url` (string), `cache`? (boolean) | 1 |
-| `twitter_community_tweets` | `/v1/twitter/community-tweets` | `url` (string), `limit`? (number), `cache`? (boolean) | 18 |
+| `twitter_community_tweets` | `/v1/twitter/community-tweets` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
 
 ### Reddit
 

@@ -58,11 +58,20 @@ _USER_META_RE = re.compile(
     r'operationType:"query",metadata:\{featureSwitches:(\[[^\]]+\])'
     r'(?:,fieldToggles:(\[[^\]]+\]))?'
 )
+_TWEET_RESULT_META_RE = re.compile(
+    r'queryId:"([A-Za-z0-9_-]+)",operationName:"TweetResultByRestId",'
+    r'operationType:"query",metadata:\{featureSwitches:(\[[^\]]+\])'
+)
 _FALLBACK_SEARCH_QID = "BGd0T_j7oVwlW5U79tO_0A"
 # Rotating; discovery from main.js is preferred. Keep short working chain.
 _FALLBACK_USER_QIDS = (
     "Gb-d6r0vxPOADdG62OEBpQ",
     "jUKA--0QkqGIFhmfRZdWrQ",
+)
+# Guest TweetResultByRestId — same engagement surface as SearchTimeline.
+_FALLBACK_TWEET_RESULT_QIDS = (
+    "OoJd6A50cv8GsifjoOHGfg",
+    "xOh7XllFWb6cIwINvgWa_A",
 )
 _SEARCH_META_TTL_S = 6 * 3600
 _search_meta_cache: dict[str, Any] = {"qid": None, "features": None, "fetched_at": 0.0}
@@ -72,6 +81,7 @@ _user_meta_cache: dict[str, Any] = {
     "field_toggles": None,
     "fetched_at": 0.0,
 }
+_tweet_result_meta_cache: dict[str, Any] = {"qid": None, "features": None, "fetched_at": 0.0}
 _USER_PROFILE_FEATURE_DEFAULTS = {
     "hidden_profile_subscriptions_enabled": True,
     "profile_label_improvements_pcf_label_in_post_enabled": True,
@@ -181,6 +191,123 @@ async def tweet_result(tweet_id: str, lang: str = "en") -> dict[str, Any] | None
     except ValueError:
         return None
     return data if isinstance(data, dict) and data.get("text") is not None else None
+
+
+async def _load_tweet_result_meta(
+    client: httpx.AsyncClient, *, force: bool = False
+) -> tuple[str, dict[str, bool]]:
+    now = time.time()
+    cached_qid = _tweet_result_meta_cache.get("qid")
+    cached_features = _tweet_result_meta_cache.get("features")
+    fetched_at = float(_tweet_result_meta_cache.get("fetched_at") or 0)
+    if (
+        not force
+        and cached_qid
+        and isinstance(cached_features, dict)
+        and now - fetched_at < _SEARCH_META_TTL_S
+    ):
+        return str(cached_qid), cached_features
+
+    qid = _FALLBACK_TWEET_RESULT_QIDS[0]
+    # Reuse SearchTimeline feature defaults — same guest engagement surface.
+    _, features = await _load_search_meta(client, force=force)
+    main_url = await _resolve_main_js(client)
+    if main_url:
+        try:
+            resp = await client.get(main_url)
+            if resp.status_code == 200 and resp.text:
+                m = _TWEET_RESULT_META_RE.search(resp.text)
+                if m:
+                    qid = m.group(1)
+                    try:
+                        switches = json.loads(m.group(2))
+                    except ValueError:
+                        switches = []
+                    if isinstance(switches, list):
+                        features = _features_from_switches(
+                            [s for s in switches if isinstance(s, str)]
+                        )
+        except httpx.HTTPError as exc:
+            log.info("twitter_tweet_result_main_js_fail", error=str(exc))
+
+    _tweet_result_meta_cache["qid"] = qid
+    _tweet_result_meta_cache["features"] = features
+    _tweet_result_meta_cache["fetched_at"] = now
+    return qid, features
+
+
+async def tweet_by_rest_id(tweet_id: str) -> dict[str, Any] | None:
+    """Guest GraphQL ``TweetResultByRestId`` — likes/replies/retweets/quotes/views/bookmarks."""
+    tid = (tweet_id or "").strip()
+    if not tid.isdigit():
+        return None
+    referer = f"https://x.com/i/status/{tid}"
+    try:
+        async with httpx.AsyncClient(timeout=25, headers=_UA, follow_redirects=True) as client:
+            guest = await _guest_token(client)
+            if not guest:
+                return None
+            guest_token, cookie = guest
+            qid, features = await _load_tweet_result_meta(client)
+            qids = [qid, *[q for q in _FALLBACK_TWEET_RESULT_QIDS if q != qid]]
+            variables = {
+                "tweetId": tid,
+                "withCommunity": False,
+                "includePromotedContent": False,
+                "withVoice": False,
+            }
+            field_toggles = {
+                "withArticlePlainText": False,
+                "withGrokAnalyze": False,
+            }
+            for candidate in qids:
+                status, payload = await _gql_get(
+                    client,
+                    operation="TweetResultByRestId",
+                    qid=candidate,
+                    variables=variables,
+                    features=features,
+                    field_toggles=field_toggles,
+                    guest_token=guest_token,
+                    cookie=cookie,
+                    referer=referer,
+                )
+                if status == 404:
+                    continue
+                if not payload:
+                    continue
+                result = (((payload.get("data") or {}).get("tweetResult") or {}).get("result"))
+                tweet = _gql_result_to_tweet(result) if isinstance(result, dict) else None
+                if tweet:
+                    log.info(
+                        "twitter_tweet_gql_ok",
+                        tweet_id=tid,
+                        qid=candidate,
+                        views=tweet.get("view_count"),
+                        bookmarks=tweet.get("bookmark_count"),
+                    )
+                    return tweet
+            # One forced meta refresh if every candidate missed.
+            qid, features = await _load_tweet_result_meta(client, force=True)
+            status, payload = await _gql_get(
+                client,
+                operation="TweetResultByRestId",
+                qid=qid,
+                variables=variables,
+                features=features,
+                field_toggles=field_toggles,
+                guest_token=guest_token,
+                cookie=cookie,
+                referer=referer,
+            )
+            if payload:
+                result = (((payload.get("data") or {}).get("tweetResult") or {}).get("result"))
+                tweet = _gql_result_to_tweet(result) if isinstance(result, dict) else None
+                if tweet:
+                    return tweet
+    except httpx.HTTPError as exc:
+        log.info("twitter_tweet_gql_fail", tweet_id=tid, error=str(exc))
+    return None
 
 
 def _meta_pairs(html: str) -> list[tuple[str, str]]:
@@ -1040,8 +1167,12 @@ def _gql_result_to_tweet(result: dict[str, Any]) -> dict[str, Any] | None:
         "bookmark_count": legacy.get("bookmark_count"),
         "view_count": safe_int(views.get("count")),
         "entities": legacy.get("entities"),
-        "extended_entities": legacy.get("extended_entities"),
+        "extended_entities": legacy.get("extended_entities") or legacy.get("extendedEntities"),
         "in_reply_to_status_id": legacy.get("in_reply_to_status_id_str"),
+        "conversation_id_str": legacy.get("conversation_id_str"),
+        "is_quote_status": legacy.get("is_quote_status"),
+        "possibly_sensitive": legacy.get("possibly_sensitive"),
+        "source": legacy.get("source"),
         "user": user,
     }
     rt_shell = result.get("retweeted_status_result") or legacy.get("retweeted_status_result")

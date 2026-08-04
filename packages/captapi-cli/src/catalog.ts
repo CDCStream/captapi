@@ -304,7 +304,7 @@ const TWITTER: Omit<Endpoint, "platform">[] = [
   { tool: "twitter_user_tweets", name: "Twitter/X User Tweets", path: "/v1/twitter/user-tweets", credits: 2, summary: "Recent tweets from a Twitter/X profile.", params: [url(TW_PROFILE), limit(20, 200)] },
   { tool: "twitter_search", name: "Twitter/X Search", path: "/v1/twitter/search", credits: 2, summary: "Search public tweets on X by keyword — text, author, engagement, hashtags, and media.", params: [q(), limit(20, 200)] },
   { tool: "twitter_community", name: "Twitter/X Community", path: "/v1/twitter/community", credits: 1, summary: "Details for an X (Twitter) community.", params: [url(TW_COMMUNITY)] },
-  { tool: "twitter_community_tweets", name: "Twitter/X Community Tweets", path: "/v1/twitter/community-tweets", credits: 18, summary: "Tweets posted in an X community.", params: [url(TW_COMMUNITY), limit(25, 200)] },
+  { tool: "twitter_community_tweets", name: "Twitter/X Community Tweets", path: "/v1/twitter/community-tweets", credits: 2, summary: "Community posts — flat 2 native; ~0.7/tweet Apify fallback.", params: [url(TW_COMMUNITY), limit(25, 200)] },
 ];
 
 const REDDIT: Omit<Endpoint, "platform">[] = [

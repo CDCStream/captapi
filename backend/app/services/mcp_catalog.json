@@ -2154,8 +2154,8 @@
     "platform": "twitter",
     "name": "Twitter/X Community Tweets",
     "path": "/v1/twitter/community-tweets",
-    "credits": 18,
-    "summary": "Tweets posted in an X community.",
+    "credits": 2,
+    "summary": "Community posts — flat 2 native; ~0.7/tweet Apify fallback.",
     "params": [
       {
         "name": "url",

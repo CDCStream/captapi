@@ -40,6 +40,34 @@ def test_normalize_tweet_iso_and_identity() -> None:
     assert row["isQuote"] is False
     assert row["isRetweet"] is False
     assert row["author"]["followers"] == 1
+    assert set(row["engagement"]) == {
+        "views",
+        "likes",
+        "replies",
+        "retweets",
+        "quotes",
+        "bookmarks",
+    }
+
+
+def test_normalize_tweet_keeps_null_engagement_keys() -> None:
+    row = _normalize_tweet(
+        {
+            "id_str": "2",
+            "full_text": "no views here",
+            "created_at": "Thu Apr 28 00:56:58 +0000 2022",
+            "favorite_count": 10,
+            "reply_count": 1,
+            "retweet_count": 2,
+            "quote_count": 3,
+            "user": {"screen_name": "a", "name": "A"},
+        }
+    )
+    assert row["publishedAt"] == "2022-04-28T00:56:58.000Z"
+    assert row["engagement"]["views"] is None
+    assert row["engagement"]["bookmarks"] is None
+    assert row["engagement"]["likes"] == 10
+    assert row["hashtags"] == []
 
 
 def test_merge_tweet_row_fills_syndication_gaps() -> None:

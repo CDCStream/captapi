@@ -32,10 +32,10 @@ router = APIRouter()
 
 CREDIT_TWEET_DETAILS = 1
 CREDIT_PROFILE = 1
-# Native syndication/guest-token lists (user-tweets, search): flat 2.
+# Native syndication/guest-token lists (user-tweets, search, community-tweets): flat 2.
 CREDIT_TWEET_LIST = 2
-# Community tweets still fall through to Apify; keep per-result rate.
-# apidojo tweet-scraper ~$0.0004-0.0008/result → 0.7 credit/result (~80% markup).
+# Apify community-tweets fallback only (scrape.badger / tweet scrapers).
+# ~$0.0004-0.0008/result → 0.7 credit/result (~80% markup).
 RATE_TWEET = 0.7
 
 
@@ -296,9 +296,27 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
         _as_bool(item.get("possiblySensitive")),
         _as_bool(item.get("possibly_sensitive")),
     )
-    # Omit null engagement / author fields. Timeline syndication usually has
-    # likes/replies/retweets/quotes; views/bookmarks/source often only on GraphQL
-    # rows (search/community). Keep 0 when a source provides it.
+    # One engagement contract for search / user-tweets / tweet-details.
+    # GraphQL (search) usually fills all six; syndication often omits views/bookmarks
+    # — keys stay present (null) so clients do not branch per endpoint.
+    engagement = {
+        "views": safe_int(
+            first_present(item.get("viewCount"), item.get("views"), item.get("view_count"))
+        ),
+        "likes": safe_int(
+            first_present(item.get("likeCount"), item.get("favoriteCount"), item.get("favorite_count"))
+        ),
+        "replies": safe_int(
+            first_present(
+                item.get("replyCount"),
+                item.get("reply_count"),
+                item.get("conversation_count"),
+            )
+        ),
+        "retweets": safe_int(first_present(item.get("retweetCount"), item.get("retweet_count"))),
+        "quotes": safe_int(first_present(item.get("quoteCount"), item.get("quote_count"))),
+        "bookmarks": safe_int(first_present(item.get("bookmarkCount"), item.get("bookmark_count"))),
+    }
     out = strip_empty({
         "platform": "twitter",
         "url": url,
@@ -307,26 +325,6 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
         "lang": safe_str(item.get("lang")),
         "publishedAt": published,
         "author": _author(author) if isinstance(author, dict) else None,
-        "engagement": {
-            # Community scraper uses snake_case view_count; GQL uses view_count;
-            # timeline actors use camelCase viewCount.
-            "views": safe_int(
-                first_present(item.get("viewCount"), item.get("views"), item.get("view_count"))
-            ),
-            "likes": safe_int(
-                first_present(item.get("likeCount"), item.get("favoriteCount"), item.get("favorite_count"))
-            ),
-            "replies": safe_int(
-                first_present(
-                    item.get("replyCount"),
-                    item.get("reply_count"),
-                    item.get("conversation_count"),
-                )
-            ),
-            "retweets": safe_int(first_present(item.get("retweetCount"), item.get("retweet_count"))),
-            "quotes": safe_int(first_present(item.get("quoteCount"), item.get("quote_count"))),
-            "bookmarks": safe_int(first_present(item.get("bookmarkCount"), item.get("bookmark_count"))),
-        },
         "isReply": _tweet_is_reply(item),
         "isRetweet": _tweet_is_retweet(item),
         "isQuote": is_quote,
@@ -338,9 +336,14 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
         ),
         "source": _strip_html_source(item.get("source")),
     })
-    # Always emit list keys so docs / clients see the contract (empty ≠ omitted).
+    # Stable contract across sibling endpoints (empty list ≠ omitted; null metric ≠ omitted).
+    out["engagement"] = engagement
     out["hashtags"] = hashtags
     out["media"] = media
+    if "isRetweet" not in out:
+        out["isRetweet"] = bool(_tweet_is_retweet(item) or False)
+    if "isReply" not in out:
+        out["isReply"] = bool(_tweet_is_reply(item) or False)
     return out
 
 
@@ -532,7 +535,7 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
 
 
 def _merge_tweet_row(base: dict[str, Any], richer: dict[str, Any]) -> dict[str, Any]:
-    """Fill syndication gaps from a richer sibling row (user-tweets timeline)."""
+    """Fill syndication gaps from a richer sibling row (GQL / user-tweets)."""
     out = dict(base)
     for key in (
         "retweet_count",
@@ -550,6 +553,10 @@ def _merge_tweet_row(base: dict[str, Any], richer: dict[str, Any]) -> dict[str, 
         "lang",
         "full_text",
         "text",
+        "entities",
+        "extended_entities",
+        "created_at",
+        "possibly_sensitive",
     ):
         if out.get(key) is None and richer.get(key) is not None:
             out[key] = richer[key]
@@ -575,20 +582,28 @@ def _merge_tweet_row(base: dict[str, Any], richer: dict[str, Any]) -> dict[str, 
 
 
 async def _enrich_tweet_details(syn: dict[str, Any]) -> dict[str, Any]:
-    """Syndication tweet-result omits retweets/quotes/followers — pull from siblings.
+    """Fill syndication gaps so tweet-details matches search's engagement contract.
 
-    1) Author's popular timeline (same surface as user-tweets) when the id matches.
-    2) Else profile_by_handle for author.followers only.
+    1) Guest GraphQL TweetResultByRestId (same surface as search — 6 metrics).
+    2) Author's popular timeline (user-tweets) when the id matches.
+    3) profile_by_handle for author.followers only.
     """
     tid = safe_str(syn.get("id_str") or syn.get("id"))
-    user = syn.get("user") if isinstance(syn.get("user"), dict) else {}
-    handle = safe_str(user.get("screen_name") or user.get("username") or user.get("userName"))
-    needs_counts = syn.get("retweet_count") is None or syn.get("quote_count") is None
-    needs_followers = user.get("followers_count") is None and user.get("followers") is None
-    if not handle or not tid:
-        return syn
     out = syn
-    if needs_counts or needs_followers:
+    if tid:
+        gql = await native.tweet_by_rest_id(tid)
+        if gql:
+            out = _merge_tweet_row(out, gql)
+    user = out.get("user") if isinstance(out.get("user"), dict) else {}
+    handle = safe_str(user.get("screen_name") or user.get("username") or user.get("userName"))
+    needs_counts = (
+        out.get("retweet_count") is None
+        or out.get("quote_count") is None
+        or out.get("view_count") is None
+        or out.get("bookmark_count") is None
+    )
+    needs_followers = user.get("followers_count") is None and user.get("followers") is None
+    if handle and tid and (needs_counts or needs_followers):
         timeline = await native.user_tweets(handle, limit=100)
         if timeline:
             for row in timeline:
@@ -599,7 +614,10 @@ async def _enrich_tweet_details(syn: dict[str, Any]) -> dict[str, Any]:
                 out = _merge_tweet_row(out, row)
                 break
     user = out.get("user") if isinstance(out.get("user"), dict) else {}
-    if user.get("followers_count") is None and user.get("followers") is None:
+    handle = handle or safe_str(
+        user.get("screen_name") or user.get("username") or user.get("userName")
+    )
+    if handle and user.get("followers_count") is None and user.get("followers") is None:
         prof = await native.profile_by_handle(handle)
         if prof:
             followers = first_present(prof.get("followers"), prof.get("followersCount"))
@@ -647,7 +665,7 @@ async def twitter_tweet_details(
 
         data = await cached_or_run(
             endpoint="twitter.tweet-details",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -807,7 +825,7 @@ async def twitter_user_tweets(
 
         data = await cached_or_run(
             endpoint="twitter.user-tweets",
-            params={"handle": handle, "limit": limit, "v": 4},
+            params={"handle": handle, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -815,7 +833,16 @@ async def twitter_user_tweets(
         return ApiResponse(data=data)
 
 
-@router.get("/search", summary="Search public tweets on X by keyword")
+@router.get(
+    "/search",
+    summary="Search public tweets on X by keyword",
+    description=(
+        "Public keyword search via guest SearchTimeline. Each result uses the "
+        "same tweet contract as user-tweets / tweet-details: ISO-8601 publishedAt, "
+        "engagement{views,likes,replies,retweets,quotes,bookmarks} (null when "
+        "omitted upstream), hashtags[], media[]. Flat 2 credits."
+    ),
+)
 async def twitter_search(
     q: str = Query(..., min_length=2, description="Keyword or phrase to search public tweets on X"),
     limit: int = Query(20, ge=1, le=200),
@@ -843,7 +870,7 @@ async def twitter_search(
 
         data = await cached_or_run(
             endpoint="twitter.search",
-            params={"q": q, "limit": limit, "v": 3},
+            params={"q": q, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -927,34 +954,77 @@ async def twitter_community(
         return ApiResponse(data=data)
 
 
-@router.get("/community-tweets", summary="Tweets posted in an X community")
+@router.get(
+    "/community-tweets",
+    summary="Tweets posted in an X community",
+    description=(
+        "List recent posts in a public X Community. Same tweet contract as "
+        "search (ISO publishedAt, engagement 6-key shape, hashtags[]). "
+        "Flat 2 credits on the native GraphQL path; Apify fallback bills about "
+        "0.7 credits per returned tweet (min 2)."
+    ),
+)
 async def twitter_community_tweets(
-    url: str = Query(..., description="Community URL (x.com/i/communities/ID) or community ID"),
+    url: str = Query(
+        ...,
+        description="X community URL (x.com/i/communities/ID) or community ID — not a tweet/status URL",
+    ),
     limit: int = Query(25, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _reject_twitter_platform_mismatch(url, "https://x.com/i/communities/123456789")
+    import asyncio
+
+    _reject_twitter_platform_mismatch(url, "https://x.com/i/communities/1493446837214187523")
     community_id = _extract_community_id(url)
     if not community_id:
         raise HTTPException(status_code=400, detail="Invalid X community URL or ID")
+    # Reject bare tweet/status IDs pasted as "community id" (common docs mistake).
+    if "/status/" in (url or "").lower():
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Expected an X community URL (x.com/i/communities/ID) or community ID, "
+                "not a tweet/status URL. Use /v1/twitter/tweet-details for a single tweet."
+            ),
+        )
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_TWEET, 2)
+    community_url = f"https://x.com/i/communities/{community_id}"
+    # Reserve Apify worst-case; native path overrides to flat CREDIT_TWEET_LIST.
+    cost = _scaled_credits(limit, RATE_TWEET, CREDIT_TWEET_LIST)
     async with billed_call(
         caller=caller,
         endpoint="/v1/twitter/community-tweets",
         platform="twitter",
-        resource_url=f"https://x.com/i/communities/{community_id}",
+        resource_url=community_url,
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native_items = await native.community_tweets(
-                community_id, limit=limit, ranking_mode="Recency"
+            meta_task = asyncio.create_task(native.community(community_id))
+            tweets_task = asyncio.create_task(
+                native.community_tweets(community_id, limit=limit, ranking_mode="Recency")
             )
+            meta, native_items = await asyncio.gather(meta_task, tweets_task)
+            community_name = safe_str((meta or {}).get("name")) if isinstance(meta, dict) else None
+            member_count = (
+                safe_int((meta or {}).get("memberCount")) if isinstance(meta, dict) else None
+            )
+
+            def _envelope(tweets: list[dict[str, Any]]) -> dict[str, Any]:
+                # Do not strip_empty tweets — engagement null keys are intentional.
+                return {
+                    "communityId": community_id,
+                    "url": community_url,
+                    "communityName": community_name,
+                    "memberCount": member_count,
+                    "totalReturned": len(tweets),
+                    "tweets": tweets,
+                }
+
             if native_items:
                 ctx["source"] = "direct"
                 tweets = [_normalize_tweet(t) for t in native_items[:limit]]
-                return {"communityId": community_id, "totalReturned": len(tweets), "tweets": tweets}
+                return _envelope(tweets)
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -971,14 +1041,19 @@ async def twitter_community_tweets(
                 raise HTTPException(status_code=404, detail="No tweets found")
             ctx["source"] = "apify"
             tweets = [_normalize_tweet(t) for t in items[:limit]]
-            return {"communityId": community_id, "totalReturned": len(tweets), "tweets": tweets}
+            return _envelope(tweets)
 
         data = await cached_or_run(
             endpoint="twitter.community-tweets",
-            params={"community_id": community_id, "limit": limit, "v": 4},
+            params={"community_id": community_id, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["tweets"]), RATE_TWEET, 2)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_TWEET_LIST
+        else:
+            ctx["credits_override"] = _scaled_credits(
+                len(data.get("tweets") or []), RATE_TWEET, CREDIT_TWEET_LIST
+            )
         return ApiResponse(data=data)
