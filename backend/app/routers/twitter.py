@@ -448,14 +448,17 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
         else None,
     )
 
-    return strip_empty(
+    display_name = safe_str(item.get("name") or item.get("fullName") or item.get("displayName"))
+    out = strip_empty(
         {
             "platform": "twitter",
             "url": safe_str(item.get("url"))
             or (f"https://x.com/{username}" if username else None),
             "id": safe_str(item.get("id") or item.get("id_str")),
             "username": safe_str(username),
-            "name": safe_str(item.get("name") or item.get("fullName")),
+            # displayName matches TikTok/IG/YouTube; name kept for BC.
+            "displayName": display_name,
+            "name": display_name,
             "bio": bio_text,
             "location": safe_str(item.get("location")),
             "verified": verified,
@@ -519,9 +522,107 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
             "fetchedAt": utc_now_iso(),
         }
     )
+    # Thin HTML fallbacks can omit verification bits — still promise the key.
+    if "verified" not in out:
+        out["verified"] = bool(verified) if verified is not None else False
+    if display_name:
+        out.setdefault("displayName", display_name)
+        out.setdefault("name", display_name)
+    return out
 
 
-@router.get("/tweet-details", summary="Tweet metadata + engagement stats")
+def _merge_tweet_row(base: dict[str, Any], richer: dict[str, Any]) -> dict[str, Any]:
+    """Fill syndication gaps from a richer sibling row (user-tweets timeline)."""
+    out = dict(base)
+    for key in (
+        "retweet_count",
+        "quote_count",
+        "reply_count",
+        "favorite_count",
+        "view_count",
+        "bookmark_count",
+        "source",
+        "conversation_id_str",
+        "conversation_id",
+        "is_retweet",
+        "is_quote_status",
+        "retweeted_status",
+        "lang",
+        "full_text",
+        "text",
+    ):
+        if out.get(key) is None and richer.get(key) is not None:
+            out[key] = richer[key]
+    base_user = out.get("user") if isinstance(out.get("user"), dict) else {}
+    rich_user = richer.get("user") if isinstance(richer.get("user"), dict) else {}
+    if rich_user:
+        merged_user = dict(base_user)
+        for key in (
+            "followers_count",
+            "followers",
+            "id_str",
+            "id",
+            "screen_name",
+            "name",
+            "verified",
+            "is_blue_verified",
+            "profile_image_url_https",
+        ):
+            if merged_user.get(key) is None and rich_user.get(key) is not None:
+                merged_user[key] = rich_user[key]
+        out["user"] = merged_user
+    return out
+
+
+async def _enrich_tweet_details(syn: dict[str, Any]) -> dict[str, Any]:
+    """Syndication tweet-result omits retweets/quotes/followers — pull from siblings.
+
+    1) Author's popular timeline (same surface as user-tweets) when the id matches.
+    2) Else profile_by_handle for author.followers only.
+    """
+    tid = safe_str(syn.get("id_str") or syn.get("id"))
+    user = syn.get("user") if isinstance(syn.get("user"), dict) else {}
+    handle = safe_str(user.get("screen_name") or user.get("username") or user.get("userName"))
+    needs_counts = syn.get("retweet_count") is None or syn.get("quote_count") is None
+    needs_followers = user.get("followers_count") is None and user.get("followers") is None
+    if not handle or not tid:
+        return syn
+    out = syn
+    if needs_counts or needs_followers:
+        timeline = await native.user_tweets(handle, limit=100)
+        if timeline:
+            for row in timeline:
+                if not isinstance(row, dict):
+                    continue
+                if safe_str(row.get("id_str") or row.get("id")) != tid:
+                    continue
+                out = _merge_tweet_row(out, row)
+                break
+    user = out.get("user") if isinstance(out.get("user"), dict) else {}
+    if user.get("followers_count") is None and user.get("followers") is None:
+        prof = await native.profile_by_handle(handle)
+        if prof:
+            followers = first_present(prof.get("followers"), prof.get("followersCount"))
+            if followers is not None:
+                merged_user = dict(user)
+                merged_user["followers_count"] = followers
+                if merged_user.get("id_str") is None and prof.get("id"):
+                    merged_user["id_str"] = safe_str(prof.get("id"))
+                out = dict(out)
+                out["user"] = merged_user
+    return out
+
+
+@router.get(
+    "/tweet-details",
+    summary="Tweet metadata + engagement (likes/replies/retweets/quotes when exposed)",
+    description=(
+        "Public tweet as clean JSON: text, author (followers when exposed), "
+        "engagement (likes, replies, retweets, quotes; views/bookmarks when "
+        "Twitter exposes them), isReply / isRetweet, hashtags[], media[], "
+        "ISO-8601 publishedAt. Flat 1 credit."
+    ),
+)
 async def twitter_tweet_details(
     url: str = Query(..., description="Public tweet URL, e.g. https://x.com/user/status/ID"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -536,16 +637,17 @@ async def twitter_tweet_details(
         base_credits=CREDIT_TWEET_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Free public syndication (native-only).
+            # Syndication tweet-result + sibling hydrate (popular timeline / profile).
             syn = await native.tweet_result(tweet_id)
             if syn:
                 ctx["source"] = "direct"
-                return _normalize_tweet(syn)
+                enriched = await _enrich_tweet_details(syn)
+                return _normalize_tweet(enriched)
             raise HTTPException(status_code=404, detail="Tweet not found")
 
         data = await cached_or_run(
             endpoint="twitter.tweet-details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -650,7 +752,7 @@ async def twitter_profile(
 
         data = await cached_or_run(
             endpoint="twitter.profile",
-            params={"handle": handle, "v": 7, "cacheMaxAge": cacheMaxAge},
+            params={"handle": handle, "v": 8, "cacheMaxAge": cacheMaxAge},
             runner=_run,
             ctx=ctx,
             # Profiles are polled repeatedly; follower counts drift slowly, so

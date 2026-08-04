@@ -1060,7 +1060,25 @@ const FACEBOOK_EVENTS: Spec[] = [
 ];
 
 const TWITTER: Spec[] = [
-  { slug: "twitter-tweet-details", name: "Twitter/X Tweet Details API", shortName: "Tweet Details", category: "details", method: "GET", path: "/v1/twitter/tweet-details", credits: 1 , tagline: "Get a tweet — text, author, likes, replies, and media as structured JSON.", longDescription: "Paste a tweet URL and get the tweet as clean JSON: text, author, like / reply counts, media when present, and publish time. Flat 1 credit per call." },
+  {
+    slug: "twitter-tweet-details",
+    name: "Twitter/X Tweet Details API",
+    shortName: "Tweet Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/twitter/tweet-details",
+    credits: 1,
+    tagline:
+      "One tweet as JSON — text, author (followers), likes/replies/retweets/quotes, media, ISO publishedAt.",
+    longDescription:
+      "Paste a tweet URL and get clean JSON: text, language, ISO-8601 publishedAt, author (username, displayName, verified, profileImage, followers when exposed), engagement (likes, replies, retweets, quotes; views and bookmarks when Twitter exposes them), isReply / isRetweet, hashtags[], and media[] URLs. Retweets/quotes/author.followers are filled from the same public timeline surface as User Tweets when that tweet appears there; otherwise those keys may be omitted. Flat 1 credit per call.",
+    delivers: [
+      "Text, author, media[], hashtags[], ISO publishedAt",
+      "Engagement: likes, replies, retweets, quotes when exposed",
+      "author.followers + isRetweet when exposed",
+      "Flat 1 credit per call",
+    ],
+  },
   { slug: "twitter-transcript", name: "Twitter/X Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/twitter/transcript", credits: 1 },
   {
     slug: "twitter-profile",
@@ -1071,14 +1089,14 @@ const TWITTER: Spec[] = [
     path: "/v1/twitter/profile",
     credits: 1,
     tagline:
-      "X profile: blue vs legacy vs identity verification, tipjar→contact{}, fastFollowers, createdAt.",
+      "X profile: verified + blue/legacy/identity, displayName, tipjar→contact{}, expanded website, createdAt.",
     longDescription:
-      "Paste a profile URL or @handle and get clean JSON. Verification is three independent bits — isBlueVerified (paid blue), isLegacyVerified (old celebrity check), isIdentityVerified — plus aggregate verified, verification{reason,verifiedSince,verifiedType}, and affiliate{description,url,badgeUrl}. Trust signals: ISO createdAt (account age), fastFollowers / normalFollowers (X's own suspicious-follower split), possiblySensitive, withheldInCountries. Outreach: tipjarSettings + contact{emails,paymentHandles,links} and bioUrls[] with expandedUrl (not raw t.co). Also listedCount, mediaCount, likesCount, pinnedTweetIds, bannerImage, highlightedTweets. Flat 1 credit. Pass cacheMaxAge=1d|3d|7d|14d|30d (envelope cached + cachedAt).",
+      "Paste a profile URL or @handle and get clean JSON. Verification is three independent bits — isBlueVerified (paid blue), isLegacyVerified (old celebrity check), isIdentityVerified — plus aggregate verified (always present), verification{reason,verifiedSince,verifiedType}, and affiliate{description,url,badgeUrl}. displayName matches other platforms (name kept for compatibility). Trust signals: ISO createdAt (account age), fastFollowers / normalFollowers (X's own suspicious-follower split), possiblySensitive, withheldInCountries. Outreach: tipjarSettings + contact{emails,paymentHandles,links}, website as expanded URL (not raw t.co), and bioUrls[] with expandedUrl. Also listedCount, mediaCount, likesCount, pinnedTweetIds, bannerImage, highlightedTweets. Flat 1 credit. Pass cacheMaxAge=1d|3d|7d|14d|30d (envelope cached + cachedAt).",
     delivers: [
-      "isBlueVerified ≠ isLegacyVerified ≠ isIdentityVerified",
+      "verified + isBlueVerified ≠ isLegacyVerified ≠ isIdentityVerified",
+      "displayName (+ name for compatibility)",
       "contact{emails,paymentHandles,links} from tipjar + bio",
-      "fastFollowers / normalFollowers + createdAt",
-      "bioUrls with expandedUrl (not t.co)",
+      "website / bioUrls expanded (not t.co) + ISO createdAt",
     ],
   },
   {

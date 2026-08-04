@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
     category: "fix",
+    title: "Twitter profile + tweet-details: sibling field parity",
+    description:
+      "twitter/profile already returned verified from GraphQL; docs example now also emits displayName (name kept for BC) so cross-platform clients use one key. tweet-details was thinner than user-tweets because syndication tweet-result omits retweet_count/quote_count/followers — we now hydrate those from the author's popular timeline (same surface as user-tweets) when the id matches, else profile for author.followers. Cache bumps: profile v8, tweet-details v5.",
+    items: [
+      "profile: displayName + verified always present",
+      "tweet-details: retweets + quotes + isRetweet + author.followers",
+      "Docs examples refreshed from live NASA / NASASpox",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "fix",
     title: "Twitter user-tweets: popular-not-latest warning + ISO publishedAt",
     description:
       "Docs said \"recent tweets\" while Twitter's public timeline embed returns ~100 most popular posts (not chronological) — same limit ScrapeCreators warns about. Copy, OpenAPI summary, use cases, and limit text now say so explicitly (not for new-tweet monitoring). publishedAt is ISO-8601 UTC (no raw \"Thu Apr 28…\"). hashtags[]/media[] always present; conversationId, source, isQuote, author.id, and engagement.views/bookmarks when the upstream row exposes them (timeline embed often omits views/source).",

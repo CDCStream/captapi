@@ -12831,6 +12831,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://x.com/NASA",
     "id": "11348282",
     "username": "NASA",
+    "displayName": "NASA",
     "name": "NASA",
     "bio": "Making the seemingly impossible, possible. ✨",
     "location": "Pale Blue Dot",
@@ -12838,21 +12839,32 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "isBlueVerified": true,
     "isIdentityVerified": false,
     "verification": {
+      "isBlueVerified": true,
       "isIdentityVerified": false,
       "verifiedType": "Government",
       "reason": "This account is verified because it is a government or multilateral organization account.  Learn more",
       "verifiedSince": "2009-08-07T19:53:50.000Z"
     },
-    "followers": 92233651,
+    "followers": 92239064,
     "following": 119,
-    "tweetCount": 74283,
-    "likesCount": 16902,
-    "mediaCount": 28057,
-    "listedCount": 97023,
+    "fastFollowers": 0,
+    "normalFollowers": 92239064,
+    "tweetCount": 74288,
+    "likesCount": 16904,
+    "mediaCount": 28058,
+    "listedCount": 97014,
     "pinnedTweetIds": [
       "2082511887757881648"
     ],
     "website": "http://www.nasa.gov/",
+    "contact": {
+      "links": [
+        "http://www.nasa.gov/"
+      ]
+    },
+    "tipjarSettings": {
+      "is_enabled": false
+    },
     "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_400x400.jpg",
     "bannerImage": "https://pbs.twimg.com/profile_banners/11348282/1775567134",
     "profileImageShape": "Square",
@@ -13052,17 +13064,25 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "lang": "en",
     "publishedAt": "2026-07-17T21:06:08.000Z",
     "author": {
+      "id": "1907894348319973378",
       "username": "NASASpox",
       "displayName": "Bethany Stevens",
       "url": "https://x.com/NASASpox",
+      "followers": 19464,
       "verified": true,
       "profileImage": "https://pbs.twimg.com/profile_images/2030158374625759233/3fWyLDjS_normal.jpg"
     },
     "engagement": {
-      "likes": 603,
-      "replies": 52
+      "likes": 606,
+      "replies": 52,
+      "retweets": 117,
+      "quotes": 6
     },
     "isReply": false,
+    "isRetweet": false,
+    "possiblySensitive": false,
+    "conversationId": "2078224758781751775",
+    "hashtags": [],
     "media": [
       "https://pbs.twimg.com/media/HNdWSZ3XsAEekpT.jpg"
     ]
