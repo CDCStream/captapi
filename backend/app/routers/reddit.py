@@ -5,6 +5,7 @@ Native-first via Reddit public JSON / OAuth; Decodo for blocked post fetches.
 
 from __future__ import annotations
 
+import asyncio
 import re
 from datetime import datetime, timezone
 from typing import Any
@@ -91,7 +92,10 @@ def _is_post(item: dict[str, Any]) -> bool:
 _THUMB_PLACEHOLDERS = {"self", "default", "nsfw", "spoiler", "image"}
 
 
-def _epoch_to_iso(value: Any) -> Any:
+def _epoch_to_iso(value: Any) -> str | None:
+    """Unix seconds (int/float/digit-string) → catalog ISO ``…000Z``. Never echo raw epochs."""
+    if isinstance(value, bool):
+        return None
     if isinstance(value, (int, float)) and value > 0:
         return datetime.fromtimestamp(int(value), tz=timezone.utc).strftime(
             "%Y-%m-%dT%H:%M:%S.000Z"
@@ -101,8 +105,8 @@ def _epoch_to_iso(value: Any) -> Any:
         if re.fullmatch(r"\d+(?:\.\d+)?", s):
             try:
                 return _epoch_to_iso(float(s))
-            except ValueError:
-                return value
+            except (ValueError, OverflowError):
+                return None
         # Normalize already-parsed ISO strings to the same ``…Z`` shape.
         if "T" in s:
             try:
@@ -111,8 +115,8 @@ def _epoch_to_iso(value: Any) -> Any:
                     dt = dt.replace(tzinfo=timezone.utc)
                 return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
             except ValueError:
-                return value
-    return value
+                return None
+    return None
 
 
 # Reddit /search.json sort values. ``comment_count`` is the ScrapeCreators alias
@@ -712,62 +716,129 @@ def _clean_reddit_image(value: Any) -> str | None:
     return s.split("?")[0] if s.startswith("http") else s
 
 
-async def _subreddit_details_native(sub: str) -> dict[str, Any] | None:
-    """Fetch subreddit info from public ``about.json`` (no Apify actor).
+async def _reddit_subreddit_json(sub: str, path_suffix: str) -> Any | None:
+    """Fetch ``/r/{sub}{path_suffix}`` via OAuth, else Decodo ``.json``.
 
-    Only the OAuth path (oauth.reddit.com, works from datacenter IPs) is
-    tried: Reddit 403-blocks anonymous requests from datacenter AND
-    residential proxies alike (fingerprint-based, measured 0/16 success), so
-    proxied retries are pure wasted latency. Returns None on failure so the
-    caller falls back to the actor.
+    ``path_suffix`` examples: ``/about``, ``/about/rules``.
     """
-    payload: Any = None
     oauth = await _reddit_oauth_headers()
     if oauth:
         try:
             resp = await proxy_fetch(
-                f"https://oauth.reddit.com/r/{sub}/about",
-                tier="none", headers=oauth,
-                params={"raw_json": "1"}, timeout=10,
+                f"https://oauth.reddit.com/r/{sub}{path_suffix}",
+                tier="none",
+                headers=oauth,
+                params={"raw_json": "1"},
+                timeout=10,
             )
             if resp.status_code < 400:
-                payload = resp.json()
+                return resp.json()
         except (httpx.HTTPError, ValueError):
-            payload = None
+            pass
 
-    if payload is None and decodo_fetch.enabled():
+    if decodo_fetch.enabled():
         fetched = await decodo_fetch.fetch_json(
-            f"https://www.reddit.com/r/{sub}/about.json?raw_json=1", timeout=25.0,
+            f"https://www.reddit.com/r/{sub}{path_suffix}.json?raw_json=1",
+            timeout=25.0,
         )
         if fetched is not None and fetched[0] < 400:
-            payload = fetched[1]
+            return fetched[1]
+    return None
 
+
+def _normalize_subreddit_rules(payload: Any) -> list[dict[str, Any]]:
     if not isinstance(payload, dict):
+        return []
+    raw = payload.get("rules")
+    if not isinstance(raw, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for row in raw:
+        if not isinstance(row, dict):
+            continue
+        name = safe_str(row.get("short_name") or row.get("violation_reason"))
+        if not name and not row.get("description"):
+            continue
+        out.append(
+            {
+                "name": name,
+                "description": safe_str(row.get("description")),
+                "kind": safe_str(row.get("kind")),
+                "violationReason": safe_str(row.get("violation_reason")),
+                "priority": safe_int(row.get("priority")),
+            }
+        )
+    return out
+
+
+async def _subreddit_details_native(sub: str) -> dict[str, Any] | None:
+    """Fetch subreddit info from public about + rules (no Apify actor).
+
+    OAuth (oauth.reddit.com) first — Reddit 403-blocks anonymous datacenter
+    hits. Decodo fallback for about/rules JSON. Returns None on about failure.
+    """
+    about_payload, rules_payload = await asyncio.gather(
+        _reddit_subreddit_json(sub, "/about"),
+        _reddit_subreddit_json(sub, "/about/rules"),
+    )
+
+    if not isinstance(about_payload, dict):
         return None
-    data = payload.get("data") or {}
+    data = about_payload.get("data") or {}
     if not (data.get("display_name") or data.get("subscribers") is not None):
         return None
 
+    display = safe_str(data.get("display_name")) or sub
+    # Reddit ``name`` is the stable t5_… fullname; bare ``id`` is base36 without prefix.
+    subreddit_id = safe_str(data.get("name"))
+    if not subreddit_id and data.get("id"):
+        subreddit_id = f"t5_{data.get('id')}"
+
     return {
         "platform": "reddit",
-        "name": safe_str(data.get("display_name")),
-        "url": f"https://www.reddit.com/r/{data.get('display_name')}",
+        "id": subreddit_id,
+        "name": display,
+        "url": f"https://www.reddit.com/r/{display}",
         "title": safe_str(data.get("title")),
         "description": safe_str(data.get("public_description") or data.get("description")),
         "members": safe_int(data.get("subscribers")),
+        # Currently online (Reddit active_user_count) — NOT weekly uniques.
+        # ScrapeCreators' weekly_active_users often looks like this same field mislabeled.
+        "activeUsers": safe_int(
+            data.get("active_user_count")
+            or data.get("accounts_active")
+            or data.get("accounts_active_count")
+        ),
         "category": safe_str(data.get("advertiser_category")),
         "language": safe_str(data.get("lang")),
         "type": safe_str(data.get("subreddit_type")),
-        "createdAt": _epoch_to_iso(data.get("created_utc")),
+        "createdAt": _epoch_to_iso(data.get("created_utc") or data.get("created")),
         "nsfw": bool(data.get("over18")),
+        "submitText": safe_str(data.get("submit_text")),
+        "rules": _normalize_subreddit_rules(rules_payload),
         "icon": _clean_reddit_image(data.get("community_icon") or data.get("icon_img")),
         "banner": _clean_reddit_image(data.get("banner_background_image") or data.get("banner_img")),
     }
 
 
-@router.get("/subreddit-details", summary="Subreddit info & member stats")
+@router.get(
+    "/subreddit-details",
+    summary="Subreddit info, rules, and member stats",
+    description=(
+        "Public subreddit card: id (t5_…), title, description, members, "
+        "activeUsers (currently online), rules[], submitText, ISO createdAt, "
+        "nsfw/type/language/category, icon/banner. Flat 1 credit. Subreddit "
+        "names are case-insensitive (AskReddit and askreddit both resolve)."
+    ),
+)
 async def subreddit_details(
-    url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
+    url: str = Query(
+        ...,
+        description=(
+            "Subreddit URL, r/name, or bare name (case-insensitive), "
+            "e.g. r/technology or AskReddit."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -780,7 +851,6 @@ async def subreddit_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Native-only: public about.json (~1s).
             native = await _subreddit_details_native(sub)
             if native is not None:
                 ctx["source"] = "direct"
@@ -789,7 +859,7 @@ async def subreddit_details(
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-details",
-            params={"sub": sub, "v": 3},
+            params={"sub": sub, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

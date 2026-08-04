@@ -2353,13 +2353,13 @@
     "name": "Reddit Subreddit Details",
     "path": "/v1/reddit/subreddit-details",
     "credits": 1,
-    "summary": "Info & member stats for a subreddit.",
+    "summary": "Subreddit card — t5_ id, members, activeUsers, rules[], ISO createdAt.",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+        "description": "Subreddit URL, r/name, or bare name (case-insensitive), e.g. r/technology or AskReddit. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2477,7 +2477,7 @@
     "name": "Threads Post Details",
     "path": "/v1/threads/post-details",
     "credits": 1,
-    "summary": "Metadata + engagement for a Threads post.",
+    "summary": "Threads post card plus comments[] and relatedPosts[] (views when Meta exposes them).",
     "params": [
       {
         "name": "url",
@@ -2498,8 +2498,8 @@
     "platform": "threads",
     "name": "Threads Post Search",
     "path": "/v1/threads/search",
-    "credits": 18,
-    "summary": "Search public Threads posts by keyword — text, author, engagement, and media.",
+    "credits": 2,
+    "summary": "Threads keyword search — flat 2 native (~0.7/post Apify). Meta Top SERP; no sort/date.",
     "params": [
       {
         "name": "q",
@@ -2511,7 +2511,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 25, max 200. Billed per result."
+        "description": "Max items to return. Default 25, max 200. Flat 2 native; Apify ~0.7/result."
       },
       {
         "name": "cache",
@@ -2526,8 +2526,8 @@
     "platform": "threads",
     "name": "Threads Search Users",
     "path": "/v1/threads/search-users",
-    "credits": 14,
-    "summary": "Find Threads users by keyword — username, display name, profile URL, verified.",
+    "credits": 1,
+    "summary": "Distinct authors from keyword search — id, avatar, verified. Flat 1 native.",
     "params": [
       {
         "name": "q",
@@ -2539,7 +2539,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
+        "description": "Max items to return. Default 20, max 100. Flat 1 native; Apify ~0.7/result."
       },
       {
         "name": "cache",

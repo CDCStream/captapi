@@ -33,6 +33,9 @@ CREDIT_DETAILS = 1
 CREDIT_PROFILE = 1
 # Native profile-hydrate user-posts (same soft-cap surface as SC): flat 2.
 CREDIT_POST_LIST = 2
+# Native search HTML (Decodo) — parity with twitter/search (2) and tiktok/search-users (1).
+CREDIT_SEARCH = 2
+CREDIT_SEARCH_USERS = 1
 RATE = 0.7
 
 
@@ -72,18 +75,23 @@ def _require_threads_post_url(url: str) -> str:
     return code
 
 
-def _user(u: dict[str, Any], *, include_profile_image: bool = True) -> dict[str, Any]:
-    """Author/user card for posts & search.
+def _verified_flag(u: dict[str, Any]) -> bool | None:
+    """Preserve false vs unknown — ``or`` would turn False into null."""
+    for key in ("is_verified", "isVerified", "verified"):
+        raw = u.get(key)
+        if isinstance(raw, bool):
+            return raw
+    return None
 
-    Follower counts are omitted — post/search actors never return them
-    (use /profile). Search modes also omit profileImage (same reason).
-    """
+
+def _user(u: dict[str, Any], *, include_profile_image: bool = True) -> dict[str, Any]:
+    """Author card for posts (slim on search/list rows)."""
     username = u.get("username") or u.get("userName") or u.get("user_name")
     pic_hd = u.get("hd_profile_pic_url_info") if isinstance(u.get("hd_profile_pic_url_info"), dict) else {}
     out: dict[str, Any] = {
         "username": safe_str(username),
         "displayName": safe_str(u.get("full_name") or u.get("fullName") or u.get("name")),
-        "verified": u.get("is_verified") or u.get("isVerified"),
+        "verified": _verified_flag(u),
     }
     if include_profile_image:
         out["profileImage"] = safe_str(
@@ -96,6 +104,32 @@ def _user(u: dict[str, Any], *, include_profile_image: bool = True) -> dict[str,
             or pic_hd.get("url")
         )
     return out
+
+
+def _normalize_search_user(u: dict[str, Any]) -> dict[str, Any]:
+    """Search-users card: id + avatar when Meta embeds them; followers often null."""
+    username = safe_str(u.get("username") or u.get("userName") or u.get("user_name"))
+    pic_hd = u.get("hd_profile_pic_url_info") if isinstance(u.get("hd_profile_pic_url_info"), dict) else {}
+    return {
+        "id": safe_str(u.get("pk") or u.get("id") or u.get("user_id") or u.get("userId")),
+        "username": username,
+        "displayName": safe_str(u.get("full_name") or u.get("fullName") or u.get("name") or u.get("displayName")),
+        "url": safe_str(u.get("url")) or (f"https://www.threads.net/@{username}" if username else None),
+        "verified": _verified_flag(u),
+        "profileImage": safe_str(
+            u.get("profile_pic_url")
+            or u.get("profilePicUrl")
+            or u.get("profile_pic_url_hd")
+            or u.get("profileImage")
+            or u.get("avatar")
+            or pic_hd.get("url")
+        ),
+        "followers": safe_int(
+            u.get("follower_count")
+            or u.get("followerCount")
+            or u.get("followers")
+        ),
+    }
 
 
 def _post_media(item: dict[str, Any]) -> list[str]:
@@ -150,10 +184,11 @@ def _normalize_post(item: dict[str, Any], *, include_author_image: bool = True) 
         is_quote = bool(quote_id) if quote_id else False
     else:
         is_quote = bool(is_quote)
+    # Do not coerce bare int view_counts — Meta HTML often embeds a GK/experiment
+    # id under that key; only dict shapes (or singular view_count) are real counts.
     views = safe_int(
         item.get("view_count")
         or item.get("viewCount")
-        or item.get("view_counts")
         or item.get("views")
         or ((item.get("engagement") or {}).get("views") if isinstance(item.get("engagement"), dict) else None)
     )
@@ -560,7 +595,15 @@ async def threads_user_posts(
         return ApiResponse(data=data)
 
 
-@router.get("/search", summary="Search public Threads posts by keyword")
+@router.get(
+    "/search",
+    summary="Search public Threads posts by keyword",
+    description=(
+        f"Public Threads post search via Meta Top SERP hydrate. Flat "
+        f"{CREDIT_SEARCH} credits on the native path; Apify fallback ~{RATE}/post "
+        f"(min {CREDIT_SEARCH}). No sort or date filter — Meta ranks the page."
+    ),
+)
 async def threads_search(
     q: str = Query(..., min_length=2, description="Keyword or phrase to search public Threads posts"),
     limit: int = Query(25, ge=1, le=200),
@@ -568,7 +611,8 @@ async def threads_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled(limit, RATE, 2)
+    # Reserve Apify worst-case; native path overrides to flat CREDIT_SEARCH.
+    cost = _scaled(limit, RATE, CREDIT_SEARCH)
     async with billed_call(
         caller=caller,
         endpoint="/v1/threads/search",
@@ -598,16 +642,30 @@ async def threads_search(
 
         data = await cached_or_run(
             endpoint="threads.search",
-            params={"q": q, "limit": limit, "v": 5},
+            params={"q": q, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(len(data["results"]), RATE, 2)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_SEARCH
+        else:
+            ctx["credits_override"] = _scaled(
+                len(data.get("results") or []), RATE, CREDIT_SEARCH
+            )
         return ApiResponse(data=data)
 
 
-@router.get("/search-users", summary="Find Threads users / creators by keyword")
+@router.get(
+    "/search-users",
+    summary="Find Threads users / creators by keyword",
+    description=(
+        f"Distinct authors from Threads keyword search hydrate. Flat "
+        f"{CREDIT_SEARCH_USERS} credit on the native path (TikTok/SC parity); "
+        f"Apify fallback ~{RATE}/user (min 2). Returns id + profileImage when "
+        f"Meta embeds them; followers is usually null on this surface."
+    ),
+)
 async def threads_search_users(
     q: str = Query(..., min_length=2, description="Keyword to find Threads users or creators"),
     limit: int = Query(20, ge=1, le=100),
@@ -629,12 +687,7 @@ async def threads_search_users(
             if native_users:
                 ctx["source"] = "direct"
                 users = [
-                    {
-                        "username": u.get("username"),
-                        "displayName": u.get("full_name"),
-                        "url": u.get("url") or f"https://www.threads.net/@{u.get('username')}",
-                        "verified": u.get("is_verified"),
-                    }
+                    _normalize_search_user(u)
                     for u in native_users
                     if u.get("username")
                 ][:limit]
@@ -652,20 +705,15 @@ async def threads_search_users(
             for item in items:
                 if item.get("type") == "profile":
                     continue
-                # Search actors omit avatar/follower fields; keep the card lean.
-                u = _user(item.get("user") or item.get("author") or item, include_profile_image=False)
-                uname = u.get("username")
+                raw = item.get("user") or item.get("author") or item
+                if not isinstance(raw, dict):
+                    continue
+                card = _normalize_search_user(raw)
+                uname = card.get("username")
                 if not uname or uname in seen:
                     continue
                 seen.add(uname)
-                users.append(
-                    {
-                        "username": uname,
-                        "displayName": u.get("displayName"),
-                        "url": f"https://www.threads.net/@{uname}",
-                        "verified": u.get("verified"),
-                    }
-                )
+                users.append(card)
                 if len(users) >= limit:
                     break
             if not users:
@@ -675,19 +723,57 @@ async def threads_search_users(
 
         data = await cached_or_run(
             endpoint="threads.search-users",
-            params={"q": q, "limit": limit, "v": 5},
+            params={"q": q, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(len(data["users"]), RATE, 2)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_SEARCH_USERS
+        else:
+            ctx["credits_override"] = _scaled(len(data.get("users") or []), RATE, 2)
         return ApiResponse(data=data)
 
 
 _POST_AUTHOR_RE = re.compile(r"@([A-Za-z0-9._]+)/post/")
 
 
-@router.get("/post-details", summary="Threads post metadata + engagement")
+def _normalize_post_details(item: dict[str, Any]) -> dict[str, Any]:
+    """Post card + always-present ``comments[]`` / ``relatedPosts[]``."""
+    out = _normalize_post(item, include_author_image=True)
+    raw_comments = item.get("comments") if isinstance(item.get("comments"), list) else []
+    raw_related = (
+        item.get("related_posts")
+        if isinstance(item.get("related_posts"), list)
+        else item.get("relatedPosts")
+    )
+    if not isinstance(raw_related, list):
+        raw_related = []
+    out["comments"] = [
+        _normalize_post(c, include_author_image=False)
+        for c in raw_comments
+        if isinstance(c, dict)
+    ]
+    out["relatedPosts"] = [
+        _normalize_post(r, include_author_image=False)
+        for r in raw_related
+        if isinstance(r, dict)
+    ][:12]
+    return out
+
+
+@router.get(
+    "/post-details",
+    summary="Threads post metadata, related posts, and comments when exposed",
+    description=(
+        "Public Threads post as clean JSON: same card as user-posts "
+        "(text, author, engagement with views when Meta exposes them, "
+        "threadId/isReply/isQuote, media) plus comments[] and relatedPosts[]. "
+        "Flat 1 credit. Logged-out Meta hydrate usually embeds related posts "
+        "(BarcelonaLoggedOutRelatedPosts) but omits the reply tree — comments[] "
+        "is then an empty array, not a missing key."
+    ),
+)
 async def threads_post_details(
     url: str = Query(..., description="Threads post URL"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -705,11 +791,11 @@ async def threads_post_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Hydrated permalink HTML embeds the post under thread_items.
+            # Hydrated permalink HTML embeds the post + LoggedOut related posts.
             native_post = await native.post_details(url)
             if native_post and native_post.get("code"):
                 ctx["source"] = "direct"
-                return _normalize_post(native_post)
+                return _normalize_post_details(native_post)
 
             apify = get_apify()
             # When the URL names the author, the posts-mode scraper gives full
@@ -730,7 +816,8 @@ async def threads_post_details(
                 )
                 if match:
                     ctx["source"] = "apify"
-                    return _normalize_post(match)
+                    # Apify profile scrape has no related/comments — stable empty arrays.
+                    return _normalize_post_details(match)
             dl_url = f"https://www.threads.com/@{author}/post/{code}" if author else url
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_THREADS_POST,
@@ -741,11 +828,20 @@ async def threads_post_details(
             if not items or (isinstance(result, dict) and result.get("error")):
                 raise HTTPException(status_code=404, detail="Post not found")
             ctx["source"] = "apify"
-            return _normalize_post_download(items[0])
+            thin = _normalize_post_download(items[0])
+            thin["comments"] = []
+            thin["relatedPosts"] = []
+            # Align thin fallback with the shared post contract keys.
+            thin.setdefault("threadId", thin.get("id"))
+            thin.setdefault("replyToId", None)
+            thin.setdefault("quoteId", None)
+            thin.setdefault("isReply", False)
+            thin.setdefault("isQuote", False)
+            return thin
 
         data = await cached_or_run(
             endpoint="threads.post-details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

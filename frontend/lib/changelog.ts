@@ -50,6 +50,45 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
+    category: "fix",
+    title: "Reddit subreddit-details: ISO createdAt, rules[], t5_ id",
+    description:
+      "Docs example showed createdAt as a float-string Unix epoch (\"1201327674.0\") while FIELD_DESCS promised ISO 8601 — the worst date-format variant in the catalog. Mapper now never echoes raw epochs; live about.json + about/rules fill id (t5_…), activeUsers (currently online — not mislabeled weekly actives), rules[], and submitText. category field-doc no longer leaks YouTube SponsorBlock enums onto Reddit; sticky lint covers category. Param copy documents case-insensitive names (Captapi advantage vs ScrapeCreators' case-sensitive warning).",
+    items: [
+      "createdAt → ISO-8601 UTC (never \"1201327674.0\")",
+      "id (t5_…) + activeUsers + rules[] + submitText",
+      "category field-doc override + sticky lint",
+      "Case-insensitive subreddit names documented",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "improvement",
+    title: "Threads search + search-users: flat native pricing + richer users",
+    description:
+      "threads/search was ~18 credits and search-users ~14 for the same native Decodo hydrate TikTok/Twitter already bill flat. Native search is now flat 2 (twitter/search parity); search-users flat 1 (TikTok/SC parity). Apify fallback stays ~0.7/result. search-users adds id + profileImage + followers (keyed, usually null). Docs drop the false “topic-related profiles” promise — users are authors of keyword SERP hits — and spell out Meta Top ranking, stale posts, and engagement-farm spam. verified no longer collapses false→null via or.",
+    items: [
+      "search: flat 2 native / ~0.7 Apify (was ~18)",
+      "search-users: flat 1 native / ~0.7 Apify (was ~14)",
+      "search-users: id + profileImage + followers key",
+      "Honest platformLimits + FAQ (Top SERP, no sort/date, not semantic people-search)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
+    category: "improvement",
+    title: "Threads post-details: comments[], relatedPosts[], views key",
+    description:
+      "threads/post-details was a same-shape alias of a single user-posts card — no fields that justified a details endpoint, and Threads had no comments surface at all. The permalink hydrate now always returns comments[] (inline same-thread replies when Meta embeds them; [] on viral logged-out pages) and relatedPosts[] from BarcelonaLoggedOutRelatedPosts (no second call). engagement.views is always keyed (often null on web hydrate). Field-doc overrides stop YouTube/Bluesky copy leaking onto Threads pages; FAQ documents the honest empty-comments case vs ScrapeCreators' deeper GraphQL path.",
+    items: [
+      "comments[] + relatedPosts[] always present on post-details",
+      "engagement.views keyed; bare Meta GK view_counts ints ignored",
+      "Threads field-doc overrides for likes/verified/views/publishedAt",
+      "FAQ: not an alias; empty comments = hydrate limit, not a missing key",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
     category: "improvement",
     title: "Threads user-posts: flat 2 native, views, thread chain",
     description:

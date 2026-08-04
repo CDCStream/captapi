@@ -403,9 +403,14 @@ def _caption_text(post: dict[str, Any]) -> str | None:
 
 
 def _view_count(post: dict[str, Any], info: dict[str, Any]) -> int | None:
-    """Best-effort public view count (SC ``view_counts`` / Meta aliases)."""
+    """Best-effort public view count (SC ``view_counts`` / Meta aliases).
+
+    Bare integer ``view_counts`` on logged-out HTML is often a Meta GateKeeper /
+    experiment id (e.g. 533423), not per-post views — only accept dict shapes
+    for that key. Singular ``view_count`` / ``play_count`` stay scalar-safe.
+    """
     for blob in (post, info):
-        for key in ("view_counts", "view_count", "viewCount", "viewCounts", "play_count"):
+        for key in ("view_count", "viewCount", "viewCounts", "play_count"):
             raw = blob.get(key)
             if raw is None:
                 continue
@@ -418,6 +423,16 @@ def _view_count(post: dict[str, Any], info: dict[str, Any]) -> int | None:
                 )
             else:
                 n = safe_int(raw)
+            if n is not None:
+                return n
+        raw_vc = blob.get("view_counts")
+        if isinstance(raw_vc, dict):
+            n = safe_int(
+                raw_vc.get("count")
+                or raw_vc.get("views")
+                or raw_vc.get("value")
+                or raw_vc.get("view_count")
+            )
             if n is not None:
                 return n
     return None
@@ -508,10 +523,18 @@ def _normalize_relay_post(
         "caption": _caption_text(post),
         "taken_at": _unix_to_iso(post.get("taken_at")),
         "user": {
+            "pk": safe_str(user.get("pk") or user.get("id")),
             "username": safe_str(user.get("username") or user.get("userName")),
             "full_name": safe_str(user.get("full_name") or user.get("fullName") or user.get("name")),
-            "is_verified": bool(user.get("is_verified") or user.get("isVerified")),
+            "is_verified": (
+                user.get("is_verified")
+                if isinstance(user.get("is_verified"), bool)
+                else user.get("isVerified")
+                if isinstance(user.get("isVerified"), bool)
+                else None
+            ),
             "profile_pic_url": _profile_pic(user) or safe_str(user.get("profile_pic_url")),
+            "follower_count": safe_int(user.get("follower_count") or user.get("followerCount")),
         },
         "like_count": safe_int(post.get("like_count") or post.get("likeCount")),
         "reply_count": safe_int(info.get("direct_reply_count") or info.get("reply_count")),
@@ -621,11 +644,27 @@ def parse_post_code(url_or_code: str) -> tuple[str | None, str | None]:
 
 
 def parse_post_html(html: str, code: str) -> dict[str, Any] | None:
-    """Extract a single post by shortcode from a permalink page HTML."""
+    """Extract a permalink post plus related posts / inline comments when present.
+
+    Logged-out Threads permalink HTML (``BarcelonaPostPage`` +
+    ``BarcelonaLoggedOutRelatedPosts``) embeds:
+
+    * the target post under ``thread_items``
+    * algorithmic **related** posts as other ``thread_items`` arrays
+    * rarely, same-thread reply posts (treated as ``comments``)
+
+    Public reply trees for viral posts are usually **not** in the initial
+    hydrate — ``comments`` is then ``[]`` (stable key, honest empty).
+    """
     if not html or not code:
         return None
     needle = code.strip()
-    # Prefer thread_items (full engagement payload).
+    main: dict[str, Any] | None = None
+    main_author: str | None = None
+    comments: list[dict[str, Any]] = []
+    related: list[dict[str, Any]] = []
+    seen_codes: set[str] = {needle}
+
     for match in _THREAD_ITEMS_RE.finditer(html):
         arr_s = _extract_json_array(html, match.end() - 1)
         if not arr_s:
@@ -634,39 +673,82 @@ def parse_post_html(html: str, code: str) -> dict[str, Any] | None:
             items = json.loads(arr_s)
         except ValueError:
             continue
-        if not isinstance(items, list):
+        if not isinstance(items, list) or not items:
             continue
+
+        posts_in_thread: list[dict[str, Any]] = []
+        target_idx: int | None = None
         for item in items:
             if not isinstance(item, dict):
                 continue
             post = item.get("post")
             if not isinstance(post, dict):
                 continue
-            if safe_str(post.get("code")) != needle:
-                continue
             normalized = _normalize_relay_post(post)
-            if normalized:
-                return normalized
-    # Fallback: scan for post objects containing the code.
-    for m in re.finditer(r'"code"\s*:\s*"' + re.escape(needle) + r'"', html):
-        brace = html.rfind("{", max(0, m.start() - 4000), m.start())
-        if brace < 0:
+            if not normalized:
+                continue
+            posts_in_thread.append(normalized)
+            if safe_str(normalized.get("code")) == needle:
+                target_idx = len(posts_in_thread) - 1
+
+        if target_idx is not None:
+            main = posts_in_thread[target_idx]
+            main_author = safe_str((main.get("user") or {}).get("username"))
+            thread_root = safe_str(main.get("pk")) or needle
+            for idx, row in enumerate(posts_in_thread):
+                if idx == target_idx:
+                    continue
+                code_s = safe_str(row.get("code"))
+                if not code_s or code_s in seen_codes:
+                    continue
+                seen_codes.add(code_s)
+                row_author = safe_str((row.get("user") or {}).get("username"))
+                # Same-thread posts from other users ≈ replies/comments.
+                # Same-author siblings are multi-part thread legs (threadId).
+                if row_author and main_author and row_author.lower() != main_author.lower():
+                    row["thread_id"] = thread_root
+                    row["reply_to_id"] = row.get("reply_to_id") or thread_root
+                    row["is_reply"] = True
+                    comments.append(row)
+                else:
+                    row["thread_id"] = thread_root
             continue
-        raw = _extract_json_object(html, brace)
-        if not raw:
+
+        # Other thread_items arrays on the permalink = LoggedOut related posts.
+        root = posts_in_thread[0]
+        code_s = safe_str(root.get("code"))
+        if not code_s or code_s in seen_codes:
             continue
-        try:
-            obj = json.loads(raw)
-        except ValueError:
-            continue
-        if not isinstance(obj, dict) or safe_str(obj.get("code")) != needle:
-            continue
-        if obj.get("like_count") is None and obj.get("caption") is None and not obj.get("user"):
-            continue
-        normalized = _normalize_relay_post(obj)
-        if normalized:
-            return normalized
-    return None
+        seen_codes.add(code_s)
+        related.append(root)
+
+    if main is None:
+        # Fallback: scan for post objects containing the code.
+        for m in re.finditer(r'"code"\s*:\s*"' + re.escape(needle) + r'"', html):
+            brace = html.rfind("{", max(0, m.start() - 4000), m.start())
+            if brace < 0:
+                continue
+            raw = _extract_json_object(html, brace)
+            if not raw:
+                continue
+            try:
+                obj = json.loads(raw)
+            except ValueError:
+                continue
+            if not isinstance(obj, dict) or safe_str(obj.get("code")) != needle:
+                continue
+            if obj.get("like_count") is None and obj.get("caption") is None and not obj.get("user"):
+                continue
+            main = _normalize_relay_post(obj)
+            if main:
+                break
+
+    if not main:
+        return None
+
+    main["comments"] = comments
+    main["related_posts"] = related[:12]
+    return main
 
 
 
@@ -805,10 +887,18 @@ async def search_users(query: str, limit: int = 20) -> list[dict[str, Any]] | No
         seen.add(username)
         users.append(
             {
+                "pk": safe_str(user.get("pk") or user.get("id")),
                 "username": username,
                 "full_name": safe_str(user.get("full_name") or user.get("fullName") or user.get("name")),
-                "is_verified": bool(user.get("is_verified") or user.get("isVerified")),
+                "is_verified": (
+                    user.get("is_verified")
+                    if isinstance(user.get("is_verified"), bool)
+                    else user.get("isVerified")
+                    if isinstance(user.get("isVerified"), bool)
+                    else None
+                ),
                 "profile_pic_url": safe_str(user.get("profile_pic_url") or user.get("profilePicUrl")),
+                "follower_count": safe_int(user.get("follower_count") or user.get("followerCount")),
                 "url": f"https://www.threads.net/@{username}",
             }
         )
@@ -869,6 +959,8 @@ async def post_details(url_or_code: str) -> dict[str, Any] | None:
         code=code,
         likes=parsed.get("like_count"),
         author=(parsed.get("user") or {}).get("username"),
+        comments=len(parsed.get("comments") or []),
+        related=len(parsed.get("related_posts") or []),
     )
     return parsed
 

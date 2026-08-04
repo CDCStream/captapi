@@ -5497,16 +5497,42 @@
     "credits": null,
     "data": {
       "platform": "reddit",
+      "id": "t5_2qh87",
       "name": "space",
       "url": "https://www.reddit.com/r/space",
       "title": "/r/space: news, articles and discussion",
       "description": "Share & discuss informative content on:\n\n* Astrophysics\n* Cosmology\n* Space Exploration\n* Planetary Science\n* Astrobiology",
-      "members": 27936127,
+      "members": 27940319,
+      "activeUsers": null,
       "category": "Lifestyles",
       "language": "en",
       "type": "public",
-      "createdAt": "1201327674.0",
+      "createdAt": "2008-01-26T06:07:54.000Z",
       "nsfw": false,
+      "submitText": "PLEASE **[READ THE SIDEBAR](https://www.reddit.com/r/space/wiki/sidebar_template)** BEFORE POSTING.",
+      "rules": [
+        {
+          "name": "Submissions must be related to Space/Cosmology",
+          "description": "This includes \"circlejerky\" submissions or space-related art, with the exception of art from space agencies or historically-significant art.",
+          "kind": "link",
+          "violationReason": "Submissions must be related to Space/Cosmology",
+          "priority": 0
+        },
+        {
+          "name": "No sensationalist/misleading/unscientific content or titles",
+          "description": "Post titles need to be descriptive and non-clickbait.  When submitting images titles need to accurately describe the content of the image (e.g. if an image is a composite this needs to be clearly stated), and without attempting to draw in upvotes or comments.  The image should stand on it's own.",
+          "kind": "all",
+          "violationReason": "No sensationalist/misleading/unscientific content or titles",
+          "priority": 1
+        },
+        {
+          "name": "No spam/blogspam/paywalled/pirated content",
+          "description": "This also means that news articles should be a top-level source.",
+          "kind": "link",
+          "violationReason": "No spam/blogspam/paywalled/pirated content",
+          "priority": 2
+        }
+      ],
       "icon": "https://styles.redditmedia.com/t5_2qh87/styles/communityIcon_ub69d1lpjlf51.png",
       "banner": "https://styles.redditmedia.com/t5_2qh87/styles/bannerBackgroundImage_n7bxapsg3kq81.png"
     }
@@ -7983,25 +8009,86 @@
       "url": "https://www.threads.net/@zuck/post/DZ7eGA1G7wU",
       "text": "Our new line of @metaglasses is available today. Three shapes, 26 style combos, with our most advanced Meta AI built in. Plus, three custom styles designed by @kyliejenner.",
       "publishedAt": "2026-06-23T12:57:42.000Z",
+      "threadId": "3925863854786722836",
+      "replyToId": null,
+      "quoteId": null,
+      "isReply": false,
+      "isQuote": false,
       "author": {
         "username": "zuck",
         "displayName": "Mark Zuckerberg",
         "verified": true,
-        "profileImage": "https://scontent-iad6-1.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-iad6-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gGRvRGRlBJzSaDiIHvy96S-H7IXH2wFzXSpG21h5j2h0Naq9IW3HS8dzgEC2DJZVZk&_nc_ohc=vLH8jAZMCqoQ7kNvwGzk09c&_nc_gid=SKYrfm-D56HlSCQ63fyNqg&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQC2Ehx5DCkim-2Ypr-U5Cpo18JJL1Cg378dtzsIxna3SQ&oe=6A6E2ABE&_nc_sid=10d13b"
+        "profileImage": "https://scontent-arn2-1.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gFsMxaeE1_m_Q_Q0eLf64nCG364CCEvIvzu9jsBCHKpQUWN0bClo9JEGGd5l3LhCQ8&_nc_ohc=2ejw17SwZhoQ7kNvwHwwhmI&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQFuCMUtskb3YHQEeVcugbTVFCIEBGnplQquZ3GzBmvhDA&oe=6A77D5BE&_nc_sid=10d13b"
       },
       "engagement": {
-        "likes": 3620,
-        "replies": 1403,
-        "reposts": 237,
-        "quotes": 117
+        "views": null,
+        "likes": 3693,
+        "replies": 1408,
+        "reposts": 243,
+        "quotes": 119
       },
       "media": [
-        "https://scontent-iad3-2.cdninstagram.com/v/t51.71878-15/729466804_1549760159886177_1883659439515397370_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=105&ig_cache_key=MzkyNTg1NzYxNDQ3NTQyMzA5NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=stcmUcGgS9kQ7kNvwE2_SBs&_nc_oc=Adr6V5qDP4eW5RXqD5GFL13d3gwBJeSM0416O70OlzPNG6x72NO4f9DGAq1cmNY2Tfk&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-2.cdninstagram.com&_nc_gid=SKYrfm-D56HlSCQ63fyNqg&_nc_ss=7a22e&oh=00_AQCrin3Lx7BW1fworyktsrvpPjkzSxnefooIqQaiXIvshQ&oe=6A6E4876",
-        "https://scontent-iad6-1.cdninstagram.com/o1/v/t16/f2/m84/AQOTRrCQTl1fyJz7fqBninvUdgWeil7BncTOhD-RfiP256I4PY_ioi8UAxdGl0WLEByzkS3XiObR8E2yNiSbmnE634ktoS1hPNebBYI.mp4?_nc_cat=107&_nc_sid=5e9851&_nc_ht=scontent-iad6-1.cdninstagram.com&_nc_ohc=CYAcI0UX3ncQ7kNvwEzQCPv&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0FST1VTRUxfSVRFTS5DMy43MjAuZGFzaF9iYXNlbGluZV8xX3YxIiwieHB2X2Fzc2V0X2lkIjoxNzk2ODE3MTU3ODA4OTg4OCwiYXNzZXRfYWdlX2RheXMiOjMzLCJ2aV91c2VjYXNlX2lkIjoxMDE2NCwiZHVyYXRpb25fcyI6MjQsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=cefa3ff17e61a968&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC81NDQyODFEMkZCRDg0MzU4MzZBQUE0QzI5MzE4MzlBRF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzYwNEVGNDk2M0EwQzdFNTY4QTIyNDRDRkI4MDZBMkIwX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbAhufCnv3qPxUCKAJDMywXQDgF41P3ztkYEmRhc2hfYmFzZWxpbmVfMV92MREAde4HZeieAQA&_nc_gid=SKYrfm-D56HlSCQ63fyNqg&_nc_zt=28&_nc_ss=7a22e&oh=00_AQCM2jLds0l7xzFxMerH9RPcZIf6qElGCgvI5V1DJS_ekg&oe=6A6A37B5",
-        "https://scontent-iad3-2.cdninstagram.com/v/t51.82787-15/728809712_17974875099103224_2528686373104860184_n.webp?_nc_cat=103&ig_cache_key=MzkyNTg1NzU3NTcwNjYwODc2NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=wgnGXUO07qoQ7kNvwFM_jto&_nc_oc=AdrxVBIXp0YmbH6aYcplbYztDeHesnqMNbGHQQdWmHeS1y7LKIltn5xPwHJCjxCyb38&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-2.cdninstagram.com&_nc_gid=SKYrfm-D56HlSCQ63fyNqg&_nc_ss=7a22e&oh=00_AQDnoCp2GOZD_qhZc4iins8M5f8WO-fA4H2nkIVk1Ii7Uw&oe=6A6E1950",
-        "https://scontent-iad6-1.cdninstagram.com/v/t51.71878-15/727566051_958314003924963_5283054625475303262_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=102&ig_cache_key=MzkyNTg1NzkxNjQyMzMxMzMwMA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=cjpOMQKC2RcQ7kNvwFqnfBA&_nc_oc=AdrtwIel1SSUzrnCttz96Tp3mS0HW8ZVGquCBE_Ymx38XsNAzWbH4yk0rdeXdVTa6Tw&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad6-1.cdninstagram.com&_nc_gid=SKYrfm-D56HlSCQ63fyNqg&_nc_ss=7a22e&oh=00_AQDcYso9P08PwHT3zbdk7Xj6Uc-IX699-JBCbBySGU0cNg&oe=6A6E460D",
-        "https://scontent-iad3-1.cdninstagram.com/o1/v/t16/f2/m84/AQMq6Zzrg22F9r5ID02lab-TQjcYUfKnqpC2_w06THGl8MZ-tKE8-YxokKyN1Yjw_Nwgwpv-xkP4ApHqJoOKrA3b9z01kZ1S4Kgf9ts.mp4?_nc_cat=101&_nc_sid=5e9851&_nc_ht=scontent-iad3-1.cdninstagram.com&_nc_ohc=dXo8gsZ3y98Q7kNvwGb-m2V&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0FST1VTRUxfSVRFTS5DMy43MjAuZGFzaF9iYXNlbGluZV8xX3YxIiwieHB2X2Fzc2V0X2lkIjoxNzk3NDg3NTE5ODEwMzIyNCwiYXNzZXRfYWdlX2RheXMiOjM0LCJ2aV91c2VjYXNlX2lkIjoxMDE2NCwiZHVyYXRpb25fcyI6MjgsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=727caf249a0595d&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC8zMTQ2RkM2Q0JBNkVFMzhBMDIwQzk0MkZEQzRGMEE4NV92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzQzNEQwMTM2OTM3NzEyNTk0MkEwNDFERTgyODAyNzg0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbw-oSxuIPuPxUCKAJDMywXQDwPnbItDlYYEmRhc2hfYmFzZWxpbmVfMV92MREAde4HZeieAQA&_nc_gid=SKYrfm-D56HlSCQ63fyNqg&_nc_ss=7a22e&_nc_zt=28&oh=00_AQCHiuPM-XsixzgMMMl1zdLIyWuBmMZFQahpOuLsDme8-w&oe=6A6A43B3",
-        "https://scontent-iad3-2.cdninstagram.com/v/t51.71878-15/729466804_1549760159886177_1883659439515397370_n.jpg?stp=c0.80.640.640a_dst-jpg_e15_s640x640_tt6&_nc_cat=105&ig_cache_key=MzkyNTg1NzYxNDQ3NTQyMzA5NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=stcmUcGgS9kQ7kNvwE2_SBs&_nc_oc=Adr6V5qDP4eW5RXqD5GFL13d3gwBJeSM0416O70OlzPNG6x72NO4f9DGAq1cmNY2Tfk&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-2.cdninstagram.com&_nc_gid=SKYrfm-D56HlSCQ63fyNqg&_nc_ss=7a22e&oh=00_AQDSeO9Kx3ytZVzlTkIMSFZLxnEbsSOcGJR0Wy7FHdzLsw&oe=6A6E4876"
+        "https://scontent-arn2-1.cdninstagram.com/v/t51.71878-15/729466804_1549760159886177_1883659439515397370_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=105&ig_cache_key=MzkyNTg1NzYxNDQ3NTQyMzA5NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=gwtwKMHXGY0Q7kNvwFs8O_B&_nc_oc=AdoeAgtu1iFjbAXZR03M0jk5mHDyXG-V4YkfEgAhFcL9ShW87MFpF6dbSvT0ivhLv8A&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_ss=7a22e&oh=00_AQGstcY-xX--otMYSGqFyYqoIP73kZ_8D8RHL_quEES13w&oe=6A77F376",
+        "https://scontent-arn2-1.cdninstagram.com/o1/v/t16/f2/m84/AQOTRrCQTl1fyJz7fqBninvUdgWeil7BncTOhD-RfiP256I4PY_ioi8UAxdGl0WLEByzkS3XiObR8E2yNiSbmnE634ktoS1hPNebBYI.mp4?_nc_cat=107&_nc_sid=5e9851&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_ohc=fSXEPxW14JIQ7kNvwHBncdf&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0FST1VTRUxfSVRFTS5DMy43MjAuZGFzaF9iYXNlbGluZV8xX3YxIiwieHB2X2Fzc2V0X2lkIjoxNzk2ODE3MTU3ODA4OTg4OCwiYXNzZXRfYWdlX2RheXMiOjQwLCJ2aV91c2VjYXNlX2lkIjoxMDE2NCwiZHVyYXRpb25fcyI6MjQsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=cefa3ff17e61a968&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC81NDQyODFEMkZCRDg0MzU4MzZBQUE0QzI5MzE4MzlBRF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzYwNEVGNDk2M0EwQzdFNTY4QTIyNDRDRkI4MDZBMkIwX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbAhufCnv3qPxUCKAJDMywXQDgF41P3ztkYEmRhc2hfYmFzZWxpbmVfMV92MREAde4HZeieAQA&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQHxRBBUCqh74vHFVtIRloUxKv6fQJnkF0rhbfQ9oLWYUw&oe=6A73E2B5",
+        "https://scontent-arn2-1.cdninstagram.com/v/t51.82787-15/728809712_17974875099103224_2528686373104860184_n.webp?_nc_cat=103&ig_cache_key=MzkyNTg1NzU3NTcwNjYwODc2NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=hcbMLGiW8xwQ7kNvwFEpLPb&_nc_oc=Adp53D-Pdh8YLEndpuRY0wdf55qTyWpQ3EHjpbRvpcciOubZ0K0xiJUOd2TabARJ0u4&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_ss=7a22e&oh=00_AQFv2NH8LmdUPaoC1Av3ZRLD7t9hzF0f8Oh7YMogVMvWMg&oe=6A77C450",
+        "https://scontent-arn2-1.cdninstagram.com/v/t51.71878-15/727566051_958314003924963_5283054625475303262_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=102&ig_cache_key=MzkyNTg1NzkxNjQyMzMxMzMwMA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=LdYJdScudXEQ7kNvwEqWHSi&_nc_oc=AdqKmmomTPIVLcZtpe7N6eQ3GQBIqSuNdCbB7emtsuWYO-MkD2glRd4edbtC0KjiXsw&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_ss=7a22e&oh=00_AQGFg_EpnLAZWh9VOZRPNGhbBDXpwWHONMMLtBFdDmLTfQ&oe=6A77F10D",
+        "https://scontent-arn2-1.cdninstagram.com/o1/v/t16/f2/m84/AQMq6Zzrg22F9r5ID02lab-TQjcYUfKnqpC2_w06THGl8MZ-tKE8-YxokKyN1Yjw_Nwgwpv-xkP4ApHqJoOKrA3b9z01kZ1S4Kgf9ts.mp4?_nc_cat=101&_nc_sid=5e9851&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_ohc=OqRq-AujzmMQ7kNvwHtu9BR&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0FST1VTRUxfSVRFTS5DMy43MjAuZGFzaF9iYXNlbGluZV8xX3YxIiwieHB2X2Fzc2V0X2lkIjoxNzk3NDg3NTE5ODEwMzIyNCwiYXNzZXRfYWdlX2RheXMiOjQyLCJ2aV91c2VjYXNlX2lkIjoxMDE2NCwiZHVyYXRpb25fcyI6MjgsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=727caf249a0595d&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC8zMTQ2RkM2Q0JBNkVFMzhBMDIwQzk0MkZEQzRGMEE4NV92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzQzNEQwMTM2OTM3NzEyNTk0MkEwNDFERTgyODAyNzg0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbw-oSxuIPuPxUCKAJDMywXQDwPnbItDlYYEmRhc2hfYmFzZWxpbmVfMV92MREAde4HZeieAQA&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_ss=7a22e&_nc_zt=28&oh=00_AQHjRSb_yOOcdvx_MfP1iGC_MnJwPeyEB_KAMLO9HoNDwQ&oe=6A73EEB3",
+        "https://scontent-arn2-1.cdninstagram.com/v/t51.71878-15/729466804_1549760159886177_1883659439515397370_n.jpg?stp=c0.80.640.640a_dst-jpg_e15_s640x640_tt6&_nc_cat=105&ig_cache_key=MzkyNTg1NzYxNDQ3NTQyMzA5NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=gwtwKMHXGY0Q7kNvwFs8O_B&_nc_oc=AdoeAgtu1iFjbAXZR03M0jk5mHDyXG-V4YkfEgAhFcL9ShW87MFpF6dbSvT0ivhLv8A&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_ss=7a22e&oh=00_AQEGr-aOyoW9YGStHdLdv4m8v2mSpWs0k2FhPeGAakF2lw&oe=6A77F376"
+      ],
+      "comments": [],
+      "relatedPosts": [
+        {
+          "platform": "threads",
+          "id": "3955997150920775044",
+          "code": "DbmhnLxFxWE",
+          "url": "https://www.threads.net/@thelexlibris/post/DbmhnLxFxWE",
+          "text": "The lack of accountability in that teas and tropes post is so wild. The signing lines is all that needs improvements?? I know not.",
+          "publishedAt": "2026-08-04T02:47:11.000Z",
+          "threadId": "3955997150920775044",
+          "replyToId": null,
+          "quoteId": null,
+          "isReply": false,
+          "isQuote": false,
+          "author": {
+            "username": "thelexlibris",
+            "displayName": "Lex 🌱",
+            "verified": null
+          },
+          "engagement": {
+            "views": null,
+            "likes": 1,
+            "replies": null,
+            "reposts": null,
+            "quotes": null
+          },
+          "media": []
+        },
+        {
+          "platform": "threads",
+          "id": "3955973937109715838",
+          "code": "DbmcVYOIMt-",
+          "url": "https://www.threads.net/@xaylibarclay/post/DbmcVYOIMt-",
+          "text": "WOW!! 😮 >> Out of approximately 41,000 to 47,000 active psychiatrists in the U.S., Black women make up less than 1% of the total. \n\nExact counts place the number of practicing Black female psychiatrists between 600 and 850 nationwide, meaning you are looking for a very rare, specialized group of professionals.\n\n🤯🤯",
+          "publishedAt": "2026-08-04T02:01:04.000Z",
+          "threadId": "3955973937109715838",
+          "replyToId": null,
+          "quoteId": null,
+          "isReply": false,
+          "isQuote": false,
+          "author": {
+            "username": "xaylibarclay",
+            "displayName": "XayLi Barclay - Tech, Cameras, Life At 40 Yrs old",
+            "verified": null
+          },
+          "engagement": {
+            "views": null,
+            "likes": 32,
+            "replies": 7,
+            "reposts": 3,
+            "quotes": null
+          },
+          "media": []
+        }
       ]
     }
   },
@@ -15312,47 +15399,30 @@
       "results": [
         {
           "platform": "threads",
-          "id": "3928882651670873164",
-          "code": "DaGMfShCYRM",
-          "url": "https://www.threads.net/@aiwithanju/post/DaGMfShCYRM",
-          "text": "All Paid Courses (Free for First 4500 People)\n\n𝗣𝗮𝗶𝗱 𝗖𝗼𝘂𝗿𝘀𝗲 𝗙𝗥𝗘𝗘 (PART - 1)\n1. Artificial Intelligence\n2. Machine Learning\n3. Prompt Engineering\n4. Claude,Chatgpt,Grok\n5. Data Analytics\n6. AWS Certified\n7. Data Science\n8. BIG DATA\n9. Python\n10. Ethical Hacking\n\n(72 Hours only )\n\nLike + RT + comment 'Drive'\n\nMust Follow me so I can DM you.",
-          "publishedAt": "2026-06-27T16:55:31.000Z",
+          "id": "3955315825888714785",
+          "code": "DbkGsmYk-Ah",
+          "url": "https://www.threads.net/@iansh04_/post/DbkGsmYk-Ah",
+          "text": "All Paid Courses (Free for First 4500 People)\n𝗣𝗮𝗶𝗱 𝗖𝗼𝘂𝗿𝘀𝗲 𝗙𝗥𝗘𝗘 (PART - 1)\n1. Artificial Intelligence\n2. Machine Learning\n3. Prompt Engineering\n4. Claude,Chatgpt,Grok\n5. Data Analytics\n6. AWS Certified\n7. Data Science\n8. BIG DATA\n9. Python\n10. Ethical Hacking\n(72 Hours only )\nLike + Repost + comment ' Drive '\nMust Follow @iansh04_ so I can DM you.",
+          "publishedAt": "2026-08-03T04:13:31.000Z",
+          "threadId": "3955315825888714785",
+          "replyToId": null,
+          "quoteId": null,
+          "isReply": false,
+          "isQuote": false,
           "author": {
-            "username": "aiwithanju",
-            "displayName": "Anjana | AI Strategist & Coach",
-            "verified": true
+            "username": "iansh04_",
+            "displayName": "Ansh Bhatnagar",
+            "verified": false
           },
           "engagement": {
-            "likes": 591,
-            "replies": 668,
-            "reposts": 187,
+            "views": null,
+            "likes": 651,
+            "replies": 790,
+            "reposts": 412,
             "quotes": 4
           },
           "media": [
-            "https://scontent-iad3-1.cdninstagram.com/v/t51.82787-15/728627202_17977076481105005_209164695399005645_n.jpg?stp=c0.200.799.799a_dst-jpg_e35_s799x799_tt6&_nc_cat=108&ig_cache_key=MzkyODg4MjY1MTY3MDg3MzE2NA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNzk5LnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=UMllvfQx1EkQ7kNvwFF9ds9&_nc_oc=AdqXPX71ockRBl2OVRF5O6A7XUeFx-wy4HykpHzxP2mPrFg1NyTsC4-K4HpbZ7gB07g&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-1.cdninstagram.com&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_ss=7a22e&oh=00_AQDcDCZ_P25J_UxIJSHQ3BAKX2ikLzNcr-Sl_tCl_rPuhg&oe=6A6E18CF"
-          ]
-        },
-        {
-          "platform": "threads",
-          "id": "3945514045746596834",
-          "code": "DbBSB7RCkvi",
-          "url": "https://www.threads.net/@withclaudeprompts/post/DbBSB7RCkvi",
-          "text": "All Paid Courses (Free for First 4500 People)\n𝗣𝗮𝗶𝗱 𝗖𝗼𝘂𝗿𝘀𝗲 𝗙𝗥𝗘𝗘 (PART - 3)\n1. Artificial Intelligence\n2. Machine Learning\n3. Cloud Computing\n4. Ethical Hacking\n5. Data Analytics\n6. AWS Certified\n7. Data Science\n8. BIG DATA\n9. Python\n10. MBA\n(72 Hours only )\n\nTo get-\n1. Follow me\n@withclaudeprompts \n[MUST]\n2. Like & Retweet to get DM\n3. Reply \" All \"",
-          "publishedAt": "2026-07-20T15:39:08.000Z",
-          "author": {
-            "username": "withclaudeprompts",
-            "displayName": "With claude prompts",
-            "verified": null
-          },
-          "engagement": {
-            "likes": 222,
-            "replies": 366,
-            "reposts": 90,
-            "quotes": 3
-          },
-          "media": [
-            "https://scontent-iad3-2.cdninstagram.com/v/t51.82787-15/751181197_17932649175349487_5570522177976349227_n.jpg?stp=cp6_dst-jpg_e35_tt6&_nc_cat=103&ig_cache_key=Mzk0NTUxMzg2MDI0MzA5NDA2MA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTE3OS5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=JSwVzU_H3Q4Q7kNvwFxQo2_&_nc_oc=AdoFCfxIagstWXjF22IdoGQbWFw8UrQPTGqgDRxhw925PVjkv9PoKk5NWH20Uz_dmLw&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-2.cdninstagram.com&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_ss=7a22e&oh=00_AQDwgfkkK8UlEqqa3kg-i7hKm0WDbECiRP3-SsgpP2f2dg&oe=6A6E49BB",
-            "https://scontent-iad3-2.cdninstagram.com/v/t51.82787-15/752740928_17932649172349487_6765669894735858771_n.jpg?stp=cp6_dst-jpg_e35_tt6&_nc_cat=103&ig_cache_key=Mzk0NTUxMzg2MDE3NTkzMDg5MA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTE3OS5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=3hsiZ_5t8gkQ7kNvwHVuyyh&_nc_oc=AdoxW87GjLAqaQ5taO0PwwBdcaiQ2zxTtDxxV3FlNB96FKru_oASz-xezHNOzZ-R0C8&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-2.cdninstagram.com&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_ss=7a22e&oh=00_AQB_JsuMh4Ky5P3LDsFq0GLY5DosMUMgIDXHh1SUtmr8IQ&oe=6A6E26AD"
+            "https://scontent-arn2-1.cdninstagram.com/v/t51.82787-15/763355760_17982304443106462_6808022601370922517_n.jpg?stp=c0.162.799.799a_dst-jpg_e35_s799x799_tt6&_nc_cat=1&ig_cache_key=Mzk1NTMxNTgyNTg4ODcxNDc4NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNzk5LnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=W6xISNbePogQ7kNvwFHyufm&_nc_oc=Adpj2_PItVsSle0pXBx8J50TeHA2rVgNKt5K3ykIx7ldNtte-CnSNdBYH26W0xnr9tc&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=2OcSzrbqz_izuGJcwi-1qQ&_nc_ss=7a22e&oh=00_AQGLu1pgLEJU7smbOpdzIyAzqlyw6AtR4JFDxcgyr2gJzA&oe=6A77FBBD"
           ]
         },
         {
@@ -15362,43 +15432,54 @@
           "url": "https://www.threads.net/@theartificialintelligence/post/DFePYrboeQq",
           "text": "🇨🇳🇺🇸 DeepSeek tells the world that artificial intelligence is not American intelligence, and the United States has no right to monopolize the development of AI that belongs to all mankind.\n\n-Dr. Victor Gao",
           "publishedAt": "2025-01-31T02:04:57.000Z",
+          "threadId": "3557348422268871722",
+          "replyToId": null,
+          "quoteId": null,
+          "isReply": false,
+          "isQuote": false,
           "author": {
             "username": "theartificialintelligence",
             "displayName": "Artificial Intelligence | AI",
             "verified": true
           },
           "engagement": {
-            "likes": 10771,
+            "views": null,
+            "likes": 10777,
             "replies": 823,
-            "reposts": 761,
+            "reposts": 759,
             "quotes": 50
           },
           "media": [
-            "https://scontent-iad6-1.cdninstagram.com/o1/v/t16/f2/m84/AQPR4zUqReqf-s4ildWOQeBb718tDuYqeErpvd3aGhr4jI7THlrcuR7esStJjWXCkmLl-XURcNSrf7AsUKFmac0NgM-QfunN0v1quQo.mp4?_nc_cat=109&_nc_sid=5e9851&_nc_ht=scontent-iad6-1.cdninstagram.com&_nc_ohc=3icBpA4DDyYQ7kNvwEn6MIV&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uRkVFRC5DMy4xMjgwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6OTU1NDY3MDkxNzkyNDE0MiwiYXNzZXRfYWdlX2RheXMiOjU0MywidmlfdXNlY2FzZV9pZCI6MTAxNjQsImR1cmF0aW9uX3MiOjI2MiwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=6df3e1b4c37b0184&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC9FRjRCRkY3RkY3NEM5REZERjE1QUJDQUI1OEU4Rjk4Ql92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYOnBhc3N0aHJvdWdoX2V2ZXJzdG9yZS9HTFRwVkJ6VThfSDFnalVIQUtJNTJLZkhlbVZ2YmtZTEFBQUYVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAm3NSR4IX7-CEVAigCQzMsF0BwYAAAAAAAGBJkYXNoX2Jhc2VsaW5lXzFfdjERAHXqB2XongEA&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQB1FVQj8uhA-qSKtliVH9A4okUJTCCDLGUwpQ_F9WoCFA&oe=6A6A352B",
-            "https://scontent-iad3-2.cdninstagram.com/v/t51.71878-15/474888843_486869244173785_943828438724363456_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=111&ig_cache_key=MzU1NzM0ODQyMjI2ODg3MTcyMg%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=0VAQZJ_qXi0Q7kNvwGqBNI3&_nc_oc=AdoH9VZA4GRIGWKMgL1yjXMwYI-Fyg1PezSOy1SBEJcSjjpPNYSj1lfGZc8BpNXYpao&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-2.cdninstagram.com&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_ss=7a22e&oh=00_AQA50Esw1q5yzm582T9AdRk2I27NSFt0AqFgSRDI6juCUg&oe=6A6E49AA"
+            "https://scontent-arn2-1.cdninstagram.com/o1/v/t16/f2/m84/AQPR4zUqReqf-s4ildWOQeBb718tDuYqeErpvd3aGhr4jI7THlrcuR7esStJjWXCkmLl-XURcNSrf7AsUKFmac0NgM-QfunN0v1quQo.mp4?_nc_cat=109&_nc_sid=5e9851&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_ohc=wtd19Chl-HEQ7kNvwGng7Cc&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uRkVFRC5DMy4xMjgwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6OTU1NDY3MDkxNzkyNDE0MiwiYXNzZXRfYWdlX2RheXMiOjU1MCwidmlfdXNlY2FzZV9pZCI6MTAxNjQsImR1cmF0aW9uX3MiOjI2MiwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=6df3e1b4c37b0184&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC9FRjRCRkY3RkY3NEM5REZERjE1QUJDQUI1OEU4Rjk4Ql92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYOnBhc3N0aHJvdWdoX2V2ZXJzdG9yZS9HTFRwVkJ6VThfSDFnalVIQUtJNTJLZkhlbVZ2YmtZTEFBQUYVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAm3NSR4IX7-CEVAigCQzMsF0BwYAAAAAAAGBJkYXNoX2Jhc2VsaW5lXzFfdjERAHXqB2XongEA&_nc_gid=2OcSzrbqz_izuGJcwi-1qQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQF8bFsn29XzqRjQkrRFQrTZklFBON9dC84Y-XO4UOk-iw&oe=6A73E02B",
+            "https://scontent-arn2-1.cdninstagram.com/v/t51.71878-15/474888843_486869244173785_943828438724363456_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=111&ig_cache_key=MzU1NzM0ODQyMjI2ODg3MTcyMg%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=3FblhuYndyEQ7kNvwEjz1O7&_nc_oc=Adp7qot7ziRgosQn26lzhfHrzzD_m2TOH814YQ1H8ASPezYzNdAr9tGFpJn46kg9I_o&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=2OcSzrbqz_izuGJcwi-1qQ&_nc_ss=7a22e&oh=00_AQEidlufgTbrLRvAeY_lttMaLW7uUuDWfGwhwIjT5ImsRQ&oe=6A77F4AA"
           ]
         },
         {
           "platform": "threads",
-          "id": "3748832590774943568",
-          "code": "DQGh2EPjD9Q",
-          "url": "https://www.threads.net/@leon_paul_h/post/DQGh2EPjD9Q",
-          "text": "I hear a lot of people saying AI is good for nothing and shouldn’t exist. You’re probably thinking of Gen-AI. \nHere is the system I built with the same AI detecting lethal landmines, designed to look like leaves, amongst thousands of leaves. \nHumans cannot do this. This saves lives. This replaces a job no one wants to do. \nThis is AI.",
-          "publishedAt": "2025-10-22T06:51:14.000Z",
+          "id": "3928882651670873164",
+          "code": "DaGMfShCYRM",
+          "url": "https://www.threads.net/@aiwithanju/post/DaGMfShCYRM",
+          "text": "All Paid Courses (Free for First 4500 People)\n\n𝗣𝗮𝗶𝗱 𝗖𝗼𝘂𝗿𝘀𝗲 𝗙𝗥𝗘𝗘 (PART - 1)\n1. Artificial Intelligence\n2. Machine Learning\n3. Prompt Engineering\n4. Claude,Chatgpt,Grok\n5. Data Analytics\n6. AWS Certified\n7. Data Science\n8. BIG DATA\n9. Python\n10. Ethical Hacking\n\n(72 Hours only )\n\nLike + RT + comment 'Drive'\n\nMust Follow me so I can DM you.",
+          "publishedAt": "2026-06-27T16:55:31.000Z",
+          "threadId": "3928882651670873164",
+          "replyToId": null,
+          "quoteId": null,
+          "isReply": false,
+          "isQuote": false,
           "author": {
-            "username": "leon_paul_h",
-            "displayName": "Leon",
-            "verified": null
+            "username": "aiwithanju",
+            "displayName": "Anjana | AI Strategist & Coach",
+            "verified": true
           },
           "engagement": {
-            "likes": 12474,
-            "replies": 506,
-            "reposts": 514,
-            "quotes": 44
+            "views": null,
+            "likes": 649,
+            "replies": 721,
+            "reposts": 195,
+            "quotes": 4
           },
           "media": [
-            "https://scontent-iad6-1.cdninstagram.com/o1/v/t16/f2/m69/AQOkoj6S3epfmd-hIhzbEIY3R2MGQFM-DV4GZz5V2s_jNTk_akx2OL8oxQCez-1O30MfEc1OK3Pzr7XjweTd5fRg.mp4?strext=1&_nc_cat=102&_nc_sid=8bf8fe&_nc_ht=scontent-iad6-1.cdninstagram.com&_nc_ohc=m-yQBUQLSScQ7kNvwFTNzNy&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uRkVFRC5DMy4xMjc2LnByb2dyZXNzaXZlX2gyNjQtYmFzaWMtZ2VuMl83MjBwIiwieHB2X2Fzc2V0X2lkIjoxODY5MzI3Njg3MzE3NTI3LCJhc3NldF9hZ2VfZGF5cyI6Mjc5LCJ2aV91c2VjYXNlX2lkIjoxMDE2NCwiZHVyYXRpb25fcyI6OCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQCZHctHg62bx4zvKy6hZ2qWaUI-0cgM7_IatYkCxlYqqA&oe=6A6E297A",
-            "https://scontent-iad6-1.cdninstagram.com/v/t51.71878-15/570177049_4178982172340663_131830339174579264_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=102&ig_cache_key=Mzc0ODgzMjU5MDc3NDk0MzU2OA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=4XBG6uzac9AQ7kNvwHPWFtk&_nc_oc=AdqS88oNRMjiJZU4CKUXNkhX8CzqQnAayBIvLz-kV2rwX11StJEp0Dg2ow1RZNZk-kM&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad6-1.cdninstagram.com&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_ss=7a22e&oh=00_AQCr5Cad4aHBdMbIjO02dvjwzuJDhFbgScrkUDFZBnwb5A&oe=6A6E2363"
+            "https://scontent-arn2-1.cdninstagram.com/v/t51.82787-15/728627202_17977076481105005_209164695399005645_n.jpg?stp=c0.200.799.799a_dst-jpg_e35_s799x799_tt6&_nc_cat=108&ig_cache_key=MzkyODg4MjY1MTY3MDg3MzE2NA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNzk5LnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=MxEGK-HxQXkQ7kNvwFGtDeU&_nc_oc=AdqdW4mwvqSB-iu2komzQ45HoOgx2wZilMkKDL2pS5DAJngoEHAEhp_Hi23r2OWLmnw&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=2OcSzrbqz_izuGJcwi-1qQ&_nc_ss=7a22e&oh=00_AQEidEbZvqpA1seY5mZlHI1dkNAtYXzsoHC8wv9Jabpkgg&oe=6A77FC0F"
           ]
         },
         {
@@ -15408,20 +15489,52 @@
           "url": "https://www.threads.net/@mit/post/DPOqb6biG_n",
           "text": "MIT researchers are seeking ways to mitigate AI’s ballooning carbon footprint, from boosting algorithms’ efficiency to rethinking data centers’ designs. “This is a once-in-a-lifetime opportunity to innovate and make AI systems less carbon-intense,” Jennifer Turliuk says. https://news.mit.edu/2025/responding-to-generative-ai-climate-impact-0930",
           "publishedAt": "2025-09-30T14:05:53.000Z",
+          "threadId": "3733107777255010279",
+          "replyToId": null,
+          "quoteId": null,
+          "isReply": false,
+          "isQuote": false,
           "author": {
             "username": "mit",
             "displayName": "MIT",
             "verified": true
           },
           "engagement": {
-            "likes": 108,
+            "views": null,
+            "likes": 110,
             "replies": 2,
             "reposts": 10,
             "quotes": null
           },
           "media": [
-            "https://scontent-iad3-2.cdninstagram.com/v/t51.82787-15/556308117_17932509414097624_2819407881773503615_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=103&ig_cache_key=MzczMzEwNzc3NzI1NTAxMDI3OQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNTYyLnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=s4xe4qnpYlwQ7kNvwGEIVzr&_nc_oc=AdoV83RboiuCZsMATPzcgU2Za39mHVTgKYbZb-w5K4WrVuFW90XnYWujsEeuXQfbTAE&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-2.cdninstagram.com&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_ss=7a22e&oh=00_AQDa6bfrSMsIC5jvxzuKierH2_-ZxpBOfWC1Wz57u46opQ&oe=6A6E304D"
+            "https://scontent-arn2-1.cdninstagram.com/v/t51.82787-15/556308117_17932509414097624_2819407881773503615_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=103&ig_cache_key=MzczMzEwNzc3NzI1NTAxMDI3OQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNTYyLnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=SRawwgfsrCAQ7kNvwEVq9H5&_nc_oc=Adppf-bdGP_tDNHWrp79mMVLA5waVwiIRmKF3xXVn8g3o0U-R9D7zZSFjbpkLKWS5lg&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=2OcSzrbqz_izuGJcwi-1qQ&_nc_ss=7a22e&oh=00_AQFadDcgotXkNiY2NQ3dlAOcHIIB_CYY2q66z02gMv95KA&oe=6A77DB4D"
           ]
+        },
+        {
+          "platform": "threads",
+          "id": "3524548563043123130",
+          "code": "DDptj6FzH-6",
+          "url": "https://www.threads.net/@blairimani/post/DDptj6FzH-6",
+          "text": "I think I have to make a Smarter in Seconds episode about AI (artificial intelligence) since I just saw someone boldly state that “AI can never lie. It’s literally never wrong.” \n\nI’ll cover the basics, why it’s popular, and how it can be dangerous. What else should I add?",
+          "publishedAt": "2024-12-16T19:55:51.000Z",
+          "threadId": "3524548563043123130",
+          "replyToId": null,
+          "quoteId": null,
+          "isReply": false,
+          "isQuote": false,
+          "author": {
+            "username": "blairimani",
+            "displayName": "Blair Imani Ali • Smarter in Seconds",
+            "verified": true
+          },
+          "engagement": {
+            "views": null,
+            "likes": 1118,
+            "replies": 240,
+            "reposts": 21,
+            "quotes": 1
+          },
+          "media": []
         }
       ]
     }
@@ -15435,34 +15548,49 @@
       "totalReturned": 5,
       "users": [
         {
-          "username": "red.rose.whiterose",
-          "displayName": null,
-          "url": "https://www.threads.net/@red.rose.whiterose",
-          "verified": false
+          "id": "63419899106",
+          "username": "3dfreelancing",
+          "displayName": "DesignX3D",
+          "url": "https://www.threads.net/@3dfreelancing",
+          "verified": false,
+          "profileImage": "https://scontent-fml20-1.cdninstagram.com/v/t51.2885-19/358048371_611813460748673_7424252667534087950_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-fml20-1.cdninstagram.com&_nc_cat=105&_nc_oc=Q6cZ2gEuCNzOQBL3WLzHjDVRIUD7nfx3k_HdX2EBkqaiTQ4PmTXyR_B_-1b8j4rN_XouC9U&_nc_ohc=ClRgc8VdrWUQ7kNvwGYy0bX&_nc_gid=BMY7SQQ5QtTZglymKPVK5A&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQFt9IQAYLyjaUWIxFVZ1Soax9syl38lEYeCSesfZ69jGQ&oe=6A77DF17&_nc_sid=10d13b",
+          "followers": null
         },
         {
-          "username": "vulnarex",
-          "displayName": null,
-          "url": "https://www.threads.net/@vulnarex",
-          "verified": false
+          "id": "69067321051",
+          "username": "sgt.edsmia",
+          "displayName": "Eds Mia",
+          "url": "https://www.threads.net/@sgt.edsmia",
+          "verified": false,
+          "profileImage": "https://scontent-fml20-1.cdninstagram.com/v/t51.82787-19/616077711_17908752390297052_8918972735608639981_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDIyLmMyIn0&_nc_ht=scontent-fml20-1.cdninstagram.com&_nc_cat=104&_nc_oc=Q6cZ2gEuCNzOQBL3WLzHjDVRIUD7nfx3k_HdX2EBkqaiTQ4PmTXyR_B_-1b8j4rN_XouC9U&_nc_ohc=PVTn-IDWAVsQ7kNvwFHmDGu&_nc_gid=BMY7SQQ5QtTZglymKPVK5A&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQFFSvfmo4CklK7KwP_B_B-6LlLzoy9Vf5bVT9IRy_MtTQ&oe=6A77D171&_nc_sid=10d13b",
+          "followers": null
         },
         {
-          "username": "alina_intech",
-          "displayName": "Alina",
-          "url": "https://www.threads.net/@alina_intech",
-          "verified": false
-        },
-        {
+          "id": "63607456922",
           "username": "eau.dreyy",
           "displayName": "O-Drey",
           "url": "https://www.threads.net/@eau.dreyy",
-          "verified": true
+          "verified": true,
+          "profileImage": "https://scontent-fml20-1.cdninstagram.com/v/t51.2885-19/398502270_649271547392532_744807875067696854_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-fml20-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gEuCNzOQBL3WLzHjDVRIUD7nfx3k_HdX2EBkqaiTQ4PmTXyR_B_-1b8j4rN_XouC9U&_nc_ohc=GDhw6eKfqFsQ7kNvwEkyJxz&_nc_gid=BMY7SQQ5QtTZglymKPVK5A&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQHNZ84cIEeSDwKksKwMIFkVRRnT4siki_gg6nBpSDBCig&oe=6A77C42C&_nc_sid=10d13b",
+          "followers": null
         },
         {
-          "username": "blkjenius",
-          "displayName": "Jay D Miller",
-          "url": "https://www.threads.net/@blkjenius",
-          "verified": true
+          "id": "63673728286",
+          "username": "juliemwenah",
+          "displayName": "Julie M. Wenah",
+          "url": "https://www.threads.net/@juliemwenah",
+          "verified": false,
+          "profileImage": "https://scontent-fml20-1.cdninstagram.com/v/t51.82787-19/658804479_17953422780120287_1128180701294910174_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby45NTcuYzIifQ&_nc_ht=scontent-fml20-1.cdninstagram.com&_nc_cat=111&_nc_oc=Q6cZ2gEuCNzOQBL3WLzHjDVRIUD7nfx3k_HdX2EBkqaiTQ4PmTXyR_B_-1b8j4rN_XouC9U&_nc_ohc=59BYiSj82N8Q7kNvwHzXmBi&_nc_gid=BMY7SQQ5QtTZglymKPVK5A&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQH823OWcHJJuoRhvrw4ellyQ6t-eP_seJCEPzx_EWYdYA&oe=6A77C499&_nc_sid=10d13b",
+          "followers": null
+        },
+        {
+          "id": "79978035604",
+          "username": "steven686079",
+          "displayName": "Steven Lamar",
+          "url": "https://www.threads.net/@steven686079",
+          "verified": false,
+          "profileImage": "https://scontent-fml20-1.cdninstagram.com/v/t51.82787-19/713643535_17877595170667605_8266358199132931574_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-fml20-1.cdninstagram.com&_nc_cat=109&_nc_oc=Q6cZ2gEuCNzOQBL3WLzHjDVRIUD7nfx3k_HdX2EBkqaiTQ4PmTXyR_B_-1b8j4rN_XouC9U&_nc_ohc=CS3jGExCtQMQ7kNvwHstSfH&_nc_gid=BMY7SQQ5QtTZglymKPVK5A&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQHac8x4oZEZill3h03QkB_aH7nraw0AZep67_jx3tRnwQ&oe=6A77F809&_nc_sid=10d13b",
+          "followers": null
         }
       ]
     }

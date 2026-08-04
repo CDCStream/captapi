@@ -1,6 +1,6 @@
 ﻿# SC parity backlog (Captapi)
 
-Last updated: 2026-08-04 (Threads user-posts flat 2 + thread chain). Next: Threads post-details (views/comments/relatedPosts) + price-anomaly pass.
+Last updated: 2026-08-04 (Reddit subreddit-details ISO + rules). Next: remaining Reddit endpoints + price anomalies.
 
 Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` → `api-examples.generated.ts`) — ship code + refresh snapshot **with `ok: true`** or `gen_examples.py` skips the slug and the page looks broken.
 
@@ -35,6 +35,9 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - [x] Threads profile: `displayName` (+ `name`), `private`/`isPrivate`, `bioLinks`/`bioFragments`, `isThreadsOnlyUser`, `transparencyLabel`, HD versions (keys always present)
 - [x] `platformLimits` docs field + UI block (Threads posts, Twitter user-tweets, FB profile-posts, YT comments, Ad Library search, TT/IG transcript, hashtag region)
 - [x] Threads `user-posts`: flat 2 native / ~0.7 Apify; `engagement.views`; `threadId`/`replyToId`/`isReply`/`isQuote`; top-level `author{}`; limit note (~20–30 Meta cap)
+- [x] Threads `post-details`: always `comments[]` + `relatedPosts[]` + `engagement.views` key; not a user-posts alias; FAQ honesty when reply tree omitted on logged-out hydrate; Threads likes/verified field-doc overrides (no YT/Bluesky bleed)
+- [x] Threads `search` / `search-users`: flat native 2 / 1 (was ~18 / ~14 Apify-priced); search-users `id` + `profileImage` + `followers` key; honest Top-SERP / non-semantic people-search docs; verified false≠null fix
+- [x] Reddit `subreddit-details`: ISO `createdAt` (was float-string epoch); `id`/`rules[]`/`activeUsers`/`submitText`; category field-doc + sticky lint; case-insensitive param docs
 
 ## Promise-gap taxonomy (do not conflate)
 
@@ -49,14 +52,17 @@ Known A-type leftovers still open; B-type for `threads-profile` closed this turn
 
 | # | Work | Effort | Notes |
 |---|------|--------|-------|
-| 1 | Price-anomaly pass (remaining 8 of 9 — followings-style FAQ or flatten) | Low | user-posts closed; trending-reels / popular-creators / shorts / ad-details still open |
-| 2 | Threads `post-details` vs SC (`view_counts`, `comments[]`, `relatedPosts[]`) | Med | |
-| 3 | Live re-probe Threads profile (bioLinks + isThreadsOnlyUser on a non-zuck account) | Low | |
-| 4 | A-type vaat lint (5 known cases) | Low | song-details, comment-replies, … |
-| 5 | Twitter search + community-tweets: cursor + sort + since/until | Med | |
-| 6 | User-tweets GraphQL path for real views/bookmarks | Med | |
-| 7 | Catalog-wide `to_iso()` helper (7 date formats) | Low | |
-| 8 | Broaden field-desc lint beyond sticky keys (optional) | Low | |
+| 1 | Catalog-wide `to_iso()` helper (remaining date-format variants) | Low | Reddit subreddit-details closed; harden shared helper next |
+| 2 | Price-anomaly pass (remaining — trending-reels / popular-creators / shorts / ad-details …) | Low | Threads search trio closed |
+| 3 | Reddit rest of block (posts/comments/search) vs SC | Med | subreddit-details done |
+| 4 | `views` consistency — Twitter (non-search) + Instagram hashtag-search | Low | Threads already keys `engagement.views` |
+| 5 | Threads search: sort / since-until if Meta exposes a path | Med | client filter on publishedAt for now |
+| 6 | Threads comments GraphQL path (SC fills where logged-out HTML is `[]`) | Med | optional deeper parity |
+| 7 | Entity-search quality (Threads/FB/Google people-or-company match) | Med | docs honesty shipped for Threads search-users |
+| 8 | A-type vaat lint (remaining cases) | Low | subreddit-details rules A-gap closed |
+| 9 | Twitter search + community-tweets: cursor + sort + since/until | Med | |
+| 10 | User-tweets GraphQL path for real views/bookmarks | Med | |
+| 11 | Threads search-users: Users-tab GraphQL + `is_active_on_text_post_app` | Med | authors-from-posts path is honest but thinner than a real people search |
 
 ## YouTube — open quality notes
 

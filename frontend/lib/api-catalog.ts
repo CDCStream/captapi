@@ -173,10 +173,14 @@ export function creditLabel(
   if (e.slug === "video-summarize") return "1 credit/min +1";
   // Native flat + Apify per-result dual pricing (document both, not "~2 (0.7/result)").
   if (
-    (e.slug === "twitter-community-tweets" || e.slug === "threads-user-posts") &&
+    (e.slug === "twitter-community-tweets" ||
+      e.slug === "threads-user-posts" ||
+      e.slug === "threads-search" ||
+      e.slug === "threads-search-users") &&
     e.creditsPerResult
   ) {
-    return `${e.credits} credits native (~${e.creditsPerResult}/result Apify)`;
+    const unit = e.credits === 1 ? "credit" : "credits";
+    return `${e.credits} ${unit} native (~${e.creditsPerResult}/result Apify)`;
   }
   if (e.creditsPerResult) {
     return `~${e.credits} credits (${e.creditsPerResult}/result)`;
@@ -1258,7 +1262,29 @@ const REDDIT: Spec[] = [
   },
   { slug: "reddit-post-transcript", name: "Reddit Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/reddit/post-transcript", credits: 2 , tagline: "Get a Reddit post's discussion as readable text — title, body, and comments in one transcript-style payload. Flat 2 credits per call.", longDescription: "Paste a Reddit post URL and get the discussion as structured text: the post title and body plus comments flattened into a transcript-style response. This is discussion text, not speech-to-text from a video. Flat 2 credits per call." },
   { slug: "reddit-search", name: "Reddit Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/reddit/search", credits: 2, tagline: "Search Reddit site-wide — sort (relevance/new/top/comments), timeframe, full scores, authorFullname, cursor. Flat 2 credits.", longDescription: "Pass a keyword or phrase and get matching public posts across Reddit as clean JSON. Sort with sort=relevance|new|top|hot|comments (alias comment_count); for top/comments use timeframe=hour|day|week|month|year|all (default all). Each result includes id/name (t3_…), title, text, subreddit, author + authorFullname (t2_…), upvotes/score/downs/upvoteRatio, comments, subscriberCount, totalAwardsReceived, isVideo, ISO publishedAt, flair, nsfw, and thumbnail. Cursor pagination via nextCursor/hasMore. Example: sort=new for chronology, or sort=top&timeframe=week for last week's top mentions. Flat 2 credits. Pass cache=true for the 24h shared cache.", delivers: ["sort + timeframe (relevance/new/top/comments × hour…all)", "authorFullname, score/downs/upvoteRatio, subscriberCount", "isVideo + totalAwardsReceived; flair/nsfw/thumbnail", "Cursor pagination; ISO publishedAt"] },
-  { slug: "reddit-subreddit-details", name: "Reddit Subreddit Details API", shortName: "Subreddit Details", category: "details", method: "GET", path: "/v1/reddit/subreddit-details", credits: 1 , tagline: "Get a subreddit — title, description, subscribers, and community rules signals as structured JSON." },
+  {
+    slug: "reddit-subreddit-details",
+    name: "Reddit Subreddit Details API",
+    shortName: "Subreddit Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/reddit/subreddit-details",
+    credits: 1,
+    tagline:
+      "Subreddit card — id (t5_…), members, activeUsers, rules[], ISO createdAt, nsfw/type. Flat 1 credit.",
+    longDescription:
+      "Pass a subreddit URL, r/name, or bare name (case-insensitive — AskReddit and askreddit both resolve; response name is Reddit's canonical casing) and get clean JSON: stable id (t5_…), name, title, public description, members, activeUsers (accounts currently online — Reddit active_user_count, not weekly uniques), category (advertiser niche), language, type (public/restricted/private), ISO-8601 createdAt, nsfw, submitText, rules[{name,description,kind,violationReason,priority}] from about/rules, icon, and banner. Flat 1 credit. Use it to map communities before sampling posts or comments.",
+    delivers: [
+      "Stable id (t5_…) + canonical name/url",
+      "members + activeUsers (currently online)",
+      "rules[] from Reddit about/rules + submitText",
+      "ISO createdAt, nsfw, type, language, category, icon/banner",
+    ],
+    platformLimits: [
+      "activeUsers is Reddit's live online count, not weekly active users. Treat ScrapeCreators weekly_active_users with the same caution when the ratio looks unrealistic vs members.",
+      "rules[] is empty when the subreddit has no configured rules endpoint payload (rare on large communities).",
+    ],
+  },
   { slug: "reddit-subreddit-search", name: "Reddit Subreddit Search API", shortName: "Subreddit Search", category: "search", method: "GET", path: "/v1/reddit/subreddit-search", credits: 2, tagline: "Search inside one subreddit — same sort/timeframe and post fields as site-wide Search. Flat 2 credits.", longDescription: "Pass a subreddit (r/name) and a query to search posts inside that community only. Same sort (relevance/new/top/hot/comments), timeframe, cursor pagination, and result fields as Reddit Search (authorFullname, score/upvoteRatio, subscriberCount, isVideo, flair, …). Flat 2 credits." },
 ];
 
@@ -1309,9 +1335,78 @@ const THREADS: Spec[] = [
       "Only the last ~20–30 posts are publicly visible on this surface (Meta soft-cap on profile hydrate / logged-out feeds). limit=100 will not return 100 — asking above ~30 just returns what Meta exposes.",
     ],
   },
-  { slug: "threads-post-details", name: "Threads Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/threads/post-details", credits: 1 , tagline: "Get a Threads post — text, author, likes, replies, and media as structured JSON." },
-  { slug: "threads-search", name: "Threads Post Search API", shortName: "Post Search", category: "search", method: "GET", path: "/v1/threads/search", credits: 18, creditsPerResult: 0.7, tagline: "Search public Threads posts by keyword — text, author, likes, replies, and media for each matching post.", longDescription: "Pass a keyword or phrase and the Threads Post Search API returns matching public posts as clean JSON. Each result includes the post URL and id, the text, when it was published, the author (username, display name, verified), engagement (likes, replies, reposts, quotes), and media URLs when the post has images or video. Use it for topic monitoring, brand listening, or content discovery on Threads. Path stays /v1/threads/search. Billed per result — about 0.7 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Public Threads posts matching your keyword", "Post URL, text, and publish time", "Author username, display name, and verified flag", "Likes, replies, reposts, quotes, and media URLs"] },
-  { slug: "threads-search-users", name: "Threads Search Users API", shortName: "Search Users", category: "search", method: "GET", path: "/v1/threads/search-users", credits: 14, creditsPerResult: 0.7, tagline: "Find Threads profiles by keyword — username, display name, profile URL, and verified flag for each match.", longDescription: "Pass a keyword and the Threads Search Users API returns distinct Threads profiles related to that topic as clean JSON. Each result includes username, display name, a ready-to-open profile URL (threads.net/@handle), and whether the account is verified. This endpoint does not include follower counts or avatars — call Threads Profile with the returned URL or @handle for full profile stats. Use it to discover creators in a niche, turn a name into a confirmed @handle, or seed a lead list. Billed per result — about 0.7 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Distinct Threads users matching your keyword", "Username, display name, and verified flag", "Canonical profile URL for each user", "Pair with Threads Profile for followers and avatar"] },
+  {
+    slug: "threads-post-details",
+    name: "Threads Post Details API",
+    shortName: "Post Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/threads/post-details",
+    credits: 1,
+    tagline:
+      "Threads post — engagement (views when exposed), comments[], relatedPosts[], threadId/isReply. Flat 1 credit.",
+    longDescription:
+      "Pass a Threads post URL and get one enriched post as clean JSON: id, code, url, text, ISO publishedAt, author{}, engagement{views,likes,replies,reposts,quotes}, threadId/replyToId/isReply/isQuote, media[], plus comments[] (inline replies when Meta embeds them on the permalink) and relatedPosts[] (BarcelonaLoggedOutRelatedPosts — algorithmic related threads, no extra call). Flat 1 credit. This is not an alias of user-posts: relatedPosts and comments are only on this endpoint.",
+    delivers: [
+      "Same post card as user-posts + engagement.views when Meta exposes it",
+      "comments[] inline (empty array when logged-out hydrate omits the reply tree)",
+      "relatedPosts[] from Meta's logged-out related module — no second request",
+      "threadId / replyToId / isReply / isQuote",
+    ],
+    platformLimits: [
+      "Logged-out Threads permalink HTML usually embeds relatedPosts but not the public reply tree. comments[] is then [] with a stable key — not a missing field. ScrapeCreators often fills comments via a deeper GraphQL path we do not use on this surface.",
+      "engagement.views is often null on web hydrate even when the Threads app shows a view count (Meta's enable_view_counts flag is off for many logged-out renders).",
+    ],
+  },
+  {
+    slug: "threads-search",
+    name: "Threads Post Search API",
+    shortName: "Post Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/threads/search",
+    credits: 2,
+    creditsPerResult: 0.7,
+    tagline:
+      "Threads keyword search — posts with engagement + media. Flat 2 credits native (~0.7/post Apify).",
+    longDescription:
+      "Pass a keyword and get public Threads posts from Meta's Top SERP hydrate as clean JSON: id, code, url, text, ISO publishedAt, author{username,displayName,verified}, engagement{views,likes,replies,reposts,quotes}, threadId/isReply/isQuote, and media[]. Flat 2 credits on the native path (parity with twitter/search); Apify fallback is about 0.7 credits per returned post (min 2). There is no sort or date filter — Meta ranks the page, and older or engagement-farm posts can appear near the top. Pass cache=true for the 24h shared cache (0 credits on hit).",
+    delivers: [
+      "Posts from Meta Top SERP for your keyword",
+      "id/code/url, text, ISO publishedAt",
+      "engagement{views,likes,replies,reposts,quotes} + media[]",
+      "Flat 2 native; ~0.7/post Apify fallback",
+    ],
+    platformLimits: [
+      "No sort or since/until — Meta's default Top ranking only. Results often mix recent and months-old posts.",
+      "Engagement-farm / giveaway spam can rank first (high replies vs likes). Captapi does not filter spam.",
+      "Native hydrate soft-caps around ~20–25 posts per page; limit above that only helps on Apify fallback.",
+    ],
+  },
+  {
+    slug: "threads-search-users",
+    name: "Threads Search Users API",
+    shortName: "Search Users",
+    category: "search",
+    method: "GET",
+    path: "/v1/threads/search-users",
+    credits: 1,
+    creditsPerResult: 0.7,
+    tagline:
+      "Threads user discovery from keyword search — id, handle, avatar, verified. Flat 1 credit native.",
+    longDescription:
+      "Pass a keyword and get distinct Threads authors who appear in Meta's keyword post search as clean JSON: id (pk when embedded), username, displayName, url, verified, profileImage, and followers (usually null on this surface — call Threads Profile for counts). Flat 1 credit on the native path (parity with TikTok search-users and ScrapeCreators); Apify fallback is about 0.7 credits per returned user (min 2). This is not a semantic people-search: users are unique authors of posts that matched the keyword on Top SERP, so handles may not contain the query. Pass cache=true for the 24h shared cache (0 credits on hit).",
+    delivers: [
+      "Distinct authors from keyword post search",
+      "id + username + displayName + url + verified",
+      "profileImage when Meta embeds it; followers keyed (often null)",
+      "Flat 1 native; ~0.7/user Apify fallback",
+    ],
+    platformLimits: [
+      "Not a Users-tab GraphQL people search — authors are derived from post SERP hits. Handle/bio may not mention your query.",
+      "followers is usually null here; use /threads/profile for follower counts and bioLinks.",
+    ],
+  },
 ];
 
 const BLUESKY: Spec[] = [
@@ -3165,7 +3260,11 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     lp(25, 200),
     CURSOR,
   ],
-  "reddit-subreddit-details": [up("Subreddit URL, r/name, or bare name, e.g. r/technology.")],
+  "reddit-subreddit-details": [
+    up(
+      "Subreddit URL, r/name, or bare name (case-insensitive), e.g. r/technology or AskReddit.",
+    ),
+  ],
   "reddit-subreddit-search": [
     up("Subreddit URL, r/name, or bare name, e.g. r/technology."),
     qp("Keywords or search query (min 2 characters)."),
@@ -4389,6 +4488,62 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       a: `Group posts by threadId. Within a thread, replyToId points at the previous post's id (root has replyToId null / isReply false). isQuote + quoteId mark quote posts.`,
     });
   }
+  if (ep.slug === "threads-post-details") {
+    list.push({
+      q: `Is this just user-posts for one URL?`,
+      a: `No. post-details always returns comments[] and relatedPosts[] on top of the shared post card. relatedPosts comes from Meta's BarcelonaLoggedOutRelatedPosts module (other creators, no second request). comments is filled only when the permalink hydrate embeds same-thread replies — viral posts often return [] with the key still present.`,
+    });
+    list.push({
+      q: `Why is comments[] empty when the post has thousands of replies?`,
+      a: `Logged-out Threads permalink HTML usually ships the main post + related posts, not the public reply tree. Captapi keeps comments: [] rather than omitting the key or inventing a separate comments endpoint that cannot be filled on this path. ScrapeCreators often populates comments via a deeper GraphQL session we do not use here.`,
+    });
+    list.push({
+      q: `Where are view counts?`,
+      a: `engagement.views is always keyed. Meta often omits per-post view_counts on logged-out web hydrate (even when the app shows views), so the value is frequently null — same honesty as user-posts.`,
+    });
+  }
+  if (ep.slug === "threads-search") {
+    list.push({
+      q: `Why is this 2 credits when older docs said ~18?`,
+      a: `Native Top SERP hydrate is flat 2 credits — same soft-cap surface as twitter/search and threads/user-posts. The old ~18 figure was Apify billed at ~0.7 credits per returned post (default limit 25). Apify fallback still uses that per-result rate when the native path is unavailable.`,
+    });
+    list.push({
+      q: `Can I sort by newest or filter by date?`,
+      a: `Not on this endpoint. Meta only exposes the default Top ranking on the logged-out search hydrate — months-old posts can sit next to recent ones. Client-side filter on publishedAt if you need a recency window.`,
+    });
+    list.push({
+      q: `Why do giveaway / engagement-farm posts rank first?`,
+      a: `Meta's Top SERP often boosts high-reply bait. Captapi returns what the hydrate embeds and does not apply a spam filter. replies ≫ likes is a common client-side signal to down-rank.`,
+    });
+  }
+  if (ep.slug === "threads-search-users") {
+    list.push({
+      q: `Why is this 1 credit when older docs said ~14?`,
+      a: `Native path is flat 1 credit — parity with TikTok search-users and ScrapeCreators Threads search/users. The old ~14 figure was Apify at ~0.7 per returned user (default limit 20). Apify fallback still uses that rate (min 2).`,
+    });
+    list.push({
+      q: `Why don't the usernames match my query?`,
+      a: `This is not a semantic people-search. Users are distinct authors of posts that matched the keyword on Meta's Top SERP — the handle or bio may not contain the query. For follower counts and bio, call Threads Profile with the returned url.`,
+    });
+    list.push({
+      q: `Why is followers null?`,
+      a: `Search post authors rarely embed follower_count. The key stays present as null for a stable parser — use /v1/threads/profile for counts.`,
+    });
+  }
+  if (ep.slug === "reddit-subreddit-details") {
+    list.push({
+      q: `Is the subreddit name case-sensitive?`,
+      a: `No. AskReddit and askreddit both resolve — Reddit is case-insensitive. The response name field uses Reddit's canonical casing.`,
+    });
+    list.push({
+      q: `Is activeUsers weekly active users?`,
+      a: `No. It is Reddit's active_user_count — accounts currently online. That is the public metric Reddit exposes on about.json. Treat third-party “weekly active” fields skeptically when the ratio to members looks unrealistic.`,
+    });
+    list.push({
+      q: `Where do rules come from?`,
+      a: `From Reddit's /r/{name}/about/rules endpoint as a structured array (name, description, kind, …). The short public_description stays in description; submitText is the compose-box guidelines when set.`,
+    });
+  }
   if (ep.slug === "tiktok-ad-library-search") {
     list.push({
       q: `Is this TikTok Creative Center (CTR / Top Ads)?`,
@@ -4658,8 +4813,7 @@ const FIELD_DESCS: Record<string, string> = {
   type: "Content type of the item.",
   postType:
     'Content type. YouTube community: "text" | "image" | "poll" | "video" | "playlist" | "quiz". Instagram: "Image" | "Video" | "Sidecar" (carousel).',
-  category:
-    'SponsorBlock segment category on video-sponsors: "sponsor" | "selfpromo" | "interaction" | "intro" | "outro" | "preview" | "music_offtopic" | "poi_highlight" | "filler". Elsewhere: generic category label.',
+  category: "Generic category label for the item or community.",
   overlapsWith:
     "UUIDs of other segments whose time range overlaps this one (SponsorBlock nested/duplicate skips).",
   coverageSeconds:
@@ -5152,6 +5306,8 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
       "true when the account exists only on Threads (no Instagram twin). Pair with Instagram fbid for an IG↔FB↔Threads identity chain when all three are present.",
     transparencyLabel:
       "Meta transparency / state-affiliated media label when exposed — brand-safety signal. Often null on logged-out hydrate.",
+    likes: "Not returned on profile — use followers for reach; post likes live on user-posts / post-details.",
+    verified: "Whether Meta shows a verified badge on this Threads profile.",
   },
   "threads-user-posts": {
     author:
@@ -5161,8 +5317,45 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     replyToId: "Parent post id when this row is a reply in a multi-part Thread (null on the root).",
     isReply: "true when the post replies to another post in a Thread chain.",
     isQuote: "true when the post quotes another post.",
+    likes: "Heart count on the Threads post (engagement.likes).",
+    verified: "Whether Meta shows a verified badge on the post author.",
     views:
-      "Public view count when Meta exposes view_counts on the hydrate (often null on logged-out profile feeds; richer on post-details when available).",
+      "Public view count when Meta exposes it on the hydrate (often null on logged-out profile feeds).",
+    publishedAt: "Post publish time as ISO-8601 UTC.",
+  },
+  "threads-post-details": {
+    likes: "Heart count on the Threads post (engagement.likes).",
+    verified: "Whether Meta shows a verified badge on the post author.",
+    views:
+      "Public view count when Meta exposes it. Often null on logged-out permalink hydrate even when the Threads app shows views.",
+    publishedAt: "Post publish time as ISO-8601 UTC.",
+    comments:
+      "Inline reply posts when Meta embeds them on the permalink. Always an array — [] when the logged-out hydrate omits the reply tree (common on viral posts).",
+    relatedPosts:
+      "Algorithmic related Threads from BarcelonaLoggedOutRelatedPosts (other creators). Always an array; empty on Apify thin fallbacks.",
+    threadId: "Id of the thread root post.",
+    replyToId: "Parent post id when this post is a reply.",
+    isReply: "true when the post replies to another post.",
+    isQuote: "true when the post quotes another post.",
+  },
+  "threads-search": {
+    likes: "Heart count on the Threads post (engagement.likes).",
+    verified:
+      "true/false when Meta embeds the badge flag; null when the hydrate omits it (unknown — not the same as unverified).",
+    quotes:
+      "Quote-post count when Meta exposes it; null when omitted (unknown — not zero).",
+    publishedAt: "Post publish time as ISO-8601 UTC (Meta Top SERP — may be months old).",
+    views:
+      "Public view count when Meta exposes it on the search hydrate (often null).",
+  },
+  "threads-search-users": {
+    id: "Meta user pk when embedded on the search hydrate; null if the author blob omits it.",
+    verified:
+      "true/false when Meta embeds the badge flag; null when omitted (unknown).",
+    profileImage: "Avatar URL when Meta embeds it on the search-post author card.",
+    followers:
+      "Follower count when present on the author blob — usually null on search; use Threads Profile for counts.",
+    likes: "Not returned on search-users — this endpoint lists profiles, not posts.",
   },
   "kick-clip": {
     creator: "Who created/cut the Kick clip (distinct from the broadcaster channel).",
@@ -5215,6 +5408,22 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "youtube-video-sponsors": {
     durationSeconds: "Sponsor segment length in seconds (end - start).",
+    category:
+      'SponsorBlock segment category: "sponsor" | "selfpromo" | "interaction" | "intro" | "outro" | "preview" | "music_offtopic" | "poi_highlight" | "filler".',
+  },
+  "reddit-subreddit-details": {
+    category:
+      "Reddit advertiser_category niche label (e.g. Lifestyles). Empty/null when Reddit omits it — not a SponsorBlock enum.",
+    createdAt: "When the subreddit was created (ISO-8601 UTC, e.g. 2008-01-26T06:07:54.000Z).",
+    members: "Subscriber count (Reddit subscribers).",
+    activeUsers:
+      "Accounts currently online on the subreddit (Reddit active_user_count). Not weekly unique actives.",
+    rules:
+      "Moderation rules from /about/rules as {name, description, kind, violationReason, priority}. Always an array.",
+    submitText: "Text shown when submitting a post (community posting guidelines) when configured.",
+    id: "Stable Reddit fullname (t5_…). Prefer this over name for joins.",
+    type: 'Subreddit access type: "public" | "restricted" | "private" | "archived" when Reddit exposes it.',
+    nsfw: "Whether Reddit marks the community over-18.",
   },
   "bluesky-profile": {
     verified:
@@ -5305,6 +5514,7 @@ const FIELD_DESC_STICKY_KEYS = new Set([
   "region",
   "mediaType",
   "channel",
+  "category",
 ]);
 
 /**
@@ -5698,8 +5908,8 @@ const SLUG_USE_CASES: Record<string, UseCase[]> = {
     { title: "Brand Safety", desc: "See which brands appear alongside a creator's content." },
   ],
   "reddit-subreddit-details": [
-    { title: "Community Enrichment", desc: "Pull subreddit title, subscribers, and description." },
-    { title: "Research", desc: "Map communities before sampling posts or comments." },
+    { title: "Community Enrichment", desc: "Pull id, members, activeUsers, rules[], and ISO createdAt." },
+    { title: "Research", desc: "Map communities (nsfw/type/language) before sampling posts or comments." },
   ],
   "twitter-community": [
     { title: "Community Enrichment", desc: "Resolve a X/Twitter Community to name and metadata." },

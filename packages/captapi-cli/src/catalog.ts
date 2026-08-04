@@ -325,7 +325,7 @@ const REDDIT: Omit<Endpoint, "platform">[] = [
     limit(25, 200),
     { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." },
   ] },
-  { tool: "reddit_subreddit_details", name: "Reddit Subreddit Details", path: "/v1/reddit/subreddit-details", credits: 1, summary: "Info & member stats for a subreddit.", params: [url(RD_SUB)] },
+  { tool: "reddit_subreddit_details", name: "Reddit Subreddit Details", path: "/v1/reddit/subreddit-details", credits: 1, summary: "Subreddit card — t5_ id, members, activeUsers, rules[], ISO createdAt.", params: [url(RD_SUB)] },
   { tool: "reddit_subreddit_search", name: "Reddit Subreddit Search", path: "/v1/reddit/subreddit-search", credits: 2, summary: "Search inside one subreddit — same sort/timeframe and fields as site-wide Search.", params: [
     url(RD_SUB),
     q(),
@@ -340,8 +340,8 @@ const THREADS: Omit<Endpoint, "platform">[] = [
   { tool: "threads_profile", name: "Threads Profile", path: "/v1/threads/profile", credits: 1, summary: "Threads profile — bio, followers, verified, isPrivate, bioLinks, transparencyLabel, HD avatar versions.", params: [url(TH_PROFILE)] },
   { tool: "threads_user_posts", name: "Threads User Posts", path: "/v1/threads/user-posts", credits: 2, summary: "Recent Threads posts — views+engagement, threadId/isReply. Flat 2 native.", params: [url(TH_PROFILE), limit(20, 100)] },
   { tool: "threads_post_details", name: "Threads Post Details", path: "/v1/threads/post-details", credits: 1, summary: "Metadata + engagement for a Threads post.", params: [url(TH_POST)] },
-  { tool: "threads_search", name: "Threads Post Search", path: "/v1/threads/search", credits: 18, summary: "Search public Threads posts by keyword — text, author, engagement, and media.", params: [q(), limit(25, 200)] },
-  { tool: "threads_search_users", name: "Threads Search Users", path: "/v1/threads/search-users", credits: 14, summary: "Find Threads users by keyword — username, display name, profile URL, verified.", params: [q(), limit(20, 100)] },
+  { tool: "threads_search", name: "Threads Post Search", path: "/v1/threads/search", credits: 2, summary: "Threads keyword search — flat 2 native (~0.7/post Apify). Meta Top SERP; no sort/date.", params: [q(), limit(25, 200)] },
+  { tool: "threads_search_users", name: "Threads Search Users", path: "/v1/threads/search-users", credits: 1, summary: "Distinct authors from keyword search — id, avatar, verified. Flat 1 native.", params: [q(), limit(20, 100)] },
 ];
 
 const BLUESKY: Omit<Endpoint, "platform">[] = [
