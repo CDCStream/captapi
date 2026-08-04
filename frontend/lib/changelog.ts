@@ -50,6 +50,20 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-04",
+    category: "fix",
+    title: "Facebook Events: one Event shape across details/search/profile",
+    description:
+      "All three Facebook Event endpoints now share local-offset startDate/endDate + timezone (evening CDT no longer rolls to the next UTC day). Profile Events parses yearless cards (Tue, Aug 4 at 8:00 PM EDT → 2026-08-04T20:00:00-04:00). Event Search drops cache-unsafe \"Happening now\", requires topic+city tokens, adds location/from/to filters, bills flat 2 on native, and the docs example is real Chicago comedy (not unrelated worship feed). Field docs, use cases, and lpFlat billing aligned.",
+    items: [
+      "Canonical local startDate on details + search + profile-events",
+      "Year resolved for yearless profile schedule sentences",
+      "Search: location/from/to + stricter relevance + no Happening now",
+      "Docs example = Zanies/Chicago comedy; flat-2 limit copy",
+      "Event use cases (not hashtag/playlist boilerplate)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-04",
     category: "improvement",
     title: "TikTok Shop reviews docs + showcase PDP hydrate",
     description:

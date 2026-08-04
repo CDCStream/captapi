@@ -957,6 +957,72 @@ def _infer_city_from_ticket_url(url: str | None) -> str | None:
     return f"{city}, {st}"
 
 
+def _event_local_dates(item: dict, start_time: str | None) -> tuple[str | None, str | None, str | None]:
+    """Return (startDate, endDate, timezone) with local offset when possible.
+
+    Prefer values already localized by the native path. Otherwise convert a UTC
+    instant using the TZ abbreviation in ``startTime`` so the calendar day
+    matches the host-facing sentence (CDT 7pm ≠ next UTC midnight). Yearless
+    listing sentences (``Tue, Aug 4 at 8:00 PM EDT``) are parsed directly.
+    """
+    tz_name = safe_str(item.get("timezone")) or facebook_events_native._timezone_from_sentence(start_time)
+    start_date = safe_str(item.get("startDate") or item.get("start_date"))
+    end_date = safe_str(item.get("endDate") or item.get("end_date"))
+    utc_start = safe_str(item.get("utcStartDate"))
+
+    def _looks_utc_z(value: str | None) -> bool:
+        if not value:
+            return False
+        return value.endswith("Z") or value.endswith("+00:00") or value.endswith("-00:00")
+
+    # Re-localize UTC-only timestamps when we know the event timezone.
+    if tz_name and (_looks_utc_z(start_date) or (not start_date and utc_start)):
+        src = start_date or utc_start
+        try:
+            iso = src.replace("Z", "+00:00")
+            dt = datetime.fromisoformat(iso)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            start_date = facebook_events_native._fmt_local_iso(int(dt.timestamp()), tz_name)
+        except (TypeError, ValueError, OSError):
+            pass
+
+    # Parse absolute schedule sentence when timestamp path left us empty / UTC-only.
+    if (not start_date or _looks_utc_z(start_date)) and start_time and not facebook_events_native.is_relative_schedule(start_time):
+        parsed = facebook_events_native.parse_schedule_sentence(start_time, prefer_upcoming=True)
+        if parsed.get("startDate"):
+            # Prefer sentence wall-clock when it disagrees with a bare UTC Z day.
+            if not start_date or _looks_utc_z(start_date):
+                start_date = parsed["startDate"]
+            if not end_date and parsed.get("endDate"):
+                end_date = parsed["endDate"]
+            if not tz_name:
+                tz_name = parsed.get("timezone")
+
+    if not start_date:
+        start_date = utc_start
+
+    if tz_name and end_date and _looks_utc_z(end_date):
+        try:
+            iso = end_date.replace("Z", "+00:00")
+            dt = datetime.fromisoformat(iso)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            end_date = facebook_events_native._fmt_local_iso(int(dt.timestamp()), tz_name)
+        except (TypeError, ValueError, OSError):
+            pass
+
+    # Apify sometimes only ships unix end / duration — honor when present.
+    if not end_date:
+        end_ts = item.get("end_timestamp") or item.get("endTimestamp")
+        if end_ts is not None:
+            try:
+                end_date = facebook_events_native._fmt_local_iso(int(end_ts), tz_name)
+            except (TypeError, ValueError):
+                end_date = None
+    return start_date, end_date, tz_name
+
+
 def _normalize_event(item: dict) -> dict:
     """Map Facebook event actor rows into a stable response shape (same keys every time)."""
     loc = item.get("location") if isinstance(item.get("location"), dict) else {}
@@ -967,7 +1033,6 @@ def _normalize_event(item: dict) -> dict:
     if not organizers and isinstance(item.get("hosts"), list):
         organizers = item["hosts"]
     location_name = item.get("location_name") or item.get("venue") or item.get("locationName")
-    start_date = safe_str(item.get("utcStartDate") or item.get("start_date") or item.get("startDate"))
     # Prefer human-readable time (apify dateTimeSentence / crawlerbros formatted_date)
     # over the ISO start_date fallback.
     start_time = safe_str(
@@ -976,34 +1041,53 @@ def _normalize_event(item: dict) -> dict:
         or item.get("formatted_date")
         or item.get("start_time")
         or item.get("startDateTime")
-        or start_date
+        or item.get("start_time_formatted")
     )
+    if start_time and facebook_events_native.is_relative_schedule(start_time):
+        # Cache-unsafe relative labels ("Happening now") — prefer absolute fields.
+        alt = safe_str(
+            item.get("start_time_formatted")
+            or item.get("dateTimeSentence")
+            or item.get("formatted_date")
+        )
+        start_time = alt if alt and not facebook_events_native.is_relative_schedule(alt) else None
+    start_date, end_date, tz_name = _event_local_dates(item, start_time)
+    if not start_time:
+        start_time = start_date
+
+    duration_seconds = safe_int(item.get("durationSeconds"))
+    if duration_seconds is None and start_date and end_date:
+        try:
+            s = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+            e = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+            if s.tzinfo is None:
+                s = s.replace(tzinfo=timezone.utc)
+            if e.tzinfo is None:
+                e = e.replace(tzinfo=timezone.utc)
+            duration_seconds = max(0, int((e - s).total_seconds()))
+        except (TypeError, ValueError):
+            duration_seconds = None
+    duration = safe_str(item.get("duration") or item.get("durationText") or item.get("display_duration"))
+    if not duration and duration_seconds is not None:
+        duration = facebook_events_native._duration_text(duration_seconds)
+
     # Apify puts the street on location.streetAddress (not location.address).
-    # Prefer that over the venue name so address is a real street line when present.
-    street = safe_str(loc.get("streetAddress") or loc.get("address"))
+    street = safe_str(loc.get("streetAddress") or loc.get("address") or loc.get("one_line_address"))
     city = safe_str(loc.get("city") or loc.get("contextualName") or item.get("location_city"))
-    composed_address = ", ".join(p for p in (street, city) if p) or None
-    address = safe_str(
-        item.get("address")
-        or item.get("location_address")
-        or composed_address
-        or street
-        or loc.get("name")
-        or location_name
-    )
+    loc_name = safe_str(loc.get("name") or location_name or item.get("location_name"))
     tickets_url = safe_str(
         tickets.get("buyUrl")
         or item.get("ticketsUrl")
         or item.get("ticketUrl")
         or item.get("ticket_url")
         or item.get("tickets_url")
+        or item.get("event_buy_ticket_url")
     )
     # TEXT places / crawlerbros / venue-only pages often leave city null or bare;
     # recover "City, ST" from address text, then Ticketmaster-style ticket URLs.
     inferred_city = _infer_city_from_text(
-        address,
         street,
-        safe_str(loc.get("name")),
+        loc_name,
         safe_str(location_name),
         safe_str(item.get("address")),
         safe_str(item.get("location_name")),
@@ -1012,18 +1096,14 @@ def _normalize_event(item: dict) -> dict:
         city = inferred_city
     elif inferred_city and "," not in city and inferred_city.lower().startswith(city.lower()):
         city = inferred_city
-    organizer = safe_str(
-        item.get("organizedBy")
-        or item.get("organizer")
-        or item.get("host")
-        or item.get("hostName")
-        or (organizers[0].get("name") if organizers and isinstance(organizers[0], dict) else None)
-    )
-    if not organizer:
-        privacy = safe_str(item.get("privacyInfo") or item.get("privacy_info")) or ""
-        m = re.search(r"Hosted by\s+(.+)", privacy, flags=re.IGNORECASE)
-        if m:
-            organizer = m.group(1).strip() or None
+
+    # address: real street only — never a bare city / venue-name echo.
+    address = street or safe_str(item.get("address") or item.get("location_address"))
+    if address and city and address.strip().lower() == city.strip().lower():
+        address = None
+    if address and loc_name and address.strip().lower() == loc_name.strip().lower():
+        address = None
+
     # apify: discoveryCategories [{label,url}]; crawlerbros: categories ["Comedy"]
     raw_categories = item.get("discoveryCategories") or item.get("categories") or []
     categories: list[dict[str, Any]] = []
@@ -1036,7 +1116,55 @@ def _normalize_event(item: dict) -> dict:
             elif isinstance(c, dict):
                 label = safe_str(c.get("label") or c.get("name"))
                 if label:
-                    categories.append({"label": label, "url": safe_str(c.get("url"))})
+                    categories.append(
+                        {
+                            "label": label,
+                            "url": safe_str(c.get("uri") or c.get("url")),
+                        }
+                    )
+
+    event_type = safe_str(item.get("eventType") or item.get("event_type") or item.get("type"))
+    # Prefer discovery category (Comedy) over Relay privacy kind (PUBLIC_TYPE).
+    if categories and (not event_type or event_type.upper().endswith("_TYPE")):
+        event_type = categories[0]["label"]
+
+    is_past = item.get("isPast") if item.get("isPast") is not None else item.get("is_past")
+    if is_past is None:
+        is_past = facebook_events_native._coerce_is_past(None, start_date)
+
+    users_going = safe_int(
+        item.get("usersGoing") or item.get("going_count") or item.get("going") or item.get("users_going")
+    )
+    users_interested = safe_int(
+        item.get("usersInterested")
+        or item.get("interested_count")
+        or item.get("interested")
+        or item.get("users_interested")
+    )
+    # responded = going + interested only. Never pass through Apify's
+    # event_connected_users_public_responded (friends-who-responded ≠ total RSVPs).
+    users_responded = None
+    if users_going is not None or users_interested is not None:
+        users_responded = (users_going or 0) + (users_interested or 0)
+
+    organizers_out: list[dict[str, Any]] = []
+    for o in organizers:
+        if not isinstance(o, dict):
+            continue
+        verified = o.get("isVerified")
+        if verified is None:
+            verified = o.get("verified")
+        organizers_out.append(
+            {
+                "id": safe_str(o.get("id")),
+                "name": safe_str(o.get("name")),
+                "url": safe_str(o.get("url")),
+                "verified": bool(verified) if verified is not None else False,
+            }
+        )
+    # Drop empty organizer shells.
+    organizers_out = [o for o in organizers_out if o.get("id") or o.get("name") or o.get("url")]
+
     # Apify pads externalLinks with null slots (fixed-length scrapes); keep real URLs only.
     raw_links = item.get("externalLinks") or item.get("external_links") or []
     external_links = [
@@ -1056,44 +1184,29 @@ def _normalize_event(item: dict) -> dict:
         "name": safe_str(item.get("name") or item.get("title")),
         "description": safe_str(item.get("description")),
         "startDate": start_date,
+        "endDate": end_date,
+        "timezone": tz_name,
         "startTime": start_time,
-        "duration": safe_str(item.get("duration") or item.get("durationText")),
-        "eventType": safe_str(item.get("eventType") or item.get("event_type") or item.get("type")),
+        "duration": duration,
+        "durationSeconds": duration_seconds,
+        "eventType": event_type,
         "isOnline": item.get("isOnline") if item.get("isOnline") is not None else item.get("is_online"),
-        "isPast": item.get("isPast") if item.get("isPast") is not None else item.get("is_past"),
+        "isPast": is_past,
         "isCanceled": item.get("isCanceled") if item.get("isCanceled") is not None else item.get("is_canceled"),
         "address": address,
         "image": safe_str(item.get("imageUrl") or item.get("photo_url") or item.get("image")),
-        "usersGoing": safe_int(
-            item.get("usersGoing") or item.get("going_count") or item.get("going") or item.get("users_going")
-        ),
-        "usersInterested": safe_int(
-            item.get("usersInterested")
-            or item.get("interested_count")
-            or item.get("interested")
-            or item.get("users_interested")
-        ),
-        "usersResponded": safe_int(
-            item.get("usersResponded") or item.get("responded_count") or item.get("users_responded")
-        ),
+        "usersGoing": users_going,
+        "usersInterested": users_interested,
+        "usersResponded": users_responded,
         "location": {
-            "name": safe_str(loc.get("name") or location_name or item.get("location_name")),
+            "name": loc_name,
             "city": city,
             "latitude": loc.get("latitude") if loc.get("latitude") is not None else item.get("latitude"),
             "longitude": loc.get("longitude") if loc.get("longitude") is not None else item.get("longitude"),
             "countryCode": country,
         },
-        "organizer": organizer,
-        "organizers": [
-            {
-                "id": safe_str(o.get("id")),
-                "name": safe_str(o.get("name")),
-                "url": safe_str(o.get("url")),
-                "verified": bool(o.get("isVerified")) if o.get("isVerified") is not None else False,
-            }
-            for o in organizers
-            if isinstance(o, dict)
-        ],
+        # organizers[] is canonical — no duplicate organizer string.
+        "organizers": organizers_out,
         "ticketsUrl": tickets_url,
         "categories": categories,
         "externalLinks": external_links,
@@ -1687,13 +1800,12 @@ async def facebook_profile_events(
 ):
     url = _require_facebook_page(url)
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_FB_EVENTS, 4)
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/profile-events",
         platform="facebook",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_FB_EVENTS_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # 1) Decodo JS-rendered page /events (DC/residential return 400).
@@ -1734,7 +1846,7 @@ async def facebook_profile_events(
 
         data = await cached_or_run(
             endpoint="facebook.profile-events",
-            params={"url": url, "limit": limit, "v": 5},
+            params={"url": url, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
             # Events actor runs take minutes (280s timeout); serve the last
@@ -2009,35 +2121,84 @@ async def facebook_marketplace_location_search(
 @router.get("/event-search", summary="Search Facebook events by keyword/location")
 async def facebook_event_search(
     q: str = Query(..., min_length=2, description="Topic and/or place, e.g. 'comedy Chicago'"),
+    location: str | None = Query(
+        None,
+        description="Optional city/place filter tokens required in title/venue (e.g. Chicago).",
+    ),
+    from_date: str | None = Query(
+        None,
+        alias="from",
+        description="Inclusive local start date filter YYYY-MM-DD.",
+    ),
+    to_date: str | None = Query(
+        None,
+        alias="to",
+        description="Inclusive local start date filter YYYY-MM-DD.",
+    ),
     limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_FB_EVENTS, 4)
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/event-search",
         platform="facebook",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_FB_EVENTS_NATIVE,
     ) as ctx:
+        def _filter_apify(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+            tokens = facebook_events_native._query_tokens(
+                f"{q} {(location or '').strip()}".strip()
+            )
+            out: list[dict[str, Any]] = []
+            for i in items:
+                if i.get("error"):
+                    continue
+                if tokens and not facebook_events_native._event_matches_query(i, tokens):
+                    continue
+                ev = _normalize_event(i)
+                if not facebook_events_native._event_in_date_range(
+                    ev, from_date=from_date, to_date=to_date
+                ):
+                    continue
+                out.append(ev)
+                if len(out) >= limit:
+                    break
+            return out
+
         async def _run() -> dict[str, Any]:
-            # 1) Native — discovery (relevance-filtered) + Google SERP → details.
-            native = await facebook_events_native.fetch_search_events(q, limit=limit)
+            # 1) Native — SERP → details, then relevance-filtered discovery.
+            native = await facebook_events_native.fetch_search_events(
+                q,
+                limit=limit,
+                location=location,
+                from_date=from_date,
+                to_date=to_date,
+            )
             if native:
                 ctx["source"] = "direct"
                 events = [_normalize_event(i) for i in native]
-                return {"query": q, "totalReturned": len(events), "events": events}
+                payload: dict[str, Any] = {
+                    "query": q,
+                    "totalReturned": len(events),
+                    "events": events,
+                }
+                if location:
+                    payload["location"] = location
+                if from_date:
+                    payload["from"] = from_date
+                if to_date:
+                    payload["to"] = to_date
+                return payload
 
             # 2) Apify snapshot-first when native search is empty/login-walled.
-            # Avoid a cold 280s browser run when a fresh dataset already exists.
-            run_input = {"searchQueries": [q], "maxEvents": limit}
+            run_input = {"searchQueries": [q], "maxEvents": max(limit, 20)}
             apify = ApifyClient(timeout=280, max_attempts=1)
             cached_items = await apify.last_succeeded_items(
                 settings.APIFY_ACTOR_FACEBOOK_EVENTS,
                 max_age_secs=48 * 3600,
-                max_items=limit,
+                max_items=max(limit, 40),
                 input_match={"searchQueries": [q]},
             )
             if cached_items:
@@ -2046,7 +2207,7 @@ async def facebook_event_search(
                     input_match={"searchQueries": [q]},
                 ):
                     await apify.start_run(settings.APIFY_ACTOR_FACEBOOK_EVENTS, run_input)
-                events = [_normalize_event(i) for i in cached_items[:limit] if not i.get("error")]
+                events = _filter_apify(cached_items)
                 ctx["source"] = "apify"
                 return {"query": q, "totalReturned": len(events), "events": events}
 
@@ -2054,26 +2215,32 @@ async def facebook_event_search(
                 items = await apify.run_actor_sync(
                     settings.APIFY_ACTOR_FACEBOOK_EVENTS,
                     run_input,
-                    max_items=limit,
+                    max_items=max(limit, 40),
                 )
             except ApifyError:
                 items = await apify.last_succeeded_items(
                     settings.APIFY_ACTOR_FACEBOOK_EVENTS,
                     max_age_secs=48 * 3600,
-                    max_items=limit,
+                    max_items=max(limit, 40),
                 )
                 if not items:
                     raise
-            events = [_normalize_event(i) for i in items[:limit] if not i.get("error")]
+            events = _filter_apify(items)
             ctx["source"] = "apify"
             return {"query": q, "totalReturned": len(events), "events": events}
 
         data = await cached_or_run(
             endpoint="facebook.event-search",
-            params={"q": q, "limit": limit, "v": 5},
+            params={
+                "q": q,
+                "limit": limit,
+                "location": location or "",
+                "from": from_date or "",
+                "to": to_date or "",
+                "v": 7,
+            },
             runner=_run,
             ctx=ctx,
-            # Native SERP path is tens of seconds; Apify still SWR for long runs.
             stale_while_revalidate=True,
             use_cache=cache,
         )
@@ -2153,7 +2320,7 @@ async def facebook_event_details(
 
         data = await cached_or_run(
             endpoint="facebook.event-details",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

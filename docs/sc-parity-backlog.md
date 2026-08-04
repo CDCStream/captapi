@@ -1,6 +1,6 @@
 ﻿# SC parity backlog (Captapi)
 
-Last updated: 2026-08-04 (Pinterest board saves/imageOriginal/cURL). Next: Pinterest board cursor + remaining price anomalies.
+Last updated: 2026-08-04 (Facebook Events canonical shape across 3 endpoints). Next: TikTok Shop relatedVideos / Twitch-Kick scope.
 
 Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` → `api-examples.generated.ts`) — ship code + refresh snapshot **with `ok: true`** or `gen_examples.py` skips the slug and the page looks broken.
 
@@ -43,6 +43,8 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - [x] Pinterest `user-boards`: stop account-scoped `followers` twin; stable row shape; Redux map + 474x cover + ISO `createdAt`; docs two-way (undocumented fields)
 - [x] LinkedIn `company`: About specialties/size/founded/organizationType + similarPages[]; employeeCount vs employees[]; Apify `identifier:[slug]` fix; slogan/cover enrich; funding/employees[] people documented gaps
 - [x] LinkedIn `company-posts`: always-key `engagement{likes,comments,reposts}`; permalink hydrate when homepage LD omits counts (A-type headline fix)
+- [x] Facebook Events: local-offset `startDate`/`endDate` + `timezone`; derive `duration`/`isPast`/`eventType`; `organizers[].id`; drop `organizer` string + facepile `usersResponded`; field-doc overrides (no LinkedIn/Bluesky/song bleed)
+- [x] Facebook Events canonical: profile-events yearless→startDate; search location/from/to + relevance; no "Happening now"; shared Event shape; comedy Chicago example; flat-2 billing docs
 
 ## Promise-gap taxonomy (do not conflate)
 

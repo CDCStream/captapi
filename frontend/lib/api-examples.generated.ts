@@ -1067,18 +1067,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.facebook.com/events/1501904507609251/",
     "name": "The Best of Chicago Comedy Showcase at Zanies Rosemont",
     "description": "Get ready for an unforgettable evening of laughter as Chicago's comedy scene brings its A-game to the stage! \"The Best of Chicago Showcase\" features a dynamic lineup of the city's funniest stand-up comedians, delivering a blend of fresh, cutting-edge material and beloved, time-tested jokes.",
-    "startDate": "2026-08-20T00:00:00+00:00",
-    "startTime": "Wednesday, August 19, 2026 at 7:00 PM – 8:30 PM CDT",
-    "duration": null,
-    "eventType": null,
+    "startDate": "2026-08-19T19:00:00-05:00",
+    "endDate": "2026-08-19T20:30:00-05:00",
+    "timezone": "America/Chicago",
+    "startTime": "Wednesday 19 August 2026 from 19:00-20:30 CDT",
+    "duration": "1 hr 30 min",
+    "durationSeconds": 5400,
+    "eventType": "Comedy",
     "isOnline": false,
-    "isPast": null,
+    "isPast": false,
     "isCanceled": false,
-    "address": "Rosemont",
-    "image": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/729939829_1455156393312553_7424802617478099383_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=108&ccb=1-7&_nc_sid=75d36f&_nc_ohc=NbH0PON4qgEQ7kNvwFpe5NR&_nc_oc=Adq5ueEQtrEOiuAgFzOO0Af3DxO_gOQ9fm_C3askwZrW4mBPiabjqlDsciP5zxSWkxE&_nc_zt=23&_nc_ht=scontent-iad3-1.xx&_nc_gid=uzyVymY6OIZIjd0SLNBHbw&_nc_ss=73289&oh=00_AQB9zBIyvpIeNL7Q6dm6HB53eQMi0VaaM9zGnnCw3Eqyvg&oe=6A62C921",
-    "usersGoing": null,
-    "usersInterested": null,
-    "usersResponded": 3,
+    "address": "5437 Park Pl, Des Plaines, IL 60018-3732, United States",
+    "image": "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=1501904507609251",
     "location": {
       "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
       "city": "Rosemont, IL",
@@ -1086,10 +1086,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "longitude": -87.86738,
       "countryCode": "US"
     },
-    "organizer": "Zanies Rosemont Comedy Club",
     "organizers": [
       {
-        "id": null,
+        "id": "100064546187809",
         "name": "Zanies Rosemont Comedy Club",
         "url": "https://www.facebook.com/RosemontZanies",
         "verified": false
@@ -1099,82 +1098,155 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "categories": [
       {
         "label": "Comedy",
-        "url": null
+        "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy"
       }
-    ],
-    "externalLinks": []
+    ]
   },
   "facebook-event-search": {
     "query": "comedy Chicago",
+    "location": "Chicago",
     "totalReturned": 5,
     "events": [
       {
         "platform": "facebook",
-        "id": "1032731593052809",
-        "url": "https://www.facebook.com/events/1032731593052809/",
-        "name": "Worship 7/26/26",
-        "startDate": "2026-07-26T15:00:00Z",
-        "startTime": "Happening now",
-        "eventType": "PUBLIC_TYPE",
-        "isOnline": true,
+        "id": "1501904507609251",
+        "url": "https://www.facebook.com/events/1501904507609251/",
+        "name": "The Best of Chicago Comedy Showcase at Zanies Rosemont",
+        "description": "Get ready for an unforgettable evening of laughter as Chicago's comedy scene brings its A-game to the stage! \"The Best of Chicago Showcase\" features a dynamic lineup of the city's funniest stand-up comedians, delivering a blend of fresh, cutting-edge material and beloved, time-tested jokes.",
+        "startDate": "2026-08-19T19:00:00-05:00",
+        "endDate": "2026-08-19T20:30:00-05:00",
+        "timezone": "America/Chicago",
+        "startTime": "Wednesday 19 August 2026 from 19:00-20:30 CDT",
+        "duration": "1 hr 30 min",
+        "durationSeconds": 5400,
+        "eventType": "Comedy",
+        "isOnline": false,
         "isPast": false,
-        "image": "https://scontent-ord5-1.xx.fbcdn.net/v/t39.30808-6/729784843_1477362577754903_401694802381250350_n.jpg?stp=c0.47.1640.782a_dst-jpg_tt6&cstp=mx1640x782&ctp=s320x320&_nc_cat=101&ccb=1-7&_nc_sid=75d36f&_nc_ohc=6svKiDO2hVoQ7kNvwHjAlFx&_nc_oc=Adrs2rdq3CgIbPLXRlU5a0xVHUuey7lwAVdgpSxj7-fa3XGPZsdFBnUw7t8dgFeQLzo&_nc_zt=23&_nc_ht=scontent-ord5-1.xx&_nc_gid=ZJcMLEDMfuHRFLFJrYmanw&_nc_ss=7b289&oh=00_AQCUn-lzpgnqH0uhjhE6MWQWKlFJn71UKBsSHV-Uo_oxzw&oe=6A6BEE8A",
-        "usersGoing": 3,
-        "usersInterested": 1
+        "isCanceled": false,
+        "address": "5437 Park Pl, Des Plaines, IL 60018-3732, United States",
+        "image": "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=1501904507609251",
+        "location": {
+          "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
+          "city": "Rosemont, IL",
+          "latitude": 41.97826,
+          "longitude": -87.86738,
+          "countryCode": "US"
+        },
+        "organizers": [
+          {
+            "id": "100064546187809",
+            "name": "Zanies Rosemont Comedy Club",
+            "url": "https://www.facebook.com/RosemontZanies",
+            "verified": false
+          }
+        ],
+        "ticketsUrl": "https://www.etix.com/ticket/p/74170542/the-best-of-chicago-showcase-rosemont-zanies-rosemont",
+        "categories": [
+          {
+            "label": "Comedy",
+            "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy"
+          }
+        ]
       },
       {
         "platform": "facebook",
-        "id": "1020197857054108",
-        "url": "https://www.facebook.com/events/1020197857054108/",
-        "name": "In-Person and Online Worship Experience",
-        "startDate": "2026-07-26T16:00:00Z",
-        "startTime": "Sun, Jul 26 at 11:00 AM CDT",
+        "id": "1345542687414105",
+        "url": "https://www.facebook.com/events/1345542687414105/",
+        "name": "Anthony Mrocka at Zanies Rosemont",
+        "startDate": "2026-08-05T19:00:00-05:00",
+        "timezone": "America/Chicago",
+        "startTime": "Wed, Aug 5 at 7:00 PM CDT",
         "eventType": "PUBLIC_TYPE",
-        "isOnline": true,
         "isPast": false,
-        "image": "https://scontent-ord5-3.xx.fbcdn.net/v/t39.30808-6/744332103_1423888923105270_3051096675327242426_n.jpg?stp=c0.19.1200.573a_dst-jpg_tt6&cstp=mx1200x573&ctp=s320x320&_nc_cat=109&ccb=1-7&_nc_sid=75d36f&_nc_ohc=yib12OViOYUQ7kNvwE_daPf&_nc_oc=AdobfdQpY8SDFjT_xffOD9zJrsspqBb4B3Zycu79SvflFYdBXd_TpK-XKLASAXhgncM&_nc_zt=23&_nc_ht=scontent-ord5-3.xx&_nc_gid=ZJcMLEDMfuHRFLFJrYmanw&_nc_ss=7b289&oh=00_AQCpkrtpEZGrupU8PePBJk5UM-MlMsiV0T956Jq0JAmViA&oe=6A6C0BDE",
-        "usersGoing": 1,
-        "usersInterested": 1
+        "isCanceled": false,
+        "location": {
+          "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
+          "city": "Rosemont, IL",
+          "countryCode": "US"
+        },
+        "organizers": [
+          {
+            "id": "100064546187809",
+            "name": "Zanies Rosemont Comedy Club",
+            "url": "https://www.facebook.com/RosemontZanies",
+            "verified": false
+          }
+        ]
       },
       {
         "platform": "facebook",
-        "id": "1411120507064710",
-        "url": "https://www.facebook.com/events/1411120507064710/",
-        "name": "Sanjeevani4U Monthly Support Group",
-        "startDate": "2026-07-26T20:30:00Z",
-        "startTime": "Sun, Jul 26 at 3:30 PM CDT",
+        "id": "1544111680677964",
+        "url": "https://www.facebook.com/events/1544111680677964/",
+        "name": "Julian McCullough at Zanies Rosemont",
+        "startDate": "2026-08-06T19:00:00-05:00",
+        "timezone": "America/Chicago",
+        "startTime": "Thu, Aug 6 at 7:00 PM CDT",
         "eventType": "PUBLIC_TYPE",
-        "isOnline": true,
         "isPast": false,
-        "image": "https://scontent-ord5-1.xx.fbcdn.net/v/t39.30808-6/613646701_1298582932295083_3210622313165210617_n.jpg?stp=c0.346.1024.488a_dst-jpg_tt6&cstp=mx1024x488&ctp=s320x320&_nc_cat=101&ccb=1-7&_nc_sid=75d36f&_nc_ohc=lwwuvCXsIw4Q7kNvwFMpt-c&_nc_oc=AdrRTviYP5UFmTyuWzFJZLH1ak6ofRtzwqOFOuG8gd-lsL-yslvJuSX7cUKqSKAYFuA&_nc_zt=23&_nc_ht=scontent-ord5-1.xx&_nc_gid=ZJcMLEDMfuHRFLFJrYmanw&_nc_ss=7b289&oh=00_AQCBrwR61TAz3t76nzzrYrX7s-IY5O2rfsoqBdftoIwt_A&oe=6A6C01E6",
-        "usersGoing": 1
+        "isCanceled": false,
+        "location": {
+          "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
+          "city": "Rosemont, IL",
+          "countryCode": "US"
+        },
+        "organizers": [
+          {
+            "id": "100064546187809",
+            "name": "Zanies Rosemont Comedy Club",
+            "url": "https://www.facebook.com/RosemontZanies",
+            "verified": false
+          }
+        ]
       },
       {
         "platform": "facebook",
-        "id": "1552110089604110",
-        "url": "https://www.facebook.com/events/1552110089604110/",
-        "name": "The Big Picture of the Bible",
-        "startDate": "2026-07-28T00:45:00Z",
-        "startTime": "Mon, Jul 27 at 7:45 PM CDT",
+        "id": "2539973679819733",
+        "url": "https://www.facebook.com/events/2539973676486400/?event_time_id=2539973679819733",
+        "name": "Casey Rocket at Zanies Rosemont",
+        "startDate": "2026-08-07T19:00:00-05:00",
+        "timezone": "America/Chicago",
+        "startTime": "Fri, Aug 7 at 7:00 PM CDT",
         "eventType": "PUBLIC_TYPE",
-        "isOnline": true,
         "isPast": false,
-        "image": "https://scontent-ord5-3.xx.fbcdn.net/v/t39.30808-6/723103611_1437329531770331_3863440088136803669_n.jpg?stp=c0.275.1080.516a_dst-jpg_tt6&cstp=mx1080x516&ctp=s320x320&_nc_cat=107&ccb=1-7&_nc_sid=75d36f&_nc_ohc=qi1dWulJN-QQ7kNvwGdr1lG&_nc_oc=Adpno_IqyRgRAlG3Z_Vfr1ul5XSlJdB1QrOjGKeBBwzYjz1oVZ5D4dS7sGlh-wdp23k&_nc_zt=23&_nc_ht=scontent-ord5-3.xx&_nc_gid=ZJcMLEDMfuHRFLFJrYmanw&_nc_ss=7b289&oh=00_AQDroLHQxAlYptc7KJaSOkLp9E3J3aGMZv5JD9viL4DmaA&oe=6A6BF0D4",
-        "usersGoing": 1,
-        "usersInterested": 2
+        "isCanceled": false,
+        "location": {
+          "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
+          "city": "Rosemont, IL",
+          "countryCode": "US"
+        },
+        "organizers": [
+          {
+            "id": "100064546187809",
+            "name": "Zanies Rosemont Comedy Club",
+            "url": "https://www.facebook.com/RosemontZanies",
+            "verified": false
+          }
+        ]
       },
       {
         "platform": "facebook",
-        "id": "2448238608938396",
-        "url": "https://www.facebook.com/events/2448238608938396/",
-        "name": "Virtual 8 Week Tarot Class - A Fool's Journey",
-        "startDate": "2026-07-30T00:00:00Z",
-        "startTime": "Wed, Jul 29 at 7:00 PM CDT",
+        "id": "2539973683153066",
+        "url": "https://www.facebook.com/events/2539973676486400/?event_time_id=2539973683153066",
+        "name": "Casey Rocket at Zanies Rosemont",
+        "startDate": "2026-08-08T18:30:00-05:00",
+        "timezone": "America/Chicago",
+        "startTime": "Sat, Aug 8 at 6:30 PM CDT",
         "eventType": "PUBLIC_TYPE",
-        "isOnline": true,
         "isPast": false,
-        "image": "https://scontent-ord5-1.xx.fbcdn.net/v/t39.30808-6/700483218_122234764490315776_10588253747618528_n.jpg?stp=c0.177.1024.488a_dst-jpg_tt6&cstp=mx1024x488&ctp=s320x320&_nc_cat=106&ccb=1-7&_nc_sid=75d36f&_nc_ohc=LCRzJKfWiKsQ7kNvwFgKR6w&_nc_oc=Adr0yn7Dhw7TfiWnVXaiYKjY79rqYJ7O0ci5ovVd8gxV0JLjAWxLsc5d_elJVsJ9zKk&_nc_zt=23&_nc_ht=scontent-ord5-1.xx&_nc_gid=ZJcMLEDMfuHRFLFJrYmanw&_nc_ss=7b289&oh=00_AQD5PDmVcflFNfOcCytfj6iAK7Q2t_Ol4M2xCzz26mezCg&oe=6A6C025D",
-        "usersGoing": 1
+        "isCanceled": false,
+        "location": {
+          "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
+          "city": "Rosemont, IL",
+          "countryCode": "US"
+        },
+        "organizers": [
+          {
+            "id": "100064546187809",
+            "name": "Zanies Rosemont Comedy Club",
+            "url": "https://www.facebook.com/RosemontZanies",
+            "verified": false
+          }
+        ]
       }
     ]
   },
@@ -1569,55 +1641,75 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "events": [
       {
         "platform": "facebook",
-        "id": "1270386418439478",
-        "url": "https://www.facebook.com/events/1270386418439478/",
-        "name": "Bon Jovi: Forever Tour",
-        "startTime": "Sun, Jul 26 at 7:30 PM EDT",
-        "address": "Madison Square Garden",
+        "id": "1595969051643502",
+        "url": "https://www.facebook.com/events/1595969051643502/",
+        "name": "J. Cole: The Fall-Off Tour",
+        "startDate": "2026-08-04T20:00:00-04:00",
+        "timezone": "America/New_York",
+        "startTime": "Tue, Aug 4 at 8:00 PM EDT",
+        "eventType": "PUBLIC_TYPE",
+        "isPast": false,
+        "isCanceled": false,
         "location": {
           "name": "Madison Square Garden"
         }
       },
       {
         "platform": "facebook",
-        "id": "1426952632010473",
-        "url": "https://www.facebook.com/events/1426952632010473/",
-        "name": "Phish",
-        "startTime": "Mon, Jul 27 at 7:30 PM EDT",
-        "address": "Madison Square Garden",
+        "id": "1379008927241796",
+        "url": "https://www.facebook.com/events/1379008927241796/",
+        "name": "Hilary Duff: the lucky me tour",
+        "startDate": "2026-08-05T19:00:00-04:00",
+        "timezone": "America/New_York",
+        "startTime": "Wed, Aug 5 at 7:00 PM EDT",
+        "eventType": "PUBLIC_TYPE",
+        "isPast": false,
+        "isCanceled": false,
         "location": {
           "name": "Madison Square Garden"
         }
       },
       {
         "platform": "facebook",
-        "id": "1217913490078179",
-        "url": "https://www.facebook.com/events/1217913490078179/",
-        "name": "RUSH: Fifty Something",
-        "startTime": "Tue, Jul 28 at 7:30 PM EDT",
-        "address": "Madison Square Garden",
+        "id": "1139174624874547",
+        "url": "https://www.facebook.com/events/1139174624874547/",
+        "name": "Hilary Duff: the lucky me tour",
+        "startDate": "2026-08-06T19:00:00-04:00",
+        "timezone": "America/New_York",
+        "startTime": "Thu, Aug 6 at 7:00 PM EDT",
+        "eventType": "PUBLIC_TYPE",
+        "isPast": false,
+        "isCanceled": false,
         "location": {
           "name": "Madison Square Garden"
         }
       },
       {
         "platform": "facebook",
-        "id": "1957542368474959",
-        "url": "https://www.facebook.com/events/1957542368474959/",
-        "name": "Phish",
-        "startTime": "Wed, Jul 29 at 7:30 PM EDT",
-        "address": "Madison Square Garden",
+        "id": "4268299330087191",
+        "url": "https://www.facebook.com/events/4268299330087191/",
+        "name": "Kill Tony 2-Day Ticket (8/7-8/8) VALID BOTH DAYS",
+        "startDate": "2026-08-07T00:00:00-04:00",
+        "timezone": "America/New_York",
+        "startTime": "Fri, Aug 7 at 12:00 AM EDT",
+        "eventType": "PUBLIC_TYPE",
+        "isPast": false,
+        "isCanceled": false,
         "location": {
           "name": "Madison Square Garden"
         }
       },
       {
         "platform": "facebook",
-        "id": "847403967774434",
-        "url": "https://www.facebook.com/events/847403967774434/",
-        "name": "RUSH: Fifty Something",
-        "startTime": "Thu, Jul 30 at 7:30 PM EDT",
-        "address": "Madison Square Garden",
+        "id": "2210401519764764",
+        "url": "https://www.facebook.com/events/2210401519764764/",
+        "name": "Kill Tony",
+        "startDate": "2026-08-07T19:00:00-04:00",
+        "timezone": "America/New_York",
+        "startTime": "Fri, Aug 7 at 7:00 PM EDT",
+        "eventType": "PUBLIC_TYPE",
+        "isPast": false,
+        "isCanceled": false,
         "location": {
           "name": "Madison Square Garden"
         }

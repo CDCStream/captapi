@@ -14,9 +14,10 @@ import html as html_lib
 import json
 import re
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from urllib.parse import quote_plus
+from zoneinfo import ZoneInfo
 
 import structlog
 
@@ -24,6 +25,36 @@ from app.services import decodo_fetch
 from app.utils.formatters import safe_str
 
 log = structlog.get_logger(__name__)
+
+# Facebook day_time_sentence ends with a TZ abbreviation (CDT, EDT, …).
+# Map to IANA so startDate keeps the calendar day the host advertised.
+_TZ_ABBREV_TO_IANA: dict[str, str] = {
+    "UTC": "Etc/UTC",
+    "GMT": "Etc/GMT",
+    "BST": "Europe/London",
+    "CET": "Europe/Berlin",
+    "CEST": "Europe/Berlin",
+    "WET": "Europe/Lisbon",
+    "WEST": "Europe/Lisbon",
+    "EET": "Europe/Bucharest",
+    "EEST": "Europe/Bucharest",
+    "EST": "America/New_York",
+    "EDT": "America/New_York",
+    "CST": "America/Chicago",
+    "CDT": "America/Chicago",
+    "MST": "America/Denver",
+    "MDT": "America/Denver",
+    "PST": "America/Los_Angeles",
+    "PDT": "America/Los_Angeles",
+    "AKST": "America/Anchorage",
+    "AKDT": "America/Anchorage",
+    "HST": "Pacific/Honolulu",
+    "HDT": "Pacific/Honolulu",
+    "AST": "America/Halifax",
+    "ADT": "America/Halifax",
+    "NST": "America/St_Johns",
+    "NDT": "America/St_Johns",
+}
 
 # One Decodo JS render is ~$0.001–0.01; flat 2 credits (~120% markup headroom).
 CREDIT_FB_EVENTS_NATIVE = 2
@@ -293,20 +324,38 @@ def _place(raw: dict[str, Any]) -> dict[str, Any]:
     place = raw.get("event_place") if isinstance(raw.get("event_place"), dict) else {}
     if not place and isinstance(raw.get("location"), dict):
         place = raw["location"]
+    nested = place.get("location") if isinstance(place.get("location"), dict) else {}
     name = place.get("contextual_name") or place.get("name") or place.get("location_name")
+    city = place.get("city")
+    if isinstance(city, dict):
+        city = city.get("name") or city.get("contextual_name")
     # FreeformPlace often puts the venue in contextual_name with city null —
     # do not copy the venue title into city.
+    lat = place.get("latitude")
+    if lat is None:
+        lat = nested.get("latitude")
+    lon = place.get("longitude")
+    if lon is None:
+        lon = nested.get("longitude")
     return {
         "name": name,
-        "city": place.get("city"),
-        "latitude": place.get("latitude"),
-        "longitude": place.get("longitude"),
-        "countryCode": place.get("country_code") or place.get("countryCode"),
-        "streetAddress": place.get("streetAddress") or place.get("address"),
+        "city": city,
+        "latitude": lat,
+        "longitude": lon,
+        "countryCode": place.get("country_code") or place.get("countryCode") or nested.get("country_code"),
+        "streetAddress": place.get("streetAddress")
+        or place.get("address")
+        or place.get("one_line_address")
+        or raw.get("one_line_address"),
     }
 
 
 def _social_counts(raw: dict[str, Any]) -> tuple[int | None, int | None]:
+    """Parse going/interested from this event's social_context only.
+
+    Never use ``event_connected_users_public_responded`` (friends-who-responded)
+    or sibling suggested-event counts — those look like attendance but aren't.
+    """
     social = raw.get("social_context") if isinstance(raw.get("social_context"), dict) else {}
     text = social.get("text") if isinstance(social.get("text"), str) else ""
     going = interested = None
@@ -316,7 +365,243 @@ def _social_counts(raw: dict[str, Any]) -> tuple[int | None, int | None]:
         going = int(m_g.group(1).replace(",", ""))
     if m_i:
         interested = int(m_i.group(1).replace(",", ""))
+    if going is None:
+        going = _safe_int(raw.get("usersGoing") or raw.get("going_count") or raw.get("going"))
+    if interested is None:
+        interested = _safe_int(
+            raw.get("usersInterested") or raw.get("interested_count") or raw.get("interested")
+        )
     return going, interested
+
+
+def _safe_int(value: Any) -> int | None:
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _clean_schedule_sentence(sentence: str | None) -> str:
+    if not sentence:
+        return ""
+    return (
+        sentence.replace("\u202f", " ")
+        .replace("\u00a0", " ")
+        .replace("\u2013", "-")
+        .replace("\u2014", "-")
+        .replace("–", "-")
+        .replace("—", "-")
+        .strip()
+    )
+
+
+def _timezone_from_sentence(sentence: str | None) -> str | None:
+    cleaned = _clean_schedule_sentence(sentence)
+    if not cleaned:
+        return None
+    m = re.search(r"\b([A-Z]{2,5})\s*$", cleaned)
+    if not m:
+        return None
+    return _TZ_ABBREV_TO_IANA.get(m.group(1))
+
+
+_RELATIVE_SCHEDULE_RE = re.compile(
+    r"^(happening\s+now|now|today|tomorrow|yesterday|"
+    r"in\s+\d+\s*(minutes?|mins?|hours?|hrs?|days?)|"
+    r"\d+\s*(minutes?|mins?|hours?|hrs?|days?)\s+ago)$",
+    re.IGNORECASE,
+)
+
+_MONTH_MAP = {
+    "jan": 1,
+    "january": 1,
+    "feb": 2,
+    "february": 2,
+    "mar": 3,
+    "march": 3,
+    "apr": 4,
+    "april": 4,
+    "may": 5,
+    "jun": 6,
+    "june": 6,
+    "jul": 7,
+    "july": 7,
+    "aug": 8,
+    "august": 8,
+    "sep": 9,
+    "sept": 9,
+    "september": 9,
+    "oct": 10,
+    "october": 10,
+    "nov": 11,
+    "november": 11,
+    "dec": 12,
+    "december": 12,
+}
+
+
+def is_relative_schedule(sentence: str | None) -> bool:
+    cleaned = _clean_schedule_sentence(sentence)
+    if not cleaned:
+        return False
+    return bool(_RELATIVE_SCHEDULE_RE.match(cleaned))
+
+
+def _parse_clock_token(token: str) -> tuple[int, int] | None:
+    m = re.match(r"^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$", token.strip(), re.I)
+    if not m:
+        return None
+    hour = int(m.group(1))
+    minute = int(m.group(2) or 0)
+    ampm = (m.group(3) or "").upper()
+    if ampm == "PM" and hour < 12:
+        hour += 12
+    elif ampm == "AM" and hour == 12:
+        hour = 0
+    if hour > 23 or minute > 59:
+        return None
+    return hour, minute
+
+
+def parse_schedule_sentence(
+    sentence: str | None,
+    *,
+    prefer_upcoming: bool = True,
+) -> dict[str, str | None]:
+    """Parse Facebook ``day_time_sentence`` → local startDate/endDate/timezone.
+
+    Handles yearless cards (``Sun, Jul 26 at 7:30 PM EDT``) by assuming the
+    current year in that zone, then rolling forward one year when the instant
+    is already more than ~12h in the past (profile upcoming calendars).
+    """
+    cleaned = _clean_schedule_sentence(sentence)
+    empty = {"startDate": None, "endDate": None, "timezone": None}
+    if not cleaned or is_relative_schedule(cleaned):
+        return empty
+
+    tz_name = _timezone_from_sentence(cleaned)
+    # Strip trailing TZ abbrev for date/time parsing.
+    body = re.sub(r"\s+[A-Z]{2,5}$", "", cleaned).strip()
+
+    month_pat = (
+        r"Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|"
+        r"Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|"
+        r"Dec(?:ember)?"
+    )
+    # US: "Wednesday, August 19, 2026 at 7:00 PM" / "Tue, Aug 4 at 8:00 PM"
+    # EU/FB: "Tue, 4 Aug at 20:00" (day-first, 24h clock)
+    m = re.search(
+        rf"(?:(?P<month>{month_pat})\s+(?P<day>\d{{1,2}})|(?P<day2>\d{{1,2}})\s+(?P<month2>{month_pat}))"
+        rf"(?:,?\s*(?P<year>\d{{4}}))?"
+        rf"(?:\s+at\s+|\s+from\s+|\s+)"
+        rf"(?P<start>\d{{1,2}}(?::\d{{2}})?\s*(?:AM|PM)?)"
+        rf"(?:\s*[-to]+\s*(?P<end>\d{{1,2}}(?::\d{{2}})?\s*(?:AM|PM)?))?",
+        body,
+        re.I,
+    )
+    if not m:
+        return {**empty, "timezone": tz_name}
+
+    month_s = m.group("month") or m.group("month2")
+    day_s = m.group("day") or m.group("day2")
+    month = _MONTH_MAP.get((month_s or "").lower())
+    if not month or not day_s:
+        return {**empty, "timezone": tz_name}
+    day = int(day_s)
+    year_s = m.group("year")
+    start_clock = _parse_clock_token(m.group("start"))
+    if not start_clock:
+        return {**empty, "timezone": tz_name}
+    end_raw = m.group("end")
+    end_clock = _parse_clock_token(end_raw) if end_raw else None
+
+    # Share AM/PM: "7:00 - 8:30 PM" → start inherits PM.
+    if end_raw and start_clock and "AM" not in m.group("start").upper() and "PM" not in m.group("start").upper():
+        if "PM" in (end_raw or "").upper() or "AM" in (end_raw or "").upper():
+            start_clock = _parse_clock_token(
+                m.group("start") + " " + re.findall(r"AM|PM", end_raw, flags=re.I)[-1]
+            )
+            if not start_clock:
+                return {**empty, "timezone": tz_name}
+
+    tz = ZoneInfo(tz_name) if tz_name else timezone.utc
+    now = datetime.now(tz)
+    year = int(year_s) if year_s else now.year
+
+    def _make(y: int, clock: tuple[int, int]) -> datetime:
+        return datetime(y, month, day, clock[0], clock[1], 0, tzinfo=tz)
+
+    try:
+        start_dt = _make(year, start_clock)
+    except ValueError:
+        return {**empty, "timezone": tz_name}
+
+    if not year_s and prefer_upcoming and start_dt < now - timedelta(hours=12):
+        try:
+            start_dt = _make(year + 1, start_clock)
+            year = year + 1
+        except ValueError:
+            pass
+
+    end_dt = None
+    if end_clock:
+        try:
+            end_dt = _make(year, end_clock)
+            if end_dt < start_dt:
+                end_dt = end_dt + timedelta(days=1)
+        except ValueError:
+            end_dt = None
+
+    return {
+        "startDate": start_dt.isoformat(timespec="seconds"),
+        "endDate": end_dt.isoformat(timespec="seconds") if end_dt else None,
+        "timezone": tz_name,
+    }
+
+
+def _fmt_local_iso(ts: int | None, tz_name: str | None) -> str | None:
+    if ts is None:
+        return None
+    try:
+        utc_dt = datetime.fromtimestamp(int(ts), tz=timezone.utc)
+    except (TypeError, ValueError, OSError):
+        return None
+    if tz_name:
+        try:
+            return utc_dt.astimezone(ZoneInfo(tz_name)).isoformat(timespec="seconds")
+        except Exception:  # noqa: BLE001
+            pass
+    return utc_dt.isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def _fmt_utc_iso(ts: int | None) -> str | None:
+    if ts is None:
+        return None
+    try:
+        return datetime.fromtimestamp(int(ts), tz=timezone.utc).isoformat().replace("+00:00", "Z")
+    except (TypeError, ValueError, OSError):
+        return None
+
+
+def _duration_text(seconds: int | None, display: str | None = None) -> str | None:
+    if isinstance(display, str) and display.strip():
+        return display.strip()
+    if seconds is None or seconds < 0:
+        return None
+    if seconds % 3600 == 0 and seconds >= 3600:
+        hours = seconds // 3600
+        return f"{hours} hr" if hours == 1 else f"{hours} hrs"
+    if seconds % 60 == 0:
+        minutes = seconds // 60
+        if minutes >= 60:
+            h, m = divmod(minutes, 60)
+            if m == 0:
+                return f"{h} hr" if h == 1 else f"{h} hrs"
+            return f"{h} hr {m} min" if h == 1 else f"{h} hrs {m} min"
+        return f"{minutes} min"
+    return f"{seconds} seconds"
 
 
 def _coerce_is_past(flag: Any, start_date: str | None) -> bool | None:
@@ -333,6 +618,199 @@ def _coerce_is_past(flag: Any, start_date: str | None) -> bool | None:
         return dt < datetime.now(timezone.utc)
     except (TypeError, ValueError):
         return None
+
+
+def _parse_json_object_after(html: str, key: str) -> dict[str, Any] | None:
+    m = re.search(rf'"{re.escape(key)}"\s*:\s*\{{', html or "")
+    if not m:
+        return None
+    blob = _extract_balanced_json(html or "", m.end() - 1)
+    if not blob:
+        return None
+    try:
+        data = json.loads(blob)
+    except ValueError:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def enrich_raw_event_from_html(html: str, eid: str | None, raw: dict[str, Any]) -> dict[str, Any]:
+    """Fill end time, host, categories, duration, coords from the event page HTML.
+
+    The thin Relay card chosen by ``extract_events_from_html`` often omits these;
+    details pages still embed them elsewhere in ScheduledServerJS.
+    """
+    out = dict(raw)
+    body = html or ""
+    if not body:
+        return out
+
+    if eid:
+        # Prefer timestamps that appear near this event id (avoid sibling cards).
+        window_hits: list[tuple[int, int]] = []
+        for m in re.finditer(re.escape(str(eid)), body):
+            chunk = body[max(0, m.start() - 400) : m.end() + 2500]
+            ts_m = re.search(r'"start_timestamp"\s*:\s*(\d+)', chunk)
+            et_m = re.search(r'"end_timestamp"\s*:\s*(\d+)', chunk)
+            if ts_m and et_m:
+                window_hits.append((int(ts_m.group(1)), int(et_m.group(1))))
+        if window_hits:
+            # Most common pair for this id wins.
+            counts: dict[tuple[int, int], int] = {}
+            for pair in window_hits:
+                counts[pair] = counts.get(pair, 0) + 1
+            start_ts, end_ts = max(counts.items(), key=lambda kv: kv[1])[0]
+            out.setdefault("start_timestamp", start_ts)
+            out.setdefault("end_timestamp", end_ts)
+        else:
+            et_m = re.search(r'"end_timestamp"\s*:\s*(\d+)', body)
+            if et_m and out.get("end_timestamp") is None:
+                out["end_timestamp"] = int(et_m.group(1))
+
+    if out.get("end_timestamp") is None:
+        et_m = re.search(r'"end_timestamp"\s*:\s*(\d+)', body)
+        if et_m:
+            out["end_timestamp"] = int(et_m.group(1))
+
+    if not out.get("day_time_sentence"):
+        dts = re.search(
+            r'"day_time_sentence"\s*:\s*"((?:\\.|[^"\\])*)"',
+            body,
+        )
+        if dts:
+            out["day_time_sentence"] = _unescape_js_str(dts.group(1))
+
+    if not out.get("display_duration"):
+        dd = re.search(r'"display_duration"\s*:\s*"((?:\\.|[^"\\])*)"', body)
+        if dd:
+            out["display_duration"] = _unescape_js_str(dd.group(1))
+
+    if out.get("is_past") is None:
+        ip = re.search(r'"is_past"\s*:\s*(true|false)', body)
+        if ip:
+            out["is_past"] = ip.group(1) == "true"
+
+    if not out.get("event_kind"):
+        ek = re.search(r'"event_kind"\s*:\s*"([^"]+)"', body)
+        if ek:
+            out["event_kind"] = ek.group(1)
+
+    if out.get("is_online") is None:
+        io = re.search(r'"is_online"\s*:\s*(true|false)', body)
+        if io:
+            out["is_online"] = io.group(1) == "true"
+
+    if out.get("is_canceled") is None:
+        ic = re.search(r'"is_canceled"\s*:\s*(true|false)', body)
+        if ic:
+            out["is_canceled"] = ic.group(1) == "true"
+
+    creator = out.get("event_creator") if isinstance(out.get("event_creator"), dict) else None
+    if not creator:
+        creator = _parse_json_object_after(body, "event_creator")
+        if creator:
+            out["event_creator"] = creator
+
+    owner = out.get("page_as_owner") if isinstance(out.get("page_as_owner"), dict) else None
+    if not owner:
+        owner = _parse_json_object_after(body, "page_as_owner")
+        if owner:
+            out["page_as_owner"] = owner
+
+    # Host URL + verified often sit next to the creator name, not inside the thin object.
+    if creator and not creator.get("url"):
+        name = creator.get("name")
+        if isinstance(name, str) and name.strip():
+            esc = re.escape(name)
+            um = re.search(
+                rf'"name"\s*:\s*"{esc}"[^}}]{{0,400}}"url"\s*:\s*"(https:\\/\\/www\.facebook\.com\\/[^"]+)"',
+                body,
+            )
+            if not um:
+                um = re.search(
+                    rf'"name"\s*:\s*"{esc}"[^}}]{{0,400}}"url"\s*:\s*"(https://www\.facebook\.com/[^"]+)"',
+                    body,
+                )
+            if um:
+                creator["url"] = _unescape_js_str(um.group(1))
+            vm = re.search(
+                rf'"name"\s*:\s*"{esc}"[^}}]{{0,400}}"is_verified"\s*:\s*(true|false)',
+                body,
+            )
+            if vm:
+                creator["is_verified"] = vm.group(1) == "true"
+
+    if not out.get("discovery_categories"):
+        cats = re.search(r'"discovery_categories"\s*:\s*(\[[^\]]{0,2000}\])', body)
+        if cats:
+            try:
+                parsed = json.loads(cats.group(1).replace("\\/", "/"))
+                if isinstance(parsed, list):
+                    out["discovery_categories"] = parsed
+            except ValueError:
+                pass
+
+    if not out.get("one_line_address"):
+        ola = re.search(r'"one_line_address"\s*:\s*"((?:\\.|[^"\\])*)"', body)
+        if ola:
+            out["one_line_address"] = _unescape_js_str(ola.group(1))
+
+    # Full About-tab copy (OG description is usually a one-line stub).
+    if not out.get("description") or len(str(out.get("description") or "")) < 80:
+        edm = re.search(
+            r'"event_description"\s*:\s*\{\s*"text"\s*:\s*"((?:\\.|[^"\\])*)"',
+            body,
+        )
+        if edm:
+            out["description"] = _unescape_js_str(edm.group(1))
+
+    # Nested FreeformPlace.location{latitude,longitude} when the card omitted them.
+    place = out.get("event_place") if isinstance(out.get("event_place"), dict) else {}
+    nested = place.get("location") if isinstance(place.get("location"), dict) else {}
+    if nested.get("latitude") is None:
+        lm = re.search(
+            r'"event_place"\s*:\s*\{[^}]{0,400}"location"\s*:\s*\{\s*"latitude"\s*:\s*([-\d.]+)\s*,\s*"longitude"\s*:\s*([-\d.]+)',
+            body,
+        )
+        if lm:
+            if not place:
+                place = {}
+            place["location"] = {
+                "latitude": float(lm.group(1)),
+                "longitude": float(lm.group(2)),
+            }
+            out["event_place"] = place
+
+    # Tickets buy URL for this event.
+    if not out.get("event_buy_ticket_url") and eid:
+        tm = re.search(
+            rf'"id"\s*:\s*"{re.escape(str(eid))}"[^}}]{{0,300}}"event_buy_ticket_url"\s*:\s*"((?:\\.|[^"\\])*)"',
+            body,
+        )
+        if tm:
+            out["event_buy_ticket_url"] = _unescape_js_str(tm.group(1))
+
+    # Attendance: only trust social_context that shares a chunk with this event's
+    # day_time_sentence (sibling suggested events also have going/interested).
+    sentence = out.get("day_time_sentence")
+    if isinstance(sentence, str) and sentence.strip() and not out.get("social_context"):
+        # Match a short escaped prefix of the sentence inside JSON.
+        needle = sentence[:40].replace("–", "\\u2013").replace("—", "\\u2014")
+        needle = needle.replace("\u202f", "\\u202f")
+        idx = body.find(needle) if needle else -1
+        if idx < 0:
+            # Fallback: unescaped search.
+            idx = body.find(sentence[:40])
+        if idx >= 0:
+            chunk = body[max(0, idx - 200) : idx + 1200]
+            sm = re.search(
+                r'"social_context"\s*:\s*\{[^}]*"text"\s*:\s*"((?:\\.|[^"\\])*)"',
+                chunk,
+            )
+            if sm:
+                out["social_context"] = {"text": _unescape_js_str(sm.group(1))}
+
+    return out
 
 
 def _prefer_upcoming(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -366,18 +844,119 @@ def normalize_raw_event(raw: dict[str, Any]) -> dict[str, Any]:
     url = raw.get("eventUrl") or raw.get("event_url") or raw.get("url")
     if not url and eid:
         url = f"https://www.facebook.com/events/{eid}/"
-    ts = raw.get("start_timestamp") or raw.get("startTimestamp")
-    start_date = None
-    if ts is not None:
-        try:
-            start_date = datetime.fromtimestamp(int(ts), tz=timezone.utc).isoformat().replace("+00:00", "Z")
-        except (TypeError, ValueError, OSError):
-            start_date = None
+    start_ts = raw.get("start_timestamp") or raw.get("startTimestamp")
+    end_ts = raw.get("end_timestamp") or raw.get("endTimestamp")
+    try:
+        start_ts_i = int(start_ts) if start_ts is not None else None
+    except (TypeError, ValueError):
+        start_ts_i = None
+    try:
+        end_ts_i = int(end_ts) if end_ts is not None else None
+    except (TypeError, ValueError):
+        end_ts_i = None
+
+    sentence = (
+        raw.get("day_time_sentence")
+        or raw.get("dateTimeSentence")
+        or raw.get("startTime")
+        or raw.get("start_time")
+    )
+    if isinstance(sentence, str) and is_relative_schedule(sentence):
+        # "Happening now" is not cache-safe — prefer absolute formatted fields.
+        sentence = (
+            raw.get("start_time_formatted")
+            or raw.get("dateTimeSentence")
+            or raw.get("day_time_sentence")
+        )
+        if isinstance(sentence, str) and is_relative_schedule(sentence):
+            sentence = None
+
+    tz_name = raw.get("timezone") if isinstance(raw.get("timezone"), str) else None
+    if not tz_name:
+        tz_name = _timezone_from_sentence(sentence if isinstance(sentence, str) else None)
+
+    utc_start = _fmt_utc_iso(start_ts_i)
+    local_start = _fmt_local_iso(start_ts_i, tz_name)
+    local_end = _fmt_local_iso(end_ts_i, tz_name)
+
+    # Yearless listing cards (profile-events) often have only the sentence.
+    if not local_start and isinstance(sentence, str):
+        parsed = parse_schedule_sentence(sentence, prefer_upcoming=True)
+        local_start = parsed.get("startDate")  # type: ignore[assignment]
+        if not local_end:
+            local_end = parsed.get("endDate")  # type: ignore[assignment]
+        if not tz_name:
+            tz_name = parsed.get("timezone")  # type: ignore[assignment]
+    if not local_start:
+        local_start = utc_start
+
+    duration_seconds: int | None = None
+    if start_ts_i is not None and end_ts_i is not None and end_ts_i >= start_ts_i:
+        duration_seconds = end_ts_i - start_ts_i
+    duration = _duration_text(
+        duration_seconds,
+        safe_str(raw.get("display_duration") or raw.get("duration") or raw.get("durationText")),
+    )
+
     place = _place(raw)
     going, interested = _social_counts(raw)
     is_online = raw.get("is_online")
     if is_online is None:
         is_online = raw.get("is_online_or_detected_online")
+
+    # Categories from discovery_categories when present.
+    categories: list[dict[str, Any]] = []
+    raw_cats = raw.get("discovery_categories") or raw.get("categories") or []
+    if isinstance(raw_cats, list):
+        for c in raw_cats:
+            if isinstance(c, str) and c.strip():
+                categories.append({"label": c.strip(), "url": None})
+            elif isinstance(c, dict):
+                label = safe_str(c.get("label") or c.get("name"))
+                if label:
+                    categories.append(
+                        {
+                            "label": label,
+                            "url": safe_str(c.get("uri") or c.get("url")),
+                        }
+                    )
+
+    # eventType: category label when available (Comedy), else Relay event_kind.
+    event_type = None
+    if categories:
+        event_type = categories[0].get("label")
+    if not event_type:
+        event_type = raw.get("eventType") or raw.get("event_kind") or raw.get("event_type")
+
+    organizers: list[dict[str, Any]] = []
+    creator = raw.get("event_creator") if isinstance(raw.get("event_creator"), dict) else {}
+    owner = raw.get("page_as_owner") if isinstance(raw.get("page_as_owner"), dict) else {}
+    host_name = safe_str(creator.get("name") or owner.get("name") or raw.get("organizedBy"))
+    host_id = safe_str(creator.get("id") or owner.get("id"))
+    host_url = safe_str(creator.get("url") or owner.get("url") or raw.get("organizerUrl"))
+    host_verified = creator.get("is_verified")
+    if host_verified is None:
+        host_verified = owner.get("is_verified")
+    if host_name or host_id or host_url:
+        organizers.append(
+            {
+                "id": host_id,
+                "name": host_name,
+                "url": host_url,
+                "isVerified": bool(host_verified) if host_verified is not None else False,
+            }
+        )
+    elif isinstance(raw.get("organizers"), list):
+        organizers = [o for o in raw["organizers"] if isinstance(o, dict)]
+
+    tickets_info = raw.get("ticketsInfo") if isinstance(raw.get("ticketsInfo"), dict) else {}
+    tickets_url = safe_str(
+        raw.get("event_buy_ticket_url")
+        or raw.get("ticketsUrl")
+        or tickets_info.get("buyUrl")
+        or raw.get("ticketUrl")
+    )
+
     return {
         "id": eid or None,
         "event_id": eid or None,
@@ -386,17 +965,28 @@ def normalize_raw_event(raw: dict[str, Any]) -> dict[str, Any]:
         "name": raw.get("name") or raw.get("title"),
         "title": raw.get("name") or raw.get("title"),
         "description": raw.get("description"),
-        "utcStartDate": start_date,
-        "start_date": start_date,
-        "startTime": raw.get("day_time_sentence") or start_date,
-        "dateTimeSentence": raw.get("day_time_sentence"),
+        # Local-offset ISO is canonical for startDate (calendar day matches startTime).
+        "startDate": local_start,
+        "endDate": local_end,
+        "timezone": tz_name,
+        # Keep UTC for debugging / older clients; router prefers startDate.
+        "utcStartDate": utc_start,
+        "start_date": local_start,
+        "startTime": (sentence if isinstance(sentence, str) and sentence.strip() else None)
+        or local_start,
+        "dateTimeSentence": sentence if isinstance(sentence, str) else None,
+        "duration": duration,
+        "durationSeconds": duration_seconds,
         "isOnline": is_online,
         "is_online": is_online,
         "isPast": _coerce_is_past(
             raw.get("is_past") if raw.get("is_past") is not None else raw.get("isPast"),
-            start_date,
+            local_start or utc_start,
         ),
-        "eventType": raw.get("event_kind") or raw.get("eventType"),
+        "isCanceled": raw.get("is_canceled")
+        if raw.get("is_canceled") is not None
+        else raw.get("isCanceled"),
+        "eventType": event_type,
         "imageUrl": _cover_image(raw),
         "image": _cover_image(raw),
         "usersGoing": going,
@@ -404,6 +994,11 @@ def normalize_raw_event(raw: dict[str, Any]) -> dict[str, Any]:
         "location": place,
         "location_name": place.get("name"),
         "location_city": place.get("city"),
+        "organizers": organizers,
+        "categories": categories,
+        "discoveryCategories": categories,
+        "ticketsUrl": tickets_url,
+        "ticketsInfo": {"buyUrl": tickets_url} if tickets_url else None,
     }
 
 
@@ -476,7 +1071,12 @@ async def fetch_page_events(page_url: str, *, limit: int = 20) -> list[dict[str,
     if not raw:
         log.info("facebook_events_native_page_empty", url=url[:120])
         return None
-    out = [normalize_raw_event(e) for e in raw[: max(limit, 40)]]
+    out: list[dict[str, Any]] = []
+    for e in raw[: max(limit, 40)]:
+        eid = str(e.get("id") or e.get("event_id") or "")
+        # Same page HTML often embeds start/end timestamps the thin card omitted.
+        enriched = enrich_raw_event_from_html(html, eid or None, e)
+        out.append(normalize_raw_event(enriched))
     out = [e for e in out if e.get("id") and e.get("name")]
     out = out[:limit]
     if not out:
@@ -537,11 +1137,30 @@ def _event_matches_query(raw: dict[str, Any], tokens: list[str]) -> bool:
     hay = _event_haystack(raw)
     if not hay:
         return False
-    # Require at least half the tokens (min 1) so "comedy Chicago" isn't
-    # satisfied by unrelated discovery feed cards.
-    need = max(1, (len(tokens) + 1) // 2)
+    # Short queries (topic + city): require every token. Longer queries: ≥70%.
+    need = len(tokens) if len(tokens) <= 3 else max(2, int(round(len(tokens) * 0.7)))
     hits = sum(1 for t in tokens if t in hay)
     return hits >= need
+
+
+def _event_in_date_range(
+    ev: dict[str, Any],
+    *,
+    from_date: str | None,
+    to_date: str | None,
+) -> bool:
+    """Filter by calendar day of startDate (YYYY-MM-DD bounds, inclusive)."""
+    if not from_date and not to_date:
+        return True
+    start = safe_str(ev.get("startDate") or ev.get("utcStartDate") or ev.get("start_date"))
+    if not start:
+        return False
+    day = start[:10]
+    if from_date and day < from_date[:10]:
+        return False
+    if to_date and day > to_date[:10]:
+        return False
+    return True
 
 
 def _event_ids_from_serp_html(html: str, *, limit: int = 40) -> list[str]:
@@ -574,32 +1193,38 @@ async def _search_event_ids_via_serp(
     # Bias SERP toward upcoming listings without inventing dates.
     variants = [
         f"site:facebook.com/events {query}",
-        f'site:facebook.com/events/ "{query}" upcoming',
+        f'site:facebook.com/events {query} comedy OR concert OR show',
     ]
+    # Prefer DDG (often works without JS) then Yahoo then Google — short timeouts
+    # so a dead SERP does not burn the whole search budget.
     sources: list[tuple[str, str | None]] = []
-    for v in variants:
+    for v in variants[:1]:
         q_enc = quote_plus(v)
         sources.extend(
             [
-                (f"https://www.google.com/search?q={q_enc}&num={num}&hl=en&gl=us&pws=0", "html"),
-                (f"https://search.yahoo.com/search?p={q_enc}&n={num}", "html"),
                 (f"https://html.duckduckgo.com/html/?q={q_enc}", None),
+                (f"https://search.yahoo.com/search?p={q_enc}&n={num}", "html"),
+                (f"https://www.google.com/search?q={q_enc}&num={num}&hl=en&gl=us&pws=0", "html"),
             ]
         )
     seen: set[str] = set()
     ids: list[str] = []
+    misses = 0
     for url, headless in sources:
         if deadline is not None and time.monotonic() >= deadline:
             break
-        # Keep each SERP fetch short so the whole search stays under budget.
-        remaining = 25.0 if deadline is None else max(5.0, deadline - time.monotonic())
+        remaining = 12.0 if deadline is None else max(4.0, min(12.0, deadline - time.monotonic()))
         got = await decodo_fetch.fetch_url(
-            url, timeout=min(25.0, remaining), headless=headless, geo="US"
+            url, timeout=remaining, headless=headless, geo="US"
         )
         if not got:
+            misses += 1
+            if misses >= 3 and not ids:
+                break
             continue
         status, body = got
         if status != 200 or not body:
+            misses += 1
             continue
         for eid in _event_ids_from_serp_html(body, limit=limit):
             if eid in seen:
@@ -645,44 +1270,62 @@ async def _hydrate_event_ids(
     return out
 
 
-async def fetch_search_events(q: str, *, limit: int = 20) -> list[dict[str, Any]] | None:
-    """Keyword search: Google SERP → details, then relevance-filtered discovery.
+async def fetch_search_events(
+    q: str,
+    *,
+    limit: int = 20,
+    location: str | None = None,
+    from_date: str | None = None,
+    to_date: str | None = None,
+) -> list[dict[str, Any]] | None:
+    """Keyword search: SERP → details, then relevance-filtered discovery.
 
-    Logged-out /events/?q= often returns an unrelated feed; SERP is the reliable
-    native path. Discovery is a second try (no scroll) for lucky shells.
+    Logged-out /events/?q= often returns an unrelated feed; SERP is preferred.
+    Discovery always runs when SERP is empty (even after SERP timeouts) so a
+    dead Google/Yahoo hop cannot zero the whole endpoint.
 
-    Hard ~30s wall budget — event search should not sit near 100s for one result.
-    Upcoming events are preferred; past events are kept only to fill ``limit``.
+    Optional ``location`` tokens are required matches (same as query tokens).
+    ``from_date`` / ``to_date`` are YYYY-MM-DD bounds on local startDate.
     """
     if limit <= 0:
         return []
     query = (q or "").strip()
     if len(query) < 2:
         return None
-    tokens = _query_tokens(query)
-    deadline = time.monotonic() + 30.0
+    loc = (location or "").strip()
+    combined = f"{query} {loc}".strip() if loc else query
+    tokens = _query_tokens(combined)
+    # Reserve ~20s for discovery/page hydrate even if SERP is slow.
+    deadline = time.monotonic() + 50.0
+    serp_deadline = time.monotonic() + 18.0
 
-    # 1) Google SERP → native event-details (query-relevant IDs).
+    def _finalize(rows: list[dict[str, Any]], path: str) -> list[dict[str, Any]]:
+        filtered = [
+            e
+            for e in rows
+            if _event_in_date_range(e, from_date=from_date, to_date=to_date)
+        ]
+        ranked = _prefer_upcoming(filtered)[:limit]
+        log.info(
+            "facebook_events_native_search_ok",
+            q=query[:80],
+            n=len(ranked),
+            path=path,
+            location=(loc[:40] if loc else None),
+        )
+        return ranked
+
+    # 1) SERP → native event-details (query-relevant IDs).
     ids = await _search_event_ids_via_serp(
-        query, limit=min(40, max(15, limit * 2)), deadline=deadline
+        combined, limit=min(40, max(15, limit * 2)), deadline=serp_deadline
     )
     if ids and time.monotonic() < deadline:
-        hydrated = await _hydrate_event_ids(ids, limit=limit, tokens=tokens)
+        hydrated = await _hydrate_event_ids(ids, limit=max(limit, 8), tokens=tokens)
         if hydrated:
-            ranked = _prefer_upcoming(hydrated)[:limit]
-            log.info(
-                "facebook_events_native_search_ok",
-                q=query[:80],
-                n=len(ranked),
-                path="serp",
-            )
-            return ranked
+            return _finalize(hydrated, "serp")
 
-    # 2) Facebook discovery shell — no scroll (scrolled feed is usually unrelated).
-    if time.monotonic() >= deadline:
-        log.info("facebook_events_native_search_empty", q=query[:80], reason="budget")
-        return None
-    url = search_events_url(query)
+    # 2) Facebook discovery shell — always try when SERP missed (strict match).
+    url = search_events_url(combined)
     html = await _fetch_html(url, scroll=False)
     if html:
         raw = extract_events_from_html(html)
@@ -690,14 +1333,7 @@ async def fetch_search_events(q: str, *, limit: int = 20) -> list[dict[str, Any]
         out = [normalize_raw_event(e) for e in matched]
         out = [e for e in out if e.get("id") and e.get("name")]
         if out:
-            ranked = _prefer_upcoming(out)[:limit]
-            log.info(
-                "facebook_events_native_search_ok",
-                q=query[:80],
-                n=len(ranked),
-                path="discovery",
-            )
-            return ranked
+            return _finalize(out, "discovery")
 
     log.info("facebook_events_native_search_empty", q=query[:80])
     return None
@@ -752,6 +1388,14 @@ async def fetch_event_details(url: str) -> dict[str, Any] | None:
     if not chosen:
         log.info("facebook_events_native_details_empty", url=target[:120])
         return None
+    # Thin Relay cards miss end_timestamp / host / categories — hydrate from HTML.
+    chosen = enrich_raw_event_from_html(html, eid, chosen)
+    if not chosen.get("description"):
+        chosen["description"] = _og_meta(html, "og:description")
+    if not _cover_image(chosen):
+        og_img = _og_meta(html, "og:image")
+        if og_img:
+            chosen["cover_photo"] = {"photo": {"image": {"uri": og_img}}}
     out = normalize_raw_event(chosen)
     if eid:
         # Never return a different event than the requested URL.

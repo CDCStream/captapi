@@ -1121,9 +1121,33 @@ const FACEBOOK_MARKETPLACE: Spec[] = [
 ];
 
 const FACEBOOK_EVENTS: Spec[] = [
-  { slug: "facebook-event-search", name: "Facebook Event Search API", shortName: "Event Search", category: "search", method: "GET", path: "/v1/facebook/event-search", credits: 2 },
-  { slug: "facebook-event-details", name: "Facebook Event Details API", shortName: "Event Details", category: "details", method: "GET", path: "/v1/facebook/event-details", credits: 2 , tagline: "Get a Facebook event — title, time, place, host, and attendance signals as structured JSON.", longDescription: "Paste a Facebook event URL and get the event details as clean JSON: title, description, start/end time, location, host page, and interest or going counts when available. Flat 2 credits per call." },
-  { slug: "facebook-profile-events", name: "Facebook Profile Events API", shortName: "Profile Events", category: "list", method: "GET", path: "/v1/facebook/profile-events", credits: 2 },
+  {
+    slug: "facebook-event-search",
+    name: "Facebook Event Search API",
+    shortName: "Event Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/facebook/event-search",
+    credits: 2,
+    tagline:
+      "Search Facebook events by topic and city — local startDate/timezone, venue, and attendance when exposed. Flat 2 credits.",
+    longDescription:
+      "Search public Facebook events with a topic query (e.g. comedy) and optional location / from / to filters. Each result uses the same Event shape as Event Details and Profile Events: startDate/endDate as ISO with the host timezone offset (calendar day matches startTime — evening CDT events do not roll to the next UTC day), timezone, isPast, eventType, location{}, image, and usersGoing/usersInterested when Facebook exposes them. Relative labels like \"Happening now\" are never returned as startTime. Flat 2 credits on the native path.",
+  },
+  { slug: "facebook-event-details", name: "Facebook Event Details API", shortName: "Event Details", category: "details", method: "GET", path: "/v1/facebook/event-details", credits: 2 , tagline: "Get a Facebook event — title, local start/end, timezone, place, host id, and attendance when exposed.", longDescription: "Paste a Facebook event URL and get clean JSON: title, description, startDate/endDate as ISO with the host timezone offset (calendar day matches startTime), IANA timezone, duration, location, organizers[{id,name,url,verified}], categories, ticketsUrl, and going/interested counts when Facebook exposes them on the logged-out hydrate. Flat 2 credits per call." },
+  {
+    slug: "facebook-profile-events",
+    name: "Facebook Profile Events API",
+    shortName: "Profile Events",
+    category: "list",
+    method: "GET",
+    path: "/v1/facebook/profile-events",
+    credits: 2,
+    tagline:
+      "List a Facebook Page's events — local startDate (year included), timezone, venue. Flat 2 credits.",
+    longDescription:
+      "Pass a Facebook Page URL and get that page's /events list as clean JSON using the same Event shape as Event Search / Event Details: id, url, name, startDate (ISO with host offset — year resolved from yearless cards like \"Tue, Aug 4 at 8:00 PM EDT\"), timezone, startTime, isPast, and location{name}. Flat 2 credits on the native path.",
+  },
 ];
 
 const TWITTER: Spec[] = [
@@ -3431,10 +3455,31 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     { name: "details", type: "boolean", required: false, description: "When true, adds description/condition/coordinates/full photo gallery (2 + 2 credits per listing). Default false → flat 2 credits; cover photo is still included." },
   ],
   "facebook-marketplace-location-search": [qp("City/place search query, e.g. Austin."), lpFlat(10, 50, 2), { name: "details", type: "boolean", required: false, description: "Legacy flag. Coordinates are included when available. Flat 2 credits either way." }],
-  "facebook-event-search": [qp("Topic and/or place, e.g. 'comedy Chicago'."), lp(20, 200)],
+  "facebook-event-search": [
+    qp("Topic keyword, e.g. 'comedy'. Pair with location for city-scoped results."),
+    {
+      name: "location",
+      type: "string",
+      required: false,
+      description: "City or place tokens required in title/venue (e.g. Chicago).",
+    },
+    {
+      name: "from",
+      type: "string",
+      required: false,
+      description: "Inclusive local start date filter YYYY-MM-DD.",
+    },
+    {
+      name: "to",
+      type: "string",
+      required: false,
+      description: "Inclusive local start date filter YYYY-MM-DD.",
+    },
+    lpFlat(20, 200, 2),
+  ],
   "facebook-event-details": [up("Facebook event URL, e.g. https://facebook.com/events/ID.")],
   "facebook-profile-photos": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
-  "facebook-profile-events": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
+  "facebook-profile-events": [up("Facebook profile/page URL, @handle, or page name."), lpFlat(20, 200, 2)],
   "facebook-marketplace-item": [up("Facebook Marketplace item URL.")],
   // Twitter / X
   "twitter-tweet-details": [up("Public tweet URL, e.g. https://x.com/user/status/ID.")],
@@ -5764,6 +5809,51 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     images: "Typed image assets when Meta exposes them ({url, resizedUrl}).",
     destinationUrl: "Click-through / landing URL from the ad creative.",
   },
+  "facebook-event-details": {
+    startDate:
+      "Event start as ISO-8601 with the host timezone offset (e.g. 2026-08-19T19:00:00-05:00). Calendar day matches startTime — not UTC midnight.",
+    endDate:
+      "Event end as ISO-8601 with the same host timezone offset when Facebook exposes end_timestamp.",
+    timezone: "IANA timezone inferred from the startTime abbreviation (e.g. America/Chicago for CDT).",
+    startTime: "Facebook's human-readable local schedule sentence (includes TZ abbrev).",
+    duration: "Human duration from Facebook (e.g. 1 hr 30 min) or derived from start/end.",
+    durationSeconds: "Duration in seconds when start and end timestamps are known.",
+    eventType:
+      "Discovery category label when present (e.g. Comedy); otherwise Relay event_kind (e.g. PUBLIC_TYPE).",
+    isPast: "Whether the event start is in the past (Relay is_past, else derived from startDate vs now).",
+    usersGoing: "Public going count when Facebook exposes it on the logged-out hydrate.",
+    usersInterested: "Public interested count when Facebook exposes it on the logged-out hydrate.",
+    usersResponded:
+      "Sum of usersGoing + usersInterested when either is present. Not Facebook's friends-who-responded facepile.",
+    verified: "Whether the host Page/profile shows a verified badge (on organizers[].verified).",
+    externalLinks: "Outbound links attached to the event when Facebook exposes them (often empty).",
+    organizers: "Host Page/profile rows: {id, name, url, verified}. Prefer organizers[].id for joins.",
+    address: "Street / one-line address when distinct from location.name. Omitted when it would only echo city.",
+  },
+  "facebook-event-search": {
+    startDate:
+      "Event start as ISO-8601 with the host timezone offset (e.g. 2026-07-27T19:45:00-05:00). Calendar day matches startTime — not UTC midnight.",
+    endDate: "Event end as ISO-8601 with the same host timezone offset when available.",
+    timezone: "IANA timezone from the startTime abbreviation (e.g. America/Chicago for CDT).",
+    startTime: "Absolute local schedule sentence — never relative labels like Happening now.",
+    duration: "Human duration when start/end are known.",
+    eventType: "Discovery category or Relay event_kind when present.",
+    isPast: "Whether the event start is in the past.",
+    usersGoing: "Public going count when Facebook exposes it.",
+    usersInterested: "Public interested count when Facebook exposes it.",
+    location: "Venue block {name, city, latitude, longitude, countryCode} when exposed.",
+  },
+  "facebook-profile-events": {
+    startDate:
+      "Event start as ISO-8601 with host timezone offset. Year is resolved for yearless cards (Tue, Aug 4 at 8:00 PM EDT → 2026-08-04T20:00:00-04:00).",
+    endDate: "Event end as ISO-8601 with host timezone offset when available.",
+    timezone: "IANA timezone from the startTime abbreviation (e.g. America/New_York for EDT).",
+    startTime: "Facebook's local schedule sentence (may omit the year — use startDate for sorting).",
+    duration: "Human duration when start/end are known.",
+    eventType: "Discovery category or Relay event_kind when present.",
+    isPast: "Whether the event start is in the past (derived from startDate).",
+    address: "Omitted when it would only duplicate location.name.",
+  },
   "pinterest-board": {
     destinationUrl: "Outbound link on the pin (product/article URL). Not an ad creative field.",
     saves: "How many times the pin was saved/repinned — Pinterest's primary engagement metric.",
@@ -6443,8 +6533,17 @@ const SLUG_USE_CASES: Record<string, UseCase[]> = {
     { title: "Price Monitoring", desc: "Track listing details without scraping the UI." },
   ],
   "facebook-event-details": [
-    { title: "Event Enrichment", desc: "Resolve a Facebook event to title, time, and host." },
-    { title: "Calendar Pipelines", desc: "Ingest event metadata into dashboards and CRM." },
+    { title: "Event Enrichment", desc: "Resolve a Facebook event URL to local start/end, venue, and host id." },
+    { title: "Calendar Pipelines", desc: "Build iCal / CRM rows from startDate + timezone without day-shift bugs." },
+  ],
+  "facebook-event-search": [
+    { title: "Local Discovery", desc: "Find public events by topic + city (comedy Chicago) for weekend guides." },
+    { title: "Date-Window Ingest", desc: "Filter with from/to on local startDate for this-week calendars." },
+    { title: "Venue Research", desc: "Collect going/interested signals when Facebook exposes them." },
+  ],
+  "facebook-profile-events": [
+    { title: "Venue Calendar", desc: "Pull a Page's upcoming shows with sortable startDate (year included)." },
+    { title: "Tour Tracking", desc: "Monitor Madison Square Garden / club pages without scraping HTML." },
   ],
   "youtube-video-sponsors": [
     { title: "Sponsorship Detection", desc: "Surface sponsor segments disclosed on a YouTube video." },
