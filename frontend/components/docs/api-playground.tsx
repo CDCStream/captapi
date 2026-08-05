@@ -321,8 +321,8 @@ export function ApiPlayground({
               </span>
               {slowUpstream ? (
                 <p className="max-w-md text-xs leading-relaxed text-slate-500">
-                  TikTok Creative Center is slow to respond; this can take 60–90
-                  seconds. Set client timeouts to at least 120s.
+                  This endpoint queries TikTok Creative Center live and typically
+                  takes 30–60 seconds. Set client timeouts to at least 120s.
                 </p>
               ) : null}
             </div>

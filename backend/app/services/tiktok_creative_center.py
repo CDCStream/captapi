@@ -1,9 +1,13 @@
 """TikTok Creative Center Top Ads.
 
-Public Top Ads live on ``ads.tiktok.com/business/creativecenter`` and are served
-by TikTok's signed ``creative_radar_api`` (browser ``user-sign`` bootstrap).
-Native path: Decodo headless + XHR capture of ``top_ads/v2/list``.
-Apify remains the fallback when Decodo is down or returns nothing.
+Public Top Ads live on ``ads.tiktok.com/business/creativecenter``. The list is
+served by signed ``creative_radar_api`` (X-Bogus / msToken via the page's
+wrapped fetch) — ``__NEXT_DATA__`` is an empty shell and unsigned direct calls
+return ``code:40101``. A real browser is required.
+
+Primary path: Decodo headless with ``fetch_resource`` early-exit on
+``top_ads/v2/list`` (data-driven — not networkidle). Apify remains the fallback
+when Decodo is down or returns nothing.
 """
 
 from __future__ import annotations
@@ -318,9 +322,10 @@ def resolve_ad_format(raw: str | None, is_spark: bool | None) -> str | None:
 
 MatchMode = Literal["any", "all"]
 
-# Cap Decodo XHR so a slow native attempt still leaves headroom for Apify under
-# Cloudflare's default Proxy Read Timeout (125s). Apify sync wait is 90s.
-DECODO_TIMEOUT_SECONDS = 15.0
+# Hard timeout for the browser capture. Early-exit via fetch_resource usually
+# finishes in ~10–25s; this is the safety net, not the happy path.
+DECODO_TIMEOUT_SECONDS = 75.0
+LIST_XHR_FILTER = "top_ads/v2/list"
 
 
 def query_tokens(q: str | None) -> list[str]:
@@ -1007,6 +1012,69 @@ def filter_top_ads(
     }
 
 
+def _materials_from_list_body(body: dict[str, Any]) -> tuple[list[dict[str, Any]], bool]:
+    """Extract materials + has_more from a Creative Center list JSON body."""
+    data = body.get("data") if isinstance(body.get("data"), dict) else {}
+    if not isinstance(data, dict):
+        return [], False
+    materials = data.get("materials")
+    rows = [
+        m
+        for m in (materials if isinstance(materials, list) else [])
+        if isinstance(m, dict) and (m.get("id") or m.get("ad_id"))
+    ]
+    pag = data.get("pagination") if isinstance(data.get("pagination"), dict) else {}
+    has_more = bool(pag.get("has_more") if "has_more" in pag else pag.get("hasMore"))
+    return rows, has_more
+
+
+def _stamp_rows(
+    rows: list[dict[str, Any]], *, period: int, region: str
+) -> list[dict[str, Any]]:
+    for row in rows:
+        row.setdefault("period_days", period)
+        if region and not row.get("countries") and not row.get("country"):
+            row["countries"] = [region]
+    return rows
+
+
+def _filter_and_truncate(
+    rows: list[dict[str, Any]],
+    *,
+    want: int,
+    has_more: bool,
+    q: str | None,
+    match: MatchMode,
+    industry: str | None,
+    objective: str | None,
+    ad_format: str | None,
+) -> dict[str, Any]:
+    filtered = filter_top_ads(
+        rows,
+        q=q,
+        match=match,
+        industry=industry,
+        objective=objective,
+        ad_format=ad_format,
+        soft_fallback=True,
+    )
+    kept = list(filtered["rows"])[:want]
+    # Exit with collected < limit while upstream still has pages → truncated.
+    truncated = len(kept) < want and has_more
+    if truncated:
+        log.warning(
+            "tiktok_cc_truncated_early_exit",
+            collected=len(kept),
+            want=want,
+            upstream_rows=len(rows),
+            has_more=has_more,
+        )
+    filtered["rows"] = kept
+    filtered["hasMore"] = has_more
+    filtered["truncated"] = truncated
+    return filtered
+
+
 async def search_top_ads(
     *,
     country: str = "US",
@@ -1019,10 +1087,12 @@ async def search_top_ads(
     objective: str | None = None,
     ad_format: str | None = None,
 ) -> dict[str, Any] | None:
-    """Decodo-native Top Ads via Creative Center XHR capture.
+    """Browser Top Ads via Decodo ``fetch_resource`` early-exit on the list XHR.
 
-    Returns a filter result dict (``rows`` + match metadata), or ``None`` when
-    Decodo is unavailable / capture failed so the router can fall back to Apify.
+    Listens for ``top_ads/v2/list`` and returns as soon as that JSON arrives —
+    not networkidle (the page keeps fetching analytics/video after we have data).
+    Returns a filter result dict (``rows`` + match metadata + ``truncated``),
+    or ``None`` when Decodo is unavailable / capture failed (Apify fallback).
     """
     from app.services import decodo_fetch
 
@@ -1042,17 +1112,100 @@ async def search_top_ads(
         industry=industry,
         objective=objective,
     )
-    # Brief wait so the signed top_ads list XHR fires after hydration.
-    actions = [{"type": "wait", "timeout": 5}]
-    got = await decodo_fetch.fetch_xhr(
+    # fetch_resource must be the sole / last browser action — exits when the
+    # matching XHR completes (signed by the page's wrapped fetch).
+    got = await decodo_fetch.fetch_url(
         page,
         timeout=DECODO_TIMEOUT_SECONDS,
+        target="universal",
         headless="html",
-        browser_actions=actions,
+        browser_actions=[
+            {
+                "type": "fetch_resource",
+                "filter": LIST_XHR_FILTER,
+                "on_error": "error",
+            }
+        ],
         geo=region if region.isalpha() and len(region) == 2 else "US",
     )
     if got is None:
-        log.warning("tiktok_cc_native_decodo_miss", page=page)
+        log.warning("tiktok_cc_fetch_resource_miss", page=page)
+        return None
+    _status, content = got
+    try:
+        body = json.loads(content) if isinstance(content, str) else None
+    except ValueError:
+        log.warning("tiktok_cc_fetch_resource_bad_json", page=page)
+        return None
+    if not isinstance(body, dict):
+        return None
+    # code 0 = OK; omit is rare. Reject 40101 "no permission" etc.
+    code = body.get("code")
+    if code is not None and code not in (0, "0"):
+        log.warning(
+            "tiktok_cc_list_error",
+            code=code,
+            msg=str(body.get("msg") or "")[:120],
+        )
+        return None
+    rows, has_more = _materials_from_list_body(body)
+    rows = _stamp_rows(rows, period=period, region=region)
+    return _filter_and_truncate(
+        rows,
+        want=want,
+        has_more=has_more,
+        q=q,
+        match=match,
+        industry=industry,
+        objective=objective,
+        ad_format=ad_format,
+    )
+
+
+async def search_top_ads_xhr_dump(
+    *,
+    country: str = "US",
+    period: int = 30,
+    order_by: str = "For You",
+    limit: int = 20,
+    q: str | None = None,
+    match: MatchMode = "any",
+    industry: str | None = None,
+    objective: str | None = None,
+    ad_format: str | None = None,
+) -> dict[str, Any] | None:
+    """Legacy full-XHR dump path (waits for render + captures all XHRs).
+
+    Kept for A/B validation against :func:`search_top_ads` early-exit — not used
+    in production. Diff ``rows`` / ad ids; they must match for the same query.
+    """
+    from app.services import decodo_fetch
+
+    if not decodo_fetch.enabled():
+        return None
+    if (ad_format or "").strip():
+        return None
+
+    region = (country or "US").strip().upper() or "US"
+    want = max(0, min(int(limit), 100))
+    page = _page_url(
+        country=region,
+        period=period,
+        order_by=order_by,
+        q=q,
+        industry=industry,
+        objective=objective,
+    )
+    # Full XHR dump after render (no wait action — Decodo 400s on wait here).
+    # Slower / heavier than fetch_resource; validation-only.
+    got = await decodo_fetch.fetch_xhr(
+        page,
+        timeout=DECODO_TIMEOUT_SECONDS,
+        target="universal",
+        headless="html",
+        geo=region if region.isalpha() and len(region) == 2 else "US",
+    )
+    if got is None:
         return None
     _status, xhrs = got
     best: dict[str, Any] | None = None
@@ -1069,28 +1222,19 @@ async def search_top_ads(
             best_score = score
             best = item
     if not best or best_score < 5:
-        log.warning("tiktok_cc_native_no_list_xhr", page=page, xhr_count=len(xhrs))
         return None
     body = _parse_xhr_body(best)
     if not body:
         return None
-    data = body.get("data") if isinstance(body.get("data"), dict) else {}
-    materials = data.get("materials") if isinstance(data, dict) else None
-    if not isinstance(materials, list):
-        return None
-    rows = [m for m in materials if isinstance(m, dict) and (m.get("id") or m.get("ad_id"))]
-    for row in rows:
-        row.setdefault("period_days", period)
-        if region and not row.get("countries") and not row.get("country"):
-            row["countries"] = [region]
-    filtered = filter_top_ads(
+    rows, has_more = _materials_from_list_body(body)
+    rows = _stamp_rows(rows, period=period, region=region)
+    return _filter_and_truncate(
         rows,
+        want=want,
+        has_more=has_more,
         q=q,
         match=match,
         industry=industry,
         objective=objective,
         ad_format=ad_format,
-        soft_fallback=True,
     )
-    filtered["rows"] = list(filtered["rows"])[:want]
-    return filtered

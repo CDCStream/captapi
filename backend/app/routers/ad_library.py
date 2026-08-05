@@ -2032,12 +2032,12 @@ async def tiktok_search(
         "resolved industry/objective, isSparkAd, and video{} (urlHd only when a "
         "distinct HD rendition exists; no duplicate media[]). Keyword q uses "
         "match=any|all with matchedFrom/filteredOut/matchBasis. Empty results "
-        "are never charged. This endpoint queries TikTok Creative Center directly "
-        "and typically takes 60–90 seconds — set your HTTP client timeout to at "
-        "least 120s (nginx/ALB default 60s and Heroku 30s will cut the connection). "
-        "Sync upstream wait up to 90s (Cloudflare Proxy Read Timeout default 125s). "
-        "Flat 2 credits on Decodo-native; Apify ~1 credit per returned ad (min 2). "
-        "For DSA firstShown/lastShown use /v1/ad-library/tiktok/search."
+        "are never charged. This endpoint opens TikTok Creative Center in a "
+        "browser and intercepts the signed list XHR (HTML has no ad data). "
+        "Typically 30–60 seconds — set your HTTP client timeout to at least 120s "
+        "(nginx/ALB default 60s and Heroku 30s will cut the connection). Flat 2 "
+        "credits on the browser path; Apify fallback ~1 credit per returned ad "
+        "(min 2). For DSA firstShown/lastShown use /v1/ad-library/tiktok/search."
     ),
 )
 async def tiktok_top_ads(
@@ -2124,7 +2124,7 @@ async def tiktok_top_ads(
             dates_present = sum(
                 1 for a in ads if a.get("firstSeen") or a.get("lastSeen")
             )
-            return {
+            out: dict[str, Any] = {
                 "query": (q or "").strip() or None,
                 "country": region,
                 "period": period_days,
@@ -2136,24 +2136,28 @@ async def tiktok_top_ads(
                 **_match_meta(filt),
                 "ads": ads,
             }
+            # Early-exit collected < limit while Creative Center still has pages.
+            if filt.get("truncated"):
+                out["truncated"] = True
+            return out
 
         async def _run() -> dict[str, Any]:
             want = max(1, min(int(limit), 100))
             overfetch = tiktok_creative_center.fetch_limit_for_query(want, q)
-            # Decodo XHR capture of creative_radar top_ads/v2/list first.
+            # Browser early-exit on signed top_ads/v2/list (not HTML / networkidle).
+            # Pass the caller's limit (not Apify overfetch) so truncated is honest.
             native = await tiktok_creative_center.search_top_ads(
                 country=region,
                 period=period_days,
                 order_by=order_label,
-                limit=overfetch,
+                limit=want,
                 q=q,
                 match=match_mode,
                 industry=industry,
                 objective=objective,
                 ad_format=ad_format,
             )
-            # Empty native with active filters → try Apify (client-side filter may
-            # have dropped everything or Creative Center returned no match).
+            # Empty browser result with active filters → try Apify.
             has_filters = bool(
                 (q or "").strip() or industry or objective or ad_format
             )
@@ -2201,14 +2205,14 @@ async def tiktok_top_ads(
                 "objective": objective or "",
                 "adFormat": ad_format or "",
                 "limit": limit,
-                "v": 5,
+                "v": 6,
             },
             _run,
             ctx,
             stale_while_revalidate=True,
             use_cache=cache,
         )
-        # Flat 2 native; Apify ~1/returned ad (min 2). Empty/timeout free.
+        # Flat 2 browser path; Apify ~1/returned ad (min 2). Empty/timeout free.
         _bill_ads(
             ctx,
             data.get("ads") or [],

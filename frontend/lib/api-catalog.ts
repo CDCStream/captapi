@@ -2816,17 +2816,18 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     credits: 20,
     creditsPerResult: 1,
     tagline:
-      "TikTok Creative Center Top Ads — advertiser, dates when present, CTR/likes, video (~1 credit/result Apify).",
+      "TikTok Creative Center Top Ads — browser-intercepted list XHR, CTR/likes, video (flat 2 / ~1 Apify).",
     longDescription:
-      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — datesPresent counts filled rows), likes + likesIsApproximate, ctr/ctrTier, costTier, isSparkAd, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Spark/Non-Spark-only adFormat and single-country query echoes are omitted. Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis (soft creative_center fallback when literal matches are empty). Empty results and upstream timeouts are never charged. This endpoint queries TikTok Creative Center directly and typically takes 60-90 seconds — every request waits for the real upstream JSON (sync up to 90s; Cloudflare Proxy Read Timeout default 125s). Flat 2 credits on Decodo-native; Apify ~1 credit per returned ad (min 2; ~20 at default limit). Pass cache=true for a 24h hit (0 credits). For DSA firstShown/lastShown use /tiktok/search.",
+      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — datesPresent counts filled rows), likes + likesIsApproximate, ctr/ctrTier, costTier, isSparkAd, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Spark/Non-Spark-only adFormat and single-country query echoes are omitted. Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis (soft creative_center fallback when literal matches are empty). Empty results and upstream timeouts are never charged. A real browser is required — Creative Center HTML is an empty shell and the list API needs page-signed requests. We intercept the signed top_ads/v2/list XHR and exit when that JSON arrives (typically 30-60 seconds; not networkidle). Flat 2 credits on the browser path; Apify fallback ~1 credit per returned ad (min 2; ~20 at default limit). truncated:true when fewer than limit ads are returned while Creative Center still has pages. Pass cache=true for a 24h hit (0 credits). For DSA firstShown/lastShown use /tiktok/search.",
     delivers: [
       "advertiser{id,name} for grouping + Spark author fallback",
       "firstSeen/lastSeen + datesPresent (often null on CC list)",
-      "Real upstream JSON (60–90s typical); empty/timeout free",
-      "~1 credit/result Apify (flat 2 native); cache=true is free",
+      "Signed list XHR early-exit (30–60s typical); empty/timeout free",
+      "Flat 2 browser / ~1 per ad Apify; truncated when short of limit",
     ],
     platformLimits: [
-      "This endpoint queries TikTok Creative Center directly and typically takes 60-90 seconds. Set your HTTP client timeout to at least 120 seconds. Note that nginx and AWS ALB default to 60s and Heroku caps at 30s.",
+      "This endpoint queries TikTok Creative Center live in a browser and typically takes 30-60 seconds. Set your HTTP client timeout to at least 120 seconds. Note that nginx and AWS ALB default to 60s and Heroku caps at 30s.",
+      "Creative Center HTML has no ad data — unsigned list API calls return no permission. Anonymous access may be capped; truncated:true means we exited before filling limit while more pages existed.",
     ],
   },
   {
@@ -6369,7 +6370,7 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     });
     list.push({
       q: `Why is this endpoint so slow — and what timeout should I set?`,
-      a: `This endpoint queries TikTok Creative Center directly and typically takes 60–90 seconds. We wait up to 90s for the real JSON (Cloudflare Proxy Read Timeout defaults to 125s — room enough for that wait). Set your HTTP client timeout to at least 120 seconds. nginx and AWS ALB default to 60s and Heroku caps at 30s — those cut the connection on your side and look like our failure. On timeout we return 503 upstream_timeout (not billed); retry shortly or use cache=true after a successful fill.`,
+      a: `Creative Center HTML is an empty shell — ads arrive only via a signed list XHR. We open the page in a browser, intercept that response, and exit when the JSON arrives (typically 30–60 seconds — not networkidle). Set your HTTP client timeout to at least 120 seconds. nginx/ALB default to 60s and Heroku caps at 30s — those cut the connection on your side. On timeout we return 503 upstream_timeout (not billed). If totalReturned < limit and truncated is true, Creative Center still had pages we did not fetch.`,
     });
     list.push({
       q: `Why did my keyword return zero — or soft Creative Center ads?`,
@@ -8377,6 +8378,8 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     match: 'Echo of the match query param ("any" or "all").',
     matchBasis:
       'any|all when literal filter kept rows; creative_center when Creative Center soft results are served because literal matches were empty; none when q was omitted.',
+    truncated:
+      "true when totalReturned < limit while Creative Center pagination still had more pages (early-exit safety net — never a silent short page).",
     datesPresent:
       "Count of ads where firstSeen or lastSeen is non-null. Creative Center's public list often omits run dates — expect 0 unless upstream ships timestamps.",
     firstSeen:
