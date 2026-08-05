@@ -8402,6 +8402,7 @@
     "data": {
       "platform": "snapchat",
       "username": "nba",
+      "handle": "nba",
       "url": "https://www.snapchat.com/@nba",
       "displayName": "NBA",
       "bio": "30 teams, 1 goal.",
@@ -8409,68 +8410,37 @@
       "categoryId": "public-profile-category-v3-business-group",
       "subcategory": "Sports League",
       "subcategoryId": "public-profile-subcategory-v3-sports-league",
-      "subscriberCount": 3657900,
+      "subscriberCount": 3653600,
+      "followers": 3653600,
       "verified": true,
       "badge": 1,
       "avatar": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvcGxQanhqRDFZRk9IUWdGMUZLRHNqP2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,90_FMjpeg",
+      "banner": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvcUZBYjExSEY3QkdkeHNiOXpkMTREP2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,1080_FMjpeg",
+      "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvcGxQanhqRDFZRk9IUWdGMUZLRHNqP2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,90_FMjpeg",
       "squareHeroImageUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvcUZBYjExSEY3QkdkeHNiOXpkMTREP2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,1080_FMjpeg",
       "snapcode": "https://app.snapchat.com/web/deeplink/snapcode?username=nba&type=SVG&bitmoji=enable",
-      "website": "NBA.com",
+      "website": "https://NBA.com",
       "businessProfileId": "ea71b19b-5eb1-4dda-afb8-13ced485f180",
       "creationTimestampMs": 1526597295058,
       "createdAt": "2018-05-17T22:48:15.058000Z",
-      "lastUpdateTimestampMs": 1785621675000,
-      "updatedAt": "2026-08-01T22:01:15Z",
+      "lastUpdateTimestampMs": 1785621674522,
+      "updatedAt": "2026-08-01T22:01:14.522000Z",
       "hasStory": false,
       "hasCuratedHighlights": true,
       "hasSpotlightHighlights": true,
-      "story": {
-        "snapCount": 6,
-        "thumbnailUrl": "https://cf-st.sc-cdn.net/d/AODMFV4kcbKapQw9bcNSU.256.IRZXSOY?mo=GlMaDjICBH1IAlBLYAFoDHABUI4BWhBEZkxhcmdlVGh1bWJuYWlsogEUCIACIg8KAmgMEgAqB0lSWlhTT1miARQImgoiDwoCaAwSACoHSVJaWFNPWQ%3D%3D&uc=75",
-        "snapList": [
-          {
-            "snapIndex": 0,
-            "snapId": "2wzhbo4SSiWIG-fd9lWR2wAAgemFmc3Jic3dpAZ-_U_TQAZ-_U8skAAAAAA",
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/AODMFV4kcbKapQw9bcNSU.1034.IRZXSOY?mo=Gl8aGDIBBDoBfUIGCK3XudMGSAJQS2ABaAxwAVCwAaIBOwiKCBIlCiMI8dhLIAEw4AM41AZAAUoOCglHKUFFPT1BNzoQ9ANQkE5oAiIPCgJoDBIAKgdJUlpYU09ZkAOQTg%3D%3D&uc=75",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/AODMFV4kcbKapQw9bcNSU.256.IRZXSOY?mo=GlMaDjICBH1IAlBLYAFoDHABUI4BWhBEZkxhcmdlVGh1bWJuYWlsogEUCIACIg8KAmgMEgAqB0lSWlhTT1miARQImgoiDwoCaAwSACoHSVJaWFNPWQ%3D%3D&uc=75",
-            "timestampInSec": 1785621367,
-            "publishedAt": "2026-08-01T21:56:07Z"
-          },
-          {
-            "snapIndex": 1,
-            "snapId": "2wzhbo4SSiWIG-fd9lWR2wAAgc3dkeHdlbnh0AZ-_U_WvAZ-_U8suAAAAAA",
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/7oaCx89Y053GDtXAGnYPU.1034.IRZXSOY?mo=GmAaGDIBBDoBfUIGCLXXudMGSAJQS2ABaAxwAVCwAaIBPAiKCBImCiQI1oxQIAEw4AM41AZAAUoPCgqDAUZTUFEsQEU7EPQDUJBOaAIiDwoCaAwSACoHSVJaWFNPWZADkE4%3D&uc=75",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/7oaCx89Y053GDtXAGnYPU.256.IRZXSOY?mo=GlMaDjICBH1IAlBLYAFoDHABUI4BWhBEZkxhcmdlVGh1bWJuYWlsogEUCIACIg8KAmgMEgAqB0lSWlhTT1miARQImgoiDwoCaAwSACoHSVJaWFNPWQ%3D%3D&uc=75",
-            "timestampInSec": 1785621367,
-            "publishedAt": "2026-08-01T21:56:07Z"
-          },
-          {
-            "snapIndex": 2,
-            "snapId": "2wzhbo4SSiWIG-fd9lWR2wAAgdWxxbmJ1b2FyAZ-_U_aJAZ-_U8s4AAAAAA",
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/IXAlIELcj5WFE1fUA1w92.1034.IRZXSOY?mo=GmAaGDIBBDoBfUIGCKfXudMGSAJQS2ABaAxwAVCwAaIBPAiKCBImCiQIz4UzIAEw4AM41AZAAUoPCgqBAVFRV0A6Pz00EPQDUIotaAIiDwoCaAwSACoHSVJaWFNPWZADii0%3D&uc=75",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/IXAlIELcj5WFE1fUA1w92.256.IRZXSOY?mo=GlMaDjICBH1IAlBLYAFoDHABUI4BWhBEZkxhcmdlVGh1bWJuYWlsogEUCIACIg8KAmgMEgAqB0lSWlhTT1miARQImgoiDwoCaAwSACoHSVJaWFNPWQ%3D%3D&uc=75",
-            "timestampInSec": 1785621367,
-            "publishedAt": "2026-08-01T21:56:07Z"
-          }
-        ]
-      },
       "highlights": [
         {
-          "highlightId": "{'value': '029f2cc3-c0df-46c2-b610-485c137f9a0a'}",
-          "storyTitle": "{'value': '2025-26 NBA Finals 🏆'}",
+          "highlightId": "029f2cc3-c0df-46c2-b610-485c137f9a0a",
+          "storyTitle": "2025-26 NBA Finals 🏆",
           "thumbnailUrl": "https://cf-st.sc-cdn.net/d/ZXSSacNIpSYqxAm21SSGc.410?mo=GjcaFjIBBDoBfUIGCMqG99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
           "snapCount": 4,
           "firstSnapUrl": "https://cf-st.sc-cdn.net/d/ZXSSacNIpSYqxAm21SSGc.400?mo=Gk8aDDIBBDoBfVBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBEwiQAyIOCgpCBgjKhvfQBkgCEgCiARMI5wciDgoKQgYIy4b30AZIAxIA&uc=94",
+          "firstSnapType": "image",
           "snapList": [
             {
               "snapIndex": 0,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/ZXSSacNIpSYqxAm21SSGc.400?mo=Gk8aDDIBBDoBfVBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBEwiQAyIOCgpCBgjKhvfQBkgCEgCiARMI5wciDgoKQgYIy4b30AZIAxIA&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/ZXSSacNIpSYqxAm21SSGc.410?mo=GjcaFjIBBDoBfUIGCMqG99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
               "timestampInSec": 1780335408,
@@ -8479,6 +8449,7 @@
             {
               "snapIndex": 1,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/FgntIqJi6clNRLmaxXkXN.400?mo=Gk0aDjIBBDoBfUgCUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogERCJADIgwKCEIGCMuG99AGEgCiAREI5wciDAoIQgYIyob30AYSAA%3D%3D&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/FgntIqJi6clNRLmaxXkXN.410?mo=GjcaFjIBBDoBfUIGCMuG99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
               "timestampInSec": 1780335408,
@@ -8487,6 +8458,7 @@
             {
               "snapIndex": 2,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/MDhgz2NGVlp7M1wfhuT1s.400?mo=GkoaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBFgiQAyIRCg06AX1CBgjPhvfQBkgCEgCiAQ4I5wciCQoFMgF9SAMSAA%3D%3D&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/MDhgz2NGVlp7M1wfhuT1s.410?mo=GjcaFjIBBDoBfUIGCM-G99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
               "timestampInSec": 1780335408,
@@ -8495,6 +8467,7 @@
             {
               "snapIndex": 3,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/V9pQZQcyVDfY0v9a5gTz6.400?mo=Gk0aDjIBBDoBfUgCUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogERCJADIgwKCEIGCMuG99AGEgCiAREI5wciDAoIQgYIyob30AYSAA%3D%3D&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/V9pQZQcyVDfY0v9a5gTz6.410?mo=GjcaFjIBBDoBfUIGCMuG99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
               "timestampInSec": 1780335408,
@@ -8503,15 +8476,17 @@
           ]
         },
         {
-          "highlightId": "{'value': '2941c1a3-96ba-45aa-bdf4-30b344e63e42'}",
-          "storyTitle": "{'value': 'Your 2025-26 Kia NBA MVP 🏆'}",
+          "highlightId": "2941c1a3-96ba-45aa-bdf4-30b344e63e42",
+          "storyTitle": "Your 2025-26 Kia NBA MVP 🏆",
           "thumbnailUrl": "https://cf-st.sc-cdn.net/d/iqFfVpTceYNBTtMJvlQns.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
           "snapCount": 19,
           "firstSnapUrl": "https://cf-st.sc-cdn.net/d/iqFfVpTceYNBTtMJvlQns.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
+          "firstSnapType": "image",
           "snapList": [
             {
               "snapIndex": 0,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/iqFfVpTceYNBTtMJvlQns.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/iqFfVpTceYNBTtMJvlQns.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
               "timestampInSec": 1779061414,
@@ -8529,6 +8504,7 @@
             {
               "snapIndex": 2,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/aUFzsbb4CKroNT0pRdE4G.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/aUFzsbb4CKroNT0pRdE4G.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
               "timestampInSec": 1779062266,
@@ -8537,6 +8513,7 @@
             {
               "snapIndex": 3,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/yWteTz76gf53bxwLBNjoX.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/yWteTz76gf53bxwLBNjoX.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
               "timestampInSec": 1779062542,
@@ -8563,6 +8540,7 @@
             {
               "snapIndex": 6,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/Q7U6frp3B5dB2EsIvVR2y.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/Q7U6frp3B5dB2EsIvVR2y.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
               "timestampInSec": 1779063199,
@@ -8679,15 +8657,17 @@
           ]
         },
         {
-          "highlightId": "{'value': '918b1b3e-d60a-43e9-b5cd-651335d4687e'}",
-          "storyTitle": "{'value': '2026 All-Star Rosters ⭐️'}",
+          "highlightId": "918b1b3e-d60a-43e9-b5cd-651335d4687e",
+          "storyTitle": "2026 All-Star Rosters ⭐️",
           "thumbnailUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
           "snapCount": 5,
           "firstSnapUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.400?mo=GkcaFDIBBDoBfUIGCNXEiswGUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogELCJADIgYKAkgCEgCiAQsI5wciBgoCSAMSAA%3D%3D&uc=94",
+          "firstSnapType": "image",
           "snapList": [
             {
               "snapIndex": 0,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.400?mo=GkcaFDIBBDoBfUIGCNXEiswGUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogELCJADIgYKAkgCEgCiAQsI5wciBgoCSAMSAA%3D%3D&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
               "timestampInSec": 1770168890,
@@ -8696,6 +8676,7 @@
             {
               "snapIndex": 1,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/9VxqlhBh839VRARSOGbNg.400?mo=GkcaFDIBBDoBfUIGCNXEiswGUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogELCJADIgYKAkgCEgCiAQsI5wciBgoCSAMSAA%3D%3D&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/9VxqlhBh839VRARSOGbNg.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
               "timestampInSec": 1770168890,
@@ -8704,6 +8685,7 @@
             {
               "snapIndex": 2,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/iYsmPWO07diOdM994g8xo.400?mo=Gk8aDDIBBDoBfVBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBEwiQAyIOCgpCBgjVxIrMBkgCEgCiARMI5wciDgoKQgYI1MSKzAZIAxIA&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/iYsmPWO07diOdM994g8xo.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
               "timestampInSec": 1770168890,
@@ -8712,6 +8694,7 @@
             {
               "snapIndex": 3,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/MjPzf75USbLSpgDtGWzjb.400?mo=Gk0aDjIBBDoBfUgCUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogERCJADIgwKCEIGCNXEiswGEgCiAREI5wciDAoIQgYI1MSKzAYSAA%3D%3D&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/MjPzf75USbLSpgDtGWzjb.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
               "timestampInSec": 1770168890,
@@ -8720,6 +8703,7 @@
             {
               "snapIndex": 4,
               "snapMediaType": 0,
+              "mediaType": "image",
               "mediaUrl": "https://cf-st.sc-cdn.net/d/w7OoZSkq2abp9kNl9uOZq.400?mo=GkoaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBFgiQAyIRCg06AX1CBgjWxIrMBkgCEgCiAQ4I5wciCQoFMgF9SAMSAA%3D%3D&uc=94",
               "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/w7OoZSkq2abp9kNl9uOZq.410?mo=GjcaFjIBBDoBfUIGCNbEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
               "timestampInSec": 1770168890,
@@ -8747,11 +8731,11 @@
             "url": "https://www.snapchat.com/@nba"
           },
           "engagement": {
-            "views": 13151,
-            "shares": 13,
-            "comments": 23,
-            "boosts": 946,
-            "recommends": 55
+            "views": 20844,
+            "shares": 21,
+            "comments": 37,
+            "boosts": 1618,
+            "recommends": 108
           },
           "snapList": [
             {
@@ -8784,11 +8768,11 @@
             "url": "https://www.snapchat.com/@nba"
           },
           "engagement": {
-            "views": 8489,
-            "shares": 2,
-            "comments": 3,
-            "boosts": 419,
-            "recommends": 22
+            "views": 10051,
+            "shares": 3,
+            "comments": 4,
+            "boosts": 533,
+            "recommends": 33
           },
           "snapList": [
             {
@@ -8808,10 +8792,13 @@
         {
           "username": "warriors",
           "displayName": "Golden State Warriors",
+          "url": "https://www.snapchat.com/@warriors",
+          "avatar": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvNjRqVjdIRlJMaHk1V21yS0MwNUZ2P2JvPUVnMGFBQm9BTWdFRVNBSlFHV0FCJnVjPTI1._RS0,640_FMjpeg",
           "profileUrl": "https://www.snapchat.com/@warriors",
           "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvNjRqVjdIRlJMaHk1V21yS0MwNUZ2P2JvPUVnMGFBQm9BTWdFRVNBSlFHV0FCJnVjPTI1._RS0,640_FMjpeg",
+          "verified": true,
           "isVerified": true,
-          "hasStory": false,
+          "hasStory": true,
           "hasCuratedHighlights": false,
           "hasSpotlightHighlights": false,
           "subscribeLink": {
@@ -8823,8 +8810,11 @@
         {
           "username": "nfl",
           "displayName": "NFL Official",
+          "url": "https://www.snapchat.com/@nfl",
+          "avatar": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvT3NjakFOS0dwSWh1VzQwek9qRnowP2JvPUVnMGFBQm9BTWdFRVNBSlFHV0FCJnVjPTI1._RS0,640_FMjpeg",
           "profileUrl": "https://www.snapchat.com/@nfl",
           "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvT3NjakFOS0dwSWh1VzQwek9qRnowP2JvPUVnMGFBQm9BTWdFRVNBSlFHV0FCJnVjPTI1._RS0,640_FMjpeg",
+          "verified": true,
           "isVerified": true,
           "hasStory": true,
           "hasCuratedHighlights": false,
@@ -8838,8 +8828,11 @@
         {
           "username": "lakerssnaps",
           "displayName": "Los Angeles Lakers",
+          "url": "https://www.snapchat.com/@lakerssnaps",
+          "avatar": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvbEplakhnM3lwRTd1dWEwdjliVjd6P2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,640_FMjpeg",
           "profileUrl": "https://www.snapchat.com/@lakerssnaps",
           "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvbEplakhnM3lwRTd1dWEwdjliVjd6P2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,640_FMjpeg",
+          "verified": true,
           "isVerified": true,
           "hasStory": false,
           "hasCuratedHighlights": false,

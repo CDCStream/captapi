@@ -51,6 +51,30 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-05",
     category: "improvement",
+    title: "Kick clip: dual modes documented, HLS typing, VOD deep-links",
+    description:
+      "GET /v1/kick/clip now documents both modes correctly: clip URL → {channelUrl, clip}; channel URL → {channelUrl, totalReturned, clips[]} with no top-level clip and no cursor. Docs cURL matches the clip-mode example (was channel URL + single clip). Playback is typed — videoType/hlsUrl for .m3u8 (not a progressive MP4). vod adds url + urlWithOffset (?t=seconds). Nested channel/creator use displayName (name deprecated alias). cacheMaxAge on the param table; empty delivers[] drops the generic What you get block. categoryId sticky lint + slug overrides keep Kick/Snapchat field notes from leaking across pages.",
+    items: [
+      "Clip vs channel examples + clips[] / totalReturned / no-cursor docs",
+      "videoType=hls + hlsUrl; vod.url / vod.urlWithOffset",
+      "displayName on actors; cacheMaxAge; Kick-specific use cases",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "fix",
+    title: "Snapchat profile: unwrap highlight ids, mediaType for images",
+    description:
+      "GET /v1/snapchat/user-profile was leaking Python dict repr into highlightId/storyTitle (str() on Snapchat {value} wrappers). Highlights now unwrap like spotlight/story snaps. snapMediaType 0 maps to mediaType image (the falsy 0 || -1 bug dropped it). story.snapCount always matches snapList length. website becomes an absolute https URL; avatar/banner are canonical (squareHeroImageUrl deprecated); relatedAccounts use the same avatar/url keys. Field docs fix the Kick categoryId leak on this page. Optional embeddedTextCaption / contextCards / hashtags / lensMetadata when Snapchat exposes them.",
+    items: [
+      "highlightId/storyTitle unwrapped (no {'value': ...} leaks)",
+      "mediaType image for snapMediaType 0; snapCount = len(snapList)",
+      "avatar/banner/website absolute + Snapchat-specific categoryId docs",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "improvement",
     title: "Twitch user-videos lean rows + real video-id cursor; schedule fields",
     description:
       "GET /v1/twitch/user-videos drops per-video channel{}/broadcaster bloat (identity stays on top-level broadcaster{}). nextCursor is now the last video id within the first-100 window (not offset \"5\") — Twitch anonymous GQL rejects after-cursors. filterBy echoes null when omitted (no silent ARCHIVE default). Thumbnails substitute {width}x{height}. windowMax documented in the limit param. GET /v1/twitch/user-schedule adds id, isRecurring, isCancelled, canceledUntil, startedAt/endedAt (+ deprecated startAt/endAt), gameId, and limit. Canonical full schedule; profile.schedule[] stays a max-10 preview. Use cases no longer talk about sounds or mediaUrlsExpireAt.",

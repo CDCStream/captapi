@@ -10,7 +10,7 @@
 // (see api-examples.generated.ts); a generic per-category shape is used as a
 // fallback for any endpoint without a snapshot.
 
-import { API_EXAMPLES } from "./api-examples.generated";
+import { API_EXAMPLES, API_EXAMPLE_VARIANTS } from "./api-examples.generated";
 
 export type PlatformId =
   | "youtube"
@@ -2078,7 +2078,25 @@ const LINKTREE: Spec[] = [
 ];
 
 const SNAPCHAT: Spec[] = [
-  { slug: "snapchat-user-profile", name: "Snapchat User Profile API", shortName: "User Profile", category: "channel", method: "GET", path: "/v1/snapchat/user-profile", credits: 1, tagline: "Public Snapchat profile — subscribers, highlights with full snap lists, Spotlight engagement, and related accounts. Flat 1 credit.", longDescription: "Pass a Snapchat username or profile URL and get the public profile as clean JSON: display name, bio, human-readable category, numeric subscriberCount, badge/verified, avatar + hero image, snapcode, website, businessProfileId, and account createdAt. Curated highlights include every snap's mediaUrl and timestamp (not just the first). Spotlight highlights carry video metadata plus engagement (views/shares/comments). Also returns the active story snap list and related accounts. Flat 1 credit." },
+  {
+    slug: "snapchat-user-profile",
+    name: "Snapchat User Profile API",
+    shortName: "User Profile",
+    category: "channel",
+    method: "GET",
+    path: "/v1/snapchat/user-profile",
+    credits: 1,
+    tagline:
+      "Snapchat profile — unwrapped highlight ids, mediaType image/video, category labels, Spotlight boosts (1 credit).",
+    longDescription:
+      "Pass a Snapchat username or profile URL and get the public profile as clean JSON — not Snapchat's protobuf wrappers. Canonical-ish card: displayName, bio, avatar, banner (square hero), url, subscriberCount as a number, verified (from badge), human-readable category (public-profile-category-v3-business-group → Business Group), absolute website URL, snapcode, createdAt. Highlights unwrap highlightId/storyTitle to plain strings (never Python dict repr). Each snap has mediaType image|video from snapMediaType 0|1, plus embeddedTextCaption / contextCards / hashtags / lensMetadata when Snapchat exposes them. story.snapCount always equals story.snapList length. Spotlight rows add engagement{views,shares,comments,boosts,recommends}. relatedAccounts[] use the same avatar/url keys as the top-level card. Flat 1 credit.",
+    delivers: [
+      "Unwrapped highlightId / storyTitle (no protobuf {value} leaks)",
+      "mediaType image|video on every snap (snapMediaType 0 and 1)",
+      "Category labels + numeric subscriberCount + verified from badge",
+      "Spotlight boosts/recommends + relatedAccounts with avatar/url",
+    ],
+  },
 ];
 
 const TRUTH_AUTH_LIMIT =
@@ -2152,10 +2170,11 @@ const KICK: Spec[] = [
     method: "GET",
     path: "/v1/kick/clip",
     credits: 1,
+    delivers: [],
     tagline:
-      "Get a Kick clip — creator vs channel, category, maturity, VOD link, views, and duration as structured JSON.",
+      "Get a Kick clip — creator vs channel, HLS playback, VOD deep-link, views, and duration as structured JSON.",
     longDescription:
-      "Pass a Kick clip URL for one enriched clip, or a channel URL/@username for recent clips[]. Clip responses separate creator (who cut the clip) from channel (the broadcaster), and include privacy, isMature, startedAt, vod.id, livestreamId, vodStartsAt, plus categorySlug/parentCategory. Channel mode returns clips[] only — no duplicate top-level clip. Flat 1 credit on the native path.",
+      "Two modes. Clip URL → {channelUrl, clip} with creator (who cut the clip) separate from channel (broadcaster), privacy, isMature, startedAt, livestreamId, vod{id,url,urlWithOffset}, vodStartsAt, and categorySlug/parentCategory. Playback is HLS: videoType is \"hls\", videoUrl/hlsUrl are the .m3u8 playlist (not a progressive MP4 — download that URL and you get a text manifest). Channel URL/@username → {channelUrl, totalReturned, clips[]} only — no top-level clip and no cursor (Kick's channel clips list is a single page; use limit, default 30, max 100). Session-only liked is omitted. Accepts cache / cacheMaxAge. Flat 1 credit on the native path.",
   },
 ];
 
@@ -3276,7 +3295,8 @@ const LINKTREE_PROFILE = "Linktree profile URL or username.";
 const SNAPCHAT_PROFILE = "Snapchat username or profile URL.";
 const TRUTH_PROFILE = "Truth Social profile URL or @username.";
 const TRUTH_POST = "Truth Social post URL or post ID.";
-const KICK_CLIP = "Kick clip URL, channel URL, or channel username.";
+const KICK_CLIP =
+  "Kick clip URL for one enriched clip (e.g. https://kick.com/{channel}/clips/clip_…), or channel URL/@username for recent clips[].";
 const AMAZON_SHOP_URL =
   "Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID. Not influencer /shop/<handle> pages.";
 const KWAI_PROFILE = "Kwai profile URL or @handle, e.g. https://www.kwai.com/@topfilmeseseriesnatv.";
@@ -3929,7 +3949,18 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     CURSOR,
   ],
   "truth-social-post": [up(TRUTH_POST)],
-  "kick-clip": [up(KICK_CLIP), lpFlat(30, 100, 1)],
+  "kick-clip": [
+    up(KICK_CLIP),
+    {
+      name: "limit",
+      type: "integer",
+      required: false,
+      description:
+        "Channel mode only — max recent clips to return (default 30, max 100). Ignored when url is a clip. Flat 1 credit. No cursor — Kick returns a single page.",
+    },
+    cachePWithMaxAge(),
+    cacheMaxAgeP(),
+  ],
   "amazon-shop-page": [
     up(AMAZON_SHOP_URL),
     { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." },
@@ -4447,6 +4478,17 @@ export function exampleResponse(ep: ApiEndpoint): string {
   return JSON.stringify({ success: true, data: exampleData(ep) }, null, 2);
 }
 
+/** Extra 200 OK tabs when an endpoint has multiple request modes. */
+export function exampleResponseVariants(
+  ep: ApiEndpoint,
+): Array<{ label: string; code: string }> {
+  const variants = API_EXAMPLE_VARIANTS[ep.slug] || [];
+  return variants.map((v) => ({
+    label: v.label,
+    code: JSON.stringify({ success: true, data: v.data }, null, 2),
+  }));
+}
+
 function article(label: string): string {
   return /^[aeiou]/i.test(label) ? "an" : "a";
 }
@@ -4712,6 +4754,13 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
         (typeof ex?.artistUrl === "string" && ex.artistUrl) ||
         null;
       if (typeof captured === "string" && /^https?:\/\//.test(captured)) return captured;
+
+      // Kick clip primary example is clip mode — do not pick the channel URL
+      // just because the param description also mentions "channel".
+      if (ep.slug === "kick-clip") {
+        const clip = ex?.clip as { url?: string } | undefined;
+        if (typeof clip?.url === "string" && /^https?:\/\//.test(clip.url)) return clip.url;
+      }
 
       const d = p.description.toLowerCase();
       const creatorPagePlatforms: PlatformId[] = ["komi", "pillar", "linkbio", "linkme"];
@@ -5380,7 +5429,7 @@ const FIELD_DESCS: Record<string, string> = {
   categorySlug: "Kick category slug (e.g. just-chatting).",
   parentCategory: "Kick parent category (e.g. irl).",
   categoryBanner: "Category banner image URL when Kick exposes one.",
-  categoryId: "Kick category id.",
+  categoryId: "Category id when the platform exposes one.",
   badges:
     "Platform badges on the result (SoundCloud pro/verified; YouTube 4K/LIVE/New; etc.).",
   creatorSubscription: "SoundCloud creator subscription ({product:{id}}, e.g. creator-pro-unlimited).",
@@ -5599,7 +5648,11 @@ const FIELD_DESCS: Record<string, string> = {
   coverImage: "Cover image URL.",
   coverUrl: "Cover image URL.",
   logo: "Logo image URL.",
-  videoUrl: "Direct video file URL (CDN link); may be null when the platform does not expose one.",
+  videoUrl:
+    "Playback URL when the platform exposes one. Content type varies by platform — check videoType (hls vs mp4) before treating it as a downloadable file.",
+  videoType: 'Playback content type: "hls" (.m3u8 playlist) or "mp4" (progressive file).',
+  hlsUrl: "HLS master/media playlist URL (.m3u8). Not a progressive video file — players and ffmpeg ingest this as a stream.",
+  mp4Url: "Progressive MP4 file URL when the platform exposes one.",
   music: "Reel soundtrack metadata (id, type, trackTitle, albumArt) when Facebook exposes it.",
   videoHeight: "Video height in pixels when available.",
   videoWidth: "Video width in pixels when available.",
@@ -6016,8 +6069,28 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     likes: "Not returned on search-users — this endpoint lists profiles, not posts.",
   },
   "kick-clip": {
-    creator: "Who created/cut the Kick clip (distinct from the broadcaster channel).",
-    channel: "Kick broadcaster channel for the clip.",
+    creator:
+      "Who created/cut the Kick clip (distinct from the broadcaster channel) — {id, username, displayName, url, profilePicture}; name is a deprecated alias of displayName.",
+    channel:
+      "Kick broadcaster channel for the clip — {id, username, displayName, url, profilePicture}; name is a deprecated alias of displayName.",
+    categoryId: "Kick category id.",
+    category: "Kick category display name (e.g. Just Chatting).",
+    videoUrl:
+      "HLS playlist URL (.m3u8) for this clip. Same value as hlsUrl — not a progressive MP4 file. Use an HLS player or ffmpeg; do not save as .mp4.",
+    videoType: 'Always "hls" for Kick clips today (Kick serves playlist.m3u8).',
+    hlsUrl: "Kick clip HLS playlist (.m3u8). Prefer this when you need an explicit stream URL.",
+    url: "Kick clip web page (https://kick.com/{channel}/clips/clip_…). Not the HLS playlist.",
+    vod: "Source VOD — {id, url, urlWithOffset}. url is https://kick.com/{channel}/videos/{id}; urlWithOffset appends ?t={vodStartsAt} seconds.",
+    urlWithOffset:
+      "VOD page URL with ?t={vodStartsAt} so Kick's player can open at the clip start (seconds).",
+    vodStartsAt: "Offset into the source VOD (seconds) where the clip starts. Paired with vod.urlWithOffset.",
+    clips:
+      "Channel mode only — recent clips for the channel (same row shape as clip). No top-level clip object in this mode.",
+    totalReturned:
+      "Channel mode only — number of clips in this response. No nextCursor — Kick's channel clips list is a single page (use limit).",
+    channelUrl: "Canonical Kick channel URL derived from the request.",
+    displayName: "Display name for channel/creator. Canonical; name is a deprecated alias.",
+    name: "Deprecated alias of displayName on nested channel/creator objects.",
   },
   "twitch-profile": {
     platform: "Platform identifier for this response (matches the endpoint's platform).",
@@ -6047,6 +6120,25 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     game: "Category / game name string (not a GraphQL Game object).",
     gameBoxArtUrl: "Category box art URL (additive media field).",
     animatedPreviewUrl: "VOD storyboard / animated preview strip when Twitch exposes it.",
+  },
+  "snapchat-user-profile": {
+    categoryId: "Snapchat public-profile category string id (e.g. public-profile-category-v3-business-group). Prefer human-readable category.",
+    category: "Human-readable category label derived from categoryId (e.g. Business Group).",
+    badge: "Snapchat official badge code: 0/absent = none, 1 = official verified. verified is derived from this.",
+    verified: "Whether the profile shows Snapchat's official badge (badge === 1).",
+    avatar: "Profile picture URL. Canonical; profilePictureUrl is a deprecated alias.",
+    banner: "Square hero / cover image URL. Canonical; squareHeroImageUrl is a deprecated alias.",
+    squareHeroImageUrl: "Deprecated alias of banner — prefer banner.",
+    website: "Absolute https website URL (scheme added when Snapchat omits it, e.g. NBA.com → https://NBA.com).",
+    highlightId: "Curated highlight id as a plain UUID string — never a protobuf {value} wrapper or Python dict repr.",
+    storyTitle: "Highlight title as a plain string (unwrapped from Snapchat's {value} wrapper).",
+    mediaType: 'Derived media kind: "image" when snapMediaType is 0, "video" when 1 (or 2). Always present when snapMediaType is known.',
+    snapMediaType: "Raw Snapchat enum: 0 = image, 1/2 = video. Prefer mediaType.",
+    snapCount: "Number of snaps in snapList for this story/highlight — always equals len(snapList).",
+    embeddedTextCaption: "On-screen text burned into the snap when Snapchat exposes it.",
+    contextCards: "Attribution cards (sound/lens/etc.) [{type,title,subtitle,url}] when present.",
+    hashtags: "Hashtags on the snap or Spotlight item when Snapchat exposes them.",
+    lensMetadata: "Lens used on the snap {id,name,creatorName} when present.",
   },
   "twitch-user-videos": {
     broadcaster: "Top-level channel card for this single-channel list (id, username, displayName, url, profileImage, followers, isPartner, isAffiliate). Not repeated on each video.",
@@ -6769,6 +6861,7 @@ const FIELD_DESC_STICKY_KEYS = new Set([
   "mediaType",
   "channel",
   "category",
+  "categoryId",
   "views",
   "plays",
   "isLive",
@@ -6781,6 +6874,9 @@ const FIELD_DESC_STICKY_KEYS = new Set([
   "group",
   "fields",
   "lastStatusAt",
+  "videoUrl",
+  "videoType",
+  "hlsUrl",
 ]);
 
 /**
@@ -6879,6 +6975,33 @@ export function responseStructure(ep: ApiEndpoint): ResponseGroup[] {
   const real = API_EXAMPLES[ep.slug];
   if (real && Object.keys(real).length > 0) {
     const derived = structureFromExample(real, ep.slug);
+    // Merge alt-mode examples (e.g. Kick channel → clips[]) so Response
+    // structure documents every mode, not only the primary curl snapshot.
+    const variants = API_EXAMPLE_VARIANTS[ep.slug] || [];
+    if (derived.length > 0 && variants.length > 0) {
+      const seenTitles = new Set(derived.map((g) => g.title));
+      const top = derived.find((g) => g.title === "Top-level fields");
+      const topNames = new Set(top?.fields.map((f) => f.name) || []);
+      for (const variant of variants) {
+        const extra = structureFromExample(variant.data, ep.slug);
+        for (const group of extra) {
+          if (group.title === "Top-level fields" && top) {
+            for (const field of group.fields) {
+              if (!topNames.has(field.name)) {
+                top.fields.push(field);
+                topNames.add(field.name);
+              }
+            }
+            continue;
+          }
+          if (!seenTitles.has(group.title)) {
+            derived.push(group);
+            seenTitles.add(group.title);
+          }
+        }
+      }
+      return derived;
+    }
     if (derived.length > 0) return derived;
   }
   switch (ep.category) {
@@ -7108,6 +7231,24 @@ const VIDEO_DETAILS_USE_CASES: UseCase[] = [
 
 /** Slug-specific use cases when category defaults would mislead. */
 const SLUG_USE_CASES: Record<string, UseCase[]> = {
+  "kick-clip": [
+    {
+      title: "Clip enrichment",
+      desc: "Resolve a Kick clip URL to creator vs channel, views, category, and HLS playlist for players/ffmpeg.",
+    },
+    {
+      title: "Channel clip feeds",
+      desc: "Pass a channel URL to pull recent clips[] (limit up to 100) without a duplicate top-level clip.",
+    },
+    {
+      title: "VOD deep-links",
+      desc: "Open vod.urlWithOffset to jump to the exact second in the source VOD where the clip was cut.",
+    },
+    {
+      title: "Moderation flags",
+      desc: "Read isMature + privacy before surfacing a clip in a public feed.",
+    },
+  ],
   "twitch-user-videos": [
     { title: "Content Pipelines", desc: "Ingest a channel's recent VODs (up to 100) with broadcastType and game metadata." },
     { title: "Monitoring", desc: "Detect new ARCHIVE uploads via video id + createdAt within the 100-video window." },

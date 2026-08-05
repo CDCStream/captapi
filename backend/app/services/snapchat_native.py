@@ -26,10 +26,28 @@ _MEDIA_TYPES = {0: "image", 1: "video", 2: "video"}
 
 
 def _val(value: Any) -> Any:
-    """Unwrap Snapchat ``{"value": ...}`` protobuf-json wrappers."""
-    if isinstance(value, dict) and "value" in value and len(value) <= 2:
-        return value.get("value")
+    """Unwrap Snapchat ``{"value": ...}`` protobuf-json wrappers.
+
+    Never pass a wrapper dict to ``safe_str`` — ``str({"value": "x"})`` leaks
+    Python dict repr (single quotes) into the JSON response.
+    """
+    seen = 0
+    while isinstance(value, dict) and "value" in value and len(value) <= 2 and seen < 4:
+        value = value.get("value")
+        seen += 1
     return value
+
+
+def _abs_url(value: Any) -> str | None:
+    """Ensure website/links are absolute https URLs (Snapchat often sends ``NBA.com``)."""
+    text = safe_str(_val(value))
+    if not text:
+        return None
+    if re.match(r"^[a-z][a-z0-9+.-]*://", text, flags=re.I):
+        return text
+    if text.startswith("//"):
+        return f"https:{text}"
+    return f"https://{text.lstrip('/')}"
 
 
 def _ms_to_iso(value: Any) -> str | None:
@@ -56,11 +74,49 @@ def _category_label(raw: str | None) -> str | None:
     return s.title() if s else None
 
 
+def _hashtag_list(raw: Any) -> list[str] | None:
+    if not isinstance(raw, list):
+        return None
+    out: list[str] = []
+    for tag in raw:
+        if isinstance(tag, str):
+            t = tag.strip().lstrip("#")
+        elif isinstance(tag, dict):
+            t = safe_str(_val(tag.get("name") or tag.get("tag") or tag.get("title"))) or ""
+            t = t.lstrip("#")
+        else:
+            t = ""
+        if t and t not in out:
+            out.append(t)
+    return out or None
+
+
+def _context_cards(raw: Any) -> list[dict[str, Any]] | None:
+    if not isinstance(raw, list):
+        return None
+    out: list[dict[str, Any]] = []
+    for card in raw:
+        if not isinstance(card, dict):
+            continue
+        row = strip_empty(
+            {
+                "type": safe_str(_val(card.get("type") or card.get("cardType"))),
+                "title": safe_str(_val(card.get("title") or card.get("name"))),
+                "subtitle": safe_str(_val(card.get("subtitle"))),
+                "url": safe_str(_val(card.get("url") or card.get("deeplinkUrl"))),
+            }
+        )
+        if row:
+            out.append(row)
+    return out or None
+
+
 def _snap_row(raw: dict[str, Any]) -> dict[str, Any] | None:
     urls = raw.get("snapUrls") if isinstance(raw.get("snapUrls"), dict) else {}
-    media_url = safe_str(urls.get("mediaUrl"))
+    media_url = safe_str(_val(urls.get("mediaUrl")))
     preview = safe_str(_val(urls.get("mediaPreviewUrl")))
-    media_type = safe_int(raw.get("snapMediaType"))
+    # Do not use ``media_type or -1`` — snapMediaType 0 (image) is falsy.
+    media_type = safe_int(_val(raw.get("snapMediaType")))
     ts = safe_int(_val(raw.get("timestampInSec")))
     published = None
     if ts and ts > 0:
@@ -71,16 +127,33 @@ def _snap_row(raw: dict[str, Any]) -> dict[str, Any] | None:
     snap_id = safe_str(_val(raw.get("snapId")))
     if not media_url and not preview and not snap_id:
         return None
+    lens = raw.get("lensMetadata") if isinstance(raw.get("lensMetadata"), dict) else None
     return strip_empty(
         {
-            "snapIndex": safe_int(raw.get("snapIndex")),
+            "snapIndex": safe_int(_val(raw.get("snapIndex"))),
             "snapId": snap_id,
             "snapMediaType": media_type,
-            "mediaType": _MEDIA_TYPES.get(media_type or -1),
+            "mediaType": _MEDIA_TYPES.get(media_type) if media_type is not None else None,
             "mediaUrl": media_url,
             "mediaPreviewUrl": preview,
             "timestampInSec": ts,
             "publishedAt": published,
+            "embeddedTextCaption": safe_str(
+                _val(raw.get("embeddedTextCaption") or raw.get("caption"))
+            ),
+            "hashtags": _hashtag_list(raw.get("hashtags")),
+            "contextCards": _context_cards(raw.get("contextCards")),
+            "lensMetadata": strip_empty(
+                {
+                    "id": safe_str(_val((lens or {}).get("id") or (lens or {}).get("lensId"))),
+                    "name": safe_str(_val((lens or {}).get("name") or (lens or {}).get("lensName"))),
+                    "creatorName": safe_str(
+                        _val((lens or {}).get("creatorName") or (lens or {}).get("creator"))
+                    ),
+                }
+            )
+            if lens
+            else None,
         }
     )
 
@@ -101,17 +174,19 @@ def _highlight(raw: dict[str, Any]) -> dict[str, Any] | None:
     snaps = _snap_list(raw.get("snapList"))
     first = snaps[0] if snaps else None
     thumb = safe_str(_val(raw.get("thumbnailUrl")))
-    title = safe_str(raw.get("storyTitle"))
-    hid = safe_str(raw.get("highlightId") or _val(raw.get("storyId")))
+    # highlightId / storyTitle arrive as {"value": "..."} — must unwrap before safe_str.
+    title = safe_str(_val(raw.get("storyTitle")))
+    hid = safe_str(_val(raw.get("highlightId")) or _val(raw.get("storyId")))
     if not hid and not title and not snaps:
         return None
     return strip_empty(
         {
             "highlightId": hid,
             "storyTitle": title,
-            "storySubtitle": safe_str(raw.get("storySubtitle")),
-            "emoji": safe_str(raw.get("emoji")),
+            "storySubtitle": safe_str(_val(raw.get("storySubtitle"))),
+            "emoji": safe_str(_val(raw.get("emoji"))),
             "thumbnailUrl": thumb,
+            # Count matches snapList we actually return (never invent from upstream).
             "snapCount": len(snaps) if snaps else None,
             "firstSnapUrl": (first or {}).get("mediaUrl"),
             "firstSnapType": (first or {}).get("mediaType"),
@@ -164,9 +239,11 @@ def _spotlight_item(
     return strip_empty(
         {
             "id": story_id,
-            "title": safe_str(video.get("name") or highlight.get("storyTitle")),
-            "description": safe_str(video.get("description")),
-            "caption": safe_str(video.get("embeddedTextCaption")),
+            "title": safe_str(
+                _val(video.get("name")) or _val(highlight.get("storyTitle"))
+            ),
+            "description": safe_str(_val(video.get("description"))),
+            "caption": safe_str(_val(video.get("embeddedTextCaption"))),
             "thumbnailUrl": safe_str(
                 video.get("thumbnailUrl") or _val(highlight.get("thumbnailUrl"))
             ),
@@ -231,7 +308,7 @@ def _related(raw: Any) -> list[dict[str, Any]]:
             if isinstance(row.get("publicProfileInfo"), dict)
             else row
         )
-        username = safe_str(info.get("username"))
+        username = safe_str(_val(info.get("username")))
         if not username:
             continue
         link = (
@@ -241,16 +318,29 @@ def _related(raw: Any) -> list[dict[str, Any]]:
             if isinstance(row.get("subscribeLink"), dict)
             else None
         )
+        avatar = safe_str(
+            _val(info.get("profilePictureUrl") or info.get("avatar"))
+        )
+        profile_url = f"https://www.snapchat.com/@{username}"
         out.append(
             strip_empty(
                 {
                     "username": username,
-                    "displayName": safe_str(info.get("title") or info.get("displayName")),
-                    "profileUrl": f"https://www.snapchat.com/@{username}",
-                    "profilePictureUrl": safe_str(
-                        info.get("profilePictureUrl") or info.get("avatar")
+                    "displayName": safe_str(
+                        _val(info.get("title") or info.get("displayName"))
                     ),
-                    "isVerified": bool(info.get("badge")) if info.get("badge") is not None else None,
+                    # Same naming as the top-level profile card.
+                    "url": profile_url,
+                    "avatar": avatar,
+                    # Deprecated aliases — prefer url / avatar.
+                    "profileUrl": profile_url,
+                    "profilePictureUrl": avatar,
+                    "verified": bool(info.get("badge"))
+                    if info.get("badge") is not None
+                    else None,
+                    "isVerified": bool(info.get("badge"))
+                    if info.get("badge") is not None
+                    else None,
                     "hasStory": bool(info.get("hasStory"))
                     if info.get("hasStory") is not None
                     else None,
@@ -264,8 +354,7 @@ def _related(raw: Any) -> list[dict[str, Any]]:
                         {
                             "oneLinkBaseUrl": safe_str((link or {}).get("oneLinkBaseUrl")),
                             "deepLinkUrl": safe_str(
-                                (link or {}).get("deepLinkUrl")
-                                or f"https://www.snapchat.com/@{username}"
+                                (link or {}).get("deepLinkUrl") or profile_url
                             ),
                             "iosAppStoreUrl": safe_str((link or {}).get("iosAppStoreUrl")),
                         }
@@ -283,6 +372,8 @@ def _story(raw: Any) -> dict[str, Any] | None:
     snaps = _snap_list(raw.get("snapList"))
     if not snaps:
         return None
+    # snapCount always equals len(snapList) we return — never echo a larger
+    # upstream total that would imply missing snaps.
     return strip_empty(
         {
             "snapCount": len(snaps),
@@ -324,40 +415,51 @@ async def fetch_user_profile(username: str) -> dict[str, Any] | None:
         log.info("snapchat_native_no_profile", username=handle)
         return None
 
-    uname = safe_str(info.get("username")) or handle
-    category_id = safe_str(info.get("categoryStringId"))
-    subcategory_id = safe_str(info.get("subcategoryStringId"))
+    uname = safe_str(_val(info.get("username"))) or handle
+    category_id = safe_str(_val(info.get("categoryStringId")))
+    subcategory_id = safe_str(_val(info.get("subcategoryStringId")))
     highlights = _highlights(page.get("curatedHighlights") or [])
     spotlights = _spotlights(
         page.get("spotlightHighlights"), page.get("spotlightStoryMetadata")
     )
     related = _related(info.get("relatedAccountsInfo") or [])
     story = _story(page.get("story"))
-    badge = info.get("badge")
+    badge = safe_int(_val(info.get("badge")))
+    avatar = safe_str(_val(info.get("profilePictureUrl")))
+    banner = safe_str(_val(info.get("squareHeroImageUrl")))
+    website = _abs_url(info.get("websiteUrl"))
 
     out = strip_empty(
         {
+            "platform": "snapchat",
             "username": uname,
+            "handle": uname,
             "mutableUsername": uname,
             "url": f"https://www.snapchat.com/@{uname}",
             "webUrl": f"https://www.snapchat.com/@{uname}",
-            "displayName": safe_str(info.get("title") or info.get("mutableName")),
-            "title": safe_str(info.get("title")),
-            "bio": safe_str(info.get("bio")),
-            "description": safe_str(info.get("bio")),
+            "displayName": safe_str(_val(info.get("title") or info.get("mutableName"))),
+            "title": safe_str(_val(info.get("title"))),
+            "bio": safe_str(_val(info.get("bio"))),
+            "description": safe_str(_val(info.get("bio"))),
             "categoryId": category_id,
             "category": _category_label(category_id),
             "subcategoryId": subcategory_id,
             "subcategory": _category_label(subcategory_id),
-            "subscriberCount": safe_int(info.get("subscriberCount")),
-            "badge": safe_int(badge) if badge is not None else None,
+            "subscriberCount": safe_int(_val(info.get("subscriberCount"))),
+            "followers": safe_int(_val(info.get("subscriberCount"))),
+            # Snapchat public badge: 0/absent = none, 1 = official verified.
+            "badge": badge,
             "isVerified": bool(badge),
             "verified": bool(badge),
-            "profilePictureUrl": safe_str(info.get("profilePictureUrl")),
-            "squareHeroImageUrl": safe_str(info.get("squareHeroImageUrl")),
-            "snapcodeImageUrl": safe_str(info.get("snapcodeImageUrl")),
-            "websiteUrl": safe_str(info.get("websiteUrl")),
-            "businessProfileId": safe_str(info.get("businessProfileId")),
+            "avatar": avatar,
+            "banner": banner,
+            # Deprecated aliases — prefer avatar / banner / website.
+            "profilePictureUrl": avatar,
+            "squareHeroImageUrl": banner,
+            "snapcodeImageUrl": safe_str(_val(info.get("snapcodeImageUrl"))),
+            "website": website,
+            "websiteUrl": website,
+            "businessProfileId": safe_str(_val(info.get("businessProfileId"))),
             "creationTimestampMs": safe_int(_val(info.get("creationTimestampMs"))),
             "createdAt": _ms_to_iso(info.get("creationTimestampMs")),
             "lastUpdateTimestampMs": safe_int(_val(info.get("lastUpdateTimestampMs"))),

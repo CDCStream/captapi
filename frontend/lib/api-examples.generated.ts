@@ -3936,16 +3936,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "createdAt": "2026-08-02T09:36:01.061092Z",
       "startedAt": "2026-08-02T05:45:57Z",
       "durationSeconds": 38,
-      "views": 18,
+      "views": 62,
       "likes": 0,
       "thumbnailUrl": "https://clips.kick.com/clips/fb/clip_01KZ0X5PGT228PY3QEB3RMR3YC/thumbnail.webp",
       "videoUrl": "https://clips.kick.com/clips/fb/clip_01KZ0X5PGT228PY3QEB3RMR3YC/playlist.m3u8",
+      "videoType": "hls",
+      "hlsUrl": "https://clips.kick.com/clips/fb/clip_01KZ0X5PGT228PY3QEB3RMR3YC/playlist.m3u8",
       "privacy": "public",
       "isMature": false,
       "livestreamId": "120226226",
       "vodStartsAt": 29450,
       "vod": {
-        "id": "8faf0a05-dcdf-4ab1-8538-e87c6eef573e"
+        "id": "8faf0a05-dcdf-4ab1-8538-e87c6eef573e",
+        "url": "https://kick.com/xqc/videos/8faf0a05-dcdf-4ab1-8538-e87c6eef573e",
+        "urlWithOffset": "https://kick.com/xqc/videos/8faf0a05-dcdf-4ab1-8538-e87c6eef573e?t=29450"
       },
       "category": "Just Chatting",
       "categoryId": "15",
@@ -3955,6 +3959,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "channel": {
         "id": "668",
         "username": "xqc",
+        "displayName": "xQc",
         "name": "xQc",
         "url": "https://kick.com/xqc",
         "profilePicture": "https://files.kick.com/images/user/676/profile_image/conversion/931b4e8f-5445-427c-bd82-b473530390cc-thumb.webp"
@@ -3962,6 +3967,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "creator": {
         "id": "7458058",
         "username": "ghosteld",
+        "displayName": "Ghosteld",
         "name": "Ghosteld",
         "url": "https://kick.com/ghosteld",
         "profilePicture": "https://files.kick.com/images/user/7458058/profile_image/conversion/d0bd5606-ab8a-42f7-b535-6f7c4a672c34-thumb.webp"
@@ -6485,6 +6491,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "snapchat-user-profile": {
     "platform": "snapchat",
     "username": "nba",
+    "handle": "nba",
     "url": "https://www.snapchat.com/@nba",
     "displayName": "NBA",
     "bio": "30 teams, 1 goal.",
@@ -6492,68 +6499,37 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "categoryId": "public-profile-category-v3-business-group",
     "subcategory": "Sports League",
     "subcategoryId": "public-profile-subcategory-v3-sports-league",
-    "subscriberCount": 3657900,
+    "subscriberCount": 3653600,
+    "followers": 3653600,
     "verified": true,
     "badge": 1,
     "avatar": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvcGxQanhqRDFZRk9IUWdGMUZLRHNqP2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,90_FMjpeg",
+    "banner": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvcUZBYjExSEY3QkdkeHNiOXpkMTREP2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,1080_FMjpeg",
+    "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvcGxQanhqRDFZRk9IUWdGMUZLRHNqP2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,90_FMjpeg",
     "squareHeroImageUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvcUZBYjExSEY3QkdkeHNiOXpkMTREP2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,1080_FMjpeg",
     "snapcode": "https://app.snapchat.com/web/deeplink/snapcode?username=nba&type=SVG&bitmoji=enable",
-    "website": "NBA.com",
+    "website": "https://NBA.com",
     "businessProfileId": "ea71b19b-5eb1-4dda-afb8-13ced485f180",
     "creationTimestampMs": 1526597295058,
     "createdAt": "2018-05-17T22:48:15.058000Z",
-    "lastUpdateTimestampMs": 1785621675000,
-    "updatedAt": "2026-08-01T22:01:15Z",
+    "lastUpdateTimestampMs": 1785621674522,
+    "updatedAt": "2026-08-01T22:01:14.522000Z",
     "hasStory": false,
     "hasCuratedHighlights": true,
     "hasSpotlightHighlights": true,
-    "story": {
-      "snapCount": 6,
-      "thumbnailUrl": "https://cf-st.sc-cdn.net/d/AODMFV4kcbKapQw9bcNSU.256.IRZXSOY?mo=GlMaDjICBH1IAlBLYAFoDHABUI4BWhBEZkxhcmdlVGh1bWJuYWlsogEUCIACIg8KAmgMEgAqB0lSWlhTT1miARQImgoiDwoCaAwSACoHSVJaWFNPWQ%3D%3D&uc=75",
-      "snapList": [
-        {
-          "snapIndex": 0,
-          "snapId": "2wzhbo4SSiWIG-fd9lWR2wAAgemFmc3Jic3dpAZ-_U_TQAZ-_U8skAAAAAA",
-          "snapMediaType": 1,
-          "mediaType": "video",
-          "mediaUrl": "https://cf-st.sc-cdn.net/d/AODMFV4kcbKapQw9bcNSU.1034.IRZXSOY?mo=Gl8aGDIBBDoBfUIGCK3XudMGSAJQS2ABaAxwAVCwAaIBOwiKCBIlCiMI8dhLIAEw4AM41AZAAUoOCglHKUFFPT1BNzoQ9ANQkE5oAiIPCgJoDBIAKgdJUlpYU09ZkAOQTg%3D%3D&uc=75",
-          "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/AODMFV4kcbKapQw9bcNSU.256.IRZXSOY?mo=GlMaDjICBH1IAlBLYAFoDHABUI4BWhBEZkxhcmdlVGh1bWJuYWlsogEUCIACIg8KAmgMEgAqB0lSWlhTT1miARQImgoiDwoCaAwSACoHSVJaWFNPWQ%3D%3D&uc=75",
-          "timestampInSec": 1785621367,
-          "publishedAt": "2026-08-01T21:56:07Z"
-        },
-        {
-          "snapIndex": 1,
-          "snapId": "2wzhbo4SSiWIG-fd9lWR2wAAgc3dkeHdlbnh0AZ-_U_WvAZ-_U8suAAAAAA",
-          "snapMediaType": 1,
-          "mediaType": "video",
-          "mediaUrl": "https://cf-st.sc-cdn.net/d/7oaCx89Y053GDtXAGnYPU.1034.IRZXSOY?mo=GmAaGDIBBDoBfUIGCLXXudMGSAJQS2ABaAxwAVCwAaIBPAiKCBImCiQI1oxQIAEw4AM41AZAAUoPCgqDAUZTUFEsQEU7EPQDUJBOaAIiDwoCaAwSACoHSVJaWFNPWZADkE4%3D&uc=75",
-          "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/7oaCx89Y053GDtXAGnYPU.256.IRZXSOY?mo=GlMaDjICBH1IAlBLYAFoDHABUI4BWhBEZkxhcmdlVGh1bWJuYWlsogEUCIACIg8KAmgMEgAqB0lSWlhTT1miARQImgoiDwoCaAwSACoHSVJaWFNPWQ%3D%3D&uc=75",
-          "timestampInSec": 1785621367,
-          "publishedAt": "2026-08-01T21:56:07Z"
-        },
-        {
-          "snapIndex": 2,
-          "snapId": "2wzhbo4SSiWIG-fd9lWR2wAAgdWxxbmJ1b2FyAZ-_U_aJAZ-_U8s4AAAAAA",
-          "snapMediaType": 1,
-          "mediaType": "video",
-          "mediaUrl": "https://cf-st.sc-cdn.net/d/IXAlIELcj5WFE1fUA1w92.1034.IRZXSOY?mo=GmAaGDIBBDoBfUIGCKfXudMGSAJQS2ABaAxwAVCwAaIBPAiKCBImCiQIz4UzIAEw4AM41AZAAUoPCgqBAVFRV0A6Pz00EPQDUIotaAIiDwoCaAwSACoHSVJaWFNPWZADii0%3D&uc=75",
-          "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/IXAlIELcj5WFE1fUA1w92.256.IRZXSOY?mo=GlMaDjICBH1IAlBLYAFoDHABUI4BWhBEZkxhcmdlVGh1bWJuYWlsogEUCIACIg8KAmgMEgAqB0lSWlhTT1miARQImgoiDwoCaAwSACoHSVJaWFNPWQ%3D%3D&uc=75",
-          "timestampInSec": 1785621367,
-          "publishedAt": "2026-08-01T21:56:07Z"
-        }
-      ]
-    },
     "highlights": [
       {
-        "highlightId": "{'value': '029f2cc3-c0df-46c2-b610-485c137f9a0a'}",
-        "storyTitle": "{'value': '2025-26 NBA Finals 🏆'}",
+        "highlightId": "029f2cc3-c0df-46c2-b610-485c137f9a0a",
+        "storyTitle": "2025-26 NBA Finals 🏆",
         "thumbnailUrl": "https://cf-st.sc-cdn.net/d/ZXSSacNIpSYqxAm21SSGc.410?mo=GjcaFjIBBDoBfUIGCMqG99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
         "snapCount": 4,
         "firstSnapUrl": "https://cf-st.sc-cdn.net/d/ZXSSacNIpSYqxAm21SSGc.400?mo=Gk8aDDIBBDoBfVBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBEwiQAyIOCgpCBgjKhvfQBkgCEgCiARMI5wciDgoKQgYIy4b30AZIAxIA&uc=94",
+        "firstSnapType": "image",
         "snapList": [
           {
             "snapIndex": 0,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/ZXSSacNIpSYqxAm21SSGc.400?mo=Gk8aDDIBBDoBfVBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBEwiQAyIOCgpCBgjKhvfQBkgCEgCiARMI5wciDgoKQgYIy4b30AZIAxIA&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/ZXSSacNIpSYqxAm21SSGc.410?mo=GjcaFjIBBDoBfUIGCMqG99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
             "timestampInSec": 1780335408,
@@ -6562,6 +6538,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "snapIndex": 1,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/FgntIqJi6clNRLmaxXkXN.400?mo=Gk0aDjIBBDoBfUgCUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogERCJADIgwKCEIGCMuG99AGEgCiAREI5wciDAoIQgYIyob30AYSAA%3D%3D&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/FgntIqJi6clNRLmaxXkXN.410?mo=GjcaFjIBBDoBfUIGCMuG99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
             "timestampInSec": 1780335408,
@@ -6570,6 +6547,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "snapIndex": 2,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/MDhgz2NGVlp7M1wfhuT1s.400?mo=GkoaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBFgiQAyIRCg06AX1CBgjPhvfQBkgCEgCiAQ4I5wciCQoFMgF9SAMSAA%3D%3D&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/MDhgz2NGVlp7M1wfhuT1s.410?mo=GjcaFjIBBDoBfUIGCM-G99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
             "timestampInSec": 1780335408,
@@ -6578,6 +6556,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "snapIndex": 3,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/V9pQZQcyVDfY0v9a5gTz6.400?mo=Gk0aDjIBBDoBfUgCUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogERCJADIgwKCEIGCMuG99AGEgCiAREI5wciDAoIQgYIyob30AYSAA%3D%3D&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/V9pQZQcyVDfY0v9a5gTz6.410?mo=GjcaFjIBBDoBfUIGCMuG99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
             "timestampInSec": 1780335408,
@@ -6586,15 +6565,17 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         ]
       },
       {
-        "highlightId": "{'value': '2941c1a3-96ba-45aa-bdf4-30b344e63e42'}",
-        "storyTitle": "{'value': 'Your 2025-26 Kia NBA MVP 🏆'}",
+        "highlightId": "2941c1a3-96ba-45aa-bdf4-30b344e63e42",
+        "storyTitle": "Your 2025-26 Kia NBA MVP 🏆",
         "thumbnailUrl": "https://cf-st.sc-cdn.net/d/iqFfVpTceYNBTtMJvlQns.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
         "snapCount": 19,
         "firstSnapUrl": "https://cf-st.sc-cdn.net/d/iqFfVpTceYNBTtMJvlQns.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
+        "firstSnapType": "image",
         "snapList": [
           {
             "snapIndex": 0,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/iqFfVpTceYNBTtMJvlQns.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/iqFfVpTceYNBTtMJvlQns.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
             "timestampInSec": 1779061414,
@@ -6612,6 +6593,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "snapIndex": 2,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/aUFzsbb4CKroNT0pRdE4G.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/aUFzsbb4CKroNT0pRdE4G.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
             "timestampInSec": 1779062266,
@@ -6620,6 +6602,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "snapIndex": 3,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/yWteTz76gf53bxwLBNjoX.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/yWteTz76gf53bxwLBNjoX.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
             "timestampInSec": 1779062542,
@@ -6646,6 +6629,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "snapIndex": 6,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/Q7U6frp3B5dB2EsIvVR2y.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/Q7U6frp3B5dB2EsIvVR2y.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
             "timestampInSec": 1779063199,
@@ -6762,15 +6746,17 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         ]
       },
       {
-        "highlightId": "{'value': '918b1b3e-d60a-43e9-b5cd-651335d4687e'}",
-        "storyTitle": "{'value': '2026 All-Star Rosters ⭐️'}",
+        "highlightId": "918b1b3e-d60a-43e9-b5cd-651335d4687e",
+        "storyTitle": "2026 All-Star Rosters ⭐️",
         "thumbnailUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
         "snapCount": 5,
         "firstSnapUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.400?mo=GkcaFDIBBDoBfUIGCNXEiswGUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogELCJADIgYKAkgCEgCiAQsI5wciBgoCSAMSAA%3D%3D&uc=94",
+        "firstSnapType": "image",
         "snapList": [
           {
             "snapIndex": 0,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.400?mo=GkcaFDIBBDoBfUIGCNXEiswGUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogELCJADIgYKAkgCEgCiAQsI5wciBgoCSAMSAA%3D%3D&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
             "timestampInSec": 1770168890,
@@ -6779,6 +6765,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "snapIndex": 1,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/9VxqlhBh839VRARSOGbNg.400?mo=GkcaFDIBBDoBfUIGCNXEiswGUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogELCJADIgYKAkgCEgCiAQsI5wciBgoCSAMSAA%3D%3D&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/9VxqlhBh839VRARSOGbNg.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
             "timestampInSec": 1770168890,
@@ -6787,6 +6774,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "snapIndex": 2,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/iYsmPWO07diOdM994g8xo.400?mo=Gk8aDDIBBDoBfVBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBEwiQAyIOCgpCBgjVxIrMBkgCEgCiARMI5wciDgoKQgYI1MSKzAZIAxIA&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/iYsmPWO07diOdM994g8xo.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
             "timestampInSec": 1770168890,
@@ -6795,6 +6783,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "snapIndex": 3,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/MjPzf75USbLSpgDtGWzjb.400?mo=Gk0aDjIBBDoBfUgCUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogERCJADIgwKCEIGCNXEiswGEgCiAREI5wciDAoIQgYI1MSKzAYSAA%3D%3D&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/MjPzf75USbLSpgDtGWzjb.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
             "timestampInSec": 1770168890,
@@ -6803,6 +6792,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "snapIndex": 4,
             "snapMediaType": 0,
+            "mediaType": "image",
             "mediaUrl": "https://cf-st.sc-cdn.net/d/w7OoZSkq2abp9kNl9uOZq.400?mo=GkoaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBFgiQAyIRCg06AX1CBgjWxIrMBkgCEgCiAQ4I5wciCQoFMgF9SAMSAA%3D%3D&uc=94",
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/w7OoZSkq2abp9kNl9uOZq.410?mo=GjcaFjIBBDoBfUIGCNbEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
             "timestampInSec": 1770168890,
@@ -6830,11 +6820,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "url": "https://www.snapchat.com/@nba"
         },
         "engagement": {
-          "views": 13151,
-          "shares": 13,
-          "comments": 23,
-          "boosts": 946,
-          "recommends": 55
+          "views": 20844,
+          "shares": 21,
+          "comments": 37,
+          "boosts": 1618,
+          "recommends": 108
         },
         "snapList": [
           {
@@ -6867,11 +6857,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "url": "https://www.snapchat.com/@nba"
         },
         "engagement": {
-          "views": 8489,
-          "shares": 2,
-          "comments": 3,
-          "boosts": 419,
-          "recommends": 22
+          "views": 10051,
+          "shares": 3,
+          "comments": 4,
+          "boosts": 533,
+          "recommends": 33
         },
         "snapList": [
           {
@@ -6891,10 +6881,13 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "username": "warriors",
         "displayName": "Golden State Warriors",
+        "url": "https://www.snapchat.com/@warriors",
+        "avatar": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvNjRqVjdIRlJMaHk1V21yS0MwNUZ2P2JvPUVnMGFBQm9BTWdFRVNBSlFHV0FCJnVjPTI1._RS0,640_FMjpeg",
         "profileUrl": "https://www.snapchat.com/@warriors",
         "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvNjRqVjdIRlJMaHk1V21yS0MwNUZ2P2JvPUVnMGFBQm9BTWdFRVNBSlFHV0FCJnVjPTI1._RS0,640_FMjpeg",
+        "verified": true,
         "isVerified": true,
-        "hasStory": false,
+        "hasStory": true,
         "hasCuratedHighlights": false,
         "hasSpotlightHighlights": false,
         "subscribeLink": {
@@ -6906,8 +6899,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "username": "nfl",
         "displayName": "NFL Official",
+        "url": "https://www.snapchat.com/@nfl",
+        "avatar": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvT3NjakFOS0dwSWh1VzQwek9qRnowP2JvPUVnMGFBQm9BTWdFRVNBSlFHV0FCJnVjPTI1._RS0,640_FMjpeg",
         "profileUrl": "https://www.snapchat.com/@nfl",
         "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvT3NjakFOS0dwSWh1VzQwek9qRnowP2JvPUVnMGFBQm9BTWdFRVNBSlFHV0FCJnVjPTI1._RS0,640_FMjpeg",
+        "verified": true,
         "isVerified": true,
         "hasStory": true,
         "hasCuratedHighlights": false,
@@ -6921,8 +6917,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "username": "lakerssnaps",
         "displayName": "Los Angeles Lakers",
+        "url": "https://www.snapchat.com/@lakerssnaps",
+        "avatar": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvbEplakhnM3lwRTd1dWEwdjliVjd6P2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,640_FMjpeg",
         "profileUrl": "https://www.snapchat.com/@lakerssnaps",
         "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvbEplakhnM3lwRTd1dWEwdjliVjd6P2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,640_FMjpeg",
+        "verified": true,
         "isVerified": true,
         "hasStory": false,
         "hasCuratedHighlights": false,
@@ -16177,4 +16176,102 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   }
+};
+
+/** Extra success examples for endpoints with multiple request modes (e.g. Kick clip vs channel). */
+export const API_EXAMPLE_VARIANTS: Record<
+  string,
+  Array<{ label: string; data: Record<string, unknown> }>
+> = {
+  "kick-clip": [
+    {
+      label: "Channel mode",
+      data: {
+        channelUrl: "https://kick.com/xqc",
+        totalReturned: 2,
+        clips: [
+          {
+            platform: "kick",
+            id: "clip_01KZ98ERXB58SMTR7C8CTEK6PJ",
+            url: "https://kick.com/xqc/clips/clip_01KZ98ERXB58SMTR7C8CTEK6PJ",
+            title: "friendliest xqc interaction",
+            createdAt: "2026-08-05T15:27:27.727198Z",
+            durationSeconds: 78,
+            views: 1,
+            likes: 0,
+            thumbnailUrl:
+              "https://clips.kick.com/clips/cc/clip_01KZ98ERXB58SMTR7C8CTEK6PJ/thumbnail.webp",
+            videoUrl:
+              "https://clips.kick.com/clips/cc/clip_01KZ98ERXB58SMTR7C8CTEK6PJ/playlist.m3u8",
+            videoType: "hls",
+            hlsUrl:
+              "https://clips.kick.com/clips/cc/clip_01KZ98ERXB58SMTR7C8CTEK6PJ/playlist.m3u8",
+            privacy: "public",
+            isMature: false,
+            livestreamId: "120500462",
+            category: "Just Chatting",
+            categoryId: "15",
+            categorySlug: "just-chatting",
+            parentCategory: "irl",
+            channel: {
+              id: "668",
+              username: "xqc",
+              displayName: "xQc",
+              name: "xQc",
+              url: "https://kick.com/xqc",
+              profilePicture:
+                "https://files.kick.com/images/user/676/profile_image/conversion/151f289a-5bff-4f31-b125-0c54c542519e-thumb.webp",
+            },
+            creator: {
+              id: "26465983",
+              username: "pepethefrogs",
+              displayName: "pepethefrogs",
+              name: "pepethefrogs",
+              url: "https://kick.com/pepethefrogs",
+            },
+          },
+          {
+            platform: "kick",
+            id: "clip_01KZ8G82TS1Q6T1F1660DWVEJ7",
+            url: "https://kick.com/xqc/clips/clip_01KZ8G82TS1Q6T1F1660DWVEJ7",
+            title: "asdasdasd",
+            createdAt: "2026-08-05T08:22:30.758808Z",
+            durationSeconds: 23,
+            views: 3,
+            likes: 0,
+            thumbnailUrl:
+              "https://clips.kick.com/clips/62/clip_01KZ8G82TS1Q6T1F1660DWVEJ7/thumbnail.webp",
+            videoUrl:
+              "https://clips.kick.com/clips/62/clip_01KZ8G82TS1Q6T1F1660DWVEJ7/playlist.m3u8",
+            videoType: "hls",
+            hlsUrl:
+              "https://clips.kick.com/clips/62/clip_01KZ8G82TS1Q6T1F1660DWVEJ7/playlist.m3u8",
+            privacy: "public",
+            isMature: true,
+            livestreamId: "120396284",
+            category: "Just Chatting",
+            categoryId: "15",
+            categorySlug: "just-chatting",
+            parentCategory: "irl",
+            channel: {
+              id: "668",
+              username: "xqc",
+              displayName: "xQc",
+              name: "xQc",
+              url: "https://kick.com/xqc",
+              profilePicture:
+                "https://files.kick.com/images/user/676/profile_image/conversion/151f289a-5bff-4f31-b125-0c54c542519e-thumb.webp",
+            },
+            creator: {
+              id: "50052941",
+              username: "tobionekenobi",
+              displayName: "TobiOneKenobi",
+              name: "TobiOneKenobi",
+              url: "https://kick.com/tobionekenobi",
+            },
+          },
+        ],
+      },
+    },
+  ],
 };

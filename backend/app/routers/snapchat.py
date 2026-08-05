@@ -36,21 +36,68 @@ def _username(value: str) -> str:
     return value.lstrip("@")
 
 
+def _looks_wrapped(value: Any) -> bool:
+    if isinstance(value, dict) and "value" in value:
+        return True
+    if isinstance(value, str) and value.startswith("{'"):
+        return True
+    return False
+
+
 def _normalize(item: dict[str, Any]) -> dict[str, Any]:
-    """Map native / Apify rows to the public profile shape (additive)."""
+    """Map native / Apify rows to the public profile shape."""
     data = item.get("data") if isinstance(item.get("data"), dict) else item
-    username = safe_str(data.get("username") or data.get("mutableUsername"))
-    highlights = data.get("curatedHighlights") or data.get("highlights") or []
-    spotlights = data.get("spotlightHighlights") or []
-    related = data.get("relatedAccounts") or []
-    # Apify sometimes nests differently — keep lists as-is when already mapped.
+    username = safe_str(data.get("username") or data.get("mutableUsername") or data.get("handle"))
+
+    highlights_raw = data.get("curatedHighlights") or data.get("highlights") or []
+    if isinstance(highlights_raw, list) and any(
+        isinstance(h, dict) and (
+            _looks_wrapped(h.get("highlightId")) or _looks_wrapped(h.get("storyTitle"))
+        )
+        for h in highlights_raw
+    ):
+        highlights = native._highlights(highlights_raw)
+    else:
+        highlights = highlights_raw if isinstance(highlights_raw, list) else []
+
+    related_raw = data.get("relatedAccounts") or data.get("relatedAccountsInfo") or []
+    if isinstance(related_raw, list) and related_raw and isinstance(related_raw[0], dict):
+        if "publicProfileInfo" in related_raw[0] or "avatar" not in related_raw[0]:
+            # Raw SC shape or old profilePictureUrl-only rows → remap.
+            if "publicProfileInfo" in related_raw[0]:
+                related = native._related(related_raw)
+            else:
+                related = related_raw
+        else:
+            related = related_raw
+    else:
+        related = []
+
+    story = data.get("story")
+    if isinstance(story, dict):
+        listed = story.get("snapList") if isinstance(story.get("snapList"), list) else []
+        # Re-map when snapCount disagrees with snapList, or snaps look unmapped.
+        if listed and (
+            safe_int(story.get("snapCount")) not in (None, len(listed))
+            or any(isinstance(s, dict) and "mediaType" not in s and s.get("snapMediaType") == 0 for s in listed)
+            or any(isinstance(s, dict) and _looks_wrapped(s.get("snapId")) for s in listed)
+        ):
+            story = native._story(story) or {**story, "snapCount": len(listed), "snapList": listed}
+        elif listed:
+            story = {**story, "snapCount": len(listed)}
+
+    avatar = safe_str(data.get("avatar") or data.get("profilePictureUrl"))
+    banner = safe_str(data.get("banner") or data.get("squareHeroImageUrl"))
+    website = safe_str(data.get("website") or data.get("websiteUrl"))
+    if website and "://" not in website:
+        website = native._abs_url(website)
+
     return strip_empty(
         {
             "platform": "snapchat",
             "username": username,
-            "url": safe_str(
-                data.get("url") or data.get("webUrl") or data.get("profileUrl")
-            )
+            "handle": username,
+            "url": safe_str(data.get("url") or data.get("webUrl") or data.get("profileUrl"))
             or (f"https://www.snapchat.com/@{username}" if username else None),
             "displayName": safe_str(
                 data.get("displayName") or data.get("title") or data.get("name")
@@ -63,18 +110,19 @@ def _normalize(item: dict[str, Any]) -> dict[str, Any]:
                 data.get("subcategoryId") or data.get("subcategoryStringId")
             ),
             "subscriberCount": safe_int(data.get("subscriberCount") or data.get("subscribers")),
+            "followers": safe_int(
+                data.get("followers") or data.get("subscriberCount") or data.get("subscribers")
+            ),
             "verified": bool(
                 data.get("isVerified") or data.get("verified") or data.get("badge")
             ),
             "badge": safe_int(data.get("badge")),
-            "avatar": safe_str(
-                data.get("profilePictureUrl")
-                or data.get("avatar")
-                or data.get("squareHeroImageUrl")
-            ),
-            "squareHeroImageUrl": safe_str(data.get("squareHeroImageUrl")),
+            "avatar": avatar,
+            "banner": banner,
+            "profilePictureUrl": avatar,
+            "squareHeroImageUrl": banner,
             "snapcode": safe_str(data.get("snapcodeImageUrl") or data.get("snapcode")),
-            "website": safe_str(data.get("websiteUrl") or data.get("website")),
+            "website": website,
             "businessProfileId": safe_str(data.get("businessProfileId")),
             "creationTimestampMs": safe_int(data.get("creationTimestampMs")),
             "createdAt": safe_str(data.get("createdAt")),
@@ -83,9 +131,9 @@ def _normalize(item: dict[str, Any]) -> dict[str, Any]:
             "hasStory": data.get("hasStory"),
             "hasCuratedHighlights": data.get("hasCuratedHighlights"),
             "hasSpotlightHighlights": data.get("hasSpotlightHighlights"),
-            "story": data.get("story"),
+            "story": story,
             "highlights": highlights,
-            "spotlightHighlights": spotlights,
+            "spotlightHighlights": data.get("spotlightHighlights") or [],
             "relatedAccounts": related,
         }
     )
@@ -129,7 +177,7 @@ async def user_profile(
 
         data = await cached_or_run(
             "snapchat.user-profile",
-            {"username": username, "v": 4},
+            {"username": username, "v": 5},
             _run,
             ctx,
             use_cache=cache,

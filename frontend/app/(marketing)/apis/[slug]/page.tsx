@@ -21,6 +21,7 @@ import {
   params,
   faqs,
   exampleResponse,
+  exampleResponseVariants,
   errorExamples,
   responseStructure,
   useCases,
@@ -328,7 +329,19 @@ export default async function ApiDetailPage({
           <h2 className="text-2xl font-semibold mb-4">Example response</h2>
           <CodeTabs
             samples={[
-              { label: "200 OK", code: exampleResponse(ep), lang: "json" },
+              {
+                label:
+                  exampleResponseVariants(ep).length > 0
+                    ? "Clip mode"
+                    : "200 OK",
+                code: exampleResponse(ep),
+                lang: "json",
+              },
+              ...exampleResponseVariants(ep).map((v) => ({
+                label: v.label,
+                code: v.code,
+                lang: "json",
+              })),
               ...errorExamples(ep).map((e) => ({
                 label: e.label,
                 code: e.code,
