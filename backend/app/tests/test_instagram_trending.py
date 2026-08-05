@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
+
+import pytest
+from fastapi import HTTPException
+
 from app.services import instagram_native as native
 from app.routers import instagram as ig_router
 
@@ -56,3 +61,44 @@ def test_filter_drops_photo_junk_from_docs_example() -> None:
     )
     assert junk["postType"] == "Image"
     assert ig_router._filter_trending_reels_only([junk]) == []
+
+
+def test_unsupported_country_is_400_with_list() -> None:
+    with pytest.raises(HTTPException) as exc:
+        ig_router._normalize_trending_country("Narnia")
+    assert exc.value.status_code == 400
+    detail = exc.value.detail
+    assert isinstance(detail, dict)
+    assert detail["error"]["code"] == "unsupported_country"
+    assert "United States" in detail["error"]["supportedCountries"]
+
+
+def test_warming_error_is_machine_readable() -> None:
+    exc = ig_router._trending_warming_http("United States")
+    assert exc.status_code == 503
+    assert exc.headers["Retry-After"] == "600"
+    assert exc.detail["error"]["code"] == "warming"
+    assert exc.detail["error"]["retryAfterSeconds"] == 600
+    assert exc.detail["error"]["country"] == "United States"
+
+
+def test_freshness_marks_stale_after_refresh_window() -> None:
+    fresh = ig_router._trending_freshness(
+        cached_at=datetime.now(timezone.utc) - timedelta(hours=2),
+        from_snapshot=True,
+    )
+    assert fresh["cached"] is True
+    assert fresh["stale"] is False
+    assert fresh["ageHours"] < 6
+
+    old = ig_router._trending_freshness(
+        cached_at=datetime.now(timezone.utc) - timedelta(hours=32),
+        from_snapshot=True,
+    )
+    assert old["cached"] is True
+    assert old["stale"] is True
+    assert old["ageHours"] >= 30
+
+
+def test_sync_wait_budget_is_gateway_safe() -> None:
+    assert ig_router._TRENDING_SYNC_WAIT_SECS <= 15

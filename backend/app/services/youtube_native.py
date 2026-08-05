@@ -21,6 +21,7 @@ import asyncio
 import base64
 import json
 import re
+import shlex
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from typing import Any, Iterator
@@ -29,6 +30,7 @@ from urllib.parse import parse_qs, urlparse
 import httpx
 
 from app.services.http_fetch import fetch as proxy_fetch, post_json, proxy_for
+from app.utils.countries import country_code_from_name, country_name
 from app.utils.formatters import safe_int, safe_list, safe_str
 
 YT_HEADERS: dict[str, str] = {
@@ -1274,14 +1276,7 @@ async def trending_shorts_native(
             "type": "short",
             "id": vid,
             "url": f"https://www.youtube.com/shorts/{vid}",
-            "title": "",
-            "publishedAt": None,
-            "durationSeconds": None,
             "thumbnailUrl": thumbnail_url_for_video_id(vid),
-            "channelName": None,
-            "channelId": None,
-            "channel": None,
-            "badges": [],
         }
         for vid in ids[:limit]
     ]
@@ -1317,6 +1312,134 @@ async def short_details_via_reel_watch(video_id: str, norm_url: str) -> dict[str
     )
 
 
+def merge_short_player_details(
+    android: dict[str, Any] | None,
+    reel: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Prefer reel_item_watch microformat; keep ANDROID engagement when richer."""
+    if not isinstance(android, dict) and not isinstance(reel, dict):
+        return None
+    out = dict(android or {})
+    if isinstance(reel, dict):
+        for key in (
+            "publishedAt",
+            "description",
+            "descriptionLinks",
+            "channelHandle",
+            "channelUrl",
+            "channelName",
+            "channelId",
+            "genre",
+            "categoryId",
+            "isFamilySafe",
+            "defaultLanguage",
+            "defaultAudioLanguage",
+            "tags",
+            "title",
+            "availableCaptions",
+            "thumbnailUrl",
+            "thumbnails",
+        ):
+            val = reel.get(key)
+            if val in (None, "", []):
+                continue
+            if key in (
+                "publishedAt",
+                "description",
+                "descriptionLinks",
+                "channelHandle",
+                "thumbnailUrl",
+                "thumbnails",
+            ) or not out.get(key):
+                out[key] = val
+        if out.get("viewCount") is None and reel.get("viewCount") is not None:
+            out["viewCount"] = reel["viewCount"]
+            out["viewCountIsApproximate"] = reel.get("viewCountIsApproximate", False)
+        if out.get("durationSeconds") is None and reel.get("durationSeconds") is not None:
+            out["durationSeconds"] = reel["durationSeconds"]
+        if out.get("likeCount") is None and reel.get("likeCount") is not None:
+            out["likeCount"] = reel["likeCount"]
+        if out.get("commentCount") is None and reel.get("commentCount") is not None:
+            out["commentCount"] = reel["commentCount"]
+            if "commentCountIsApproximate" in reel:
+                out["commentCountIsApproximate"] = reel["commentCountIsApproximate"]
+    if out.get("viewCount") is None and not (isinstance(reel, dict) and reel.get("title")):
+        return None
+    return out if out else None
+
+
+def _finalize_short_list_card(vid: str, details: dict[str, Any] | None) -> dict[str, Any]:
+    """Canonical Shorts list row — nested channel, no flat aliases / dead keys."""
+    from app.utils.media_urls import (
+        canonicalize_youtube_channel_url,
+        decode_youtube_handle,
+    )
+
+    out: dict[str, Any] = {
+        "id": vid,
+        "url": f"https://www.youtube.com/shorts/{vid}",
+        "type": "short",
+    }
+    if not isinstance(details, dict):
+        out["thumbnailUrl"] = thumbnail_url_for_video_id(vid)
+        return out
+
+    for key in ("title", "description", "publishedAt", "genre"):
+        val = details.get(key)
+        if val not in (None, "", []):
+            out[key] = val
+    tags = details.get("tags") or details.get("keywords")
+    if isinstance(tags, list) and tags:
+        out["keywords"] = tags
+
+    exact_views = safe_int(details.get("viewCount"))
+    if exact_views is not None:
+        out["viewCount"] = exact_views
+        out["viewCountText"] = format_count_text(exact_views)
+        out["viewCountIsApproximate"] = bool(details.get("viewCountIsApproximate"))
+
+    dur = safe_int(details.get("durationSeconds"))
+    if dur is not None:
+        out["durationSeconds"] = dur
+        out["durationFormatted"] = format_duration_hms(dur)
+
+    thumbs, thumb_url = prefer_short_thumbnails(
+        vid, details.get("thumbnails"), details.get("thumbnailUrl")
+    )
+    out["thumbnailUrl"] = thumb_url or thumbnail_url_for_video_id(vid)
+    # List cards keep a single thumbnailUrl (not the full thumbnails[] ladder).
+
+    handle = decode_youtube_handle(details.get("channelHandle"))
+    channel_id = safe_str(details.get("channelId"))
+    channel_url = canonicalize_youtube_channel_url(
+        details.get("channelUrl"), channel_id=channel_id, handle=handle
+    )
+    channel_title = safe_str(details.get("channelName"))
+    if channel_id or channel_title or handle or channel_url:
+        channel: dict[str, Any] = {
+            "id": channel_id,
+            "title": channel_title,
+            "handle": handle,
+            "url": channel_url,
+        }
+        out["channel"] = {k: v for k, v in channel.items() if v not in (None, "")}
+
+    if details.get("commentCount") is not None:
+        cc = safe_int(details.get("commentCount"))
+        if cc is not None:
+            out["commentCount"] = cc
+            out["commentCountText"] = format_count_text(cc)
+            out["commentCountIsApproximate"] = bool(
+                details.get("commentCountIsApproximate", True)
+            )
+    if details.get("likeCount") is not None:
+        like = safe_int(details.get("likeCount"))
+        if like is not None:
+            out["likeCount"] = like
+            out["likeCountText"] = format_count_text(like)
+    return out
+
+
 async def enrich_short_cards(
     cards: list[dict[str, Any]],
     *,
@@ -1325,9 +1448,10 @@ async def enrich_short_cards(
 ) -> list[dict[str, Any]]:
     """Fill Shorts list rows via InnerTube player (SC channel/trending Shorts parity).
 
-    Shelf cards only expose title + compact views. Player gives exact viewCount,
-    duration, publishDate, description, genre, keywords, and channel identity.
-    Optional ``next`` pass fills commentCount (and likeCount when exposed).
+    Merges ``reel_item_watch`` (microformat) with ANDROID player when either is
+    incomplete — some Shorts omit publishDate/handle on one path only.
+    Canonical row shape: nested ``channel{}``, ``viewCount``+Text, no flat
+    channel* aliases, no empty ``badges`` / ``channel.thumbnail``.
     """
     if not cards:
         return cards
@@ -1341,65 +1465,29 @@ async def enrich_short_cards(
                 vid = m.group(1) if m else None
             if not vid:
                 return card
-            url = safe_str(card.get("url")) or f"https://www.youtube.com/shorts/{vid}"
-            out = {**card, "id": vid, "url": url, "type": "short"}
-            out["thumbnailUrl"] = (
-                out.get("thumbnailUrl") or thumbnail_url_for_video_id(vid)
+            url = f"https://www.youtube.com/shorts/{vid}"
+            reel = await short_details_via_reel_watch(vid, url)
+            need_android = (
+                not isinstance(reel, dict)
+                or reel.get("publishedAt") is None
+                or not reel.get("channelHandle")
+                or not reel.get("genre")
+                or is_auto_frame_still_url(reel.get("thumbnailUrl"))
             )
-            details = await short_details_via_reel_watch(vid, url)
-            if details is None:
-                details = await video_details_native(vid, url)
-            if isinstance(details, dict):
-                exact_views = safe_int(details.get("viewCount"))
-                if exact_views is not None:
-                    _stamp_count_fields(out, count=exact_views, approximate=False)
-                for src, dest in (
-                    ("title", "title"),
-                    ("description", "description"),
-                    ("publishedAt", "publishedAt"),
-                    ("durationSeconds", "durationSeconds"),
-                    ("channelName", "channelName"),
-                    ("channelId", "channelId"),
-                    ("channelHandle", "channelHandle"),
-                    ("channelUrl", "channelUrl"),
-                    ("genre", "genre"),
-                    ("thumbnailUrl", "thumbnailUrl"),
-                ):
-                    val = details.get(src)
-                    if val not in (None, "", []):
-                        out[dest] = val
-                tags = details.get("tags")
-                if isinstance(tags, list) and tags:
-                    out["keywords"] = tags
-                if out.get("channelId") or out.get("channelName"):
-                    out["channel"] = {
-                        "id": out.get("channelId"),
-                        "title": out.get("channelName"),
-                        "handle": out.get("channelHandle"),
-                        "url": out.get("channelUrl"),
-                        "thumbnail": None,
-                    }
-            dur = out.get("durationSeconds")
-            if dur is not None:
-                try:
-                    secs = int(dur)
-                except (TypeError, ValueError):
-                    secs = None
-                if secs is not None:
-                    out["durationSeconds"] = secs
-                    out["durationMs"] = secs * 1000
-                    out["durationFormatted"] = format_duration_hms(secs)
-            if not out.get("thumbnailUrl"):
-                out["thumbnailUrl"] = thumbnail_url_for_video_id(vid)
-            if with_engagement:
-                # commentCount via next engagement panel; likes from like-button a11y.
+            android = await video_details_native(vid, url) if need_android else None
+            details = merge_short_player_details(android, reel)
+            if details is None and isinstance(reel, dict):
+                details = reel
+            if details is None and isinstance(android, dict):
+                details = android
+
+            if with_engagement and isinstance(details, dict):
                 boot = await innertube("next", {"videoId": vid}, timeout=12)
                 if boot is not None:
-                    cc = _comments_total(boot)
+                    cc, cc_approx = _comments_total_meta(boot)
                     if cc is not None:
-                        out["commentCount"] = cc
-                        out["commentCountInt"] = cc
-                        out["commentCountText"] = format_count_text(cc)
+                        details["commentCount"] = cc
+                        details["commentCountIsApproximate"] = cc_approx
                     like = None
                     for btn in walk_find(boot, "toggleButtonRenderer"):
                         a11y = (
@@ -1421,10 +1509,9 @@ async def enrich_short_cards(
                             if like is not None:
                                 break
                     if like is not None:
-                        out["likeCount"] = like
-                        out["likeCountInt"] = like
-                        out["likeCountText"] = format_count_text(like)
-            return out
+                        details["likeCount"] = like
+
+            return _finalize_short_list_card(vid, details)
 
     return list(await asyncio.gather(*[_one(c) for c in cards]))
 
@@ -1843,8 +1930,9 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
         handle = "@" + vanity.split("@", 1)[1]
 
     subscriber_count = None
+    subscriber_count_is_approximate = False
     video_count = None
-    banner = None
+    banner = _channel_banner_url(data, avatar=avatar) if data else None
     if data:
         page_blob = json.dumps(data, ensure_ascii=False)
         header_html = json.dumps(data.get("header") or {}, ensure_ascii=False)
@@ -1852,13 +1940,14 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
             r"([\d.,]+[KMB]?) subscribers", page_blob
         )
         if m:
-            subscriber_count = parse_count_text(m.group(1))
+            subscriber_count, subscriber_count_is_approximate = parse_count_text_meta(
+                m.group(1)
+            )
         m = re.search(r"([\d.,]+[KMB]?) videos?", header_html) or re.search(
             r"([\d.,]+[KMB]?) videos?", page_blob
         )
         if m:
             video_count = parse_count_text(m.group(1))
-        banner = _best_thumb((data.get("header") or {}))
 
     # About popup: exact view count, joined date, country, links.
     view_count = None
@@ -1875,16 +1964,15 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
             (nav.get("urlEndpoint") or {}).get("url")
             or (nav.get("commandMetadata") or {}).get("webCommandMetadata", {}).get("url")
         )
-        if link_url and link_url.startswith("/"):
-            link_url = f"https://www.youtube.com{link_url}"
         # YouTube wraps external URLs in a redirector — unwrap when present.
         if link_url and "q=" in link_url and "youtube.com/redirect" in link_url:
             q = parse_qs(urlparse(link_url).query).get("q") or []
             if q:
                 link_url = q[0]
+        link_url = _absolute_http_url(link_url)
         link_title = text_of(link.get("title"))
         if link_url:
-            links.append({"text": safe_str(link_title) or "", "url": safe_str(link_url) or ""})
+            links.append({"text": safe_str(link_title) or "", "url": link_url})
     # About fields: InnerTube about-tab params often return the main channel
     # browse without aboutChannelViewModel. Prefer that when present, else
     # fetch /about (ytInitialData still embeds the about view model).
@@ -1911,7 +1999,9 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
             joined = re.sub(r"^joined\s+", "", joined, flags=re.I).strip() or joined
         country = safe_str(text_of(about.get("country"))) or safe_str(about.get("country"))
         if subscriber_count is None:
-            subscriber_count = parse_count_text(about.get("subscriberCountText"))
+            subscriber_count, subscriber_count_is_approximate = parse_count_text_meta(
+                about.get("subscriberCountText")
+            )
         if video_count is None:
             video_count = parse_count_text(about.get("videoCountText"))
         if not description:
@@ -1920,9 +2010,9 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
         for link in about.get("links") or []:
             view_model = link.get("channelExternalLinkViewModel") or {}
             link_title = text_of(view_model.get("title"))
-            link_url = text_of(view_model.get("link"))
+            link_url = _absolute_http_url(text_of(view_model.get("link")))
             if link_url:
-                about_links.append({"text": safe_str(link_title) or "", "url": safe_str(link_url) or ""})
+                about_links.append({"text": safe_str(link_title) or "", "url": link_url})
         if about_links:
             links = about_links
 
@@ -1954,18 +2044,26 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
 
     if not links:
         links = _links_from_html(html)
+    else:
+        # Ensure scheme even when About returned bare hosts.
+        links = [
+            {"text": row.get("text") or "", "url": _absolute_http_url(row.get("url")) or ""}
+            for row in links
+            if row.get("url")
+        ]
 
     verified = None
     if data:
         header_blob = json.dumps(data.get("header") or {})
         verified = "CHECK_CIRCLE" in header_blob or '"BADGE_STYLE_TYPE_VERIFIED"' in header_blob
 
-    # SEO keywords from channelMetadataRenderer (comma/space string or list).
+    # SEO keywords from channelMetadataRenderer (space-separated; multi-word in quotes).
     tags = _channel_tags(meta.get("keywords"))
     if not tags and html:
-        m = re.search(r'"keywords"\s*:\s*"([^"]+)"', html)
+        m = re.search(r'"keywords"\s*:\s*"((?:\\.|[^"\\])*)"', html)
         if m:
-            tags = _channel_tags(m.group(1))
+            raw_kw = bytes(m.group(1), "utf-8").decode("unicode_escape")
+            tags = _channel_tags(raw_kw)
 
     # Business email when the creator put it in the About/description text or
     # a mailto: link. YouTube's CAPTCHA "View email address" reveal is not scraped.
@@ -1973,18 +2071,36 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
     if email is None and html:
         email = _email_from_texts(html[:200_000])
 
+    country_code = country_code_from_name(country)
+    country_display = country_name(country_code) if country_code else safe_str(country)
+    joined_at = _parse_joined_at(joined)
+    canonical = (
+        f"https://www.youtube.com/{handle}"
+        if handle
+        else f"https://www.youtube.com/channel/{channel_id}"
+    )
+
     return {
+        "platform": "youtube",
         "url": f"https://www.youtube.com/channel/{channel_id}",
+        "canonicalUrl": canonical,
         "id": channel_id,
         "name": name or "",
         "handle": handle,
         "description": description,
         "subscriberCount": subscriber_count,
+        "subscriberCountIsApproximate": (
+            bool(subscriber_count_is_approximate)
+            if subscriber_count is not None
+            else None
+        ),
         "videoCount": video_count,
         "viewCount": view_count,
         "thumbnailUrl": avatar,
         "bannerUrl": banner,
-        "country": country,
+        "country": country_code,
+        "countryName": country_display,
+        "joinedAt": joined_at,
         "joinedDate": joined,
         "verified": verified,
         "links": links,
@@ -2010,7 +2126,12 @@ _EMAIL_BLOCKLIST = {
 
 
 def _channel_tags(raw: Any) -> list[str]:
-    """Normalize channel SEO keywords to a clean string list."""
+    """Normalize channel SEO keywords to a clean string list.
+
+    YouTube stores keywords as one space-separated string where multi-word tags
+    are double-quoted (``"medical facts" neuroscience``). Naive ``.split()``
+    leaves quote characters and splits those groups — use a quote-aware tokenizer.
+    """
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -2018,14 +2139,116 @@ def _channel_tags(raw: Any) -> list[str]:
         for item in raw:
             s = safe_str(item)
             if s:
-                out.append(s)
-        return out
+                out.append(s.strip().strip('"').strip("'"))
+        return [t for t in out if t]
     text = safe_str(raw) or ""
     if not text:
         return []
-    # YouTube usually comma-separates; fall back to whitespace for rare shapes.
-    parts = re.split(r"\s*,\s*", text) if "," in text else text.split()
-    return [p.strip() for p in parts if p and p.strip()]
+    # Comma-separated (rare) — treat commas as separators first.
+    if "," in text and '"' not in text:
+        return [p.strip() for p in re.split(r"\s*,\s*", text) if p.strip()]
+    try:
+        parts = shlex.split(text)
+    except ValueError:
+        parts = text.split()
+    return [p.strip().strip('"').strip("'") for p in parts if p and p.strip().strip('"').strip("'")]
+
+
+def _absolute_http_url(url: str | None) -> str | None:
+    """Ensure external / relative YouTube link values are absolute https URLs."""
+    raw = safe_str(url)
+    if not raw:
+        return None
+    if raw.startswith("//"):
+        return f"https:{raw}"
+    if re.match(r"^https?://", raw, re.I):
+        return raw
+    if raw.startswith("/"):
+        return f"https://www.youtube.com{raw}"
+    # Bare host/path from About (instagram.com/foo) — assume https.
+    return f"https://{raw.lstrip('/')}"
+
+
+def _yt_image_file_id(url: str | None) -> str | None:
+    raw = safe_str(url) or ""
+    m = re.search(r"/([A-Za-z0-9_-]{16,})=", raw)
+    return m.group(1) if m else None
+
+
+def _looks_like_avatar_thumb(url: str | None) -> bool:
+    """Avatar CDN params look like ``=s160-c-k-c0x00ffffff-no-rj``."""
+    raw = safe_str(url) or ""
+    return bool(re.search(r"=s\d+-c-k-c0x00ffffff", raw, re.I))
+
+
+def _channel_banner_url(data: dict[str, Any], *, avatar: str | None) -> str | None:
+    """Real channel banner — never fall back to the avatar thumbnail.
+
+    Prefer ``c4TabbedHeaderRenderer.banner|tvBanner|mobileBanner``, then
+    ``pageHeaderViewModel.banner.imageBannerViewModel.image``.
+    """
+    header = data.get("header") if isinstance(data.get("header"), dict) else {}
+    avatar_id = _yt_image_file_id(avatar)
+
+    def _accept(url: str | None) -> str | None:
+        if not url:
+            return None
+        if avatar_id and _yt_image_file_id(url) == avatar_id:
+            return None
+        if _looks_like_avatar_thumb(url):
+            return None
+        return url
+
+    c4 = header.get("c4TabbedHeaderRenderer")
+    if isinstance(c4, dict):
+        for key in ("banner", "tvBanner", "mobileBanner"):
+            got = _accept(_best_thumb(c4.get(key)))
+            if got:
+                return got
+
+    page_header = header.get("pageHeaderRenderer")
+    if isinstance(page_header, dict):
+        content = page_header.get("content") if isinstance(page_header.get("content"), dict) else {}
+        vm = content.get("pageHeaderViewModel") if isinstance(content.get("pageHeaderViewModel"), dict) else {}
+        banner_wrap = vm.get("banner") if isinstance(vm.get("banner"), dict) else {}
+        image_vm = banner_wrap.get("imageBannerViewModel") or banner_wrap
+        if isinstance(image_vm, dict):
+            got = _accept(_best_thumb(image_vm.get("image") or image_vm))
+            if got:
+                return got
+
+    # Named banner keys only — never recurse the whole header (avatars live there).
+    for key in ("tvBanner", "banner", "mobileBanner"):
+        for node in walk_find(header, key):
+            got = _accept(_best_thumb(node))
+            if got:
+                return got
+    return None
+
+
+_JOINED_DATE_FORMATS = (
+    "%b %d, %Y",  # Jul 31, 2017
+    "%B %d, %Y",  # July 31, 2017
+    "%d %b %Y",  # 31 Jul 2017
+    "%d %B %Y",  # 31 July 2017
+)
+
+
+def _parse_joined_at(joined: str | None) -> str | None:
+    """Parse About ``joinedDateText`` (English) → ``YYYY-MM-DD``."""
+    text = safe_str(joined)
+    if not text:
+        return None
+    cleaned = re.sub(r"^joined\s+", "", text, flags=re.I).strip()
+    # Already ISO.
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", cleaned):
+        return cleaned
+    for fmt in _JOINED_DATE_FORMATS:
+        try:
+            return datetime.strptime(cleaned, fmt).date().isoformat()
+        except ValueError:
+            continue
+    return None
 
 
 def _email_from_texts(*texts: Any) -> str | None:
@@ -2074,7 +2297,7 @@ def _links_from_html(html: str) -> list[dict[str, str]]:
         if host in seen:
             continue
         seen.add(host)
-        out.append({"text": _SOCIAL_LABELS.get(host, host), "url": raw})
+        out.append({"text": _SOCIAL_LABELS.get(host, host), "url": _absolute_http_url(raw) or raw})
     return out
 
 
@@ -2389,6 +2612,55 @@ def _youtube_thumbnails(thumbs: list[Any]) -> list[dict[str, Any]]:
     return out
 
 
+_AUTO_FRAME2_THUMB_RE = re.compile(
+    r"/(?:mq|hq|sd|maxres)?2\.(?:jpg|webp)(?:\?|$)",
+    re.I,
+)
+
+
+def is_auto_frame_still_url(url: str | None) -> bool:
+    """True for YouTube auto storyboard stills (``2.jpg`` / ``mq2.jpg`` / …)."""
+    return bool(url and _AUTO_FRAME2_THUMB_RE.search(url))
+
+
+def prefer_short_thumbnails(
+    video_id: str,
+    thumbs: list[Any] | None,
+    thumbnail_url: str | None = None,
+) -> tuple[list[dict[str, Any]], str | None]:
+    """Prefer vertical / channel-set covers over landscape frame-2 stills."""
+    cleaned = _youtube_thumbnails(thumbs if isinstance(thumbs, list) else [])
+    vertical = [
+        t
+        for t in cleaned
+        if (t.get("height") or 0) > (t.get("width") or 0)
+    ]
+    if vertical:
+        return vertical, safe_str(vertical[-1].get("url")) or thumbnail_url
+    non_frame2 = [t for t in cleaned if not is_auto_frame_still_url(t.get("url"))]
+    if non_frame2:
+        return non_frame2, safe_str(non_frame2[-1].get("url")) or thumbnail_url
+    if cleaned and not all(is_auto_frame_still_url(t.get("url")) for t in cleaned):
+        return cleaned, safe_str(cleaned[-1].get("url")) or thumbnail_url
+    # Player only shipped frame-2 landscape stills — fall back to stable covers.
+    vid = (video_id or "").strip()
+    if len(vid) == 11:
+        synth = [
+            {
+                "url": f"https://i.ytimg.com/vi/{vid}/oardefault.jpg",
+                "width": None,
+                "height": None,
+            },
+            {
+                "url": f"https://i.ytimg.com/vi/{vid}/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720,
+            },
+        ]
+        return synth, synth[0]["url"]
+    return cleaned, thumbnail_url or (cleaned[-1]["url"] if cleaned else None)
+
+
 def _youtube_available_captions(player: dict[str, Any]) -> list[dict[str, Any]]:
     from app.utils.media_urls import cdn_expires_at
 
@@ -2423,7 +2695,9 @@ def build_youtube_video_details(
 ) -> dict[str, Any] | None:
     """Normalize an InnerTube player payload into the public video-details shape."""
     from app.utils.media_urls import (
+        canonicalize_youtube_channel_url,
         channel_handle_from_profile_url,
+        decode_youtube_handle,
         description_links,
         live_status_from_youtube,
         utc_now_iso,
@@ -2454,7 +2728,12 @@ def build_youtube_video_details(
             duration_seconds = None
 
     owner_profile = safe_str(micro.get("ownerProfileUrl"))
-    channel_handle = channel_handle_from_profile_url(owner_profile)
+    channel_handle = decode_youtube_handle(
+        channel_handle_from_profile_url(owner_profile)
+    )
+    channel_url = canonicalize_youtube_channel_url(
+        owner_profile, channel_id=channel_id, handle=channel_handle
+    )
     live_status = live_status_from_youtube(details)
     # Shorts hard-cap is 180s. Prefer YouTube's isShortsEligible; also treat
     # /shorts/ URLs and classic ≤60s watch links as Shorts when in range.
@@ -2482,7 +2761,12 @@ def build_youtube_video_details(
         live_broadcast = {}
 
     description = safe_str(details.get("shortDescription"))
-    return {
+    if is_short and thumbnails:
+        thumbnails, best_thumb = prefer_short_thumbnails(video_id, thumbnails)
+    else:
+        best_thumb = thumbnails[-1]["url"] if thumbnails else None
+    out: dict[str, Any] = {
+        "platform": "youtube",
         "url": norm_url,
         "id": video_id,
         "title": safe_str(details.get("title")) or "",
@@ -2491,17 +2775,13 @@ def build_youtube_video_details(
         "channelName": safe_str(details.get("author") or micro.get("ownerChannelName")),
         "channelId": channel_id,
         "channelHandle": channel_handle,
-        "channelUrl": (
-            owner_profile
-            if owner_profile
-            else (f"https://www.youtube.com/channel/{channel_id}" if channel_id else None)
-        ),
+        "channelUrl": channel_url,
         "publishedAt": safe_str(micro.get("publishDate") or micro.get("uploadDate")),
         "durationSeconds": duration_seconds,
         "viewCount": safe_int(details.get("viewCount")),
         "likeCount": like_count,
         "commentCount": comment_count,
-        "thumbnailUrl": thumbnails[-1]["url"] if thumbnails else None,
+        "thumbnailUrl": best_thumb,
         "thumbnails": thumbnails,
         "genre": safe_str(micro.get("category")),
         "categoryId": safe_str(details.get("categoryId") or micro.get("categoryId")),
@@ -2528,6 +2808,9 @@ def build_youtube_video_details(
         "fetchedAt": fetched_at or utc_now_iso(),
         "viewCountIsApproximate": False,
     }
+    if duration_seconds is not None:
+        out["durationFormatted"] = format_duration_hms(duration_seconds)
+    return out
 
 
 async def video_details_native(video_id: str, norm_url: str) -> dict[str, Any] | None:
@@ -2709,13 +2992,16 @@ def _comments_section_token(data: Any) -> str | None:
     return first
 
 
-def _comments_total(data: Any) -> int | None:
-    """Best-effort total from comments header / engagement panel."""
+def _comments_total_meta(data: Any) -> tuple[int | None, bool]:
+    """Best-effort total from comments header / engagement panel.
+
+    Returns ``(count, approximate)`` — approximate when the source used K/M/B.
+    """
     for header in walk_find(data, "commentsHeaderRenderer"):
         for key in ("countText", "commentsCount", "headerText"):
-            n = parse_count_text(text_of(header.get(key)))
+            n, approx = parse_count_text_meta(text_of(header.get(key)))
             if n is not None:
-                return n
+                return n, approx
     # Current InnerTube ``next`` shape: engagementPanelTitleHeaderRenderer
     # with title "Comments" and contextualInfo like "2.4M" / "10M".
     for header in walk_find(data, "engagementPanelTitleHeaderRenderer"):
@@ -2723,20 +3009,31 @@ def _comments_total(data: Any) -> int | None:
         if title and title not in ("comments", "comment"):
             continue
         for key in ("contextualInfo", "subtitle", "countText", "headerText"):
-            n = parse_count_text(text_of(header.get(key)))
+            n, approx = parse_count_text_meta(text_of(header.get(key)))
             if n is not None:
-                return n
-    return None
+                return n, approx
+    return None, False
+
+
+def _comments_total(data: Any) -> int | None:
+    n, _approx = _comments_total_meta(data)
+    return n
+
+
+async def comment_count_native_meta(video_id: str) -> tuple[int | None, bool]:
+    """Resolve comment count + approximate flag via InnerTube ``next``."""
+    if not video_id:
+        return None, False
+    boot = await innertube("next", {"videoId": video_id}, timeout=15)
+    if boot is None:
+        return None, False
+    return _comments_total_meta(boot)
 
 
 async def comment_count_native(video_id: str) -> int | None:
     """Resolve comment count via InnerTube ``next`` engagement panel."""
-    if not video_id:
-        return None
-    boot = await innertube("next", {"videoId": video_id}, timeout=15)
-    if boot is None:
-        return None
-    return _comments_total(boot)
+    n, _approx = await comment_count_native_meta(video_id)
+    return n
 
 
 async def _comments_entry_token(norm_url: str) -> tuple[str | None, int | None]:

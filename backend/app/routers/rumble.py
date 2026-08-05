@@ -124,13 +124,19 @@ def _dedupe_streams(streams: list[dict[str, Any]]) -> list[dict[str, Any]]:
         seen_url.add(url)
         if quality and quality != "auto":
             seen_quality.add(qkey)
-        out.append(
-            {
-                "url": url,
-                "type": safe_str(s.get("type")),
-                "quality": safe_str(s.get("quality")),
-            }
-        )
+        row: dict[str, Any] = {
+            "url": url,
+            "type": safe_str(s.get("type")),
+            "quality": safe_str(s.get("quality")),
+        }
+        expires = safe_str(s.get("expiresAt"))
+        if not expires:
+            from app.utils.media_urls import cdn_expires_at
+
+            expires = cdn_expires_at(url)
+        if expires:
+            row["expiresAt"] = expires
+        out.append(row)
         if len(out) >= 12:
             break
     return out
@@ -160,6 +166,7 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
         "dislikes": parse_compact_count(item.get("dislikes") or item.get("dislikeCount")),
         "durationSeconds": duration_seconds,
         "durationText": duration_text,
+        "durationFormatted": rumble_video_native._duration_formatted(duration_seconds),
         "publishedAt": safe_str(
             item.get("uploadedAt")
             or item.get("uploadDate")
@@ -219,6 +226,7 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
         "dislikes": safe_int(votes.get("num_votes_down")) if votes else None,
         "durationSeconds": duration_seconds,
         "durationText": duration_text,
+        "durationFormatted": rumble_video_native._duration_formatted(duration_seconds),
         "publishedAt": safe_str(item.get("upload_date")),
         "thumbnail": safe_str(item.get("thumb")),
         "comments": safe_int(comments.get("count")) if comments else None,
@@ -229,6 +237,7 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
                     "url": safe_str(v.get("url")),
                     "type": safe_str(v.get("type")),
                     "quality": safe_str(v.get("quality_text") or v.get("resolution")),
+                    "expiresAt": safe_str(v.get("expiresAt")),
                 }
                 for v in streams
             ]

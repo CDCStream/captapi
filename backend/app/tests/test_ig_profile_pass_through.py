@@ -66,10 +66,29 @@ def test_channel_details_and_profile_search_parity() -> None:
     assert ch["fbid"] == "17841402777077586"
     assert ch["relatedProfiles"][0]["username"] == "itsallykrinsky"
     assert ch["likeAndViewCountsDisabled"] is True
+    assert ch["url"] == "https://www.instagram.com/austinbbq/"
+    assert "private" not in ch
+    assert ch["isPrivate"] is False
     ps = map_profile_search_user(u)
+    assert ps["platform"] == "instagram"
     assert ps["categoryName"] == "Entrepreneur"
     assert ps["fbid"] == "17841402777077586"
     assert ps["relatedProfiles"][0]["id"] == "9"
+    assert ps["url"] == "https://www.instagram.com/austinbbq/"
+    assert "private" not in ps
+    assert ps["isPrivate"] is False
+    assert ch["url"] == ps["url"]
+
+
+def test_cdn_image_expires_at_from_oe() -> None:
+    from app.services.instagram_native import cdn_image_expires_at
+
+    url = (
+        "https://scontent.cdninstagram.com/v/t51.xxx/x.jpg"
+        "?stp=dst-jpg_s150x150&oe=6A78852D&_nc_ht=scontent.cdninstagram.com"
+    )
+    assert cdn_image_expires_at(url) == "2026-08-09T13:48:29Z"
+    assert cdn_image_expires_at("https://example.com/a.jpg") is None
 
 
 def test_post_likes_null_when_counts_disabled() -> None:

@@ -49,6 +49,84 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 /** Static mirror of the migration seed — used only when the table is unavailable. */
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
+    publishedAt: "2026-08-05",
+    category: "fix",
+    title: "Stop kicking fresh signups out of the dashboard",
+    description:
+      "Middleware no longer treats every failed getUser() as a dead session. Transient Auth/network/refresh races used to hard-signOut users ~30–60s after api_key_created, bouncing them to /login → /signup. Now only definitive Auth failures clear cookies (no Auth-side signOut revocation), and signup no longer fires analytics for already-registered emails.",
+    items: [
+      "Middleware: wipe session only on definitive Auth failures",
+      "No supabase.auth.signOut() from middleware (keeps refresh tokens)",
+      "auth-retry soft bounce keeps cookies for recovery",
+      "Signup: empty identities → \"already exists\", no duplicate track()",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "fix",
+    title: "YouTube trending-shorts: https handles, canonical cards, honest source docs",
+    description:
+      "GET /v1/youtube/trending-shorts now forces https channel URLs, percent-decodes @handles, merges reel_item_watch + ANDROID so sparse first-items get publishedAt/handle/genre, and emits a canonical row shape (nested channel{}, viewCount+Text, no flat channel* / *Int / badges / empty thumbnail). Docs state source=reel_watch_sequence is a recommendation feed, not a global trending chart; query is omitted unless q is a real topic seed.",
+    items: [
+      "https + decoded @handle on channel.url",
+      "Canonical card — drop flat aliases and dead empty fields",
+      "reel+ANDROID merge for sparse Shorts (e.g. Top Ranks King)",
+      "Docs: recommendation sequence, not a trending chart",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "fix",
+    title: "YouTube Shorts video-details: reel microformat + approx flags",
+    description:
+      "GET /v1/youtube/shorts/video-details now merges reel_item_watch (publishedAt, description, @handle) with ANDROID engagement, prefers vertical/channel covers over landscape frame-2 stills, adds platform + durationFormatted + commentCountIsApproximate, and omits genre/categoryId/isFamilySafe/defaultLanguage/defaultAudioLanguage when Shorts microformat lacks them. subscriberCountIsApproximate lands on channel-details; Rumble streams[] reuse cdn_expires_at and durationFormatted.",
+    items: [
+      "reel_item_watch fill for publishDate / description / handle",
+      "Vertical thumbs; oardefault/maxres fallback vs hq2 stills",
+      "commentCountIsApproximate + channel subscriberCountIsApproximate",
+      "Rumble streams[].expiresAt + durationFormatted (shared helpers)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "fix",
+    title: "YouTube channel-details: tags, banner, ISO country/joinedAt",
+    description:
+      "GET /v1/youtube/channel-details now quote-aware-parses SEO keywords (\"USA science facts\" stays one tag), returns a real bannerUrl or null instead of the s160 avatar, absolutizes links[].url with https://, emits country as ISO-3166 alpha-2 (+ countryName) and joinedAt as YYYY-MM-DD, and adds platform + canonicalUrl. Field docs note subscriberCount is YouTube's rounded display value while viewCount is exact when About exposes it.",
+    items: [
+      "Quote-aware tags (shlex) — multi-word keywords intact",
+      "bannerUrl = real banner or null (never avatar)",
+      "links[].url absolute https://",
+      "country IN + joinedAt YYYY-MM-DD + platform",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "fix",
+    title: "Instagram profile-search: canonical url, isPrivate, imageExpiresAt",
+    description:
+      "GET /v1/instagram/profile-search users[] now include platform, drop the duplicate private alias (keep isPrivate to match channel-details / basic-profile), emit canonical https://www.instagram.com/{user}/ urls, and expose imageExpiresAt from CDN oe= when present. Docs clarify mode is always resolve (no keyword search / cursor). Same profile URL + isPrivate shape on channel-details and basic-profile.",
+    items: [
+      "platform + canonical www.instagram.com/{user}/ url",
+      "isPrivate only (private alias removed)",
+      "imageExpiresAt from CDN oe= hex",
+      "Docs: resolve-only, no nextCursor",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "fix",
+    title: "Instagram trending-reels: no more 6-minute hangs",
+    description:
+      "GET /v1/instagram/trending-reels caps the synchronous Apify wait at 15s (background refresh still runs), serves any-age video snapshots with cached/cachedAt/stale/ageHours instead of 503 when a prior run exists, and returns machine-readable 503 warming (+ Retry-After: 600) only for cold countries. Unsupported countries are 400 with supportedCountries[]. Docs position the endpoint as snapshot-backed (<24h typical); use reels-search for live scrapes.",
+    items: [
+      "Sync Apify wait capped at 15s — background kick continues",
+      "Any-age snapshot served with cached / stale / ageHours",
+      "503 warming + Retry-After only when no snapshot exists",
+      "400 unsupported_country with supportedCountries[]",
+    ],
+  },
+  {
     publishedAt: "2026-08-04",
     category: "fix",
     title: "Text transcripts: omit null cue fields; LinkedIn ugcPost dates",

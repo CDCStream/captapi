@@ -1569,7 +1569,7 @@
     "name": "Instagram Trending Reels",
     "path": "/v1/instagram/trending-reels",
     "credits": 1,
-    "summary": "Trending Reels from instagram.com/reels — videos only, flat 1 credit. Duplicates across calls expected.",
+    "summary": "Snapshot-backed trending Reels (typical freshness <24h) — videos only, flat 1 credit. Use reels-search for live scrapes.",
     "params": [
       {
         "name": "country",

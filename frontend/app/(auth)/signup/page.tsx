@@ -54,7 +54,7 @@ function SignupForm() {
     const sb = createClient();
     const first = firstName.trim();
     const last = lastName.trim();
-    const { error } = await sb.auth.signUp({
+    const { data, error } = await sb.auth.signUp({
       email,
       password,
       options: {
@@ -70,6 +70,12 @@ function SignupForm() {
     setLoading(false);
     if (error) {
       toast.error(error.message);
+      return;
+    }
+    // Supabase anti-enumeration: existing emails often return success with
+    // empty identities — do not treat that as a new signup (or fire ads).
+    if (!data.user?.identities?.length) {
+      toast.error("An account with this email already exists. Sign in instead.");
       return;
     }
     track("signup", { method: "password", from_tools: fromTools });

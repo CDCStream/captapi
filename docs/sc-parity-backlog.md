@@ -1,6 +1,6 @@
 ﻿# SC parity backlog (Captapi)
 
-Last updated: 2026-08-04 (text transcripts omit cue keys; LinkedIn ugcPost publishedAt). Next: Cursor pattern copy from truth-social-user-posts · TikTok Shop relatedVideos.
+Last updated: 2026-08-05 (instagram trending-reels: 15s wait, stale snapshots, warming 503). Next: Cursor pattern copy from truth-social-user-posts · TikTok Shop relatedVideos.
 
 Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. Field lists come from **examples** (`api_snapshots.json` · `api-examples.generated.ts`) · ship code + refresh snapshot **with `ok: true`** or `gen_examples.py` skips the slug and the page looks broken.
 

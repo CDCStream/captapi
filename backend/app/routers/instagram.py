@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 import httpx
+import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
@@ -40,6 +41,12 @@ from app.utils.url import (
 )
 
 router = APIRouter()
+log = structlog.get_logger(__name__)
+
+# Sync Apify wait budget — gateways (CF 100s / ALB 60s) and SDKs disconnect far sooner.
+_TRENDING_SYNC_WAIT_SECS = 15
+_TRENDING_REFRESH_AFTER_SECS = 6 * 3600
+_TRENDING_WARM_RETRY_SECS = 600
 
 CREDIT_TRANSCRIPT = 2
 CREDIT_SUMMARIZE = 4
@@ -1881,6 +1888,58 @@ def _filter_trending_reels_only(items: list[dict[str, Any]]) -> list[dict[str, A
     return out
 
 
+def _trending_media_split(mapped: list[dict[str, Any]]) -> tuple[int, int]:
+    """Count video vs non-video rows after normalize (before reel/stale filter)."""
+    videos = 0
+    photos = 0
+    for item in mapped:
+        if instagram_native.is_reel_post(item):
+            videos += 1
+        else:
+            photos += 1
+    return videos, photos
+
+
+def _trending_freshness(*, cached_at: datetime | None, from_snapshot: bool) -> dict[str, Any]:
+    now = datetime.now(timezone.utc)
+    if cached_at is None:
+        age_secs = 0.0
+        cached_at_iso = now.isoformat().replace("+00:00", "Z")
+    else:
+        if cached_at.tzinfo is None:
+            cached_at = cached_at.replace(tzinfo=timezone.utc)
+        age_secs = max(0.0, (now - cached_at).total_seconds())
+        cached_at_iso = cached_at.isoformat().replace("+00:00", "Z")
+    age_hours = round(age_secs / 3600.0, 2)
+    return {
+        "cached": from_snapshot,
+        "cachedAt": cached_at_iso,
+        "stale": bool(from_snapshot and age_secs > _TRENDING_REFRESH_AFTER_SECS),
+        "ageHours": age_hours,
+    }
+
+
+def _trending_payload(
+    reels: list[dict[str, Any]],
+    *,
+    country: str,
+    freshness: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "platform": "instagram",
+        "country": country,
+        "totalReturned": len(reels),
+        "note": (
+            "Snapshot-backed trending list (typical freshness under 24h). "
+            "Instagram returns a small overlapping batch per scrape; "
+            "duplicates across requests are expected. "
+            "For live keyword search use /v1/instagram/reels-search."
+        ),
+        "reels": reels,
+        **freshness,
+    }
+
+
 # Countries supported by the trending actor's input enum. Anything else makes
 # the run fail instantly with invalid-input, so we validate up front.
 _TRENDING_COUNTRIES = [
@@ -1917,8 +1976,37 @@ def _normalize_trending_country(raw: str) -> str:
     if alias:
         return alias
     raise HTTPException(
-        status_code=422,
-        detail=f"Unsupported country '{cleaned}'. Use a country name or ISO code from: {', '.join(_TRENDING_COUNTRIES)}.",
+        status_code=400,
+        detail={
+            "error": {
+                "code": "unsupported_country",
+                "country": cleaned,
+                "supportedCountries": list(_TRENDING_COUNTRIES),
+            },
+            "message": (
+                f"Unsupported country '{cleaned}'. "
+                "Pass a supported country name or ISO code."
+            ),
+        },
+    )
+
+
+def _trending_warming_http(country: str) -> HTTPException:
+    return HTTPException(
+        status_code=503,
+        detail={
+            "error": {
+                "code": "warming",
+                "retryAfterSeconds": _TRENDING_WARM_RETRY_SECS,
+                "country": country,
+            },
+            "message": (
+                "Trending Reels for this country are being refreshed "
+                f"(~{_TRENDING_WARM_RETRY_SECS // 60} minutes). Retry shortly — "
+                "we never return Explore photos as Reels."
+            ),
+        },
+        headers={"Retry-After": str(_TRENDING_WARM_RETRY_SECS)},
     )
 
 
@@ -1932,10 +2020,11 @@ async def instagram_trending_reels(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    """Public Instagram Reels surface — videos only, flat 1 credit.
+    """Snapshot-backed trending Reels — videos only, flat 1 credit.
 
-    Instagram only returns a small overlapping batch per request; call again
-    for more and expect some duplicates (same behaviour as the /reels page).
+    Prefer reels-search when you need a live keyword scrape. This endpoint
+    serves native /reels when available, otherwise any-age Apify snapshots
+    (never Explore photos). Cold countries warm in the background (~10 min).
     """
     settings = get_settings()
     country = _normalize_trending_country(country)
@@ -1943,7 +2032,8 @@ async def instagram_trending_reels(
         caller=caller,
         endpoint="/v1/instagram/trending-reels",
         platform="instagram",
-        resource_url=None,
+        # Persist country so warm-cron / most-used can rank real demand.
+        resource_url=f"country:{country}",
         base_credits=CREDIT_TRENDING_REELS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
@@ -1952,83 +2042,119 @@ async def instagram_trending_reels(
             if native:
                 reels = [decodo.strip_null_post_fields(r) for r in native[:limit]]
                 ctx["source"] = "direct"
-                return {
-                    "platform": "instagram",
-                    "country": country,
-                    "totalReturned": len(reels),
-                    "note": (
-                        "Instagram returns a small overlapping batch per call; "
-                        "duplicates across requests are expected."
-                    ),
-                    "reels": reels,
-                }
+                return _trending_payload(
+                    reels,
+                    country=country,
+                    freshness=_trending_freshness(cached_at=None, from_snapshot=False),
+                )
 
-            # 2) Apify fallthrough — actor runs take ~10-12 minutes, so serve a
-            # recent snapshot (<=48h), kick a background refresh when older
-            # than 6h, and for a cold country wait out the request budget.
-            # Over-fetch then filter: the actor returns mixed Explore media.
-            client = ApifyClient(timeout=280, max_attempts=1)
+            # 2) Apify fallthrough — never hold the HTTP request for a 10-minute
+            # actor. Serve any-age video snapshot; kick refresh in background;
+            # wait at most 15s only when this country has never had a usable run.
+            client = ApifyClient(timeout=30, max_attempts=1)
             actor = settings.APIFY_ACTOR_INSTAGRAM_TRENDING
             fetch_n = min(200, max(limit * 5, limit + 40))
             run_input = {"max_results": fetch_n, "country": country}
             match = {"country": country}
 
-            def _payload(items: list[dict[str, Any]]) -> dict[str, Any] | None:
-                mapped = [
+            def _map_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+                return [
                     decodo.strip_null_post_fields(_normalize_trending_item(i))
                     for i in items
                     if not i.get("error")
                 ]
+
+            async def _ensure_refresh(*, force: bool = False) -> dict[str, Any] | None:
+                active = await client.find_active_run(actor, input_match=match)
+                if active is not None:
+                    return active
+                if force:
+                    started = await client.start_run(actor, run_input)
+                    log.info(
+                        "ig_trending_apify_start",
+                        country=country,
+                        runId=(started or {}).get("id"),
+                        status=(started or {}).get("status"),
+                    )
+                    return started
+                return None
+
+            # Walk any-age SUCCEEDED runs until we find video Reels (skip photos-only).
+            snapshot_payload: dict[str, Any] | None = None
+            snapshot_age_secs = 0.0
+            for run in await client.list_succeeded_runs(actor, input_match=match, limit=25):
+                run_id = run.get("id")
+                items = await client.dataset_items(run["defaultDatasetId"], max_items=fetch_n)
+                mapped = _map_items(items)
+                videos, photos = _trending_media_split(mapped)
                 reels = _filter_trending_reels_only(mapped)[:limit]
-                if not reels:
-                    return None
-                ctx["source"] = "apify"
-                return {
-                    "platform": "instagram",
-                    "country": country,
-                    "totalReturned": len(reels),
-                    "note": (
-                        "Instagram returns a small overlapping batch per call; "
-                        "duplicates across requests are expected."
-                    ),
-                    "reels": reels,
-                }
-
-            last = await client.last_succeeded_run(actor, max_age_secs=48 * 3600, input_match=match)
-            if last:
-                items = await client.dataset_items(last["defaultDatasetId"], max_items=fetch_n)
-                if items:
-                    finished = datetime.fromisoformat(last["finishedAt"].replace("Z", "+00:00"))
-                    age_secs = (datetime.now(timezone.utc) - finished).total_seconds()
-                    if age_secs > 6 * 3600 and not await client.find_active_run(actor, input_match=match):
-                        await client.start_run(actor, run_input)
-                    payload = _payload(items)
-                    if payload is not None:
-                        return payload
-                    # Cached run was photos-only — kick a refresh and keep waiting.
-
-            active = await client.find_active_run(actor, input_match=match)
-            if active is None:
-                active = await client.start_run(actor, run_input)
-            items = await client.wait_for_run_items(active["id"], wait_secs=270, max_items=fetch_n) if active else []
-            payload = _payload(items) if items else None
-            if payload is None:
-                raise HTTPException(
-                    status_code=503,
-                    detail=(
-                        "Trending Reels for this country are being refreshed "
-                        "(scraping takes ~10 minutes). Retry shortly — we never "
-                        "return Explore photos as Reels."
-                    ),
+                finished = datetime.fromisoformat(run["finishedAt"].replace("Z", "+00:00"))
+                age_secs = (datetime.now(timezone.utc) - finished).total_seconds()
+                log.info(
+                    "ig_trending_apify_snapshot",
+                    country=country,
+                    runId=run_id,
+                    status=run.get("status"),
+                    items=len(items),
+                    videos=videos,
+                    photos=photos,
+                    afterFilter=len(reels),
+                    ageHours=round(age_secs / 3600.0, 2),
                 )
-            return payload
+                if reels:
+                    ctx["source"] = "apify"
+                    snapshot_payload = _trending_payload(
+                        reels,
+                        country=country,
+                        freshness=_trending_freshness(cached_at=finished, from_snapshot=True),
+                    )
+                    snapshot_age_secs = age_secs
+                    break
+
+            if snapshot_payload is not None:
+                if snapshot_age_secs > _TRENDING_REFRESH_AFTER_SECS:
+                    await _ensure_refresh(force=True)
+                return snapshot_payload
+
+            # Cold country (or only photos-only history): kick / join, short wait.
+            active = await _ensure_refresh(force=True)
+            items: list[dict[str, Any]] = []
+            run_status = (active or {}).get("status")
+            run_id = (active or {}).get("id")
+            if active and active.get("id"):
+                items = await client.wait_for_run_items(
+                    active["id"],
+                    wait_secs=_TRENDING_SYNC_WAIT_SECS,
+                    max_items=fetch_n,
+                )
+            mapped = _map_items(items)
+            videos, photos = _trending_media_split(mapped)
+            reels = _filter_trending_reels_only(mapped)[:limit]
+            log.info(
+                "ig_trending_apify_wait",
+                country=country,
+                runId=run_id,
+                status=run_status,
+                waitSecs=_TRENDING_SYNC_WAIT_SECS,
+                items=len(items),
+                videos=videos,
+                photos=photos,
+                afterFilter=len(reels),
+            )
+            if reels:
+                ctx["source"] = "apify"
+                return _trending_payload(
+                    reels,
+                    country=country,
+                    freshness=_trending_freshness(cached_at=None, from_snapshot=False),
+                )
+            raise _trending_warming_http(country)
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 14},
+            params={"country": country, "limit": limit, "v": 15},
             runner=_run,
             ctx=ctx,
-            # Native path is seconds; Apify path still SWR for long actor runs.
             stale_while_revalidate=True,
             use_cache=cache,
         )
@@ -2348,20 +2474,22 @@ def _profile_to_search_user(profile: dict) -> dict:
     from app.utils.formatters import strip_empty
 
     username = safe_str(profile.get("username"))
-    private = profile.get("private")
+    private = profile.get("isPrivate")
     if private is None:
-        private = profile.get("isPrivate")
+        private = profile.get("private")
+    profile_image = safe_str(profile.get("profileImage") or profile.get("profile_pic_url"))
     out = {
+        "platform": "instagram",
         "id": safe_str(profile.get("id")),
         "username": username,
         "displayName": safe_str(profile.get("displayName") or profile.get("full_name")),
-        "url": f"https://instagram.com/{username}" if username else safe_str(profile.get("url")),
+        "url": instagram_native.canonical_instagram_profile_url(username)
+        or safe_str(profile.get("url")),
         "bio": safe_str(profile.get("bio") or profile.get("biography")),
         "followers": safe_int(profile.get("followers") or profile.get("follower_count")),
         "following": safe_int(profile.get("following") or profile.get("following_count")),
         "postCount": safe_int(profile.get("postCount") or profile.get("media_count")),
         "verified": profile.get("verified") if profile.get("verified") is not None else profile.get("is_verified"),
-        "private": private,
         "isPrivate": private,
         "isBusinessAccount": profile.get("isBusinessAccount")
         if profile.get("isBusinessAccount") is not None
@@ -2372,8 +2500,9 @@ def _profile_to_search_user(profile: dict) -> dict:
         "categoryName": safe_str(profile.get("categoryName") or profile.get("category_name")),
         "externalUrl": safe_str(profile.get("externalUrl") or profile.get("external_url")),
         "bioLinks": profile.get("bioLinks") or profile.get("bio_links"),
-        "profileImage": safe_str(profile.get("profileImage") or profile.get("profile_pic_url")),
+        "profileImage": profile_image,
         "profileImageHd": safe_str(profile.get("profileImageHd") or profile.get("profile_pic_url_hd")),
+        "imageExpiresAt": instagram_native.cdn_image_expires_at(profile_image),
     }
     return strip_empty(out)
 
@@ -2418,7 +2547,7 @@ async def instagram_profile_search(
                                 "displayName": meta["title"],
                                 "followers": None,
                                 "verified": False,
-                                "private": False,
+                                "isPrivate": False,
                                 "profileImage": meta["image"],
                             }
                         )
@@ -2432,12 +2561,13 @@ async def instagram_profile_search(
                 "totalReturned": len(users),
                 "users": users,
                 # Honest scope: name/@handle → one public profile, not niche discovery.
+                # Keyword / multi-result search is login-gated on Instagram; only resolve exists.
                 "mode": "resolve",
             }
 
         data = await cached_or_run(
             endpoint="instagram.profile-search",
-            params={"q": q, "v": 7},
+            params={"q": q, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

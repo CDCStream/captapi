@@ -31,8 +31,19 @@ function LoginForm() {
       toast.message("Your session expired. Please sign in again.");
     } else if (reason === "account-missing") {
       toast.message("Account data was reset. Please sign in again.");
+    } else if (reason === "auth-retry") {
+      // Transient Auth blip — cookies were kept. Retry session before asking
+      // the user to sign in again (avoids killing fresh onboarding journeys).
+      void (async () => {
+        const sb = createClient();
+        const { data } = await sb.auth.getUser();
+        if (data.user) {
+          const next = redirect.startsWith("/") ? redirect : "/dashboard";
+          window.location.assign(next);
+        }
+      })();
     }
-  }, [params]);
+  }, [params, redirect]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();

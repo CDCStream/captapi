@@ -41,11 +41,15 @@ def normalize_transcript_text(text: str) -> str:
 
 
 def count_words(text: str) -> int:
-    """Whitespace tokens minus emoji-only leftovers (URL still counts as 1)."""
+    """Count tokens that contain at least one letter or digit.
+
+    Emoji-only leftovers and punctuation-only tokens (``&``, ``-``) are 0.
+    URL tokens still count as 1.
+    """
     n = 0
     for tok in (text or "").split():
         cleaned = _EMOJI_RE.sub("", tok).strip(_WORD_PUNCT_STRIP)
-        if cleaned:
+        if cleaned and any(ch.isalnum() for ch in cleaned):
             n += 1
     return n
 

@@ -865,7 +865,7 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
     }
     author_out: dict[str, Any] = {
         "name": safe_str(author.get("name") or p.get("authorName") or p.get("companyName")),
-        "url": safe_str(
+        "url": linkedin_native.canonicalize_linkedin_url(
             author.get("url") or author.get("profile_url") or p.get("authorUrl") or p.get("companyUrl")
         ),
     }
@@ -1196,6 +1196,8 @@ async def linkedin_post_transcript(
             transcript, segments, read_secs = paragraph_text_segments(text)
             author = post.get("author") if isinstance(post.get("author"), dict) else {}
             author_out = dict(author) if author else {}
+            if author_out.get("url"):
+                author_out["url"] = linkedin_native.canonicalize_linkedin_url(author_out.get("url"))
             if not author_out.get("url"):
                 derived = _author_url_from_post_url(post.get("url") or url)
                 if derived:
@@ -1217,7 +1219,7 @@ async def linkedin_post_transcript(
 
         data = await cached_or_run(
             endpoint="linkedin.post-transcript",
-            params={"url": url, "v": 7},
+            params={"url": url, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

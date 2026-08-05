@@ -256,7 +256,24 @@ const YOUTUBE: Spec[] = [
       "YouTube's public comment surface is soft-capped (~1,500 top / ~7,000 newest depending on sort). Cursor ends when YouTube stops — not a Captapi truncation.",
     ],
   },
-  { slug: "youtube-channel-details", name: "YouTube Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/youtube/channel-details", credits: 1, tagline: "YouTube channel stats as real numbers plus handle, verified, banner, links, email, and SEO tags.", longDescription: "Pass a channel URL, handle, or UC id and get clean JSON: numeric subscriberCount / videoCount / viewCount, handle, verified, joinedDate, bannerUrl, structured links, plus additive email when present in About/description and tags from channel SEO keywords. Flat 1 credit per call." },
+  {
+    slug: "youtube-channel-details",
+    name: "YouTube Channel Details API",
+    shortName: "Channel Details",
+    category: "channel",
+    method: "GET",
+    path: "/v1/youtube/channel-details",
+    credits: 1,
+    tagline:
+      "YouTube channel stats — ISO country/joinedAt, real banner, quote-aware SEO tags, absolute links. Flat 1 credit.",
+    longDescription:
+      "Pass a channel URL, @handle, or UC… id and get clean JSON: platform, id, url + canonicalUrl (@handle when known), name, handle, description, subscriberCount (YouTube's rounded display value, e.g. 292K→292000) with subscriberCountIsApproximate, videoCount, viewCount (exact when About exposes it), thumbnailUrl, bannerUrl (real channel banner or null — never the avatar), country (ISO-3166 alpha-2) + countryName, joinedAt (YYYY-MM-DD) with joinedDate kept as the English About label, verified, links[{text,url}] with absolute https URLs, email when published in About/description (not the CAPTCHA reveal), and tags[] from channel SEO keywords (quote-aware — multi-word tags stay one entry). Flat 1 credit.",
+    platformLimits: [
+      "subscriberCount is YouTube's rounded shelf value; subscriberCountIsApproximate is true when the source used K/M/B compact form. viewCount is exact when the About panel exposes it.",
+      "bannerUrl is null when the channel has no banner — we never substitute the avatar.",
+      "email is only returned when the creator published it in description/About text or a mailto link — not from YouTube's CAPTCHA email reveal.",
+    ],
+  },
   {
     slug: "youtube-search",
     name: "YouTube Search API",
@@ -329,12 +346,19 @@ const YOUTUBE: Spec[] = [
     path: "/v1/youtube/shorts/video-details",
     credits: 1,
     tagline: "YouTube Short metadata — same schema as Video Details, with isShort:true; long-form videos get HTTP 422.",
-    longDescription: "Same field schema as YouTube Video Details (title, channel, duration, view/like/comment counts, tags, …) but scoped to Shorts: response always includes isShort:true and a youtube.com/shorts/{id} URL. Videos longer than 3 minutes — even if pasted as /shorts/{id} — return HTTP 422; use Video Details for those. Flat 1 credit.",
+    longDescription:
+      "Same field schema as YouTube Video Details (title, channel, duration, view/like/comment counts, tags, …) but scoped to Shorts: response always includes platform, isShort:true, durationSeconds + durationFormatted, and a youtube.com/shorts/{id} URL. Uses reel_item_watch for publishDate / description / @handle (ANDROID player often omits Shorts microformat). Thumbnails prefer vertical / channel covers over landscape frame-2 stills. commentCountIsApproximate is true when YouTube only exposes a compact total (e.g. 11K→11000). genre / categoryId / isFamilySafe / defaultLanguage / defaultAudioLanguage are omitted when Shorts microformat does not expose them (not returned as null). Videos longer than 3 minutes — even if pasted as /shorts/{id} — return HTTP 422; use Video Details for those. Flat 1 credit.",
     delivers: [
-      "Same schema as Video Details + isShort: true",
-      "Canonical shorts URL in the response",
-      "HTTP 422 for long-form videos (>3 min)",
+      "Same schema as Video Details + isShort: true + platform",
+      "publishedAt / description / channelHandle from reel_item_watch",
+      "durationSeconds + durationFormatted; commentCountIsApproximate",
+      "Canonical shorts URL; HTTP 422 for long-form (>3 min)",
       "Flat 1 credit",
+    ],
+    platformLimits: [
+      "commentCount is usually YouTube's rounded header value (11K) — see commentCountIsApproximate.",
+      "genre / categoryId / isFamilySafe / defaultLanguage / defaultAudioLanguage are omitted when Shorts microformat lacks them.",
+      "When the player only ships landscape frame-2 stills, thumbnailUrl falls back to oardefault / maxresdefault.",
     ],
   },
   {
@@ -358,7 +382,7 @@ const YOUTUBE: Spec[] = [
     credits: 2,
     tagline: "Channel Shorts shelf with player-enriched fields (SC channel/shorts parity).",
     longDescription:
-      "Lists a channel's Shorts tab, then fills each row via InnerTube player — id, exact viewCount/viewCountText, thumbnailUrl (from video id when the shelf omits it), publishedAt, durationSeconds/durationMs, description, genre, likeCount/commentCount when exposed. Flat 2 credits on the native path (was incorrectly 1/result at 20). Not an alias of Video Details.",
+      "Lists a channel's Shorts tab, then fills each row via InnerTube player — nested channel{}, exact viewCount/viewCountText + viewCountIsApproximate, thumbnailUrl (prefers cover over frame-2 stills), publishedAt, durationSeconds/durationFormatted, description, genre, likeCount/commentCount (+ commentCountIsApproximate) when exposed. Flat 2 credits on the native path (was incorrectly 1/result at 20). Not an alias of Video Details.",
   },
   {
     slug: "youtube-trending-shorts",
@@ -368,9 +392,20 @@ const YOUTUBE: Spec[] = [
     method: "GET",
     path: "/v1/youtube/trending-shorts",
     credits: 2,
-    tagline: "YouTube Shorts reel/trending sequence — not a keyword search for \"trending\".",
+    tagline: "YouTube Shorts recommendation sequence — not a global trending chart or keyword search.",
     longDescription:
-      "Fetches Shorts from YouTube's reel_watch_sequence feed (same surface ScrapeCreators uses for /v1/youtube/shorts/trending). Each call returns a fresh batch with channel, exact views, duration, publish date, and engagement when available. Optional q only seeds the sequence from a topic Short — it is not a search of the word trending. Flat 2 credits.",
+      "Served from YouTube's reel_watch_sequence (Shorts recommendation feed — same surface ScrapeCreators uses for /v1/youtube/shorts/trending). This is not a global trending ranking: results are session-dependent, may include older or re-uploaded Shorts, and can vary between calls. Response source is always reel_watch_sequence on the native path. Each row is player-enriched with nested channel{id,url,title,handle} (https + percent-decoded @handle), exact viewCount + viewCountText + viewCountIsApproximate, durationSeconds + durationFormatted, publishedAt/genre when microformat exposes them, and commentCount with commentCountIsApproximate. Flat aliases (channelId/channelUrl/viewCountInt/…) and empty badges/channel.thumbnail are omitted. Optional q seeds the sequence from a topic Short only — values like trending/shorts are ignored (not echoed as query). Flat 2 credits.",
+    delivers: [
+      "reel_watch_sequence feed — not a keyword search for \"trending\"",
+      "Nested channel{} with https + decoded @handle",
+      "Exact views + commentCountIsApproximate; no dead empty fields",
+      "Flat 2 credits",
+    ],
+    platformLimits: [
+      "Not a global trending chart — recommendation sequence varies between calls.",
+      "Older Shorts and re-uploads can appear; filter by publishedAt client-side if you need freshness.",
+      "No cursor — each call returns a fresh batch up to limit.",
+    ],
   },
   {
     slug: "youtube-channel-streams",
@@ -890,14 +925,19 @@ const INSTAGRAM: Spec[] = [
     path: "/v1/instagram/trending-reels",
     credits: 1,
     tagline:
-      "Trending Reels from Instagram's public /reels page — videos only, flat 1 credit. Expect overlapping duplicates across calls.",
+      "Snapshot-backed trending Reels (typical freshness <24h) — videos only, flat 1 credit. Use reels-search for live results.",
     longDescription:
-      "Fetches trending Reels from Instagram's public instagram.com/reels surface (not the Explore photo grid). Instagram only gives a small batch at a time and results can overlap, so call this endpoint repeatedly for more coverage — expect some duplicates; that is how Instagram's Reels page behaves too. Each result is a video Reel (productType clips) with video URL when available, caption, author, and view / like / comment counts. Photos, carousels, and multi-year stale resurfaces are never returned (503 if a fallthrough scrape has no Reels yet). Flat 1 credit per call. Pass cache=true for the 24h shared cache.",
+      "Trending Reels is served from a periodic snapshot (native /reels when available, otherwise any-age Apify country snapshot). Typical freshness is under 24 hours — check cached / cachedAt / stale / ageHours on the response and decide whether that is fresh enough for your job. This is not a live Explore scrape: photos and carousels are never returned as Reels. Instagram only yields a small overlapping batch per scrape, so duplicates across calls are expected. For live keyword search use Instagram Reels Search. Cold countries (no snapshot yet) return 503 with error.code=warming + Retry-After: 600 while a background refresh runs (sync wait capped at ~15s — never multi-minute hangs). Unsupported countries return 400 with supportedCountries[]. Flat 1 credit per successful call. Pass cache=true for the 24h shared Redis cache.",
     delivers: [
-      "Video Reels only from /reels — never Explore photos",
-      "Flat 1 credit (not per-result)",
-      "Duplicates across calls are expected (Instagram behaviour)",
-      "country localization (35 countries)",
+      "Snapshot-backed list with cached / cachedAt / stale / ageHours",
+      "Video Reels only — never Explore photos",
+      "Flat 1 credit (cheaper than live scrapes by design)",
+      "country localization (35 countries); 400 lists supportedCountries",
+    ],
+    platformLimits: [
+      "Not a live feed — typical freshness under 24h; use /v1/instagram/reels-search when you need an immediate keyword scrape.",
+      "Cold country (never snapshotted) returns 503 warming with Retry-After: 600 while Apify refreshes in the background.",
+      "Photos / carousels / multi-year Explore resurfaces are filtered out — we never invent Reels from the Explore photo grid.",
     ],
   },
   {
@@ -969,13 +1009,18 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Resolve a brand or @handle to one public Instagram profile — stable id, bio, links, and stats (not niche discovery).",
     delivers: [
-      "One resolved public profile (mode=resolve) — not a multi-result niche search",
-      "Stable numeric id for CRM joins (handles change)",
-      "username, displayName, bio, bioLinks, externalUrl, categoryName",
-      "followers / following / postCount + verified, private, business flags",
+      "One resolved public profile (mode=resolve only — keyword search is login-gated)",
+      "Stable numeric id + canonical www.instagram.com/{user}/ url for joins",
+      "username, displayName, bio, bioLinks, externalUrl, categoryName, platform",
+      "followers / following / postCount + verified, isPrivate, business flags",
+    ],
+    platformLimits: [
+      "mode is always resolve — Instagram's multi-result keyword search requires login; there is no search mode and no nextCursor/hasMore on this endpoint.",
+      "profileImage / profileImageHd are signed Instagram CDN URLs (oe= expiry). imageExpiresAt is ISO when oe= is present; re-host for long-term storage.",
+      "0 or 1 users[] — not a paginated discovery feed. Use relatedProfiles[] for adjacent accounts.",
     ],
     longDescription:
-      "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, instagram.com/natgeo) and this endpoint resolves it to the matching public Instagram account — a name→handle resolver, not a Google-style niche discovery search (queries like \"fitness coach\" will not return a creator list). Response: mode=resolve, users[0] with id (numeric), username, displayName, url, bio, bioLinks[], externalUrl, categoryName, fbid, relatedProfiles[], businessAddress, likeAndViewCountsDisabled, followers/following/postCount, verified, private/isPrivate, isBusinessAccount/isProfessionalAccount, and profile images. Walk relatedProfiles for niche discovery without a separate creator-search endpoint. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+      "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, instagram.com/natgeo) and this endpoint resolves it to the matching public Instagram account — a name→handle resolver, not a Google-style niche discovery search (queries like \"fitness coach\" will not return a creator list). Response: mode=resolve (the only mode; Instagram keyword search is login-gated), users[0] with platform, id (numeric), username, displayName, url (canonical https://www.instagram.com/{user}/), bio, bioLinks[], externalUrl, categoryName, fbid, relatedProfiles[], businessAddress, likeAndViewCountsDisabled, followers/following/postCount, verified, isPrivate, isBusinessAccount/isProfessionalAccount, profileImage/profileImageHd, and imageExpiresAt when the CDN oe= param is present. No nextCursor — resolve returns at most one user. Walk relatedProfiles for niche discovery without a separate creator-search endpoint. Flat 1 credit. Pass cache=true for the 24h shared cache.",
   },
   { slug: "instagram-embed", name: "Instagram Embed HTML API", shortName: "Embed HTML", category: "details", method: "GET", path: "/v1/instagram/embed", credits: 1, tagline: "Get Instagram's own self-contained embed HTML for any post, reel, or profile — ready to drop into an iframe on your site.", longDescription: "Pass an Instagram post, reel, or profile URL (or an @handle) and get back Instagram's own self-contained embed page as ready-to-use HTML — the full <html> document Instagram serves at /embed/, which you can drop straight into an <iframe srcdoc> or render server-side. The response also returns embedUrl, so you can point an <iframe src> at it directly instead. Posts and reels come back as a rich media card (with caption); profiles come back as a profile card that links to the account. No login or OAuth needed — it's fast, costs just 1 credit. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh. If Instagram's embed page is ever unavailable, the response falls back to the classic blockquote + embed.js snippet.", delivers: ["Instagram's full self-contained embed HTML document", "embedUrl you can load directly in an <iframe src>", "Canonical Instagram permalink for the post/reel/profile", "Type flag (post/reel/profile) plus shortcode or username"] },
   {
@@ -3180,7 +3225,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "string",
       required: false,
       description:
-        "Optional topic seed for the Shorts reel sequence. Omit for the default trending feed — not a keyword search for \"trending\".",
+        "Optional topic seed for the Shorts recommendation sequence. Omit (or pass trending/shorts) for the default reel feed — not a keyword search.",
     },
     lpFlat(20, 100, 2),
   ],
@@ -3423,7 +3468,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "string",
       required: false,
       description:
-        "Country for Reels localization — full name or ISO code (e.g. 'United States', 'US', 'Turkey', 'TR'). Default United States. 35 countries supported.",
+        "Country for Reels localization — full name or ISO code (e.g. 'United States', 'US', 'Turkey', 'TR'). Default United States. Unsupported values return 400 with supportedCountries[].",
     },
     lpFlat(20, 200, 1),
   ],
@@ -5833,6 +5878,24 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     publishedAt:
       "ISO-8601 when available; approximate from relative labels on list cards — see publishedTimeText.",
   },
+  "youtube-channel-details": {
+    platform: 'Always "youtube".',
+    canonicalUrl: "Preferred public URL — https://www.youtube.com/@handle when known, else /channel/UC….",
+    bannerUrl:
+      "Channel banner image when YouTube exposes one (c4TabbedHeader / pageHeader banner). null when the channel has no banner — never a downsized avatar.",
+    thumbnailUrl: "Channel avatar / profile image.",
+    country: "ISO-3166 alpha-2 channel country (e.g. US, IN). Prefer this over countryName for joins.",
+    countryName: "English display name for country (e.g. United States). Locale-stable English from our ISO map.",
+    joinedAt: "Channel creation date as YYYY-MM-DD (parsed from About joinedDateText under en scrape).",
+    joinedDate: "English About label (e.g. Jul 31, 2017). Prefer joinedAt for sorting/filters.",
+    subscriberCount:
+      "Subscriber count from YouTube's rounded display text (292K → 292000). Not always exact.",
+    viewCount: "Lifetime channel view count when the About panel exposes it (exact integer).",
+    tags: "SEO keywords from channelMetadata. Multi-word tags stay one entry (quote-aware parse).",
+    links: "About / primary links as {text, url} with absolute https:// URLs.",
+    email:
+      "Contact email only when the creator published it in description/About text or a mailto link — not from YouTube's CAPTCHA email reveal.",
+  },
   "youtube-channel-videos": {
     publishedAt:
       "ISO-8601 when available; approximate from relative labels on list cards — see publishedTimeText.",
@@ -5846,6 +5909,27 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
       "video_view_count (reach-style) when exposed; otherwise falls back to total plays. Not the same as plays — the gap can be ~2×.",
     plays:
       "Total play count including replays (video_play_count). Often higher than views. Prefer viewsInstagram for Instagram-only reports.",
+  },
+  "instagram-trending-reels": {
+    cached: "true when the list came from a stored country snapshot (Apify fallthrough), false on a fresh native /reels hit.",
+    cachedAt: "When the underlying snapshot finished (ISO-8601). On native hits this is approximately now.",
+    stale: "true when the snapshot is older than the 6h refresh window — still usable; a background refresh was kicked.",
+    ageHours: "Age of the snapshot in hours (float). Prefer this over guessing from cachedAt.",
+    country: "Localized country name used for this snapshot (from the country query param).",
+    note: "Honesty copy: snapshot-backed, duplicates expected, points to reels-search for live scrapes.",
+    reels: "Video Reels only (productType clips). Photos / carousels / multi-year Explore resurfaces are never included.",
+  },
+  "instagram-profile-search": {
+    mode: 'Always "resolve". Instagram keyword / multi-result search is login-gated — there is no "search" mode and no nextCursor on this endpoint.',
+    platform: 'Always "instagram" on each users[] row.',
+    url: "Canonical profile URL: https://www.instagram.com/{username}/ (www + trailing slash) — join-safe with channel-details / basic-profile.",
+    isPrivate: "Whether the account is private. Canonical privacy flag (no separate private alias).",
+    profileImage:
+      "Profile photo URL (HD when available). Signed Instagram CDN — expires; see imageExpiresAt. Canonical name across Instagram endpoints (not avatar).",
+    profileImageHd: "HD profile photo URL when Instagram exposes one; may equal profileImage.",
+    imageExpiresAt:
+      "ISO-8601 expiry parsed from the CDN oe= hex timestamp when present. Re-host the image for long-term storage — do not treat the CDN URL as permanent.",
+    users: "0 or 1 resolved public profile(s). Not a paginated discovery list.",
   },
   "instagram-reels-search": {
     views:
@@ -5869,7 +5953,10 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     embedId: "Rumble's player embed id (may differ from the /v… page id).",
     durationSeconds: "Length in seconds (integer).",
     durationText: "Human clock duration (e.g. 1:26:25).",
+    durationFormatted: "Zero-padded HH:MM:SS (same helper as YouTube video-details).",
     duration: "Legacy alias of durationText on this endpoint — prefer durationSeconds for math.",
+    "streams[].expiresAt":
+      "ISO expiry parsed from signed CDN query params (expire / e / x-expires) when present.",
     type: 'Content kind: "video" | "short" | "live".',
     likes: "Rumble upvotes when the vote UI is present; null when unknown (never invent 0).",
     dislikes: "Rumble downvotes when present; null when unknown.",

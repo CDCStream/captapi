@@ -118,6 +118,13 @@ def _seconds_to_clock(seconds: int | None) -> str | None:
     return f"{minutes}:{secs:02d}"
 
 
+def _duration_formatted(seconds: int | None) -> str | None:
+    """YouTube-style zero-padded ``HH:MM:SS`` (shared helper)."""
+    from app.services.youtube_native import format_duration_hms
+
+    return format_duration_hms(seconds)
+
+
 def _parse_count(raw: str | None) -> int | None:
     """Parse ``1.2K`` / ``3M`` / ``12,345`` view strings."""
     if not raw:
@@ -236,20 +243,25 @@ def _quality_from_stream_url(url: str) -> str | None:
 
 
 def _streams_from_html(html: str) -> list[dict[str, Any]]:
+    from app.utils.media_urls import cdn_expires_at
+
     seen: set[str] = set()
     out: list[dict[str, Any]] = []
     for url in _MP4_RE.findall(html or ""):
-        clean = unescape(url).split("&amp;")[0].split("?")[0]
+        # Keep query string — signed CDNs often put expiry in ``expire`` / ``e``.
+        clean = unescape(url).split("&amp;")[0]
         if clean in seen:
             continue
         seen.add(clean)
-        out.append(
-            {
-                "url": clean,
-                "type": "mp4",
-                "quality": _quality_from_stream_url(clean),
-            }
-        )
+        row: dict[str, Any] = {
+            "url": clean,
+            "type": "mp4",
+            "quality": _quality_from_stream_url(clean),
+        }
+        expires = cdn_expires_at(clean)
+        if expires:
+            row["expiresAt"] = expires
+        out.append(row)
         if len(out) >= 8:
             break
     return out
@@ -374,6 +386,8 @@ def _streams_from_media(media: dict[str, Any] | None) -> list[dict[str, Any]]:
     """Build a flat playable ``streams`` list from ``media`` (+ keep mp4 first)."""
     if not media:
         return []
+    from app.utils.media_urls import cdn_expires_at
+
     out: list[dict[str, Any]] = []
     seen: set[str] = set()
 
@@ -382,7 +396,11 @@ def _streams_from_media(media: dict[str, Any] | None) -> list[dict[str, Any]]:
         if not clean or clean in seen:
             return
         seen.add(clean)
-        out.append({"url": clean, "type": typ, "quality": quality})
+        row: dict[str, Any] = {"url": clean, "type": typ, "quality": quality}
+        expires = cdn_expires_at(clean)
+        if expires:
+            row["expiresAt"] = expires
+        out.append(row)
 
     def _quality_label(q: Any, *, suffix: str = "p") -> str | None:
         if str(q).isdigit():
@@ -485,7 +503,8 @@ def apply_embedjs(card: dict[str, Any], payload: dict[str, Any]) -> dict[str, An
     if dur is not None and dur > 0:
         card["durationSeconds"] = dur
         card["durationText"] = _seconds_to_clock(dur)
-        # Legacy alias — prefer durationSeconds / durationText.
+        card["durationFormatted"] = _duration_formatted(dur)
+        # Legacy alias — prefer durationSeconds / durationText / durationFormatted.
         card["duration"] = card["durationText"]
 
     live_raw = payload.get("live")
@@ -646,6 +665,7 @@ def parse_video_html(html: str, url: str | None = None) -> dict[str, Any] | None
         "comments": _comments_from_html(html),
         "durationSeconds": duration_seconds,
         "durationText": duration_text,
+        "durationFormatted": _duration_formatted(duration_seconds),
         "duration": duration_text,
         "publishedAt": safe_str((video or {}).get("uploadDate")),
         "thumbnail": thumbnail,
@@ -774,6 +794,9 @@ def parse_search_html(html: str, limit: int = 20) -> list[dict[str, Any]]:
                 "likes": likes,
                 "dislikes": dislikes,
                 "duration": safe_str(dur_m.group(1)) if dur_m else None,
+                "durationSeconds": _clock_to_seconds(
+                    safe_str(dur_m.group(1)) if dur_m else None
+                ),
                 "publishedAt": safe_str(time_m.group(1)) if time_m else None,
                 "thumbnail": safe_str(unescape(thumb_m.group(1))) if thumb_m else None,
                 "comments": _counter_from_match(_COMMENTS_RE.search(chunk)),

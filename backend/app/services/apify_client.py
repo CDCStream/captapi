@@ -129,6 +129,40 @@ class ApifyClient:
             return []
         return items if isinstance(items, list) else []
 
+    async def list_succeeded_runs(
+        self,
+        actor_id: str,
+        *,
+        input_match: dict[str, Any] | None = None,
+        limit: int = 25,
+    ) -> list[dict[str, Any]]:
+        """SUCCEEDED runs newest-first (no age filter), optionally INPUT-matched."""
+        actor_path = actor_id.replace("/", "~")
+        out: list[dict[str, Any]] = []
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                resp = await client.get(
+                    f"{self.BASE}/acts/{actor_path}/runs",
+                    params={
+                        "token": self.token,
+                        "desc": 1,
+                        "limit": max(1, min(limit, 50)),
+                        "status": "SUCCEEDED",
+                    },
+                )
+                resp.raise_for_status()
+                for run in (resp.json().get("data") or {}).get("items") or []:
+                    if not (run.get("finishedAt") and run.get("defaultDatasetId")):
+                        continue
+                    if input_match:
+                        run_input = await self._fetch_run_input(client, run)
+                        if any(run_input.get(k) != v for k, v in input_match.items()):
+                            continue
+                    out.append(run)
+        except httpx.HTTPError:
+            return out
+        return out
+
     async def last_succeeded_run(
         self,
         actor_id: str,
@@ -136,29 +170,21 @@ class ApifyClient:
         input_match: dict[str, Any] | None = None,
     ) -> dict[str, Any] | None:
         """Most recent SUCCEEDED run that finished within ``max_age_secs``,
-        optionally restricted to runs whose INPUT contains ``input_match``."""
-        actor_path = actor_id.replace("/", "~")
-        try:
-            async with httpx.AsyncClient(timeout=30) as client:
-                resp = await client.get(
-                    f"{self.BASE}/acts/{actor_path}/runs",
-                    params={"token": self.token, "desc": 1, "limit": 10, "status": "SUCCEEDED"},
-                )
-                resp.raise_for_status()
-                for run in (resp.json().get("data") or {}).get("items") or []:
-                    finished = run.get("finishedAt")
-                    if not (finished and run.get("defaultDatasetId")):
-                        continue
-                    finished_dt = datetime.fromisoformat(finished.replace("Z", "+00:00"))
-                    if (datetime.now(timezone.utc) - finished_dt).total_seconds() > max_age_secs:
-                        return None
-                    if input_match:
-                        run_input = await self._fetch_run_input(client, run)
-                        if any(run_input.get(k) != v for k, v in input_match.items()):
-                            continue
-                    return run
-        except httpx.HTTPError:
-            return None
+        optionally restricted to runs whose INPUT contains ``input_match``.
+
+        Pass ``float("inf")`` (or a huge number) for any-age snapshots.
+        """
+        for run in await self.list_succeeded_runs(
+            actor_id, input_match=input_match, limit=25
+        ):
+            finished = run.get("finishedAt")
+            if not finished:
+                continue
+            finished_dt = datetime.fromisoformat(finished.replace("Z", "+00:00"))
+            if (datetime.now(timezone.utc) - finished_dt).total_seconds() > max_age_secs:
+                # Runs are newest-first; once one is too old, older ones are too.
+                return None
+            return run
         return None
 
     async def last_succeeded_items(

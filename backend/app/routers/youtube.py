@@ -34,6 +34,7 @@ from app.services.youtube_native import (
     channel_has_live_tab,
     channel_tab_native,
     comment_count_native,
+    comment_count_native_meta,
     comment_replies_native,
     comments_native,
     community_posts_native,
@@ -41,12 +42,17 @@ from app.services.youtube_native import (
     enrich_video_cards,
     extract_initial_json,
     find_continuation_token,
+    format_duration_hms,
     hashtag_native,
     innertube,
+    merge_short_player_details,
     parse_count_text,
+    parse_count_text_meta,
     playlist_native,
+    prefer_short_thumbnails,
     search_native,
     search_shorts_native,
+    short_details_via_reel_watch,
     text_of,
     thumbnail_url_for_video_id,
     transcript_native,
@@ -592,18 +598,69 @@ def _is_youtube_short_payload(details: dict[str, Any], *, input_url: str) -> boo
     return False
 
 
+# Microformat fields often absent on Shorts even when reel_item_watch succeeds
+# for publishDate/handle. Omit (do not null) when unavailable — matches the
+# transcript contract: omit N/A, null only for failed extract.
+_SHORTS_OMIT_IF_NULL = (
+    "genre",
+    "categoryId",
+    "isFamilySafe",
+    "defaultLanguage",
+    "defaultAudioLanguage",
+)
+
+
 def _stamp_short_fields(details: dict[str, Any], video_id: str) -> dict[str, Any]:
+    from app.utils.media_urls import (
+        canonicalize_youtube_channel_url,
+        decode_youtube_handle,
+    )
+
     out = dict(details)
+    out["platform"] = "youtube"
     out["isShort"] = True
     out["contentType"] = "short"
     out["url"] = _shorts_canonical_url(video_id)
+    duration = safe_int(out.get("durationSeconds"))
+    if duration is not None:
+        out["durationFormatted"] = out.get("durationFormatted") or format_duration_hms(
+            duration
+        )
+    thumbs, thumb_url = prefer_short_thumbnails(
+        video_id, out.get("thumbnails"), out.get("thumbnailUrl")
+    )
+    if thumbs:
+        out["thumbnails"] = thumbs
+    if thumb_url:
+        out["thumbnailUrl"] = thumb_url
+    handle = decode_youtube_handle(out.get("channelHandle"))
+    if handle:
+        out["channelHandle"] = handle
+    out["channelUrl"] = canonicalize_youtube_channel_url(
+        out.get("channelUrl"),
+        channel_id=safe_str(out.get("channelId")),
+        handle=handle,
+    )
+    if out.get("commentCount") is not None and "commentCountIsApproximate" not in out:
+        # Comment totals from InnerTube headers are almost always compact ("11K").
+        out["commentCountIsApproximate"] = True
+    for key in _SHORTS_OMIT_IF_NULL:
+        if out.get(key) is None:
+            out.pop(key, None)
     return out
 
 
 async def _assert_youtube_short(url: str) -> tuple[str, str, dict[str, Any]]:
     """Resolve ``url`` and ensure it is a Short. Returns (id, shortsUrl, details)."""
-    vid, norm_url = _require_youtube_url(url)
-    details = await _video_details_native(vid, norm_url)
+    vid, _norm_url = _require_youtube_url(url)
+    shorts_url = _shorts_canonical_url(vid)
+    # ANDROID player often omits Shorts microformat (publishDate / handle /
+    # description). reel_item_watch fills those; ANDROID still wins on engagement.
+    reel, android = await asyncio.gather(
+        short_details_via_reel_watch(vid, shorts_url),
+        _video_details_native(vid, shorts_url),
+    )
+    details = merge_short_player_details(android, reel)
     if not isinstance(details, dict) or details.get("viewCount") is None:
         # Duration-only fallback: still try to reject obvious long-form.
         raise HTTPException(status_code=404, detail="Video not found")
@@ -621,7 +678,7 @@ async def _assert_youtube_short(url: str) -> tuple[str, str, dict[str, Any]]:
                 "/v1/youtube/video-details for regular videos."
             )
         raise HTTPException(status_code=422, detail=detail)
-    return vid, _shorts_canonical_url(vid), _stamp_short_fields(details, vid)
+    return vid, shorts_url, _stamp_short_fields(details, vid)
 
 
 def _ts_float(x: Any) -> float:
@@ -983,18 +1040,21 @@ _COMMENT_COUNT_RES = (
 )
 
 
-def _parse_comment_count(html: str) -> int | None:
+def _parse_comment_count_meta(html: str) -> tuple[int | None, bool]:
     """Best-effort comment count from watch-page JSON / labels."""
-    from app.services.youtube_native import parse_count_text
-
     for rx in _COMMENT_COUNT_RES:
         m = rx.search(html or "")
         if not m:
             continue
-        parsed = parse_count_text(m.group(1))
+        parsed, approx = parse_count_text_meta(m.group(1))
         if parsed is not None:
-            return parsed
-    return None
+            return parsed, approx
+    return None, False
+
+
+def _parse_comment_count(html: str) -> int | None:
+    n, _approx = _parse_comment_count_meta(html)
+    return n
 
 
 async def _watch_player_response(norm_url: str) -> tuple[dict[str, Any] | None, str]:
@@ -1109,22 +1169,33 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
                     if not out.get(key) and enriched.get(key) not in (None, [], ""):
                         out[key] = enriched[key]
         if out.get("commentCount") is None and html:
-            out["commentCount"] = _parse_comment_count(html)
+            n, approx = _parse_comment_count_meta(html)
+            if n is not None:
+                out["commentCount"] = n
+                out["commentCountIsApproximate"] = approx
         if out.get("commentCount") is None:
-            out["commentCount"] = await comment_count_native(vid)
+            n, approx = await comment_count_native_meta(vid)
+            out["commentCount"] = n
+            if n is not None:
+                out["commentCountIsApproximate"] = approx
         return out
 
     if player is None:
         if isinstance(android, dict) and android.get("commentCount") is None:
-            android = {**android, "commentCount": await comment_count_native(vid)}
+            n, approx = await comment_count_native_meta(vid)
+            android = {**android, "commentCount": n}
+            if n is not None:
+                android["commentCountIsApproximate"] = approx
             if android.get("durationSeconds") is not None and "durationFormatted" not in android:
                 android["durationFormatted"] = _format_duration(int(android["durationSeconds"]))
         return android
 
     like_count = _parse_like_count(html) if html else None
-    comment_count = _parse_comment_count(html) if html else None
+    comment_count, comment_approx = (
+        _parse_comment_count_meta(html) if html else (None, False)
+    )
     if comment_count is None:
-        comment_count = await comment_count_native(vid)
+        comment_count, comment_approx = await comment_count_native_meta(vid)
     out = build_youtube_video_details(
         player=player,
         video_id=vid,
@@ -1134,6 +1205,8 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
     )
     if not out:
         return android
+    if comment_count is not None:
+        out["commentCountIsApproximate"] = comment_approx
     if not out.get("genre") and genre:
         out["genre"] = genre
     if not out.get("tags") and tags:
@@ -1262,7 +1335,7 @@ async def youtube_channel_details(
 
         data = await cached_or_run(
             endpoint="youtube.channel-details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1643,15 +1716,27 @@ async def youtube_search(
         return ApiResponse(data=data)
 
 
+_TRENDING_NOOP_Q = frozenset({"trending", "shorts", "#shorts"})
+
+
+def _normalize_trending_topic_q(q: str | None) -> str | None:
+    """Topic seed for the reel sequence — ignore playground placeholders."""
+    raw = (q or "").strip()
+    if not raw or raw.lower() in _TRENDING_NOOP_Q:
+        return None
+    return raw
+
+
 @router.get("/trending-shorts", summary="Trending YouTube Shorts")
 async def youtube_trending_shorts(
     q: str | None = Query(
         None,
         min_length=2,
         description=(
-            "Optional topic seed for the Shorts reel sequence (not a keyword search). "
-            "Omit for the default trending/recommendation feed — same surface as "
-            "ScrapeCreators GET /v1/youtube/shorts/trending."
+            "Optional topic seed for the Shorts recommendation sequence (not a "
+            "keyword search). Values like trending/shorts are ignored — omit for "
+            "the default reel feed. Same surface as ScrapeCreators "
+            "GET /v1/youtube/shorts/trending."
         ),
     ),
     limit: int = Query(
@@ -1664,6 +1749,7 @@ async def youtube_trending_shorts(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
+    topic_q = _normalize_trending_topic_q(q)
     # Flat fee: reel sequence + player enrich is native; Apify is rare fallback.
     async with billed_call(
         caller=caller,
@@ -1673,19 +1759,22 @@ async def youtube_trending_shorts(
         base_credits=2,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await trending_shorts_native(limit, q=q)
+            native = await trending_shorts_native(limit, q=topic_q)
             if native:
                 ctx["source"] = "direct"
-                return {
+                payload: dict[str, Any] = {
                     "platform": "youtube",
-                    "query": q,
                     "source": "reel_watch_sequence",
                     "totalReturned": len(native),
                     "shorts": native[:limit],
                 }
+                # Only echo query when it actually seeded a topic Short.
+                if topic_q:
+                    payload["query"] = topic_q
+                return payload
 
             # Legacy fallback only — keyword Shorts search is NOT the product path.
-            seed = (q or "").strip() or "#shorts"
+            seed = topic_q or "#shorts"
             client = ApifyClient(timeout=280, max_attempts=1)
             try:
                 items = await client.run_actor_sync(
@@ -1716,17 +1805,19 @@ async def youtube_trending_shorts(
                 vid = safe_str(row.get("id"))
                 if vid and not row.get("thumbnailUrl"):
                     row["thumbnailUrl"] = thumbnail_url_for_video_id(vid)
-            return {
+            payload = {
                 "platform": "youtube",
-                "query": q,
                 "source": "apify_fallback",
                 "totalReturned": len(shorts),
                 "shorts": shorts,
             }
+            if topic_q:
+                payload["query"] = topic_q
+            return payload
 
         data = await cached_or_run(
             endpoint="youtube.trending-shorts",
-            params={"q": q or "", "limit": limit, "v": 8},
+            params={"q": topic_q or "", "limit": limit, "v": 9},
             runner=_run,
             ctx=ctx,
             stale_while_revalidate=True,
@@ -1783,7 +1874,7 @@ async def youtube_channel_shorts(
 
         data = await cached_or_run(
             endpoint="youtube.channel-shorts",
-            params={"url": url, "limit": limit, "v": 6},
+            params={"url": url, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2046,7 +2137,7 @@ async def shorts_details(
 
         data = await cached_or_run(
             endpoint="youtube.shorts-video-details",
-            params={"url": shorts_url, "v": 3},
+            params={"url": shorts_url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -59,18 +59,73 @@ def description_links(text: str | None) -> list[dict[str, str]]:
     return out
 
 
+def decode_youtube_handle(handle: str | None) -> str | None:
+    """Normalize ``@handle`` text — percent-decode (Cyrillic etc.), keep leading @."""
+    from urllib.parse import unquote
+
+    raw = (handle or "").strip()
+    if not raw:
+        return None
+    if raw.startswith("@"):
+        body = unquote(raw[1:])
+    else:
+        body = unquote(raw)
+    body = (body or "").strip()
+    if not body or body.startswith("channel") or "/" in body:
+        return None
+    return f"@{body}"
+
+
 def channel_handle_from_profile_url(profile_url: str | None) -> str | None:
     if not profile_url:
         return None
+    from urllib.parse import unquote
+
     path = urlparse(profile_url).path.strip("/")
     if not path:
         return None
-    part = path.split("/")[0]
-    if part.startswith("@"):
-        return part
-    if part.startswith("channel") or part.startswith("c/") or part.startswith("user"):
+    part = unquote(path.split("/")[0])
+    if part in {"channel", "c", "user"}:
         return None
-    return f"@{part}" if part else None
+    return decode_youtube_handle(part)
+
+
+def canonicalize_youtube_channel_url(
+    url: str | None = None,
+    *,
+    channel_id: str | None = None,
+    handle: str | None = None,
+) -> str | None:
+    """Force ``https://www.youtube.com/@handle`` or ``/channel/UC…`` — never ``http://``."""
+    h = decode_youtube_handle(handle) or channel_handle_from_profile_url(url)
+    if h:
+        return f"https://www.youtube.com/{h}"
+    cid = (channel_id or "").strip()
+    if cid.startswith("UC"):
+        return f"https://www.youtube.com/channel/{cid}"
+    raw = (url or "").strip()
+    if not raw:
+        return None
+    if raw.startswith("//"):
+        raw = "https:" + raw
+    elif raw.startswith("http://"):
+        raw = "https://" + raw[len("http://") :]
+    elif not raw.startswith("https://") and "youtube." in raw:
+        raw = "https://" + raw.lstrip("/")
+    parsed = urlparse(raw)
+    host = (parsed.netloc or "").lower().removeprefix("www.")
+    if host.endswith("youtube.com") or host == "youtu.be":
+        path = (parsed.path or "").rstrip("/")
+        if "/channel/" in path:
+            cid_part = path.split("/channel/", 1)[-1].split("/")[0]
+            if cid_part.startswith("UC"):
+                return f"https://www.youtube.com/channel/{cid_part}"
+        h2 = channel_handle_from_profile_url(raw)
+        if h2:
+            return f"https://www.youtube.com/{h2}"
+        if path:
+            return f"https://www.youtube.com{path}"
+    return raw.split("?")[0] or None
 
 
 def live_status_from_youtube(details: dict[str, Any]) -> str:

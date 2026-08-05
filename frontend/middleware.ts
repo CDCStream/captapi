@@ -31,6 +31,45 @@ function expireAuthCookies(request: NextRequest, response: NextResponse) {
   }
 }
 
+/**
+ * True only when Auth is certain the session is dead.
+ * Network blips / 5xx / refresh races must NOT wipe cookies — that was kicking
+ * freshly verified users out of /dashboard ~30–60s after api_key_created.
+ */
+function isDefinitiveAuthFailure(error: { message?: string; code?: string; status?: number } | null): boolean {
+  if (!error) {
+    // Cookie present but getUser returned null with no error → cookie is empty/junk.
+    return true;
+  }
+  const code = (error.code || "").toLowerCase();
+  const msg = (error.message || "").toLowerCase();
+  const status = error.status;
+  const definitiveCodes = [
+    "refresh_token_not_found",
+    "refresh_token_already_used",
+    "invalid_refresh_token",
+    "session_not_found",
+    "user_not_found",
+    "user_banned",
+    "bad_jwt",
+    "invalid_jwt",
+    "session_expired",
+  ];
+  if (definitiveCodes.some((c) => code === c || code.includes(c))) return true;
+  if (
+    msg.includes("refresh token") ||
+    msg.includes("session missing") ||
+    msg.includes("invalid jwt") ||
+    msg.includes("jwt expired") ||
+    msg.includes("user not found")
+  ) {
+    return true;
+  }
+  // GoTrue auth rejection — not a transport failure.
+  if (status === 401 || status === 403) return true;
+  return false;
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -55,6 +94,7 @@ export async function middleware(request: NextRequest) {
 
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
   const authCookie = hasSupabaseAuthCookie(request);
@@ -68,12 +108,8 @@ export async function middleware(request: NextRequest) {
     return target;
   };
 
-  const clearSessionToLogin = async (reason: string, redirectPath?: string) => {
-    try {
-      await supabase.auth.signOut();
-    } catch {
-      // Best-effort — still redirect and attach whatever cookie clears we got.
-    }
+  /** Clear cookies locally — do NOT call Auth signOut (revokes refresh tokens). */
+  const clearSessionToLogin = (reason: string, redirectPath?: string) => {
     // Already on login/signup: clear cookies in place — never redirect to self
     // (that caused ERR_TOO_MANY_REDIRECTS when the JWT cookie was stale).
     if (isAuthPage) {
@@ -92,8 +128,23 @@ export async function middleware(request: NextRequest) {
     return res;
   };
 
-  // Stale session: browser still has the JWT cookie but Auth user is gone.
+  // Cookie present but no user: only wipe when Auth is definitive. Transient
+  // getUser failures (network / 5xx / refresh race) used to hard-signOut and
+  // end the onboarding journey mid-dashboard.
   if (authCookie && !user) {
+    if (!isDefinitiveAuthFailure(userError)) {
+      // Leave cookies alone. Soft-bounce protected routes so the client can retry
+      // without destroying the session; public pages just continue.
+      if (isProtected) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/login";
+        url.search = "";
+        url.searchParams.set("reason", "auth-retry");
+        url.searchParams.set("redirect", `${path}${request.nextUrl.search}`);
+        return copyAuthCookies(NextResponse.redirect(url));
+      }
+      return supabaseResponse;
+    }
     return clearSessionToLogin(
       "session-expired",
       path.startsWith("/dashboard") ? path : undefined,

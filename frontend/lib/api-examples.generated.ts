@@ -3279,13 +3279,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "13460080",
         "username": "nike",
         "displayName": "Nike",
-        "url": "https://instagram.com/nike",
+        "url": "https://www.instagram.com/nike/",
         "bio": "Just Do It.",
         "followers": 291623659,
         "following": 264,
         "postCount": 1668,
         "verified": true,
-        "private": false,
         "isPrivate": false,
         "isBusinessAccount": true,
         "isProfessionalAccount": true,
@@ -3297,7 +3296,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           }
         ],
         "profileImage": "https://instagram.fadb3-1.fna.fbcdn.net/v/t51.82787-19/551608484_18567162979020081_1135468084872726555_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4zOTkuYzIifQ&_nc_ht=instagram.fadb3-1.fna.fbcdn.net&_nc_cat=1&_nc_oc=Q6cZ2gE3fm8U-4zquMXb-DCa2XFEqsm-rZ_BWOXzqz5HNEFIKiHcxSpjEdlCVP0v32ZLy3tMLEVo2JvIx8SA4xy09gYm&_nc_ohc=jOWQehR8N0kQ7kNvwHCN0UL&_nc_gid=Ov3EEVEX3-M4dSFajR8eTQ&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQE94ajaP7La8AcjJgA2RbClgYMx9xGFF0qoyUObgazGWg&oe=6A764BBA&_nc_sid=8b3546",
-        "profileImageHd": "https://instagram.fadb3-1.fna.fbcdn.net/v/t51.82787-19/551608484_18567162979020081_1135468084872726555_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4zOTkuYzIifQ&_nc_ht=instagram.fadb3-1.fna.fbcdn.net&_nc_cat=1&_nc_oc=Q6cZ2gE3fm8U-4zquMXb-DCa2XFEqsm-rZ_BWOXzqz5HNEFIKiHcxSpjEdlCVP0v32ZLy3tMLEVo2JvIx8SA4xy09gYm&_nc_ohc=jOWQehR8N0kQ7kNvwHCN0UL&_nc_gid=Ov3EEVEX3-M4dSFajR8eTQ&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQE94ajaP7La8AcjJgA2RbClgYMx9xGFF0qoyUObgazGWg&oe=6A764BBA&_nc_sid=8b3546"
+        "profileImageHd": "https://instagram.fadb3-1.fna.fbcdn.net/v/t51.82787-19/551608484_18567162979020081_1135468084872726555_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4zOTkuYzIifQ&_nc_ht=instagram.fadb3-1.fna.fbcdn.net&_nc_cat=1&_nc_oc=Q6cZ2gE3fm8U-4zquMXb-DCa2XFEqsm-rZ_BWOXzqz5HNEFIKiHcxSpjEdlCVP0v32ZLy3tMLEVo2JvIx8SA4xy09gYm&_nc_ohc=jOWQehR8N0kQ7kNvwHCN0UL&_nc_gid=Ov3EEVEX3-M4dSFajR8eTQ&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQE94ajaP7La8AcjJgA2RbClgYMx9xGFF0qoyUObgazGWg&oe=6A764BBA&_nc_sid=8b3546",
+        "platform": "instagram",
+        "imageExpiresAt": "2026-08-07T21:18:50Z"
       }
     ],
     "mode": "resolve"
@@ -3919,7 +3920,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         ]
       }
     ],
-    "note": "Instagram returns a small overlapping batch per call; duplicates across requests are expected."
+    "note": "Snapshot-backed trending list (typical freshness under 24h). Instagram returns a small overlapping batch per scrape; duplicates across requests are expected. For live keyword search use /v1/instagram/reels-search.",
+    "cached": true,
+    "cachedAt": "2026-07-29T18:00:00Z",
+    "stale": true,
+    "ageHours": 32.0
   },
   "kick-clip": {
     "channelUrl": "https://kick.com/xqc",
@@ -14985,27 +14990,36 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "videoCount": 994,
     "viewCount": 135029730952,
     "thumbnailUrl": "https://yt3.googleusercontent.com/nxYrc_1_2f77DoBadyxMTmv7ZpRZapHR5jbuYe7PlPd5cIRJxtNNEYyOC0ZsxaDyJJzXrnJiuDE=s900-c-k-c0x00ffffff-no-rj",
-    "bannerUrl": "https://yt3.googleusercontent.com/nxYrc_1_2f77DoBadyxMTmv7ZpRZapHR5jbuYe7PlPd5cIRJxtNNEYyOC0ZsxaDyJJzXrnJiuDE=s160-c-k-c0x00ffffff-no-rj",
-    "country": "United States",
+    "bannerUrl": null,
+    "country": "US",
     "joinedDate": "Feb 19, 2012",
     "verified": true,
     "links": [
       {
         "text": "$1,000,000 Contest",
-        "url": "themostdangerousgames.com"
+        "url": "https://themostdangerousgames.com"
       },
       {
         "text": "Follow",
-        "url": "instagram.com/mrbeast"
+        "url": "https://instagram.com/mrbeast"
       },
       {
         "text": "Twitter",
-        "url": "twitter.com/MrBeast"
+        "url": "https://twitter.com/MrBeast"
       },
       {
         "text": "Facebook",
-        "url": "facebook.com/mrbeast"
+        "url": "https://facebook.com/mrbeast"
       }
+    ],
+    "platform": "youtube",
+    "canonicalUrl": "https://www.youtube.com/@MrBeast",
+    "countryName": "United States",
+    "joinedAt": "2012-02-19",
+    "tags": [
+      "challenge",
+      "philanthropy",
+      "giveaway"
     ]
   },
   "youtube-channel-playlists": {

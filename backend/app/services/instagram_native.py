@@ -43,6 +43,36 @@ _UA = (
     "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"
 )
 
+
+def canonical_instagram_profile_url(username: str | None) -> str | None:
+    """Canonical profile URL: ``https://www.instagram.com/{user}/`` (www + slash)."""
+    u = safe_str(username)
+    if not u:
+        return None
+    return f"https://www.instagram.com/{u.lstrip('@')}/"
+
+
+def cdn_image_expires_at(url: str | None) -> str | None:
+    """Parse Instagram CDN ``oe=`` (hex unix) or shared ``expire`` helpers."""
+    raw = safe_str(url)
+    if not raw:
+        return None
+    if "oe=" in raw:
+        try:
+            qs = urllib.parse.parse_qs(urllib.parse.urlparse(raw).query)
+            oe = (qs.get("oe") or [None])[0]
+            if oe:
+                ts = int(oe, 16)
+                if ts > 0:
+                    return datetime.fromtimestamp(ts, tz=timezone.utc).strftime(
+                        "%Y-%m-%dT%H:%M:%SZ"
+                    )
+        except (ValueError, OSError, OverflowError, TypeError):
+            pass
+    from app.utils.media_urls import cdn_expires_at
+
+    return cdn_expires_at(raw)
+
 # One rate-limited tier shouldn't kill the fast path; each tier gets its own
 # session (fresh IP + csrf token).
 _TIERS: tuple[str, ...] = ("datacenter", "residential")
@@ -2092,7 +2122,7 @@ def _related_profiles(user: dict[str, Any]) -> list[dict[str, Any]] | None:
                 or node.get("profile_pic_url_hd")
                 or node.get("profilePicUrl")
             ),
-            "url": f"https://instagram.com/{username}" if username else None,
+            "url": canonical_instagram_profile_url(username),
         }
         out.append({k: v for k, v in row.items() if v is not None})
     return out or None
@@ -2153,9 +2183,10 @@ def map_basic_profile(user: dict[str, Any]) -> dict[str, Any]:
     if latest_reel is not None and not isinstance(latest_reel, (int, float, str)):
         latest_reel = safe_str(latest_reel) or None
 
+    profile_image = pic_hd or pic
     out: dict[str, Any] = {
         "platform": "instagram",
-        "url": f"https://instagram.com/{username}" if username else None,
+        "url": canonical_instagram_profile_url(username),
         "id": uid,
         "pk": safe_str(user.get("pk") or uid),
         "username": username,
@@ -2196,9 +2227,10 @@ def map_basic_profile(user: dict[str, Any]) -> dict[str, Any]:
             if user.get("should_show_category") is None
             else bool(user.get("should_show_category"))
         ),
-        "profileImage": pic_hd or pic,
+        "profileImage": profile_image,
         "profileImageHd": pic_hd,
         "profileImageUrl": pic,
+        "imageExpiresAt": cdn_image_expires_at(profile_image),
         "externalUrl": external,
         "fbid": safe_str(user.get("fbid") or user.get("fbid_v2")),
         "pronouns": pronouns,
@@ -2359,7 +2391,7 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
     )
     return {
         "platform": "instagram",
-        "url": f"https://instagram.com/{username}" if username else None,
+        "url": canonical_instagram_profile_url(username),
         "username": username,
         "displayName": safe_str(user.get("full_name")),
         "bio": safe_str(user.get("biography")),
@@ -2368,6 +2400,7 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
         "postCount": post_count,
         "verified": False if verified is None else bool(verified),
         "profileImage": profile_image,
+        "imageExpiresAt": cdn_image_expires_at(profile_image),
         "externalUrl": external,
         # --- additive (non-breaking) ---
         "id": safe_str(user.get("id") or user.get("pk")),
@@ -2427,11 +2460,13 @@ def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
     if is_business is None:
         is_business = user.get("is_business")
     is_pro = user.get("is_professional_account")
+    profile_image = pic_hd or pic
     out: dict[str, Any] = {
+        "platform": "instagram",
         "id": uid,
         "username": username,
         "displayName": safe_str(user.get("full_name")),
-        "url": f"https://instagram.com/{username}" if username else None,
+        "url": canonical_instagram_profile_url(username),
         "bio": safe_str(user.get("biography")),
         "followers": _edge_count(user.get("edge_followed_by") or user.get("follower_count")),
         "following": _edge_count(user.get("edge_follow") or user.get("following_count")),
@@ -2441,16 +2476,16 @@ def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
             or user.get("all_media_count")
         ),
         "verified": False if verified is None else bool(verified),
-        # Keep ``private`` for back-compat; ``isPrivate`` matches channel-details.
-        "private": False if private is None else bool(private),
+        # Canonical privacy flag — matches channel-details / basic-profile (no ``private`` alias).
         "isPrivate": False if private is None else bool(private),
         "isBusinessAccount": None if is_business is None else bool(is_business),
         "isProfessionalAccount": None if is_pro is None else bool(is_pro),
         "categoryName": category,
         "externalUrl": external,
         "bioLinks": bio_links,
-        "profileImage": pic_hd or pic,
+        "profileImage": profile_image,
         "profileImageHd": pic_hd,
+        "imageExpiresAt": cdn_image_expires_at(profile_image),
         "fbid": safe_str(user.get("fbid") or user.get("fbid_v2")),
         "businessAddress": _business_address(user),
         "relatedProfiles": _related_profiles(user),

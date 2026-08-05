@@ -612,6 +612,26 @@ def strip_comments_on_linkedin_suffix(text: str | None) -> str | None:
     return _COMMENTS_ON_LINKEDIN_SUFFIX_RE.sub("", cleaned).rstrip() or None
 
 
+# Guest HTML often returns country hosts (lt.linkedin.com, uk.linkedin.com…).
+# Profile/company join keys must stay on www.
+_LI_COUNTRY_HOST_RE = re.compile(
+    r"^(https?://)([a-z]{2})\.linkedin\.com(/.*)?$",
+    re.I,
+)
+
+
+def canonicalize_linkedin_url(url: str | None) -> str | None:
+    """Map ``xx.linkedin.com/...`` → ``https://www.linkedin.com/...``."""
+    cleaned = safe_str(url)
+    if not cleaned:
+        return None
+    m = _LI_COUNTRY_HOST_RE.match(cleaned)
+    if m:
+        path = m.group(3) or "/"
+        return f"https://www.linkedin.com{path}"
+    return cleaned
+
+
 def _author_from_ld(block: dict[str, Any]) -> dict[str, Any]:
     author = block.get("author") if isinstance(block.get("author"), dict) else None
     if author is None:
@@ -624,7 +644,7 @@ def _author_from_ld(block: dict[str, Any]) -> dict[str, Any]:
             author = {}
     author_out: dict[str, Any] = {
         "name": safe_str(author.get("name")),
-        "url": safe_str(author.get("url")),
+        "url": canonicalize_linkedin_url(author.get("url")),
     }
     # Public post LD almost never includes job title; keep when present.
     # Do NOT invent headline from follower counts / SEO chrome.

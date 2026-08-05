@@ -74,7 +74,9 @@ class YouTubeComments(BaseModel):
 
 
 class YouTubeChannelDetails(BaseModel):
+    platform: str = "youtube"
     url: str
+    canonicalUrl: str | None = None
     id: str | None = None
     name: str
     handle: str | None = None
@@ -85,6 +87,8 @@ class YouTubeChannelDetails(BaseModel):
     thumbnailUrl: str | None = None
     bannerUrl: str | None = None
     country: str | None = None
+    countryName: str | None = None
+    joinedAt: str | None = None
     joinedDate: str | None = None
     verified: bool | None = None
     links: list[dict[str, str]] = []

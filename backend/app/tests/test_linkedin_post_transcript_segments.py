@@ -71,6 +71,26 @@ def test_count_words_emoji_zero_url_one():
     assert len(text.split()) == 19
     assert count_words("📊:") == 0
     assert count_words("hello 🚀 world") == 2
+    # Punctuation-only tokens (&, -) are not words.
+    seg4 = (
+        "Bookmark it & watch the talk today - it might be the most valuable "
+        "thing you learn about real-world AI engineering all month."
+    )
+    assert count_words(seg4) == 21
+    assert "&" in seg4.split() and "-" in seg4.split()
+
+
+def test_canonicalize_linkedin_country_host():
+    from app.services.linkedin_native import canonicalize_linkedin_url
+
+    assert (
+        canonicalize_linkedin_url("https://lt.linkedin.com/in/linasbeliunas")
+        == "https://www.linkedin.com/in/linasbeliunas"
+    )
+    assert (
+        canonicalize_linkedin_url("https://www.linkedin.com/in/linasbeliunas")
+        == "https://www.linkedin.com/in/linasbeliunas"
+    )
 
 
 def test_strip_comments_on_linkedin_suffix():
