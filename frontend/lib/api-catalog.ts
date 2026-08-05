@@ -2817,12 +2817,12 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     tagline:
       "TikTok Creative Center Top Ads — advertiser, dates when present, CTR/likes, video (flat 2 credits).",
     longDescription:
-      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — datesPresent counts filled rows), likes + likesIsApproximate, ctr/ctrTier, costTier, isSparkAd, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Spark/Non-Spark-only adFormat and single-country query echoes are omitted. Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis (soft creative_center fallback when literal matches are empty). Empty results and upstream timeouts are never charged. Upstream capped (~40s Decodo / ~20s Apify). Flat 2 credits per successful call with ads — native or Apify (not per result). For DSA firstShown/lastShown use /tiktok/search.",
+      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — datesPresent counts filled rows), likes + likesIsApproximate, ctr/ctrTier, costTier, isSparkAd, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Spark/Non-Spark-only adFormat and single-country query echoes are omitted. Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis (soft creative_center fallback when literal matches are empty). Empty results and upstream timeouts are never charged. Decodo first; Apify sync wait ~20s then continues in the background and warms cache — retry with cache=true after retryAfterSeconds (~60). Flat 2 credits per successful call with ads (not per result). For DSA firstShown/lastShown use /tiktok/search.",
     delivers: [
       "advertiser{id,name} for grouping + Spark author fallback",
       "firstSeen/lastSeen + datesPresent (often null on CC list)",
-      "Flat 2 credits when ads return (not per-result)",
-      "matchBasis transparency; empty/timeout free",
+      "Fast-fail + background Apify warm (cache=true on retry)",
+      "Flat 2 credits when ads return; empty/timeout free",
     ],
   },
   {
@@ -6356,6 +6356,10 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `How many credits does Top Ads cost?`,
       a: `Flat 2 credits per successful call when ads are returned — same on Decodo-native and Apify fallback (not per result). Empty results and upstream timeouts are never charged.`,
+    });
+    list.push({
+      q: `Why did Top Ads return 503 upstream_timeout — and will retry work?`,
+      a: `Apify often needs ~60–90s. We wait ~20s on the request, leave the actor running, and warm the Redis cache in the background. Retry with cache=true after retryAfterSeconds (~60). A later call may also reuse a recent SUCCEEDED Apify snapshot without cache=true. Timeouts are never billed.`,
     });
     list.push({
       q: `Why did my keyword return zero — or soft Creative Center ads?`,

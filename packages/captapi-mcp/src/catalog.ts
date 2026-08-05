@@ -644,7 +644,7 @@ const TIKTOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
     name: "TikTok Creative Center Top Ads",
     path: "/v1/ad-library/tiktok/top-ads",
     credits: 2,
-    summary: "Creative Center Top Ads — flat 2 credits (not per-result), advertiser{}, dates when present, empty free.",
+    summary: "Creative Center Top Ads — flat 2 credits; Apify fast-fail+background warm (retry cache=true).",
     params: [
       { name: "q", type: "string", required: false, description: "Optional keyword (substring). See match + matchedFrom." },
       { name: "match", type: "string", required: false, description: 'Keyword mode: "any" (default) or "all".' },

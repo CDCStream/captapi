@@ -7816,7 +7816,7 @@
           "Ad Library"
         ],
         "summary": "TikTok Creative Center Top Ads",
-        "description": "High-performing TikTok ads from Creative Center Top Ads (ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — check datesPresent), likes (+likesIsApproximate), ctr/ctrTier, costTier, resolved industry/objective, isSparkAd, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis. Empty results are never charged. Upstream capped (~40s Decodo / ~20s Apify). Flat 2 credits when ads are returned (native or Apify — not per result). For DSA firstShown/lastShown use /v1/ad-library/tiktok/search.",
+        "description": "High-performing TikTok ads from Creative Center Top Ads (ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — check datesPresent), likes (+likesIsApproximate), ctr/ctrTier, costTier, resolved industry/objective, isSparkAd, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis. Empty results are never charged. Sync wait ~20s on Apify; the actor keeps running and warms the cache — retry with cache=true after retryAfterSeconds (~60). Flat 2 credits when ads are returned (native or Apify — not per result). For DSA firstShown/lastShown use /v1/ad-library/tiktok/search.",
         "operationId": "tiktok_top_ads_v1_ad_library_tiktok_top_ads_get",
         "security": [
           {
