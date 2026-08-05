@@ -928,17 +928,18 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Snapshot-backed trending Reels (typical freshness <24h) — videos only, flat 1 credit. Use reels-search for live results.",
     longDescription:
-      "Trending Reels is served from a periodic snapshot (native /reels when available, otherwise any-age Apify country snapshot). Typical freshness is under 24 hours — check cached / cachedAt / stale / ageHours on the response and decide whether that is fresh enough for your job. This is not a live Explore scrape: photos and carousels are never returned as Reels. Instagram only yields a small overlapping batch per scrape, so duplicates across calls are expected. For live keyword search use Instagram Reels Search. Cold countries (no snapshot yet) return 503 with error.code=warming + Retry-After: 600 while a background refresh runs (sync wait capped at ~15s — never multi-minute hangs). Unsupported countries return 400 with supportedCountries[]. Flat 1 credit per successful call. Pass cache=true for the 24h shared Redis cache.",
+      "Trending Reels is served from a periodic snapshot (native /reels when available, otherwise any-age Apify country snapshot). Typical snapshot freshness is under 24 hours — check cached / snapshotAt / stale / ageHours. Each reel includes engagement.views (+ viewsInstagram/viewsFacebook when Instagram exposes the split), caption (not a duplicated description), author.url as https://www.instagram.com/{user}/, and countryCode (ISO) alongside the country name. Photos/carousels are never returned. Instagram only yields a small overlapping batch per scrape, so duplicates across calls are expected. Content older than ~180 days is dropped as Explore resurfacing — not a strict 24h content window. For live keyword search use Instagram Reels Search. Cold countries return 503 warming + Retry-After: 600. Flat 1 credit per successful call.",
     delivers: [
-      "Snapshot-backed list with cached / cachedAt / stale / ageHours",
-      "Video Reels only — never Explore photos",
-      "Flat 1 credit (cheaper than live scrapes by design)",
-      "country localization (35 countries); 400 lists supportedCountries",
+      "Snapshot freshness: cached / snapshotAt / stale / ageHours",
+      "engagement.views (+ IG/FB split when available)",
+      "countryCode ISO + canonical author.url",
+      "Video Reels only — never Explore photos; flat 1 credit",
     ],
     platformLimits: [
-      "Not a live feed — typical freshness under 24h; use /v1/instagram/reels-search when you need an immediate keyword scrape.",
+      "Not a live feed — typical snapshot freshness under 24h; use /v1/instagram/reels-search for immediate keyword scrapes.",
       "Cold country (never snapshotted) returns 503 warming with Retry-After: 600 while Apify refreshes in the background.",
-      "Photos / carousels / multi-year Explore resurfaces are filtered out — we never invent Reels from the Explore photo grid.",
+      "Photos / carousels / Explore resurfaces older than ~180 days are filtered out.",
+      "Logged-out Polaris sometimes withholds play counts — we backfill from author feeds when possible; views may still be null.",
     ],
   },
   {
@@ -1162,9 +1163,70 @@ const FACEBOOK: Spec[] = [
 ];
 
 const FACEBOOK_MARKETPLACE: Spec[] = [
-  { slug: "facebook-marketplace-search", name: "Facebook Marketplace Search API", shortName: "Marketplace Search", category: "search", method: "GET", path: "/v1/facebook/marketplace-search", credits: 2, tagline: "Search Facebook Marketplace by keyword and city name — price filters, sort, condition, radius, and createdAt. Flat 2 credits.", longDescription: "Search Facebook Marketplace with a product keyword and a city/place name (no lat/lng required). Each result includes title, price (+ priceAmount in minor units), strikethrough price when discounted, categoryId, location, deliveryTypes, isSold/isLive/isPending/isHidden, cover photo, and createdAt. Optional filters: minPrice, maxPrice, sortBy, daysSinceListed, condition, deliveryMethod, availability, radiusMiles, category. Cursor pagination via nextCursor/hasMore within the fetched SSR page. Default list path is flat 2 credits and already includes the cover photo. Pass details=true for description, condition, coordinates, and the full photo gallery — billed as 2 + 2 credits per listing." },
-  { slug: "facebook-marketplace-location-search", name: "Facebook Marketplace Location Search API", shortName: "Marketplace Locations", category: "search", method: "GET", path: "/v1/facebook/marketplace-location-search", credits: 2 },
-  { slug: "facebook-marketplace-item", name: "Facebook Marketplace Item API", shortName: "Marketplace Item", category: "details", method: "GET", path: "/v1/facebook/marketplace-item", credits: 2 , tagline: "Get a Facebook Marketplace listing — title, price, condition, and location as structured JSON.", longDescription: "Paste a Facebook Marketplace item URL and get the listing as clean JSON: title, price, description, condition, delivery types, photos, and location when available. Flat 2 credits per call." },
+  {
+    slug: "facebook-marketplace-search",
+    name: "Facebook Marketplace Search API",
+    shortName: "Marketplace Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/facebook/marketplace-search",
+    credits: 2,
+    tagline:
+      "Search Marketplace by keyword + city — filters, isLocal/shipsOutsideRadius, opaque cursor (2 credits).",
+    longDescription:
+      "Search Facebook Marketplace with a product keyword and a city/place name (no lat/lng required). Each result: title, price + priceAmount (minor units), categoryId, location/city/state, deliveryTypes, status (available|pending|sold) with isSold/isPending/isHidden, cover image, createdAt, plus isLocal and shipsOutsideRadius so nationwide shipped listings (SHIPPING / SHIPPING_ONSITE) are not mistaken for nearby pickups. Facebook can surface shipped inventory outside radiusMiles — use deliveryMethod=local_pickup for local-only, or filter on isLocal. Optional filters: minPrice, maxPrice, sortBy, daysSinceListed, condition, deliveryMethod, availability, radiusMiles, category. Opaque nextCursor within the fetched SSR page. Default list path is flat 2 credits (cover photo in image — photos[] only when the card has more than one). Pass details=true for description, condition, coordinates, full photo gallery, seller{} when Facebook exposes it, and distanceMiles — billed as 2 + 2 credits per listing.",
+    delivers: [
+      "12 filters + city-name location (no lat/lng required)",
+      "isLocal / shipsOutsideRadius on every row",
+      "status enum (available|pending|sold)",
+      "details=true = 2 + 2 credits per listing (stated upfront)",
+    ],
+    platformLimits: [
+      "Shipped listings can appear outside radiusMiles — prefer deliveryMethod=local_pickup or isLocal.",
+      "Deep feed pagination beyond one SSR/scroll page is not replayable across Decodo calls.",
+    ],
+  },
+  {
+    slug: "facebook-marketplace-location-search",
+    name: "Facebook Marketplace Location Search API",
+    shortName: "Location Resolve",
+    category: "search",
+    method: "GET",
+    path: "/v1/facebook/marketplace-location-search",
+    credits: 2,
+    tagline:
+      "Disambiguate city names into Marketplace hubs — Facebook cityPageId + lat/lng (2 credits).",
+    longDescription:
+      "Resolve a city/place query into Facebook Marketplace location hubs with the canonical cityPageId (same id marketplace-search listings expose), slug, city/state, and coordinates when available. marketplace-search already accepts a city string with no lat/lng required — use this endpoint when the name is ambiguous (Austin TX vs Austin MN vs Austin IN) or you need cityPageId/coordinates before searching. Bare city names may return multiple candidates; include a state (e.g. 'Austin, TX') for a single hit. Flat 2 credits.",
+    delivers: [
+      "Facebook cityPageId as id (same as search cityPageId)",
+      "Multi-candidate disambiguation for bare city names",
+      "lat/lng + Marketplace hub slug when available",
+    ],
+    platformLimits: [
+      "Optional geocode — skip when marketplace-search's city string is enough.",
+      "cityPageId may be omitted when Facebook's hub HTML does not expose city_page.id.",
+    ],
+  },
+  {
+    slug: "facebook-marketplace-item",
+    name: "Facebook Marketplace Item API",
+    shortName: "Marketplace Item",
+    category: "details",
+    method: "GET",
+    path: "/v1/facebook/marketplace-item",
+    credits: 2,
+    tagline:
+      "Marketplace listing — title, priceAmount, status, seller{}, condition, coords (2 credits).",
+    longDescription:
+      "Paste a Facebook Marketplace item URL and get the listing as clean JSON aligned with search rows: title, price + priceAmount (minor units), currency, categoryId, location/city/state/cityPageId, status (available|pending|sold) with isSold/isPending/isHidden, deliveryTypes, image + photos[], createdAt, plus detail-only description, condition, latitude/longitude, and seller{id,name,url,joinedAt,rating} when Facebook's public page exposes marketplace_listing_seller. Flat 2 credits. Session-only isViewerSeller is never returned.",
+    delivers: [
+      "Same core fields as search rows (incl. priceAmount, city/state)",
+      "status enum — not livestream isLive",
+      "seller{} when Facebook exposes it",
+      "description, condition, lat/lng, full photos[]",
+    ],
+  },
 ];
 
 const FACEBOOK_EVENTS: Spec[] = [
@@ -1759,17 +1821,30 @@ const RUMBLE: Spec[] = [
     path: "/v1/rumble/video-details",
     credits: 1,
     tagline:
-      "Rumble video metadata — real likes/comments (null when unknown), durationSeconds, captions, and media qualities.",
+      "Rumble video metadata — real likes/comments (null when unknown), durationSeconds + durationText, captions, media.",
     longDescription:
-      "Paste a Rumble video URL and get clean JSON: title, description, views, likes/dislikes/comments (null when Rumble does not expose them — never fake zeros), duration + durationSeconds, publishedAt, thumbnail, width/height, channel name/url/handle plus channelFollowers and channelVerified, numericId/embedId/shareUrl/embedUrl, captions (language → .vtt path), media (mp4 and/or tar qualities, timeline, audio, hls — each with bitrate/size/resolution when present), and a flat streams[] list. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+      "Paste a Rumble video URL and get clean JSON: title, description, views, likes/dislikes/comments (null when Rumble does not expose them — never fake zeros), durationSeconds + durationText (same pair as channel-videos — no legacy duration string), publishedAt, thumbnail, width/height, channel name/url/handle plus channelFollowers and channelVerified, numericId/embedId/shareUrl/embedUrl (real embed id, not the page permalink), captions (language → .vtt path), media (mp4 and/or tar qualities, timeline, audio, hls), and streams[]. Flat 1 credit. Pass cache=true for the 24h shared cache.",
     delivers: [
       "Engagement counts stay null when unknown (no fake zeros)",
-      "durationSeconds plus human duration string",
-      "captions{} with .vtt paths and media{mp4|tar,timeline,audio,hls}",
-      "channelFollowers + channelVerified without a second channel call",
+      "durationSeconds + durationText (aligned with channel-videos)",
+      "Real embedId/embedUrl (page id ≠ embed id on Rumble)",
+      "captions{} + media{mp4|tar,timeline,audio,hls}",
     ],
   },
-  { slug: "rumble-channel-videos", name: "Rumble Channel Videos API", shortName: "Channel Videos", category: "list", method: "GET", path: "/v1/rumble/channel-videos", credits: 12, creditsPerResult: 0.6 },
+  {
+    slug: "rumble-channel-videos",
+    name: "Rumble Channel Videos API",
+    shortName: "Channel Videos",
+    category: "list",
+    method: "GET",
+    path: "/v1/rumble/channel-videos",
+    credits: 12,
+    creditsPerResult: 0.6,
+    tagline:
+      "Rumble channel uploads — type, durationSeconds + durationText, engagement; embedUrl only when a real embed id is known.",
+    longDescription:
+      "List a channel's uploads as clean JSON. Each row: id, url, type (video|short|live), title, channel/channelUrl/channelHandle, views/likes/dislikes/comments, durationSeconds + durationText (same pair as video-details), publishedAt, thumbnail, streams[], shareUrl. embedUrl/embedId are present only when Rumble exposes a distinct embed id — page permalink ids are never used to invent /embed/{id}/ URLs (those 404). Flat ~0.6 credits per returned video (min 2).",
+  },
   { slug: "rumble-search", name: "Rumble Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/rumble/search", credits: 12, creditsPerResult: 0.6 },
   { slug: "rumble-comments", name: "Rumble Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/rumble/comments", credits: 2 },
 ];
@@ -1906,16 +1981,159 @@ const TIKTOK_SHOP: Spec[] = [
 ];
 
 const GITHUB: Spec[] = [
-  { slug: "github-user", name: "GitHub User API", shortName: "User", category: "channel", method: "GET", path: "/v1/github/user", credits: 1, tagline: "GitHub public profile — login, bio, email when public, followers, and repos as clean JSON (1 credit).", longDescription: "Pass a GitHub username or profile URL and get the public /users/{username} profile as camelCase JSON: login, name, company, blog, location, email (only when the user made it public), bio, avatar, publicRepos/publicGists, followers/following, twitterUsername, hireable, nodeId, siteAdmin, and createdAt/updatedAt. type is user or organization. Flat 1 credit. Honesty note: this wraps GitHub's free public REST API (5,000 req/hour with a personal access token). Prefer Captapi for one-key multi-platform workflows; call api.github.com directly for GitHub-only jobs so you do not spend credits on free data." },
-  { slug: "github-repositories", name: "GitHub Repositories API", shortName: "Repositories", category: "list", method: "GET", path: "/v1/github/repositories", credits: 12, creditsPerResult: 0.4 },
-  { slug: "github-pull-requests", name: "GitHub Pull Requests API", shortName: "Pull Requests", category: "list", method: "GET", path: "/v1/github/pull-requests", credits: 12, creditsPerResult: 0.4 },
-  { slug: "github-activity", name: "GitHub Activity API", shortName: "Activity", category: "list", method: "GET", path: "/v1/github/activity", credits: 12, creditsPerResult: 0.4 , tagline: "List a GitHub user's recent public activity — pushes, issues, pull requests, and similar events." },
-  { slug: "github-followers", name: "GitHub Followers API", shortName: "Followers", category: "list", method: "GET", path: "/v1/github/followers", credits: 12, creditsPerResult: 0.4 },
-  { slug: "github-following", name: "GitHub Following API", shortName: "Following", category: "list", method: "GET", path: "/v1/github/following", credits: 12, creditsPerResult: 0.4 },
-  { slug: "github-contributions", name: "GitHub Contributions API", shortName: "Contributions", category: "details", method: "GET", path: "/v1/github/contributions", credits: 3 , tagline: "Get a GitHub user's contribution activity — contribution counts and calendar-style signals as structured JSON.", longDescription: "Pass a GitHub username or profile URL and get contribution activity as clean JSON — useful for developer profiling and hiring screens. Flat 3 credits per call." },
-  { slug: "github-repository", name: "GitHub Repository API", shortName: "Repository", category: "details", method: "GET", path: "/v1/github/repository", credits: 3 , tagline: "Get a GitHub repository — description, stars, forks, language, license, and topics as structured JSON.", longDescription: "Pass a repository URL or owner/name and get the repo metadata as clean JSON: description, stars, forks, open issues, primary language, license, topics, and timestamps. Flat 3 credits per call." },
-  { slug: "github-trending-repositories", name: "GitHub Trending Repositories API", shortName: "Trending Repositories", category: "search", method: "GET", path: "/v1/github/trending-repositories", credits: 12, creditsPerResult: 0.6 },
-  { slug: "github-trending-developers", name: "GitHub Trending Developers API", shortName: "Trending Developers", category: "search", method: "GET", path: "/v1/github/trending-developers", credits: 12, creditsPerResult: 0.6 },
+  {
+    slug: "github-user",
+    name: "GitHub User API",
+    shortName: "User",
+    category: "channel",
+    method: "GET",
+    path: "/v1/github/user",
+    credits: 1,
+    tagline:
+      "GitHub public profile — login, type User|Organization, email when public, followers (1 credit).",
+    longDescription:
+      "Pass a GitHub username or profile URL and get the public /users/{username} profile as camelCase JSON: login, name, company, blog, location, email (only when the account made it public — omitted when null), bio, avatar, publicRepos/publicGists, followers/following, twitterUsername, hireable, nodeId, siteAdmin, and createdAt/updatedAt. type is User or Organization (GitHub's casing) so orgs are distinguishable from people. Flat 1 credit. Honesty note: this is a thin wrap of GitHub's free public REST API (60 req/hour unauthenticated; 5,000/hour with a personal access token). Captapi's value here is one key across ~32 platforms, no per-platform rate-limit handling, and the same response envelope/field names as other profile endpoints — not removing a GitHub OAuth barrier (there isn't one for public profiles). Call api.github.com directly for GitHub-only jobs.",
+  },
+  {
+    slug: "github-repositories",
+    name: "GitHub Repositories API",
+    shortName: "Repositories",
+    category: "list",
+    method: "GET",
+    path: "/v1/github/repositories",
+    credits: 12,
+    creditsPerResult: 0.4,
+    tagline:
+      "List a user's repos with sort/direction/type — opaque Link cursor (~0.4/repo).",
+    longDescription:
+      "List repositories from GitHub REST /users/{login}/repos. Pass sort=created|updated|pushed|full_name (default updated), direction=asc|desc, and type=owner|member|all — all echoed at the top level. Each row is the same camelCase repo card as github/repository minus watchers and parent (list payloads omit subscribers_count and parent — call github/repository for those). Opaque nextCursor from GitHub's Link header. ~0.4 credits/repo (default limit 30 → ~12). Pricing vs detail: single-repo lookup is flat 1 credit; this list is per-result for bulk. Trending is a separate HTML scrape at flat 2.",
+  },
+  {
+    slug: "github-pull-requests",
+    name: "GitHub Pull Requests API",
+    shortName: "Pull Requests",
+    category: "list",
+    method: "GET",
+    path: "/v1/github/pull-requests",
+    credits: 12,
+    creditsPerResult: 0.4,
+    tagline:
+      "List repo PRs — draft, labels, author{}, head/base, opaque Link cursor (state echoed).",
+    longDescription:
+      "List pull requests for a repository via GitHub REST /pulls. Default state=open (pass closed|all — the applied filter is echoed as data.state). Each row: number, title, state, draft, labels[], author{id,login,avatar,url}, head/base refs, assignees, requestedReviewers, closedAt/mergedAt. Opaque nextCursor from GitHub's Link header (not a bare page number). Billing scales with results (~0.4/PR, min ~12 at default limit).",
+  },
+  {
+    slug: "github-activity",
+    name: "GitHub Activity API",
+    shortName: "Activity",
+    category: "list",
+    method: "GET",
+    path: "/v1/github/activity",
+    credits: 12,
+    creditsPerResult: 0.4,
+    tagline:
+      "Public events with typed payload (Push commits/ref, PR/issue action) — 90-event ceiling.",
+    longDescription:
+      "Recent public events from /users/{login}/events/public with a normalized payload per type: PushEvent → ref, size, commits[{sha,message}]; PullRequestEvent → action + PR fields; IssuesEvent → action + issue fields. actor is omitted (same as username). GitHub caps this feed at 90 events (~90 days) — eventCeiling is echoed and pagination stops there (limit max 90). Opaque nextCursor from the Link header. Not a contribution graph — use github/contributions for the heatmap.",
+  },
+  {
+    slug: "github-followers",
+    name: "GitHub Followers API",
+    shortName: "Followers",
+    category: "list",
+    method: "GET",
+    path: "/v1/github/followers",
+    credits: 3,
+    creditsPerResult: 0.1,
+    tagline:
+      "Follower cards {id, login, type, url, avatar} — ~0.1/row; large accounts are expensive to page fully.",
+    longDescription:
+      "List followers from /users/{login}/followers as {id, login, type (User|Organization), url, avatar}. Opaque nextCursor from GitHub's Link header. Billed ~0.1 credits/row (min 3; default limit 30 → ~3). There is no sampling/since parameter — paging a mega-account (~250k followers) costs ~25k credits at this rate; for full archives prefer api.github.com. Structurally identical to github/following.",
+  },
+  {
+    slug: "github-following",
+    name: "GitHub Following API",
+    shortName: "Following",
+    category: "list",
+    method: "GET",
+    path: "/v1/github/following",
+    credits: 3,
+    creditsPerResult: 0.1,
+    tagline:
+      "Accounts a user follows — same card and ~0.1/row pricing as followers.",
+    longDescription:
+      "List accounts from /users/{login}/following as {id, login, type, url, avatar}. Same shape, opaque Link cursor, and ~0.1 credits/row (min 3) as github/followers. No sampling parameter — large following lists are expensive to exhaust via Captapi.",
+  },
+  {
+    slug: "github-contributions",
+    name: "GitHub Contributions API",
+    shortName: "Contributions",
+    category: "details",
+    method: "GET",
+    path: "/v1/github/contributions",
+    credits: 2,
+    tagline:
+      "GitHub contribution graph — totalContributions, currentStreak, days[{date,count,level}] (2 credits).",
+    longDescription:
+      "Pass a GitHub username or profile URL and get the real last-year contribution calendar from github.com/users/{login}/contributions: totalContributions, from/to date range, currentStreak, and days[{date, count, level}] (the heatmap). source discloses that HTML calendar. This is not /users/{u}/events/public (max 90 events / 90 days) and not a sampled stars sum. Flat 2 credits.",
+  },
+  {
+    slug: "github-repository",
+    name: "GitHub Repository API",
+    shortName: "Repository",
+    category: "details",
+    method: "GET",
+    path: "/v1/github/repository",
+    credits: 1,
+    tagline:
+      "GitHub repo — stars, real watchers (subscribers), openIssuesAndPrs, license, parent when fork (1 credit).",
+    longDescription:
+      "Pass a repository URL or owner/name and get GitHub REST /repos/{owner}/{repo} as camelCase JSON: description, stars, forks, watchers (subscribers_count — people notified of activity; not the legacy watchers_count star alias), openIssuesAndPrs (GitHub's open_issues_count = open issues + open PRs), primary programming language, license (SPDX; NOASSERTION → null with licenseName kept), topics, parent when isFork, size, visibility, hasIssues/hasDiscussions, ownerType (User|Organization), and timestamps. Flat 1 credit. For the curated trending page (stars gained today/this week/month), use github/trending-repositories.",
+  },
+  {
+    slug: "github-trending-repositories",
+    name: "GitHub Trending Repositories API",
+    shortName: "Trending",
+    category: "search",
+    method: "GET",
+    path: "/v1/github/trending-repositories",
+    credits: 2,
+    tagline:
+      "github.com/trending — repos ranked by starsGained (daily|weekly|monthly), not all-time stars (2 credits).",
+    longDescription:
+      "Scrapes the public github.com/trending page (source: \"github.com/trending\") — repositories ranked by stars gained in a window, not REST /search/repositories sorted by all-time stars. Pass since=daily|weekly|monthly (default daily) and optional language slug (e.g. python → /trending/python). Each row: rank, fullName, url, description, language (programming language), stars, forks, starsGained, since. Flat 2 credits. The HTML page usually lists ~25 repos; there is no cursor (unlike Search API's 1000-result cap). This is not a substitute for github/repository detail fields (license, watchers/subscribers, parent, …).",
+    delivers: [
+      "Real github.com/trending (not all-time star search)",
+      "since=daily|weekly|monthly + starsGained",
+      "source field discloses the HTML page",
+    ],
+    platformLimits: [
+      "Page usually has ≤25 rows — no cursor / no Search API 1000 cap.",
+      "Not the same 23-field detail object as github/repository.",
+    ],
+  },
+  {
+    slug: "github-trending-developers",
+    name: "GitHub Trending Developers API",
+    shortName: "Trending Devs",
+    category: "search",
+    method: "GET",
+    path: "/v1/github/trending-developers",
+    credits: 2,
+    tagline:
+      "github.com/trending/developers — windowed ranks with popularRepo + followers (2 credits).",
+    longDescription:
+      "Scrapes github.com/trending/developers (source: \"github.com/trending/developers\") for developers ranked in a since=daily|weekly|monthly window — not REST /search/users with followers:>1000 (all-time most-followed). Each row: rank, login, name, url, avatar, popularRepo/popularRepoUrl/popularRepoDescription, plus followers, following, bio, company, location, publicRepos, ownerType hydrated from GET /users/{login}. No Search relevance score field. Flat 2 credits. Page usually ≤25 rows (no cursor).",
+    delivers: [
+      "Real github.com/trending/developers (not followers:>1000 search)",
+      "since window + popularRepo from the page",
+      "followers/bio/company/location for ranking and vetting",
+    ],
+    platformLimits: [
+      "Hydration uses GitHub REST /users/{login} per row — profile fields may be omitted if GitHub rate-limits.",
+      "Page usually has ≤25 rows — no cursor.",
+    ],
+  },
 ];
 
 
@@ -2011,7 +2229,7 @@ const SPOTIFY: Spec[] = [
     tagline:
       "Spotify artist — followers, monthlyListeners, worldRank, topCities, topTracks with playCount, concerts, and related artists (1 credit).",
     longDescription:
-      "Pass a Spotify artist URL, URI, or ID and get a clean profile: name, description, image, followers, monthlyListeners, worldRank, topCities[], externalLinks[], verified, topTracks[] (with playCount), concerts[], relatedArtists[], and albums/singles (with counts). Flat 1 credit. monthlyListeners, topCities, and worldRank are not on Spotify's public Web API — they come from the web-player GraphQL path this endpoint uses. raw keeps the upstream payload for advanced use (shape may change); prefer the normalized fields.",
+      "Pass a Spotify artist URL, URI, or ID and get a clean profile: name (track/artist title — not a profile displayName alias), description, image, followers, monthlyListeners, worldRank, topCities[{city,country,region,listeners}], externalLinks[], verified, topTracks[] (with playCount), concerts[], relatedArtists[], and albums[]/singles[] samples plus albumsCount/singlesCount and albumsHasMore/singlesHasMore. Flat 1 credit. monthlyListeners, topCities, and worldRank are not on Spotify's public Web API. The overview GraphQL only embeds a short discography sample — when HasMore is true, chain release URIs into /spotify/album. Pass raw=true only if you need the full upstream GraphQL payload (omitted by default — it is ~80% of the old response).",
   },
   {
     slug: "spotify-track",
@@ -2022,11 +2240,23 @@ const SPOTIFY: Spec[] = [
     path: "/v1/spotify/track",
     credits: 1,
     tagline:
-      "Spotify track — playCount, artist/album IDs, explicit rating, and duration as clean JSON.",
+      "Spotify track — playCount, joinable artists[]/album{}, explicit, releaseDate (1 credit).",
     longDescription:
-      "Pass a Spotify track URL, URI, or ID and get clean JSON: id, name, playCount (stream count from Spotify's web GraphQL), trackNumber, contentRating/explicit, durationMs, artistItems[{id,uri,name,url}], albumInfo[{id,uri,name,url,releaseDate}], and previewUrl when Spotify exposes one. Flat artists[] name strings and album name kept for back-compat. Flat 1 credit. Note: Spotify's 0–100 popularity score is not on this Pathfinder surface — playCount is the listen metric.",
+      "Pass a Spotify track URL, URI, or ID and get clean JSON: id, name (song title), playCount (stream count from Spotify's web GraphQL — same metric as artist topTracks[].playCount), trackNumber, contentRating/explicit, durationMs, artists[{id,uri,name,url}] (chain into /spotify/artist), album{id,uri,name,url,releaseDate} (chain into /spotify/album), releaseDate, and previewUrl / isrc / popularity when this Pathfinder surface exposes them. Flat 1 credit (same as artist — not 2). Pass raw=true only for the full GraphQL payload (omitted by default). Note: Spotify's official 0–100 popularity and ISRC are often absent on getTrack; playCount is the listen metric here.",
   },
-  { slug: "spotify-album", name: "Spotify Album API", shortName: "Album", category: "details", method: "GET", path: "/v1/spotify/album", credits: 2 , tagline: "Get a Spotify album — title, artists, tracks, release date, and cover art as structured JSON." },
+  {
+    slug: "spotify-album",
+    name: "Spotify Album API",
+    shortName: "Album",
+    category: "details",
+    method: "GET",
+    path: "/v1/spotify/album",
+    credits: 1,
+    tagline:
+      "Spotify album — tracks[] with playCount, joinable artists[], releaseDate, explicit (1 credit).",
+    longDescription:
+      "Pass a Spotify album URL, URI, or ID and get clean JSON: name, artists[{id,uri,name,url}] (chain into /spotify/artist), tracks[{trackNumber,discNumber,name,uri,url,durationMs,playCount,explicit,artists}] from tracksV2 (per-track stream counts), totalTracks, releaseDate (full ISO — not year-only), releaseYear, album-level explicit (derived from track contentRating), and cover image. Flat 1 credit (same as artist/track — not 2). Pass raw=true only if you need the full GraphQL payload (omitted by default).",
+  },
   {
     slug: "spotify-search",
     name: "Spotify Search API",
@@ -2036,9 +2266,9 @@ const SPOTIFY: Spec[] = [
     path: "/v1/spotify/search",
     credits: 2,
     tagline:
-      "Search Spotify tracks, albums, artists, podcasts, or episodes — full URIs, explicit/playable, scrapedAt.",
+      "Search Spotify — canonical spotify: URIs, explicit/playable, fetchedAt (flat 2 credits).",
     longDescription:
-      "Pass q plus optional type=tracks|albums|artists|podcasts|episodes (default tracks) and limit (max 50). Each result ships a canonical Spotify URI (spotify:track:… / album:… / artist:… / show:… / episode:…) so you can chain into Track / Album / Artist / Podcast endpoints without guessing prefixes, plus url, name, artists[], album, durationMs/durationFormatted, explicit, playable, image, and scrapedAt (per-result fetch time — Apify sequential stamps when present, otherwise the request fetch time). Flat 2 credits on native Pathfinder; Apify fallthrough scales per result.",
+      "Pass q plus optional type=tracks|albums|artists|podcasts|episodes (default tracks) and limit (max 50, no cursor). Primary path is web-player Pathfinder GraphQL (same family as /spotify/artist|track|album); Apify scraper is fallthrough only — do not assume one raw schema across both (GraphQL __typename vs flat albumName/isExplicit/scrapedAt). Envelope: query, type, fetchedAt, source (pathfinder|apify), results[]. Each result ships a canonical Spotify URI (spotify:track:… not a bare id), url, name, artists (structured on Pathfinder track/album hits), durationMs/durationFormatted, explicit, playable, image, and scrapedAt. Flat 2 credits on native Pathfinder; Apify fallthrough scales per result. Pass raw=true for per-result upstream payloads (omitted by default; searchTerm is not repeated inside raw).",
   },
   {
     slug: "spotify-podcast",
@@ -2051,9 +2281,21 @@ const SPOTIFY: Spec[] = [
     tagline:
       "Spotify podcast show — publisher, rating, topics, explicit flag, and totalEpisodes as clean JSON.",
     longDescription:
-      "Pass a Spotify show/podcast URL, URI, or ID and get clean JSON: id, name, description, publisher{name}, rating{average, totalRatings}, topics[{title, uri}], contentRating/explicit, mediaType, totalEpisodes, and cover image. Publisher is the show's publisher (not host names stuffed into artists[]). Flat 1 credit. Does not ship Spotify's UI color palette (visualIdentity) or a bulky raw dump.",
+      "Pass a Spotify show/podcast URL, URI, or ID (not an artist URL) and get clean JSON: id, name, description, publisher{name}, rating{average, totalRatings}, topics[{title, uri}], contentRating/explicit, mediaType, showTypes, totalEpisodes, and cover image. Publisher is the show's publisher (not host names stuffed into artists[]). Flat 1 credit per call. Does not ship Spotify's UI color palette (visualIdentity) or a bulky raw dump. For the episode archive, use /spotify/podcast-episodes (cursor pagination).",
   },
-  { slug: "spotify-podcast-episodes", name: "Spotify Podcast Episodes API", shortName: "Podcast Episodes", category: "list", method: "GET", path: "/v1/spotify/podcast-episodes", credits: 2 },
+  {
+    slug: "spotify-podcast-episodes",
+    name: "Spotify Podcast Episodes API",
+    shortName: "Podcast Episodes",
+    category: "list",
+    method: "GET",
+    path: "/v1/spotify/podcast-episodes",
+    credits: 2,
+    tagline:
+      "Podcast episode archive — previewUrl, releaseDate, explicit, cursor pagination (flat 2 credits).",
+    longDescription:
+      "Pass a Spotify show/podcast URL, URI, or ID (not an artist URL). Returns the show card plus episodes[{id, name, description, releaseDate, durationMs, previewUrl, audioUrls[], mediaTypes, hasVideo, contentRating/explicit, hasTranscripts, paywallContent, showTypes}]. totalEpisodes comes from the same episodes query as the page (no drift vs a separate show fetch). Cursor pagination via nextCursor/hasMore (offset into the archive; limit max 50). Flat 2 credits per call on native Pathfinder. Same anti-bloat rule as /spotify/podcast: no visualIdentity color dumps, no playedState, no per-episode podcastV2 show copies — raw is opt-in (?raw=true) and still slimmed.",
+  },
 ];
 
 const SOUNDCLOUD: Spec[] = [
@@ -2066,12 +2308,36 @@ const SOUNDCLOUD: Spec[] = [
     path: "/v1/soundcloud/artist",
     credits: 1,
     tagline:
-      "SoundCloud artist profile — bio, counts, verified, badges, and creator subscription tier.",
+      "SoundCloud artist — handle, subscriptionTier, externalLinks, verified (1 credit).",
     longDescription:
-      "Pass a SoundCloud artist URL or username and get the public profile as clean JSON: id, username, name, description, avatar, city/countryCode, verified, followers/followings/trackCount/playlistCount/likesCount, plus badges (pro / creatorMidTier / proUnlimited / verified), creatorSubscription.product.id (e.g. creator-pro-unlimited), and lastModified. Flat 1 credit.",
+      "Pass a SoundCloud artist URL or username and get clean JSON: id, handle (permalink slug — the join key; username is the display name and may differ in casing), username, name, description, avatar, city/countryCode, verified, subscriptionTier (pro-unlimited|pro|mid-tier|free — one field, not badges + creatorSubscription duplicates), followers/followings/trackCount/playlistCount/likesCount, externalLinks[{url,network,title,username}] from SoundCloud web-profiles when published, createdAt when SoundCloud exposes it (often redacted on the public api-v2), and lastModified. Flat 1 credit. Accepts cache / cacheMaxAge.",
   },
-  { slug: "soundcloud-artist-tracks", name: "SoundCloud Artist Tracks API", shortName: "Artist Tracks", category: "list", method: "GET", path: "/v1/soundcloud/artist-tracks", credits: 2 },
-  { slug: "soundcloud-track", name: "SoundCloud Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/soundcloud/track", credits: 1 , tagline: "Get a SoundCloud track — title, artist, plays, likes, duration, and artwork as structured JSON." },
+  {
+    slug: "soundcloud-artist-tracks",
+    name: "SoundCloud Artist Tracks API",
+    shortName: "Artist Tracks",
+    category: "list",
+    method: "GET",
+    path: "/v1/soundcloud/artist-tracks",
+    credits: 2,
+    tagline:
+      "Artist track list — same track shape as /soundcloud/track, artist{} once at top, opaque cursor (2 credits).",
+    longDescription:
+      "Pass a SoundCloud artist URL or username and get that artist's tracks as clean JSON. Each track row matches /soundcloud/track (title, plays/likes/reposts/comments/downloads, license, genre/tags, artwork, streamable/downloadable) — without repeating artist{} on every row. Top-level artistId + artist{id,handle,name,url,avatar,followers,verified} join to /soundcloud/artist; artistUrl is the profile URL. nextCursor is an opaque token (not a SoundCloud api-v2 URL). Flat 2 credits per call (limit up to 100).",
+  },
+  {
+    slug: "soundcloud-track",
+    name: "SoundCloud Track API",
+    shortName: "Track",
+    category: "details",
+    method: "GET",
+    path: "/v1/soundcloud/track",
+    credits: 1,
+    tagline:
+      "SoundCloud track — plays/likes/license, nested artist{}, streamUrl when streamable (1 credit).",
+    longDescription:
+      "Pass a SoundCloud track URL and get clean JSON: title, artist{id,handle,name,url,avatar,followers,verified} (chain id/handle into /soundcloud/artist), plays/likes/reposts/comments/downloads, license, genre/tags, publishedAt, streamable/downloadable (SoundCloud permission flags), and when the public api-v2 allows it — streamUrl (progressive MP3), hlsUrl, downloadUrl, plus mediaUrlsExpireAt for signed CDN links. waveformUrl is the waveform JSON endpoint, not audio. Flat 1 credit. Accepts cache / cacheMaxAge.",
+  },
 ];
 
 const LINKTREE: Spec[] = [
@@ -2223,11 +2489,50 @@ const ACCOUNT: Spec[] = [
     credits: 0,
     tagline: "Plan, subscription vs top-up credits, monthly quota, and renewsAt — 0 credits.",
     longDescription:
-      "Call with your Captapi key and get plan, monthlyQuota, subscriptionCredits (reset each billing period), topupCredits (never expire), totalCredits, and subscriptionRenewsAt as camelCase JSON. Free — does not consume credits. Use this to tell whether remaining balance is time-boxed subscription quota or permanent top-ups.",
+      "Live (never cached) credit balance for the calling Captapi key as camelCase JSON: plan, monthlyQuota, subscriptionCredits, topupCredits, totalCredits, subscriptionRenewsAt / quotaResetsAt, usedThisMonth, keyName, and rateLimitPerMinute. snake_case aliases (monthly_quota, …) are emitted for one release — prefer camelCase. Free — does not consume credits. Use for low-balance alerts and dashboards.",
   },
-  { slug: "account-request-history", name: "Request History API", shortName: "Request History", category: "list", method: "GET", path: "/v1/account/request-history", credits: 0 , tagline: "See recent API requests made with your Captapi key — path, status, and credits used.", longDescription: "List recent requests for your Captapi account as structured JSON: endpoint path, status, credits charged, and timestamps. Free — does not consume credits." },
-  { slug: "account-daily-usage", name: "Daily Usage API", shortName: "Daily Usage", category: "list", method: "GET", path: "/v1/account/daily-usage", credits: 0 , tagline: "See day-by-day credit usage for your Captapi account.", longDescription: "Get daily credit usage for your Captapi key as structured JSON — useful for spend monitoring and budgeting. Free — does not consume credits." },
-  { slug: "account-most-used-routes", name: "Most Used Routes API", shortName: "Most Used Routes", category: "list", method: "GET", path: "/v1/account/most-used-routes", credits: 0 , tagline: "See which Captapi endpoints your key calls most often.", longDescription: "Get a ranked list of the routes your Captapi key uses most, with call counts over a chosen window. Free — does not consume credits." },
+  {
+    slug: "account-request-history",
+    name: "Request History API",
+    shortName: "Request History",
+    category: "list",
+    method: "GET",
+    path: "/v1/account/request-history",
+    credits: 0,
+    tagline: "Recent API requests for your key — requestId, status, credits, cacheHit (0 credits).",
+    longDescription:
+      "Live (never cached) request log for your Captapi key — free. Each row includes requestId (same UUID as the response envelope / x-captapi-request-id for support matching), endpoint, platform, resource (public URL or internal cache key such as instagram_user:handle — resourceUrl is a deprecated alias), creditsUsed, cacheHit, statusCode, responseTimeMs, errorMessage, createdAt. Filter with endpoint, statusCode, since, and until. limit only caps rows returned — it does not bill.",
+    delivers: [
+      "requestId per row for support / envelope matching",
+      "creditsUsed + cacheHit + responseTimeMs (see cache savings in one sample)",
+      "Filters: endpoint, statusCode, since, until",
+      "Free — never cached, never billed",
+    ],
+  },
+  {
+    slug: "account-daily-usage",
+    name: "Daily Usage API",
+    shortName: "Daily Usage",
+    category: "list",
+    method: "GET",
+    path: "/v1/account/daily-usage",
+    credits: 0,
+    tagline: "Day-by-day credit usage for spend monitoring (0 credits).",
+    longDescription:
+      "Daily credit usage buckets for your Captapi key — date, requests, creditsUsed, success/fail counts. Live account data — not cached. Free.",
+  },
+  {
+    slug: "account-most-used-routes",
+    name: "Most Used Routes API",
+    shortName: "Most Used Routes",
+    category: "list",
+    method: "GET",
+    path: "/v1/account/most-used-routes",
+    credits: 0,
+    tagline: "Ranked list of which Captapi routes your key calls most (0 credits).",
+    longDescription:
+      "Ranked routes for your Captapi key over a chosen window — endpoint, request counts, creditsUsed. Live account data — not cached. Free.",
+  },
 ];
 
 /** Cross-platform analytics + direct video-file upload helpers (not social platforms). */
@@ -2241,18 +2546,20 @@ const UTILITIES: Spec[] = [
     path: "/v1/analytics/post",
     credits: 1,
     tagline: "Unified metrics for one post, video, or reel — platform auto-detected (1 credit).",
-    longDescription: "Pass any supported post, video, or reel URL (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble) and get one normalized metrics object — views, likes, comments, shares, saves, interactions, and engagementRate with engagementRateBasis=interactions/views (ratio). Platform is auto-detected. Schema is stable across networks; unavailable values are null (YouTube has no public share/save counts; author.username is the @handle when known, never the display name; verified stays null without a channel badge). Do not compare this engagementRate to TikTok popular-creators — that field uses a different engagementRateBasis (percent). Flat 1 credit per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
+    longDescription:
+      "Pass a public post/video/reel URL from one of 11 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble) — not the full Captapi catalog (Kwai, Twitch, Spotify, Snapchat, and others are out of scope). Platform is auto-detected; cross-platform URLs are the point of this endpoint. Returns one normalized metrics object: views, likes, comments, shares, saves, interactions, engagementRate with engagementRateBasis=interactions/views (ratio), plus commentsIsApproximate / interactionsIsApproximate when a compact UI count (e.g. YouTube \"2.4M\") contributed. Schema is stable across networks; unavailable values are null (YouTube has no public share/save counts; author.username is the @handle when known, never the display name). Do not compare this engagementRate to TikTok popular-creators — that field uses a different engagementRateBasis (percent). Flat 1 credit. Pass cache=true for the 24h shared cache (0 credits on hit).",
   },
   {
     slug: "analytics-compare",
     name: "Compare Analytics API",
     shortName: "Compare Analytics",
-    category: "list",
+    category: "details",
     method: "GET",
     path: "/v1/analytics/compare",
     credits: 1,
-    tagline: "Compare unified metrics across up to 10 URLs in one call — 1 credit per resolved URL (cache hits free).",
-    longDescription: "Pass up to 10 comma-separated post/video/reel URLs (any mix of supported platforms) and get count/resolved/failedCount plus results[] and failed[]. Each ok row is the same shape as /v1/analytics/post (platform, status, title, publishedAt, author, metrics{views,likes,comments,shares,saves,interactions,engagementRate,engagementRateBasis}). Failed URLs keep platform when detected and appear in failed[] with a reason — so a partial batch never silently drops rows. Bills 1 credit per successfully resolved URL that is not served from the 24h cache (shared with post analytics); there is no bulk discount vs N separate /post calls — the win is one HTTP round-trip. Pass cache=true for free cache hits.",
+    tagline: "Compare unified metrics across up to 10 URLs — each row is the analytics/post object (1 credit/resolved URL).",
+    longDescription:
+      "Pass up to 10 comma-separated post/video/reel URLs (any mix of the same 11 platforms as Post Analytics) and get count/resolved/failedCount plus results[] and failed[]. Each ok row is exactly the /v1/analytics/post object plus status — platform, id, title, url, publishedAt (full ISO), durationSeconds, thumbnailUrl, author{}, metrics{views, likes, comments, shares, saves, interactions, engagementRate, engagementRateBasis, approximate flags}. Failed URLs appear in failed[] with a reason. Bills 1 credit per successfully resolved URL that is not served from the 24h cache shared with post analytics; no bulk discount vs N separate /post calls — the win is one HTTP round-trip. Pass cache=true for free cache hits.",
   },
   {
     slug: "video-transcript",
@@ -2262,8 +2569,9 @@ const UTILITIES: Spec[] = [
     method: "POST",
     path: "/v1/video/transcript",
     credits: 1,
-    tagline: "Whisper transcription of an uploaded video or audio file — 1 credit per minute of audio.",
-    longDescription: "Upload a video or audio file (multipart form field `file`) and get a Whisper transcript as structured JSON — full text, segments, word count, language, and duration. Billed at 1 credit per minute of audio (rounded up, minimum 1).",
+    tagline: "Whisper transcription of an uploaded file — 1 credit/min; durationSeconds + creditsCharged in the response.",
+    longDescription:
+      "POST multipart form field `file` (not a query string). Returns transcript, transcriptSegments[{text,start,duration,timestamp}], wordCount, segments, language, durationSeconds (alias duration), creditsCharged, and noSpeech. Optional form fields: language (ISO-639-1 hint), translate=true (English), timestampGranularity=segment|word. Limits: 200MB / 60 minutes. No speech → empty transcript + noSpeech=true (still billed for duration). Billed 1 credit per minute of audio (rounded up, min 1) — verify with creditsCharged.",
   },
   {
     slug: "video-summarize",
@@ -2273,8 +2581,15 @@ const UTILITIES: Spec[] = [
     method: "POST",
     path: "/v1/video/summarize",
     credits: 2,
-    tagline: "Transcribe an uploaded file with Whisper, then return an AI summary — 1 credit per minute + 1 for the summary.",
-    longDescription: "Upload a video or audio file (multipart form field `file`) to transcribe with Whisper and get an AI summary (key points, topics, sentiment) plus the transcript. Billed at 1 credit per minute of audio (rounded up) plus 1 credit for the summary.",
+    tagline: "Whisper + AI summary of an uploaded file — transcript included; 1 credit/min + 1.",
+    longDescription:
+      "POST multipart form field `file` (use curl -F file=@path — not a query string). Whisper-transcribes the upload, then GPT-4o-mini returns summary, keyPoints, topics, and sentiment in the same JSON as the full transcript (transcript, transcriptSegments, wordCount, language, durationSeconds / duration, creditsCharged). Summary length scales with the audio — short clips may be one paragraph with fewer bullets; longer recordings aim for 2–3 paragraphs and 4–8 key points. Same Whisper controls (language, translate, timestampGranularity) and 200MB / 60 min limits as File Transcript. Empty/no-speech → HTTP 422. Billing: ceil(durationSeconds/60) + 1.",
+    delivers: [
+      "AI summary + keyPoints + topics + sentiment (GPT-4o-mini)",
+      "Full Whisper transcript + timed segments in the same response",
+      "language, durationSeconds, and creditsCharged for bill verification",
+      "POST multipart file upload — same Whisper controls as File Transcript",
+    ],
   },
 ];
 
@@ -2290,10 +2605,47 @@ const KWAI: Spec[] = [
     tagline:
       "Fetch Kwai profile — display name, bio, counts, and verification as structured JSON.",
     longDescription:
-      "Pass a Kwai profile URL or @handle and get the public account as clean JSON: id/eid, username, displayName, bio, avatar, verified + verifiedDescription/verifiedNumber when Kwai exposes them, gender, followers/following/likedCount, publicPostCount/privatePostCount, and isPrivate. Parsed from Kwai's public web page (JSON-LD + Nuxt SSR state) — not HTML scraping of visible counters. Note: Kwai's web surface sometimes stubs follower/following to 1; when that happens we prefer schema.org counts for followers and omit following rather than ship a fake 1. Flat 1 credit.",
+      "Pass a Kwai profile URL or @handle and get the public account as clean JSON: id/eid, username, displayName, bio, avatar, verified + verifiedDescription/verifiedNumber when Kwai exposes them, gender, followers/following/likedCount, publicPostCount/privatePostCount/postCount/videoCount, and isPrivate. No redundant raw{} — normalized fields only. Parsed from Kwai's public web page (JSON-LD + Nuxt SSR state) — not HTML scraping of visible counters. Note: Kwai's web surface sometimes stubs follower/following to 1; when that happens we prefer schema.org counts for followers and omit following rather than ship a fake 1. Flat 1 credit (native web parse; not the 17-credit Apify post path).",
   },
-  { slug: "kwai-user-posts", name: "Kwai User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/kwai/user-posts", credits: 45, creditsPerResult: 2.25 },
-  { slug: "kwai-post", name: "Kwai Post API", shortName: "Post", category: "details", method: "GET", path: "/v1/kwai/post", credits: 17 , tagline: "Get a Kwai post — caption, author, and engagement fields as structured JSON." },
+  {
+    slug: "kwai-user-posts",
+    name: "Kwai User Posts API",
+    shortName: "User Posts",
+    category: "list",
+    method: "GET",
+    path: "/v1/kwai/user-posts",
+    credits: 20,
+    creditsPerResult: 1,
+    tagline:
+      "Kwai profile posts — caption, engagement, mp4 + transcript when Kwai exposes it (~1 credit/post).",
+    longDescription:
+      "Pass a Kwai profile URL or @handle and get that creator's public posts as clean JSON. Each post: id/url, text (real captions only — Kwai's placeholder \"...\" descriptions are omitted), publishedAt, durationSeconds, thumbnailUrl, videoUrl with videoType (\"mp4\" or \"hls\"), mediaUrlsExpireAt parsed from the signed CDN tag=, engagement{views,likes,comments,shares}, and transcript when Kwai's JSON-LD auto-captions are present (duplicate merged tracks are deduped). Author{id,username,displayName,avatar,url} is returned once at the top — not repeated on every row. Opaque nextCursor pages within the posts Kwai exposes on one profile fetch (the public web surface does not offer a deep archive API). ~1 credit per post returned (min 2; default limit 20 → ~20 credits). Transcript is included when Kwai publishes it — not a separate Whisper bill.",
+    delivers: [
+      "Posts with engagement + signed mp4 videoUrl",
+      "videoType + mediaUrlsExpireAt from CDN tag=",
+      "Transcript when Kwai JSON-LD exposes captions",
+      "Author{} once; opaque cursor within one fetch",
+    ],
+  },
+  {
+    slug: "kwai-post",
+    name: "Kwai Post API",
+    shortName: "Post",
+    category: "details",
+    method: "GET",
+    path: "/v1/kwai/post",
+    credits: 2,
+    tagline:
+      "Single Kwai video — caption, author, engagement, mp4, transcript + hashtags (2 credits).",
+    longDescription:
+      "Pass a Kwai video URL and get one post as clean JSON: same core card as a user-posts row (text when published, author{}, engagement, videoUrl/videoType, mediaUrlsExpireAt, transcript when Kwai exposes auto-captions) plus hashtags[] parsed from the caption. Placeholder \"...\" captions are omitted. Flat 2 credits — priced in line with one list item, not the old 17-credit Apify-era rate.",
+    delivers: [
+      "Caption + hashtags[] when published",
+      "author{} + engagement{}",
+      "videoUrl / videoType / mediaUrlsExpireAt",
+      "transcript when Kwai exposes auto-captions",
+    ],
+  },
 ];
 
 const KOMI: Spec[] = [
@@ -2363,7 +2715,19 @@ const LINKBIO: Spec[] = [
 ];
 
 const LINKME: Spec[] = [
-  { slug: "linkme-profile", name: "Linkme Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/linkme/profile", credits: 4 , tagline: "Extract the public links and profile fields from a Linkme profile.", longDescription: "Paste a Linkme profile URL and get the public profile as structured JSON — profile fields plus the links listed on the page." },
+  {
+    slug: "linkme-profile",
+    name: "Linkme Profile API",
+    shortName: "Profile",
+    category: "channel",
+    method: "GET",
+    path: "/v1/linkme/profile",
+    credits: 1,
+    tagline:
+      "Linkme profile → bio, profileVisitCount, featured links, webLinks, email/infoLinks, stripeStatus. Flat 1 credit.",
+    longDescription:
+      "Paste a Linkme URL (link.me/danucd) and get the public profile from Linkme's dehydrated SSR payload (TanStack $tsr) — not HTML meta tags or the site footer. Identity: id, username/handle, displayName, firstName/lastName, bio, avatar + isDefaultProfilePicture. Audience: profileVisitCount (e.g. 15.9k) and totalLinks. Flags: verifiedAccount, isAmbassador, isPrivate. Timestamps: createdAt/updatedAt. links[] are featured CTA rows; webLinks[] are social icon groups (linkValue/faceValue/baseUrl); infoLinks[] carry email/contact; stripeStatus{tipsEnabled,stripeEnabled} signals monetization; socials{} + other[] cover mapped/unmapped networks. Flat 1 credit. Pass cache=true or cacheMaxAge (1d/3d/7d/14d/30d) for the shared response cache.",
+  },
 ];
 
 const FACEBOOK_AD_LIBRARY: Spec[] = [
@@ -2440,7 +2804,7 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     tagline:
       "Search TikTok Commercial Content Library — relevance-filtered, ISO dates, stable null schema (2 credits native).",
     longDescription:
-      "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) by keyword. Results are relevance-filtered so query tokens must appear in advertiser or ad copy (empty beats Romanian good-morning spam for q=fashion). Schema matches Facebook shape: headline/cta/landingUrl/spend/advertiser.id stay present as null when TikTok withholds them (DSA does not publish Meta-style spend). firstShown/lastShown are ISO-8601. Flat 2 credits on the native path; Apify fallback is capped at 5 — never the old ~70-credit per-result trap. country is a two-letter ISO code (default GB — EU-led; US often empty). For brand performance (CTR, likes, ranking), use /v1/ad-library/tiktok/top-ads instead — that is Creative Center, a different product.",
+      "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) by keyword. Local keyword matching is case-insensitive substring with match=any|all (default any). When the filter reduces the SERP, matchedFrom / filteredOut explain how many rows existed before filtering. Schema keeps nulls for headline/cta/landingUrl/spend/advertiser.id when TikTok withholds them. firstShown/lastShown are ISO-8601. Flat 2 credits when results are returned (empty is free); Apify fallback capped at 5. Upstream capped (~40s) under ALB/nginx defaults. country default GB (US often empty). For brand performance use /v1/ad-library/tiktok/top-ads.",
   },
   {
     slug: "tiktok-ad-library-top-ads",
@@ -2451,9 +2815,15 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     path: "/v1/ad-library/tiktok/top-ads",
     credits: 2,
     tagline:
-      "TikTok Creative Center Top Ads — CTR, likes, industry/objective, and video URLs (2 credits native).",
+      "TikTok Creative Center Top Ads — advertiser, dates when present, CTR/likes, video (2 credits native).",
     longDescription:
-      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad Creative Center detail page), title, brandName, likes + likesIsApproximate, ctr/ctrTier (TikTok-normalized 0–1 score + bucket), costTier, isSparkAd, resolved industry/industryKey, objective, adFormat, countries, and video{url,urlHd,cover,durationSeconds,width,height}. Keyword q is relevance-filtered so every token must appear in title, brand, tags, or industry — Creative Center soft-matches (and often ignores keyword with for_you); empty beats unrelated ads. The public list API has no firstSeen/lastSeen and no cursor pagination. Filter with country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), and optional industry/objective/adFormat. Flat 2 credits on the Decodo-native path; Apify fallback is ~1 credit per returned ad (minimum 2). This is Creative Center — not the EU Commercial Content Library (use /tiktok/search for DSA transparency).",
+      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — datesPresent counts filled rows), likes + likesIsApproximate, ctr/ctrTier, costTier, isSparkAd, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Spark/Non-Spark-only adFormat and single-country query echoes are omitted. Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis (soft creative_center fallback when literal matches are empty). Empty results are never charged. Upstream capped (~40s Decodo / ~20s Apify). Flat 2 credits native when ads are returned; Apify ~1/ad (min 2). For DSA firstShown/lastShown use /tiktok/search.",
+    delivers: [
+      "advertiser{id,name} for grouping + Spark author fallback",
+      "firstSeen/lastSeen + datesPresent (often null on CC list)",
+      "likesIsApproximate; video without duplicate media[]",
+      "matchBasis transparency; empty results free",
+    ],
   },
   {
     slug: "tiktok-ad-library-ad-details",
@@ -2873,10 +3243,11 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "linkme",
     name: "Linkme",
-    blurb: "Extract public Linkme profile links and metadata.",
+    blurb:
+      "Linkme profiles as JSON — bio, profileVisitCount, webLinks, infoLinks/email, stripeStatus. Flat 1 credit.",
     icon: "link",
     color: "text-blue-500",
-    exampleUrl: "https://link.me/example",
+    exampleUrl: "https://link.me/danucd",
     endpoints: LINKME.map((s) => ({ ...s, platform: "linkme" as const })),
   },
 ];
@@ -3019,9 +3390,10 @@ export const AGENT_ROUTING_EXAMPLES: AgentRoutingExample[] = [
       "Find Facebook Marketplace location id",
       "Search marketplace by city",
     ],
-    prefer: "Use location search first (details=true when you need lat/lng), then marketplace search with the selected place.",
+    prefer:
+      "Use location resolve when the city name is ambiguous or you need cityPageId/lat/lng; otherwise pass the city string straight to marketplace-search.",
     endpointSlug: "facebook-marketplace-location-search",
-    why: "Resolves a city/place to a Facebook Marketplace location with coordinates when available.",
+    why: "Returns Facebook cityPageId + coordinates so you can disambiguate hubs (Austin TX vs Austin MN) before searching.",
   },
   {
     intent: "Kwai creator monitoring",
@@ -3231,9 +3603,9 @@ export function delivers(ep: ApiEndpoint): string[] {
   if (ep.delivers) return ep.delivers;
   if (ep.platform === "account") {
     return [
-      "Live data for your Captapi API key",
+      "Live data for your Captapi API key (never cached)",
       "No credit charge for account endpoints",
-      "Clean JSON ready for dashboards and alerts",
+      "Clean JSON ready for dashboards and low-balance alerts",
       "Useful for monitoring usage and spend",
     ];
   }
@@ -3311,6 +3683,13 @@ const lpFlat = (def: number, max: number, credits: number): ApiParam => ({
   required: false,
   description: `Max items to return (default ${def}, max ${max}). Flat ${credits} credit${credits === 1 ? "" : "s"} per call.`,
 });
+/** Limit helper for free account endpoints (never bills). */
+const lpFree = (def: number, max: number): ApiParam => ({
+  name: "limit",
+  type: "integer",
+  required: false,
+  description: `Max rows to return (default ${def}, max ${max}). Free — does not consume credits.`,
+});
 const lang = (): ApiParam => ({ name: "language", type: "string", required: false, description: 'Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.' });
 const langOut = (): ApiParam => ({ name: "language", type: "string", required: false, description: 'ISO code, e.g. "tr": pins the speech language and sets the summary output language. Defaults to auto-detect + English summary.' });
 const langUi = (): ApiParam => ({ name: "language", type: "string", required: false, description: "Interface language for localized results, e.g. en-US or de-DE. Default en-US." });
@@ -3377,11 +3756,19 @@ const AMAZON_SHOP_URL =
 const KWAI_PROFILE = "Kwai profile URL or @handle, e.g. https://www.kwai.com/@topfilmeseseriesnatv.";
 const KWAI_POST = "Kwai video URL, e.g. https://www.kwai.com/@topfilmeseseriesnatv/video/5240932700689736196.";
 const CURSOR = { name: "cursor", type: "string" as const, required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." };
+const GH_OPAQUE_CURSOR = {
+  name: "cursor",
+  type: "string" as const,
+  required: false,
+  description:
+    "Opaque cursor from a previous nextCursor (GitHub Link page=). Not a bare page number.",
+};
 const KOMI_PAGE =
   "Komi page URL or username, e.g. https://komi.io/kimkardashian or https://kimkardashian.komi.io/.";
 const PILLAR_PAGE = "Pillar page URL or username.";
 const LINKBIO_PAGE = "Linkbio (lnk.bio) page URL or username, e.g. https://lnk.bio/charlidamelio.";
-const LINKME_PROFILE = "Linkme profile URL or username.";
+const LINKME_PROFILE =
+  "Linkme profile URL or username, e.g. https://link.me/danucd or danucd.";
 
 const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   // YouTube
@@ -3760,21 +4147,55 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-comment-replies": [up("Facebook post URL the comment belongs to."), cid(), lpFlat(50, 500, 2)],
   "facebook-marketplace-search": [
     qp("Product or keyword to search Facebook Marketplace for."),
-    { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." },
-    lpFlat(20, 200, 2),
+    {
+      name: "location",
+      type: "string",
+      required: true,
+      description: "Search-origin city or place name, e.g. 'Austin, TX' (query echo — not each listing's city).",
+    },
+    {
+      name: "limit",
+      type: "number",
+      required: false,
+      description:
+        "How many listings to return (1–200). Flat 2 credits when details=false; details=true billed as 2 + 2 per listing.",
+    },
     { name: "minPrice", type: "number", required: false, description: "Minimum price in local currency units." },
     { name: "maxPrice", type: "number", required: false, description: "Maximum price in local currency units." },
     { name: "sortBy", type: "string", required: false, description: "suggested | distance | creation_time | price_ascend | price_descend." },
     { name: "daysSinceListed", type: "string", required: false, description: "1 (24h), 7, or 30." },
     { name: "condition", type: "string", required: false, description: "new, like_new, good, fair (comma-separated ok)." },
-    { name: "deliveryMethod", type: "string", required: false, description: "local_pickup | shipping | all." },
+    {
+      name: "deliveryMethod",
+      type: "string",
+      required: false,
+      description:
+        "local_pickup | shipping | all. Shipped listings can appear nationwide outside radiusMiles — use local_pickup for nearby-only; rows expose isLocal / shipsOutsideRadius.",
+    },
     { name: "availability", type: "string", required: false, description: "available | sold | all." },
-    { name: "radiusMiles", type: "number", required: false, description: "Radius in miles: 1,2,5,10,20,40,60,80,100,250,500." },
+    {
+      name: "radiusMiles",
+      type: "number",
+      required: false,
+      description:
+        "Radius in miles: 1,2,5,10,20,40,60,80,100,250,500. Does not exclude nationwide shipped inventory.",
+    },
     { name: "category", type: "string", required: false, description: "Top-level category slug, e.g. electronics." },
-    { name: "cursor", type: "string", required: false, description: "Pagination cursor from a previous nextCursor." },
-    { name: "details", type: "boolean", required: false, description: "When true, adds description/condition/coordinates/full photo gallery (2 + 2 credits per listing). Default false → flat 2 credits; cover photo is still included." },
+    { name: "cursor", type: "string", required: false, description: "Opaque pagination cursor from a previous nextCursor." },
+    {
+      name: "details",
+      type: "boolean",
+      required: false,
+      description:
+        "When true, adds description/condition/coordinates/full photo gallery/seller/distanceMiles — billed as 2 + 2 credits per listing. Default false → flat 2 credits; cover photo is still in image.",
+    },
   ],
-  "facebook-marketplace-location-search": [qp("City/place search query, e.g. Austin."), lpFlat(10, 50, 2), { name: "details", type: "boolean", required: false, description: "Legacy flag. Coordinates are included when available. Flat 2 credits either way." }],
+  "facebook-marketplace-location-search": [
+    qp(
+      "City/place query. Bare names like 'Austin' may return multiple candidates (TX/MN/IN); include a state for a single hit (e.g. 'Austin, TX').",
+    ),
+    lpFlat(10, 50, 2),
+  ],
   "facebook-event-search": [
     qp("Topic keyword, e.g. 'comedy'. Pair with location for city-scoped results."),
     {
@@ -3987,9 +4408,39 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   ],
   "twitch-clip": [up("Twitch clip URL, channel URL, or username."), cachePWithMaxAge(), cacheMaxAgeP()],
   // Spotify
-  "spotify-artist": [up(SPOTIFY_URL), cacheP()],
-  "spotify-track": [up(SPOTIFY_URL), cacheP()],
-  "spotify-album": [up(SPOTIFY_URL), cacheP()],
+  "spotify-artist": [
+    up(SPOTIFY_URL),
+    {
+      name: "raw",
+      type: "boolean",
+      required: false,
+      description:
+        "Include the upstream GraphQL payload as data.raw. Default false — omit unless you need fields not in the normalized shape (~80% of the old response body).",
+    },
+    cacheP(),
+  ],
+  "spotify-track": [
+    up(SPOTIFY_URL),
+    {
+      name: "raw",
+      type: "boolean",
+      required: false,
+      description:
+        "Include the upstream GraphQL payload as data.raw. Default false — getTrack embeds bulky artist discography.",
+    },
+    cacheP(),
+  ],
+  "spotify-album": [
+    up(SPOTIFY_URL),
+    {
+      name: "raw",
+      type: "boolean",
+      required: false,
+      description:
+        "Include the upstream GraphQL payload as data.raw. Default false — omit unless you need fields not in the normalized shape.",
+    },
+    cacheP(),
+  ],
   "spotify-search": [
     qp("Search term (min 2 chars)."),
     {
@@ -4000,14 +4451,56 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
         "Result kind: tracks (default), albums, artists, podcasts, or episodes.",
     },
     lpFlat(20, 50, 2),
+    {
+      name: "raw",
+      type: "boolean",
+      required: false,
+      description:
+        "Include per-result upstream payload as results[].raw. Default false. Pathfinder GraphQL vs Apify scraper shapes differ — see FAQ.",
+    },
     cacheP(),
   ],
-  "spotify-podcast": [up(SPOTIFY_URL), lpFlat(20, 50, 1), cacheP()],
-  "spotify-podcast-episodes": [up(SPOTIFY_URL), lp(20, 50)],
+  "spotify-podcast": [
+    {
+      name: "url",
+      type: "url",
+      required: true,
+      description: "Spotify show/podcast URL, URI, or ID (e.g. https://open.spotify.com/show/…). Not an artist URL.",
+    },
+    cacheP(),
+  ],
+  "spotify-podcast-episodes": [
+    {
+      name: "url",
+      type: "url",
+      required: true,
+      description: "Spotify show/podcast URL, URI, or ID (e.g. https://open.spotify.com/show/…). Not an artist URL.",
+    },
+    lpFlat(20, 50, 2),
+    CURSOR,
+    {
+      name: "raw",
+      type: "boolean",
+      required: false,
+      description:
+        "Include slimmed per-episode upstream payload as episodes[].raw. Default false. visualIdentity / playedState / podcastV2 are never included.",
+    },
+    cacheP(),
+  ],
   // SoundCloud
-  "soundcloud-artist": [up(SC_PROFILE)],
-  "soundcloud-artist-tracks": [up(SC_PROFILE), lpFlat(20, 100, 2), CURSOR],
-  "soundcloud-track": [up(SC_TRACK)],
+  "soundcloud-artist": [up(SC_PROFILE), cachePWithMaxAge(), cacheMaxAgeP()],
+  "soundcloud-artist-tracks": [
+    up(SC_PROFILE),
+    lpFlat(20, 100, 2),
+    {
+      name: "cursor",
+      type: "string" as const,
+      required: false,
+      description:
+        "Opaque pagination cursor from the previous nextCursor. Leave empty for the first page. Do not edit or invent values.",
+    },
+  ],
+  "soundcloud-track": [up(SC_TRACK), cachePWithMaxAge(), cacheMaxAgeP()],
   // Linktree / Snapchat
   "linktree-page": [up(LINKTREE_PROFILE), cachePWithMaxAge(), cacheMaxAgeP()],
   "snapchat-user-profile": [up(SNAPCHAT_PROFILE)],
@@ -4050,12 +4543,47 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   ],
   // Account
   "account-balance": [],
-  "account-request-history": [lp(50, 500)],
+  "account-request-history": [
+    lpFree(50, 500),
+    {
+      name: "endpoint",
+      type: "string",
+      required: false,
+      description: "Exact Captapi path filter, e.g. /v1/instagram/basic-profile.",
+    },
+    {
+      name: "statusCode",
+      type: "integer",
+      required: false,
+      description: "Filter by HTTP status code (e.g. 500).",
+    },
+    {
+      name: "since",
+      type: "string",
+      required: false,
+      description: "Inclusive lower bound on createdAt (ISO date or datetime).",
+    },
+    {
+      name: "until",
+      type: "string",
+      required: false,
+      description: "Exclusive upper bound on createdAt (ISO date or datetime).",
+    },
+  ],
   "account-daily-usage": [{ name: "days", type: "integer", required: false, description: "Number of days to include (default 30, max 365)." }],
-  "account-most-used-routes": [{ name: "days", type: "integer", required: false, description: "Number of days to include (default 30, max 365)." }, lp(20, 100)],
+  "account-most-used-routes": [
+    { name: "days", type: "integer", required: false, description: "Number of days to include (default 30, max 365)." },
+    lpFree(20, 100),
+  ],
   // Utilities (analytics + uploaded video files)
   "analytics-post": [
-    up("A public post, video, or reel URL (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble)."),
+    {
+      name: "url",
+      type: "string",
+      required: true,
+      description:
+        "Public post/video/reel URL from one of 11 platforms: YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble. Platform is auto-detected — cross-platform URLs are expected here (unlike single-platform endpoints). Not in scope: Kwai, Twitch, Spotify, Snapchat, and other Captapi platforms.",
+    },
     cacheP(),
   ],
   "analytics-compare": [
@@ -4063,7 +4591,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       name: "urls",
       type: "string",
       required: true,
-      description: "Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms.",
+      description:
+        "Comma-separated post/video/reel URLs (up to 10), any mix of the same 11 platforms as Post Analytics. Example: a TikTok URL and a YouTube URL in one call.",
     },
     cacheP(),
   ],
@@ -4072,7 +4601,26 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       name: "file",
       type: "file",
       required: true,
-      description: "Video or audio file to transcribe (multipart form upload).",
+      description:
+        "Video or audio file (multipart form field — use -F file=@path, not a query string). Max 200MB / 60 minutes.",
+    },
+    {
+      name: "language",
+      type: "string",
+      required: false,
+      description: 'ISO-639-1 Whisper language hint, e.g. "en" or "tr". Omit to auto-detect.',
+    },
+    {
+      name: "translate",
+      type: "boolean",
+      required: false,
+      description: "When true, translate speech to English (Whisper translations API). Default false.",
+    },
+    {
+      name: "timestampGranularity",
+      type: "string",
+      required: false,
+      description: "segment (default) or word — word-level timings when Whisper exposes them.",
     },
   ],
   "video-summarize": [
@@ -4080,28 +4628,163 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       name: "file",
       type: "file",
       required: true,
-      description: "Video or audio file to transcribe and summarize (multipart form upload).",
+      description:
+        "Video or audio file (multipart form field — use -F file=@path, not a query string). Max 200MB / 60 minutes.",
+    },
+    {
+      name: "language",
+      type: "string",
+      required: false,
+      description: 'ISO-639-1 Whisper language hint, e.g. "en" or "tr". Omit to auto-detect.',
+    },
+    {
+      name: "translate",
+      type: "boolean",
+      required: false,
+      description: "When true, translate speech to English before summarizing. Default false.",
+    },
+    {
+      name: "timestampGranularity",
+      type: "string",
+      required: false,
+      description: "segment (default) or word.",
     },
   ],
   // Kwai / small creator pages
   "kwai-profile": [up(KWAI_PROFILE)],
-  "kwai-user-posts": [up(KWAI_PROFILE), lp(20, 200)],
+  "kwai-user-posts": [
+    up(KWAI_PROFILE),
+    {
+      name: "limit",
+      type: "number" as const,
+      required: false,
+      description: "Max posts to return (1–200). Default 20. ~1 credit per post returned (min 2).",
+    },
+    {
+      name: "cursor",
+      type: "string" as const,
+      required: false,
+      description:
+        "Opaque pagination cursor from the previous nextCursor. Pages within posts from one profile fetch.",
+    },
+  ],
   "kwai-post": [up(KWAI_POST)],
   "komi-page": [up(KOMI_PAGE), cachePWithMaxAge(), cacheMaxAgeP()],
   "pillar-page": [up(PILLAR_PAGE), cachePWithMaxAge(), cacheMaxAgeP()],
   "linkbio-page": [up(LINKBIO_PAGE), cachePWithMaxAge(), cacheMaxAgeP()],
-  "linkme-profile": [up(LINKME_PROFILE)],
+  "linkme-profile": [up(LINKME_PROFILE), cachePWithMaxAge(), cacheMaxAgeP()],
   // GitHub
   "github-user": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL, e.g. getify or https://github.com/getify." }],
-  "github-repositories": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100), CURSOR],
-  "github-repository": [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name, e.g. vercel/next.js." }],
-  "github-pull-requests": [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name, e.g. vercel/next.js." }, { name: "state", type: "string", required: false, description: "open, closed, or all. Default open." }, lp(30, 100), CURSOR],
-  "github-activity": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100), CURSOR],
-  "github-followers": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100), CURSOR],
-  "github-following": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100), CURSOR],
-  "github-contributions": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }],
-  "github-trending-repositories": [{ name: "q", type: "string", required: false, description: "GitHub search query. Default stars:>1000." }, lp(20, 100)],
-  "github-trending-developers": [{ name: "q", type: "string", required: false, description: "GitHub user search query. Default followers:>1000." }, lp(20, 100)],
+  "github-repositories": [
+    { name: "username", type: "string", required: true, description: "GitHub username or profile URL, e.g. torvalds." },
+    {
+      name: "sort",
+      type: "string",
+      required: false,
+      description:
+        "created | updated | pushed | full_name (default updated). Not stars — GitHub's user-repos API has no stars sort. Echoed as data.sort.",
+    },
+    {
+      name: "direction",
+      type: "string",
+      required: false,
+      description: "asc or desc (default desc). Echoed as data.direction.",
+    },
+    {
+      name: "type",
+      type: "string",
+      required: false,
+      description: "owner (default) | member | all — affiliation filter. Echoed as data.type.",
+    },
+    lp(30, 100),
+    GH_OPAQUE_CURSOR,
+  ],
+  "github-repository": [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name, e.g. torvalds/linux or https://github.com/torvalds/linux." }],
+  "github-pull-requests": [
+    { name: "repo", type: "string", required: true, description: "Repository URL or owner/name, e.g. vercel/next.js." },
+    {
+      name: "state",
+      type: "string",
+      required: false,
+      description: "open (API default), closed, or all. Echoed as data.state. Docs example uses closed so mergedAt is visible.",
+    },
+    lp(30, 100),
+    GH_OPAQUE_CURSOR,
+  ],
+  "github-activity": [
+    {
+      name: "username",
+      type: "string",
+      required: true,
+      description: "GitHub username or profile URL, e.g. getify.",
+    },
+    lp(30, 90),
+    {
+      name: "cursor",
+      type: "string",
+      required: false,
+      description:
+        "Opaque cursor from a previous nextCursor. Pagination stops after GitHub's 90-event public activity ceiling.",
+    },
+  ],
+  "github-followers": [
+    {
+      name: "username",
+      type: "string",
+      required: true,
+      description: "GitHub username or profile URL, e.g. getify.",
+    },
+    lp(30, 100),
+    GH_OPAQUE_CURSOR,
+  ],
+  "github-following": [
+    {
+      name: "username",
+      type: "string",
+      required: true,
+      description: "GitHub username or profile URL, e.g. getify.",
+    },
+    lp(30, 100),
+    GH_OPAQUE_CURSOR,
+  ],
+  "github-contributions": [
+    {
+      name: "username",
+      type: "string",
+      required: true,
+      description: "GitHub username or profile URL, e.g. getify or https://github.com/getify.",
+    },
+  ],
+  "github-trending-repositories": [
+    {
+      name: "since",
+      type: "string",
+      required: false,
+      description: "Trending window: daily (default), weekly, or monthly — matches github.com/trending?since=.",
+    },
+    {
+      name: "language",
+      type: "string",
+      required: false,
+      description: "Optional programming-language slug (e.g. python, typescript) → /trending/{language}.",
+    },
+    lpFlat(25, 100, 2),
+  ],
+  "github-trending-developers": [
+    {
+      name: "since",
+      type: "string",
+      required: false,
+      description: "Trending window: daily (default), weekly, or monthly — matches github.com/trending/developers?since=.",
+    },
+    {
+      name: "language",
+      type: "string",
+      required: false,
+      description: "Optional programming-language slug → /trending/developers/{language}.",
+    },
+    lpFlat(25, 100, 2),
+  ],
   // TikTok Shop
   "tiktok-shop-search": [
     qp("Product search query (min 2 characters), e.g. phone case."),
@@ -4240,6 +4923,12 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       required: false,
       description: "Two-letter ISO country code (e.g. GB, DE, FR). Default GB (EU DSA library; US often empty).",
     },
+    {
+      name: "match",
+      type: "string",
+      required: false,
+      description: 'Keyword token mode: "any" (default, OR substring) or "all" (AND). Empty results are free.',
+    },
     lpFlat(20, 200, 2),
     cacheP(),
   ],
@@ -4249,7 +4938,13 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "string",
       required: false,
       description:
-        "Optional keyword. Every token must appear in title, brand, tags, or industry — empty when Creative Center soft-matches.",
+        "Optional keyword — case-insensitive substring on title/brand/tags/industry. See match and matchedFrom in the response.",
+    },
+    {
+      name: "match",
+      type: "string",
+      required: false,
+      description: 'Keyword token mode: "any" (default, OR) or "all" (AND). Soft Creative Center fallback when literal matches are empty.',
     },
     {
       name: "country",
@@ -4382,96 +5077,25 @@ function exampleData(ep: ApiEndpoint): Record<string, unknown> {
   if (real) return real;
   // Never fall through to the generic list lorem (example.com) for the
   // showcase compare endpoint — that kills the cross-platform positioning.
-  if (ep.slug === "analytics-compare") {
-    return {
-      count: 2,
-      resolved: 2,
-      failedCount: 0,
-      results: [
-        {
-          platform: "youtube",
-          status: "ok",
-          url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-          id: "dQw4w9WgXcQ",
-          title: "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
-          publishedAt: "2009-10-25T06:57:33.000Z",
-          author: {
-            username: "RickAstleyYT",
-            displayName: "Rick Astley",
-            verified: null,
-          },
-          metrics: {
-            views: 1799593805,
-            likes: 19303349,
-            comments: 2400000,
-            shares: null,
-            saves: null,
-            interactions: 21703349,
-            engagementRate: 0.0121,
-            engagementRateBasis: "interactions/views",
-          },
-        },
-        {
-          platform: "youtube",
-          status: "ok",
-          url: "https://www.youtube.com/watch?v=jNQXAC9IVRw",
-          id: "jNQXAC9IVRw",
-          title: "Me at the zoo",
-          publishedAt: "2005-04-24T03:31:52.000Z",
-          author: {
-            username: "jawed",
-            displayName: "jawed",
-            verified: null,
-          },
-          metrics: {
-            views: 402652118,
-            likes: 19283609,
-            comments: 10000000,
-            shares: null,
-            saves: null,
-            interactions: 29283609,
-            engagementRate: 0.0727,
-            engagementRateBasis: "interactions/views",
-          },
-        },
-      ],
-      failed: [],
-    };
-  }
-  if (ep.slug === "analytics-post") {
-    return {
-      platform: "youtube",
-      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      id: "dQw4w9WgXcQ",
-      title: "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
-      publishedAt: "2009-10-25T06:57:33.000Z",
-      author: {
-        username: "RickAstleyYT",
-        displayName: "Rick Astley",
-        verified: null,
-      },
-      metrics: {
-        views: 1799593805,
-        likes: 19303349,
-        comments: 2400000,
-        shares: null,
-        saves: null,
-        interactions: 21703349,
-        engagementRate: 0.0121,
-        engagementRateBasis: "interactions/views",
-      },
-    };
-  }
+  // analytics-* must come from API_EXAMPLES (gen_examples.py). Never fall
+  // through to list/details lorem (example.com / "Latest upload").
+
   switch (ep.category) {
     case "transcript":
       return {
+        filename: "sample.mp4",
         transcript:
           "Hey everyone, welcome back to the channel. Today we're breaking down structured data APIs.",
-        wordCount: 1240,
-        segments: 86,
+        wordCount: 14,
+        segments: 2,
+        language: "english",
+        durationSeconds: 8.4,
+        duration: 8.4,
+        creditsCharged: 1,
+        noSpeech: false,
         transcriptSegments: [
-          { text: "Hey everyone, welcome back to the channel.", start: 0.0, duration: 4.12, timestamp: "00:00" },
-          { text: "Today we're breaking down structured data APIs.", start: 4.12, duration: 4.28, timestamp: "00:04" },
+          { text: "Hey everyone, welcome back to the channel.", start: 0.0, duration: 4.12, end: 4.12, timestamp: "00:00" },
+          { text: "Today we're breaking down structured data APIs.", start: 4.12, duration: 4.28, end: 8.4, timestamp: "00:04" },
         ],
       };
     case "summarize":
@@ -4750,7 +5374,7 @@ const PROFILE_URL: Record<PlatformId, string> = {
   komi: "https://komi.io/kimkardashian",
   pillar: "https://pillar.io/angelstrife",
   linkbio: "https://lnk.bio/charlidamelio",
-  linkme: "https://link.me/example",
+  linkme: "https://link.me/danucd",
 };
 
 /** A realistic example value for a single parameter of an endpoint. */
@@ -4771,19 +5395,33 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       return "US";
     case "username": {
       if (ep.platform === "github") {
-        const captured = API_EXAMPLES[ep.slug]?.login;
+        const ex = API_EXAMPLES[ep.slug] as { login?: string; username?: string } | undefined;
+        const captured = ex?.login ?? ex?.username;
         if (typeof captured === "string" && captured.trim()) return captured;
         return "getify";
       }
       return "hydrojug";
     }
     case "repo":
+      if (ep.slug === "github-repository") {
+        const captured = API_EXAMPLES[ep.slug]?.fullName;
+        if (typeof captured === "string" && captured.trim()) return captured;
+        return "torvalds/linux";
+      }
       return "vercel/next.js";
     case "state":
       // Prefer closed so docs examples show mergedAt when present.
       return ep.slug === "github-pull-requests" ? "closed" : "open";
     case "sort":
+      if (ep.slug === "github-repositories") return "pushed";
       return "relevance";
+    case "direction":
+      return "desc";
+    case "type":
+      if (ep.slug === "github-repositories") return "owner";
+      if (ep.slug === "spotify-search") return "tracks";
+      if (ep.slug.startsWith("youtube-")) return "video";
+      return "all";
     case "location":
       return "Austin, TX";
     case "details":
@@ -4795,8 +5433,17 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
     case "comment_id":
       return "7311234567890123456";
     case "limit":
-      return "20";
+      return ep.slug === "github-trending-repositories" ? "25" : "20";
+    case "since":
+      return "daily";
     case "language":
+      // GitHub trending uses a programming-language slug, not ISO speech codes.
+      if (
+        ep.slug === "github-trending-repositories" ||
+        ep.slug === "github-trending-developers"
+      ) {
+        return "python";
+      }
       return "en";
     case "id": {
       // Keep the Try-it default in sync with the captured example response.
@@ -4817,7 +5464,10 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
         .filter(Boolean)
         .slice(0, 10);
       if (captured.length >= 2) return captured.join(",");
-      return "https://www.youtube.com/watch?v=dQw4w9WgXcQ,https://www.youtube.com/watch?v=jNQXAC9IVRw";
+      return (
+        "https://www.tiktok.com/@khaby.lame/video/7646812028874673439," +
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      );
     }
     case "file":
       return "@video.mp4";
@@ -4849,6 +5499,14 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       // Pinterest board — never fall through to the platform pin exampleUrl.
       if (ep.slug === "pinterest-board") {
         return "https://www.pinterest.com/potterybarn/rustic-lodge-lookbook/";
+      }
+      // Spotify podcast pair — never fall through to the platform artist exampleUrl.
+      if (ep.slug === "spotify-podcast" || ep.slug === "spotify-podcast-episodes") {
+        return "https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk";
+      }
+      // SoundCloud track — never fall through to the platform profile exampleUrl.
+      if (ep.slug === "soundcloud-track") {
+        return "https://soundcloud.com/nasa/episode-179-life-support";
       }
       if (ep.slug === "twitch-user-schedule") {
         const u = API_EXAMPLES[ep.slug]?.username;
@@ -4894,14 +5552,6 @@ function exampleArgs(ep: ApiEndpoint): { name: string; value: string }[] {
   const ps = params(ep);
   const required = ps.filter((p) => p.required);
   let chosen = required.length > 0 ? required : ps.slice(0, 1);
-  // Location-search docs snapshot uses details=true (lat/lng). Marketplace
-  // search docs use the default native list path (details=false).
-  if (ep.slug === "facebook-marketplace-location-search") {
-    const details = ps.find((p) => p.name === "details");
-    if (details && !chosen.some((p) => p.name === "details")) {
-      chosen = [...chosen, details];
-    }
-  }
   // Pull-requests docs snapshot uses state=closed so mergedAt is visible.
   if (ep.slug === "github-pull-requests") {
     const state = ps.find((p) => p.name === "state");
@@ -4909,12 +5559,16 @@ function exampleArgs(ep: ApiEndpoint): { name: string; value: string }[] {
       chosen = [...chosen, state];
     }
   }
+  // Repositories docs show sort=pushed (most recently pushed).
+  if (ep.slug === "github-repositories") {
+    for (const name of ["sort", "direction", "type"] as const) {
+      const p = ps.find((x) => x.name === name);
+      if (p && !chosen.some((c) => c.name === name)) chosen = [...chosen, p];
+    }
+  }
   return chosen.map((p) => ({
     name: p.name,
-    value:
-      ep.slug === "facebook-marketplace-location-search" && p.name === "details"
-        ? "true"
-        : exampleValue(ep, p),
+    value: exampleValue(ep, p),
   }));
 }
 
@@ -4925,11 +5579,32 @@ export function exampleQueryString(ep: ApiEndpoint): string {
 }
 
 export function exampleUrl(ep: ApiEndpoint): string {
-  return `${API_URL}${ep.path}?${exampleQueryString(ep)}`;
+  if (isMultipartPost(ep)) return `${API_URL}${ep.path}`;
+  const qs = exampleQueryString(ep);
+  return qs ? `${API_URL}${ep.path}?${qs}` : `${API_URL}${ep.path}`;
+}
+
+/** True when the endpoint accepts a multipart file upload (POST + type:file). */
+export function isMultipartPost(ep: ApiEndpoint): boolean {
+  return ep.method === "POST" && params(ep).some((p) => p.type === "file");
 }
 
 export function curlExample(ep: ApiEndpoint): string {
-  return `curl "${exampleUrl(ep)}" \\\n  -H "Authorization: Bearer capt_live_..."`;
+  const key = "capt_live_...";
+  if (isMultipartPost(ep)) {
+    const fileParam = params(ep).find((p) => p.type === "file");
+    const fileName = (fileParam ? exampleValue(ep, fileParam) : "@video.mp4").replace(/^@/, "");
+    const extras = params(ep)
+      .filter((p) => p.type !== "file" && p.required)
+      .map((p) => ` \\\n  -F "${p.name}=${exampleValue(ep, p)}"`)
+      .join("");
+    return (
+      `curl -X POST "${API_URL}${ep.path}" \\\n` +
+      `  -H "Authorization: Bearer ${key}" \\\n` +
+      `  -F "file=@${fileName}"${extras}`
+    );
+  }
+  return `curl "${exampleUrl(ep)}" \\\n  -H "Authorization: Bearer ${key}"`;
 }
 
 /** A placeholder example value for a single param (used in form inputs). */
@@ -4986,20 +5661,140 @@ export function requestSamples(
   const key = apiKey && apiKey.trim() ? apiKey.trim() : "capt_live_...";
   const args = activeArgs(ep, values);
   const base = `${API_URL}${ep.path}`;
+
+  if (isMultipartPost(ep)) {
+    const fileArg = args.find((a) => a.name === "file") ?? { name: "file", value: "@video.mp4" };
+    const filePath = fileArg.value.replace(/^@/, "") || "video.mp4";
+    const otherArgs = args.filter((a) => a.name !== "file");
+    const curlExtras = otherArgs.map((a) => ` \\\n  -F "${a.name}=${a.value}"`).join("");
+    const pyFiles = `    files={"file": open(${JSON.stringify(filePath)}, "rb")},`;
+    const pyData =
+      otherArgs.length > 0
+        ? `\n    data={\n${otherArgs.map((a) => `        "${a.name}": ${JSON.stringify(a.value)},`).join("\n")}\n    },`
+        : "";
+    const nodeFormLines = [
+      `form.append("file", await fs.openAsBlob(${JSON.stringify(filePath)}));`,
+      ...otherArgs.map((a) => `form.append(${JSON.stringify(a.name)}, ${JSON.stringify(a.value)});`),
+    ].join("\n");
+    const phpFields = [
+      `    "file" => new CURLFile(${JSON.stringify(filePath)}),`,
+      ...otherArgs.map((a) => `    "${a.name}" => ${JSON.stringify(a.value)},`),
+    ].join("\n");
+    return [
+      {
+        label: "cURL",
+        code:
+          `curl -X POST "${base}" \\\n` +
+          `  -H "Authorization: Bearer ${key}" \\\n` +
+          `  -F "file=@${filePath}"${curlExtras}\n` +
+          `# or: -H "x-api-key: ${key}"`,
+      },
+      {
+        label: "Python",
+        code: `import requests
+
+res = requests.post(
+    "${base}",
+${pyFiles}${pyData}
+    headers={"Authorization": "Bearer ${key}"},  # or "x-api-key": "${key}"
+)
+print(res.json())`,
+      },
+      {
+        label: "Node",
+        code: `import fs from "node:fs";
+
+const form = new FormData();
+${nodeFormLines}
+const res = await fetch("${base}", {
+  method: "POST",
+  headers: { Authorization: "Bearer ${key}" }, // or { "x-api-key": "${key}" }
+  body: form,
+});
+const data = await res.json();
+console.log(data);`,
+      },
+      {
+        label: "PHP",
+        code: `<?php
+$ch = curl_init("${base}");
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, [
+${phpFields}
+]);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer ${key}"]); // or x-api-key: ${key}
+echo curl_exec($ch);
+curl_close($ch);`,
+      },
+      {
+        label: "Go",
+        code: `package main
+
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"os"
+)
+
+func main() {
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	fw, _ := w.CreateFormFile("file", ${JSON.stringify(filePath)})
+	f, _ := os.Open(${JSON.stringify(filePath)})
+	io.Copy(fw, f)
+	f.Close()
+${otherArgs.map((a) => `\tw.WriteField(${JSON.stringify(a.name)}, ${JSON.stringify(a.value)})`).join("\n")}
+	w.Close()
+	req, _ := http.NewRequest("POST", "${base}", &buf)
+	req.Header.Set("Authorization", "Bearer ${key}")
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	res, _ := http.DefaultClient.Do(req)
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+	fmt.Println(string(body))
+}`,
+      },
+      {
+        label: "Java",
+        code: `// Use java.net.http with a multipart body builder, or OkHttp:
+// OkHttpClient client = new OkHttpClient();
+// RequestBody fileBody = RequestBody.create(new File(${JSON.stringify(filePath)}), MediaType.parse("application/octet-stream"));
+// MultipartBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+//     .addFormDataPart("file", ${JSON.stringify(filePath)}, fileBody)
+${otherArgs.map((a) => `//     .addFormDataPart(${JSON.stringify(a.name)}, ${JSON.stringify(a.value)})`).join("\n")}
+//     .build();
+// Request request = new Request.Builder().url("${base}")
+//     .header("Authorization", "Bearer ${key}")
+//     .post(body).build();
+// try (Response res = client.newCall(request).execute()) {
+//   System.out.println(res.body().string());
+// }`,
+      },
+    ];
+  }
+
   const u = requestUrl(ep, values);
   const pyParams = args.map((a) => `        "${a.name}": ${JSON.stringify(a.value)},`).join("\n");
   const phpParams = args.map((a) => `    "${a.name}" => ${JSON.stringify(a.value)},`).join("\n");
+  const method = ep.method === "POST" ? "POST" : "GET";
 
   return [
     {
       label: "cURL",
-      code: `curl "${u}" \\\n  -H "Authorization: Bearer ${key}"\n# or: -H "x-api-key: ${key}"`,
+      code:
+        method === "POST"
+          ? `curl -X POST "${u}" \\\n  -H "Authorization: Bearer ${key}"\n# or: -H "x-api-key: ${key}"`
+          : `curl "${u}" \\\n  -H "Authorization: Bearer ${key}"\n# or: -H "x-api-key: ${key}"`,
     },
     {
       label: "Python",
       code: `import requests
 
-res = requests.get(
+res = requests.${method === "POST" ? "post" : "get"}(
     "${base}",
     params={
 ${pyParams}
@@ -5012,7 +5807,7 @@ print(res.json())`,
       label: "Node",
       code: `const res = await fetch(
   "${u}",
-  { headers: { Authorization: "Bearer ${key}" } }, // or { "x-api-key": "${key}" }
+  { method: "${method}", headers: { Authorization: "Bearer ${key}" } }, // or { "x-api-key": "${key}" }
 );
 const data = await res.json();
 console.log(data);`,
@@ -5025,7 +5820,7 @@ curl_setopt($ch, CURLOPT_URL, "${base}?" . http_build_query([
 ${phpParams}
 ]));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer ${key}"]); // or x-api-key: ${key}
+${method === "POST" ? "curl_setopt($ch, CURLOPT_POST, true);\n" : ""}curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer ${key}"]); // or x-api-key: ${key}
 echo curl_exec($ch);
 curl_close($ch);`,
     },
@@ -5040,7 +5835,7 @@ import (
 )
 
 func main() {
-	req, _ := http.NewRequest("GET",
+	req, _ := http.NewRequest("${method}",
 		"${u}", nil)
 	req.Header.Set("Authorization", "Bearer ${key}") // or Set("x-api-key", "${key}")
 	res, _ := http.DefaultClient.Do(req)
@@ -5058,7 +5853,7 @@ HttpClient client = HttpClient.newHttpClient();
 HttpRequest request = HttpRequest.newBuilder()
     .uri(URI.create("${u}"))
     .header("Authorization", "Bearer ${key}") // or .header("x-api-key", "${key}")
-    .GET()
+    .${method === "POST" ? "POST(HttpRequest.BodyPublishers.noBody())" : "GET()"}
     .build();
 HttpResponse<String> res = client.send(
     request, HttpResponse.BodyHandlers.ofString());
@@ -5092,7 +5887,7 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
             : ep.slug === "video-transcript"
               ? `Billing is 1 credit per minute of audio (rounded up, minimum 1). Failed or empty results are never charged.`
               : ep.slug === "video-summarize"
-                ? `Billing is 1 credit per minute of audio (rounded up) plus 1 credit for the AI summary. Failed or empty results are never charged.`
+                ? `Billing is 1 credit per minute of audio (rounded up) plus 1 credit for the AI summary. The response includes durationSeconds and creditsCharged so you can verify the line item. No-speech uploads return HTTP 422 and are not charged for the summary step.`
                 : ep.creditsPerResult
                   ? `At the default limit this endpoint costs ${ep.credits} credits (${ep.creditsPerResult} per result). Billing scales with how many results you request. ${CACHE_NOTE} Failed or empty results are never charged.`
                   : `Each successful call costs ${ep.credits} credit${ep.credits === 1 ? "" : "s"}. ${
@@ -5113,11 +5908,23 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       q: `How is engagementRate calculated?`,
       a: `On Post Analytics and Compare, engagementRate is always interactions ÷ views (a ratio). Every metrics object includes engagementRateBasis: "interactions/views". TikTok popular-creators uses a different basis (Creative Center percent or avgLikesPerVideo/followers) — do not compare those numbers to post analytics without reading engagementRateBasis.`,
     });
+    list.push({
+      q: `What do commentsIsApproximate / interactionsIsApproximate mean?`,
+      a: `Some platforms expose compact UI counts (YouTube "2.4M" comments). We still return an integer, but commentsIsApproximate=true means that integer is rounded — interactions and engagementRate inherit the same uncertainty via interactionsIsApproximate. Prefer exact likes when present; do not treat interactions as unit-precise when the flag is true.`,
+    });
+    list.push({
+      q: `Which platforms are supported?`,
+      a: `Eleven: YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble. That is intentionally not the full Captapi catalog — Kwai, Twitch, Spotify, Snapchat, and others are out of scope for this unified metrics shape.`,
+    });
   }
   if (ep.slug === "analytics-compare") {
     list.push({
       q: `What happens when some URLs fail?`,
       a: `Each results[] row has status ok or error and a platform field when detected. Failed URLs also appear in failed[] as {url, platform, reason}. Only successfully resolved URLs are billed (1 credit each; cache hits free).`,
+    });
+    list.push({
+      q: `Is each results[] row the same as Post Analytics?`,
+      a: `Yes — the same mapper and schema (platform, id, title, url, publishedAt, durationSeconds, thumbnailUrl, author{}, metrics{}), plus status. publishedAt is full ISO with milliseconds on both endpoints.`,
     });
   }
   if (
@@ -5151,6 +5958,56 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       q: `Is this the same as Spotify's free Web API?`,
       a: `No. Spotify's official Web API returns followers, popularity, genres, and top tracks, but not monthlyListeners, topCities, or worldRank. Those three come from the web-player GraphQL path this endpoint uses — along with topTracks playCount, concerts, and relatedArtists as clean JSON.`,
     });
+    list.push({
+      q: `Why is raw omitted by default?`,
+      a: `raw is the full GraphQL payload (~80% of the old response) and every normalized field is already derived from it. Pass raw=true only when you need an upstream key we do not lift. It also duplicates itself internally (e.g. biography vs profile.biography).`,
+    });
+    list.push({
+      q: `Why are albums[] / singles[] shorter than albumsCount / singlesCount?`,
+      a: `queryArtistOverview only embeds a short discography sample. albumsHasMore / singlesHasMore are true when the catalog is larger — chain each release uri into /spotify/album. There is no discography cursor on this overview surface.`,
+    });
+  }
+  if (ep.slug === "spotify-track") {
+    list.push({
+      q: `Does track return playCount like artist topTracks?`,
+      a: `Yes. playCount is the same stream-count metric as topTracks[].playCount on /spotify/artist — from Spotify's web GraphQL getTrack, not the official Web API.`,
+    });
+    list.push({
+      q: `How do I join to artist or album?`,
+      a: `artists[] is [{id, uri, name, url}] and album is {id, uri, name, url, releaseDate}. Pass artists[0].uri into /spotify/artist and album.uri into /spotify/album.`,
+    });
+    list.push({
+      q: `Why are popularity / isrc / previewUrl often missing?`,
+      a: `Pathfinder getTrack frequently omits Spotify Web API popularity (0–100), ISRC, and preview URLs. When present they are returned; playCount is the listen metric on this surface.`,
+    });
+  }
+  if (ep.slug === "spotify-album") {
+    list.push({
+      q: `Where is the track list?`,
+      a: `tracks[] — each row has trackNumber, discNumber, name, uri/url, durationMs, playCount, explicit, and artists[{id,uri,name,url}]. totalTracks matches the album; tracksHasMore is true only if a page was truncated.`,
+    });
+    list.push({
+      q: `Is releaseDate the full date or just the year?`,
+      a: `releaseDate is the ISO timestamp from Spotify (e.g. 2022-10-21T00:00:00Z) when precision is DAY. releaseYear is kept as a convenience integer.`,
+    });
+  }
+  if (ep.slug === "spotify-search") {
+    list.push({
+      q: `Why does results[].uri look different from older scrapes?`,
+      a: `uri is always a canonical Spotify URI (spotify:track:… / album:… / artist:…). Bare IDs are expanded. Chain them into /spotify/track, /album, or /artist without guessing prefixes.`,
+    });
+    list.push({
+      q: `Is search raw the same as artist/track/album raw?`,
+      a: `Not always. The primary path is Pathfinder GraphQL (same family as details). Apify fallthrough uses a flat scraper object (albumName, isExplicit, scrapedAt). Envelope source is pathfinder or apify — do not write one raw parser for both. Prefer normalized fields; pass raw=true only when needed.`,
+    });
+    list.push({
+      q: `How fresh are results?`,
+      a: `Envelope fetchedAt is when this request completed. Each result has scrapedAt (Apify stamp when present, otherwise the same fetch time). There is no cursor — max 50 results per call.`,
+    });
+    list.push({
+      q: `Is billing per result or flat?`,
+      a: `Flat 2 credits on the native Pathfinder path. Apify fallthrough scales per result (~1.15×). The limit param does not mean "billed per result" on the primary path.`,
+    });
   }
   if (ep.slug === "spotify-podcast") {
     list.push({
@@ -5159,7 +6016,150 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     });
     list.push({
       q: `What does rating mean on a podcast?`,
-      a: `rating.average is Spotify's show rating (about 0–5) and rating.totalRatings is how many people voted. It's the main numeric quality signal for podcast research on this endpoint.`,
+      a: `rating is an object: rating.average is Spotify's show score (about 0–5) and rating.totalRatings is how many people voted. It's the main numeric quality signal for podcast research on this endpoint — not on Spotify's free Web API.`,
+    });
+    list.push({
+      q: `Why is there no limit parameter?`,
+      a: `This endpoint returns a single show. For the episode list, use /spotify/podcast-episodes (limit + cursor).`,
+    });
+  }
+  if (ep.slug === "spotify-podcast-episodes") {
+    list.push({
+      q: `Do you ship visualIdentity / raw color dumps?`,
+      a: `No — same rule as /spotify/podcast. visualIdentity, playedState, and per-episode podcastV2 show copies are stripped. Pass raw=true only for a slimmed upstream payload; default responses omit raw entirely.`,
+    });
+    list.push({
+      q: `How do I page past the newest 50 episodes?`,
+      a: `Pass cursor=nextCursor from the previous response (integer offset). hasMore is false at the end of the archive. Flat 2 credits per page on native Pathfinder.`,
+    });
+    list.push({
+      q: `Why can totalEpisodes differ from an older /spotify/podcast call?`,
+      a: `This endpoint sets totalEpisodes from the same episodesV2 query as the page so the embedded podcast card cannot drift within one response. A separate /spotify/podcast call moments later can still see a new episode published.`,
+    });
+  }
+  if (ep.slug === "soundcloud-track") {
+    list.push({
+      q: `What do streamable / downloadable mean if streamUrl is missing?`,
+      a: `They are SoundCloud permission flags on the track. When the public api-v2 lets us mint a progressive MP3 we return streamUrl (and often hlsUrl) with mediaUrlsExpireAt. downloadUrl is only present when SoundCloud exposes a public download without OAuth — downloadable:true alone does not guarantee a URL.`,
+    });
+    list.push({
+      q: `How do I join to soundcloud/artist?`,
+      a: `Use artist.id or artist.handle (permalink slug). artist.name/username-style display names can differ in casing from the URL slug.`,
+    });
+  }
+  if (ep.slug === "soundcloud-artist") {
+    list.push({
+      q: `What is subscriptionTier vs the old badges / creatorSubscription fields?`,
+      a: `subscriptionTier is the single canonical plan: pro-unlimited | pro | mid-tier | free. We no longer ship duplicate badges.proUnlimited + creatorSubscription.product.id + badges.verified — verified stays top-level only.`,
+    });
+    list.push({
+      q: `Why is handle different from username?`,
+      a: `handle is the permalink slug in the URL (e.g. flume). username is SoundCloud's display username (e.g. Flume). Prefer handle/id for joins.`,
+    });
+  }
+  if (ep.slug === "github-user") {
+    // Replace the generic "Do I need a GitHub API key or OAuth?" answer — public
+    // GitHub profiles need neither; sell the real value (one key / envelope).
+    const oauthIdx = list.findIndex((f) => /API key or OAuth/i.test(f.q));
+    if (oauthIdx >= 0) {
+      list[oauthIdx] = {
+        q: `Why use Captapi instead of api.github.com?`,
+        a: `GitHub's public /users/{username} API is free (60 req/hour unauthenticated, 5,000/hour with a personal access token) and needs no OAuth for public profiles. Captapi's value is one Bearer key across ~32 platforms, shared rate-limit/retry handling, and the same camelCase envelope as other profile endpoints — not removing a GitHub login barrier. For GitHub-only jobs, call api.github.com directly.`,
+      };
+    }
+    list.push({
+      q: `How do I tell a user from an organization?`,
+      a: `Read type — "User" or "Organization" (GitHub's casing). Examples: getify is a User; vercel is an Organization.`,
+    });
+    list.push({
+      q: `When is email present?`,
+      a: `Only when the account made an email public on their GitHub profile. Private emails are never returned; the field is omitted when unset.`,
+    });
+  }
+  if (ep.slug === "facebook-marketplace-location-search") {
+    list.push({
+      q: `When should I call this instead of marketplace-search?`,
+      a: `marketplace-search already accepts a city/place name with no lat/lng required. Use location resolve when the name is ambiguous (Austin TX vs Austin MN) or you need Facebook's cityPageId / coordinates before searching. Otherwise skip it — it is an optional 2-credit geocode/disambiguation step.`,
+    });
+    list.push({
+      q: `What is id / cityPageId?`,
+      a: `Facebook's Marketplace city page id (city_page.id) — the same value marketplace-search listings expose as cityPageId. It is not a fabricated "city|city|state" string.`,
+    });
+  }
+  if (ep.slug === "github-repository") {
+    list.push({
+      q: `Is watchers the same as stars?`,
+      a: `No. watchers is GitHub's subscribers_count (notification watchers). GitHub's REST watchers_count field is a deprecated alias of stargazers and is never returned here.`,
+    });
+    list.push({
+      q: `Why is openIssuesAndPrs not just open issues?`,
+      a: `GitHub's open_issues_count includes open pull requests. Use /github/pull-requests when you need PRs alone.`,
+    });
+  }
+  if (ep.slug === "github-trending-repositories") {
+    list.push({
+      q: `Is this the same as sorting /search/repositories by stars?`,
+      a: `No. That returns all-time most-starred repos (public-apis, free-programming-books, …). This endpoint scrapes github.com/trending and ranks by starsGained in the since window. source is always "github.com/trending".`,
+    });
+    list.push({
+      q: `Why is there no cursor?`,
+      a: `GitHub's trending HTML page is a single short list (usually ≤25). There is no Search API pagination here and no 1000-result Search cap either.`,
+    });
+  }
+  if (ep.slug === "github-trending-developers") {
+    list.push({
+      q: `Is this followers:>1000 user search?`,
+      a: `No. That returns all-time most-followed accounts. This scrapes github.com/trending/developers for a since window and hydrates followers/bio from /users/{login}. There is no Search relevance score field.`,
+    });
+  }
+  if (ep.slug === "github-contributions") {
+    list.push({
+      q: `Is recentPublicEvents still returned?`,
+      a: `No. That field was a count of /users/{u}/events/public rows (hard-capped at 90) and was not a contribution metric. This endpoint returns the heatmap: totalContributions, currentStreak, and days[].`,
+    });
+    list.push({
+      q: `Where does the calendar come from?`,
+      a: `The public HTML at github.com/users/{login}/contributions (same graph as the profile). source echoes that path.`,
+    });
+  }
+  if (ep.slug === "github-pull-requests") {
+    list.push({
+      q: `Why does the docs example use state=closed if the default is open?`,
+      a: `API default is open. The docs cURL passes state=closed so mergedAt/closedAt show in the example response — data.state always echoes whichever filter ran.`,
+    });
+    list.push({
+      q: `Why include draft?`,
+      a: `Draft PRs are not ready for review. Counting them as shipped PRs skews throughput metrics — filter draft=false.`,
+    });
+  }
+  if (ep.slug === "github-activity") {
+    list.push({
+      q: `Why is there an eventCeiling of 90?`,
+      a: `GitHub's /users/{u}/events/public returns at most 90 events (and only ~90 days). We echo eventCeiling and stop hasMore there — deep pagination past that is not available.`,
+    });
+    list.push({
+      q: `Where is the commit message / branch?`,
+      a: `On PushEvent rows, payload.ref is the branch and payload.commits[] has sha + message. Other types expose payload.action and the related entity fields.`,
+    });
+  }
+  if (ep.slug === "github-followers" || ep.slug === "github-following") {
+    list.push({
+      q: `Why is paging a large account expensive?`,
+      a: `There is no sampling/since parameter — every page costs ~0.1 credits/row. ~250k followers ≈ 25k credits. For full archives call api.github.com (free, rate-limited) directly.`,
+    });
+    list.push({
+      q: `What is id / type for?`,
+      a: `id is GitHub's numeric account id (stable for joins/dedup). type is User or Organization — both come from the upstream followers/following payload.`,
+    });
+  }
+  if (ep.slug === "github-repositories") {
+    list.push({
+      q: `Can I sort by stars?`,
+      a: `No — GitHub's /users/{u}/repos only supports sort=created|updated|pushed|full_name. Use sort=pushed for recently active repos. For star ranking, call api.github.com search (user:LOGIN sort:stars) or github/repository per repo.`,
+    });
+    list.push({
+      q: `Why is parent missing on forks?`,
+      a: `GitHub's list payload omits parent. isFork is still true. Call github/repository on the fork for parent (upstream fullName).`,
     });
   }
   if (ep.slug === "tiktok-search-users") {
@@ -5323,11 +6323,11 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     });
     list.push({
       q: `Why is this only 2 credits when older docs said ~70?`,
-      a: `Native Decodo search is flat 2 credits. The old ~70 figure was Apify billed at ~3.5 credits per result (limit 20). Apify fallback is now capped at 5 credits total. TikTok DSA still withholds spend/CTA more often than Meta — that is a data-source limit, not a reason to charge 35× Facebook.`,
+      a: `Native Decodo search is flat 2 credits when ads are returned (empty is free). The old ~70 figure was Apify billed at ~3.5 credits per result (limit 20). Apify fallback is now capped at 5 credits total.`,
     });
     list.push({
       q: `Why did my keyword return zero ads?`,
-      a: `We relevance-filter so every query token must appear in advertiser name or ad copy. TikTok's library soft-matches aggressively; without filtering, fashion queries returned Romanian good-morning ads. Empty is intentional — try a brand/advertiser name, another EU country code, or Creative Center Top Ads for performance creatives.`,
+      a: `Check matchedFrom vs totalReturned. If matchedFrom>0 and totalReturned=0, the library had rows and local filter (match=any|all, substring) dropped them — try match=any or a brand name. If matchedFrom=0, the DSA library truly had nothing for that country/query (US is often empty; default GB).`,
     });
   }
   if (ep.slug === "facebook-ad-library-search") {
@@ -5355,24 +6355,39 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     });
     list.push({
       q: `How many credits does Top Ads cost?`,
-      a: `Flat 2 credits on the Decodo-native Creative Center path. If that path is unavailable, the Apify fallback bills about 1 credit per returned ad (minimum 2).`,
+      a: `Flat 2 credits on the Decodo-native path when ads are returned. Empty results (and upstream timeouts) are never charged. Apify fallback bills about 1 credit per returned ad (minimum 2).`,
     });
     list.push({
-      q: `Why did my keyword return zero ads?`,
-      a: `Creative Center soft-matches keywords (and often ignores them with orderBy=for_you). We relevance-filter so every query token must appear in title, brand, tags, or resolved industry — empty beats paying for unrelated landlord/brows/concert ads. Try a brand name, orderBy=likes|ctr, or an industry key (e.g. Games / Casino).`,
+      q: `Why did my keyword return zero — or soft Creative Center ads?`,
+      a: `Read matchedFrom, filteredOut, literalMatches, and matchBasis. match=any (default) keeps rows with any token as a substring; match=all requires every token. When literal matches are empty but Creative Center returned a soft-ranked set, matchBasis=creative_center serves that set instead of a silent zero. Upstream work is capped (~40s) under ALB/nginx defaults.`,
     });
     list.push({
       q: `What does ctr mean, and where are ad dates?`,
-      a: `ctr is TikTok's normalized 0–1 Creative Center score (not a raw click-through percent); ctrTier is the bucket TikTok assigns. The public Top Ads list API does not expose firstSeen/lastSeen — only your period lookback window. For DSA start/end dates use /tiktok/search.`,
+      a: `ctr is TikTok's normalized 0–1 Creative Center score (not a raw click-through percent); ctrTier is the bucket TikTok assigns. Each ad has firstSeen/lastSeen (ISO-8601) when Creative Center or the actor ships timestamps; otherwise they stay null — check datesPresent on the response. The period param is only the lookback window for the ranking. For DSA firstShown/lastShown use /tiktok/search.`,
+    });
+    list.push({
+      q: `How do I group ads by advertiser?`,
+      a: `Use advertiser.id when present, else advertiser.name / brandName. Spark Ads that ship brandName "Not Mention" fall back to the organic creator nickname and author id. Creative Center often omits a stable business id — null advertiser.id is expected on some rows.`,
     });
     list.push({
       q: `Why did Top Ads return 502 with industry set?`,
       a: `The Apify fallback only accepts its fixed industry enum (All Industries, Gaming, E-commerce & Shopping, Beauty & Personal Care, …). We now map TikTok keys/aliases (label_25000000000, Games→Gaming) before the actor call; unsupported values return HTTP 400 with the allowed list — not upstream_actor_error 502. Omit industry or use Gaming / All Industries to unblock.`,
     });
   }
+  if (ep.slug === "linkme-profile") {
+    list.push({
+      q: `Why did Linkme used to return Privacy Policy and Terms as links?`,
+      a: `An older HTML scrape read the SSR shell meta tags and site footer. We now parse Linkme's dehydrated TanStack $tsr profile (same payload SC uses): bio, profileVisitCount, featured links[], webLinks[], infoLinks/email, stripeStatus, and isDefaultProfilePicture. Footer chrome is never returned. Flat 1 credit.`,
+    });
+  }
   list.push({
     q: `Is the ${ep.name} suitable for production use?`,
-    a: `Yes. It is a stable REST endpoint with predictable JSON and automatic retries. ${CACHE_NOTE} Use it for analytics, monitoring, and content automation.`,
+    a:
+      ep.platform === "account"
+        ? `Yes. It is a stable REST endpoint with predictable JSON. Account endpoints are always live (never cached) and do not charge credits.`
+        : ep.platform === "utilities" && ep.method === "POST"
+          ? `Yes. It is a stable REST endpoint with predictable JSON. Upload via multipart form field file (POST) — see the cURL sample. Use durationSeconds / creditsCharged to verify per-minute billing.`
+          : `Yes. It is a stable REST endpoint with predictable JSON and automatic retries. ${CACHE_NOTE} Use it for analytics, monitoring, and content automation.`,
   });
 
   return list;
@@ -5552,9 +6567,15 @@ const FIELD_DESCS: Record<string, string> = {
   trackNumber: "Track position on the album.",
   contentRating: "Spotify content rating label (e.g. NONE, EXPLICIT).",
   explicit: "Whether the track is marked explicit.",
-  artistItems: "Structured Spotify artists ({id, uri, name, url}) for chaining.",
-  albumInfo: "Structured Spotify album ({id, uri, name, url, releaseDate}).",
+  artistItems:
+    "Legacy alias — prefer artists[{id, uri, name, url}] on /spotify/track.",
+  albumInfo:
+    "Legacy alias — prefer album{id, uri, name, url, releaseDate} on /spotify/track.",
   previewUrl: "30s MP3 preview URL when Spotify exposes one.",
+  albumsHasMore:
+    "True when albumsCount exceeds the overview sample in albums[] — chain release URIs into /spotify/album.",
+  singlesHasMore:
+    "True when singlesCount exceeds the overview sample in singles[] — chain release URIs into /spotify/album.",
   mediaType: "Media type label for this item (platform-specific enum).",
   playable: "Whether the track is playable in the web player.",
   scrapedAt:
@@ -6200,8 +7221,130 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     marketplace: "Amazon marketplace code echoed from the request (default US).",
   },
   "github-user": {
+    platform: 'Always "github" on this endpoint.',
+    type: 'GitHub account kind: "User" or "Organization" (upstream casing preserved).',
+    name: "GitHub profile display name (not a deprecated alias — GitHub has no displayName field here).",
     email:
-      "Public email only when the user made it public on their GitHub profile. Null when private or unset.",
+      "Public email only when the account made it public on their GitHub profile. Omitted when private or unset.",
+    hireable: "true when the user marked themselves hireable on GitHub; omitted/null when unset.",
+    siteAdmin: "true when the account is a GitHub site admin (rare).",
+    nodeId: "GitHub GraphQL node_id for the account.",
+    publicRepos: "Count of public repositories.",
+    publicGists: "Count of public gists.",
+    twitterUsername: "Public X/Twitter username when set on the GitHub profile. Omitted when unset.",
+  },
+  "github-repository": {
+    platform: 'Always "github" on this endpoint.',
+    type: 'Always "repository" on each repo object.',
+    language: 'Primary programming language (e.g. "C", "Python") — not a spoken-language code.',
+    stars: "stargazers_count — total stars.",
+    watchers:
+      "subscribers_count — people watching for notifications. Omitted on list payloads that lack the field. Never GitHub's legacy watchers_count (that equals stars).",
+    openIssuesAndPrs:
+      "GitHub open_issues_count — open issues plus open pull requests. Use github/pull-requests for PRs alone.",
+    license: "SPDX license id when GitHub maps one. Null when NOASSERTION/NONE — see licenseName.",
+    licenseName: "Human-readable license label from GitHub (e.g. Other, MIT License).",
+    parent: "Upstream fullName when isFork is true (from GitHub parent.full_name). Present on this detail endpoint only.",
+    ownerType: 'Owner account kind: "User" or "Organization".',
+    size: "Repository size in kilobytes (GitHub's size field).",
+    visibility: 'Repository visibility (usually "public" on this surface).',
+    hasIssues: "Whether the issues feature is enabled on the repo.",
+    hasDiscussions: "Whether GitHub Discussions is enabled.",
+  },
+  "github-trending-repositories": {
+    source: 'Always "github.com/trending" — HTML trending page, not REST star search.',
+    since: "Trending window echoed from the request: daily | weekly | monthly.",
+    language: "Programming-language filter slug echoed from the request (null when browsing all languages).",
+    starsGained: "Stars gained in the since window — the metric that ranks github.com/trending.",
+    rank: "1-based position on the trending page.",
+    stars: "Total star count shown on the trending card.",
+    forks: "Total fork count shown on the trending card.",
+  },
+  "github-trending-developers": {
+    source: 'Always "github.com/trending/developers" — not REST /search/users.',
+    since: "Trending window echoed from the request: daily | weekly | monthly.",
+    rank: "1-based position on the trending developers page.",
+    followers: "Follower count hydrated from GET /users/{login} (the ranking signal you can sort on).",
+    popularRepo: "owner/name of the popular repo shown on the trending card.",
+    publicRepos: "Public repository count from the hydrated profile.",
+    bio: "Public profile bio when set.",
+  },
+  "github-contributions": {
+    source: "Public contribution calendar HTML path (github.com/users/{login}/contributions).",
+    totalContributions: "Contributions in the last year — the number on the profile graph heading.",
+    currentStreak: "Consecutive days with count>0 ending at the most recent calendar day (0 if today is empty).",
+    from: "First date in days[] (start of the calendar window).",
+    to: "Last date in days[] (end of the calendar window).",
+    days: "Per-day rows [{date, count, level}] for the heatmap. count is the contribution total; level is GitHub's 0–4 intensity.",
+    count: "Contributions on that date (from the calendar tool-tip).",
+    level: "GitHub intensity 0–4 for the heatmap cell.",
+  },
+  "github-pull-requests": {
+    state:
+      "Top-level: filter echoed from the request (open|closed|all). On each PR: GitHub's PR state.",
+    draft: "true when the PR is a draft — exclude from review-throughput metrics.",
+    labels: "Label objects [{name, color, description}] from the PR.",
+    author: "PR author card {id, login, avatar, url} — not a bare login string.",
+    head: "Source branch {ref, sha, label}.",
+    base: "Target branch {ref, sha, label}.",
+    closedAt: "When the PR was closed (ISO). Distinct from mergedAt.",
+    mergedAt: "When the PR was merged (ISO). Null/omitted if not merged.",
+    requestedReviewers: "Requested reviewer cards [{id, login, avatar, url}].",
+    assignees: "Assignee cards [{id, login, avatar, url}].",
+    nextCursor: "Opaque Link-header cursor (not a bare page number).",
+  },
+  "github-activity": {
+    type: 'GitHub event enum: PushEvent, PullRequestEvent, IssuesEvent, CreateEvent, WatchEvent, ForkEvent, …',
+    payload:
+      "Type-specific details — PushEvent: ref/size/commits[]; PullRequestEvent/IssuesEvent: action + entity fields.",
+    eventCeiling:
+      "Hard cap of 90 — GitHub's /users/{u}/events/public limit. hasMore is false once reached.",
+    nextCursor: "Opaque Link-header cursor. Pagination stops at eventCeiling.",
+    repo: "owner/name of the repository the event targets.",
+  },
+  "github-repositories": {
+    sort: "Echo of sort=created|updated|pushed|full_name (default updated).",
+    direction: "Echo of direction=asc|desc (default desc).",
+    type: 'Top-level: affiliation filter owner|member|all. On each repo row: always "repository".',
+    language: 'Primary programming language (e.g. "C", "Python") — not a spoken-language code.',
+    watchers:
+      "Omitted on this list endpoint — GitHub's list payload has no subscribers_count (and watchers_count would wrongly equal stars). Use github/repository for real watchers.",
+    parent:
+      "Omitted on this list — GitHub's /users/{u}/repos payload has no parent object. isFork is still set; call github/repository for upstream fullName.",
+    openIssuesAndPrs:
+      "GitHub open_issues_count — open issues plus open pull requests.",
+    license: "SPDX id when mapped; null for NOASSERTION/NONE — see licenseName.",
+    licenseName: "Human-readable license label from GitHub.",
+    nextCursor: "Opaque Link-header cursor (not a bare page number).",
+  },
+  "github-followers": {
+    id: "GitHub numeric account id — stable for joins and dedup across pages.",
+    login: "GitHub username.",
+    type: 'Account kind: "User" or "Organization".',
+    url: "Profile URL (https://github.com/{login}).",
+    avatar: "Avatar image URL.",
+    nextCursor: "Opaque Link-header cursor (not a bare page number).",
+  },
+  "github-following": {
+    id: "GitHub numeric account id — stable for joins and dedup across pages.",
+    login: "GitHub username.",
+    type: 'Account kind: "User" or "Organization".',
+    url: "Profile URL (https://github.com/{login}).",
+    avatar: "Avatar image URL.",
+    nextCursor: "Opaque Link-header cursor (not a bare page number).",
+  },
+  "facebook-marketplace-location-search": {
+    id: "Facebook Marketplace city page id — same value as cityPageId and as search listings' cityPageId. Omitted when Facebook's hub HTML does not expose it.",
+    cityPageId: "Alias of id — Facebook city_page.id for the Marketplace hub.",
+    slug: "Marketplace hub path slug (e.g. austin, austin-minnesota).",
+    name: "Display label, usually 'City, ST'.",
+    city: "City name from the query / hub.",
+    state: "US state abbreviation when known.",
+    latitude: "Hub latitude when Facebook exposes it (included by default — no details flag).",
+    longitude: "Hub longitude when Facebook exposes it.",
+    query: "Echo of the q parameter you sent.",
+    totalReturned: "Number of location candidates in this response.",
+    locations: "Candidate Marketplace hubs for disambiguation or geocode.",
   },
   "facebook-page-details": {
     email: "Public email when the Facebook Page About section exposes one. Null when omitted.",
@@ -6263,6 +7406,37 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     other:
       "Typed social networks that did not map into socials{} [{url, title?, type?}]. Empty when every icon mapped.",
     url: "On the page: https://lnk.bio/{username}. On a link row: outbound destination.",
+  },
+  "linkme-profile": {
+    id: "Linkme profile id as a hex string.",
+    displayName: "firstName + lastName when present. Canonical; name is a deprecated alias.",
+    name: "Deprecated alias of displayName — prefer displayName.",
+    handle: "Linkme username. Canonical alongside username.",
+    bio: "Creator bio from the dehydrated profile. Empty string when unset. description is a deprecated alias.",
+    description: "Deprecated alias of bio — prefer bio.",
+    avatar: "Profile image URL on media.link.me. Check isDefaultProfilePicture before treating it as a real photo.",
+    isDefaultProfilePicture:
+      "True when Linkme is serving a placeholder avatar (e.g. default/profile/avatar-2.png) — not the creator's photo.",
+    profileVisitCount:
+      "Public profile visit count as Linkme displays it (string, e.g. \"15.9k\" or \"29\"). One of the few audience metrics in the link-in-bio block.",
+    totalLinks: "Linkme's reported total link count on the profile (may differ from links[].length when featured CTAs and icon rows diverge).",
+    linkCount: "Number of featured CTA rows in links[] (not footer chrome).",
+    links: "Featured CTA buttons [{id?, title, url, thumbnail?, description?}]. Never Privacy Policy / Terms footer rows.",
+    webLinks:
+      "Social icon groups [{title, linkId?, links:[{linkValue, faceValue?, baseUrl?}]}] — Instagram, Spotify, Twitch, …",
+    infoLinks:
+      "Contact groups [{title, linkId?, links:[{linkValue, faceValue?}]}]. Email usually appears here; mirrored on top-level email.",
+    email: "Public email from infoLinks when published. Null when unset.",
+    stripeStatus: "{tipsEnabled, stripeEnabled, stripeAccountId?} — monetization / tips signal from Linkme.",
+    verifiedAccount: "True when Linkme marks the account verified.",
+    isAmbassador: "True when the profile is a Linkme ambassador.",
+    isPrivate: "True when the profile is private.",
+    createdAt: "Profile createdAt from Linkme (YYYY-MM-DD HH:mm:ss).",
+    updatedAt: "Profile updatedAt from Linkme (YYYY-MM-DD HH:mm:ss).",
+    socials:
+      "CamelCase URL map derived from webLinks + featured CTAs — instagram/tiktok/youtube/twitter/facebook/spotify/appleMusic/twitch/threads/…",
+    other: "Typed social rows that did not map into socials{} (e.g. Deezer, Youtube-music).",
+    url: "On the page: https://link.me/{username}. On a link row: outbound destination.",
   },
   "linktree-page": {
     id: "Linktree account id as a string (catalog-wide id convention).",
@@ -6370,10 +7544,213 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     relatedClips: "Other public clips from the same broadcaster [{id,slug,url,title,views,thumbnail,language,…}] — discovery surface ScrapeCreators also ships.",
   },
   "spotify-track": {
+    platform: 'Always "spotify" on this endpoint.',
+    name: "Track title (song name). Not a profile displayName alias.",
+    artists:
+      "Credited artists as [{id, uri, name, url}] — chain uri into /spotify/artist.",
+    album:
+      "Containing album as {id, uri, name, url, releaseDate} — chain uri into /spotify/album.",
+    playCount:
+      "Lifetime stream count from Spotify web GraphQL (same metric as artist topTracks[].playCount).",
+    popularity:
+      "Spotify Web API 0–100 popularity when Pathfinder exposes it; often absent — prefer playCount.",
+    isrc: "ISRC when Pathfinder exposes it; often absent on getTrack.",
+    previewUrl: "30s MP3 preview URL when Spotify exposes one; often absent on getTrack.",
+    explicit: "Derived from contentRating.label (EXPLICIT → true, NONE → false).",
+    releaseDate: "Album release date (ISO) when Spotify exposes it on the track payload.",
     mediaType: "Spotify media type (e.g. AUDIO).",
   },
   "spotify-artist": {
-    region: "Artist region/country when Spotify exposes it.",
+    platform: 'Always "spotify" on this endpoint.',
+    name: "Artist display name on Spotify. Not a deprecated displayName alias.",
+    region: "ISO region/country for a topCities row (listener geography), not a request market.",
+    country:
+      "ISO country for a topCities listener city (e.g. US). Not a popular-creators feed market.",
+    playCount: "Lifetime stream count for a topTracks[] row.",
+    albumsHasMore:
+      "True when albumsCount > len(albums[]) — overview sample is incomplete; chain into /spotify/album.",
+    singlesHasMore:
+      "True when singlesCount > len(singles[]) — overview sample is incomplete; chain into /spotify/album.",
+  },
+  "spotify-album": {
+    platform: 'Always "spotify" on this endpoint.',
+    name: "Album title. Not a profile displayName alias.",
+    artists:
+      "Album artists as [{id, uri, name, url}] — chain uri into /spotify/artist.",
+    tracks:
+      "Album track list from tracksV2 — [{trackNumber, discNumber, name, uri, url, durationMs, playCount, explicit, artists}].",
+    playCount: "Lifetime stream count for a tracks[] row (same GraphQL metric as /spotify/track).",
+    releaseDate: "Full album release timestamp (ISO) when Spotify precision is DAY — prefer over releaseYear alone.",
+    releaseYear: "Convenience year derived from releaseDate / date.year.",
+    explicit: "True if any track is EXPLICIT; false when all rated tracks are NONE.",
+    tracksHasMore: "True when totalTracks exceeds the tracks[] page returned (rare after full pagination).",
+    totalTracks: "Album track count from Spotify (matches tracks[] length when the catalog page is complete).",
+  },
+  "spotify-search": {
+    platform: 'Always "spotify" on this endpoint.',
+    name: "Result title (track, album, artist, or show name). Not a profile displayName alias.",
+    uri: "Canonical Spotify URI (spotify:track:… / album:… / artist:… / show:… / episode:…) — never a bare id.",
+    artists:
+      "On Pathfinder track/album hits: [{id, uri, name, url}]. Apify fallthrough may still ship name strings.",
+    explicit: "Whether the item is marked explicit (from contentRating or Apify isExplicit).",
+    durationFormatted: "Human duration (m:ss) when known.",
+    scrapedAt: "When this result was scraped/fetched (Apify stamp or request fetch time).",
+    fetchedAt: "When this search request completed (envelope).",
+    source: 'Upstream used for this response: "pathfinder" (GraphQL) or "apify" (scraper fallthrough).',
+    query: "Echo of the q parameter.",
+  },
+  "spotify-podcast": {
+    platform: 'Always "spotify" on this endpoint.',
+    name: "Podcast show title. Not a profile displayName alias.",
+    explicit: "Whether the show is marked explicit (from contentRating labels).",
+    playable: "Whether the show is playable in the current market when Spotify exposes it.",
+    rating: "Show rating object {average, totalRatings} — Spotify web GraphQL; not on the free Web API.",
+    publisher: "Show publisher {name} — not episode hosts and never stuffed into artists[].",
+    showTypes: 'Show type flags when Spotify exposes them (e.g. "SHOW_TYPE_EXCLUSIVE").',
+    totalEpisodes: "Episode count for the show when Spotify exposes it.",
+  },
+  "spotify-podcast-episodes": {
+    platform: 'Always "spotify" on this endpoint.',
+    name: "Episode title. Not a profile displayName alias.",
+    id: "Episode id (same id as in spotify:episode:{id}).",
+    explicit: "Whether this episode is marked explicit (from contentRating.label).",
+    playable: "Whether this episode is playable in the current market.",
+    previewUrl: "MP3 preview URL from previewPlayback.audioPreview.cdnUrl when Spotify exposes one.",
+    audioUrls: "Additional mp3 preview source URLs from audio.items[].",
+    releaseDate: "Full episode release timestamp (ISO, often minute precision) — prefer over releaseYear alone.",
+    releaseYear: "Convenience year derived from releaseDate.",
+    mediaTypes: 'Media kinds on the episode (e.g. ["AUDIO","VIDEO"]).',
+    hasVideo: "True when mediaTypes includes VIDEO.",
+    hasTranscripts: "True when Spotify exposes transcript items for the episode.",
+    paywallContent: "True when restrictions.paywallContent is set (exclusive/paywalled).",
+    showTypes: 'Show-level type flags copied from the parent show (e.g. "SHOW_TYPE_EXCLUSIVE").',
+    rating: "On the embedded podcast card: {average, totalRatings}.",
+    totalEpisodes: "Archive size from this episodes query (same source as pagination — no intra-response drift).",
+    nextCursor: "Offset string for the next page; null when hasMore is false.",
+    hasMore: "True when more episodes remain beyond this page.",
+  },
+  "soundcloud-track": {
+    platform: 'Always "soundcloud" on this endpoint.',
+    artist:
+      "Uploader as {id, handle, name, url, avatar, followers, verified} — chain id/handle into /soundcloud/artist.",
+    plays: "Playback count for the track.",
+    likes: "Like count for the track.",
+    reposts: "Repost count for the track.",
+    comments: "Comment count for the track.",
+    downloads: "How many times the track was downloaded on SoundCloud (their counter).",
+    downloadable:
+      "SoundCloud permission flag — the uploader allows downloads. Does not guarantee downloadUrl (public api-v2 often requires OAuth).",
+    streamable:
+      "SoundCloud permission flag — the track may be streamed. When true we usually mint streamUrl / hlsUrl.",
+    streamUrl:
+      "Signed progressive MP3 CDN URL when we can mint one from api-v2 transcodings. Expires — see mediaUrlsExpireAt.",
+    hlsUrl: "Signed HLS playlist URL when available. Expires — see mediaUrlsExpireAt.",
+    downloadUrl:
+      "Direct download URL only when SoundCloud exposes a public download without OAuth; omitted otherwise even if downloadable is true.",
+    mediaUrlsExpireAt: "ISO expiry for signed streamUrl / hlsUrl CDN links.",
+    waveformUrl: "URL of SoundCloud's waveform JSON (peaks), not an audio file.",
+    license: "Track license string from SoundCloud (e.g. all-rights-reserved) — reuse-policy signal.",
+    publishedAt: "Track created/publish time as ISO-8601.",
+  },
+  "soundcloud-artist": {
+    platform: 'Always "soundcloud" on this endpoint.',
+    handle: "Permalink slug in the profile URL (e.g. flume) — prefer this over username for joins.",
+    username: "SoundCloud display username (e.g. Flume). May differ in casing from handle.",
+    name: "Display name when SoundCloud exposes full_name; otherwise username.",
+    verified: "Whether the account is verified. Top-level only (not duplicated under badges).",
+    subscriptionTier:
+      'Canonical plan: "pro-unlimited" | "pro" | "mid-tier" | "free" — replaces badges.proUnlimited + creatorSubscription.product.id.',
+    externalLinks:
+      "Profile social/website links from SoundCloud web-profiles [{url, network, title, username}] when published.",
+    createdAt:
+      "Account created time as ISO-8601 when SoundCloud exposes it on the public api-v2 (often redacted/null).",
+    followers: "Follower count.",
+    followings: "Number of accounts this artist follows.",
+    trackCount: "Public track count.",
+    playlistCount: "Public playlist count.",
+    likesCount: "Likes count on the profile when SoundCloud exposes it.",
+  },
+  "soundcloud-artist-tracks": {
+    platform: 'Always "soundcloud" on this endpoint.',
+    artistId: "SoundCloud numeric artist id — join key for /soundcloud/artist.",
+    artistUrl: "Artist profile URL (also on top-level artist.url).",
+    artist:
+      "Artist card once for the whole page {id,handle,name,url,avatar,followers,verified}. Not repeated on each track.",
+    nextCursor:
+      "Opaque pagination token. Pass as cursor on the next call. Not a SoundCloud URL — do not edit.",
+    tracks:
+      "Track rows matching /soundcloud/track shape without per-row artist{} (single-artist list).",
+  },
+  "kwai-profile": {
+    platform: 'Always "kwai" on this endpoint.',
+    id: "Kwai opaque profile eid (same value as eid).",
+    eid: "Kwai opaque profile eid.",
+    bio: "Profile bio when Kwai's public page exposes it.",
+    verified: "Whether Kwai shows a verified badge on this profile.",
+    verifiedDescription: "Kwai verification label text when present (e.g. Conta Oficial).",
+    followers: "Follower count when Kwai exposes a non-stub value.",
+    following: "Following count when Kwai exposes a non-stub value (omitted when the web surface stubs it to 1).",
+    likedCount: "Total likes received across the creator's posts.",
+    postCount: "Public post/video count (same as publicPostCount / videoCount).",
+    videoCount: "Alias of postCount — public video/post count for cadence joins.",
+    publicPostCount: "Public posts count.",
+    privatePostCount: "Private posts count when Kwai exposes it.",
+  },
+  "facebook-marketplace-search": {
+    location: "Search-origin city echoed from the location query param (not each listing's city).",
+    status: 'Listing availability: "available" | "pending" | "sold". Prefer this over isPublished.',
+    isSold: "Convenience bool for status === sold.",
+    isPending: "Convenience bool for status === pending.",
+    isPublished:
+      "Whether Facebook still publishes the listing page (their is_live). Not a livestream. Omitted when status is sold/pending — prefer status.",
+    isLocal: "true when the listing's city/state matches the search origin (or distanceMiles ≤ radiusMiles when coords exist).",
+    shipsOutsideRadius:
+      "true when the listing offers shipping and isLocal is false — typical nationwide SHIPPING_ONSITE inventory.",
+    distanceMiles: "Approximate miles from search origin when both sides have coordinates (details=true path).",
+    priceAmount: "Price in minor units (cents) for exact arithmetic — prefer over float price.",
+    photos: "Photo gallery URIs. Omitted on list cards when only the cover exists (use image). Full gallery with details=true.",
+    image: "Cover photo URL.",
+    deliveryTypes: 'Facebook delivery enums (e.g. IN_PERSON, SHIPPING_ONSITE).',
+    seller: "Seller card when Facebook exposes marketplace_listing_seller on the enriched/item path.",
+  },
+  "facebook-marketplace-item": {
+    location: "Listing city/area text from the item page (not the search query).",
+    status: 'Listing availability: "available" | "pending" | "sold". Sold listings can still be published.',
+    isSold: "Convenience bool for status === sold.",
+    isPending: "Convenience bool for status === pending.",
+    isPublished:
+      "Whether Facebook still publishes the listing page (their is_live). Not a livestream — prefer status.",
+    priceAmount: "Price in minor units (cents) for exact arithmetic.",
+    seller: "Seller {id, name, url, joinedAt, rating} when Facebook exposes marketplace_listing_seller on the public page.",
+    photos: "Full photo gallery when the item page exposes it.",
+    city: "Listing city from reverse geocode or location text.",
+    state: "Listing state/region code when exposed.",
+  },
+  "kwai-user-posts": {
+    platform: 'Always "kwai" on this endpoint.',
+    profileUrl: "Canonical Kwai profile URL for the request (https://www.kwai.com/@handle).",
+    author:
+      "Creator card once for the page {id, username, displayName, avatar, url}. Not repeated on each post.",
+    nextCursor:
+      "Opaque pagination token within the posts from one profile fetch. Pass as cursor. Null when exhausted.",
+    text: 'Post caption when Kwai publishes a real one. Placeholder descriptions ("...") are omitted — not returned as text.',
+    transcript:
+      "Auto-caption text from Kwai JSON-LD when present (deduped if two tracks were concatenated). Omitted when Kwai does not expose captions — not null.",
+    videoUrl: "Signed progressive playback URL (usually mp4). Check videoType; re-fetch before mediaUrlsExpireAt.",
+    videoType: 'Playback type: "mp4" (progressive) or "hls" (.m3u8).',
+    mediaUrlsExpireAt: "ISO expiry for signed videoUrl / CDN links, parsed from Kwai's tag= query param.",
+    thumbnailUrl: "Post cover image URL.",
+  },
+  "kwai-post": {
+    platform: 'Always "kwai" on this endpoint.',
+    author: "Post author {id, username, displayName, avatar, url}.",
+    text: 'Post caption when Kwai publishes a real one. Placeholder descriptions ("...") are omitted.',
+    transcript:
+      "Auto-caption text from Kwai JSON-LD when present (deduped). Omitted when Kwai does not expose captions.",
+    videoUrl: "Signed progressive playback URL (usually mp4). Check videoType; re-fetch before mediaUrlsExpireAt.",
+    videoType: 'Playback type: "mp4" (progressive) or "hls" (.m3u8).',
+    mediaUrlsExpireAt: "ISO expiry for signed videoUrl, parsed from Kwai's tag= query param.",
+    hashtags: "Hashtag texts without #, parsed from text when present.",
   },
   "tiktok-shop-search": {
     region:
@@ -6447,12 +7824,24 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "instagram-trending-reels": {
     cached: "true when the list came from a stored country snapshot (Apify fallthrough), false on a fresh native /reels hit.",
-    cachedAt: "When the underlying snapshot finished (ISO-8601). On native hits this is approximately now.",
+    snapshotAt:
+      "When the underlying country snapshot finished (ISO-8601, ms precision). Present only when cached=true.",
+    cachedAt: "Alias of snapshotAt (one release). Omitted on fresh native hits — do not treat as Redis cache time.",
     stale: "true when the snapshot is older than the 6h refresh window — still usable; a background refresh was kicked.",
-    ageHours: "Age of the snapshot in hours (float). Prefer this over guessing from cachedAt.",
-    country: "Localized country name used for this snapshot (from the country query param).",
-    note: "Honesty copy: snapshot-backed, duplicates expected, points to reels-search for live scrapes.",
+    ageHours: "Age of the snapshot in hours (float). 0 on fresh native hits.",
+    country: "Localized country name used for Apify/native geo (e.g. United States).",
+    countryCode: "ISO-3166 alpha-2 for the same country (e.g. US). Prefer this for joins.",
+    note: "Honesty copy: snapshot-backed, duplicates expected, ~180d content-age filter, points to reels-search for live scrapes.",
     reels: "Video Reels only (productType clips). Photos / carousels / multi-year Explore resurfaces are never included.",
+    "engagement.views":
+      "Primary view/play metric when Instagram exposes it (video_view_count or total plays). Null when logged-out hydrate withholds plays.",
+    "engagement.viewsInstagram": "Instagram-only plays when the split is available.",
+    "engagement.viewsFacebook": "Facebook cross-post plays when available (or total−IG).",
+    caption: "Reel caption. description is not duplicated on this endpoint.",
+    "author.url": "Canonical https://www.instagram.com/{username}/ (www + trailing slash).",
+    "author.isPrivate": "Whether the account is private. Canonical privacy flag (not private).",
+    videoUrlExpiresAt: "ISO expiry parsed from the signed CDN oe= param when present.",
+    thumbnailUrlExpiresAt: "ISO expiry for thumbnailUrl when oe= is present.",
   },
   "instagram-profile-search": {
     mode: 'Always "resolve". Instagram keyword / multi-result search is login-gated — there is no "search" mode and no nextCursor on this endpoint.',
@@ -6488,10 +7877,8 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     embedUrl:
       "Real Rumble embed URL (/embed/{embedId}/). embedId is often different from the page permalink id — never invent from id alone.",
     embedId: "Rumble's player embed id (may differ from the /v… page id).",
-    durationSeconds: "Length in seconds (integer).",
-    durationText: "Human clock duration (e.g. 1:26:25).",
-    durationFormatted: "Zero-padded HH:MM:SS (same helper as YouTube video-details).",
-    duration: "Legacy alias of durationText on this endpoint — prefer durationSeconds for math.",
+    durationSeconds: "Length in seconds (integer). Canonical with durationText — same pair as channel-videos.",
+    durationText: "Human clock duration (e.g. 1:26:25). Not zero-padded HH:MM:SS.",
     "streams[].expiresAt":
       "ISO expiry parsed from signed CDN query params (expire / e / x-expires) when present.",
     type: 'Content kind: "video" | "short" | "live".',
@@ -6504,8 +7891,8 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   "rumble-channel-videos": {
     channel: "Top-level: channel slug you queried. Per-video channel is the display name string.",
     embedUrl:
-      "Present only when Rumble exposes a real embed id. Omitted when unknown — page permalink ids are not embed ids.",
-    durationSeconds: "Length in seconds (integer).",
+      "Present only when upstream ships a distinct embed id (≠ page id). Omitted otherwise — never invent /embed/{permalink}/.",
+    durationSeconds: "Length in seconds (integer). Same pair as video-details.",
     durationText: "Human clock duration (e.g. 1:30:56).",
     type: 'Content kind: "video" | "short" | "live" (from /shorts/ URL or isLive).',
     likes: "Upvotes when the channel scrape exposes rumbleVotes; null when unknown.",
@@ -6520,6 +7907,8 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "linkedin-post-transcript": {
     transcript: "Full LinkedIn post body text (not speech-to-text from a video).",
+    language:
+      "Always null today — LinkedIn text posts have no speech language. Present so clients share a schema with Whisper transcript endpoints.",
     timingSource:
       'Always "none" on this endpoint today (native and Apify). "captions" is reserved for future cue support — do not branch on it; nothing emits it yet.',
     estimatedReadSeconds: "Whole-transcript reading-time estimate at 200 wpm. Not per-segment duration.",
@@ -6945,6 +8334,37 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   "tiktok-ad-library-search": {
     videos: "Typed video assets for the ad creative when present.",
     status: "Ad delivery status when the library exposes it.",
+    matchedFrom: "SERP row count before local keyword filtering.",
+    filteredOut: "How many of those rows the local keyword filter dropped.",
+    literalMatches: "Rows that passed the local substring filter (match=any|all).",
+    match: 'Echo of the match query param ("any" or "all").',
+    matchBasis: 'How keywords were applied — "any", "all", or "none".',
+  },
+  "tiktok-ad-library-top-ads": {
+    matchedFrom: "Row count after industry/objective/format filters, before local keyword filtering.",
+    filteredOut: "Rows dropped by the local keyword filter (0 when matchBasis=creative_center).",
+    literalMatches: "Rows that passed local substring matching.",
+    match: 'Echo of the match query param ("any" or "all").',
+    matchBasis:
+      'any|all when literal filter kept rows; creative_center when Creative Center soft results are served because literal matches were empty; none when q was omitted.',
+    datesPresent:
+      "Count of ads where firstSeen or lastSeen is non-null. Creative Center's public list often omits run dates — expect 0 unless upstream ships timestamps.",
+    firstSeen:
+      "ISO-8601 UTC when the creative was first observed / created, if Creative Center or the actor provides it; otherwise null.",
+    lastSeen:
+      "ISO-8601 UTC when the creative was last shown / ended, if provided; otherwise null. For DSA windows use /tiktok/search.",
+    advertiser:
+      "Grouping axis {id,name}. id may be brand_id or Spark author uid; null when Creative Center withholds it. name mirrors brandName (Spark falls back to creator nickname).",
+    brandName:
+      'Advertiser / brand display name. Spark Ads with "Not Mention" fall back to the organic creator.',
+    likesIsApproximate:
+      "true when likes looks like a rounded Creative Center bucket (e.g. multiples of 1k/100k); false when the integer looks exact.",
+    "video.urlHd":
+      "Present only when a distinct HD rendition exists (different URL from video.url). Omitted when null — not a dead always-null field.",
+    isSparkAd:
+      "true for Spark Ads. adFormat is omitted when it would only repeat Spark/Non-Spark.",
+    countries:
+      "Omitted when it only echoes the request country filter (already at response root). Kept for multi-country targeting.",
   },
   "tiktok-shop-product-details": {
     platform: "Always tiktok_shop for this endpoint.",
@@ -6985,11 +8405,73 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     slug: "SEO slug from the hydrated PDP URL when present.",
     image: "Product image from the showcase shelf (or PDP when the shelf omits one).",
   },
+  "account-balance": {
+    monthlyQuota: "Plan monthly subscription credit allotment (e.g. free=100).",
+    subscriptionCredits: "Remaining subscription credits (reset at quotaResetsAt / subscriptionRenewsAt).",
+    topupCredits: "Remaining purchased top-up credits (never expire).",
+    totalCredits: "subscriptionCredits + topupCredits.",
+    usedThisMonth: "Sum of creditsUsed on requests since the current billing window (or last 30 days).",
+    quotaResetsAt: "When subscription credits renew — same value as subscriptionRenewsAt when set.",
+    keyName: "Display name of the calling API key when set; null for session JWT calls.",
+    rateLimitPerMinute: "Plan RPM ceiling enforced by Captapi (not GitHub/etc.).",
+    rateLimitRemaining: "Always null on this endpoint — RPM remaining is per Redis window, not snapshotted here.",
+    monthly_quota: "Deprecated snake_case alias of monthlyQuota — prefer camelCase.",
+    subscription_credits: "Deprecated snake_case alias of subscriptionCredits.",
+    topup_credits: "Deprecated snake_case alias of topupCredits.",
+    total_credits: "Deprecated snake_case alias of totalCredits.",
+    subscription_renews_at: "Deprecated snake_case alias of subscriptionRenewsAt.",
+  },
+  "video-transcript": {
+    durationSeconds: "Audio duration in seconds from Whisper — basis for per-minute billing.",
+    duration: "Alias of durationSeconds (same number) for bill verification.",
+    creditsCharged: "Credits billed for this call: ceil(durationSeconds/60), minimum 1.",
+    language: "Detected (or hinted) speech language from Whisper.",
+    noSpeech: "true when Whisper found no trustworthy speech (empty transcript; still billed for duration).",
+    wordCount: "Word count of the returned transcript (matches the text — not a truncated preview).",
+    segments: "Number of timed segments in transcriptSegments.",
+  },
+  "video-summarize": {
+    summary: "AI executive summary (GPT-4o-mini). Length scales with the transcript — short clips may be one paragraph; longer audio aims for 2–3.",
+    keyPoints: "Bullet takeaways (typically 4–8 on longer audio; fewer on short clips).",
+    transcript: "Full Whisper transcript of the upload — always present on success (not summary-only).",
+    durationSeconds: "Audio duration in seconds from Whisper — basis for the per-minute part of billing.",
+    duration: "Alias of durationSeconds (same number) for bill verification.",
+    creditsCharged: "Credits billed: ceil(durationSeconds/60) + 1 for the summary.",
+    language: "Detected (or hinted) speech language from Whisper.",
+    noSpeech: "Should be false on success — empty speech returns HTTP 422 instead.",
+  },
+  "account-request-history": {
+    requestId:
+      "UUID of the logged call — same value as the response envelope requestId / x-captapi-request-id header. Use when contacting support.",
+    resource:
+      "Logged resource identifier: a public URL when the call had one, otherwise an internal cache key (e.g. instagram_user:handle).",
+    resourceUrl: "Deprecated alias of resource (not always a URL). Prefer resource.",
+    creditsUsed: "Credits charged for that call (0 on cache hits).",
+    cacheHit: "true when the call was served from the 24h shared cache (0 credits).",
+    filters: "Echo of the query filters applied to this page of results.",
+  },
   "analytics-compare": {
     status: "Row status: ok when the URL resolved, error when it failed.",
+    results:
+      "Array of analytics/post objects (plus status). Same metrics{}, author{}, and ISO publishedAt as Post Analytics.",
+    failed: "Unresolved URLs as {url, platform, reason}.",
+    publishedAt: "Full ISO-8601 UTC with milliseconds (same as analytics/post) — never date-only.",
+    commentsIsApproximate:
+      "true when comments came from a compact UI count (e.g. YouTube \"2.4M\"). Null when comments is null.",
+    interactionsIsApproximate:
+      "true when any approximate numerator contributed to interactions (inherits commentsIsApproximate).",
+    engagementRateBasis: 'Always "interactions/views" on this endpoint — not TikTok popular-creators percent.',
   },
   "analytics-post": {
-    status: "Request status: ok when the post resolved, error when it failed.",
+    commentsIsApproximate:
+      "true when comments came from a compact UI count (e.g. YouTube \"2.4M\"). The integer is still returned, but treat it as ± rounding error — not unit-precise.",
+    interactionsIsApproximate:
+      "true when interactions (and thus engagementRate) inherit uncertainty from an approximate numerator such as comments.",
+    viewsIsApproximate: "true when views came from a compact UI count. Usually false on YouTube watch pages with exact viewCount.",
+    engagementRateBasis: 'Always "interactions/views" (ratio). Do not compare to popular-creators without reading that field\'s basis.',
+    username: "Author @handle when known — never the display name.",
+    shares: "Null when the platform does not expose public share counts (e.g. YouTube).",
+    saves: "Null when the platform does not expose public save/bookmark counts (e.g. YouTube).",
   },
 };
 
@@ -7398,7 +8880,6 @@ const PROFILE_CHANNEL_SLUGS = new Set([
   "tiktok-channel-details",
   "instagram-channel-details",
   "linkedin-company",
-  "github-user",
   "snapchat-user-profile",
   "truth-social-profile",
   "twitch-profile",
@@ -7406,6 +8887,8 @@ const PROFILE_CHANNEL_SLUGS = new Set([
   "twitter-profile",
   "threads-profile",
   "linkme-profile",
+  "kwai-profile",
+  "soundcloud-artist",
 ]);
 
 /** Name → @handle resolvers filed under search (e.g. Instagram Profile Search). */
@@ -7440,6 +8923,110 @@ const VIDEO_DETAILS_USE_CASES: UseCase[] = [
 
 /** Slug-specific use cases when category defaults would mislead. */
 const SLUG_USE_CASES: Record<string, UseCase[]> = {
+  "account-balance": [
+    {
+      title: "Low-balance alerts",
+      desc: "Poll totalCredits / usedThisMonth and page when subscriptionCredits approach zero.",
+    },
+    {
+      title: "Subscription vs top-up",
+      desc: "Tell time-boxed subscriptionCredits apart from permanent topupCredits before auto-buy logic.",
+    },
+    {
+      title: "Key identity",
+      desc: "Read keyName + rateLimitPerMinute for the calling key in ops dashboards.",
+    },
+  ],
+  "account-request-history": [
+    {
+      title: "Support matching",
+      desc: "Copy requestId from a failed call and match it to the envelope / x-captapi-request-id header.",
+    },
+    {
+      title: "Incident filters",
+      desc: "Query last week's 5xx with statusCode + since/until, or a single endpoint path.",
+    },
+    {
+      title: "Cache savings",
+      desc: "Compare cacheHit true (0 credits, ~150ms) vs false (billed, multi-second) on the same resource.",
+    },
+  ],
+  "account-daily-usage": [
+    {
+      title: "Spend charts",
+      desc: "Plot creditsUsed per day for budgeting and anomaly detection.",
+    },
+    {
+      title: "Reliability",
+      desc: "Compare successfulRequests vs failedRequests over the window.",
+    },
+  ],
+  "account-most-used-routes": [
+    {
+      title: "Cost hotspots",
+      desc: "Rank which Captapi routes burn the most credits for your key.",
+    },
+    {
+      title: "Product planning",
+      desc: "See which integrations your customers actually call.",
+    },
+  ],
+  "video-transcript": [
+    {
+      title: "Bring-your-own media",
+      desc: "Transcribe uploaded podcasts or meeting recordings without a social URL.",
+    },
+    {
+      title: "Bill verification",
+      desc: "Read durationSeconds and creditsCharged to confirm the per-minute invoice line.",
+    },
+    {
+      title: "Word timings",
+      desc: "Pass timestampGranularity=word when you need karaoke-style captions.",
+    },
+  ],
+  "video-summarize": [
+    {
+      title: "Meeting digests",
+      desc: "Upload a recording and get summary + keyPoints plus the full transcript in one call.",
+    },
+    {
+      title: "Bill verification",
+      desc: "creditsCharged = ceil(durationSeconds/60) + 1 — both fields are in the response.",
+    },
+    {
+      title: "Bring-your-own media",
+      desc: "Summarize podcasts or offline files without a social URL.",
+    },
+  ],
+  "analytics-post": [
+    {
+      title: "Cross-platform dashboards",
+      desc: "One metrics{} shape for YouTube, TikTok, Instagram, and eight other networks — read engagementRateBasis before comparing rates.",
+    },
+    {
+      title: "Honest reporting",
+      desc: "When commentsIsApproximate is true, show rounded comments and inherited interactions uncertainty in reports.",
+    },
+    {
+      title: "Handle vs display name",
+      desc: "Join on author.username (@handle), never displayName.",
+    },
+  ],
+  "analytics-compare": [
+    {
+      title: "A/B uploads",
+      desc: "Pass two URLs (e.g. TikTok + YouTube) and compare the same metrics{} object side by side.",
+    },
+    {
+      title: "Partial batches",
+      desc: "Use failed[] + status when one URL dies — resolved rows still bill and return full post analytics.",
+    },
+    {
+      title: "One round-trip",
+      desc: "Up to 10 URLs per call; same per-URL credit as Post Analytics, cache shared.",
+    },
+  ],
   "amazon-shop-page": [
     {
       title: "Seller catalog ingest",
@@ -7660,24 +9247,306 @@ const SLUG_USE_CASES: Record<string, UseCase[]> = {
     { title: "Stream Monitoring", desc: "Poll live room state without scraping the app UI." },
   ],
   "spotify-album": [
-    { title: "Catalog Enrichment", desc: "Pull album metadata, artists, and track lists." },
-    { title: "Music Databases", desc: "Normalize Spotify album IDs into structured JSON." },
+    {
+      title: "Track lists with stream counts",
+      desc: "Read tracks[] with playCount, durationMs, and explicit without scraping the album page.",
+    },
+    {
+      title: "Catalog joins",
+      desc: "Chain artists[].uri → /spotify/artist and tracks[].uri → /spotify/track.",
+    },
+    {
+      title: "Release metadata",
+      desc: "Use full releaseDate (ISO) plus cover art for discography and CRM enrichment.",
+    },
+  ],
+  "spotify-search": [
+    {
+      title: "Discovery → details",
+      desc: "Search then chain canonical result URIs into /spotify/track, /album, or /artist.",
+    },
+    {
+      title: "Freshness-aware ingest",
+      desc: "Use fetchedAt / scrapedAt to know when results were pulled (no cursor beyond limit 50).",
+    },
+  ],
+  "spotify-podcast": [
+    {
+      title: "Podcast research",
+      desc: "Rank shows with rating{average, totalRatings} — a signal Spotify's free Web API does not expose.",
+    },
+    {
+      title: "Publisher vs hosts",
+      desc: "Use publisher{name} without mistaking it for episode hosts or artists[].",
+    },
+    {
+      title: "Archive fan-out",
+      desc: "Chain the show URI into /spotify/podcast-episodes for cursor-paginated episode history.",
+    },
+  ],
+  "spotify-podcast-episodes": [
+    {
+      title: "Full archive crawl",
+      desc: "Walk nextCursor/hasMore to ingest beyond the newest 50 episodes (flat 2 credits per page).",
+    },
+    {
+      title: "Preview ingest",
+      desc: "Collect previewUrl / audioUrls mp3 previews plus releaseDate and explicit without scraping the show page.",
+    },
+    {
+      title: "Exclusive / video flags",
+      desc: "Filter hasVideo, paywallContent, and showTypes for format and exclusivity research.",
+    },
   ],
   "spotify-track": [
-    { title: "Track Metadata", desc: "Resolve a Spotify track to title, artists, duration, and album." },
-    { title: "Catalog Enrichment", desc: "Enrich playlists and CRM rows with Spotify track fields." },
+    {
+      title: "Stream counts",
+      desc: "Read playCount (same GraphQL stream metric as artist topTracks) without the official Web API.",
+    },
+    {
+      title: "Catalog joins",
+      desc: "Chain artists[].uri → /spotify/artist and album.uri → /spotify/album from one track resolve.",
+    },
+    {
+      title: "Playlist enrichment",
+      desc: "Fill CRM/playlist rows with title, durationMs, explicit, and releaseDate at 1 credit.",
+    },
+  ],
+  "spotify-artist": [
+    {
+      title: "Audience geography",
+      desc: "Use monthlyListeners, worldRank, and topCities — fields Spotify's free Web API does not expose.",
+    },
+    {
+      title: "Hit tracks",
+      desc: "Rank an artist's topTracks by playCount for A&R, playlisting, and competitive research.",
+    },
+    {
+      title: "Discography fan-out",
+      desc: "When albumsHasMore/singlesHasMore, walk release URIs into /spotify/album for full catalog detail.",
+    },
   ],
   "soundcloud-track": [
-    { title: "Track Metadata", desc: "Resolve a SoundCloud track to title, artist, and stats." },
-    { title: "Catalog Enrichment", desc: "Normalize SoundCloud URLs into structured JSON." },
+    {
+      title: "Engagement + license",
+      desc: "Read plays/likes/reposts/comments/downloads and license for reuse research at 1 credit.",
+    },
+    {
+      title: "Playback URLs",
+      desc: "Use streamUrl / hlsUrl (with mediaUrlsExpireAt) when streamable; downloadable is a permission flag.",
+    },
+    {
+      title: "Artist join",
+      desc: "Chain artist.id or artist.handle into /soundcloud/artist without a second resolve scrape.",
+    },
+  ],
+  "soundcloud-artist": [
+    {
+      title: "Plan + verification",
+      desc: "Use subscriptionTier and verified for creator qualification without parsing badge duplicates.",
+    },
+    {
+      title: "Creator graph",
+      desc: "Pipe externalLinks (Facebook/Twitter/YouTube/site) into matching Captapi profile endpoints.",
+    },
+    {
+      title: "Permalink joins",
+      desc: "Prefer handle (URL slug) over username display casing when storing CRM keys.",
+    },
+  ],
+  "soundcloud-artist-tracks": [
+    {
+      title: "Content Pipelines",
+      desc: "Ingest an artist's track catalog with the same fields as /soundcloud/track.",
+    },
+    {
+      title: "Monitoring",
+      desc: "Detect new uploads via track id + publishedAt across opaque cursor pages.",
+    },
+    {
+      title: "Artist join",
+      desc: "Use top-level artistId / artist.handle once — not repeated on every track row.",
+    },
+    {
+      title: "Analytics",
+      desc: "Aggregate plays/likes across the artist's recent tracks without artist{} bloat.",
+    },
+  ],
+  "kwai-profile": [
+    {
+      title: "Profile Enrichment",
+      desc: "Resolve a Kwai @handle to bio, avatar, verified, and follower/like/post counts.",
+    },
+    {
+      title: "Creator Verification",
+      desc: "Confirm verified + verifiedDescription before outreach on Brazilian/Kwai audiences.",
+    },
+    {
+      title: "Competitive Analysis",
+      desc: "Track followers, likedCount, and postCount over time for accounts you already follow.",
+    },
+    {
+      title: "Partnership Qualification",
+      desc: "Vet Kwai creators with publicPostCount and audience size at 1 credit.",
+    },
+  ],
+  "kwai-user-posts": [
+    {
+      title: "Content Pipelines",
+      desc: "Ingest a creator's recent Kwai posts with engagement and signed mp4 URLs.",
+    },
+    {
+      title: "Transcripts included",
+      desc: "Use transcript when Kwai JSON-LD exposes auto-captions — included in the per-post credit, not a separate Whisper call.",
+    },
+    {
+      title: "Monitoring",
+      desc: "Detect new uploads via post id + publishedAt across opaque cursor pages.",
+    },
+    {
+      title: "Archiving",
+      desc: "Snapshot metadata plus CDN media — re-fetch videoUrl before mediaUrlsExpireAt.",
+    },
+  ],
+  "kwai-post": [
+    {
+      title: "Post enrichment",
+      desc: "Resolve a Kwai video URL to caption, hashtags, author, and engagement.",
+    },
+    {
+      title: "Playback",
+      desc: "Play or download via videoUrl when videoType is mp4; re-fetch before mediaUrlsExpireAt.",
+    },
+    {
+      title: "Captions",
+      desc: "Read transcript when Kwai exposes auto-captions (deduped); omitted when unavailable.",
+    },
   ],
   "github-repository": [
-    { title: "Repo Enrichment", desc: "Pull stars, language, and repo metadata for a GitHub URL." },
-    { title: "Developer Research", desc: "Compare repositories without scraping HTML." },
+    {
+      title: "Repo enrichment",
+      desc: "Resolve owner/name to stars, real watchers (subscribers), license, and parent when forked.",
+    },
+    {
+      title: "Issue vs PR load",
+      desc: "Read openIssuesAndPrs (issues+PRs); use github/pull-requests when you need PRs alone.",
+    },
+    {
+      title: "License hygiene",
+      desc: "Prefer license (SPDX); when null, check licenseName — NOASSERTION is not passed through.",
+    },
+  ],
+  "github-trending-repositories": [
+    {
+      title: "Momentum discovery",
+      desc: "Find repos gaining stars today/this week/month via starsGained — not all-time star charts.",
+    },
+    {
+      title: "Language radar",
+      desc: "Pass language=python (or typescript, …) to scope /trending/{language}.",
+    },
+    {
+      title: "Detail fan-out",
+      desc: "Chain fullName into github/repository for license, watchers/subscribers, and parent.",
+    },
+  ],
+  "github-trending-developers": [
+    {
+      title: "Windowed discovery",
+      desc: "Rank developers from github.com/trending/developers by since=daily|weekly|monthly — not all-time follower search.",
+    },
+    {
+      title: "Popular repo signal",
+      desc: "Read popularRepo + description from the trending card, then open github/repository for detail.",
+    },
+    {
+      title: "Hiring shortlist",
+      desc: "Filter hydrated followers, publicRepos, location, and bio without a second profile call.",
+    },
   ],
   "github-contributions": [
-    { title: "Contributor Activity", desc: "Summarize a GitHub user's contribution graph." },
-    { title: "Developer Vetting", desc: "Check recent activity before hiring or partnering." },
+    {
+      title: "Hiring screens",
+      desc: "Read totalContributions + currentStreak from the real heatmap — not a 90-event API ceiling.",
+    },
+    {
+      title: "Cadence charts",
+      desc: "Plot days[{date,count,level}] for the last year without scraping the profile HTML yourself.",
+    },
+    {
+      title: "Quiet periods",
+      desc: "Spot gaps in the calendar (count=0 stretches) before outreach.",
+    },
+  ],
+  "github-pull-requests": [
+    {
+      title: "Review throughput",
+      desc: "Count non-draft PRs (draft=false) opened or merged in a window without HTML scraping.",
+    },
+    {
+      title: "Label triage",
+      desc: "Filter labels[] for bug/feature queues before assigning reviewers.",
+    },
+    {
+      title: "Branch mapping",
+      desc: "Read head.ref → base.ref to see which branches land where.",
+    },
+  ],
+  "github-activity": [
+    {
+      title: "Push forensics",
+      desc: "Read PushEvent payload.commits[].message + ref — not just 'someone pushed'.",
+    },
+    {
+      title: "Issue/PR actions",
+      desc: "Track opened/closed/merged via IssuesEvent and PullRequestEvent payload.action.",
+    },
+    {
+      title: "Bounded feed",
+      desc: "Respect eventCeiling=90 — this is recent public activity, not a full history archive.",
+    },
+  ],
+  "github-repositories": [
+    {
+      title: "Recent activity",
+      desc: "sort=pushed to list a developer's most recently pushed repos.",
+    },
+    {
+      title: "Owned vs member",
+      desc: "type=owner|member|all to separate personal repos from org memberships.",
+    },
+    {
+      title: "Fork parent lookup",
+      desc: "When isFork is true, call github/repository for parent — list payloads omit it.",
+    },
+  ],
+  "github-followers": [
+    {
+      title: "Audience sample",
+      desc: "Page a first screen of followers with stable id for CRM joins — not a full mega-account dump.",
+    },
+    {
+      title: "Org vs user",
+      desc: "Filter type=Organization vs User in the follower graph.",
+    },
+    {
+      title: "When to call GitHub directly",
+      desc: "Full archives of 100k+ followers are cheaper on api.github.com (free, rate-limited).",
+    },
+  ],
+  "github-following": [
+    {
+      title: "Interest graph",
+      desc: "See who a developer follows — same {id, login, type} cards as followers.",
+    },
+    {
+      title: "Dedup across pages",
+      desc: "Use numeric id, not login alone, when merging following pages.",
+    },
+    {
+      title: "When to call GitHub directly",
+      desc: "Exhaustive following dumps belong on api.github.com, not Captapi credit pages.",
+    },
   ],
   "komi-page": [
     {
@@ -7751,9 +9620,87 @@ const SLUG_USE_CASES: Record<string, UseCase[]> = {
       desc: "Inspect other[] for niche social icons that do not fit the fixed socials{} key list.",
     },
   ],
+  "linkme-profile": [
+    {
+      title: "Audience sizing",
+      desc: "Use profileVisitCount (e.g. 15.9k) with totalLinks — one of the few public link-in-bio audience metrics.",
+    },
+    {
+      title: "Lead enrichment",
+      desc: "Read infoLinks / top-level email plus stripeStatus.tipsEnabled for contact and monetization signals.",
+    },
+    {
+      title: "Social + CTA inventory",
+      desc: "Pipe socials{} / webLinks[] into Captapi profile endpoints and treat links[] as featured CTAs (not footer chrome).",
+    },
+    {
+      title: "Avatar quality gate",
+      desc: "Skip isDefaultProfilePicture=true avatars so placeholder images never enter your creator DB.",
+    },
+  ],
+  "facebook-marketplace-search": [
+    {
+      title: "Local inventory",
+      desc: "Search by city name + keyword; filter isLocal or deliveryMethod=local_pickup to drop nationwide shipped rows.",
+    },
+    {
+      title: "Price band monitoring",
+      desc: "minPrice/maxPrice + sortBy=price_ascend for deal alerts without scraping the UI.",
+    },
+    {
+      title: "Tiered detail fetch",
+      desc: "List at flat 2 credits; pass details=true only when you need description/coords/gallery (2 + 2 per listing).",
+    },
+    {
+      title: "Status filtering",
+      desc: "Read status (available|pending|sold) — Facebook may keep sold listings published.",
+    },
+  ],
+  "facebook-marketplace-location-search": [
+    {
+      title: "City disambiguation",
+      desc: "Bare 'Austin' can mean TX, MN, or IN — pick the hub whose cityPageId/state matches before searching listings.",
+    },
+    {
+      title: "Canonical place id",
+      desc: "Use id / cityPageId (Facebook city_page.id) — the same identifier marketplace-search cards expose.",
+    },
+    {
+      title: "Optional geocode",
+      desc: "Skip this call when marketplace-search's city string is enough; use it only for coords or multi-city resolve.",
+    },
+  ],
+  "github-user": [
+    {
+      title: "Multi-platform enrichment",
+      desc: "Same Captapi key and envelope as Spotify/SoundCloud/Bluesky profiles — join developer handles without a separate GitHub client.",
+    },
+    {
+      title: "User vs Organization",
+      desc: "Read type (User | Organization) so org accounts are not mistaken for people.",
+    },
+    {
+      title: "Hiring screens",
+      desc: "Pull hireable, publicRepos, followers, and public email (when set) for lightweight developer profiling.",
+    },
+    {
+      title: "When to call GitHub directly",
+      desc: "GitHub-only workloads should hit api.github.com free — Captapi shines when you already fan out across many platforms.",
+    },
+  ],
   "facebook-marketplace-item": [
-    { title: "Listing Enrichment", desc: "Pull Marketplace item title, price, and seller signals." },
-    { title: "Price Monitoring", desc: "Track listing details without scraping the UI." },
+    {
+      title: "Listing Enrichment",
+      desc: "Resolve a Marketplace URL to title, priceAmount, status, and seller{} when Facebook exposes it.",
+    },
+    {
+      title: "Seller research",
+      desc: "Use seller.id / seller.url to see who is listing and join to other Marketplace calls.",
+    },
+    {
+      title: "Price Monitoring",
+      desc: "Track price + priceAmount (minor units) and status without scraping the UI.",
+    },
   ],
   "facebook-event-details": [
     { title: "Event Enrichment", desc: "Resolve a Facebook event URL to local start/end, venue, and host id." },
@@ -7883,14 +9830,6 @@ const CHANNEL_CATALOG_LIST_SLUGS = new Set([
   "linkedin-company-posts",
   "pinterest-user-pins",
   "pinterest-user-boards",
-  "soundcloud-artist-tracks",
-  "spotify-podcast-episodes",
-  "kwai-user-posts",
-  "github-repositories",
-  "github-followers",
-  "github-following",
-  "github-activity",
-  "github-pull-requests",
 ]);
 
 const CHANNEL_CATALOG_USE_CASES: UseCase[] = [

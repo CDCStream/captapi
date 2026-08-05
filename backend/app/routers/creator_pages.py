@@ -33,7 +33,7 @@ EXAMPLES = {
     "komi": "https://komi.io/username",
     "pillar": "https://pillar.io/username",
     "linkbio": "https://lnk.bio/username",
-    "linkme": "https://link.me/username",
+    "linkme": "https://link.me/danucd",
 }
 
 # Flat credit cost per platform. Link-in-bio JSON/HTML scrapes that return a
@@ -42,7 +42,7 @@ CREDIT_PAGE = {
     "komi": 1,
     "pillar": 1,
     "linkbio": 1,
-    "linkme": 4,
+    "linkme": 1,
 }
 
 _KOMI_HEADERS = {
@@ -133,6 +133,8 @@ _NAV_HOSTS = (
     "istmp.email",
     "mediakit.bio",
     "menoo.me",
+    # Linkme site chrome — never treat as creator links.
+    "about.link.me",
 )
 
 _LINKBIO_TITLE_SUFFIX = re.compile(
@@ -1252,6 +1254,373 @@ async def _fetch_linkbio(value: str) -> dict[str, Any] | None:
     return _strip_page(parsed)
 
 
+
+_LINKME_MEDIA = "https://media.link.me/_resize/image/quality=90,format=webp/images"
+_LINKME_WEB_TITLES: dict[str, str] = {
+    "instagram": "instagram",
+    "tiktok": "tiktok",
+    "youtube": "youtube",
+    "twitter": "twitter",
+    "x": "twitter",
+    "facebook": "facebook",
+    "spotify": "spotify",
+    "apple-music": "appleMusic",
+    "apple music": "appleMusic",
+    "soundcloud": "soundcloud",
+    "twitch": "twitch",
+    "threads": "threads",
+    "linkedin": "linkedin",
+    "snapchat": "snapchat",
+    "pinterest": "pinterest",
+    "discord": "discord",
+    "telegram": "telegram",
+    "whatsapp": "whatsapp",
+    "patreon": "patreon",
+}
+
+
+def _linkme_extract_balanced(src: str, start: int) -> str:
+    """Return the {...} literal starting at ``start`` (JS string-aware)."""
+    if start >= len(src) or src[start] != "{":
+        raise ValueError("expected object")
+    depth = 0
+    i = start
+    in_str = False
+    esc = False
+    while i < len(src):
+        ch = src[i]
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+        else:
+            if ch == '"':
+                in_str = True
+            elif ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    return src[start : i + 1]
+        i += 1
+    raise ValueError("unbalanced object")
+
+
+def _linkme_js_literal_to_json(text: str) -> Any:
+    """TanStack $R dehydrated object → Python (via JSON)."""
+    cleaned = re.sub(r"\$R\[\d+\]=", "", text)
+    cleaned = cleaned.replace("!0", "true").replace("!1", "false")
+    cleaned = re.sub(r"\bvoid 0\b", "null", cleaned)
+    cleaned = re.sub(r"([{\[,]\s*)([A-Za-z_][A-Za-z0-9_]*)\s*:", r'\1"\2":', cleaned)
+    return json.loads(cleaned)
+
+
+def _linkme_tsr_body(page: str) -> str | None:
+    match = re.search(
+        r'<script[^>]*class=["\']\$tsr["\'][^>]*>(.*?)</script>',
+        page,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    return match.group(1) if match else None
+
+
+def _linkme_parse_named_object(body: str, name: str) -> dict[str, Any] | None:
+    match = re.search(rf"{re.escape(name)}:\$R\[\d+\]=", body)
+    if not match:
+        return None
+    try:
+        literal = _linkme_extract_balanced(body, match.end())
+        data = _linkme_js_literal_to_json(literal)
+    except (ValueError, json.JSONDecodeError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _linkme_avatar(profile: dict[str, Any]) -> str | None:
+    webp = safe_str(profile.get("profileImageWebp"))
+    png = safe_str(profile.get("profileImage"))
+    path = webp or png
+    if not path:
+        return None
+    if path.startswith("http"):
+        return path
+    # webp-images/... already includes a prefix; png paths are under images/.
+    if path.startswith("webp-images/"):
+        return f"https://media.link.me/_resize/image/quality=90,format=webp/{path}"
+    return f"{_LINKME_MEDIA}/{path.lstrip('/')}"
+
+
+def _linkme_truthy(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value != 0
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes"}
+    return False
+
+
+def _linkme_map_web_groups(groups: list[Any] | None) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, str], list[dict[str, Any]]]:
+    """Return (webLinks[], social candidates, socials{}, other[])."""
+    web_out: list[dict[str, Any]] = []
+    candidates: list[dict[str, Any]] = []
+    for group in groups or []:
+        if not isinstance(group, dict):
+            continue
+        title = safe_str(group.get("title")) or ""
+        title_key = title.lower().replace("_", "-")
+        social_key = _LINKME_WEB_TITLES.get(title_key) or _LINKME_WEB_TITLES.get(
+            title_key.replace("-", " ")
+        )
+        entries: list[dict[str, Any]] = []
+        for item in group.get("links") or []:
+            if not isinstance(item, dict):
+                continue
+            value = safe_str(item.get("linkValue") or item.get("url"))
+            if not value:
+                continue
+            entry = {
+                "linkValue": value,
+                "faceValue": safe_str(item.get("faceValue")),
+                "baseUrl": safe_str(item.get("baseUrl")),
+            }
+            entries.append(strip_empty(entry) if isinstance(entry, dict) else entry)
+            url = value if "://" in value or value.startswith("mailto:") else None
+            if title.lower() == "email" or (value and "@" in value and "://" not in value):
+                candidates.append(
+                    {
+                        "url": value if value.startswith("mailto:") else f"mailto:{value}",
+                        "socialKey": "email",
+                        "type": "EMAIL",
+                        "title": title or "Email",
+                    }
+                )
+            elif url:
+                candidates.append(
+                    {
+                        "url": url,
+                        "socialKey": social_key or _social_key_for_url(url),
+                        "type": title or None,
+                        "title": title or None,
+                    }
+                )
+        if entries:
+            web_out.append(
+                strip_empty(
+                    {
+                        "title": title or None,
+                        "linkId": group.get("linkId"),
+                        "links": entries,
+                    }
+                )
+            )
+    socials, other = _partition_socials(candidates)
+    return web_out, candidates, socials, other
+
+
+def _linkme_map_featured(featured: dict[str, Any] | None) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    if not isinstance(featured, dict):
+        return rows
+    for item in featured.get("list") or []:
+        if not isinstance(item, dict):
+            continue
+        url = safe_str(item.get("url") or item.get("link"))
+        if not url or not url.startswith("http"):
+            continue
+        if _is_platform_noise_link(url):
+            continue
+        raw_id = item.get("id")
+        rows.append(
+            {
+                "id": safe_str(raw_id) if raw_id is not None else None,
+                "title": safe_str(item.get("title")),
+                "url": url,
+                "thumbnail": safe_str(item.get("thumbnail") or item.get("image")),
+                "description": safe_str(item.get("description")),
+            }
+        )
+    # Drop null-only extras via strip later; keep title even when null.
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        item = {
+            "url": row["url"],
+            "title": row.get("title"),
+        }
+        if row.get("id"):
+            item["id"] = row["id"]
+        if row.get("thumbnail"):
+            item["thumbnail"] = row["thumbnail"]
+        if row.get("description"):
+            item["description"] = row["description"]
+        out.append(item)
+    return out
+
+
+def _linkme_map_info_links(groups: list[Any] | None) -> tuple[list[dict[str, Any]], str | None]:
+    info_out: list[dict[str, Any]] = []
+    email: str | None = None
+    for group in groups or []:
+        if not isinstance(group, dict):
+            continue
+        title = safe_str(group.get("title"))
+        entries: list[dict[str, Any]] = []
+        for item in group.get("links") or []:
+            if not isinstance(item, dict):
+                continue
+            value = safe_str(item.get("linkValue") or item.get("url"))
+            if not value:
+                continue
+            entries.append(
+                strip_empty(
+                    {
+                        "linkValue": value,
+                        "faceValue": safe_str(item.get("faceValue")),
+                    }
+                )
+            )
+            if (title or "").lower() == "email" or ("@" in value and "://" not in value):
+                email = email or value
+        if entries:
+            info_out.append(
+                strip_empty({"title": title, "linkId": group.get("linkId"), "links": entries})
+            )
+    return info_out, email
+
+
+def _linkme_parse_page(page: str, page_url: str) -> dict[str, Any] | None:
+    """Parse Linkme TanStack ``$tsr`` dehydrated profile (not __NEXT_DATA__ / meta)."""
+    body = _linkme_tsr_body(page)
+    if not body:
+        return None
+    profile = _linkme_parse_named_object(body, "profile")
+    if not profile or not safe_str(profile.get("username")):
+        return None
+    featured = _linkme_parse_named_object(body, "featuredLinks")
+    username = safe_str(profile.get("username")) or ""
+    first = safe_str(profile.get("firstName")) or ""
+    last = safe_str(profile.get("lastName")) or ""
+    display = " ".join(p for p in (first, last) if p).strip() or None
+    bio = safe_str(profile.get("bio")) or ""
+    links = _linkme_map_featured(featured)
+    web_links, _cands, socials, other = _linkme_map_web_groups(
+        profile.get("webLinks") if isinstance(profile.get("webLinks"), list) else []
+    )
+    # Featured CTAs that are social URLs fill gaps in socials{}.
+    for link in links:
+        url = safe_str(link.get("url"))
+        if not url:
+            continue
+        key = _social_key_for_url(url)
+        if key and key not in socials:
+            socials[key] = url
+    info_links, email = _linkme_map_info_links(
+        profile.get("infoLinks") if isinstance(profile.get("infoLinks"), list) else []
+    )
+    stripe = profile.get("stripeStatus") if isinstance(profile.get("stripeStatus"), dict) else {}
+    stripe_out = {
+        "tipsEnabled": _linkme_truthy(stripe.get("tipsEnabled")),
+        "stripeEnabled": _linkme_truthy(stripe.get("stripeEnabled")),
+    }
+    if safe_str(stripe.get("stripeAccountId")):
+        stripe_out["stripeAccountId"] = safe_str(stripe.get("stripeAccountId"))
+
+    total_links = profile.get("totalLinks")
+    try:
+        total_links_i = int(total_links) if total_links is not None else len(links)
+    except (TypeError, ValueError):
+        total_links_i = len(links)
+
+    out = {
+        "platform": "linkme",
+        "id": safe_str(profile.get("id")),
+        "url": f"https://link.me/{username}",
+        "username": username,
+        "handle": username,
+        "displayName": display,
+        "name": display,
+        "firstName": first or None,
+        "lastName": last or None,
+        "bio": bio,
+        "description": bio,
+        "avatar": _linkme_avatar(profile),
+        "isDefaultProfilePicture": _linkme_truthy(profile.get("isDefaultProfilePicture")),
+        "profileVisitCount": safe_str(profile.get("profileVisitCount")),
+        "verifiedAccount": _linkme_truthy(profile.get("verifiedAccount")),
+        "isAmbassador": _linkme_truthy(profile.get("isAmbassador")),
+        "isPrivate": _linkme_truthy(profile.get("isPrivate")),
+        "createdAt": safe_str(profile.get("createdAt")),
+        "updatedAt": safe_str(profile.get("updatedAt")),
+        "totalLinks": total_links_i,
+        "linkCount": len(links),
+        "links": links,
+        "webLinks": web_links,
+        "infoLinks": info_links,
+        "stripeStatus": stripe_out,
+        "email": email,
+        "socials": socials,
+        "other": other,
+        "chatId": safe_str(profile.get("chatID") or profile.get("chatId")),
+    }
+    cleaned = strip_empty(
+        {
+            k: v
+            for k, v in out.items()
+            if k
+            not in (
+                "bio",
+                "description",
+                "links",
+                "webLinks",
+                "infoLinks",
+                "other",
+                "stripeStatus",
+                "isDefaultProfilePicture",
+                "verifiedAccount",
+                "isAmbassador",
+                "isPrivate",
+                "totalLinks",
+                "linkCount",
+            )
+        }
+    )
+    # Keep booleans / counts / empty bio even when falsy — they are signals.
+    cleaned["bio"] = bio
+    cleaned["description"] = bio
+    cleaned["links"] = links
+    cleaned["linkCount"] = len(links)
+    cleaned["totalLinks"] = total_links_i
+    cleaned["webLinks"] = web_links
+    cleaned["infoLinks"] = info_links
+    cleaned["other"] = other
+    cleaned["stripeStatus"] = stripe_out
+    cleaned["isDefaultProfilePicture"] = _linkme_truthy(profile.get("isDefaultProfilePicture"))
+    cleaned["verifiedAccount"] = _linkme_truthy(profile.get("verifiedAccount"))
+    cleaned["isAmbassador"] = _linkme_truthy(profile.get("isAmbassador"))
+    cleaned["isPrivate"] = _linkme_truthy(profile.get("isPrivate"))
+    return cleaned
+
+
+async def _fetch_linkme(value: str) -> dict[str, Any] | None:
+    """Linkme is a TanStack SPA; profile JSON is dehydrated in ``$tsr``, not meta/footer."""
+    profile_url = _url("linkme", value)
+    try:
+        resp = await fetch_html(profile_url, timeout=30.0, prefer_impersonate=True)
+    except httpx.HTTPError:
+        return None
+    if resp.status_code == 404:
+        return None
+    if resp.status_code >= 400 or _is_cloudflare_block(resp.status_code, resp.text):
+        return None
+    parsed = _linkme_parse_page(resp.text, str(resp.url))
+    if not parsed:
+        return None
+    return parsed
+
+
 async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
     if platform == "komi":
         komi = await _fetch_komi(value)
@@ -1265,6 +1634,16 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
         linkbio = await _fetch_linkbio(value)
         if linkbio:
             return linkbio
+    if platform == "linkme":
+        # Never fall through to meta/footer scrape — that returned Privacy/Terms
+        # as creator links. Missing $tsr profile is a hard failure.
+        linkme = await _fetch_linkme(value)
+        if linkme:
+            return linkme
+        raise HTTPException(
+            status_code=502,
+            detail="Linkme profile data unavailable (SSR shell without dehydrated profile)",
+        )
     profile = _url(platform, value)
     # lnk.bio (and occasionally peers) sit behind Cloudflare bot checks that
     # reject plain httpx — browser_fetch uses Chrome TLS impersonation first.
@@ -1368,7 +1747,7 @@ async def _page(
     ) as ctx:
         data = await cached_or_run(
             f"{platform}.page",
-            {"url": profile, "v": 12, "cacheMaxAge": cache_max_age},
+            {"url": profile, "v": 13, "cacheMaxAge": cache_max_age},
             lambda: _fetch_page(platform, profile),
             ctx,
             use_cache=use_cache,
@@ -1456,6 +1835,25 @@ async def linkbio_page(
     )
 
 
-@router.get("/linkme/profile", summary="Linkme profile")
-async def linkme_profile(url: str = Query(..., description="Linkme profile URL or username"), cache: bool = Query(False, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
-    return await _page("linkme", url, caller, use_cache=cache)
+@router.get(
+    "/linkme/profile",
+    summary="Linkme profile",
+    description=(
+        "Public Linkme profile as clean JSON from the dehydrated SSR profile payload "
+        "(not HTML meta/footer). Returns displayName/bio, avatar + isDefaultProfilePicture, "
+        "profileVisitCount, totalLinks, verifiedAccount/isAmbassador/isPrivate, "
+        "createdAt/updatedAt, featured links[], webLinks[] (social icons), infoLinks[] "
+        "(email/contact), stripeStatus{tipsEnabled,stripeEnabled}, socials{}, and other[]. "
+        "Flat 1 credit. Example: https://link.me/danucd."
+    ),
+)
+async def linkme_profile(
+    url: str = Query(..., description="Linkme profile URL or username (e.g. link.me/danucd)"),
+    cache: bool = Query(False, description=_CACHE_DESC),
+    cacheMaxAge: str | None = Query(None, description=CACHE_MAX_AGE_DESC),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    use_cache, ttl = resolve_cache_options(cache, cacheMaxAge)
+    return await _page(
+        "linkme", url, caller, use_cache=use_cache, ttl=ttl, cache_max_age=cacheMaxAge
+    )

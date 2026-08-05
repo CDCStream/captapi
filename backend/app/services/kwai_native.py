@@ -486,13 +486,20 @@ def _post_from_video_ld(video: dict[str, Any], *, profile_url: str | None = None
     author = _author_meta_from_person(person, fallback_url=profile_url)
     stats = video.get("interactionStatistic")
     caption = safe_str(video.get("description"))
-    if caption in (None, ".", "...", "…"):
-        caption = safe_str(video.get("transcript")) or safe_str(video.get("name"))
+    # Kwai often publishes description as "..." — leave empty so the router omits
+    # text rather than shipping a placeholder or stuffing transcript into caption.
+    if caption and caption.strip() in {".", "..", "...", "…", "...."}:
+        caption = None
+    title = safe_str(video.get("name"))
+    if title and title.strip() in {".", "..", "...", "…", "...."}:
+        title = None
+    transcript = safe_str(video.get("transcript"))
     return {
         "id": _video_id(url),
         "url": url,
-        "caption": caption,
-        "transcript": safe_str(video.get("transcript")),
+        "caption": caption or title,
+        "name": title,
+        "transcript": transcript,
         "createTime": safe_str(video.get("uploadDate")),
         "duration": _duration_seconds(video.get("duration")),
         "thumb": _thumb(video.get("thumbnailUrl")),

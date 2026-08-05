@@ -2222,15 +2222,14 @@ class FacebookMarketplaceApi:
         """
         return self._t.get("/v1/facebook/marketplace-search", {"q": q, "location": location, "limit": limit, "minPrice": minPrice, "maxPrice": maxPrice, "sortBy": sortBy, "daysSinceListed": daysSinceListed, "condition": condition, "deliveryMethod": deliveryMethod, "availability": availability, "radiusMiles": radiusMiles, "category": category, "cursor": cursor, "details": details, "cache": cache})
 
-    def location_search(self, *, q: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). (17 credits)
+    def location_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Marketplace Location Search — Disambiguate city names into Marketplace hubs with Facebook cityPageId + lat/lng. marketplace-search already accepts a city string — use this for ambiguous names (Austin TX vs MN) or when you need cityPageId. Flat 2 credits. (2 credits)
 
-        :param q: City/place search query, e.g. Austin.
-        :param limit: Max items to return. Default 10, max 50. Flat 17 credits per call.
-        :param details: Set true to include latitude/longitude per location (slower; doubles cost to 34 credits).
+        :param q: City/place query. Bare 'Austin' may return TX/MN/IN; include a state for a single hit.
+        :param limit: Max items to return. Default 10, max 50. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/facebook/marketplace-location-search", {"q": q, "limit": limit, "details": details, "cache": cache})
+        return self._t.get("/v1/facebook/marketplace-location-search", {"q": q, "limit": limit, "cache": cache})
 
     def item(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (1 credit)
@@ -2266,15 +2265,14 @@ class AsyncFacebookMarketplaceApi:
         """
         return await self._t.get("/v1/facebook/marketplace-search", {"q": q, "location": location, "limit": limit, "minPrice": minPrice, "maxPrice": maxPrice, "sortBy": sortBy, "daysSinceListed": daysSinceListed, "condition": condition, "deliveryMethod": deliveryMethod, "availability": availability, "radiusMiles": radiusMiles, "category": category, "cursor": cursor, "details": details, "cache": cache})
 
-    async def location_search(self, *, q: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). (17 credits)
+    async def location_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Marketplace Location Search — Disambiguate city names into Marketplace hubs with Facebook cityPageId + lat/lng. marketplace-search already accepts a city string — use this for ambiguous names (Austin TX vs MN) or when you need cityPageId. Flat 2 credits. (2 credits)
 
-        :param q: City/place search query, e.g. Austin.
-        :param limit: Max items to return. Default 10, max 50. Flat 17 credits per call.
-        :param details: Set true to include latitude/longitude per location (slower; doubles cost to 34 credits).
+        :param q: City/place query. Bare 'Austin' may return TX/MN/IN; include a state for a single hit.
+        :param limit: Max items to return. Default 10, max 50. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/facebook/marketplace-location-search", {"q": q, "limit": limit, "details": details, "cache": cache})
+        return await self._t.get("/v1/facebook/marketplace-location-search", {"q": q, "limit": limit, "cache": cache})
 
     async def item(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (1 credit)
@@ -2467,20 +2465,22 @@ class TiktokAdLibraryApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Ad Library Search — Search TikTok Commercial Content Library (EU DSA) — ISO dates, advertiser, reach bands. (2 credits)
+    def search(self, *, q: str, country: str | None = None, match: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Ad Library Search — EU DSA Ad Library search — match=any|all, matchedFrom/filteredOut, empty free, ~40s cap. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default GB (US often empty).
+        :param match: Keyword mode: "any" (default) or "all".
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "limit": limit, "cache": cache})
+        return self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "match": match, "limit": limit, "cache": cache})
 
-    def top_ads(self, *, q: str | None = None, country: str | None = None, period: float | None = None, orderBy: str | None = None, industry: str | None = None, objective: str | None = None, adFormat: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Creative Center Top Ads — Creative Center Top Ads — CTR, likes, industry/objective, video URLs (2 credits native). (2 credits)
+    def top_ads(self, *, q: str | None = None, match: str | None = None, country: str | None = None, period: float | None = None, orderBy: str | None = None, industry: str | None = None, objective: str | None = None, adFormat: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Creative Center Top Ads — Creative Center Top Ads — advertiser{}, firstSeen/lastSeen+datesPresent, no media[] dup, empty free. (2 credits)
 
-        :param q: Optional keyword filter.
+        :param q: Optional keyword (substring). See match + matchedFrom.
+        :param match: Keyword mode: "any" (default) or "all".
         :param country: ISO country code. Default US.
         :param period: Lookback days: 7, 30, or 180. Default 30.
         :param orderBy: for_you | likes | ctr | impressions | cost.
@@ -2490,7 +2490,7 @@ class TiktokAdLibraryApi:
         :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/ad-library/tiktok/top-ads", {"q": q, "country": country, "period": period, "orderBy": orderBy, "industry": industry, "objective": objective, "adFormat": adFormat, "limit": limit, "cache": cache})
+        return self._t.get("/v1/ad-library/tiktok/top-ads", {"q": q, "match": match, "country": country, "period": period, "orderBy": orderBy, "industry": industry, "objective": objective, "adFormat": adFormat, "limit": limit, "cache": cache})
 
     def ad_details(self, *, url: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Ad Details — TikTok ad details by ad URL or ID. (2 credits)
@@ -2506,20 +2506,22 @@ class AsyncTiktokAdLibraryApi:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Ad Library Search — Search TikTok Commercial Content Library (EU DSA) — ISO dates, advertiser, reach bands. (2 credits)
+    async def search(self, *, q: str, country: str | None = None, match: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Ad Library Search — EU DSA Ad Library search — match=any|all, matchedFrom/filteredOut, empty free, ~40s cap. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default GB (US often empty).
+        :param match: Keyword mode: "any" (default) or "all".
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "match": match, "limit": limit, "cache": cache})
 
-    async def top_ads(self, *, q: str | None = None, country: str | None = None, period: float | None = None, orderBy: str | None = None, industry: str | None = None, objective: str | None = None, adFormat: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Creative Center Top Ads — Creative Center Top Ads — CTR, likes, industry/objective, video URLs (2 credits native). (2 credits)
+    async def top_ads(self, *, q: str | None = None, match: str | None = None, country: str | None = None, period: float | None = None, orderBy: str | None = None, industry: str | None = None, objective: str | None = None, adFormat: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Creative Center Top Ads — Creative Center Top Ads — advertiser{}, firstSeen/lastSeen+datesPresent, no media[] dup, empty free. (2 credits)
 
-        :param q: Optional keyword filter.
+        :param q: Optional keyword (substring). See match + matchedFrom.
+        :param match: Keyword mode: "any" (default) or "all".
         :param country: ISO country code. Default US.
         :param period: Lookback days: 7, 30, or 180. Default 30.
         :param orderBy: for_you | likes | ctr | impressions | cost.
@@ -2529,7 +2531,7 @@ class AsyncTiktokAdLibraryApi:
         :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/ad-library/tiktok/top-ads", {"q": q, "country": country, "period": period, "orderBy": orderBy, "industry": industry, "objective": objective, "adFormat": adFormat, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/ad-library/tiktok/top-ads", {"q": q, "match": match, "country": country, "period": period, "orderBy": orderBy, "industry": industry, "objective": objective, "adFormat": adFormat, "limit": limit, "cache": cache})
 
     async def ad_details(self, *, url: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Ad Details — TikTok ad details by ad URL or ID. (2 credits)
@@ -2712,97 +2714,102 @@ class GithubApi:
         self._t = transport
 
     def user(self, *, username: str, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub User — Public GitHub profile (email when public). 1 credit — wraps free GitHub REST API. (1 credit)
+        """GitHub User — Public GitHub profile as camelCase JSON (type User|Organization, email when public). 1 credit — thin wrap of free GitHub REST; prefer Captapi for one-key multi-platform, api.github.com for GitHub-only. (1 credit)
 
-        :param username: GitHub username or profile URL.
+        :param username: GitHub username or profile URL, e.g. getify.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/user", {"username": username, "cache": cache})
 
-    def repositories(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Repositories — List a GitHub user's repositories, with cursor pagination (nextCursor + hasMore). (12 credits)
+    def repositories(self, *, username: str, sort: str | None = None, direction: str | None = None, type_: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Repositories — List repos with sort/direction/type echoed; opaque Link cursor. parent/watchers only on github/repository. (12 credits)
 
         :param username: GitHub username or profile URL.
+        :param sort: created|updated|pushed|full_name (default updated).
+        :param direction: asc or desc (default desc).
+        :param type_: owner|member|all (default owner).
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
+        :param cursor: Opaque cursor from previous nextCursor (GitHub Link page=).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/github/repositories", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
+        return self._t.get("/v1/github/repositories", {"username": username, "sort": sort, "direction": direction, "type": type_, "limit": limit, "cursor": cursor, "cache": cache})
 
     def repository(self, *, repo: str, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Repository — Repository details, stars, forks and metadata. (3 credits)
+        """GitHub Repository — Repo details — stars, real watchers (subscribers), openIssuesAndPrs, license (NOASSERTION→null), parent when fork. Flat 1 credit. (1 credit)
 
-        :param repo: Repository URL or owner/name.
+        :param repo: Repository URL or owner/name, e.g. torvalds/linux.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/repository", {"repo": repo, "cache": cache})
 
     def pull_requests(self, *, repo: str, state: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Pull Requests — List repository pull requests, with cursor pagination (nextCursor + hasMore). (12 credits)
+        """GitHub Pull Requests — List PRs with draft, labels, author{}, head/base; state echoed; opaque Link cursor. (12 credits)
 
         :param repo: Repository URL or owner/name.
-        :param state: open, closed, or all. Default open.
+        :param state: open (default), closed, or all — echoed as data.state.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
+        :param cursor: Opaque cursor from previous nextCursor (GitHub Link page=).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/pull-requests", {"repo": repo, "state": state, "limit": limit, "cursor": cursor, "cache": cache})
 
     def activity(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Activity — Recent public activity for a GitHub user, with cursor pagination (nextCursor + hasMore). (12 credits)
+        """GitHub Activity — Public events with typed payload (Push commits/ref, PR/issue action). 90-event ceiling; opaque Link cursor. (12 credits)
 
-        :param username: GitHub username or profile URL.
-        :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
+        :param username: GitHub username or profile URL, e.g. getify.
+        :param limit: Max items to return. Default 30, max 90. Billed per result.
+        :param cursor: Opaque cursor from previous nextCursor. Stops at 90-event ceiling.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/activity", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
     def followers(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Followers — List GitHub followers, with cursor pagination (nextCursor + hasMore). (12 credits)
+        """GitHub Followers — Follower cards {id,login,type,url,avatar}. ~0.1/row; opaque Link cursor. Large accounts expensive to page fully. (3 credits)
 
-        :param username: GitHub username or profile URL.
+        :param username: GitHub username or profile URL, e.g. getify.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
+        :param cursor: Opaque cursor from previous nextCursor (GitHub Link page=).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/followers", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
     def following(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Following — List accounts a GitHub user follows, with cursor pagination (nextCursor + hasMore). (12 credits)
+        """GitHub Following — Same card and ~0.1/row pricing as followers. Opaque Link cursor. (3 credits)
 
-        :param username: GitHub username or profile URL.
+        :param username: GitHub username or profile URL, e.g. getify.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
+        :param cursor: Opaque cursor from previous nextCursor (GitHub Link page=).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/following", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
     def contributions(self, *, username: str, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Contributions — Summary of recent public GitHub contributions. (3 credits)
+        """GitHub Contributions — Real contribution graph — totalContributions, currentStreak, days[{date,count,level}] from the public calendar HTML. Flat 2 credits. (2 credits)
 
-        :param username: GitHub username or profile URL.
+        :param username: GitHub username or profile URL, e.g. getify.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/contributions", {"username": username, "cache": cache})
 
-    def trending_repositories(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Trending Repositories — Search trending repositories by stars or query. (12 credits)
+    def trending_repositories(self, *, since: str | None = None, language: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Trending Repositories — github.com/trending — repos ranked by starsGained (since=daily|weekly|monthly), not all-time star search. Flat 2 credits. (2 credits)
 
-        :param q: GitHub repository search query. Default stars:>1000.
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param since: daily (default), weekly, or monthly.
+        :param language: Optional programming-language slug, e.g. python.
+        :param limit: Max items to return. Default 25, max 100. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/github/trending-repositories", {"q": q, "limit": limit, "cache": cache})
+        return self._t.get("/v1/github/trending-repositories", {"since": since, "language": language, "limit": limit, "cache": cache})
 
-    def trending_developers(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Trending Developers — Search popular GitHub developers. (12 credits)
+    def trending_developers(self, *, since: str | None = None, language: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Trending Developers — github.com/trending/developers — windowed ranks with popularRepo + hydrated followers/bio. Flat 2 credits. (2 credits)
 
-        :param q: GitHub user search query. Default followers:>1000.
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param since: daily (default), weekly, or monthly.
+        :param language: Optional programming-language slug, e.g. python.
+        :param limit: Max items to return. Default 25, max 100. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/github/trending-developers", {"q": q, "limit": limit, "cache": cache})
+        return self._t.get("/v1/github/trending-developers", {"since": since, "language": language, "limit": limit, "cache": cache})
 
 
 class AsyncGithubApi:
@@ -2810,97 +2817,102 @@ class AsyncGithubApi:
         self._t = transport
 
     async def user(self, *, username: str, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub User — Public GitHub profile (email when public). 1 credit — wraps free GitHub REST API. (1 credit)
+        """GitHub User — Public GitHub profile as camelCase JSON (type User|Organization, email when public). 1 credit — thin wrap of free GitHub REST; prefer Captapi for one-key multi-platform, api.github.com for GitHub-only. (1 credit)
 
-        :param username: GitHub username or profile URL.
+        :param username: GitHub username or profile URL, e.g. getify.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/user", {"username": username, "cache": cache})
 
-    async def repositories(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Repositories — List a GitHub user's repositories, with cursor pagination (nextCursor + hasMore). (12 credits)
+    async def repositories(self, *, username: str, sort: str | None = None, direction: str | None = None, type_: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Repositories — List repos with sort/direction/type echoed; opaque Link cursor. parent/watchers only on github/repository. (12 credits)
 
         :param username: GitHub username or profile URL.
+        :param sort: created|updated|pushed|full_name (default updated).
+        :param direction: asc or desc (default desc).
+        :param type_: owner|member|all (default owner).
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
+        :param cursor: Opaque cursor from previous nextCursor (GitHub Link page=).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/github/repositories", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
+        return await self._t.get("/v1/github/repositories", {"username": username, "sort": sort, "direction": direction, "type": type_, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def repository(self, *, repo: str, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Repository — Repository details, stars, forks and metadata. (3 credits)
+        """GitHub Repository — Repo details — stars, real watchers (subscribers), openIssuesAndPrs, license (NOASSERTION→null), parent when fork. Flat 1 credit. (1 credit)
 
-        :param repo: Repository URL or owner/name.
+        :param repo: Repository URL or owner/name, e.g. torvalds/linux.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/repository", {"repo": repo, "cache": cache})
 
     async def pull_requests(self, *, repo: str, state: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Pull Requests — List repository pull requests, with cursor pagination (nextCursor + hasMore). (12 credits)
+        """GitHub Pull Requests — List PRs with draft, labels, author{}, head/base; state echoed; opaque Link cursor. (12 credits)
 
         :param repo: Repository URL or owner/name.
-        :param state: open, closed, or all. Default open.
+        :param state: open (default), closed, or all — echoed as data.state.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
+        :param cursor: Opaque cursor from previous nextCursor (GitHub Link page=).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/pull-requests", {"repo": repo, "state": state, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def activity(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Activity — Recent public activity for a GitHub user, with cursor pagination (nextCursor + hasMore). (12 credits)
+        """GitHub Activity — Public events with typed payload (Push commits/ref, PR/issue action). 90-event ceiling; opaque Link cursor. (12 credits)
 
-        :param username: GitHub username or profile URL.
-        :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
+        :param username: GitHub username or profile URL, e.g. getify.
+        :param limit: Max items to return. Default 30, max 90. Billed per result.
+        :param cursor: Opaque cursor from previous nextCursor. Stops at 90-event ceiling.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/activity", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def followers(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Followers — List GitHub followers, with cursor pagination (nextCursor + hasMore). (12 credits)
+        """GitHub Followers — Follower cards {id,login,type,url,avatar}. ~0.1/row; opaque Link cursor. Large accounts expensive to page fully. (3 credits)
 
-        :param username: GitHub username or profile URL.
+        :param username: GitHub username or profile URL, e.g. getify.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
+        :param cursor: Opaque cursor from previous nextCursor (GitHub Link page=).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/followers", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def following(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Following — List accounts a GitHub user follows, with cursor pagination (nextCursor + hasMore). (12 credits)
+        """GitHub Following — Same card and ~0.1/row pricing as followers. Opaque Link cursor. (3 credits)
 
-        :param username: GitHub username or profile URL.
+        :param username: GitHub username or profile URL, e.g. getify.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
+        :param cursor: Opaque cursor from previous nextCursor (GitHub Link page=).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/following", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def contributions(self, *, username: str, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Contributions — Summary of recent public GitHub contributions. (3 credits)
+        """GitHub Contributions — Real contribution graph — totalContributions, currentStreak, days[{date,count,level}] from the public calendar HTML. Flat 2 credits. (2 credits)
 
-        :param username: GitHub username or profile URL.
+        :param username: GitHub username or profile URL, e.g. getify.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/contributions", {"username": username, "cache": cache})
 
-    async def trending_repositories(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Trending Repositories — Search trending repositories by stars or query. (12 credits)
+    async def trending_repositories(self, *, since: str | None = None, language: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Trending Repositories — github.com/trending — repos ranked by starsGained (since=daily|weekly|monthly), not all-time star search. Flat 2 credits. (2 credits)
 
-        :param q: GitHub repository search query. Default stars:>1000.
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param since: daily (default), weekly, or monthly.
+        :param language: Optional programming-language slug, e.g. python.
+        :param limit: Max items to return. Default 25, max 100. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/github/trending-repositories", {"q": q, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/github/trending-repositories", {"since": since, "language": language, "limit": limit, "cache": cache})
 
-    async def trending_developers(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Trending Developers — Search popular GitHub developers. (12 credits)
+    async def trending_developers(self, *, since: str | None = None, language: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Trending Developers — github.com/trending/developers — windowed ranks with popularRepo + hydrated followers/bio. Flat 2 credits. (2 credits)
 
-        :param q: GitHub user search query. Default followers:>1000.
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param since: daily (default), weekly, or monthly.
+        :param language: Optional programming-language slug, e.g. python.
+        :param limit: Max items to return. Default 25, max 100. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/github/trending-developers", {"q": q, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/github/trending-developers", {"since": since, "language": language, "limit": limit, "cache": cache})
 
 
 class TwitchApi:
@@ -3312,12 +3324,16 @@ class AccountApi:
         """
         return self._t.get("/v1/account/balance", {})
 
-    def request_history(self, *, limit: float | None = None) -> dict[str, Any]:
-        """Request History — List recent Captapi API requests for the current key owner. (0 credits)
+    def request_history(self, *, limit: float | None = None, endpoint: str | None = None, statusCode: float | None = None, since: str | None = None, until: str | None = None) -> dict[str, Any]:
+        """Request History — Live request log with requestId, creditsUsed, cacheHit. Filter by endpoint/statusCode/since/until. Free. (0 credits)
 
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max rows to return. Default 50, max 500. Free — does not consume credits.
+        :param endpoint: Exact Captapi path, e.g. /v1/instagram/basic-profile.
+        :param statusCode: HTTP status filter, e.g. 500.
+        :param since: Inclusive createdAt lower bound (ISO date or datetime).
+        :param until: Exclusive createdAt upper bound (ISO date or datetime).
         """
-        return self._t.get("/v1/account/request-history", {"limit": limit})
+        return self._t.get("/v1/account/request-history", {"limit": limit, "endpoint": endpoint, "statusCode": statusCode, "since": since, "until": until})
 
     def daily_usage(self, *, days: float | None = None) -> dict[str, Any]:
         """Daily Usage — Daily request and credit usage summary. (0 credits)
@@ -3330,7 +3346,7 @@ class AccountApi:
         """Most Used Routes — Most used API routes by request count and credits. (0 credits)
 
         :param days: Number of days to include. Default 30, max 365.
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param limit: Max rows to return. Default 20, max 100. Free — does not consume credits.
         """
         return self._t.get("/v1/account/most-used-routes", {"days": days, "limit": limit})
 
@@ -3344,12 +3360,16 @@ class AsyncAccountApi:
         """
         return await self._t.get("/v1/account/balance", {})
 
-    async def request_history(self, *, limit: float | None = None) -> dict[str, Any]:
-        """Request History — List recent Captapi API requests for the current key owner. (0 credits)
+    async def request_history(self, *, limit: float | None = None, endpoint: str | None = None, statusCode: float | None = None, since: str | None = None, until: str | None = None) -> dict[str, Any]:
+        """Request History — Live request log with requestId, creditsUsed, cacheHit. Filter by endpoint/statusCode/since/until. Free. (0 credits)
 
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max rows to return. Default 50, max 500. Free — does not consume credits.
+        :param endpoint: Exact Captapi path, e.g. /v1/instagram/basic-profile.
+        :param statusCode: HTTP status filter, e.g. 500.
+        :param since: Inclusive createdAt lower bound (ISO date or datetime).
+        :param until: Exclusive createdAt upper bound (ISO date or datetime).
         """
-        return await self._t.get("/v1/account/request-history", {"limit": limit})
+        return await self._t.get("/v1/account/request-history", {"limit": limit, "endpoint": endpoint, "statusCode": statusCode, "since": since, "until": until})
 
     async def daily_usage(self, *, days: float | None = None) -> dict[str, Any]:
         """Daily Usage — Daily request and credit usage summary. (0 credits)
@@ -3362,7 +3382,7 @@ class AsyncAccountApi:
         """Most Used Routes — Most used API routes by request count and credits. (0 credits)
 
         :param days: Number of days to include. Default 30, max 365.
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param limit: Max rows to return. Default 20, max 100. Free — does not consume credits.
         """
         return await self._t.get("/v1/account/most-used-routes", {"days": days, "limit": limit})
 
@@ -3372,34 +3392,40 @@ class UtilitiesApi:
         self._t = transport
 
     def analytics_post(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Post Analytics — Unified metrics for one post/video/reel (platform auto-detected). Same shape everywhere; platform-missing fields stay null. Flat 1 credit. (1 credit)
+        """Post Analytics — Unified metrics for one post across 11 platforms (auto-detect). engagementRateBasis + commentsIsApproximate/interactionsIsApproximate. Flat 1 credit. (1 credit)
 
-        :param url: A public post, video, or reel URL from a supported platform. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Post/video/reel URL from YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble. Platform auto-detected — cross-platform URLs are expected. Not Kwai/Twitch/Spotify/Snapchat.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/analytics/post", {"url": url, "cache": cache})
 
     def analytics_compare(self, *, urls: str, cache: bool | None = None) -> dict[str, Any]:
-        """Compare Analytics — Same unified metrics as post analytics for up to 10 URLs. 1 credit per resolved URL; cache hits free. (1 credit)
+        """Compare Analytics — Same analytics/post object per URL (up to 10). 1 credit per resolved URL; cache hits free. Mix platforms freely. (1 credit)
 
-        :param urls: Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms.
+        :param urls: Comma-separated URLs (up to 10), any mix of the 11 Post Analytics platforms.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/analytics/compare", {"urls": urls, "cache": cache})
 
-    def video_transcript(self, *, file: str) -> dict[str, Any]:
-        """Video File Transcript — Whisper transcription of an uploaded video/audio file. 1 credit per minute of audio. (1 credit)
+    def video_transcript(self, *, file: str, language: str | None = None, translate: bool | None = None, timestampGranularity: str | None = None) -> dict[str, Any]:
+        """Video File Transcript — POST multipart Whisper transcript. Returns language, durationSeconds, creditsCharged. 1 credit/min. Max 200MB/60min. (1 credit)
 
-        :param file: Local path or multipart file upload of the video/audio to transcribe.
+        :param file: Local path to video/audio — sent as multipart form field file (POST), not a query string.
+        :param language: ISO-639-1 Whisper language hint, e.g. en or tr.
+        :param translate: Translate speech to English when true.
+        :param timestampGranularity: segment (default) or word.
         """
-        return self._t.get("/v1/video/transcript", {"file": file})
+        return self._t.post_multipart("/v1/video/transcript", {"file": file, "language": language, "translate": translate, "timestampGranularity": timestampGranularity})
 
-    def video_summarize(self, *, file: str) -> dict[str, Any]:
-        """Video File Summarizer — Transcribe an uploaded video/audio file and return an AI summary. 1 credit per minute + 1 for the summary. (2 credits)
+    def video_summarize(self, *, file: str, language: str | None = None, translate: bool | None = None, timestampGranularity: str | None = None) -> dict[str, Any]:
+        """Video File Summarizer — POST multipart Whisper + AI summary PLUS full transcript. durationSeconds/creditsCharged. 1 credit/min + 1. (2 credits)
 
-        :param file: Local path or multipart file upload of the video/audio to transcribe and summarize.
+        :param file: Local path to video/audio — multipart form field file (POST), not a query string.
+        :param language: ISO-639-1 Whisper language hint.
+        :param translate: Translate speech to English when true.
+        :param timestampGranularity: segment (default) or word.
         """
-        return self._t.get("/v1/video/summarize", {"file": file})
+        return self._t.post_multipart("/v1/video/summarize", {"file": file, "language": language, "translate": translate, "timestampGranularity": timestampGranularity})
 
 
 class AsyncUtilitiesApi:
@@ -3407,34 +3433,40 @@ class AsyncUtilitiesApi:
         self._t = transport
 
     async def analytics_post(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Post Analytics — Unified metrics for one post/video/reel (platform auto-detected). Same shape everywhere; platform-missing fields stay null. Flat 1 credit. (1 credit)
+        """Post Analytics — Unified metrics for one post across 11 platforms (auto-detect). engagementRateBasis + commentsIsApproximate/interactionsIsApproximate. Flat 1 credit. (1 credit)
 
-        :param url: A public post, video, or reel URL from a supported platform. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Post/video/reel URL from YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble. Platform auto-detected — cross-platform URLs are expected. Not Kwai/Twitch/Spotify/Snapchat.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/analytics/post", {"url": url, "cache": cache})
 
     async def analytics_compare(self, *, urls: str, cache: bool | None = None) -> dict[str, Any]:
-        """Compare Analytics — Same unified metrics as post analytics for up to 10 URLs. 1 credit per resolved URL; cache hits free. (1 credit)
+        """Compare Analytics — Same analytics/post object per URL (up to 10). 1 credit per resolved URL; cache hits free. Mix platforms freely. (1 credit)
 
-        :param urls: Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms.
+        :param urls: Comma-separated URLs (up to 10), any mix of the 11 Post Analytics platforms.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/analytics/compare", {"urls": urls, "cache": cache})
 
-    async def video_transcript(self, *, file: str) -> dict[str, Any]:
-        """Video File Transcript — Whisper transcription of an uploaded video/audio file. 1 credit per minute of audio. (1 credit)
+    async def video_transcript(self, *, file: str, language: str | None = None, translate: bool | None = None, timestampGranularity: str | None = None) -> dict[str, Any]:
+        """Video File Transcript — POST multipart Whisper transcript. Returns language, durationSeconds, creditsCharged. 1 credit/min. Max 200MB/60min. (1 credit)
 
-        :param file: Local path or multipart file upload of the video/audio to transcribe.
+        :param file: Local path to video/audio — sent as multipart form field file (POST), not a query string.
+        :param language: ISO-639-1 Whisper language hint, e.g. en or tr.
+        :param translate: Translate speech to English when true.
+        :param timestampGranularity: segment (default) or word.
         """
-        return await self._t.get("/v1/video/transcript", {"file": file})
+        return await self._t.post_multipart("/v1/video/transcript", {"file": file, "language": language, "translate": translate, "timestampGranularity": timestampGranularity})
 
-    async def video_summarize(self, *, file: str) -> dict[str, Any]:
-        """Video File Summarizer — Transcribe an uploaded video/audio file and return an AI summary. 1 credit per minute + 1 for the summary. (2 credits)
+    async def video_summarize(self, *, file: str, language: str | None = None, translate: bool | None = None, timestampGranularity: str | None = None) -> dict[str, Any]:
+        """Video File Summarizer — POST multipart Whisper + AI summary PLUS full transcript. durationSeconds/creditsCharged. 1 credit/min + 1. (2 credits)
 
-        :param file: Local path or multipart file upload of the video/audio to transcribe and summarize.
+        :param file: Local path to video/audio — multipart form field file (POST), not a query string.
+        :param language: ISO-639-1 Whisper language hint.
+        :param translate: Translate speech to English when true.
+        :param timestampGranularity: segment (default) or word.
         """
-        return await self._t.get("/v1/video/summarize", {"file": file})
+        return await self._t.post_multipart("/v1/video/summarize", {"file": file, "language": language, "translate": translate, "timestampGranularity": timestampGranularity})
 
 
 class KwaiApi:

@@ -214,7 +214,7 @@ def _normalize_post(item: dict) -> dict:
             "id": safe_str(owner.get("id") or item.get("ownerId")),
             "username": safe_str(author),
             "displayName": safe_str(item.get("ownerFullName") or owner.get("fullName") or owner.get("full_name")),
-            "url": f"https://instagram.com/{author}" if author else None,
+            "url": instagram_native.canonical_instagram_profile_url(author),
             "followers": safe_int(
                 owner.get("followerCount") or owner.get("followersCount") or item.get("ownerFollowerCount")
             ),
@@ -1839,41 +1839,74 @@ def _normalize_trending_item(item: dict) -> dict:
             shortcode = m.group(1)
     if shortcode and is_video:
         url = f"https://www.instagram.com/reel/{shortcode}/"
-    return {
+    likes = decodo.hidden_count(item.get("likes"))
+    play_count = safe_int(
+        item.get("plays")
+        or item.get("play_count")
+        or item.get("playCount")
+        or item.get("video_play_count")
+        or item.get("videoPlayCount")
+    )
+    ig_play_count = safe_int(item.get("ig_play_count") or item.get("igPlayCount"))
+    fb_play_count = safe_int(item.get("fb_play_count") or item.get("fbPlayCount"))
+    video_view_count = safe_int(
+        item.get("video_view_count") or item.get("videoViewCount") or item.get("view_count")
+    )
+    video_url = safe_str(item.get("video_url") or item.get("videoUrl"))
+    thumb = safe_str(item.get("thumbnail_url") or item.get("image_url") or item.get("thumbnailUrl"))
+    out: dict[str, Any] = {
         "platform": "instagram",
         "url": url,
         "id": media_id or shortcode or raw_id,
         "shortcode": shortcode,
         "postType": post_type,
         "productType": product or ("clips" if is_video else None),
-        # Explore feed category, e.g. "TV & Movies" / "Bollywood TV & Movies".
-        "section": safe_str(item.get("section")),
-        "topic": safe_str(item.get("topic")),
         "caption": caption,
-        "description": caption,
         "publishedAt": published.replace("+00:00", "Z") if published else None,
         "durationSeconds": round(duration, 3) if duration is not None else None,
-        "thumbnailUrl": safe_str(item.get("thumbnail_url") or item.get("image_url")),
-        "videoUrl": safe_str(item.get("video_url")),
+        "thumbnailUrl": thumb,
+        "videoUrl": video_url,
         "author": decodo.build_ig_author(
             {
                 "username": username,
                 "full_name": item.get("full_name") or item.get("fullName"),
                 "is_verified": item.get("is_verified") or item.get("verified"),
+                "is_private": item.get("is_private") or item.get("isPrivate"),
                 "profile_pic_url": item.get("profile_pic_url")
                 or item.get("profilePicUrl")
                 or item.get("profile_image"),
             },
             username=username,
         ),
-        "engagement": {
-            "views": safe_int(item.get("plays")),
-            "likes": decodo.hidden_count(item.get("likes")),
-            "comments": decodo.hidden_count(item.get("comments")),
-        },
+        "engagement": decodo.engagement_with_play_split(
+            {
+                "likes": likes,
+                "comments": decodo.hidden_count(item.get("comments")),
+            },
+            play_count=play_count,
+            ig_play_count=ig_play_count,
+            fb_play_count=fb_play_count,
+            video_view_count=video_view_count,
+            likes=likes,
+            is_video=is_video,
+        ),
         "hashtags": decodo.dedupe_preserve(decodo._HASHTAG_RE.findall(caption)),
         "mentions": decodo.dedupe_preserve(decodo._MENTION_RE.findall(caption)),
     }
+    # Explore categories only when the actor actually ships them (never null).
+    section = safe_str(item.get("section"))
+    topic = safe_str(item.get("topic"))
+    if section:
+        out["section"] = section
+    if topic:
+        out["topic"] = topic
+    video_exp = instagram_native.cdn_image_expires_at(video_url)
+    thumb_exp = instagram_native.cdn_image_expires_at(thumb)
+    if video_exp:
+        out["videoUrlExpiresAt"] = video_exp
+    if thumb_exp:
+        out["thumbnailUrlExpiresAt"] = thumb_exp
+    return out
 
 
 def _filter_trending_reels_only(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1900,23 +1933,75 @@ def _trending_media_split(mapped: list[dict[str, Any]]) -> tuple[int, int]:
     return videos, photos
 
 
+def _iso_ms(dt: datetime) -> str:
+    """UTC ISO-8601 with millisecond precision (Z)."""
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+
+
 def _trending_freshness(*, cached_at: datetime | None, from_snapshot: bool) -> dict[str, Any]:
     now = datetime.now(timezone.utc)
-    if cached_at is None:
-        age_secs = 0.0
-        cached_at_iso = now.isoformat().replace("+00:00", "Z")
-    else:
+    if from_snapshot and cached_at is not None:
         if cached_at.tzinfo is None:
             cached_at = cached_at.replace(tzinfo=timezone.utc)
         age_secs = max(0.0, (now - cached_at).total_seconds())
-        cached_at_iso = cached_at.isoformat().replace("+00:00", "Z")
-    age_hours = round(age_secs / 3600.0, 2)
+        snapshot_at = _iso_ms(cached_at)
+        return {
+            "cached": True,
+            # snapshotAt = when the country snapshot finished. cachedAt kept as
+            # a one-release alias for clients already reading it.
+            "snapshotAt": snapshot_at,
+            "cachedAt": snapshot_at,
+            "stale": age_secs > _TRENDING_REFRESH_AFTER_SECS,
+            "ageHours": round(age_secs / 3600.0, 2),
+        }
+    # Fresh native /reels hit — not a snapshot; don't invent cachedAt.
     return {
-        "cached": from_snapshot,
-        "cachedAt": cached_at_iso,
-        "stale": bool(from_snapshot and age_secs > _TRENDING_REFRESH_AFTER_SECS),
-        "ageHours": age_hours,
+        "cached": False,
+        "stale": False,
+        "ageHours": 0,
     }
+
+
+# Reverse map: actor country name → ISO-3166 alpha-2.
+_TRENDING_COUNTRY_TO_ISO: dict[str, str] = {
+    "United States": "US",
+    "Canada": "CA",
+    "United Kingdom": "GB",
+    "Australia": "AU",
+    "Germany": "DE",
+    "France": "FR",
+    "Italy": "IT",
+    "Spain": "ES",
+    "Netherlands": "NL",
+    "Sweden": "SE",
+    "Norway": "NO",
+    "Denmark": "DK",
+    "Finland": "FI",
+    "Poland": "PL",
+    "Portugal": "PT",
+    "Brazil": "BR",
+    "Mexico": "MX",
+    "Argentina": "AR",
+    "Chile": "CL",
+    "Colombia": "CO",
+    "Japan": "JP",
+    "South Korea": "KR",
+    "Singapore": "SG",
+    "Hong Kong": "HK",
+    "Taiwan": "TW",
+    "India": "IN",
+    "Indonesia": "ID",
+    "Thailand": "TH",
+    "Philippines": "PH",
+    "Malaysia": "MY",
+    "Vietnam": "VN",
+    "United Arab Emirates": "AE",
+    "Saudi Arabia": "SA",
+    "Turkey": "TR",
+    "South Africa": "ZA",
+}
 
 
 def _trending_payload(
@@ -1928,11 +2013,14 @@ def _trending_payload(
     return {
         "platform": "instagram",
         "country": country,
+        "countryCode": _TRENDING_COUNTRY_TO_ISO.get(country),
         "totalReturned": len(reels),
         "note": (
             "Snapshot-backed trending list (typical freshness under 24h). "
             "Instagram returns a small overlapping batch per scrape; "
             "duplicates across requests are expected. "
+            "Content age filter drops Explore resurfaces older than ~180 days — "
+            "not a strict 24h content window. "
             "For live keyword search use /v1/instagram/reels-search."
         ),
         "reels": reels,
@@ -2152,7 +2240,7 @@ async def instagram_trending_reels(
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 15},
+            params={"country": country, "limit": limit, "v": 16},
             runner=_run,
             ctx=ctx,
             stale_while_revalidate=True,

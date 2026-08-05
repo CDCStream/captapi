@@ -79,9 +79,14 @@ for (const [platform, endpoints] of byPlatform) {
     const m = camel(methodSnake(e));
     const iface = `${pascal(e.tool)}Params`;
     const arg = e.params.length === 0 ? "params: Record<string, never> = {}" : e.params.every((p) => !p.required) ? `params: ${iface} = {}` : `params: ${iface}`;
+    const isUpload = e.params.some((p) => p.name === "file") && e.path.startsWith("/v1/video/");
     tsLines.push(`  /** ${e.name} — ${e.summary} (${e.credits} credit${e.credits === 1 ? "" : "s"}) */`);
     tsLines.push(`  ${m}(${arg}): Promise<ApiEnvelope> {`);
-    tsLines.push(`    return this.core.get(${JSON.stringify(e.path)}, params);`);
+    tsLines.push(
+      isUpload
+        ? `    return this.core.postMultipart(${JSON.stringify(e.path)}, params);`
+        : `    return this.core.get(${JSON.stringify(e.path)}, params);`,
+    );
     tsLines.push("  }");
   }
   tsLines.push("}", "");
@@ -158,7 +163,12 @@ for (const [platform, endpoints] of byPlatform) {
       const m = methodSnake(e);
       const { sig, body } = pySignature(e);
       const prefix = variant === "sync" ? "def" : "async def";
-      const call = variant === "sync" ? `self._t.get("${e.path}", ${body})` : `await self._t.get("${e.path}", ${body})`;
+      const isUpload = e.params.some((p) => p.name === "file") && e.path.startsWith("/v1/video/");
+      const methodCall = isUpload ? "post_multipart" : "get";
+      const call =
+        variant === "sync"
+          ? `self._t.${methodCall}("${e.path}", ${body})`
+          : `await self._t.${methodCall}("${e.path}", ${body})`;
       pyLines.push(`    ${prefix} ${m}(${sig}) -> dict[str, Any]:`);
       pyLines.push(...pyDoc(e, "        "));
       pyLines.push(`        return ${call}`);

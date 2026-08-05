@@ -104,6 +104,35 @@ def _coerce_duration_pair(raw: Any) -> tuple[int | None, str | None]:
     return None, text
 
 
+def _stamp_duration(card: dict[str, Any], raw: Any = None) -> dict[str, Any]:
+    """Canonical Rumble duration: durationSeconds + durationText only.
+
+    Drops legacy ``duration`` (string) and redundant ``durationFormatted``
+    so video-details / channel-videos / search share one schema.
+    """
+    seed = raw
+    if seed is None:
+        seed = (
+            card.get("durationSeconds")
+            if card.get("durationSeconds") is not None
+            else card.get("duration")
+        )
+    seconds, text = _coerce_duration_pair(seed)
+    if seconds is None and card.get("durationText"):
+        seconds, text = _coerce_duration_pair(card.get("durationText"))
+    card.pop("duration", None)
+    card.pop("durationFormatted", None)
+    if seconds is not None:
+        card["durationSeconds"] = seconds
+    elif "durationSeconds" in card and card["durationSeconds"] is None:
+        card.pop("durationSeconds", None)
+    if text:
+        card["durationText"] = text
+    elif "durationText" in card and not card.get("durationText"):
+        card.pop("durationText", None)
+    return card
+
+
 def _dedupe_streams(streams: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Prefer unique playable URLs; collapse duplicate quality labels."""
     seen_url: set[str] = set()
@@ -164,9 +193,6 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
             item.get("likes") or item.get("likeCount") or item.get("likesCount")
         ),
         "dislikes": parse_compact_count(item.get("dislikes") or item.get("dislikeCount")),
-        "durationSeconds": duration_seconds,
-        "durationText": duration_text,
-        "durationFormatted": rumble_video_native._duration_formatted(duration_seconds),
         "publishedAt": safe_str(
             item.get("uploadedAt")
             or item.get("uploadDate")
@@ -176,6 +202,7 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
         "thumbnail": safe_str(item.get("thumbnail") or item.get("thumbnailUrl") or item.get("image")),
         "comments": parse_compact_count(item.get("commentsCount") or item.get("comments")),
     }
+    _stamp_duration(out, duration_seconds if duration_seconds is not None else duration_text)
     # Never invent embedUrl from the page permalink id — Rumble's embed id is
     # often different (page v7cv2cc → embed v7aoh22). Fabricated embeds 404.
     video_id = safe_str(item.get("id") or item.get("permalink_id"))
@@ -227,9 +254,6 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
         "views": safe_int(item.get("views")),
         "likes": safe_int(votes.get("num_votes_up")) if votes else None,
         "dislikes": safe_int(votes.get("num_votes_down")) if votes else None,
-        "durationSeconds": duration_seconds,
-        "durationText": duration_text,
-        "durationFormatted": rumble_video_native._duration_formatted(duration_seconds),
         "publishedAt": safe_str(item.get("upload_date")),
         "thumbnail": safe_str(item.get("thumb")),
         "comments": safe_int(comments.get("count")) if comments else None,
@@ -246,6 +270,7 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
             ]
         ),
     }
+    _stamp_duration(out, duration_seconds if duration_seconds is not None else duration_text)
     if embed_id:
         out["embedId"] = embed_id
         out["embedUrl"] = f"https://rumble.com/embed/{embed_id}/"
@@ -342,26 +367,26 @@ async def _fetch_video_page(url: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail="Video not found")
 
     # Last-resort OG-only card — engagement unknown, so null (not 0).
-    return {
-        "platform": "rumble",
-        "id": safe_str(video_id),
-        "url": safe_str(canonical),
-        "type": _rumble_content_type(canonical, is_live=None),
-        "title": safe_str(title),
-        "description": safe_str(description),
-        "channel": None,
-        "channelUrl": None,
-        "views": None,
-        "likes": None,
-        "dislikes": None,
-        "durationSeconds": None,
-        "durationText": None,
-        "publishedAt": None,
-        "thumbnail": safe_str(thumbnail),
-        "comments": None,
-        "isLive": None,
-        "streams": [],
-    }
+    return _stamp_duration(
+        {
+            "platform": "rumble",
+            "id": safe_str(video_id),
+            "url": safe_str(canonical),
+            "type": _rumble_content_type(canonical, is_live=None),
+            "title": safe_str(title),
+            "description": safe_str(description),
+            "channel": None,
+            "channelUrl": None,
+            "views": None,
+            "likes": None,
+            "dislikes": None,
+            "publishedAt": None,
+            "thumbnail": safe_str(thumbnail),
+            "comments": None,
+            "isLive": None,
+            "streams": [],
+        }
+    )
 
 
 @router.get(
@@ -387,7 +412,7 @@ async def video_details(
             native = await rumble_video_native.video_details_native(_canonical_video_url(url))
             if native and native.get("title"):
                 ctx["source"] = "direct"
-                return native
+                return _stamp_duration(native)
 
             apify = get_apify()
             try:
@@ -407,7 +432,7 @@ async def video_details(
 
         data = await cached_or_run(
             endpoint="rumble.video-details",
-            params={"url": url, "v": 7},
+            params={"url": url, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -452,7 +477,7 @@ async def channel_videos(
 
         data = await cached_or_run(
             endpoint="rumble.channel-videos",
-            params={"channel": channel, "limit": limit, "v": 6},
+            params={"channel": channel, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -556,7 +581,8 @@ async def rumble_search(
             native = await rumble_video_native.search_native(q, limit=limit)
             if native:
                 ctx["source"] = "direct"
-                return {"query": q, "totalReturned": len(native), "results": native}
+                stamped = [_stamp_duration(dict(r)) for r in native]
+                return {"query": q, "totalReturned": len(stamped), "results": stamped}
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -572,7 +598,7 @@ async def rumble_search(
 
         data = await cached_or_run(
             endpoint="rumble.search",
-            params={"q": q, "limit": limit, "v": 4},
+            params={"q": q, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

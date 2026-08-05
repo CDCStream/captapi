@@ -58,23 +58,7 @@ export class HttpCore {
     this.fetchImpl = options.fetch ?? globalThis.fetch;
   }
 
-  async get(path: string, params: object = {}): Promise<ApiEnvelope> {
-    const url = new URL(this.baseUrl + path);
-    for (const [k, v] of Object.entries(params as Record<string, unknown>)) {
-      if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
-    }
-
-    let res: Response;
-    try {
-      res = await this.fetchImpl(url, {
-        headers: { authorization: `Bearer ${this.apiKey}`, accept: "application/json" },
-        signal: AbortSignal.timeout(this.timeoutMs),
-      });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      throw new CaptapiError(`Request to ${path} failed: ${message}`, 0, "network_error", err);
-    }
-
+  private async parse(path: string, res: Response): Promise<ApiEnvelope> {
     let body: any;
     try {
       body = await res.json();
@@ -99,5 +83,68 @@ export class HttpCore {
     }
 
     return body as ApiEnvelope;
+  }
+
+  async get(path: string, params: object = {}): Promise<ApiEnvelope> {
+    const url = new URL(this.baseUrl + path);
+    for (const [k, v] of Object.entries(params as Record<string, unknown>)) {
+      if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
+    }
+
+    let res: Response;
+    try {
+      res = await this.fetchImpl(url, {
+        headers: { authorization: `Bearer ${this.apiKey}`, accept: "application/json" },
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new CaptapiError(`Request to ${path} failed: ${message}`, 0, "network_error", err);
+    }
+
+    return this.parse(path, res);
+  }
+
+  /**
+   * POST multipart/form-data. ``file`` may be a local path (Node), Blob, or File.
+   * Other params become additional form fields.
+   */
+  async postMultipart(path: string, params: object = {}): Promise<ApiEnvelope> {
+    const form = new FormData();
+    const entries = params as Record<string, unknown>;
+    const fileVal = entries.file;
+    if (fileVal == null) {
+      throw new CaptapiError("Missing required form field: file", 400, "missing_file");
+    }
+    if (typeof fileVal === "string") {
+      // Node: treat string as a filesystem path.
+      const fs = await import("node:fs");
+      const pathMod = await import("node:path");
+      const buf = fs.readFileSync(fileVal);
+      form.append("file", new Blob([buf]), pathMod.basename(fileVal));
+    } else if (typeof Blob !== "undefined" && fileVal instanceof Blob) {
+      form.append("file", fileVal, (fileVal as File).name || "upload.bin");
+    } else {
+      form.append("file", fileVal as any);
+    }
+    for (const [k, v] of Object.entries(entries)) {
+      if (k === "file" || v === undefined || v === null) continue;
+      form.append(k, String(v));
+    }
+
+    let res: Response;
+    try {
+      res = await this.fetchImpl(this.baseUrl + path, {
+        method: "POST",
+        headers: { authorization: `Bearer ${this.apiKey}`, accept: "application/json" },
+        body: form,
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new CaptapiError(`Request to ${path} failed: ${message}`, 0, "network_error", err);
+    }
+
+    return this.parse(path, res);
   }
 }

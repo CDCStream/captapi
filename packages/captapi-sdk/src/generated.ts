@@ -1590,12 +1590,10 @@ export interface FacebookMarketplaceSearchParams {
 }
 
 export interface FacebookMarketplaceLocationSearchParams {
-  /** City/place search query, e.g. Austin. */
+  /** City/place query. Bare 'Austin' may return TX/MN/IN; include a state for a single hit. */
   q: string;
-  /** Max items to return. Default 10, max 50. Flat 17 credits per call. */
+  /** Max items to return. Default 10, max 50. Flat 2 credits per call. */
   limit?: number;
-  /** Set true to include latitude/longitude per location (slower; doubles cost to 34 credits). */
-  details?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1613,7 +1611,7 @@ export class FacebookMarketplaceApi {
   search(params: FacebookMarketplaceSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/marketplace-search", params);
   }
-  /** Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). (17 credits) */
+  /** Facebook Marketplace Location Search — Disambiguate city names into Marketplace hubs with Facebook cityPageId + lat/lng. marketplace-search already accepts a city string — use this for ambiguous names (Austin TX vs MN) or when you need cityPageId. Flat 2 credits. (2 credits) */
   locationSearch(params: FacebookMarketplaceLocationSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/marketplace-location-search", params);
   }
@@ -1754,6 +1752,8 @@ export interface TiktokAdLibrarySearchParams {
   q: string;
   /** ISO country code. Default GB (US often empty). */
   country?: string;
+  /** Keyword mode: "any" (default) or "all". */
+  match?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
@@ -1761,8 +1761,10 @@ export interface TiktokAdLibrarySearchParams {
 }
 
 export interface TiktokAdLibraryTopAdsParams {
-  /** Optional keyword filter. */
+  /** Optional keyword (substring). See match + matchedFrom. */
   q?: string;
+  /** Keyword mode: "any" (default) or "all". */
+  match?: string;
   /** ISO country code. Default US. */
   country?: string;
   /** Lookback days: 7, 30, or 180. Default 30. */
@@ -1792,11 +1794,11 @@ export interface TiktokAdLibraryAdDetailsParams {
 
 export class TiktokAdLibraryApi {
   constructor(private readonly core: HttpCore) {}
-  /** TikTok Ad Library Search — Search TikTok Commercial Content Library (EU DSA) — ISO dates, advertiser, reach bands. (2 credits) */
+  /** TikTok Ad Library Search — EU DSA Ad Library search — match=any|all, matchedFrom/filteredOut, empty free, ~40s cap. (2 credits) */
   search(params: TiktokAdLibrarySearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/tiktok/search", params);
   }
-  /** TikTok Creative Center Top Ads — Creative Center Top Ads — CTR, likes, industry/objective, video URLs (2 credits native). (2 credits) */
+  /** TikTok Creative Center Top Ads — Creative Center Top Ads — advertiser{}, firstSeen/lastSeen+datesPresent, no media[] dup, empty free. (2 credits) */
   topAds(params: TiktokAdLibraryTopAdsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/tiktok/top-ads", params);
   }
@@ -1925,7 +1927,7 @@ export class AmazonShopApi {
 }
 
 export interface GithubUserParams {
-  /** GitHub username or profile URL. */
+  /** GitHub username or profile URL, e.g. getify. */
   username: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -1934,16 +1936,22 @@ export interface GithubUserParams {
 export interface GithubRepositoriesParams {
   /** GitHub username or profile URL. */
   username: string;
+  /** created|updated|pushed|full_name (default updated). */
+  sort?: string;
+  /** asc or desc (default desc). */
+  direction?: string;
+  /** owner|member|all (default owner). */
+  type?: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
-  /** Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  /** Opaque cursor from previous nextCursor (GitHub Link page=). */
   cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
 
 export interface GithubRepositoryParams {
-  /** Repository URL or owner/name. */
+  /** Repository URL or owner/name, e.g. torvalds/linux. */
   repo: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -1952,69 +1960,73 @@ export interface GithubRepositoryParams {
 export interface GithubPullRequestsParams {
   /** Repository URL or owner/name. */
   repo: string;
-  /** open, closed, or all. Default open. */
+  /** open (default), closed, or all — echoed as data.state. */
   state?: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
-  /** Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  /** Opaque cursor from previous nextCursor (GitHub Link page=). */
   cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
 
 export interface GithubActivityParams {
-  /** GitHub username or profile URL. */
+  /** GitHub username or profile URL, e.g. getify. */
   username: string;
-  /** Max items to return. Default 30, max 100. Billed per result. */
+  /** Max items to return. Default 30, max 90. Billed per result. */
   limit?: number;
-  /** Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  /** Opaque cursor from previous nextCursor. Stops at 90-event ceiling. */
   cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
 
 export interface GithubFollowersParams {
-  /** GitHub username or profile URL. */
+  /** GitHub username or profile URL, e.g. getify. */
   username: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
-  /** Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  /** Opaque cursor from previous nextCursor (GitHub Link page=). */
   cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
 
 export interface GithubFollowingParams {
-  /** GitHub username or profile URL. */
+  /** GitHub username or profile URL, e.g. getify. */
   username: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
-  /** Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  /** Opaque cursor from previous nextCursor (GitHub Link page=). */
   cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
 
 export interface GithubContributionsParams {
-  /** GitHub username or profile URL. */
+  /** GitHub username or profile URL, e.g. getify. */
   username: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
 
 export interface GithubTrendingRepositoriesParams {
-  /** GitHub repository search query. Default stars:>1000. */
-  q: string;
-  /** Max items to return. Default 20, max 100. Billed per result. */
+  /** daily (default), weekly, or monthly. */
+  since?: string;
+  /** Optional programming-language slug, e.g. python. */
+  language?: string;
+  /** Max items to return. Default 25, max 100. Flat 2 credits per call. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
 
 export interface GithubTrendingDevelopersParams {
-  /** GitHub user search query. Default followers:>1000. */
-  q: string;
-  /** Max items to return. Default 20, max 100. Billed per result. */
+  /** daily (default), weekly, or monthly. */
+  since?: string;
+  /** Optional programming-language slug, e.g. python. */
+  language?: string;
+  /** Max items to return. Default 25, max 100. Flat 2 credits per call. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -2022,44 +2034,44 @@ export interface GithubTrendingDevelopersParams {
 
 export class GithubApi {
   constructor(private readonly core: HttpCore) {}
-  /** GitHub User — Public GitHub profile (email when public). 1 credit — wraps free GitHub REST API. (1 credit) */
+  /** GitHub User — Public GitHub profile as camelCase JSON (type User|Organization, email when public). 1 credit — thin wrap of free GitHub REST; prefer Captapi for one-key multi-platform, api.github.com for GitHub-only. (1 credit) */
   user(params: GithubUserParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/user", params);
   }
-  /** GitHub Repositories — List a GitHub user's repositories, with cursor pagination (nextCursor + hasMore). (12 credits) */
+  /** GitHub Repositories — List repos with sort/direction/type echoed; opaque Link cursor. parent/watchers only on github/repository. (12 credits) */
   repositories(params: GithubRepositoriesParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/repositories", params);
   }
-  /** GitHub Repository — Repository details, stars, forks and metadata. (3 credits) */
+  /** GitHub Repository — Repo details — stars, real watchers (subscribers), openIssuesAndPrs, license (NOASSERTION→null), parent when fork. Flat 1 credit. (1 credit) */
   repository(params: GithubRepositoryParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/repository", params);
   }
-  /** GitHub Pull Requests — List repository pull requests, with cursor pagination (nextCursor + hasMore). (12 credits) */
+  /** GitHub Pull Requests — List PRs with draft, labels, author{}, head/base; state echoed; opaque Link cursor. (12 credits) */
   pullRequests(params: GithubPullRequestsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/pull-requests", params);
   }
-  /** GitHub Activity — Recent public activity for a GitHub user, with cursor pagination (nextCursor + hasMore). (12 credits) */
+  /** GitHub Activity — Public events with typed payload (Push commits/ref, PR/issue action). 90-event ceiling; opaque Link cursor. (12 credits) */
   activity(params: GithubActivityParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/activity", params);
   }
-  /** GitHub Followers — List GitHub followers, with cursor pagination (nextCursor + hasMore). (12 credits) */
+  /** GitHub Followers — Follower cards {id,login,type,url,avatar}. ~0.1/row; opaque Link cursor. Large accounts expensive to page fully. (3 credits) */
   followers(params: GithubFollowersParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/followers", params);
   }
-  /** GitHub Following — List accounts a GitHub user follows, with cursor pagination (nextCursor + hasMore). (12 credits) */
+  /** GitHub Following — Same card and ~0.1/row pricing as followers. Opaque Link cursor. (3 credits) */
   following(params: GithubFollowingParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/following", params);
   }
-  /** GitHub Contributions — Summary of recent public GitHub contributions. (3 credits) */
+  /** GitHub Contributions — Real contribution graph — totalContributions, currentStreak, days[{date,count,level}] from the public calendar HTML. Flat 2 credits. (2 credits) */
   contributions(params: GithubContributionsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/contributions", params);
   }
-  /** GitHub Trending Repositories — Search trending repositories by stars or query. (12 credits) */
-  trendingRepositories(params: GithubTrendingRepositoriesParams): Promise<ApiEnvelope> {
+  /** GitHub Trending Repositories — github.com/trending — repos ranked by starsGained (since=daily|weekly|monthly), not all-time star search. Flat 2 credits. (2 credits) */
+  trendingRepositories(params: GithubTrendingRepositoriesParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/trending-repositories", params);
   }
-  /** GitHub Trending Developers — Search popular GitHub developers. (12 credits) */
-  trendingDevelopers(params: GithubTrendingDevelopersParams): Promise<ApiEnvelope> {
+  /** GitHub Trending Developers — github.com/trending/developers — windowed ranks with popularRepo + hydrated followers/bio. Flat 2 credits. (2 credits) */
+  trendingDevelopers(params: GithubTrendingDevelopersParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/trending-developers", params);
   }
 }
@@ -2331,8 +2343,16 @@ export interface AccountBalanceParams {
 }
 
 export interface AccountRequestHistoryParams {
-  /** Max items to return. Default 50, max 500. Billed per result. */
+  /** Max rows to return. Default 50, max 500. Free — does not consume credits. */
   limit?: number;
+  /** Exact Captapi path, e.g. /v1/instagram/basic-profile. */
+  endpoint?: string;
+  /** HTTP status filter, e.g. 500. */
+  statusCode?: number;
+  /** Inclusive createdAt lower bound (ISO date or datetime). */
+  since?: string;
+  /** Exclusive createdAt upper bound (ISO date or datetime). */
+  until?: string;
 }
 
 export interface AccountDailyUsageParams {
@@ -2343,7 +2363,7 @@ export interface AccountDailyUsageParams {
 export interface AccountMostUsedRoutesParams {
   /** Number of days to include. Default 30, max 365. */
   days?: number;
-  /** Max items to return. Default 20, max 100. Billed per result. */
+  /** Max rows to return. Default 20, max 100. Free — does not consume credits. */
   limit?: number;
 }
 
@@ -2353,7 +2373,7 @@ export class AccountApi {
   balance(params: Record<string, never> = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/account/balance", params);
   }
-  /** Request History — List recent Captapi API requests for the current key owner. (0 credits) */
+  /** Request History — Live request log with requestId, creditsUsed, cacheHit. Filter by endpoint/statusCode/since/until. Free. (0 credits) */
   requestHistory(params: AccountRequestHistoryParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/account/request-history", params);
   }
@@ -2368,46 +2388,58 @@ export class AccountApi {
 }
 
 export interface AnalyticsPostParams {
-  /** A public post, video, or reel URL from a supported platform. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  /** Post/video/reel URL from YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble. Platform auto-detected — cross-platform URLs are expected. Not Kwai/Twitch/Spotify/Snapchat. */
   url: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
 
 export interface AnalyticsCompareParams {
-  /** Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms. */
+  /** Comma-separated URLs (up to 10), any mix of the 11 Post Analytics platforms. */
   urls: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
 
 export interface VideoTranscriptParams {
-  /** Local path or multipart file upload of the video/audio to transcribe. */
+  /** Local path to video/audio — sent as multipart form field file (POST), not a query string. */
   file: string;
+  /** ISO-639-1 Whisper language hint, e.g. en or tr. */
+  language?: string;
+  /** Translate speech to English when true. */
+  translate?: boolean;
+  /** segment (default) or word. */
+  timestampGranularity?: string;
 }
 
 export interface VideoSummarizeParams {
-  /** Local path or multipart file upload of the video/audio to transcribe and summarize. */
+  /** Local path to video/audio — multipart form field file (POST), not a query string. */
   file: string;
+  /** ISO-639-1 Whisper language hint. */
+  language?: string;
+  /** Translate speech to English when true. */
+  translate?: boolean;
+  /** segment (default) or word. */
+  timestampGranularity?: string;
 }
 
 export class UtilitiesApi {
   constructor(private readonly core: HttpCore) {}
-  /** Post Analytics — Unified metrics for one post/video/reel (platform auto-detected). Same shape everywhere; platform-missing fields stay null. Flat 1 credit. (1 credit) */
+  /** Post Analytics — Unified metrics for one post across 11 platforms (auto-detect). engagementRateBasis + commentsIsApproximate/interactionsIsApproximate. Flat 1 credit. (1 credit) */
   analyticsPost(params: AnalyticsPostParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/analytics/post", params);
   }
-  /** Compare Analytics — Same unified metrics as post analytics for up to 10 URLs. 1 credit per resolved URL; cache hits free. (1 credit) */
+  /** Compare Analytics — Same analytics/post object per URL (up to 10). 1 credit per resolved URL; cache hits free. Mix platforms freely. (1 credit) */
   analyticsCompare(params: AnalyticsCompareParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/analytics/compare", params);
   }
-  /** Video File Transcript — Whisper transcription of an uploaded video/audio file. 1 credit per minute of audio. (1 credit) */
+  /** Video File Transcript — POST multipart Whisper transcript. Returns language, durationSeconds, creditsCharged. 1 credit/min. Max 200MB/60min. (1 credit) */
   videoTranscript(params: VideoTranscriptParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/video/transcript", params);
+    return this.core.postMultipart("/v1/video/transcript", params);
   }
-  /** Video File Summarizer — Transcribe an uploaded video/audio file and return an AI summary. 1 credit per minute + 1 for the summary. (2 credits) */
+  /** Video File Summarizer — POST multipart Whisper + AI summary PLUS full transcript. durationSeconds/creditsCharged. 1 credit/min + 1. (2 credits) */
   videoSummarize(params: VideoSummarizeParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/video/summarize", params);
+    return this.core.postMultipart("/v1/video/summarize", params);
   }
 }
 

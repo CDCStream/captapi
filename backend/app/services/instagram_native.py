@@ -2770,7 +2770,16 @@ def _as_trending_reel(post: dict[str, Any]) -> dict[str, Any]:
         url = f"https://www.instagram.com/reel/{shortcode}/"
     engagement = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
     author = post.get("author") if isinstance(post.get("author"), dict) else {}
-    return {
+    # Keep the full play-count split (views / viewsInstagram / viewsFacebook /
+    # plays) — dropping to likes+comments only made every reel look viewless.
+    eng_out = {
+        k: engagement.get(k)
+        for k in ("views", "likes", "comments", "viewsInstagram", "viewsFacebook", "plays")
+        if k in engagement or k in {"views", "likes", "comments"}
+    }
+    video_url = safe_str(post.get("videoUrl"))
+    thumb = safe_str(post.get("thumbnailUrl"))
+    out: dict[str, Any] = {
         "platform": "instagram",
         "url": url,
         # Prefer numeric media id (matches channel-reels); shortcode for URLs.
@@ -2778,23 +2787,29 @@ def _as_trending_reel(post: dict[str, Any]) -> dict[str, Any]:
         "shortcode": shortcode,
         "postType": "Video",
         "productType": product if product else "clips",
-        "section": post.get("section"),
-        "topic": post.get("topic"),
-        "caption": post.get("caption"),
-        "description": post.get("description") or post.get("caption"),
+        "caption": post.get("caption") or post.get("description"),
         "publishedAt": post.get("publishedAt"),
         "durationSeconds": post.get("durationSeconds"),
-        "thumbnailUrl": post.get("thumbnailUrl"),
-        "videoUrl": post.get("videoUrl"),
+        "thumbnailUrl": thumb,
+        "videoUrl": video_url,
         "author": build_ig_author(author, username=safe_str(author.get("username"))),
-        "engagement": {
-            "views": engagement.get("views"),
-            "likes": engagement.get("likes"),
-            "comments": engagement.get("comments"),
-        },
+        "engagement": eng_out,
         "hashtags": dedupe_preserve(post.get("hashtags") or []),
         "mentions": dedupe_preserve(post.get("mentions") or []),
     }
+    section = safe_str(post.get("section"))
+    topic = safe_str(post.get("topic"))
+    if section:
+        out["section"] = section
+    if topic:
+        out["topic"] = topic
+    video_exp = cdn_image_expires_at(video_url)
+    thumb_exp = cdn_image_expires_at(thumb)
+    if video_exp:
+        out["videoUrlExpiresAt"] = video_exp
+    if thumb_exp:
+        out["thumbnailUrlExpiresAt"] = thumb_exp
+    return out
 
 
 async def trending_reels_native(
@@ -2838,6 +2853,9 @@ async def trending_reels_native(
     posts = await hydrate_shortcodes(codes, limit=fetch_n)
     if not posts:
         return None
+    # Polaris hydrate often omits play_count logged-out — author feeds fill
+    # views / viewsInstagram so the trending list has a real primary metric.
+    posts = await enrich_posts_from_author_feeds(posts, max_authors=min(12, len(posts)))
     reels: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
     for post in posts:
@@ -2853,12 +2871,13 @@ async def trending_reels_native(
             seen_ids.add(rid)
         reels.append(row)
 
-    def _rank(row: dict[str, Any]) -> tuple[int, float]:
+    def _rank(row: dict[str, Any]) -> tuple[int, int, float]:
         eng = row.get("engagement") if isinstance(row.get("engagement"), dict) else {}
+        views = safe_int(eng.get("views") or eng.get("viewsInstagram") or eng.get("plays")) or 0
         likes = safe_int(eng.get("likes")) or 0
         published = _parse_published_at(row.get("publishedAt"))
         ts = published.timestamp() if published else 0.0
-        return likes, ts
+        return views, likes, ts
 
     reels.sort(key=_rank, reverse=True)
     out = reels[:limit]

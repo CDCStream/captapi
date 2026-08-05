@@ -50,6 +50,50 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-05",
+    category: "improvement",
+    title: "SoundCloud track streamUrl + nested artist{}",
+    description:
+      "GET /v1/soundcloud/track now mints streamUrl / hlsUrl (signed CDN, with mediaUrlsExpireAt) when streamable, nests the uploader as artist{id,handle,name,url,avatar,followers,verified}, and documents downloadable/streamable as permission flags (downloadUrl only when public). GET /v1/soundcloud/artist collapses plan duplicates into subscriptionTier, adds handle (permalink slug) + externalLinks from web-profiles, keeps verified top-level only, and accepts cacheMaxAge. Field docs no longer tautological.",
+    items: [
+      "Track: streamUrl/hlsUrl + nested artist{}; cacheMaxAge",
+      "Artist: subscriptionTier, handle, externalLinks; drop badge/subscription duplicates",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "fix",
+    title: "Spotify podcast-episodes: no color dumps, cursor archive",
+    description:
+      "GET /v1/spotify/podcast-episodes no longer ships visualIdentity color palettes, playedState, or per-episode podcastV2 show copies (same rule /spotify/podcast already documented). Episodes lift previewUrl, audioUrls, full releaseDate, hasVideo/mediaTypes, explicit, hasTranscripts, paywallContent, showTypes, and id. Cursor pagination (nextCursor/hasMore) walks past the newest 50. totalEpisodes comes from the same episodes query as the page. /spotify/podcast drops the useless limit param; cURL examples use a show URL (not an artist); field docs and use cases no longer leak track/mediaUrlsExpireAt copy.",
+    items: [
+      "Episodes: lift previews/dates/flags; raw opt-in + slimmed; cursor pagination",
+      "Podcast: remove limit; show-URL cURL; podcast-specific field docs / use cases",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "fix",
+    title: "Spotify album tracks[] + search URI/freshness",
+    description:
+      "GET /v1/spotify/album now pages getAlbum tracksV2 into tracks[] (playCount, explicit, joinable artists), emits full releaseDate, joinable artists[], album-level explicit, and drops to 1 credit. raw is opt-in (?raw=true) on album/track/artist/search. Search always ships canonical spotify: URIs, envelope fetchedAt + source (pathfinder|apify), strips default raw, and documents the Apify fallthrough schema split vs GraphQL details.",
+    items: [
+      "Album: tracks[] with playCount; releaseDate; artists joins; 1 credit; raw opt-in",
+      "Search: canonical URIs; fetchedAt/source; raw opt-in; flat-2 billing wording",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "fix",
+    title: "Spotify track joins + artist raw opt-in",
+    description:
+      "GET /v1/spotify/track now returns playCount and joinable artists[{id,uri,name,url}] / album{id,uri,name,url,releaseDate} (plus explicit, releaseDate; popularity/isrc/previewUrl when Pathfinder exposes them) at flat 1 credit — same as artist. GET /v1/spotify/artist omits raw unless raw=true, and surfaces albumsHasMore/singlesHasMore when the overview discography sample is incomplete. Field docs no longer leak displayName/popular-creators copy onto Spotify name/country.",
+    items: [
+      "Track: playCount, structured artists/album joins, 1 credit",
+      "Artist: raw=true opt-in; albumsHasMore/singlesHasMore; field-doc fixes",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
     category: "fix",
     title: "Komi page: content modules, PRODUCT price, 1 credit",
     description:

@@ -54,6 +54,9 @@ CREDIT_TIKTOK_AD_SEARCH_APIFY = 5
 CREDIT_TIKTOK_TOP_ADS = 2
 RATE_TIKTOK_TOP_ADS = 1.0
 CREDIT_TIKTOK_TOP_ADS_MIN = 2
+# Stay under nginx/ALB 60s defaults (same fast-fail spirit as IG trending-reels).
+_TIKTOK_AD_APIFY_TIMEOUT_SECS = 20.0
+_TIKTOK_AD_RETRY_AFTER_SECS = 30
 
 _DKI_RE = re.compile(
     r"\{(?:KeyWord|KEYWORD|Keyword|param\d*|CUSTOMIZER\.[^}:]+)(?::[^}]*)?\}",
@@ -1401,6 +1404,58 @@ async def _run_actor(actor: str, payload: dict[str, Any], limit: int) -> list[di
     return items[:limit]
 
 
+async def _run_actor_fast(
+    actor: str, payload: dict[str, Any], limit: int, *, timeout: float
+) -> list[dict[str, Any]]:
+    """Apify sync with a hard timeout — never hold the client past ALB defaults."""
+    from app.services.apify_client import ApifyClient
+
+    client = ApifyClient(timeout=timeout, max_attempts=1)
+    try:
+        items = await client.run_actor_sync(actor, payload, max_items=limit)
+    except ApifyError as exc:
+        msg = str(exc).lower()
+        if "timeout" in msg:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": {
+                        "code": "upstream_timeout",
+                        "retryAfterSeconds": _TIKTOK_AD_RETRY_AFTER_SECS,
+                    },
+                    "message": (
+                        f"TikTok Ad Library upstream timed out after {timeout:g}s. "
+                        "Retry shortly — empty/timeout responses are not billed."
+                    ),
+                },
+                headers={"Retry-After": str(_TIKTOK_AD_RETRY_AFTER_SECS)},
+            ) from exc
+        raise HTTPException(status_code=502, detail=f"Ad Library upstream error: {exc}") from exc
+    return items[:limit]
+
+
+def _match_meta(filt: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "matchedFrom": int(filt.get("matchedFrom") or 0),
+        "filteredOut": int(filt.get("filteredOut") or 0),
+        "literalMatches": int(filt.get("literalMatches") or 0),
+        "match": filt.get("match") or "any",
+        "matchBasis": filt.get("matchBasis") or "any",
+    }
+
+
+def _bill_ads(ctx: dict[str, Any], ads: list[Any], *, flat: int, apify_rate: float | None = None) -> None:
+    """Empty 200s are free; otherwise flat native or scaled Apify."""
+    n = len(ads)
+    if n == 0:
+        ctx["credits_override"] = 0
+        return
+    if ctx.get("source") == "direct" or apify_rate is None:
+        ctx["credits_override"] = flat
+        return
+    ctx["credits_override"] = _scaled(n, apify_rate, CREDIT_TIKTOK_TOP_ADS_MIN)
+
+
 @router.get("/facebook/search", summary="Search Meta/Facebook Ad Library")
 async def facebook_search(
     q: str = Query(..., min_length=2, description="Keyword, brand, or advertiser to search."),
@@ -1855,14 +1910,14 @@ async def facebook_ad_transcript(
     summary="Search TikTok Ad Library",
     description=(
         "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) "
-        "as clean JSON. Flat 2 credits on the native path (Apify fallback capped at "
-        f"{CREDIT_TIKTOK_AD_SEARCH_APIFY} — never the old ~70-credit per-result trap). "
-        "Results are relevance-filtered so keyword tokens must appear in advertiser "
-        "or ad copy. Schema keeps nulls for headline/cta/landingUrl/spend/advertiser.id "
-        "when TikTok withholds them (DSA library does not publish Meta-style spend). "
-        "firstShown/lastShown are ISO-8601. Default country is GB (EU-led; US often "
-        "empty). For Creative Center Top Ads (CTR, likes, brand ranking), use "
-        "/v1/ad-library/tiktok/top-ads."
+        "as clean JSON. Flat 2 credits on the native path when results are returned "
+        f"(Apify fallback capped at {CREDIT_TIKTOK_AD_SEARCH_APIFY}); empty results "
+        "are never charged. Local keyword matching is case-insensitive substring "
+        "with match=any|all (default any). When the filter reduces the set, "
+        "matchedFrom / filteredOut explain how many SERP rows existed before "
+        "filtering. Upstream work is capped (~40s Decodo / ~20s Apify) so clients "
+        "are not billed after ALB disconnect. Default country GB. For Creative "
+        "Center Top Ads use /v1/ad-library/tiktok/top-ads."
     ),
 )
 async def tiktok_search(
@@ -1873,12 +1928,20 @@ async def tiktok_search(
         max_length=2,
         description="Two-letter ISO country code (e.g. GB, DE, FR). Default GB — EU Commercial Content Library; US often empty.",
     ),
+    match: str = Query(
+        "any",
+        description='Keyword token mode: "any" (default, OR) or "all" (AND). Substring, case-insensitive.',
+    ),
     limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
     region = _tiktok_region(country)
+    try:
+        match_mode = tiktok_ads_native.normalize_match_mode(match)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     # Over-fetch then relevance-filter so limit is filled with on-topic ads.
     fetch_limit = min(200, max(limit * 3, limit))
     async with billed_call(
@@ -1895,17 +1958,22 @@ async def tiktok_search(
             )
             if native is not None:
                 ctx["source"] = "direct"
-                matched = tiktok_ads_native.filter_ads_by_query(native, q)[:limit]
-                ads = [_normalize_ad(i, "tiktok_ad_library") for i in matched]
-                ctx["credits_override"] = CREDIT_TIKTOK_AD_SEARCH
+                filt = tiktok_ads_native.filter_ads_by_query(
+                    native, q, match=match_mode
+                )
+                ads = [
+                    _normalize_ad(i, "tiktok_ad_library")
+                    for i in filt["rows"][:limit]
+                ]
                 return {
                     "query": q,
                     "country": region,
                     "totalReturned": len(ads),
+                    **_match_meta(filt),
                     "ads": ads,
                 }
 
-            items = await _run_actor(
+            items = await _run_actor_fast(
                 settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY,
                 {
                     "source": "both",
@@ -1914,25 +1982,34 @@ async def tiktok_search(
                     "maxResults": fetch_limit,
                 },
                 fetch_limit,
+                timeout=_TIKTOK_AD_APIFY_TIMEOUT_SECS,
             )
             ctx["source"] = "apify"
-            matched = tiktok_ads_native.filter_ads_by_query(items, q)[:limit]
-            ads = [_normalize_ad(i, "tiktok_ad_library") for i in matched]
+            filt = tiktok_ads_native.filter_ads_by_query(items, q, match=match_mode)
+            ads = [
+                _normalize_ad(i, "tiktok_ad_library") for i in filt["rows"][:limit]
+            ]
             return {
                 "query": q,
                 "country": region,
                 "totalReturned": len(ads),
+                **_match_meta(filt),
                 "ads": ads,
             }
 
         data = await cached_or_run(
             "ad-library.tiktok.search",
-            {"q": q, "country": region, "limit": limit, "v": 7},
+            {"q": q, "country": region, "limit": limit, "match": match_mode, "v": 8},
             _run,
             ctx,
             use_cache=cache,
         )
-        if ctx.get("source") != "direct":
+        ads = data.get("ads") or []
+        if not ads:
+            ctx["credits_override"] = 0
+        elif ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_TIKTOK_AD_SEARCH
+        else:
             ctx["credits_override"] = CREDIT_TIKTOK_AD_SEARCH_APIFY
         return ApiResponse(data=data)
 
@@ -1943,26 +2020,29 @@ async def tiktok_search(
     description=(
         "High-performing TikTok ads from Creative Center Top Ads "
         "(ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, "
-        "likes (+likesIsApproximate), ctr/ctrTier (normalized 0–1 score + TikTok "
-        "bucket), costTier, resolved industry/objective, isSparkAd, and video{} "
-        "renditions. url is the per-ad Creative Center detail page. Keyword q is "
-        "relevance-filtered client-side (Creative Center soft-matches and often "
-        "ignores keyword with for_you — empty beats unrelated ads). No firstSeen/"
-        "lastSeen on the public list API; no cursor pagination. Filter with country "
-        "(default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|"
-        "cost), optional industry/objective/adFormat. Flat 2 credits on the "
-        "Decodo-native path; Apify fallback is ~1 credit per returned ad (minimum 2). "
-        "Not the EU Commercial Content Library — use /v1/ad-library/tiktok/search "
-        "for DSA transparency ads."
+        "advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — "
+        "check datesPresent), likes (+likesIsApproximate), ctr/ctrTier, costTier, "
+        "resolved industry/objective, isSparkAd, and video{} (urlHd only when a "
+        "distinct HD rendition exists; no duplicate media[]). Keyword q uses "
+        "match=any|all with matchedFrom/filteredOut/matchBasis. Empty results "
+        "are never charged. Upstream capped (~40s Decodo / ~20s Apify). Flat 2 "
+        "credits native when ads are returned; Apify ~1/ad (min 2). For DSA "
+        "firstShown/lastShown use /v1/ad-library/tiktok/search."
     ),
 )
 async def tiktok_top_ads(
     q: str | None = Query(
         None,
         description=(
-            "Optional keyword. Results must mention every token in title, brand, "
-            "tags, or industry — empty is intentional when Creative Center soft-matches."
+            "Optional keyword. Case-insensitive substring match on title, brand, "
+            "tags, industry, objective. See match=any|all. When literal matches "
+            "are empty, Creative Center soft results may still be returned "
+            "(matchBasis=creative_center) with matchedFrom populated."
         ),
+    ),
+    match: str = Query(
+        "any",
+        description='Keyword token mode: "any" (default, OR) or "all" (AND).',
     ),
     country: str = Query(
         "US",
@@ -2008,6 +2088,7 @@ async def tiktok_top_ads(
     try:
         period_days = tiktok_creative_center.normalize_period(period)
         order_label = tiktok_creative_center.normalize_order_by(order_by)
+        match_mode = tiktok_creative_center.normalize_match_mode(match)
         # Validate/map before Apify fallback — actor enum mismatch used to
         # surface as upstream_actor_error 502 instead of a clear 400.
         tiktok_creative_center.normalize_apify_industry(industry)
@@ -2024,6 +2105,28 @@ async def tiktok_top_ads(
     ) as ctx:
         order_key = order_by.strip().lower().replace(" ", "_").replace("-", "_")
 
+        async def _payload(filt: dict[str, Any], *, want: int) -> dict[str, Any]:
+            ads = [
+                tiktok_creative_center.normalize_top_ad(i, query_country=region)
+                for i in filt.get("rows") or []
+                if isinstance(i, dict) and (i.get("ad_id") or i.get("id"))
+            ][:want]
+            dates_present = sum(
+                1 for a in ads if a.get("firstSeen") or a.get("lastSeen")
+            )
+            return {
+                "query": (q or "").strip() or None,
+                "country": region,
+                "period": period_days,
+                "orderBy": order_key,
+                "totalReturned": len(ads),
+                # Creative Center Top Ads rarely publishes run dates — clients
+                # can see how often firstSeen/lastSeen are filled vs null.
+                "datesPresent": dates_present,
+                **_match_meta(filt),
+                "ads": ads,
+            }
+
         async def _run() -> dict[str, Any]:
             want = max(1, min(int(limit), 100))
             overfetch = tiktok_creative_center.fetch_limit_for_query(want, q)
@@ -2034,31 +2137,19 @@ async def tiktok_top_ads(
                 order_by=order_label,
                 limit=overfetch,
                 q=q,
+                match=match_mode,
                 industry=industry,
                 objective=objective,
                 ad_format=ad_format,
             )
             # Empty native with active filters → try Apify (client-side filter may
             # have dropped everything or Creative Center returned no match).
-            filtered = bool(
+            has_filters = bool(
                 (q or "").strip() or industry or objective or ad_format
             )
-            if native is not None and (native or not filtered):
+            if native is not None and (native.get("rows") or not has_filters):
                 ctx["source"] = "direct"
-                ads = [
-                    tiktok_creative_center.normalize_top_ad(i)
-                    for i in native
-                    if isinstance(i, dict) and (i.get("ad_id") or i.get("id"))
-                ][:want]
-                ctx["credits_override"] = CREDIT_TIKTOK_TOP_ADS
-                return {
-                    "query": (q or "").strip() or None,
-                    "country": region,
-                    "period": period_days,
-                    "orderBy": order_key,
-                    "totalReturned": len(ads),
-                    "ads": ads,
-                }
+                return await _payload(native, want=want)
 
             payload = tiktok_creative_center.apify_input(
                 country=region,
@@ -2070,37 +2161,29 @@ async def tiktok_top_ads(
                 objective=objective,
                 ad_format=ad_format,
             )
-            items = await _run_actor(
+            items = await _run_actor_fast(
                 settings.APIFY_ACTOR_TIKTOK_CREATIVE_CENTER,
                 payload,
                 overfetch,
+                timeout=_TIKTOK_AD_APIFY_TIMEOUT_SECS,
             )
             ctx["source"] = "apify"
-            matched = tiktok_creative_center.filter_top_ads(
+            filt = tiktok_creative_center.filter_top_ads(
                 [i for i in items if isinstance(i, dict)],
                 q=q,
+                match=match_mode,
                 industry=industry,
                 objective=objective,
                 ad_format=ad_format,
+                soft_fallback=True,
             )
-            ads = [
-                tiktok_creative_center.normalize_top_ad(i)
-                for i in matched
-                if i.get("ad_id") or i.get("id")
-            ][:want]
-            return {
-                "query": (q or "").strip() or None,
-                "country": region,
-                "period": period_days,
-                "orderBy": order_key,
-                "totalReturned": len(ads),
-                "ads": ads,
-            }
+            return await _payload(filt, want=want)
 
         data = await cached_or_run(
             "ad-library.tiktok.top-ads",
             {
                 "q": q or "",
+                "match": match_mode,
                 "country": region,
                 "period": period_days,
                 "orderBy": order_label,
@@ -2108,19 +2191,18 @@ async def tiktok_top_ads(
                 "objective": objective or "",
                 "adFormat": ad_format or "",
                 "limit": limit,
-                "v": 3,
+                "v": 4,
             },
             _run,
             ctx,
             use_cache=cache,
         )
-        if ctx.get("source") != "direct":
-            n = len(data.get("ads") or [])
-            ctx["credits_override"] = (
-                CREDIT_TIKTOK_TOP_ADS_MIN
-                if n == 0
-                else _scaled(n, RATE_TIKTOK_TOP_ADS, CREDIT_TIKTOK_TOP_ADS_MIN)
-            )
+        _bill_ads(
+            ctx,
+            data.get("ads") or [],
+            flat=CREDIT_TIKTOK_TOP_ADS,
+            apify_rate=RATE_TIKTOK_TOP_ADS if ctx.get("source") != "direct" else None,
+        )
         return ApiResponse(data=data)
 
 

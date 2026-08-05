@@ -1,6 +1,6 @@
 // AUTO-GENERATED — do not edit by hand.
 // Real example responses captured live from https://api.captapi.com.
-// Arrays truncated to 2 items; HTML/poison strings stubbed for SSR safety.
+// Arrays truncated to 2 items by default (keyPoints/topics/transcriptSegments/requests keep higher caps); HTML stubbed for SSR.
 // Mode variants: frontend/lib/api-example-variants.ts (not overwritten).
 // Regenerate: python backend/gen_examples.py (source: backend/api_snapshots.json).
 
@@ -11,7 +11,17 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "subscriptionCredits": 0,
     "topupCredits": 9599,
     "totalCredits": 9599,
-    "subscriptionRenewsAt": null
+    "subscriptionRenewsAt": null,
+    "usedThisMonth": 498,
+    "quotaResetsAt": null,
+    "keyName": "production",
+    "rateLimitPerMinute": 40,
+    "rateLimitRemaining": null,
+    "monthly_quota": 100,
+    "subscription_credits": 0,
+    "topup_credits": 9599,
+    "total_credits": 9599,
+    "subscription_renews_at": null
   },
   "account-daily-usage": {
     "days": 7,
@@ -53,8 +63,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "totalReturned": 5,
     "requests": [
       {
+        "requestId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         "endpoint": "/v1/instagram/basic-profile",
         "platform": "instagram",
+        "resource": "instagram_user:adencylnozturk",
         "resourceUrl": "instagram_user:adencylnozturk",
         "creditsUsed": 0,
         "cacheHit": true,
@@ -64,8 +76,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "createdAt": "2026-07-18T11:31:44.31599+00:00"
       },
       {
+        "requestId": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
         "endpoint": "/v1/instagram/basic-profile",
         "platform": "instagram",
+        "resource": "instagram_user:adencylnozturk",
         "resourceUrl": "instagram_user:adencylnozturk",
         "creditsUsed": 1,
         "cacheHit": false,
@@ -73,8 +87,54 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "responseTimeMs": 4980,
         "errorMessage": null,
         "createdAt": "2026-07-18T11:31:21.584147+00:00"
+      },
+      {
+        "requestId": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+        "endpoint": "/v1/instagram/basic-profile",
+        "platform": "instagram",
+        "resource": "instagram_user:adencylnozturk",
+        "resourceUrl": "instagram_user:adencylnozturk",
+        "creditsUsed": 1,
+        "cacheHit": false,
+        "statusCode": 200,
+        "responseTimeMs": 4168,
+        "errorMessage": null,
+        "createdAt": "2026-07-18T11:31:20.30634+00:00"
+      },
+      {
+        "requestId": "d4e5f6a7-b8c9-0123-def0-234567890123",
+        "endpoint": "/v1/pinterest/board",
+        "platform": "pinterest",
+        "resource": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/",
+        "resourceUrl": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/",
+        "creditsUsed": 3,
+        "cacheHit": false,
+        "statusCode": 200,
+        "responseTimeMs": 17558,
+        "errorMessage": null,
+        "createdAt": "2026-07-18T11:29:07.873651+00:00"
+      },
+      {
+        "requestId": "e5f6a7b8-c9d0-1234-ef01-345678901234",
+        "endpoint": "/v1/facebook/marketplace-item",
+        "platform": "facebook",
+        "resource": "https://www.facebook.com/marketplace/item/2228870800986975/",
+        "resourceUrl": "https://www.facebook.com/marketplace/item/2228870800986975/",
+        "creditsUsed": 1,
+        "cacheHit": false,
+        "statusCode": 200,
+        "responseTimeMs": 10482,
+        "errorMessage": null,
+        "createdAt": "2026-07-18T11:28:59.677517+00:00"
       }
-    ]
+    ],
+    "filters": {
+      "endpoint": null,
+      "statusCode": null,
+      "since": null,
+      "until": null,
+      "limit": 5
+    }
   },
   "amazon-shop-page": {
     "platform": "amazon_shop",
@@ -126,8 +186,36 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "failedCount": 0,
     "results": [
       {
+        "platform": "tiktok",
+        "url": "https://www.tiktok.com/@khaby.lame/video/7646812028874673439",
+        "id": "7646812028874673439",
+        "title": "Thank you, please come again!!!🙋🏿‍♂️💸#learnfromkhaby #comedy",
+        "publishedAt": "2026-06-02T14:56:35.000Z",
+        "durationSeconds": 29.0,
+        "thumbnailUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-p-0068-tx2/oUAHVIiQDac8uC75AEfyALAA1FrTAqEEQ3GRPe~tplv-tiktokx-origin.image?dr=9636&x-expires=1783263600&x-signature=2PlkofS3nAbuOWtQQSaCTJIU0bQ%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
+        "author": {
+          "username": "khaby.lame",
+          "displayName": "Khabane lame",
+          "url": "https://www.tiktok.com/@khaby.lame",
+          "verified": true
+        },
+        "metrics": {
+          "views": 14700000,
+          "viewsIsApproximate": false,
+          "likes": 1300000,
+          "comments": 13600,
+          "commentsIsApproximate": false,
+          "shares": 13400,
+          "saves": 50705,
+          "interactions": 1377705,
+          "interactionsIsApproximate": false,
+          "engagementRate": 0.0937,
+          "engagementRateBasis": "interactions/views"
+        },
+        "status": "ok"
+      },
+      {
         "platform": "youtube",
-        "status": "ok",
         "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
         "id": "dQw4w9WgXcQ",
         "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
@@ -142,40 +230,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "metrics": {
           "views": 1799593805,
+          "viewsIsApproximate": false,
           "likes": 19303349,
           "comments": 2400000,
+          "commentsIsApproximate": true,
           "shares": null,
           "saves": null,
           "interactions": 21703349,
+          "interactionsIsApproximate": true,
           "engagementRate": 0.0121,
           "engagementRateBasis": "interactions/views"
-        }
-      },
-      {
-        "platform": "youtube",
-        "status": "ok",
-        "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
-        "id": "jNQXAC9IVRw",
-        "title": "Me at the zoo",
-        "publishedAt": "2005-04-24T03:31:52.000Z",
-        "durationSeconds": 19,
-        "thumbnailUrl": "https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg?sqp=-oaymwEmCOADEOgC8quKqQMa8AEB-AG-AoAC8AGKAgwIABABGFUgWShlMA8=&rs=AOn4CLA9eLBatYv9WbkD4BbZ2Im-biSPTw",
-        "author": {
-          "username": "jawed",
-          "displayName": "jawed",
-          "url": "https://www.youtube.com/channel/UC4QobU6STFB0P71PMvOGN5A",
-          "verified": null
         },
-        "metrics": {
-          "views": 402652118,
-          "likes": 19283609,
-          "comments": 10000000,
-          "shares": null,
-          "saves": null,
-          "interactions": 29283609,
-          "engagementRate": 0.0727,
-          "engagementRateBasis": "interactions/views"
-        }
+        "status": "ok"
       }
     ],
     "failed": []
@@ -196,11 +262,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     },
     "metrics": {
       "views": 1799593805,
+      "viewsIsApproximate": false,
       "likes": 19303349,
       "comments": 2400000,
+      "commentsIsApproximate": true,
       "shares": null,
       "saves": null,
       "interactions": 21703349,
+      "interactionsIsApproximate": true,
       "engagementRate": 0.0121,
       "engagementRateBasis": "interactions/views"
     }
@@ -370,6 +439,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "speaker": "body",
         "text": "The Voting Information Center—one-tap voting registration information from election experts and authorities in one place.",
+        "start": 0,
+        "duration": 0,
+        "timestamp": "00:00"
+      },
+      {
+        "speaker": "cta",
+        "text": "Learn more",
+        "start": 0,
+        "duration": 0,
+        "timestamp": "00:00"
+      },
+      {
+        "speaker": "landingUrl",
+        "text": "http://facebook.com/votinginformationcenter",
         "start": 0,
         "duration": 0,
         "timestamp": "00:00"
@@ -799,7 +882,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "latitude": 38.888854980469,
     "longitude": -77.085571289062,
     "isSold": true,
-    "isLive": true,
     "deliveryTypes": [
       "IN_PERSON",
       "DOOR_PICKUP"
@@ -809,19 +891,33 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "https://scontent-mad1-1.xx.fbcdn.net/v/t39.84726-6/749377945_1746854896315726_817991790771142418_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=Td50J02FhxwQ7kNvwEMS5Gk&_nc_oc=Adq3GF3R5f05eu3AlZfXV5BYX7n-dl-fGhjd7L4VfCb2IZztMYgOGJOLqDwEA8uVUvU&_nc_zt=14&_nc_ht=scontent-mad1-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQC6x7FebWsdvTVd2WTXik82gabWPwTIgqcmEHjtOn9PRA&oe=6A6D9DBB",
       "https://scontent-mad2-1.xx.fbcdn.net/v/t45.5328-4/750643688_1384573667068640_514500939676617077_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=111&ccb=1-7&_nc_sid=247b10&_nc_ohc=Aa-65J_vFfcQ7kNvwF56W3U&_nc_oc=AdqZo7FznGIikAd34m8FI2BzTOz3YUC3qQQ7lZPPYOm6lxpve9wXM1XMfZkSG1T1N-k&_nc_zt=23&_nc_ht=scontent-mad2-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQADpKLF9okchpYthAq_g22eIr1EZlOHwgG-Ih5jzyIFyQ&oe=6A6D812F"
     ],
-    "createdAt": "2026-07-17T18:23:51+00:00"
+    "createdAt": "2026-07-17T18:23:51+00:00",
+    "status": "sold",
+    "priceAmount": 12500,
+    "city": "Arlington",
+    "state": "VA"
   },
   "facebook-marketplace-location-search": {
-    "query": "Austin, TX",
-    "totalReturned": 1,
+    "query": "Austin",
+    "totalReturned": 3,
     "locations": [
       {
-        "id": "austin, tx|austin|tx",
+        "id": "109791499039942",
+        "cityPageId": "109791499039942",
+        "slug": "austin",
         "name": "Austin, TX",
         "city": "Austin",
         "state": "TX",
         "latitude": 30.2677,
         "longitude": -97.7475
+      },
+      {
+        "slug": "austin-minnesota",
+        "name": "Austin, MN",
+        "city": "Austin",
+        "state": "MN",
+        "latitude": 43.6666,
+        "longitude": -92.9746
       }
     ]
   },
@@ -853,19 +949,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "state": "AZ",
         "cityPageId": "109791499039942",
         "isSold": false,
-        "isLive": true,
         "isPending": false,
         "isHidden": false,
-        "isViewerSeller": false,
         "deliveryTypes": [
           "IN_PERSON",
           "SHIPPING_ONSITE"
         ],
         "image": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/748718464_1472100928021023_7004614235492134530_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=109&ccb=1-7&_nc_sid=92e707&_nc_ohc=Osco_iBPSHsQ7kNvwE88Z2B&_nc_oc=AdrnNrq4GxtoKGWCDi_qxKj2BfO-OcysnTpk7mDO5d-84zPauj6YWLhxJPZuiRErURoSW7OUci-LjqdvjivdYc4u&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQFTCh3FFtSTB-AA28V6Jr1NtrTs9PSVie1b1KW_xUkkNw&oe=6A753B85",
-        "photos": [
-          "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/748718464_1472100928021023_7004614235492134530_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=109&ccb=1-7&_nc_sid=92e707&_nc_ohc=Osco_iBPSHsQ7kNvwE88Z2B&_nc_oc=AdrnNrq4GxtoKGWCDi_qxKj2BfO-OcysnTpk7mDO5d-84zPauj6YWLhxJPZuiRErURoSW7OUci-LjqdvjivdYc4u&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQFTCh3FFtSTB-AA28V6Jr1NtrTs9PSVie1b1KW_xUkkNw&oe=6A753B85"
-        ],
-        "createdAt": "2026-07-16T06:02:16+00:00"
+        "createdAt": "2026-07-16T06:02:16+00:00",
+        "status": "available",
+        "isPublished": true,
+        "isLocal": false,
+        "shipsOutsideRadius": true
       },
       {
         "platform": "facebook",
@@ -882,19 +977,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "state": "CA",
         "cityPageId": "107983435897193",
         "isSold": false,
-        "isLive": true,
         "isPending": false,
         "isHidden": false,
-        "isViewerSeller": false,
         "deliveryTypes": [
           "IN_PERSON",
           "SHIPPING_ONSITE"
         ],
         "image": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/749286700_1116782047845292_1788708914246608626_n.jpg?stp=c0.81.526.526a_dst-jpg_p526x395_tt6&_nc_cat=110&ccb=1-7&_nc_sid=92e707&_nc_ohc=gbzkYGqnXmYQ7kNvwGzH1qf&_nc_oc=AdqLUHLAdzpxyU4TF9F6Xf5v9Tib9M6UCrmYThgY8kMR7j8y-uMyvFm3zwMzYYMwX1rcrfF1-yMiBdhJbknk-W2-&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQHJWOlgp25sCHb9Xzuo5yQVzSCjOZpSF6EaQpKDCudKZA&oe=6A751DFD",
-        "photos": [
-          "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/749286700_1116782047845292_1788708914246608626_n.jpg?stp=c0.81.526.526a_dst-jpg_p526x395_tt6&_nc_cat=110&ccb=1-7&_nc_sid=92e707&_nc_ohc=gbzkYGqnXmYQ7kNvwGzH1qf&_nc_oc=AdqLUHLAdzpxyU4TF9F6Xf5v9Tib9M6UCrmYThgY8kMR7j8y-uMyvFm3zwMzYYMwX1rcrfF1-yMiBdhJbknk-W2-&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQHJWOlgp25sCHb9Xzuo5yQVzSCjOZpSF6EaQpKDCudKZA&oe=6A751DFD"
-        ],
-        "createdAt": "2026-07-18T17:45:28+00:00"
+        "createdAt": "2026-07-18T17:45:28+00:00",
+        "status": "available",
+        "isPublished": true,
+        "isLocal": false,
+        "shipsOutsideRadius": true
       }
     ]
   },
@@ -1097,116 +1191,212 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "summary": "The video discusses the concept of a galaxy cluster, which consists of multiple galaxies grouped together. Specifically, it focuses on a galaxy cluster made up of two sub-clusters of similar mass that are currently interacting and separating in a complex manner. This dynamic relationship is significant for scientific study, as it provides insights into the behavior of galaxies in close proximity to one another. Eventually, these sub-clusters are expected to merge, further contributing to our understanding of galaxy formation and evolution.\n\nAdditionally, the video highlights the phenomenon of gravitational lensing, where the concentrated mass of the cluster bends light due to its gravitational pull. This effect allows astronomers to observe distant and faint background galaxies and stars that would otherwise be invisible, enhancing our ability to study the universe and its structures. The interplay of these two sub-clusters not only illustrates the chaotic nature of cosmic interactions but also serves as a valuable tool for astronomical research.",
     "keyPoints": [
       "A galaxy cluster consists of multiple galaxies grouped together.",
-      "The featured cluster contains two sub-clusters of similar mass interacting and separating."
+      "The featured cluster contains two sub-clusters of similar mass interacting and separating.",
+      "The relationship between the sub-clusters is complex but crucial for scientific study.",
+      "Gravitational lensing occurs due to the cluster's mass, bending and focusing light.",
+      "This lensing effect allows the observation of faint background galaxies and stars.",
+      "The merging of the sub-clusters will provide further insights into galaxy evolution."
     ],
     "topics": [
       "galaxy cluster",
-      "gravitational lensing"
+      "gravitational lensing",
+      "cosmic interactions",
+      "astronomy",
+      "galaxy formation",
+      "space science"
     ],
     "sentiment": "neutral"
   },
   "github-activity": {
-    "username": "torvalds",
-    "totalReturned": 5,
-    "nextCursor": "2",
+    "username": "getify",
+    "eventCeiling": 90,
+    "totalReturned": 2,
+    "nextCursor": "eyJ2IjoxLCJrIjoiYWN0aXZpdHkiLCJwIjoyfQ",
     "hasMore": true,
     "events": [
       {
-        "id": "15224705962",
+        "id": "9001",
         "type": "PushEvent",
-        "repo": "torvalds/linux",
-        "actor": "torvalds",
-        "createdAt": "2026-07-18T04:53:40Z"
+        "repo": "getify/You-Dont-Know-JS",
+        "repoUrl": "https://github.com/getify/You-Dont-Know-JS",
+        "payload": {
+          "ref": "refs/heads/2nd-ed",
+          "head": "deadbeef",
+          "before": "cafebabe",
+          "size": 1,
+          "distinctSize": 1,
+          "commits": [
+            {
+              "sha": "deadbeef",
+              "message": "typo fix",
+              "authorName": "Kyle Simpson",
+              "authorEmail": "getify@gmail.com",
+              "distinct": true
+            }
+          ]
+        },
+        "createdAt": "2026-07-01T10:00:00Z",
+        "public": true
       },
       {
-        "id": "15206866323",
-        "type": "PushEvent",
-        "repo": "torvalds/linux",
-        "actor": "torvalds",
-        "createdAt": "2026-07-17T20:16:14Z"
+        "id": "9002",
+        "type": "IssuesEvent",
+        "repo": "getify/You-Dont-Know-JS",
+        "repoUrl": "https://github.com/getify/You-Dont-Know-JS",
+        "payload": {
+          "action": "opened",
+          "number": 7,
+          "title": "Clarify chapter 3",
+          "url": "https://github.com/getify/You-Dont-Know-JS/issues/7",
+          "state": "open"
+        },
+        "createdAt": "2026-06-28T10:00:00Z",
+        "public": true
       }
     ]
   },
   "github-contributions": {
-    "username": "torvalds",
-    "recentPublicEvents": 90,
-    "recentEventTypes": [
-      "IssueCommentEvent",
-      "PullRequestEvent"
-    ],
-    "publicRepositoriesSampled": 12,
-    "starsAcrossSampledRepos": 252421
+    "username": "getify",
+    "source": "github.com/users/getify/contributions",
+    "url": "https://github.com/getify",
+    "totalContributions": 164,
+    "from": "2025-08-03",
+    "to": "2025-08-05",
+    "currentStreak": 2,
+    "days": [
+      {
+        "date": "2025-08-03",
+        "count": 0,
+        "level": 0
+      },
+      {
+        "date": "2025-08-04",
+        "count": 5,
+        "level": 2
+      }
+    ]
   },
   "github-followers": {
-    "username": "torvalds",
-    "totalReturned": 5,
-    "nextCursor": "2",
+    "username": "getify",
+    "totalReturned": 2,
+    "nextCursor": "eyJ2IjoxLCJrIjoiZm9sbG93ZXJzIiwicCI6Mn0",
     "hasMore": true,
     "followers": [
       {
+        "id": 206,
         "login": "sprsquish",
+        "type": "User",
         "url": "https://github.com/sprsquish",
         "avatar": "https://avatars.githubusercontent.com/u/206?v=4"
       },
       {
+        "id": 365,
         "login": "pius",
+        "type": "User",
         "url": "https://github.com/pius",
         "avatar": "https://avatars.githubusercontent.com/u/365?v=4"
       }
     ]
   },
   "github-following": {
-    "username": "gaearon",
-    "totalReturned": 5,
-    "nextCursor": "2",
+    "username": "getify",
+    "totalReturned": 2,
+    "nextCursor": "eyJ2IjoxLCJrIjoiZm9sbG93aW5nIiwicCI6Mn0",
     "hasMore": true,
     "following": [
       {
+        "id": 579,
         "login": "mikeal",
+        "type": "User",
         "url": "https://github.com/mikeal",
         "avatar": "https://avatars.githubusercontent.com/u/579?v=4"
       },
       {
-        "login": "stefanpenner",
-        "url": "https://github.com/stefanpenner",
-        "avatar": "https://avatars.githubusercontent.com/u/1377?v=4"
+        "id": 9950313,
+        "login": "nodejs",
+        "type": "Organization",
+        "url": "https://github.com/nodejs",
+        "avatar": "https://avatars.githubusercontent.com/u/9950313?v=4"
       }
     ]
   },
   "github-pull-requests": {
     "repository": "vercel/next.js",
-    "totalReturned": 5,
-    "nextCursor": "2",
+    "state": "closed",
+    "totalReturned": 2,
+    "nextCursor": "eyJ2IjoxLCJrIjoicHVsbHMiLCJwIjoyfQ",
     "hasMore": true,
     "pullRequests": [
       {
-        "id": 4101562593,
-        "number": 96016,
-        "title": "Upgrade React from `172742b4-20260716` to `81e442ea-20260721`",
+        "id": 11,
+        "number": 100,
+        "title": "docs: clarify cursor",
         "state": "closed",
-        "url": "https://github.com/vercel/next.js/pull/96016",
-        "author": "vercel-release-bot",
-        "createdAt": "2026-07-21T16:55:14Z",
-        "updatedAt": "2026-07-21T17:25:32Z",
-        "mergedAt": "2026-07-21T17:25:14Z"
+        "draft": false,
+        "url": "https://github.com/vercel/next.js/pull/100",
+        "author": {
+          "id": 1,
+          "login": "example",
+          "url": "https://github.com/example",
+          "avatar": "https://avatars.githubusercontent.com/u/1?v=4"
+        },
+        "labels": [
+          {
+            "name": "documentation",
+            "color": "0075ca"
+          }
+        ],
+        "head": {
+          "ref": "docs-cursor",
+          "sha": "aaa111",
+          "label": "example:docs-cursor"
+        },
+        "base": {
+          "ref": "canary",
+          "sha": "bbb222",
+          "label": "vercel:canary"
+        },
+        "createdAt": "2026-06-01T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z",
+        "closedAt": "2026-06-02T12:00:00Z",
+        "mergedAt": "2026-06-02T12:00:00Z"
       },
       {
-        "id": 4101405905,
-        "number": 96014,
-        "title": "Fix Turbopack middleware matcher with i18n single locale",
+        "id": 12,
+        "number": 101,
+        "title": "WIP: experimental",
         "state": "closed",
-        "url": "https://github.com/vercel/next.js/pull/96014",
-        "author": "eps1lon",
-        "createdAt": "2026-07-21T16:33:19Z",
-        "updatedAt": "2026-07-21T17:10:46Z",
-        "mergedAt": "2026-07-21T16:46:57Z"
+        "draft": true,
+        "url": "https://github.com/vercel/next.js/pull/101",
+        "author": {
+          "id": 2,
+          "login": "dev",
+          "url": "https://github.com/dev",
+          "avatar": "https://avatars.githubusercontent.com/u/2?v=4"
+        },
+        "head": {
+          "ref": "wip",
+          "sha": "ccc",
+          "label": "dev:wip"
+        },
+        "base": {
+          "ref": "canary",
+          "sha": "ddd",
+          "label": "vercel:canary"
+        },
+        "createdAt": "2026-05-01T00:00:00Z",
+        "updatedAt": "2026-05-03T00:00:00Z",
+        "closedAt": "2026-05-03T00:00:00Z"
       }
     ]
   },
   "github-repositories": {
     "username": "torvalds",
-    "totalReturned": 5,
-    "nextCursor": "2",
+    "sort": "pushed",
+    "direction": "desc",
+    "type": "owner",
+    "totalReturned": 2,
+    "nextCursor": "eyJ2IjoxLCJrIjoicmVwb3MiLCJwIjoyfQ",
     "hasMore": true,
     "repositories": [
       {
@@ -1218,18 +1408,16 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "description": "Linux kernel source tree",
         "owner": "torvalds",
         "ownerUrl": "https://github.com/torvalds",
+        "ownerType": "User",
+        "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
         "language": "C",
         "stars": 239734,
         "forks": 63487,
-        "watchers": 239734,
-        "openIssues": 3,
+        "openIssuesAndPrs": 3,
         "defaultBranch": "master",
-        "homepage": null,
-        "license": "NOASSERTION",
-        "topics": [],
+        "licenseName": "Other",
         "isFork": false,
         "isArchived": false,
-        "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
         "pushedAt": "2026-07-18T04:53:39Z",
         "createdAt": "2011-09-04T22:48:12Z",
         "updatedAt": "2026-07-18T18:40:38Z"
@@ -1240,21 +1428,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "libgit2",
         "fullName": "torvalds/libgit2",
         "url": "https://github.com/torvalds/libgit2",
-        "description": "A cross-platform, linkable library implementation of Git that you can use in your application.",
+        "description": "A cross-platform, linkable library implementation of Git.",
         "owner": "torvalds",
         "ownerUrl": "https://github.com/torvalds",
+        "ownerType": "User",
+        "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
         "language": "C",
         "stars": 370,
         "forks": 28,
-        "watchers": 370,
-        "openIssues": 1,
+        "openIssuesAndPrs": 1,
         "defaultBranch": "main",
         "homepage": "https://libgit2.org/",
-        "license": "NOASSERTION",
-        "topics": [],
+        "licenseName": "Other",
         "isFork": true,
         "isArchived": false,
-        "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
         "pushedAt": "2023-12-19T11:45:42Z",
         "createdAt": "2022-07-30T03:30:56Z",
         "updatedAt": "2026-07-18T17:03:41Z"
@@ -1270,105 +1457,107 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "description": "Linux kernel source tree",
     "owner": "torvalds",
     "ownerUrl": "https://github.com/torvalds",
+    "ownerType": "User",
+    "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
     "language": "C",
-    "stars": 239734,
+    "stars": 241852,
     "forks": 63487,
-    "watchers": 239734,
-    "openIssues": 3,
+    "watchers": 8345,
+    "openIssuesAndPrs": 3,
     "defaultBranch": "master",
-    "homepage": null,
-    "license": "NOASSERTION",
-    "topics": [],
+    "licenseName": "Other",
     "isFork": false,
     "isArchived": false,
-    "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
+    "size": 6228144,
+    "visibility": "public",
+    "hasIssues": false,
+    "hasDiscussions": false,
     "pushedAt": "2026-07-18T04:53:39Z",
     "createdAt": "2011-09-04T22:48:12Z",
     "updatedAt": "2026-07-18T18:40:38Z"
   },
   "github-trending-developers": {
-    "query": "followers:>1000",
-    "totalReturned": 5,
+    "source": "github.com/trending/developers",
+    "since": "weekly",
+    "totalReturned": 2,
     "developers": [
       {
-        "login": "torvalds",
-        "url": "https://github.com/torvalds",
-        "avatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
-        "score": 1.0
+        "platform": "github",
+        "type": "developer",
+        "rank": 1,
+        "login": "getify",
+        "name": "Kyle Simpson",
+        "url": "https://github.com/getify",
+        "avatar": "https://avatars.githubusercontent.com/u/150330?v=4",
+        "popularRepo": "getify/You-Dont-Know-JS",
+        "popularRepoUrl": "https://github.com/getify/You-Dont-Know-JS",
+        "popularRepoDescription": "A book series on JS",
+        "since": "weekly",
+        "followers": 45221,
+        "publicRepos": 74,
+        "bio": "Human-Centric Technologist",
+        "location": "Austin, TX",
+        "ownerType": "User"
       },
       {
-        "login": "karpathy",
-        "url": "https://github.com/karpathy",
-        "avatar": "https://avatars.githubusercontent.com/u/241138?v=4",
-        "score": 1.0
+        "platform": "github",
+        "type": "developer",
+        "rank": 2,
+        "login": "sindresorhus",
+        "name": "Sindre Sorhus",
+        "url": "https://github.com/sindresorhus",
+        "avatar": "https://avatars.githubusercontent.com/u/170270?v=4",
+        "popularRepo": "sindresorhus/awesome",
+        "popularRepoUrl": "https://github.com/sindresorhus/awesome",
+        "since": "weekly",
+        "followers": 70000,
+        "publicRepos": 1200,
+        "ownerType": "User"
       }
     ]
   },
   "github-trending-repositories": {
-    "query": "stars:>1000 language:python",
-    "totalReturned": 5,
+    "source": "github.com/trending",
+    "since": "daily",
+    "totalReturned": 2,
     "repositories": [
       {
         "platform": "github",
         "type": "repository",
-        "name": "public-apis",
-        "fullName": "public-apis/public-apis",
-        "url": "https://github.com/public-apis/public-apis",
-        "description": "A collective list of free APIs",
-        "owner": "public-apis",
-        "ownerUrl": "https://github.com/public-apis",
-        "language": "Python",
-        "stars": 451178,
-        "forks": 49637,
-        "watchers": 451178,
-        "openIssues": 1569,
-        "defaultBranch": "master",
-        "homepage": "https://APILayer.com/?utm_source=Github&utm_medium=Referral&utm_campaign=Public-apis-repo",
-        "license": "MIT",
-        "topics": [
-          "api",
-          "apis"
-        ],
-        "isFork": false,
-        "isArchived": false,
-        "ownerAvatar": "https://avatars.githubusercontent.com/u/51121562?v=4",
-        "pushedAt": "2026-07-13T15:58:22Z",
-        "createdAt": "2016-03-20T23:49:42Z",
-        "updatedAt": "2026-07-18T18:42:31Z"
+        "rank": 1,
+        "name": "computer",
+        "fullName": "cloudflare/computer",
+        "url": "https://github.com/cloudflare/computer",
+        "description": "Remote browser infrastructure",
+        "owner": "cloudflare",
+        "ownerUrl": "https://github.com/cloudflare",
+        "language": "TypeScript",
+        "stars": 2514,
+        "forks": 120,
+        "starsGained": 796,
+        "since": "daily"
       },
       {
         "platform": "github",
         "type": "repository",
-        "name": "free-programming-books",
-        "fullName": "EbookFoundation/free-programming-books",
-        "url": "https://github.com/EbookFoundation/free-programming-books",
-        "description": ":books: Freely available programming books",
-        "owner": "EbookFoundation",
-        "ownerUrl": "https://github.com/EbookFoundation",
+        "rank": 2,
+        "name": "hot-repo",
+        "fullName": "example/hot-repo",
+        "url": "https://github.com/example/hot-repo",
+        "description": "Trending sample",
+        "owner": "example",
+        "ownerUrl": "https://github.com/example",
         "language": "Python",
-        "stars": 392415,
-        "forks": 66541,
-        "watchers": 392415,
-        "openIssues": 75,
-        "defaultBranch": "main",
-        "homepage": "https://ebookfoundation.github.io/free-programming-books/",
-        "license": "CC-BY-4.0",
-        "topics": [
-          "books",
-          "education"
-        ],
-        "isFork": false,
-        "isArchived": false,
-        "ownerAvatar": "https://avatars.githubusercontent.com/u/14127308?v=4",
-        "pushedAt": "2026-07-18T10:02:18Z",
-        "createdAt": "2013-10-11T06:50:37Z",
-        "updatedAt": "2026-07-18T18:39:42Z"
+        "stars": 1200,
+        "forks": 80,
+        "starsGained": 327,
+        "since": "daily"
       }
     ]
   },
   "github-user": {
     "platform": "github",
-    "type": "user",
+    "type": "User",
     "login": "getify",
     "id": 150330,
     "nodeId": "MDQ6VXNlcjE1MDMzMA==",
@@ -1378,14 +1567,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "company": "Getify Solutions",
     "blog": "http://getify.me",
     "location": "Austin, TX",
-    "email": null,
     "bio": "Kyle Simpson is a Human-Centric Technologist. He's fighting for the people behind the pixels.",
     "avatar": "https://avatars.githubusercontent.com/u/150330?v=4",
     "publicRepos": 74,
     "publicGists": 411,
     "followers": 45221,
     "following": 3,
-    "twitterUsername": null,
     "hireable": true,
     "siteAdmin": false,
     "createdAt": "2009-11-08T06:56:21Z",
@@ -1957,11 +2144,19 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "summary": "The speaker emphasizes the importance of self-worth and the belief that everyone has the potential to become significant. They encourage listeners to recognize their own value and to fight for their happiness, suggesting that negative influences from others can diminish one's self-esteem. By surrounding oneself with positivity and cutting out pessimistic influences, individuals can foster a more optimistic outlook on life. The message is ultimately one of empowerment, urging people to acknowledge their worth and strive for personal fulfillment.",
     "keyPoints": [
       "Everyone has the potential to be significant and should recognize their own value.",
-      "Negative voices from others can impact self-esteem; it's important to challenge them."
+      "Negative voices from others can impact self-esteem; it's important to challenge them.",
+      "Fighting for happiness is essential and requires active effort.",
+      "Surrounding oneself with positivity can lead to a more optimistic mindset.",
+      "Cynicism and overanalysis can negatively affect mental well-being.",
+      "Being a good person and genuinely trying is commendable and valuable."
     ],
     "topics": [
       "self-worth",
-      "happiness"
+      "happiness",
+      "positivity",
+      "optimism",
+      "mental health",
+      "empowerment"
     ],
     "sentiment": "positive"
   },
@@ -2050,6 +2245,48 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "duration": 4.72,
         "end": 10.64,
         "timestamp": "00:05"
+      },
+      {
+        "text": "globally, this is geology and action that is all-inspiring. The touch is something very human.",
+        "start": 10.64,
+        "duration": 5.04,
+        "end": 15.68,
+        "timestamp": "00:10"
+      },
+      {
+        "text": "There are myths, there are legends, there are important stories that hold a sacred",
+        "start": 16.24,
+        "duration": 5.36,
+        "end": 21.6,
+        "timestamp": "00:16"
+      },
+      {
+        "text": "dish if you will. It's absolutely beautiful. And you just see how lush the vegetation is. There's",
+        "start": 21.6,
+        "duration": 4.24,
+        "end": 25.84,
+        "timestamp": "00:21"
+      },
+      {
+        "text": "such a diverse ecosystem. It's incredible. We're having so much fun about to unveil the seven",
+        "start": 25.84,
+        "duration": 7.28,
+        "end": 33.12,
+        "timestamp": "00:25"
+      },
+      {
+        "text": "natural wonders of America, just in time for the Fourth of July. Absolutely. You'll see this on",
+        "start": 33.12,
+        "duration": 4.56,
+        "end": 37.68,
+        "timestamp": "00:33"
+      },
+      {
+        "text": "ABC National Geographic in NatGeo.com. So guess where we are, comment and let us know what you think",
+        "start": 37.68,
+        "duration": 5.76,
+        "end": 43.44,
+        "timestamp": "00:37"
       }
     ],
     "wordCount": 135,
@@ -2210,8 +2447,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "platform": "kwai",
     "id": "5240932700689736196",
     "url": "https://www.kwai.com/@topfilmeseseriesnatv/video/5240932700689736196",
-    "text": "...",
-    "transcript": "BANDIDO ESTAVA ESPERANDO ELE NA SAIDA DO BANCOBANDIDO ESTAVA ESPERANDO ELE NA SAIDA DO BANCO.",
+    "transcript": "BANDIDO ESTAVA ESPERANDO ELE NA SAIDA DO BANCO.",
     "publishedAt": "2026-01-24T00:50:13Z",
     "durationSeconds": 156,
     "thumbnailUrl": "https://aws-br-pic.kwai.net/upic/2026/01/24/08/BMjAyNjAxMjQwODQ4MTNfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMDI4NTA4NDg3NF8yXzM=_oscn2_Befd2f922b58f2b5f72e4cb3c375d043d.webp",
@@ -2220,7 +2456,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "id": "3x9mhse7ekkvfa9",
       "username": "topfilmeseseriesnatv",
       "displayName": "Topseriesfilmetv",
-      "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_t.jpg",
+      "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_s.jpg",
       "url": "https://www.kwai.com/@topfilmeseseriesnatv"
     },
     "engagement": {
@@ -2228,7 +2464,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "likes": 9232,
       "comments": 91,
       "shares": 169
-    }
+    },
+    "videoType": "mp4",
+    "mediaUrlsExpireAt": "2026-07-22T20:46:12.000Z"
   },
   "kwai-profile": {
     "platform": "kwai",
@@ -2247,58 +2485,56 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "publicPostCount": 3707,
     "privatePostCount": 0,
     "postCount": 3707,
-    "isPrivate": false
+    "isPrivate": false,
+    "videoCount": 3707
   },
   "kwai-user-posts": {
     "profileUrl": "https://www.kwai.com/@topfilmeseseriesnatv",
+    "author": {
+      "id": "3x9mhse7ekkvfa9",
+      "username": "topfilmeseseriesnatv",
+      "displayName": "Topseriesfilmetv",
+      "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_s.jpg",
+      "url": "https://www.kwai.com/@topfilmeseseriesnatv"
+    },
     "totalReturned": 5,
+    "nextCursor": null,
+    "hasMore": false,
     "posts": [
       {
         "platform": "kwai",
         "id": "5240932700689736196",
         "url": "https://www.kwai.com/@topfilmeseseriesnatv/video/5240932700689736196",
-        "text": "...",
-        "transcript": "BANDIDO ESTAVA ESPERANDO ELE NA SAIDA DO BANCOBANDIDO ESTAVA ESPERANDO ELE NA SAIDA DO BANCO.",
+        "transcript": "BANDIDO ESTAVA ESPERANDO ELE NA SAIDA DO BANCO.",
         "publishedAt": "2026-01-24T00:50:13Z",
         "durationSeconds": 156,
         "thumbnailUrl": "https://aws-br-pic.kwai.net/upic/2026/01/24/08/BMjAyNjAxMjQwODQ4MTNfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMDI4NTA4NDg3NF8yXzM=_oscn2_Befd2f922b58f2b5f72e4cb3c375d043d.webp",
         "videoUrl": "https://aws-br-cdn.kwai.net/upic/2026/01/24/08/BMjAyNjAxMjQwODQ4MTNfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMDI4NTA4NDg3NF8yXzM=_b_Bf1ce0ec42b4fe4482cd50678b3abd2d4.mp4?tag=1-1784753172-s-0-afgxvdpz8w-4a78f339bd4accdf",
-        "author": {
-          "id": "3x9mhse7ekkvfa9",
-          "username": "topfilmeseseriesnatv",
-          "displayName": "Topseriesfilmetv",
-          "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_t.jpg",
-          "url": "https://www.kwai.com/@topfilmeseseriesnatv"
-        },
         "engagement": {
           "views": 138841,
           "likes": 9232,
           "comments": 91,
           "shares": 169
-        }
+        },
+        "videoType": "mp4",
+        "mediaUrlsExpireAt": "2026-07-22T20:46:12.000Z"
       },
       {
         "platform": "kwai",
         "id": "5197304080333126332",
         "url": "https://www.kwai.com/@topfilmeseseriesnatv/video/5197304080333126332",
-        "text": "...",
         "publishedAt": "2026-07-21T01:41:02Z",
         "durationSeconds": 125,
         "thumbnailUrl": "https://p16-kimg.kwai.net/kimg/EKzM1y8qmQEKAnMzEg1waG90by1vdmVyc2VhGoMBdXBpYy8yMDI2LzA3LzIxLzAxL0JNakF5TmpBM01qRXdNVFF3TVRCZk1UVXdNREF4TkRVMU1ERTVPVFExWHpFMU1ERXhNVEUwTlRFMU9UUTBNRjh5WHpNPV9vdXVfQjVkMzdmMDZiZTFmMmU5NjQ0MGNkNjhhMjc3ZTg1MjRlLndlYnA.webp",
         "videoUrl": "https://aws-br-cdn.kwai.net/upic/2026/07/21/01/BMjAyNjA3MjEwMTQwMTBfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMTE0NTE1OTQ0MF8yXzM=_b_B9e078740aaad1692190abe5e2e2e61c6.mp4?tag=1-1784753179-s-0-46g59inljw-0d434501e8fb5c1c",
-        "author": {
-          "id": "3x9mhse7ekkvfa9",
-          "username": "topfilmeseseriesnatv",
-          "displayName": "Topseriesfilmetv",
-          "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_tw.webp",
-          "url": "https://www.kwai.com/@topfilmeseseriesnatv"
-        },
         "engagement": {
           "views": 8998,
           "likes": 441,
           "comments": 7,
           "shares": 16
-        }
+        },
+        "videoType": "mp4",
+        "mediaUrlsExpireAt": "2026-07-22T20:46:19.000Z"
       }
     ]
   },
@@ -2595,6 +2831,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "wordCount": 24,
         "charStart": 89,
         "charEnd": 223
+      },
+      {
+        "text": "In June’s edition of The Monthly Tech-In, we’re sharing stories from Build and beyond about the developers, founders and communities who are using AI to tackle real-world challenges, from helping creators protect their work to advancing more inclusive AI systems.",
+        "index": 2,
+        "wordCount": 40,
+        "charStart": 227,
+        "charEnd": 490
+      },
+      {
+        "text": "Read more about the people and innovations who are shaping what's next:",
+        "index": 3,
+        "wordCount": 12,
+        "charStart": 493,
+        "charEnd": 564
       }
     ],
     "wordCount": 89,
@@ -2605,7 +2855,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     },
     "publishedAt": "2026-07-04 13:19:24",
     "timingSource": "none",
-    "estimatedReadSeconds": 27
+    "estimatedReadSeconds": 27,
+    "language": null
   },
   "linkedin-profile": {
     "platform": "linkedin",
@@ -2662,24 +2913,99 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "linkme-profile": {
     "platform": "linkme",
-    "url": "https://link.me/kevinhart",
-    "username": "kevinhart",
-    "name": "Check out Kevin Hart (@kevinhart) on Linkme",
-    "firstName": "Kevin",
-    "lastName": "Hart",
-    "description": "Discover Kevin Hart on LinkMe: Connect and see what they're passionate about.",
-    "avatar": "https://media.link.me/_resize/image/quality=90,format=webp/images/default/profile/avatar-2.png",
-    "linkCount": 2,
+    "id": "1bf3efbf94cc4f55d3650ddc61094ac3",
+    "url": "https://link.me/danucd",
+    "username": "danucd",
+    "handle": "danucd",
+    "displayName": "Dana",
+    "name": "Dana",
+    "firstName": "Dana",
+    "avatar": "https://media.link.me/_resize/image/quality=90,format=webp/webp-images/user-profile/1169288/tmp-2541-1763300314455.webp",
+    "profileVisitCount": "54.1k",
+    "createdAt": "2024-11-01 12:37:51",
+    "updatedAt": "2025-11-16 13:43:17",
+    "email": "dana.danucd@gmail.com",
+    "socials": {
+      "appleMusic": "https://music.apple.com/ng/artist/danucd/1562315189",
+      "spotify": "https://open.spotify.com/artist/0A8XmfCL2yangEtvot3peD?autoplay=true&source_application=google_assistant",
+      "instagram": "https://www.instagram.com/danucd/",
+      "facebook": "https://www.facebook.com/Danucd",
+      "twitter": "https://www.twitter.com/Danucd1",
+      "youtube": "https://www.youtube.com/@DanucD2",
+      "tiktok": "https://www.tiktok.com/@danucd_",
+      "twitch": "https://m.twitch.tv/danucd?fbclid=PAZXh0bgNhZW0CMTEAAaaw5KxeIr47f2JnvCWttLnzIFG35Q8vQ6dK_H4Pv7bQKefUMmqYXvRPm90_aem_qRBQ5McX7dnSwaw8aHxqaA&desktop-redirect=true",
+      "threads": "https://www.threads.net/@danucd?hl=en"
+    },
+    "chatId": "LinkMe-1169288",
+    "bio": "ALL MY LINKS👇",
+    "description": "ALL MY LINKS👇",
     "links": [
       {
-        "title": "Privacy Policy",
-        "url": "https://about.link.me/privacypolicy"
+        "url": "https://twitch.tv/danucd",
+        "title": "Twitch",
+        "id": "231267",
+        "thumbnail": "small"
       },
       {
-        "title": "Terms",
-        "url": "https://about.link.me/termsandconditions"
+        "url": "https://www.youtube.com/@DanucD2",
+        "title": "Daily YouTube",
+        "id": "611348",
+        "thumbnail": "small"
       }
-    ]
+    ],
+    "linkCount": 12,
+    "totalLinks": 7,
+    "webLinks": [
+      {
+        "title": "Apple-music",
+        "linkId": 9,
+        "links": [
+          {
+            "linkValue": "https://music.apple.com/ng/artist/danucd/1562315189",
+            "faceValue": "1562315189",
+            "baseUrl": "https://music.apple.com/profile/"
+          }
+        ]
+      },
+      {
+        "title": "Spotify",
+        "linkId": 10,
+        "links": [
+          {
+            "linkValue": "https://open.spotify.com/artist/0A8XmfCL2yangEtvot3peD?autoplay=true&source_application=google_assistant",
+            "faceValue": "0A8XmfCL2yangEtvot3peD",
+            "baseUrl": "https://open.spotify.com/user/"
+          }
+        ]
+      }
+    ],
+    "infoLinks": [
+      {
+        "title": "Email",
+        "linkId": 1,
+        "links": [
+          {
+            "linkValue": "dana.danucd@gmail.com",
+            "faceValue": "dana.danucdgmail.com"
+          }
+        ]
+      }
+    ],
+    "other": [
+      {
+        "url": "https://www.deezer.com/artist/129733822/radio?autoplay=true",
+        "title": "Deezer",
+        "type": "Deezer"
+      }
+    ],
+    "stripeStatus": {
+      "tipsEnabled": false,
+      "stripeEnabled": false
+    },
+    "isDefaultProfilePicture": false,
+    "verifiedAccount": false,
+    "isAmbassador": true,
+    "isPrivate": false
   },
   "linktree-page": {
     "platform": "linktree",
@@ -3198,6 +3524,30 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "wordCount": 1,
         "charStart": 94,
         "charEnd": 103
+      },
+      {
+        "text": "EffingWasps: Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme",
+        "speaker": "EffingWasps",
+        "index": 2,
+        "wordCount": 19,
+        "charStart": 105,
+        "charEnd": 233
+      },
+      {
+        "text": "b407driver: Become? It has always been the greatest (unsolved) challenge.",
+        "speaker": "b407driver",
+        "index": 3,
+        "wordCount": 10,
+        "charStart": 235,
+        "charEnd": 308
+      },
+      {
+        "text": "Waarm: The current biggest challenge is funding.",
+        "speaker": "Waarm",
+        "index": 4,
+        "wordCount": 7,
+        "charStart": 310,
+        "charEnd": 358
       }
     ],
     "wordCount": 51,
@@ -3574,7 +3924,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "comments": 1050,
     "durationSeconds": 5185,
     "durationText": "1:26:25",
-    "duration": "1:26:25",
     "publishedAt": "2026-07-17T12:18:39+00:00",
     "thumbnail": "https://1a-1791.com/video/fwe2/7c/s8/1/C/w/c/H/CwcHA.qR4e-small-Now-I-Can-Finally-Talk-Abou..jpg",
     "width": 1920,
@@ -3884,6 +4233,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "soundcloud-artist": {
     "platform": "soundcloud",
     "id": "2976616",
+    "handle": "flume",
     "url": "https://soundcloud.com/flume",
     "username": "Flume",
     "name": "Flume",
@@ -3892,29 +4242,42 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "city": "Sydney",
     "countryCode": "AU",
     "verified": true,
-    "badges": {
-      "pro": false,
-      "creatorMidTier": false,
-      "proUnlimited": true,
-      "verified": true
-    },
-    "creatorSubscription": {
-      "product": {
-        "id": "creator-pro-unlimited"
-      }
-    },
-    "followers": 2227687,
+    "subscriptionTier": "pro-unlimited",
+    "followers": 2227731,
     "followings": 203,
     "trackCount": 412,
     "playlistCount": 46,
     "likesCount": 149,
-    "lastModified": "2026-02-13T20:55:02Z"
+    "lastModified": "2026-02-13T20:55:02Z",
+    "externalLinks": [
+      {
+        "url": "https://dumb.store/",
+        "network": "personal",
+        "title": "DUMB Store"
+      },
+      {
+        "url": "http://www.facebook.com/flumemusic",
+        "network": "facebook",
+        "title": "Facebook",
+        "username": "flumemusic"
+      }
+    ]
   },
   "soundcloud-artist-tracks": {
     "platform": "soundcloud",
+    "artistId": "112904040",
     "artistUrl": "https://soundcloud.com/nasa",
+    "artist": {
+      "id": "112904040",
+      "handle": "nasa",
+      "name": "NASA",
+      "url": "https://soundcloud.com/nasa",
+      "avatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
+      "followers": 158701,
+      "verified": true
+    },
     "totalReturned": 5,
-    "nextCursor": "https://api-v2.soundcloud.com/users/112904040/tracks?offset=2026-07-13T13%3A25%3A32.000Z%2Ctracks%2C00000000002359662548&limit=5",
+    "nextCursor": "eyJ1IjoiMTEyOTA0MDQwIiwibyI6IjIwMjYtMDctMTNUMTM6MjU6MzIuMDAwWix0cmFja3MsMDAwMDAwMDAwMDIzNTk2NjI1NDgifQ",
     "hasMore": true,
     "tracks": [
       {
@@ -3924,11 +4287,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "title": "Houston We Have a Podcast: ISS Results: Materials Science",
         "description": "On episode 430, Kim de Groh and Sylvie Crowell review what researchers have learned and published from the Materials International Space Station Experiment (MISSE) platform that tests how materials perform in the harsh environment of space.",
         "genre": "Science",
-        "artist": "NASA",
-        "artistUrl": "https://soundcloud.com/nasa",
-        "artistAvatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
-        "artistFollowers": 158701,
-        "artistVerified": true,
         "durationMs": 2928970,
         "plays": 129,
         "likes": 5,
@@ -3953,11 +4311,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "title": "Artemis II: El regreso de la humanidad a la Luna",
         "description": "Acompáñanos en esta edición especial de Universo curioso de la NASA mientras hacemos un recorrido por la misión Artemis II de principio a fin. Revivimos la expectación en los días previos al despegue, la potencia del histórico lanzamiento y el increíble viaje de la tripu-lación a través del espacio profundo. Exploramos los momentos más críticos de la misión —desde el emocionante sobrevuelo lunar hasta el exitoso amerizaje en el océano Pacífi-co— que completa un capítulo fundamental en esta nueva era de la exploración espacial.\nEncuentra más información sobre Artemis en: ciencia.nasa.gov/artemis",
         "genre": "Science",
-        "artist": "NASA",
-        "artistUrl": "https://soundcloud.com/nasa",
-        "artistAvatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
-        "artistFollowers": 158701,
-        "artistVerified": true,
         "durationMs": 3026998,
         "plays": 184,
         "likes": 4,
@@ -3979,28 +4332,35 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "soundcloud-track": {
     "platform": "soundcloud",
-    "id": "2364347957",
-    "url": "https://soundcloud.com/nasa/artemis-ii-el-regreso-de-la-1",
-    "title": "Artemis II: El regreso de la humanidad a la Luna",
-    "description": "Acompáñanos en esta edición especial de Universo curioso de la NASA mientras hacemos un recorrido por la misión Artemis II de principio a fin. Revivimos la expectación en los días previos al despegue, la potencia del histórico lanzamiento y el increíble viaje de la tripu-lación a través del espacio profundo. Exploramos los momentos más críticos de la misión —desde el emocionante sobrevuelo lunar hasta el exitoso amerizaje en el océano Pacífi-co— que completa un capítulo fundamental en esta nueva era de la exploración espacial.\nEncuentra más información sobre Artemis en: ciencia.nasa.gov/artemis",
+    "id": "2375655854",
+    "url": "https://soundcloud.com/nasa/episode-179-life-support",
+    "title": "Episode 179: Life Support Systems: From Space Station to Orion",
+    "description": "Astronauts aboard the International Space Station depend on life support systems that provide clean air, drinkable water, and a safe, livable environment. These systems are what make long-duration spaceflight not only possible, but comfortable. Today, some of these space station technologies have been adapted for Artemis – specifically, aboard the Orion crew capsule.",
     "genre": "Science",
-    "artist": "NASA",
-    "artistUrl": "https://soundcloud.com/nasa",
-    "artistAvatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
-    "artistFollowers": 158684,
-    "artistVerified": true,
-    "durationMs": 3026998,
-    "plays": 122,
-    "likes": 5,
-    "reposts": 2,
+    "artist": {
+      "id": "112904040",
+      "handle": "nasa",
+      "name": "NASA",
+      "url": "https://soundcloud.com/nasa",
+      "avatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
+      "followers": 158759,
+      "verified": true
+    },
+    "durationMs": 874406,
+    "plays": 5,
+    "likes": 1,
+    "reposts": 1,
     "downloads": 0,
-    "comments": 6,
-    "publishedAt": "2026-07-20T14:01:49Z",
+    "comments": 1,
+    "publishedAt": "2026-08-05T18:24:11Z",
     "license": "all-rights-reserved",
     "downloadable": true,
     "streamable": true,
-    "waveformUrl": "https://wave.sndcdn.com/4hOvfT5B6ZYH_m.json",
-    "artwork": "https://i1.sndcdn.com/artworks-vHT95zmztFEO1K49-1BXSXA-large.jpg",
+    "streamUrl": "https://cf-media.sndcdn.com/MLL2GDHPueMc.128.mp3?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiKjovL2NmLW1lZGlhLnNuZGNkbi5jb20vTUxMMkdESFB1ZU1jLjEyOC5tcDMqIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg1OTU3Nzg2fX19XX0_&Signature=cDzjtDOmAvn41PNIb-9dZXQqVIjgHARvK8PmwgfhXmVSEbdg~gbLsrO82AqhNl7RuMv2eq3q8wqNJc3cF0SPuKa9dXGAgWgiS3Y~ZP-3C9sj0rS5I0gddBCWF8WVmhAAT7m7a87wqSO-mj3XTacfaheJUBYJHQ6o6tmJLbNbh6fEdsj2zW58wYijWCjCzRHi~Y0ujYsQYVvZmiXymnOk3mk-3jh7ifyF70nSD5Hlm6vkyqRAcYujX0~8TqBsYHN9E55Nk3L2rHy1eypM5z9HttWPIq8hC5ahCM9adro8kEobAvjPpvdAbSB7mXXGYoK4KXnhDt24Ca9Bkjn484Z6sg__&Key-Pair-Id=APKAI6TU7MMXM5DG6EPQ",
+    "hlsUrl": "https://playback.media-streaming.soundcloud.cloud/MLL2GDHPueMc/aac_160k/a6f11843-eb03-4d7e-9f3a-897e58367925/playlist.m3u8?expires=1785964866&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wbGF5YmFjay5tZWRpYS1zdHJlYW1pbmcuc291bmRjbG91ZC5jbG91ZC9NTEwyR0RIUHVlTWMvYWFjXzE2MGsvYTZmMTE4NDMtZWIwMy00ZDdlLTlmM2EtODk3ZTU4MzY3OTI1L3BsYXlsaXN0Lm0zdTg~ZXhwaXJlcz0xNzg1OTY0ODY2IiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg1OTU3Nzg2fX19XX0_&Signature=i6dAnRPDDEm5WfkvqguSogWUxP2n8U4q6Vwlclblq5hYBR4ZxWPtbIggHHTWbYXVokqgWoDeRxOqw811Bysb3HYs~3b8CZh2elLsSbloWWWxONdROYQf9xTUYmBR1SbIlsQj7z1VvNM~5KsEfIECVzCY-gF8I6F4p5P06sqQv9cDZ3-Wdq~WdAWkKsVzispfStxoG8glXS4~iceC8AHTCW8wrLOa0MZJ9mItuAw5QVQmw47X1V3OVVC1V1nuMi-owF5BN5yLrA7rCQtk8R0ucpfZILSn2gTyaNtZsi4uKdRFfa1X-Y6~hdjxdDO6ixtN~6iYDCk7hJgcjHBRHiLoQg__&Key-Pair-Id=K34606QXLEIRF3",
+    "mediaUrlsExpireAt": "2026-08-05T21:21:06Z",
+    "waveformUrl": "https://wave.sndcdn.com/MLL2GDHPueMc_m.json",
+    "artwork": "https://i1.sndcdn.com/artworks-P4yXCelBLW8JxnUB-SPPJRA-large.jpg",
     "tags": [
       "nasa",
       "podcast"
@@ -4010,856 +4370,85 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "platform": "spotify",
     "type": "album",
     "uri": "spotify:album:151w1FgRZfnKZA9FEcg9Z3",
-    "url": "https://open.spotify.com/album/151w1FgRZfnKZA9FEcg9Z3?si=7_7dkBwYR5aqiPjykdfmvQ",
+    "url": "https://open.spotify.com/album/151w1FgRZfnKZA9FEcg9Z3?si=DKhdQPU7T8W1NtfM19TiiA",
     "name": "Midnights",
     "artists": [
-      "Taylor Swift"
+      {
+        "id": "06HL4z0CvFAxyc27GXpf02",
+        "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
+        "name": "Taylor Swift",
+        "url": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02"
+      }
     ],
     "releaseYear": 2022,
-    "image": "https://i.scdn.co/image/ab67616d00001e02bb54dde68cd23e2a268ae0f5",
+    "image": "https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5",
     "totalTracks": 13,
-    "raw": {
-      "__typename": "Album",
-      "uri": "spotify:album:151w1FgRZfnKZA9FEcg9Z3",
-      "name": "Midnights",
-      "artists": {
-        "items": [
+    "tracks": [
+      {
+        "trackNumber": 1,
+        "discNumber": 1,
+        "name": "Lavender Haze",
+        "uri": "spotify:track:5jQI2r1RdgtuT8S3iG8zFC",
+        "url": "https://open.spotify.com/track/5jQI2r1RdgtuT8S3iG8zFC",
+        "durationMs": 202395,
+        "playCount": 902202241,
+        "explicit": true,
+        "artists": [
           {
             "id": "06HL4z0CvFAxyc27GXpf02",
-            "profile": {
-              "name": "Taylor Swift"
-            },
-            "sharingInfo": {
-              "shareUrl": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02?si=XVaLiKf4T0G7s35SUpHQTQ"
-            },
             "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
-            "visuals": {
-              "avatarImage": {
-                "sources": [
-                  {
-                    "height": 640,
-                    "url": "https://i.scdn.co/image/ab6761610000e5ebe2e8e7ff002a4afda1c7147e",
-                    "width": 640
-                  },
-                  {
-                    "height": 160,
-                    "url": "https://i.scdn.co/image/ab6761610000f178e2e8e7ff002a4afda1c7147e",
-                    "width": 160
-                  }
-                ]
-              }
-            }
-          }
-        ],
-        "totalCount": 1
-      },
-      "coverArt": {
-        "extractedColors": {
-          "colorDark": {
-            "hex": "#7A7676"
-          },
-          "colorLight": {
-            "hex": "#E8E0E0"
-          },
-          "colorRaw": {
-            "hex": "#E8E0E0"
-          }
-        },
-        "sources": [
-          {
-            "height": 300,
-            "url": "https://i.scdn.co/image/ab67616d00001e02bb54dde68cd23e2a268ae0f5",
-            "width": 300
-          },
-          {
-            "height": 64,
-            "url": "https://i.scdn.co/image/ab67616d00004851bb54dde68cd23e2a268ae0f5",
-            "width": 64
+            "name": "Taylor Swift",
+            "url": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02"
           }
         ]
       },
-      "date": {
-        "isoString": "2022-10-21T00:00:00Z",
-        "precision": "DAY"
-      },
-      "tracksV2": {
-        "items": [
+      {
+        "trackNumber": 2,
+        "discNumber": 1,
+        "name": "Maroon",
+        "uri": "spotify:track:3eX0NZfLtGzoLUxPNvRfqm",
+        "url": "https://open.spotify.com/track/3eX0NZfLtGzoLUxPNvRfqm",
+        "durationMs": 218270,
+        "playCount": 627635994,
+        "explicit": true,
+        "artists": [
           {
-            "track": {
-              "artists": {
-                "items": [
-                  {
-                    "profile": {
-                      "name": "Taylor Swift"
-                    },
-                    "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02"
-                  }
-                ]
-              },
-              "associationsV3": {
-                "videoAssociations": {
-                  "totalCount": 1
-                }
-              },
-              "contentRating": {
-                "label": "EXPLICIT"
-              },
-              "discNumber": 1,
-              "duration": {
-                "totalMilliseconds": 202395
-              },
-              "name": "Lavender Haze",
-              "playability": {
-                "playable": true
-              },
-              "playcount": "901032338",
-              "saved": false,
-              "trackNumber": 1,
-              "uri": "spotify:track:5jQI2r1RdgtuT8S3iG8zFC"
-            },
-            "uid": "6a22a05d1c8523acd991"
+            "id": "06HL4z0CvFAxyc27GXpf02",
+            "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
+            "name": "Taylor Swift",
+            "url": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02"
           }
-        ],
-        "totalCount": 13
-      },
-      "sharingInfo": {
-        "shareId": "7_7dkBwYR5aqiPjykdfmvQ",
-        "shareUrl": "https://open.spotify.com/album/151w1FgRZfnKZA9FEcg9Z3?si=7_7dkBwYR5aqiPjykdfmvQ"
+        ]
       }
-    }
+    ],
+    "tracksHasMore": false,
+    "releaseDate": "2022-10-21T00:00:00Z",
+    "explicit": true,
+    "id": "151w1FgRZfnKZA9FEcg9Z3"
   },
   "spotify-artist": {
     "platform": "spotify",
     "type": "artist",
     "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
-    "url": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02?si=XzEUcLZ4RlmEQtnhJVQ2MQ",
+    "url": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02?si=ojAujUioTXmCOg3l0f4rNg",
     "name": "Taylor Swift",
     "description": "And, baby, that’s show business for you. New album The Life of a Showgirl. Available now ❤️‍🔥",
-    "followers": 161714021,
-    "monthlyListeners": 100752084,
+    "followers": 161871951,
+    "monthlyListeners": 100784802,
     "image": "https://i.scdn.co/image/ab6761610000e5ebe2e8e7ff002a4afda1c7147e",
-    "raw": {
-      "__typename": "Artist",
-      "discography": {
-        "albums": {
-          "items": [
-            {
-              "releases": {
-                "items": [
-                  {
-                    "copyright": {
-                      "items": [
-                        {
-                          "text": "© 2025 Taylor Swift",
-                          "type": "C"
-                        },
-                        {
-                          "text": "℗ 2025 Taylor Swift",
-                          "type": "P"
-                        }
-                      ]
-                    },
-                    "coverArt": {
-                      "sources": [
-                        {
-                          "height": 300,
-                          "url": "https://i.scdn.co/image/ab67616d00001e02f756bdc2c11a985dc0c06d94",
-                          "width": 300
-                        },
-                        {
-                          "height": 64,
-                          "url": "https://i.scdn.co/image/ab67616d00004851f756bdc2c11a985dc0c06d94",
-                          "width": 64
-                        }
-                      ]
-                    },
-                    "date": {
-                      "day": 7,
-                      "month": 11,
-                      "precision": "DAY",
-                      "year": 2025
-                    },
-                    "id": "6QNMhoV8V0u7cFuhhUBOn7",
-                    "label": "Taylor Swift",
-                    "name": "The Life of a Showgirl + Acoustic Collection",
-                    "playability": {
-                      "playable": true,
-                      "reason": "PLAYABLE"
-                    },
-                    "sharingInfo": {
-                      "shareId": "KLxm6rCMQAm4YcjHJTOvWQ",
-                      "shareUrl": "https://open.spotify.com/album/6QNMhoV8V0u7cFuhhUBOn7?si=KLxm6rCMQAm4YcjHJTOvWQ"
-                    },
-                    "tracks": {
-                      "totalCount": 19
-                    },
-                    "type": "ALBUM",
-                    "uri": "spotify:album:6QNMhoV8V0u7cFuhhUBOn7"
-                  }
-                ]
-              }
-            },
-            {
-              "releases": {
-                "items": [
-                  {
-                    "copyright": {
-                      "items": [
-                        {
-                          "text": "© 2025 Taylor Swift",
-                          "type": "C"
-                        },
-                        {
-                          "text": "℗ 2025 Taylor Swift",
-                          "type": "P"
-                        }
-                      ]
-                    },
-                    "coverArt": {
-                      "sources": [
-                        {
-                          "height": 300,
-                          "url": "https://i.scdn.co/image/ab67616d00001e02d7812467811a7da6e6a44902",
-                          "width": 300
-                        },
-                        {
-                          "height": 64,
-                          "url": "https://i.scdn.co/image/ab67616d00004851d7812467811a7da6e6a44902",
-                          "width": 64
-                        }
-                      ]
-                    },
-                    "date": {
-                      "day": 3,
-                      "month": 10,
-                      "precision": "DAY",
-                      "year": 2025
-                    },
-                    "id": "4a6NzYL1YHRUgx9e3YZI6I",
-                    "label": "Taylor Swift",
-                    "name": "The Life of a Showgirl",
-                    "playability": {
-                      "playable": true,
-                      "reason": "PLAYABLE"
-                    },
-                    "sharingInfo": {
-                      "shareId": "iS6riwW_Qy-tXMrIyY9_XA",
-                      "shareUrl": "https://open.spotify.com/album/4a6NzYL1YHRUgx9e3YZI6I?si=iS6riwW_Qy-tXMrIyY9_XA"
-                    },
-                    "tracks": {
-                      "totalCount": 12
-                    },
-                    "type": "ALBUM",
-                    "uri": "spotify:album:4a6NzYL1YHRUgx9e3YZI6I"
-                  }
-                ]
-              }
-            }
-          ],
-          "totalCount": 33
-        },
-        "compilations": {
-          "items": [
-            {
-              "releases": {
-                "items": [
-                  {
-                    "copyright": {
-                      "items": [
-                        {
-                          "text": "© 2024 Taylor Swift",
-                          "type": "C"
-                        },
-                        {
-                          "text": "℗ 2024 Taylor Swift",
-                          "type": "P"
-                        }
-                      ]
-                    },
-                    "coverArt": {
-                      "sources": [
-                        {
-                          "height": 300,
-                          "url": "https://i.scdn.co/image/ab67616d00001e02c246cd7fb142b383672627c8",
-                          "width": 300
-                        },
-                        {
-                          "height": 64,
-                          "url": "https://i.scdn.co/image/ab67616d00004851c246cd7fb142b383672627c8",
-                          "width": 64
-                        }
-                      ]
-                    },
-                    "date": {
-                      "day": 3,
-                      "month": 10,
-                      "precision": "DAY",
-                      "year": 2024
-                    },
-                    "id": "30gDvYhEgyTbGEdCIY8FWV",
-                    "label": "Taylor Swift",
-                    "name": "THE TORTURED POETS DEPARTMENT | TS The Eras Tour Setlist",
-                    "playability": {
-                      "playable": true,
-                      "reason": "PLAYABLE"
-                    },
-                    "sharingInfo": {
-                      "shareId": "kFkacM1QRMK5FJ9Hb-HIrw",
-                      "shareUrl": "https://open.spotify.com/album/30gDvYhEgyTbGEdCIY8FWV?si=kFkacM1QRMK5FJ9Hb-HIrw"
-                    },
-                    "tracks": {
-                      "totalCount": 7
-                    },
-                    "type": "COMPILATION",
-                    "uri": "spotify:album:30gDvYhEgyTbGEdCIY8FWV"
-                  }
-                ]
-              }
-            }
-          ],
-          "totalCount": 1
-        },
-        "latest": {
-          "copyright": {
-            "items": [
-              {
-                "text": "© 2026 Wonderland Music Company, Inc. (BMI) / Pixar Music (BMI) and Walt Disney Music Company (ASCAP) / Pixar Talking Pictures (ASCAP)",
-                "type": "C"
-              },
-              {
-                "text": "℗ 2026 Walt Disney Records / Pixar",
-                "type": "P"
-              }
-            ]
-          },
-          "coverArt": {
-            "sources": [
-              {
-                "height": 300,
-                "url": "https://i.scdn.co/image/ab67616d00001e02e8852f06eca817333d20e60b",
-                "width": 300
-              },
-              {
-                "height": 64,
-                "url": "https://i.scdn.co/image/ab67616d00004851e8852f06eca817333d20e60b",
-                "width": 64
-              }
-            ]
-          },
-          "date": {
-            "day": 12,
-            "month": 6,
-            "precision": "DAY",
-            "year": 2026
-          },
-          "id": "4Ii9whWXI1O1H01ziECRaG",
-          "label": "Walt Disney Records / Pixar",
-          "name": "I Knew It, I Knew You (From \"Toy Story 5\")",
-          "playability": {
-            "playable": true,
-            "reason": "PLAYABLE"
-          },
-          "sharingInfo": {
-            "shareId": "nZ66vs3RRJii1Y_Dx_t1Zg",
-            "shareUrl": "https://open.spotify.com/album/4Ii9whWXI1O1H01ziECRaG?si=nZ66vs3RRJii1Y_Dx_t1Zg"
-          },
-          "tracks": {
-            "totalCount": 3
-          },
-          "type": "SINGLE",
-          "uri": "spotify:album:4Ii9whWXI1O1H01ziECRaG"
-        },
-        "popularReleasesAlbums": {
-          "items": [
-            {
-              "copyright": {
-                "items": [
-                  {
-                    "text": "© 2025 Taylor Swift",
-                    "type": "C"
-                  },
-                  {
-                    "text": "℗ 2025 Taylor Swift",
-                    "type": "P"
-                  }
-                ]
-              },
-              "coverArt": {
-                "sources": [
-                  {
-                    "height": 300,
-                    "url": "https://i.scdn.co/image/ab67616d00001e02d7812467811a7da6e6a44902",
-                    "width": 300
-                  },
-                  {
-                    "height": 64,
-                    "url": "https://i.scdn.co/image/ab67616d00004851d7812467811a7da6e6a44902",
-                    "width": 64
-                  }
-                ]
-              },
-              "date": {
-                "day": 3,
-                "month": 10,
-                "precision": "DAY",
-                "year": 2025
-              },
-              "id": "4a6NzYL1YHRUgx9e3YZI6I",
-              "label": "Taylor Swift",
-              "name": "The Life of a Showgirl",
-              "playability": {
-                "playable": true,
-                "reason": "PLAYABLE"
-              },
-              "sharingInfo": {
-                "shareId": "vSJa5UaiQ2SUNY0VFGVwyw",
-                "shareUrl": "https://open.spotify.com/album/4a6NzYL1YHRUgx9e3YZI6I?si=vSJa5UaiQ2SUNY0VFGVwyw"
-              },
-              "tracks": {
-                "totalCount": 12
-              },
-              "type": "ALBUM",
-              "uri": "spotify:album:4a6NzYL1YHRUgx9e3YZI6I"
-            },
-            {
-              "copyright": {
-                "items": [
-                  {
-                    "text": "© 2019 Taylor Swift",
-                    "type": "C"
-                  },
-                  {
-                    "text": "℗ 2019 Taylor Swift",
-                    "type": "P"
-                  }
-                ]
-              },
-              "coverArt": {
-                "sources": [
-                  {
-                    "height": 300,
-                    "url": "https://i.scdn.co/image/ab67616d00001e02e787cffec20aa2a396a61647",
-                    "width": 300
-                  },
-                  {
-                    "height": 64,
-                    "url": "https://i.scdn.co/image/ab67616d00004851e787cffec20aa2a396a61647",
-                    "width": 64
-                  }
-                ]
-              },
-              "date": {
-                "day": 23,
-                "month": 8,
-                "precision": "DAY",
-                "year": 2019
-              },
-              "id": "1NAmidJlEaVgA3MpcPFYGq",
-              "label": "Taylor Swift",
-              "name": "Lover",
-              "playability": {
-                "playable": true,
-                "reason": "PLAYABLE"
-              },
-              "sharingInfo": {
-                "shareId": "wcjPySC6Qt-rziksFMcprg",
-                "shareUrl": "https://open.spotify.com/album/1NAmidJlEaVgA3MpcPFYGq?si=wcjPySC6Qt-rziksFMcprg"
-              },
-              "tracks": {
-                "totalCount": 18
-              },
-              "type": "ALBUM",
-              "uri": "spotify:album:1NAmidJlEaVgA3MpcPFYGq"
-            }
-          ],
-          "totalCount": 20
-        },
-        "singles": {
-          "items": [
-            {
-              "releases": {
-                "items": [
-                  {
-                    "copyright": {
-                      "items": [
-                        {
-                          "text": "© 2026 Wonderland Music Company, Inc. (BMI) / Pixar Music (BMI) and Walt Disney Music Company (ASCAP) / Pixar Talking Pictures (ASCAP)",
-                          "type": "C"
-                        },
-                        {
-                          "text": "℗ 2026 Walt Disney Records / Pixar",
-                          "type": "P"
-                        }
-                      ]
-                    },
-                    "coverArt": {
-                      "sources": [
-                        {
-                          "height": 300,
-                          "url": "https://i.scdn.co/image/ab67616d00001e02e8852f06eca817333d20e60b",
-                          "width": 300
-                        },
-                        {
-                          "height": 64,
-                          "url": "https://i.scdn.co/image/ab67616d00004851e8852f06eca817333d20e60b",
-                          "width": 64
-                        }
-                      ]
-                    },
-                    "date": {
-                      "day": 12,
-                      "month": 6,
-                      "precision": "DAY",
-                      "year": 2026
-                    },
-                    "id": "4Ii9whWXI1O1H01ziECRaG",
-                    "label": "Walt Disney Records / Pixar",
-                    "name": "I Knew It, I Knew You (From \"Toy Story 5\")",
-                    "playability": {
-                      "playable": true,
-                      "reason": "PLAYABLE"
-                    },
-                    "sharingInfo": {
-                      "shareId": "koh4Jx1QRJW7w80babxnKg",
-                      "shareUrl": "https://open.spotify.com/album/4Ii9whWXI1O1H01ziECRaG?si=koh4Jx1QRJW7w80babxnKg"
-                    },
-                    "tracks": {
-                      "totalCount": 3
-                    },
-                    "type": "SINGLE",
-                    "uri": "spotify:album:4Ii9whWXI1O1H01ziECRaG"
-                  }
-                ]
-              }
-            },
-            {
-              "releases": {
-                "items": [
-                  {
-                    "copyright": {
-                      "items": [
-                        {
-                          "text": "© 2026 Taylor Swift",
-                          "type": "C"
-                        },
-                        {
-                          "text": "℗ 2026 Taylor Swift",
-                          "type": "P"
-                        }
-                      ]
-                    },
-                    "coverArt": {
-                      "sources": [
-                        {
-                          "height": 300,
-                          "url": "https://i.scdn.co/image/ab67616d00001e02dc6e4c7774e0c77c210d3a31",
-                          "width": 300
-                        },
-                        {
-                          "height": 64,
-                          "url": "https://i.scdn.co/image/ab67616d00004851dc6e4c7774e0c77c210d3a31",
-                          "width": 64
-                        }
-                      ]
-                    },
-                    "date": {
-                      "day": 31,
-                      "month": 3,
-                      "precision": "DAY",
-                      "year": 2026
-                    },
-                    "id": "71GTik4z9bbKKY2EmUvkDI",
-                    "label": "Taylor Swift",
-                    "name": "Elizabeth Taylor",
-                    "playability": {
-                      "playable": true,
-                      "reason": "PLAYABLE"
-                    },
-                    "sharingInfo": {
-                      "shareId": "eyXqkQQWSeu4h9pEWv6G6A",
-                      "shareUrl": "https://open.spotify.com/album/71GTik4z9bbKKY2EmUvkDI?si=eyXqkQQWSeu4h9pEWv6G6A"
-                    },
-                    "tracks": {
-                      "totalCount": 3
-                    },
-                    "type": "SINGLE",
-                    "uri": "spotify:album:71GTik4z9bbKKY2EmUvkDI"
-                  }
-                ]
-              }
-            }
-          ],
-          "totalCount": 79
-        },
-        "topTracks": {
-          "items": [
-            {
-              "track": {
-                "albumOfTrack": {
-                  "coverArt": {
-                    "sources": [
-                      {
-                        "url": "https://i.scdn.co/image/ab67616d00001e02d7812467811a7da6e6a44902"
-                      },
-                      {
-                        "url": "https://i.scdn.co/image/ab67616d00004851d7812467811a7da6e6a44902"
-                      }
-                    ]
-                  },
-                  "uri": "spotify:album:4a6NzYL1YHRUgx9e3YZI6I"
-                },
-                "artists": {
-                  "items": [
-                    {
-                      "profile": {
-                        "name": "Taylor Swift"
-                      },
-                      "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02"
-                    }
-                  ]
-                },
-                "associationsV3": {
-                  "videoAssociations": {
-                    "totalCount": 1
-                  }
-                },
-                "contentRating": {
-                  "label": "NONE"
-                },
-                "discNumber": 1,
-                "duration": {
-                  "totalMilliseconds": 226073
-                },
-                "id": "53iuhJlwXhSER5J2IYYv1W",
-                "name": "The Fate of Ophelia",
-                "playability": {
-                  "playable": true,
-                  "reason": "PLAYABLE"
-                },
-                "playcount": "1564999602",
-                "uri": "spotify:track:53iuhJlwXhSER5J2IYYv1W"
-              },
-              "uid": "231bf597ddd1da456200"
-            },
-            {
-              "track": {
-                "albumOfTrack": {
-                  "coverArt": {
-                    "sources": [
-                      {
-                        "url": "https://i.scdn.co/image/ab67616d00001e02a35a1d4983e2b4fd0094f910"
-                      },
-                      {
-                        "url": "https://i.scdn.co/image/ab67616d00004851a35a1d4983e2b4fd0094f910"
-                      }
-                    ]
-                  },
-                  "uri": "spotify:album:3ZLIShtR6Fjs4nTWFpBUB6"
-                },
-                "artists": {
-                  "items": [
-                    {
-                      "profile": {
-                        "name": "Taylor Swift"
-                      },
-                      "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02"
-                    }
-                  ]
-                },
-                "associationsV3": {
-                  "videoAssociations": {
-                    "totalCount": 1
-                  }
-                },
-                "contentRating": {
-                  "label": "NONE"
-                },
-                "discNumber": 1,
-                "duration": {
-                  "totalMilliseconds": 178186
-                },
-                "id": "5uPaqMMt59KGrdKIitDRqa",
-                "name": "I Knew It, I Knew You - From \"Toy Story 5\"",
-                "playability": {
-                  "playable": true,
-                  "reason": "PLAYABLE"
-                },
-                "playcount": "133109572",
-                "uri": "spotify:track:5uPaqMMt59KGrdKIitDRqa"
-              },
-              "uid": "063fb4f3170db71ba947"
-            }
-          ]
-        }
-      },
-      "goods": {
-        "concerts": {
-          "items": [],
-          "totalCount": 0
-        }
-      },
-      "headerImage": {
-        "data": {
-          "__typename": "ImageV2",
-          "sources": [
-            {
-              "maxHeight": 640,
-              "maxWidth": 1494,
-              "url": "https://image-cdn-fa.spotifycdn.com/image/ab67618600000194c45b07608a062f02a9c89bab"
-            },
-            {
-              "maxHeight": 1080,
-              "maxWidth": 1920,
-              "url": "https://i2o.scdn.co/image/ab67618600001667c45b07608a062f02a9c89bab"
-            }
-          ]
-        }
-      },
-      "id": "06HL4z0CvFAxyc27GXpf02",
-      "onPlatformReputationTrait": {
-        "verification": {
-          "isRegistered": true,
-          "isVerified": true
-        }
-      },
-      "profile": {
-        "biography": {
-          "text": "And, baby, that’s show business for you. New album The Life of a Showgirl. Available now ❤️‍🔥",
-          "type": "AUTOBIOGRAPHY"
-        },
-        "externalLinks": {
-          "items": [
-            {
-              "name": "FACEBOOK",
-              "url": "https://facebook.com/TaylorSwift"
-            },
-            {
-              "name": "INSTAGRAM",
-              "url": "https://instagram.com/taylorswift"
-            }
-          ]
-        },
-        "name": "Taylor Swift"
-      },
-      "relatedContent": {
-        "relatedArtists": {
-          "items": [
-            {
-              "id": "74KM79TiuVKeVCqs8QtB0B",
-              "profile": {
-                "name": "Sabrina Carpenter"
-              },
-              "uri": "spotify:artist:74KM79TiuVKeVCqs8QtB0B",
-              "visuals": {
-                "avatarImage": {
-                  "sources": [
-                    {
-                      "height": 640,
-                      "url": "https://i.scdn.co/image/ab6761610000e5eb78e45cfa4697ce3c437cb455",
-                      "width": 640
-                    },
-                    {
-                      "height": 160,
-                      "url": "https://i.scdn.co/image/ab6761610000f17878e45cfa4697ce3c437cb455",
-                      "width": 160
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "id": "66CXWjxzNUsdJxJ2JdwvnR",
-              "profile": {
-                "name": "Ariana Grande"
-              },
-              "uri": "spotify:artist:66CXWjxzNUsdJxJ2JdwvnR",
-              "visuals": {
-                "avatarImage": {
-                  "sources": [
-                    {
-                      "height": 640,
-                      "url": "https://i.scdn.co/image/ab6761610000e5eb766397ec42a573a53eb5fb87",
-                      "width": 640
-                    },
-                    {
-                      "height": 160,
-                      "url": "https://i.scdn.co/image/ab6761610000f178766397ec42a573a53eb5fb87",
-                      "width": 160
-                    }
-                  ]
-                }
-              }
-            }
-          ],
-          "totalCount": 40
-        }
-      },
-      "sharingInfo": {
-        "shareId": "XzEUcLZ4RlmEQtnhJVQ2MQ",
-        "shareUrl": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02?si=XzEUcLZ4RlmEQtnhJVQ2MQ"
-      },
-      "stats": {
-        "followers": 161714021,
-        "monthlyListeners": 100752084,
-        "topCities": {
-          "items": [
-            {
-              "city": "London",
-              "country": "GB",
-              "numberOfListeners": 1630216,
-              "region": "ENG"
-            },
-            {
-              "city": "Quezon City",
-              "country": "PH",
-              "numberOfListeners": 1235715,
-              "region": "00"
-            }
-          ]
-        },
-        "worldRank": 6
-      },
-      "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
-      "visuals": {
-        "avatarImage": {
-          "extractedColors": {
-            "colorRaw": {
-              "hex": "#50A080"
-            }
-          },
-          "sources": [
-            {
-              "height": 640,
-              "url": "https://i.scdn.co/image/ab6761610000e5ebe2e8e7ff002a4afda1c7147e",
-              "width": 640
-            },
-            {
-              "height": 160,
-              "url": "https://i.scdn.co/image/ab6761610000f178e2e8e7ff002a4afda1c7147e",
-              "width": 160
-            }
-          ]
-        }
-      },
-      "name": "Taylor Swift",
-      "biography": {
-        "text": "And, baby, that’s show business for you. New album The Life of a Showgirl. Available now ❤️‍🔥",
-        "type": "AUTOBIOGRAPHY"
-      }
-    },
     "worldRank": 6,
     "topCities": [
       {
         "city": "London",
         "country": "GB",
         "region": "ENG",
-        "listeners": 1630216
+        "listeners": 1612075
       },
       {
         "city": "Quezon City",
         "country": "PH",
         "region": "00",
-        "listeners": 1235715
+        "listeners": 1256007
       }
     ],
     "externalLinks": [
@@ -4878,20 +4467,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "The Fate of Ophelia",
         "uri": "spotify:track:53iuhJlwXhSER5J2IYYv1W",
         "url": "https://open.spotify.com/track/53iuhJlwXhSER5J2IYYv1W",
-        "playCount": 1564999602,
+        "playCount": 1571637645,
         "durationMs": 226073,
         "albumUri": "spotify:album:4a6NzYL1YHRUgx9e3YZI6I",
-        "image": "https://i.scdn.co/image/ab67616d00001e02d7812467811a7da6e6a44902",
+        "image": "https://i.scdn.co/image/ab67616d0000b273d7812467811a7da6e6a44902",
         "explicit": false
       },
       {
         "name": "I Knew It, I Knew You - From \"Toy Story 5\"",
         "uri": "spotify:track:5uPaqMMt59KGrdKIitDRqa",
         "url": "https://open.spotify.com/track/5uPaqMMt59KGrdKIitDRqa",
-        "playCount": 133109572,
+        "playCount": 137089953,
         "durationMs": 178186,
         "albumUri": "spotify:album:3ZLIShtR6Fjs4nTWFpBUB6",
-        "image": "https://i.scdn.co/image/ab67616d00001e02a35a1d4983e2b4fd0094f910",
+        "image": "https://i.scdn.co/image/ab67616d0000b273a35a1d4983e2b4fd0094f910",
         "explicit": false
       }
     ],
@@ -4915,7 +4504,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "The Life of a Showgirl + Acoustic Collection",
         "uri": "spotify:album:6QNMhoV8V0u7cFuhhUBOn7",
         "url": "https://open.spotify.com/album/6QNMhoV8V0u7cFuhhUBOn7",
-        "image": "https://i.scdn.co/image/ab67616d00001e02f756bdc2c11a985dc0c06d94",
+        "image": "https://i.scdn.co/image/ab67616d0000b273f756bdc2c11a985dc0c06d94",
         "releaseYear": 2025,
         "totalTracks": 19
       },
@@ -4923,7 +4512,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "The Life of a Showgirl",
         "uri": "spotify:album:4a6NzYL1YHRUgx9e3YZI6I",
         "url": "https://open.spotify.com/album/4a6NzYL1YHRUgx9e3YZI6I",
-        "image": "https://i.scdn.co/image/ab67616d00001e02d7812467811a7da6e6a44902",
+        "image": "https://i.scdn.co/image/ab67616d0000b273d7812467811a7da6e6a44902",
         "releaseYear": 2025,
         "totalTracks": 12
       }
@@ -4933,7 +4522,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "I Knew It, I Knew You (From \"Toy Story 5\")",
         "uri": "spotify:album:4Ii9whWXI1O1H01ziECRaG",
         "url": "https://open.spotify.com/album/4Ii9whWXI1O1H01ziECRaG",
-        "image": "https://i.scdn.co/image/ab67616d00001e02e8852f06eca817333d20e60b",
+        "image": "https://i.scdn.co/image/ab67616d0000b273e8852f06eca817333d20e60b",
         "releaseYear": 2026,
         "totalTracks": 3
       },
@@ -4941,13 +4530,16 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "Elizabeth Taylor",
         "uri": "spotify:album:71GTik4z9bbKKY2EmUvkDI",
         "url": "https://open.spotify.com/album/71GTik4z9bbKKY2EmUvkDI",
-        "image": "https://i.scdn.co/image/ab67616d00001e02dc6e4c7774e0c77c210d3a31",
+        "image": "https://i.scdn.co/image/ab67616d0000b273dc6e4c7774e0c77c210d3a31",
         "releaseYear": 2026,
         "totalTracks": 3
       }
     ],
     "albumsCount": 33,
-    "singlesCount": 79
+    "singlesCount": 79,
+    "albumsHasMore": true,
+    "singlesHasMore": true,
+    "id": "06HL4z0CvFAxyc27GXpf02"
   },
   "spotify-podcast": {
     "platform": "spotify",
@@ -4956,15 +4548,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk",
     "name": "The Joe Rogan Experience",
     "description": "The official podcast of comedian Joe Rogan.",
-    "image": "https://i.scdn.co/image/ab6765630000ba8a1e1acaebe06610165612f1ef",
-    "totalEpisodes": 2725,
+    "image": "https://i.scdn.co/image/ab6765630000ba8a913317cdfae64a2585aa0f36",
+    "totalEpisodes": 2731,
     "id": "4rOoJ6Egrf8K2IrywzwOMk",
     "publisher": {
       "name": "Joe Rogan"
     },
     "rating": {
-      "average": 4.656897342177361,
-      "totalRatings": 951004
+      "average": 4.6556989281194445,
+      "totalRatings": 952065
     },
     "topics": [
       {
@@ -4980,7 +4572,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "mediaType": "MIXED",
     "htmlDescription": "<p>The official podcast of comedian Joe Rogan.</p>",
     "playable": true,
-    "consumptionOrder": "EPISODIC"
+    "consumptionOrder": "EPISODIC",
+    "showTypes": [
+      "SHOW_TYPE_EXCLUSIVE"
+    ]
   },
   "spotify-podcast-episodes": {
     "platform": "spotify",
@@ -4991,15 +4586,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "url": "https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk",
       "name": "The Joe Rogan Experience",
       "description": "The official podcast of comedian Joe Rogan.",
-      "image": "https://i.scdn.co/image/ab6765630000ba8a1e1acaebe06610165612f1ef",
-      "totalEpisodes": 2722,
+      "image": "https://i.scdn.co/image/ab6765630000ba8a913317cdfae64a2585aa0f36",
+      "totalEpisodes": 2731,
       "id": "4rOoJ6Egrf8K2IrywzwOMk",
       "publisher": {
         "name": "Joe Rogan"
       },
       "rating": {
-        "average": 4.656897342177361,
-        "totalRatings": 951004
+        "average": 4.6556989281194445,
+        "totalRatings": 952065
       },
       "topics": [
         {
@@ -5015,516 +4610,147 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "mediaType": "MIXED",
       "htmlDescription": "<p>The official podcast of comedian Joe Rogan.</p>",
       "playable": true,
-      "consumptionOrder": "EPISODIC"
+      "consumptionOrder": "EPISODIC",
+      "showTypes": [
+        "SHOW_TYPE_EXCLUSIVE"
+      ]
     },
+    "totalEpisodes": 2731,
     "totalReturned": 5,
     "episodes": [
       {
         "platform": "spotify",
         "type": "episode",
-        "uri": "spotify:episode:25xKO33R8MuWDHon82THE0",
-        "url": "https://open.spotify.com/episode/25xKO33R8MuWDHon82THE0?si=crkbtVYVRVelIsPXFLjhig",
-        "name": "#2527 - MrBeast",
-        "description": "Jimmy Donaldson, better known as MrBeast, is a YouTuber, entrepreneur, and philanthropist. He is the founder of Beast Industries and Beast Philanthropy, and the creator and host of the Prime Video competition series “Beast Games.”www.beastgames.comwww.beastphilanthropy.orgwww.youtube.com/@MrBeast      Learn more about your ad choices. Visit podcastchoices.com/adchoices",
-        "durationMs": 10123050,
+        "uri": "spotify:episode:6sriD1voEkINLnr08M9nmw",
+        "url": "https://open.spotify.com/episode/6sriD1voEkINLnr08M9nmw",
+        "name": "#2535 - Andrew Wilson",
+        "description": "Andrew Wilson has participated in thousands of debates on political, cultural, and religious topics. He hosts \"The Crucible\" and owns its associated online training program, Debate University.www.youtube.com/@The_Crucible  www.rumble.com/c/TheCrucible  www.thecrucible.video  www.debateuniversity.com  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  Use code ROGAN at https://BlueChew.com to get 10% OFF + Free Overnight Shipping on your first order. Learn more about your ad choices. Visit podcastchoices.com/adchoices",
+        "durationMs": 10072297,
+        "durationFormatted": "2:47:52",
         "releaseYear": 2026,
-        "image": "https://i.scdn.co/image/ab6765630000f68dae7eda3fb0261372fba3e18c",
-        "raw": {
-          "__typename": "Episode",
-          "audio": {
-            "items": [
-              {
-                "url": "https://p.scdn.co/mp3-preview/2f9340916935c4bfd8de8ecfafe5344073226e74"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/8890ef960cf2ba6d513a689b53c0e0a34620f903"
-              }
-            ]
-          },
-          "contentRating": {
-            "label": "EXPLICIT"
-          },
-          "coverArt": {
-            "sources": [
-              {
-                "height": 64,
-                "url": "https://i.scdn.co/image/ab6765630000f68dae7eda3fb0261372fba3e18c",
-                "width": 64
-              },
-              {
-                "height": 300,
-                "url": "https://i.scdn.co/image/ab67656300005f1fae7eda3fb0261372fba3e18c",
-                "width": 300
-              }
-            ]
-          },
-          "description": "Jimmy Donaldson, better known as MrBeast, is a YouTuber, entrepreneur, and philanthropist. He is the founder of Beast Industries and Beast Philanthropy, and the creator and host of the Prime Video competition series “Beast Games.”www.beastgames.comwww.beastphilanthropy.orgwww.youtube.com/@MrBeast      Learn more about your ad choices. Visit podcastchoices.com/adchoices",
-          "duration": {
-            "totalMilliseconds": 10123050
-          },
-          "htmlDescription": "<p>Jimmy Donaldson, better known as MrBeast, is a YouTuber, entrepreneur, and philanthropist. He is the founder of Beast Industries and Beast Philanthropy, and the creator and host of the Prime Video competition series “Beast Games.”<br />www.beastgames.com<br />www.beastphilanthropy.org<br />www.youtube.com/@MrBeast<br /></p><br/><p><br /><a href=\"https://pplx.ai/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://dkng.co/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://BlueChew.com\" rel=\"nofollow\"><br /></a><br /></p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
-          "id": "25xKO33R8MuWDHon82THE0",
-          "mediaTypes": [
-            "AUDIO",
-            "VIDEO"
-          ],
-          "name": "#2527 - MrBeast",
-          "playability": {
-            "playable": true,
-            "reason": "PLAYABLE"
-          },
-          "playedState": {
-            "playPositionMilliseconds": 0,
-            "state": "NOT_STARTED"
-          },
-          "podcastV2": {
-            "data": {
-              "__typename": "Podcast",
-              "coverArt": {
-                "sources": [
-                  {
-                    "height": 64,
-                    "url": "https://i.scdn.co/image/ab6765630000f68d1e1acaebe06610165612f1ef",
-                    "width": 64
-                  },
-                  {
-                    "height": 300,
-                    "url": "https://i.scdn.co/image/ab67656300005f1f1e1acaebe06610165612f1ef",
-                    "width": 300
-                  }
-                ]
-              },
-              "name": "The Joe Rogan Experience",
-              "showTypes": [
-                "SHOW_TYPE_EXCLUSIVE"
-              ],
-              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
-            }
-          },
-          "previewPlayback": {
-            "audioPreview": {
-              "cdnUrl": "https://p.scdn.co/mp3-preview/fbdde763b7027fc2c352b3e77e856072193fbe4b.mp3"
-            }
-          },
-          "releaseDate": {
-            "isoString": "2026-07-16T17:00:00Z",
-            "precision": "MINUTE"
-          },
-          "restrictions": {
-            "paywallContent": false
-          },
-          "sharingInfo": {
-            "shareId": "crkbtVYVRVelIsPXFLjhig",
-            "shareUrl": "https://open.spotify.com/episode/25xKO33R8MuWDHon82THE0?si=crkbtVYVRVelIsPXFLjhig"
-          },
-          "transcripts": {},
-          "type": "PODCAST_EPISODE",
-          "uri": "spotify:episode:25xKO33R8MuWDHon82THE0",
-          "visualIdentity": {
-            "sixteenByNineCoverImage": {
-              "image": {
-                "data": {
-                  "__typename": "ImageV2",
-                  "sources": [
-                    {
-                      "maxHeight": 720,
-                      "maxWidth": 1280,
-                      "url": "https://image-cdn-ak.spotifycdn.com/image/ab6772ab000030ae5a2498f3d761d4dae14c8927"
-                    },
-                    {
-                      "maxHeight": 360,
-                      "maxWidth": 640,
-                      "url": "https://image-cdn-ak.spotifycdn.com/image/ab6772ab0000e0e75a2498f3d761d4dae14c8927"
-                    }
-                  ]
-                }
-              }
-            },
-            "squareCoverImage": {
-              "__typename": "VisualIdentityImage",
-              "extractedColorSet": {
-                "encoreBaseSetTextColor": {
-                  "alpha": 255,
-                  "blue": 110,
-                  "green": 165,
-                  "red": 255
-                },
-                "highContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 48,
-                    "red": 145
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 9,
-                    "red": 97
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 154,
-                    "green": 192,
-                    "red": 255
-                  }
-                },
-                "higherContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 10,
-                    "red": 101
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 40,
-                    "green": 55,
-                    "red": 144
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 96,
-                    "green": 215,
-                    "red": 30
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 154,
-                    "green": 192,
-                    "red": 255
-                  }
-                },
-                "minContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 111,
-                    "red": 247
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 83,
-                    "red": 217
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  }
-                }
-              }
-            }
-          }
-        }
+        "image": "https://i.scdn.co/image/ab6765630000ba8adfec1dc1162dd326137b168e",
+        "id": "6sriD1voEkINLnr08M9nmw",
+        "previewUrl": "https://p.scdn.co/mp3-preview/df88d8d9a774747ca6dd4eb64f71a0984cf8760a.mp3",
+        "audioUrls": [
+          "https://p.scdn.co/mp3-preview/04e810abec582425b173ac15187820cb5f534e0b",
+          "https://p.scdn.co/mp3-preview/582677c5c09f2020c744a5278f3748a069abbe1a"
+        ],
+        "releaseDate": "2026-08-05T17:00:00Z",
+        "mediaTypes": [
+          "AUDIO",
+          "VIDEO"
+        ],
+        "hasVideo": true,
+        "contentRating": "EXPLICIT",
+        "explicit": true,
+        "hasTranscripts": false,
+        "paywallContent": false,
+        "showTypes": [
+          "SHOW_TYPE_EXCLUSIVE"
+        ],
+        "playable": true,
+        "htmlDescription": "<p>Andrew Wilson has participated in thousands of debates on political, cultural, and religious topics. He hosts \"The Crucible\" and owns its associated online training program, Debate University.<br />www.youtube.com/@The_Crucible  <br />www.rumble.com/c/TheCrucible  <br /><a href=\"www.thecrucible.video\" rel=\"nofollow\">www.thecrucible.video</a>  <br />www.debateuniversity.com</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Use code ROGAN at <a href=\"https://BlueChew.com\" rel=\"nofollow\">https://BlueChew.com</a> to get 10% OFF + Free Overnight Shipping on your first order.</p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>"
       },
       {
         "platform": "spotify",
         "type": "episode",
-        "uri": "spotify:episode:2J3m075zqKwZ43mysdezJK",
-        "url": "https://open.spotify.com/episode/2J3m075zqKwZ43mysdezJK?si=jrpMxrx5R5SB9qjTByvPJA",
-        "name": "#2526 - JD Vance",
-        "description": "JD Vance is the Vice President of the United States, a Marine Corps veteran, former U.S. Senator from Ohio, and author. His latest book, “Communion: Finding My Way Back to Faith,” is available now.www.harpercollins.com/products/communion-j-d-vancewww.whitehouse.gov/administration/jd-vance  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  50% off your first box at https://www.thefarmersdog.com/rogan!  Sign up at https://foxnation.com to watch RAF 11! Learn more about your ad choices. Visit podcastchoices.com/adchoices",
-        "durationMs": 10414079,
+        "uri": "spotify:episode:12sZKqXfCxdOci06HGV7vf",
+        "url": "https://open.spotify.com/episode/12sZKqXfCxdOci06HGV7vf",
+        "name": "JRE MMA Show #183 with Rico Verhoeven",
+        "description": "Joe sits down with professional boxer, kickboxer, and mixed martial artist Rico Verhoeven.www.youtube.com/@RicoVerhoeven  https://ricoverhoeven.com      Learn more about your ad choices. Visit podcastchoices.com/adchoices",
+        "durationMs": 8232297,
+        "durationFormatted": "2:17:12",
         "releaseYear": 2026,
-        "image": "https://i.scdn.co/image/ab6765630000f68dca6df7e6f0bea75e26aa81e8",
-        "raw": {
-          "__typename": "Episode",
-          "audio": {
-            "items": [
-              {
-                "url": "https://p.scdn.co/mp3-preview/91e492f1704273826da8c4c533cd3d449069c1ba"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/e3b623e752a46a58c80a2cbeb45d299ec8a43b6b"
-              }
-            ]
-          },
-          "contentRating": {
-            "label": "EXPLICIT"
-          },
-          "coverArt": {
-            "sources": [
-              {
-                "height": 64,
-                "url": "https://i.scdn.co/image/ab6765630000f68dca6df7e6f0bea75e26aa81e8",
-                "width": 64
-              },
-              {
-                "height": 300,
-                "url": "https://i.scdn.co/image/ab67656300005f1fca6df7e6f0bea75e26aa81e8",
-                "width": 300
-              }
-            ]
-          },
-          "description": "JD Vance is the Vice President of the United States, a Marine Corps veteran, former U.S. Senator from Ohio, and author. His latest book, “Communion: Finding My Way Back to Faith,” is available now.www.harpercollins.com/products/communion-j-d-vancewww.whitehouse.gov/administration/jd-vance  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  50% off your first box at https://www.thefarmersdog.com/rogan!  Sign up at https://foxnation.com to watch RAF 11! Learn more about your ad choices. Visit podcastchoices.com/adchoices",
-          "duration": {
-            "totalMilliseconds": 10414079
-          },
-          "htmlDescription": "<p>JD Vance is the Vice President of the United States, a Marine Corps veteran, former U.S. Senator from Ohio, and author. His latest book, “Communion: Finding My Way Back to Faith,” is available now.<br />www.harpercollins.com/products/communion-j-d-vance<br />www.whitehouse.gov/administration/jd-vance</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>50% off your first box at <a href=\"https://www.thefarmersdog.com/rogan\" rel=\"nofollow\">https://www.thefarmersdog.com/rogan</a>!</p><br/><p><br /></p><br/><p>Sign up at <a href=\"https://foxnation.com\" rel=\"nofollow\">https://foxnation.com</a> to watch RAF 11!</p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
-          "id": "2J3m075zqKwZ43mysdezJK",
-          "mediaTypes": [
-            "AUDIO",
-            "VIDEO"
-          ],
-          "name": "#2526 - JD Vance",
-          "playability": {
-            "playable": true,
-            "reason": "PLAYABLE"
-          },
-          "playedState": {
-            "playPositionMilliseconds": 0,
-            "state": "NOT_STARTED"
-          },
-          "podcastV2": {
-            "data": {
-              "__typename": "Podcast",
-              "coverArt": {
-                "sources": [
-                  {
-                    "height": 64,
-                    "url": "https://i.scdn.co/image/ab6765630000f68d1e1acaebe06610165612f1ef",
-                    "width": 64
-                  },
-                  {
-                    "height": 300,
-                    "url": "https://i.scdn.co/image/ab67656300005f1f1e1acaebe06610165612f1ef",
-                    "width": 300
-                  }
-                ]
-              },
-              "name": "The Joe Rogan Experience",
-              "showTypes": [
-                "SHOW_TYPE_EXCLUSIVE"
-              ],
-              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
-            }
-          },
-          "previewPlayback": {
-            "audioPreview": {
-              "cdnUrl": "https://p.scdn.co/mp3-preview/ef7705919e95acc2a79d4d203e311220e8a85b6e.mp3"
-            }
-          },
-          "releaseDate": {
-            "isoString": "2026-07-15T17:00:00Z",
-            "precision": "MINUTE"
-          },
-          "restrictions": {
-            "paywallContent": false
-          },
-          "sharingInfo": {
-            "shareId": "jrpMxrx5R5SB9qjTByvPJA",
-            "shareUrl": "https://open.spotify.com/episode/2J3m075zqKwZ43mysdezJK?si=jrpMxrx5R5SB9qjTByvPJA"
-          },
-          "transcripts": {},
-          "type": "PODCAST_EPISODE",
-          "uri": "spotify:episode:2J3m075zqKwZ43mysdezJK",
-          "visualIdentity": {
-            "sixteenByNineCoverImage": {
-              "image": {
-                "data": {
-                  "__typename": "ImageV2",
-                  "sources": [
-                    {
-                      "maxHeight": 720,
-                      "maxWidth": 1280,
-                      "url": "https://image-cdn-ak.spotifycdn.com/image/ab6772ab000030ae6836d7fb3ec70a76a4d3d03c"
-                    },
-                    {
-                      "maxHeight": 360,
-                      "maxWidth": 640,
-                      "url": "https://image-cdn-ak.spotifycdn.com/image/ab6772ab0000e0e76836d7fb3ec70a76a4d3d03c"
-                    }
-                  ]
-                }
-              }
-            },
-            "squareCoverImage": {
-              "__typename": "VisualIdentityImage",
-              "extractedColorSet": {
-                "encoreBaseSetTextColor": {
-                  "alpha": 255,
-                  "blue": 110,
-                  "green": 165,
-                  "red": 255
-                },
-                "highContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 48,
-                    "red": 145
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 9,
-                    "red": 97
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 154,
-                    "green": 192,
-                    "red": 255
-                  }
-                },
-                "higherContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 10,
-                    "red": 101
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 40,
-                    "green": 55,
-                    "red": 144
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 96,
-                    "green": 215,
-                    "red": 30
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 154,
-                    "green": 192,
-                    "red": 255
-                  }
-                },
-                "minContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 111,
-                    "red": 247
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 83,
-                    "red": 217
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  }
-                }
-              }
-            }
-          }
-        }
+        "image": "https://i.scdn.co/image/ab6765630000ba8a7cec0dc10cb879778e8a6246",
+        "id": "12sZKqXfCxdOci06HGV7vf",
+        "previewUrl": "https://p.scdn.co/mp3-preview/862ca22fba9863c7b3b9476ae3fa75efb7e54247.mp3",
+        "audioUrls": [
+          "https://p.scdn.co/mp3-preview/8ccd9b3ce42a7c28545b2566d145b0810f853ab5",
+          "https://p.scdn.co/mp3-preview/bd8fd704118106c2987f86498bf19a90f06afb94"
+        ],
+        "releaseDate": "2026-08-04T17:00:00Z",
+        "mediaTypes": [
+          "AUDIO",
+          "VIDEO"
+        ],
+        "hasVideo": true,
+        "contentRating": "EXPLICIT",
+        "explicit": true,
+        "hasTranscripts": false,
+        "paywallContent": false,
+        "showTypes": [
+          "SHOW_TYPE_EXCLUSIVE"
+        ],
+        "playable": true,
+        "htmlDescription": "<p>Joe sits down with professional boxer, kickboxer, and mixed martial artist Rico Verhoeven.<br />www.youtube.com/@RicoVerhoeven  <br /><a href=\"https://ricoverhoeven.com/\" rel=\"nofollow\">https://ricoverhoeven.com</a><br /></p><br/><p><br /><a href=\"https://pplx.ai/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://squarespace.com/ROGAN\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://BetterHelp.com/JRE\" rel=\"nofollow\"><br /></a></p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>"
       }
-    ]
+    ],
+    "nextCursor": "5",
+    "hasMore": true
   },
   "spotify-search": {
     "platform": "spotify",
     "query": "lofi beats",
     "type": "tracks",
+    "fetchedAt": "2026-08-05T18:55:46.523Z",
+    "source": "pathfinder",
     "totalReturned": 5,
     "results": [
       {
         "platform": "spotify",
         "type": "track",
-        "uri": "spotify:track:1S7FNazOUQc21EaQyh5nJT",
-        "url": "https://open.spotify.com/track/1S7FNazOUQc21EaQyh5nJT",
-        "name": "Nightmote - Lofi Remix",
+        "uri": "spotify:track:48Ltu18o0gZ5M6bpPujrnX",
+        "url": "https://open.spotify.com/track/48Ltu18o0gZ5M6bpPujrnX",
+        "name": "Call me",
         "artists": [
-          "Yoylecake Michael",
-          "111robloxdude"
+          {
+            "id": "6OOxsmeDk34xk6Ok3Ap95C",
+            "uri": "spotify:artist:6OOxsmeDk34xk6Ok3Ap95C",
+            "name": "90sFlav",
+            "url": "https://open.spotify.com/artist/6OOxsmeDk34xk6Ok3Ap95C"
+          }
         ],
-        "album": "Nightmote (Lofi Remix)",
-        "durationMs": 207620,
-        "durationFormatted": "3:27",
-        "image": "https://i.scdn.co/image/ab67616d0000b2735d372fc451453e8b83900014",
-        "id": "1S7FNazOUQc21EaQyh5nJT",
+        "album": {
+          "id": "16rpLyQoz4GQomc5KKivAJ",
+          "uri": "spotify:album:16rpLyQoz4GQomc5KKivAJ",
+          "name": "Collection",
+          "url": "https://open.spotify.com/album/16rpLyQoz4GQomc5KKivAJ"
+        },
+        "durationMs": 126250,
+        "durationFormatted": "2:06",
+        "image": "https://i.scdn.co/image/ab67616d0000b273a13ce5870cd54091da11d981",
+        "id": "48Ltu18o0gZ5M6bpPujrnX",
+        "contentRating": "NONE",
         "explicit": false,
-        "playable": true,
-        "scrapedAt": "2026-07-18T11:28:01.801Z"
+        "scrapedAt": "2026-08-05T18:55:46.523Z"
       },
       {
         "platform": "spotify",
         "type": "track",
-        "uri": "spotify:track:6AOXQYGPpd7KIIBxCCZzUx",
-        "url": "https://open.spotify.com/track/6AOXQYGPpd7KIIBxCCZzUx",
-        "name": "Lofi Beats",
+        "uri": "spotify:track:1xqpCUhTXEG3Zj7E6VEyj4",
+        "url": "https://open.spotify.com/track/1xqpCUhTXEG3Zj7E6VEyj4",
+        "name": "Lodi Dodi",
         "artists": [
-          "Lofi Sleep Chill & Study"
+          {
+            "id": "7hJcb9fa4alzcOq3EaNPoG",
+            "uri": "spotify:artist:7hJcb9fa4alzcOq3EaNPoG",
+            "name": "Snoop Dogg",
+            "url": "https://open.spotify.com/artist/7hJcb9fa4alzcOq3EaNPoG"
+          }
         ],
-        "album": "Wave Heart: Chill Lofi Music",
-        "durationMs": 120000,
-        "durationFormatted": "2:00",
-        "image": "https://i.scdn.co/image/ab67616d0000b27391027e42977d144b3db3f705",
-        "id": "6AOXQYGPpd7KIIBxCCZzUx",
-        "explicit": false,
-        "playable": true,
-        "scrapedAt": "2026-07-18T11:28:01.901Z"
+        "album": {
+          "id": "0iXJO2ZAfKzNDYa6E4EFfl",
+          "uri": "spotify:album:0iXJO2ZAfKzNDYa6E4EFfl",
+          "name": "Death Row Greatest Hits",
+          "url": "https://open.spotify.com/album/0iXJO2ZAfKzNDYa6E4EFfl"
+        },
+        "durationMs": 264480,
+        "durationFormatted": "4:24",
+        "image": "https://i.scdn.co/image/ab67616d0000b2739322ff440b23b5717ddd8c9b",
+        "id": "1xqpCUhTXEG3Zj7E6VEyj4",
+        "contentRating": "EXPLICIT",
+        "explicit": true,
+        "scrapedAt": "2026-08-05T18:55:46.523Z"
       }
     ]
   },
@@ -5535,21 +4761,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://open.spotify.com/track/0V3wPSX9ygBnCm8psDIegu",
     "name": "Anti-Hero",
     "artists": [
-      "Taylor Swift"
-    ],
-    "album": "Midnights",
-    "durationMs": 200690,
-    "releaseYear": 2022,
-    "image": "https://i.scdn.co/image/ab67616d00001e02bb54dde68cd23e2a268ae0f5",
-    "id": "0V3wPSX9ygBnCm8psDIegu",
-    "playCount": 2036192400,
-    "trackNumber": 3,
-    "contentRating": "NONE",
-    "explicit": false,
-    "mediaType": "AUDIO",
-    "playable": true,
-    "releaseDate": "2022-10-21T00:00:00Z",
-    "artistItems": [
       {
         "id": "06HL4z0CvFAxyc27GXpf02",
         "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
@@ -5557,13 +4768,25 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02"
       }
     ],
-    "albumInfo": {
+    "album": {
       "id": "151w1FgRZfnKZA9FEcg9Z3",
       "uri": "spotify:album:151w1FgRZfnKZA9FEcg9Z3",
       "name": "Midnights",
       "url": "https://open.spotify.com/album/151w1FgRZfnKZA9FEcg9Z3",
       "releaseDate": "2022-10-21T00:00:00Z"
-    }
+    },
+    "durationMs": 200690,
+    "durationFormatted": "3:20",
+    "releaseYear": 2022,
+    "image": "https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5",
+    "id": "0V3wPSX9ygBnCm8psDIegu",
+    "playCount": 2037355549,
+    "trackNumber": 3,
+    "contentRating": "NONE",
+    "explicit": false,
+    "mediaType": "AUDIO",
+    "playable": true,
+    "releaseDate": "2022-10-21T00:00:00Z"
   },
   "threads-post-details": {
     "platform": "threads",
@@ -5908,28 +5131,34 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "period": 30,
     "orderBy": "ctr",
     "totalReturned": 2,
+    "datesPresent": 1,
+    "match": "any",
+    "matchedFrom": 2,
+    "filteredOut": 0,
+    "literalMatches": 2,
+    "matchBasis": "none",
     "ads": [
       {
         "platform": "tiktok_creative_center",
         "id": "7662489073849090066",
-        "url": "https://ads.tiktok.com/business/creativecenter/inspiration/topads/pc/en?period=30&region=US&order_by=ctr",
+        "url": "https://ads.tiktok.com/business/creativecenter/topads/7662489073849090066/pc/en",
         "title": "Nuuly loves a woman in a suit ! #ad #nuulypartner #nuuly #frthoidolovenuuly",
         "brandName": "nuuly",
+        "advertiser": {
+          "id": "brand_nuuly",
+          "name": "nuuly"
+        },
+        "firstSeen": "2026-01-10T00:00:00.000Z",
+        "lastSeen": null,
         "likes": 620,
+        "likesIsApproximate": false,
         "ctr": 0.17,
         "ctrTier": "below_50%",
         "costTier": 1,
-        "favorite": false,
         "isSparkAd": false,
-        "industry": "All Industries",
+        "industry": "Charity & Public Welfare",
         "industryKey": "label_23105000000",
         "objective": "Reach",
-        "objectiveKey": null,
-        "adFormat": "All Formats",
-        "countries": [
-          "US"
-        ],
-        "periodDays": 30,
         "video": {
           "id": "v10033g50000example",
           "url": "https://v16m-default.tiktokcdn.com/example.mp4",
@@ -5938,48 +5167,37 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "durationSeconds": 15.0,
           "width": 720,
           "height": 1280
-        },
-        "media": [
-          "https://p16-common-sign.tiktokcdn.com/example~tplv-noop.image",
-          "https://v16m-default.tiktokcdn.com/example-hd.mp4"
-        ],
-        "tags": []
+        }
       },
       {
         "platform": "tiktok_creative_center",
         "id": "7662938725836324871",
-        "url": "https://ads.tiktok.com/business/creativecenter/inspiration/topads/pc/en?period=30&region=US&order_by=ctr",
+        "url": "https://ads.tiktok.com/business/creativecenter/topads/7662938725836324871/pc/en",
         "title": "How I fix my hair EASILY on the go #hair #hairhack",
-        "brandName": null,
+        "brandName": "Creator X",
+        "advertiser": {
+          "id": "uid42",
+          "name": "Creator X"
+        },
+        "firstSeen": null,
+        "lastSeen": null,
         "likes": 5,
+        "likesIsApproximate": false,
         "ctr": 0.62,
         "ctrTier": "top_25%",
         "costTier": 0,
-        "favorite": false,
-        "isSparkAd": false,
-        "industry": "All Industries",
+        "isSparkAd": true,
+        "industry": "Charity & Public Welfare",
         "industryKey": "label_23105000000",
         "objective": "Product Sales",
-        "objectiveKey": null,
-        "adFormat": "All Formats",
-        "countries": [
-          "US"
-        ],
-        "periodDays": 30,
         "video": {
           "id": "v10033g50000example",
           "url": "https://v16m-default.tiktokcdn.com/example.mp4",
-          "urlHd": "https://v16m-default.tiktokcdn.com/example-hd.mp4",
           "cover": "https://p16-common-sign.tiktokcdn.com/example~tplv-noop.image",
           "durationSeconds": 15.0,
           "width": 720,
           "height": 1280
-        },
-        "media": [
-          "https://p16-common-sign.tiktokcdn.com/example~tplv-noop.image",
-          "https://v16m-default.tiktokcdn.com/example-hd.mp4"
-        ],
-        "tags": []
+        }
       }
     ]
   },
@@ -7296,11 +6514,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "summary": "In this playful and imaginative narrative, a child and their father embark on a creative journey to build a super-fast cardboard Ferrari. Initially, the child is excited about their cardboard creation, but soon realizes that it cannot compete on a real racing track. The father reassures the child and proposes to construct a real metal Ferrari using materials from a junkyard. Together, they work on the new car, focusing on its strength and aesthetics, ultimately transforming their dream into reality with a shiny, fast white Ferrari that outshines the previous cardboard model.",
     "keyPoints": [
       "The story begins with a child excited about a cardboard Ferrari.",
-      "The realization that cardboard cannot race leads to a creative solution."
+      "The realization that cardboard cannot race leads to a creative solution.",
+      "The father and child decide to build a real metal Ferrari from junkyard materials.",
+      "They focus on creating a strong and beautiful car with a powerful engine.",
+      "The transformation from cardboard to metal symbolizes creativity and resilience.",
+      "The final product is a shiny white Ferrari that is deemed the fastest on the track."
     ],
     "topics": [
       "imagination",
-      "creativity"
+      "creativity",
+      "father-child bond",
+      "building",
+      "transformation",
+      "racing",
+      "play"
     ],
     "sentiment": "positive"
   },
@@ -7404,6 +6631,27 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "duration": 7.2,
         "end": 16.48,
         "timestamp": "00:09"
+      },
+      {
+        "text": "I wanna make a rock and a-na I wanna make a rock and a-na",
+        "start": 16.48,
+        "duration": 6.72,
+        "end": 23.2,
+        "timestamp": "00:16"
+      },
+      {
+        "text": "Wish we never go, go, rock and a-na We need to make a rock and a-na",
+        "start": 23.2,
+        "duration": 7.28,
+        "end": 30.48,
+        "timestamp": "00:23"
+      },
+      {
+        "text": "Wish we never go, go, rock and a-na We need to make a rock and a-na",
+        "start": 30.48,
+        "duration": 2.0,
+        "end": 32.48,
+        "timestamp": "00:30"
       }
     ],
     "wordCount": 81,
@@ -8189,6 +7437,13 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "wordCount": 15,
         "charStart": 39,
         "charEnd": 158
+      },
+      {
+        "text": "Here's your NASA Minute! https://t.co/GAZ4sUqfbZ",
+        "index": 2,
+        "wordCount": 5,
+        "charStart": 160,
+        "charEnd": 208
       }
     ],
     "wordCount": 27,
@@ -8304,6 +7559,100 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "media": []
       }
     ]
+  },
+  "video-summarize": {
+    "filename": "sample.mp4",
+    "summary": "This walkthrough shows how teams extract structured data from social video at scale without standing up scrapers or OAuth apps. It covers a single API key across platforms, shared caching, and why clean JSON beats brittle HTML parses.\n\nThe speaker contrasts fresh fetches with cache hits: the same profile call can drop from multi-second billed work to a sub-second free response. They also stress verifying per-minute Whisper billing via durationSeconds and creditsCharged in the response.\n\nClosing takeaways focus on bringing your own media files for transcript-plus-summary in one POST, and using request logs to prove cache savings.",
+    "keyPoints": [
+      "One Captapi key works across supported platforms — no per-network OAuth.",
+      "Pass cache=true for a free 24h shared cache hit on social endpoints.",
+      "Whisper file endpoints bill per minute; read durationSeconds and creditsCharged.",
+      "Summarize returns the full transcript alongside summary/keyPoints/topics.",
+      "Short clips yield shorter summaries; longer audio aims for 2–3 paragraphs and 4–8 bullets.",
+      "Account request history exposes cacheHit and responseTimeMs side by side.",
+      "Use multipart POST (-F file=@path) — never put the file in the query string.",
+      "Empty/no-speech audio returns HTTP 422 on summarize (cannot summarize silence)."
+    ],
+    "topics": [
+      "APIs",
+      "data extraction",
+      "automation",
+      "billing",
+      "caching"
+    ],
+    "sentiment": "positive",
+    "transcript": "Hey everyone, welcome back to the channel. Today we are breaking down structured data APIs for social video. First, one API key across platforms beats stitching OAuth apps together. Second, the shared cache turns expensive profile lookups into free sub-second hits. Third, when you upload a file for Whisper, always check durationSeconds against creditsCharged. Finally, summarize gives you the AI digest plus the full transcript in the same JSON payload.",
+    "transcriptSegments": [
+      {
+        "text": "Hey everyone, welcome back to the channel. Today we are breaking down structured data APIs for social video.",
+        "start": 0.0,
+        "duration": 8.2,
+        "end": 8.2,
+        "timestamp": "00:00"
+      },
+      {
+        "text": "First, one API key across platforms beats stitching OAuth apps together.",
+        "start": 8.2,
+        "duration": 5.1,
+        "end": 13.3,
+        "timestamp": "00:08"
+      },
+      {
+        "text": "Second, the shared cache turns expensive profile lookups into free sub-second hits.",
+        "start": 13.3,
+        "duration": 5.4,
+        "end": 18.7,
+        "timestamp": "00:13"
+      },
+      {
+        "text": "Third, when you upload a file for Whisper, always check durationSeconds against creditsCharged.",
+        "start": 18.7,
+        "duration": 6.0,
+        "end": 24.7,
+        "timestamp": "00:18"
+      },
+      {
+        "text": "Finally, summarize gives you the AI digest plus the full transcript in the same JSON payload.",
+        "start": 24.7,
+        "duration": 5.5,
+        "end": 30.2,
+        "timestamp": "00:24"
+      }
+    ],
+    "wordCount": 70,
+    "segments": 5,
+    "language": "english",
+    "durationSeconds": 30.2,
+    "duration": 30.2,
+    "creditsCharged": 2,
+    "noSpeech": false
+  },
+  "video-transcript": {
+    "filename": "sample.mp4",
+    "transcript": "Hey everyone, welcome back to the channel. Today we're breaking down structured data APIs.",
+    "transcriptSegments": [
+      {
+        "text": "Hey everyone, welcome back to the channel.",
+        "start": 0.0,
+        "duration": 4.12,
+        "end": 4.12,
+        "timestamp": "00:00"
+      },
+      {
+        "text": "Today we're breaking down structured data APIs.",
+        "start": 4.12,
+        "duration": 4.28,
+        "end": 8.4,
+        "timestamp": "00:04"
+      }
+    ],
+    "wordCount": 14,
+    "segments": 2,
+    "language": "english",
+    "durationSeconds": 8.4,
+    "duration": 8.4,
+    "creditsCharged": 1,
+    "noSpeech": false
   },
   "youtube-channel-details": {
     "url": "https://www.youtube.com/channel/UCX6OQ3DkcsbYNE6H8uQQuVA",
@@ -8896,11 +8245,21 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "summary": "The song 'Never Gonna Give You Up' by Rick Astley is a classic pop anthem that emphasizes unwavering commitment and loyalty in a romantic relationship. The lyrics express a deep emotional connection, highlighting the importance of honesty and trust between partners. Astley reassures his loved one that he will always be there for them, promising never to abandon or hurt them, which resonates with listeners on a personal level.\n\nThis iconic track has gained a cultural significance beyond its initial release, becoming a symbol of internet memes and nostalgia. Its catchy melody and memorable chorus have made it a timeless favorite, often associated with themes of love, dedication, and sincerity. The song's upbeat tempo and heartfelt message continue to engage audiences, making it a staple in pop music history.",
     "keyPoints": [
       "Emphasizes commitment and loyalty in relationships.",
-      "Highlights the importance of honesty and trust."
+      "Highlights the importance of honesty and trust.",
+      "Reassures loved ones of unwavering support.",
+      "Cultural icon associated with internet memes.",
+      "Timeless melody and catchy chorus.",
+      "Resonates with themes of love and dedication.",
+      "Continues to engage audiences across generations."
     ],
     "topics": [
       "Rick Astley",
-      "Never Gonna Give You Up"
+      "Never Gonna Give You Up",
+      "Pop Music",
+      "Commitment",
+      "Love",
+      "Nostalgia",
+      "Internet Memes"
     ],
     "sentiment": "positive"
   },

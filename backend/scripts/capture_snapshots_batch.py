@@ -290,10 +290,10 @@ def batch3_phase1() -> list[tuple[str, str, dict]]:
         ("github-followers", "/v1/github/followers", {"username": "torvalds", "limit": 5}),
         ("github-following", "/v1/github/following", {"username": "gaearon", "limit": 5}),
         ("github-contributions", "/v1/github/contributions", {"username": "torvalds"}),
-        ("github-trending-repositories", "/v1/github/trending-repositories", {"limit": 5}),
-        ("github-trending-developers", "/v1/github/trending-developers", {"limit": 5}),
+        ("github-trending-repositories", "/v1/github/trending-repositories", {"since": "daily", "limit": 5}),
+        ("github-trending-developers", "/v1/github/trending-developers", {"since": "daily", "limit": 5}),
         ("facebook-marketplace-search", "/v1/facebook/marketplace-search", {"q": "desk chair", "location": "Austin, TX", "limit": 5, "details": "true"}),
-        ("facebook-marketplace-location-search", "/v1/facebook/marketplace-location-search", {"q": "Austin", "limit": 5, "details": "true"}),
+        ("facebook-marketplace-location-search", "/v1/facebook/marketplace-location-search", {"q": "Austin", "limit": 5}),
         ("facebook-event-search", "/v1/facebook/event-search", {"q": "comedy Chicago", "limit": 5}),
         ("facebook-profile-photos", "/v1/facebook/profile-photos", {"url": "https://www.facebook.com/nasa", "limit": 5}),
         ("facebook-profile-events", "/v1/facebook/profile-events", {"url": "https://www.facebook.com/MadisonSquareGarden", "limit": 5}),
@@ -388,7 +388,7 @@ def batch4_phase1() -> list[tuple[str, str, dict]]:
         ("komi-page", "/v1/komi/page", {"url": "https://komi.io/ksi"}),
         ("pillar-page", "/v1/pillar/page", {"url": "https://pillar.io/angelstrife"}),
         ("linkbio-page", "/v1/linkbio/page", {"url": "https://lnk.bio/charlidamelio"}),
-        ("linkme-profile", "/v1/linkme/profile", {"url": "https://link.me/kevinhart"}),
+        ("linkme-profile", "/v1/linkme/profile", {"url": "https://link.me/danucd"}),
     ]
 
 
@@ -496,7 +496,7 @@ def batch5_phase1() -> list[tuple[str, str, dict]]:
         ("komi-page", "/v1/komi/page", {"url": "https://komi.io/ksi"}),
         ("pillar-page", "/v1/pillar/page", {"url": "https://pillar.io/angelstrife"}),
         ("linkbio-page", "/v1/linkbio/page", {"url": "https://lnk.bio/charlidamelio"}),
-        ("linkme-profile", "/v1/linkme/profile", {"url": "https://link.me/kevinhart"}),
+        ("linkme-profile", "/v1/linkme/profile", {"url": "https://link.me/danucd"}),
         ("linktree-page", "/v1/linktree/page", {"url": "https://linktr.ee/miguelangeles"}),
         ("twitch-profile", "/v1/twitch/profile", {"url": "https://www.twitch.tv/shroud"}),
         ("twitch-user-videos", "/v1/twitch/user-videos", {"url": "https://www.twitch.tv/shroud", "limit": 5}),
@@ -588,7 +588,10 @@ def batch_quality_phase1() -> list[tuple[str, str, dict]]:
             "/v1/analytics/compare",
             {
                 **fresh,
-                "urls": "https://www.youtube.com/watch?v=dQw4w9WgXcQ,https://www.youtube.com/watch?v=jNQXAC9IVRw",
+                "urls": (
+                    "https://www.tiktok.com/@khaby.lame/video/7646812028874673439,"
+                    "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                ),
             },
         ),
         ("tiktok-top-search", "/v1/tiktok/top-search", {**fresh, "q": "nasa", "limit": 5}),
@@ -615,7 +618,7 @@ def batch_nullfix_phase1() -> list[tuple[str, str, dict]]:
     return [
         ("github-repository", "/v1/github/repository", {"repo": "https://github.com/torvalds/linux"}),
         ("github-repositories", "/v1/github/repositories", {"username": "torvalds", "limit": 5}),
-        ("github-trending-repositories", "/v1/github/trending-repositories", {"q": "stars:>1000 language:python", "limit": 5}),
+        ("github-trending-repositories", "/v1/github/trending-repositories", {"since": "weekly", "language": "python", "limit": 5}),
         ("twitch-clip", "/v1/twitch/clip", {"url": "https://www.twitch.tv/xqc/clip/EnergeticEmpathicElephantJKanStyle-0sOlvgAod9mDhCw4"}),
         ("twitch-profile", "/v1/twitch/profile", {"url": "https://www.twitch.tv/shroud"}),
         ("twitch-user-videos", "/v1/twitch/user-videos", {"url": "https://www.twitch.tv/shroud", "limit": 5}),
@@ -647,7 +650,7 @@ def batch_nullfix_phase1() -> list[tuple[str, str, dict]]:
         ("threads-search-users", "/v1/threads/search-users", {"q": "tech", "limit": 5}),
         ("rumble-channel-videos", "/v1/rumble/channel-videos", {"url": "https://rumble.com/c/Bongino", "limit": 5}),
         ("rumble-video-details", "/v1/rumble/video-details", {"url": "https://rumble.com/v7cv2cc-now-i-can-finally-talk-about-it-ep.-2555-07172026.html"}),
-        ("linkme-profile", "/v1/linkme/profile", {"url": "https://link.me/kevinhart"}),
+        ("linkme-profile", "/v1/linkme/profile", {"url": "https://link.me/danucd"}),
         ("pillar-page", "/v1/pillar/page", {"url": "https://pillar.io/angelstrife"}),
         ("amazon-shop-page", "/v1/amazon-shop/page", {"url": "https://www.amazon.com/sp?seller=A294P4X9EWVXLJ", "limit": 5}),
         ("tiktok-shop-product-details", "/v1/tiktok-shop/product-details", {"url": "https://www.tiktok.com/shop/pdp/1731743608991158724"}),

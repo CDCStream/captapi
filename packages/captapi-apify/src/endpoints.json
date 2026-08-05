@@ -2190,26 +2190,20 @@
     "platform": "facebook",
     "name": "Facebook Marketplace Location Search",
     "path": "/v1/facebook/marketplace-location-search",
-    "credits": 17,
-    "summary": "Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34).",
+    "credits": 2,
+    "summary": "Disambiguate city names into Marketplace hubs with Facebook cityPageId + lat/lng. marketplace-search already accepts a city string — use this for ambiguous names (Austin TX vs MN) or when you need cityPageId. Flat 2 credits.",
     "params": [
       {
         "name": "q",
         "type": "string",
         "required": true,
-        "description": "City/place search query, e.g. Austin."
+        "description": "City/place query. Bare 'Austin' may return TX/MN/IN; include a state for a single hit."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 10, max 50. Flat 17 credits per call."
-      },
-      {
-        "name": "details",
-        "type": "string",
-        "required": false,
-        "description": "Set true to include latitude/longitude per location (slower; doubles cost to 34 credits)."
+        "description": "Max items to return. Default 10, max 50. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -3517,13 +3511,13 @@
     "name": "GitHub User",
     "path": "/v1/github/user",
     "credits": 1,
-    "summary": "Public GitHub profile (email when public). 1 credit — wraps free GitHub REST API.",
+    "summary": "Public GitHub profile as camelCase JSON (type User|Organization, email when public). 1 credit — thin wrap of free GitHub REST; prefer Captapi for one-key multi-platform, api.github.com for GitHub-only.",
     "params": [
       {
         "name": "username",
         "type": "string",
         "required": true,
-        "description": "GitHub username or profile URL."
+        "description": "GitHub username or profile URL, e.g. getify."
       },
       {
         "name": "cache",
@@ -3539,13 +3533,31 @@
     "name": "GitHub Repositories",
     "path": "/v1/github/repositories",
     "credits": 12,
-    "summary": "List a GitHub user's repositories, with cursor pagination (nextCursor + hasMore).",
+    "summary": "List repos with sort/direction/type echoed; opaque Link cursor. parent/watchers only on github/repository.",
     "params": [
       {
         "name": "username",
         "type": "string",
         "required": true,
         "description": "GitHub username or profile URL."
+      },
+      {
+        "name": "sort",
+        "type": "string",
+        "required": false,
+        "description": "created|updated|pushed|full_name (default updated)."
+      },
+      {
+        "name": "direction",
+        "type": "string",
+        "required": false,
+        "description": "asc or desc (default desc)."
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "required": false,
+        "description": "owner|member|all (default owner)."
       },
       {
         "name": "limit",
@@ -3557,7 +3569,7 @@
         "name": "cursor",
         "type": "string",
         "required": false,
-        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+        "description": "Opaque cursor from previous nextCursor (GitHub Link page=)."
       },
       {
         "name": "cache",
@@ -3572,14 +3584,14 @@
     "platform": "github",
     "name": "GitHub Repository",
     "path": "/v1/github/repository",
-    "credits": 3,
-    "summary": "Repository details, stars, forks and metadata.",
+    "credits": 1,
+    "summary": "Repo details — stars, real watchers (subscribers), openIssuesAndPrs, license (NOASSERTION→null), parent when fork. Flat 1 credit.",
     "params": [
       {
         "name": "repo",
         "type": "string",
         "required": true,
-        "description": "Repository URL or owner/name."
+        "description": "Repository URL or owner/name, e.g. torvalds/linux."
       },
       {
         "name": "cache",
@@ -3595,7 +3607,7 @@
     "name": "GitHub Pull Requests",
     "path": "/v1/github/pull-requests",
     "credits": 12,
-    "summary": "List repository pull requests, with cursor pagination (nextCursor + hasMore).",
+    "summary": "List PRs with draft, labels, author{}, head/base; state echoed; opaque Link cursor.",
     "params": [
       {
         "name": "repo",
@@ -3607,7 +3619,7 @@
         "name": "state",
         "type": "string",
         "required": false,
-        "description": "open, closed, or all. Default open."
+        "description": "open (default), closed, or all — echoed as data.state."
       },
       {
         "name": "limit",
@@ -3619,7 +3631,7 @@
         "name": "cursor",
         "type": "string",
         "required": false,
-        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+        "description": "Opaque cursor from previous nextCursor (GitHub Link page=)."
       },
       {
         "name": "cache",
@@ -3635,25 +3647,25 @@
     "name": "GitHub Activity",
     "path": "/v1/github/activity",
     "credits": 12,
-    "summary": "Recent public activity for a GitHub user, with cursor pagination (nextCursor + hasMore).",
+    "summary": "Public events with typed payload (Push commits/ref, PR/issue action). 90-event ceiling; opaque Link cursor.",
     "params": [
       {
         "name": "username",
         "type": "string",
         "required": true,
-        "description": "GitHub username or profile URL."
+        "description": "GitHub username or profile URL, e.g. getify."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 30, max 100. Billed per result."
+        "description": "Max items to return. Default 30, max 90. Billed per result."
       },
       {
         "name": "cursor",
         "type": "string",
         "required": false,
-        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+        "description": "Opaque cursor from previous nextCursor. Stops at 90-event ceiling."
       },
       {
         "name": "cache",
@@ -3668,14 +3680,14 @@
     "platform": "github",
     "name": "GitHub Followers",
     "path": "/v1/github/followers",
-    "credits": 12,
-    "summary": "List GitHub followers, with cursor pagination (nextCursor + hasMore).",
+    "credits": 3,
+    "summary": "Follower cards {id,login,type,url,avatar}. ~0.1/row; opaque Link cursor. Large accounts expensive to page fully.",
     "params": [
       {
         "name": "username",
         "type": "string",
         "required": true,
-        "description": "GitHub username or profile URL."
+        "description": "GitHub username or profile URL, e.g. getify."
       },
       {
         "name": "limit",
@@ -3687,7 +3699,7 @@
         "name": "cursor",
         "type": "string",
         "required": false,
-        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+        "description": "Opaque cursor from previous nextCursor (GitHub Link page=)."
       },
       {
         "name": "cache",
@@ -3702,14 +3714,14 @@
     "platform": "github",
     "name": "GitHub Following",
     "path": "/v1/github/following",
-    "credits": 12,
-    "summary": "List accounts a GitHub user follows, with cursor pagination (nextCursor + hasMore).",
+    "credits": 3,
+    "summary": "Same card and ~0.1/row pricing as followers. Opaque Link cursor.",
     "params": [
       {
         "name": "username",
         "type": "string",
         "required": true,
-        "description": "GitHub username or profile URL."
+        "description": "GitHub username or profile URL, e.g. getify."
       },
       {
         "name": "limit",
@@ -3721,7 +3733,7 @@
         "name": "cursor",
         "type": "string",
         "required": false,
-        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+        "description": "Opaque cursor from previous nextCursor (GitHub Link page=)."
       },
       {
         "name": "cache",
@@ -3736,14 +3748,14 @@
     "platform": "github",
     "name": "GitHub Contributions",
     "path": "/v1/github/contributions",
-    "credits": 3,
-    "summary": "Summary of recent public GitHub contributions.",
+    "credits": 2,
+    "summary": "Real contribution graph — totalContributions, currentStreak, days[{date,count,level}] from the public calendar HTML. Flat 2 credits.",
     "params": [
       {
         "name": "username",
         "type": "string",
         "required": true,
-        "description": "GitHub username or profile URL."
+        "description": "GitHub username or profile URL, e.g. getify."
       },
       {
         "name": "cache",
@@ -3758,20 +3770,26 @@
     "platform": "github",
     "name": "GitHub Trending Repositories",
     "path": "/v1/github/trending-repositories",
-    "credits": 12,
-    "summary": "Search trending repositories by stars or query.",
+    "credits": 2,
+    "summary": "github.com/trending — repos ranked by starsGained (since=daily|weekly|monthly), not all-time star search. Flat 2 credits.",
     "params": [
       {
-        "name": "q",
+        "name": "since",
         "type": "string",
-        "required": true,
-        "description": "GitHub repository search query. Default stars:>1000."
+        "required": false,
+        "description": "daily (default), weekly, or monthly."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Optional programming-language slug, e.g. python."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
+        "description": "Max items to return. Default 25, max 100. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -3786,20 +3804,26 @@
     "platform": "github",
     "name": "GitHub Trending Developers",
     "path": "/v1/github/trending-developers",
-    "credits": 12,
-    "summary": "Search popular GitHub developers.",
+    "credits": 2,
+    "summary": "github.com/trending/developers — windowed ranks with popularRepo + hydrated followers/bio. Flat 2 credits.",
     "params": [
       {
-        "name": "q",
+        "name": "since",
         "type": "string",
-        "required": true,
-        "description": "GitHub user search query. Default followers:>1000."
+        "required": false,
+        "description": "daily (default), weekly, or monthly."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Optional programming-language slug, e.g. python."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
+        "description": "Max items to return. Default 25, max 100. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -4360,13 +4384,37 @@
     "name": "Request History",
     "path": "/v1/account/request-history",
     "credits": 0,
-    "summary": "List recent Captapi API requests for the current key owner.",
+    "summary": "Live request log with requestId, creditsUsed, cacheHit. Filter by endpoint/statusCode/since/until. Free.",
     "params": [
       {
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Billed per result."
+        "description": "Max rows to return. Default 50, max 500. Free — does not consume credits."
+      },
+      {
+        "name": "endpoint",
+        "type": "string",
+        "required": false,
+        "description": "Exact Captapi path, e.g. /v1/instagram/basic-profile."
+      },
+      {
+        "name": "statusCode",
+        "type": "number",
+        "required": false,
+        "description": "HTTP status filter, e.g. 500."
+      },
+      {
+        "name": "since",
+        "type": "string",
+        "required": false,
+        "description": "Inclusive createdAt lower bound (ISO date or datetime)."
+      },
+      {
+        "name": "until",
+        "type": "string",
+        "required": false,
+        "description": "Exclusive createdAt upper bound (ISO date or datetime)."
       }
     ]
   },
@@ -4404,7 +4452,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
+        "description": "Max rows to return. Default 20, max 100. Free — does not consume credits."
       }
     ]
   },
@@ -4414,13 +4462,13 @@
     "name": "Post Analytics",
     "path": "/v1/analytics/post",
     "credits": 1,
-    "summary": "Unified metrics for one post/video/reel (platform auto-detected). Same shape everywhere; platform-missing fields stay null. Flat 1 credit.",
+    "summary": "Unified metrics for one post across 11 platforms (auto-detect). engagementRateBasis + commentsIsApproximate/interactionsIsApproximate. Flat 1 credit.",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "A public post, video, or reel URL from a supported platform. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+        "description": "Post/video/reel URL from YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble. Platform auto-detected — cross-platform URLs are expected. Not Kwai/Twitch/Spotify/Snapchat."
       },
       {
         "name": "cache",
@@ -4436,13 +4484,13 @@
     "name": "Compare Analytics",
     "path": "/v1/analytics/compare",
     "credits": 1,
-    "summary": "Same unified metrics as post analytics for up to 10 URLs. 1 credit per resolved URL; cache hits free.",
+    "summary": "Same analytics/post object per URL (up to 10). 1 credit per resolved URL; cache hits free. Mix platforms freely.",
     "params": [
       {
         "name": "urls",
         "type": "string",
         "required": true,
-        "description": "Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms."
+        "description": "Comma-separated URLs (up to 10), any mix of the 11 Post Analytics platforms."
       },
       {
         "name": "cache",
@@ -4458,13 +4506,31 @@
     "name": "Video File Transcript",
     "path": "/v1/video/transcript",
     "credits": 1,
-    "summary": "Whisper transcription of an uploaded video/audio file. 1 credit per minute of audio.",
+    "summary": "POST multipart Whisper transcript. Returns language, durationSeconds, creditsCharged. 1 credit/min. Max 200MB/60min.",
     "params": [
       {
         "name": "file",
         "type": "string",
         "required": true,
-        "description": "Local path or multipart file upload of the video/audio to transcribe."
+        "description": "Local path to video/audio — sent as multipart form field file (POST), not a query string."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "ISO-639-1 Whisper language hint, e.g. en or tr."
+      },
+      {
+        "name": "translate",
+        "type": "boolean",
+        "required": false,
+        "description": "Translate speech to English when true."
+      },
+      {
+        "name": "timestampGranularity",
+        "type": "string",
+        "required": false,
+        "description": "segment (default) or word."
       }
     ]
   },
@@ -4474,13 +4540,31 @@
     "name": "Video File Summarizer",
     "path": "/v1/video/summarize",
     "credits": 2,
-    "summary": "Transcribe an uploaded video/audio file and return an AI summary. 1 credit per minute + 1 for the summary.",
+    "summary": "POST multipart Whisper + AI summary PLUS full transcript. durationSeconds/creditsCharged. 1 credit/min + 1.",
     "params": [
       {
         "name": "file",
         "type": "string",
         "required": true,
-        "description": "Local path or multipart file upload of the video/audio to transcribe and summarize."
+        "description": "Local path to video/audio — multipart form field file (POST), not a query string."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "ISO-639-1 Whisper language hint."
+      },
+      {
+        "name": "translate",
+        "type": "boolean",
+        "required": false,
+        "description": "Translate speech to English when true."
+      },
+      {
+        "name": "timestampGranularity",
+        "type": "string",
+        "required": false,
+        "description": "segment (default) or word."
       }
     ]
   },
@@ -4838,7 +4922,7 @@
     "name": "TikTok Ad Library Search",
     "path": "/v1/ad-library/tiktok/search",
     "credits": 2,
-    "summary": "Search TikTok Commercial Content Library (EU DSA) — ISO dates, advertiser, reach bands.",
+    "summary": "EU DSA Ad Library search — match=any|all, matchedFrom/filteredOut, empty free, ~40s cap.",
     "params": [
       {
         "name": "q",
@@ -4851,6 +4935,12 @@
         "type": "string",
         "required": false,
         "description": "ISO country code. Default GB (US often empty)."
+      },
+      {
+        "name": "match",
+        "type": "string",
+        "required": false,
+        "description": "Keyword mode: \"any\" (default) or \"all\"."
       },
       {
         "name": "limit",
@@ -4872,13 +4962,19 @@
     "name": "TikTok Creative Center Top Ads",
     "path": "/v1/ad-library/tiktok/top-ads",
     "credits": 2,
-    "summary": "Creative Center Top Ads — CTR, likes, industry/objective, video URLs (2 credits native).",
+    "summary": "Creative Center Top Ads — advertiser{}, firstSeen/lastSeen+datesPresent, no media[] dup, empty free.",
     "params": [
       {
         "name": "q",
         "type": "string",
         "required": false,
-        "description": "Optional keyword filter."
+        "description": "Optional keyword (substring). See match + matchedFrom."
+      },
+      {
+        "name": "match",
+        "type": "string",
+        "required": false,
+        "description": "Keyword mode: \"any\" (default) or \"all\"."
       },
       {
         "name": "country",

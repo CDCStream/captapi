@@ -88,6 +88,13 @@ const limitFlat = (def: number, max: number, credits: number): ToolParam => ({
   required: false,
   description: `Max items to return. Default ${def}, max ${max}. Flat ${credits} credit${credits === 1 ? "" : "s"} per call.`,
 });
+/** Limit helper for free account endpoints (never bills). */
+const limitFree = (def: number, max: number): ToolParam => ({
+  name: "limit",
+  type: "number",
+  required: false,
+  description: `Max rows to return. Default ${def}, max ${max}. Free — does not consume credits.`,
+});
 const languageUi = (): ToolParam => ({
   name: "language",
   type: "string",
@@ -287,7 +294,7 @@ const FACEBOOK_MARKETPLACE: Omit<Endpoint, "platform">[] = [
     { name: "cursor", type: "string", required: false, description: "Pagination cursor from a previous nextCursor." },
     { name: "details", type: "string", required: false, description: "Set true for description/condition/coordinates/full gallery (2 + 2 credits per listing). Cover photo is included even when false." },
   ] },
-  { tool: "facebook_marketplace_location_search", name: "Facebook Marketplace Location Search", path: "/v1/facebook/marketplace-location-search", credits: 17, summary: "Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34).", params: [q("City/place search query, e.g. Austin."), limitFlat(10, 50, 17), { name: "details", type: "string", required: false, description: "Set true to include latitude/longitude per location (slower; doubles cost to 34 credits)." }] },
+  { tool: "facebook_marketplace_location_search", name: "Facebook Marketplace Location Search", path: "/v1/facebook/marketplace-location-search", credits: 2, summary: "Disambiguate city names into Marketplace hubs with Facebook cityPageId + lat/lng. marketplace-search already accepts a city string — use this for ambiguous names (Austin TX vs MN) or when you need cityPageId. Flat 2 credits.", params: [q("City/place query. Bare 'Austin' may return TX/MN/IN; include a state for a single hit."), limitFlat(10, 50, 2), cacheParam()] },
   { tool: "facebook_marketplace_item", name: "Facebook Marketplace Item", path: "/v1/facebook/marketplace-item", credits: 1, summary: "Details for a single Facebook Marketplace listing.", params: [url("Facebook Marketplace item URL.")] },
 ];
 
@@ -411,16 +418,16 @@ const TIKTOK_SHOP: Omit<Endpoint, "platform">[] = [
 ];
 
 const GITHUB: Omit<Endpoint, "platform">[] = [
-  { tool: "github_user", name: "GitHub User", path: "/v1/github/user", credits: 1, summary: "Public GitHub profile (email when public). 1 credit — wraps free GitHub REST API.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, cacheParam()] },
-  { tool: "github_repositories", name: "GitHub Repositories", path: "/v1/github/repositories", credits: 12, summary: "List a GitHub user's repositories, with cursor pagination (nextCursor + hasMore).", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
-  { tool: "github_repository", name: "GitHub Repository", path: "/v1/github/repository", credits: 3, summary: "Repository details, stars, forks and metadata.", params: [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name." }] },
-  { tool: "github_pull_requests", name: "GitHub Pull Requests", path: "/v1/github/pull-requests", credits: 12, summary: "List repository pull requests, with cursor pagination (nextCursor + hasMore).", params: [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name." }, { name: "state", type: "string", required: false, description: "open, closed, or all. Default open." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
-  { tool: "github_activity", name: "GitHub Activity", path: "/v1/github/activity", credits: 12, summary: "Recent public activity for a GitHub user, with cursor pagination (nextCursor + hasMore).", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
-  { tool: "github_followers", name: "GitHub Followers", path: "/v1/github/followers", credits: 12, summary: "List GitHub followers, with cursor pagination (nextCursor + hasMore).", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
-  { tool: "github_following", name: "GitHub Following", path: "/v1/github/following", credits: 12, summary: "List accounts a GitHub user follows, with cursor pagination (nextCursor + hasMore).", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
-  { tool: "github_contributions", name: "GitHub Contributions", path: "/v1/github/contributions", credits: 3, summary: "Summary of recent public GitHub contributions.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }] },
-  { tool: "github_trending_repositories", name: "GitHub Trending Repositories", path: "/v1/github/trending-repositories", credits: 12, summary: "Search trending repositories by stars or query.", params: [q("GitHub repository search query. Default stars:>1000."), limit(20, 100)] },
-  { tool: "github_trending_developers", name: "GitHub Trending Developers", path: "/v1/github/trending-developers", credits: 12, summary: "Search popular GitHub developers.", params: [q("GitHub user search query. Default followers:>1000."), limit(20, 100)] },
+  { tool: "github_user", name: "GitHub User", path: "/v1/github/user", credits: 1, summary: "Public GitHub profile as camelCase JSON (type User|Organization, email when public). 1 credit — thin wrap of free GitHub REST; prefer Captapi for one-key multi-platform, api.github.com for GitHub-only.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL, e.g. getify." }, cacheParam()] },
+  { tool: "github_repositories", name: "GitHub Repositories", path: "/v1/github/repositories", credits: 12, summary: "List repos with sort/direction/type echoed; opaque Link cursor. parent/watchers only on github/repository.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, { name: "sort", type: "string", required: false, description: "created|updated|pushed|full_name (default updated)." }, { name: "direction", type: "string", required: false, description: "asc or desc (default desc)." }, { name: "type", type: "string", required: false, description: "owner|member|all (default owner)." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Opaque cursor from previous nextCursor (GitHub Link page=)." }] },
+  { tool: "github_repository", name: "GitHub Repository", path: "/v1/github/repository", credits: 1, summary: "Repo details — stars, real watchers (subscribers), openIssuesAndPrs, license (NOASSERTION→null), parent when fork. Flat 1 credit.", params: [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name, e.g. torvalds/linux." }, cacheParam()] },
+  { tool: "github_pull_requests", name: "GitHub Pull Requests", path: "/v1/github/pull-requests", credits: 12, summary: "List PRs with draft, labels, author{}, head/base; state echoed; opaque Link cursor.", params: [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name." }, { name: "state", type: "string", required: false, description: "open (default), closed, or all — echoed as data.state." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Opaque cursor from previous nextCursor (GitHub Link page=)." }] },
+  { tool: "github_activity", name: "GitHub Activity", path: "/v1/github/activity", credits: 12, summary: "Public events with typed payload (Push commits/ref, PR/issue action). 90-event ceiling; opaque Link cursor.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL, e.g. getify." }, limit(30, 90), { name: "cursor", type: "string", required: false, description: "Opaque cursor from previous nextCursor. Stops at 90-event ceiling." }] },
+  { tool: "github_followers", name: "GitHub Followers", path: "/v1/github/followers", credits: 3, summary: "Follower cards {id,login,type,url,avatar}. ~0.1/row; opaque Link cursor. Large accounts expensive to page fully.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL, e.g. getify." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Opaque cursor from previous nextCursor (GitHub Link page=)." }] },
+  { tool: "github_following", name: "GitHub Following", path: "/v1/github/following", credits: 3, summary: "Same card and ~0.1/row pricing as followers. Opaque Link cursor.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL, e.g. getify." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Opaque cursor from previous nextCursor (GitHub Link page=)." }] },
+  { tool: "github_contributions", name: "GitHub Contributions", path: "/v1/github/contributions", credits: 2, summary: "Real contribution graph — totalContributions, currentStreak, days[{date,count,level}] from the public calendar HTML. Flat 2 credits.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL, e.g. getify." }, cacheParam()] },
+  { tool: "github_trending_repositories", name: "GitHub Trending Repositories", path: "/v1/github/trending-repositories", credits: 2, summary: "github.com/trending — repos ranked by starsGained (since=daily|weekly|monthly), not all-time star search. Flat 2 credits.", params: [{ name: "since", type: "string", required: false, description: "daily (default), weekly, or monthly." }, { name: "language", type: "string", required: false, description: "Optional programming-language slug, e.g. python." }, limitFlat(25, 100, 2), cacheParam()] },
+  { tool: "github_trending_developers", name: "GitHub Trending Developers", path: "/v1/github/trending-developers", credits: 2, summary: "github.com/trending/developers — windowed ranks with popularRepo + hydrated followers/bio. Flat 2 credits.", params: [{ name: "since", type: "string", required: false, description: "daily (default), weekly, or monthly." }, { name: "language", type: "string", required: false, description: "Optional programming-language slug, e.g. python." }, limitFlat(25, 100, 2), cacheParam()] },
 ];
 
 
@@ -501,9 +508,22 @@ const AMAZON_SHOP_ENDPOINTS: Omit<Endpoint, "platform">[] = [
 
 const ACCOUNT: Omit<Endpoint, "platform">[] = [
   { tool: "account_balance", name: "Credit Balance", path: "/v1/account/balance", credits: 0, summary: "Get current Captapi credit balance and plan limits.", params: [] },
-  { tool: "account_request_history", name: "Request History", path: "/v1/account/request-history", credits: 0, summary: "List recent Captapi API requests for the current key owner.", params: [limit(50, 500)] },
+  {
+    tool: "account_request_history",
+    name: "Request History",
+    path: "/v1/account/request-history",
+    credits: 0,
+    summary: "Live request log with requestId, creditsUsed, cacheHit. Filter by endpoint/statusCode/since/until. Free.",
+    params: [
+      limitFree(50, 500),
+      { name: "endpoint", type: "string", required: false, description: "Exact Captapi path, e.g. /v1/instagram/basic-profile." },
+      { name: "statusCode", type: "number", required: false, description: "HTTP status filter, e.g. 500." },
+      { name: "since", type: "string", required: false, description: "Inclusive createdAt lower bound (ISO date or datetime)." },
+      { name: "until", type: "string", required: false, description: "Exclusive createdAt upper bound (ISO date or datetime)." },
+    ],
+  },
   { tool: "account_daily_usage", name: "Daily Usage", path: "/v1/account/daily-usage", credits: 0, summary: "Daily request and credit usage summary.", params: [{ name: "days", type: "number", required: false, description: "Number of days to include. Default 30, max 365." }] },
-  { tool: "account_most_used_routes", name: "Most Used Routes", path: "/v1/account/most-used-routes", credits: 0, summary: "Most used API routes by request count and credits.", params: [{ name: "days", type: "number", required: false, description: "Number of days to include. Default 30, max 365." }, limit(20, 100)] },
+  { tool: "account_most_used_routes", name: "Most Used Routes", path: "/v1/account/most-used-routes", credits: 0, summary: "Most used API routes by request count and credits.", params: [{ name: "days", type: "number", required: false, description: "Number of days to include. Default 30, max 365." }, limitFree(20, 100)] },
 ];
 
 const UTILITIES: Omit<Endpoint, "platform">[] = [
@@ -512,9 +532,9 @@ const UTILITIES: Omit<Endpoint, "platform">[] = [
     name: "Post Analytics",
     path: "/v1/analytics/post",
     credits: 1,
-    summary: "Unified metrics for one post/video/reel (platform auto-detected). Same shape everywhere; platform-missing fields stay null. Flat 1 credit.",
+    summary: "Unified metrics for one post across 11 platforms (auto-detect). engagementRateBasis + commentsIsApproximate/interactionsIsApproximate. Flat 1 credit.",
     params: [
-      url("A public post, video, or reel URL from a supported platform."),
+      { name: "url", type: "string", required: true, description: "Post/video/reel URL from YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble. Platform auto-detected — cross-platform URLs are expected. Not Kwai/Twitch/Spotify/Snapchat." },
       cacheParam(),
     ],
   },
@@ -523,14 +543,9 @@ const UTILITIES: Omit<Endpoint, "platform">[] = [
     name: "Compare Analytics",
     path: "/v1/analytics/compare",
     credits: 1,
-    summary: "Same unified metrics as post analytics for up to 10 URLs. 1 credit per resolved URL; cache hits free.",
+    summary: "Same analytics/post object per URL (up to 10). 1 credit per resolved URL; cache hits free. Mix platforms freely.",
     params: [
-      {
-        name: "urls",
-        type: "string",
-        required: true,
-        description: "Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms.",
-      },
+      { name: "urls", type: "string", required: true, description: "Comma-separated URLs (up to 10), any mix of the 11 Post Analytics platforms." },
       cacheParam(),
     ],
   },
@@ -539,14 +554,12 @@ const UTILITIES: Omit<Endpoint, "platform">[] = [
     name: "Video File Transcript",
     path: "/v1/video/transcript",
     credits: 1,
-    summary: "Whisper transcription of an uploaded video/audio file. 1 credit per minute of audio.",
+    summary: "POST multipart Whisper transcript. Returns language, durationSeconds, creditsCharged. 1 credit/min. Max 200MB/60min.",
     params: [
-      {
-        name: "file",
-        type: "string",
-        required: true,
-        description: "Local path or multipart file upload of the video/audio to transcribe.",
-      },
+      { name: "file", type: "string", required: true, description: "Local path to video/audio — sent as multipart form field file (POST), not a query string." },
+      { name: "language", type: "string", required: false, description: "ISO-639-1 Whisper language hint, e.g. en or tr." },
+      { name: "translate", type: "boolean", required: false, description: "Translate speech to English when true." },
+      { name: "timestampGranularity", type: "string", required: false, description: "segment (default) or word." },
     ],
   },
   {
@@ -554,14 +567,12 @@ const UTILITIES: Omit<Endpoint, "platform">[] = [
     name: "Video File Summarizer",
     path: "/v1/video/summarize",
     credits: 2,
-    summary: "Transcribe an uploaded video/audio file and return an AI summary. 1 credit per minute + 1 for the summary.",
+    summary: "POST multipart Whisper + AI summary PLUS full transcript. durationSeconds/creditsCharged. 1 credit/min + 1.",
     params: [
-      {
-        name: "file",
-        type: "string",
-        required: true,
-        description: "Local path or multipart file upload of the video/audio to transcribe and summarize.",
-      },
+      { name: "file", type: "string", required: true, description: "Local path to video/audio — multipart form field file (POST), not a query string." },
+      { name: "language", type: "string", required: false, description: "ISO-639-1 Whisper language hint." },
+      { name: "translate", type: "boolean", required: false, description: "Translate speech to English when true." },
+      { name: "timestampGranularity", type: "string", required: false, description: "segment (default) or word." },
     ],
   },
 ];
@@ -615,15 +626,28 @@ const FACEBOOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
 ];
 
 const TIKTOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
-  { tool: "tiktok_ad_library_search", name: "TikTok Ad Library Search", path: "/v1/ad-library/tiktok/search", credits: 2, summary: "Search TikTok Commercial Content Library (EU DSA) — ISO dates, advertiser, reach bands.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default GB (US often empty)." }, limit(20, 200)] },
+  {
+    tool: "tiktok_ad_library_search",
+    name: "TikTok Ad Library Search",
+    path: "/v1/ad-library/tiktok/search",
+    credits: 2,
+    summary: "EU DSA Ad Library search — match=any|all, matchedFrom/filteredOut, empty free, ~40s cap.",
+    params: [
+      q(),
+      { name: "country", type: "string", required: false, description: "ISO country code. Default GB (US often empty)." },
+      { name: "match", type: "string", required: false, description: 'Keyword mode: "any" (default) or "all".' },
+      limit(20, 200),
+    ],
+  },
   {
     tool: "tiktok_ad_library_top_ads",
     name: "TikTok Creative Center Top Ads",
     path: "/v1/ad-library/tiktok/top-ads",
     credits: 2,
-    summary: "Creative Center Top Ads — CTR, likes, industry/objective, video URLs (2 credits native).",
+    summary: "Creative Center Top Ads — advertiser{}, firstSeen/lastSeen+datesPresent, no media[] dup, empty free.",
     params: [
-      { name: "q", type: "string", required: false, description: "Optional keyword filter." },
+      { name: "q", type: "string", required: false, description: "Optional keyword (substring). See match + matchedFrom." },
+      { name: "match", type: "string", required: false, description: 'Keyword mode: "any" (default) or "all".' },
       { name: "country", type: "string", required: false, description: "ISO country code. Default US." },
       { name: "period", type: "number", required: false, description: "Lookback days: 7, 30, or 180. Default 30." },
       { name: "orderBy", type: "string", required: false, description: "for_you | likes | ctr | impressions | cost." },

@@ -1208,6 +1208,10 @@ async def linkedin_post_transcript(
                 "platform": "linkedin",
                 "url": post.get("url") or url,
                 "transcript": transcript,
+                # Text-only transcript — LinkedIn does not expose a speech
+                # language. Key is always present (null) so clients can join
+                # the same schema as Whisper transcript endpoints.
+                "language": None,
                 "timingSource": TIMING_NONE,
                 "estimatedReadSeconds": read_secs,
                 "transcriptSegments": segments,
@@ -1219,7 +1223,7 @@ async def linkedin_post_transcript(
 
         data = await cached_or_run(
             endpoint="linkedin.post-transcript",
-            params={"url": url, "v": 8},
+            params={"url": url, "v": 9},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

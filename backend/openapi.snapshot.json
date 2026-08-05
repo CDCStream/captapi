@@ -6778,10 +6778,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Delivery filter: local_pickup, shipping, or all.",
+              "description": "Delivery filter: local_pickup, shipping, or all. Shipped listings (SHIPPING / SHIPPING_ONSITE) can appear nationwide outside radiusMiles — use local_pickup for nearby-only results. Each row includes isLocal / shipsOutsideRadius so you can tell.",
               "title": "Deliverymethod"
             },
-            "description": "Delivery filter: local_pickup, shipping, or all."
+            "description": "Delivery filter: local_pickup, shipping, or all. Shipped listings (SHIPPING / SHIPPING_ONSITE) can appear nationwide outside radiusMiles — use local_pickup for nearby-only results. Each row includes isLocal / shipsOutsideRadius so you can tell."
           },
           {
             "name": "availability",
@@ -6814,10 +6814,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Search radius in miles (1,2,5,10,20,40,60,80,100,250,500). Default ~40.",
+              "description": "Search radius in miles (1,2,5,10,20,40,60,80,100,250,500). Default ~40. Does not exclude nationwide shipped listings — see deliveryMethod=local_pickup.",
               "title": "Radiusmiles"
             },
-            "description": "Search radius in miles (1,2,5,10,20,40,60,80,100,250,500). Default ~40."
+            "description": "Search radius in miles (1,2,5,10,20,40,60,80,100,250,500). Default ~40. Does not exclude nationwide shipped listings — see deliveryMethod=local_pickup."
           },
           {
             "name": "category",
@@ -6907,7 +6907,8 @@
         "tags": [
           "Facebook"
         ],
-        "summary": "Search Facebook Marketplace locations",
+        "summary": "Resolve Facebook Marketplace locations",
+        "description": "Disambiguate a city/place name into Marketplace hubs with lat/lng and Facebook cityPageId (same id search listings expose). marketplace-search already accepts a city string — use this when the name is ambiguous (Austin TX vs Austin MN) or you need coordinates / cityPageId before searching. Flat 2 credits.",
         "operationId": "facebook_marketplace_location_search_v1_facebook_marketplace_location_search_get",
         "security": [
           {
@@ -6922,10 +6923,10 @@
             "schema": {
               "type": "string",
               "minLength": 2,
-              "description": "City/place search query, e.g. Austin",
+              "description": "City/place query. Include a state for a single hit (e.g. 'Austin, TX'); bare names like 'Austin' may return multiple candidates for disambiguation.",
               "title": "Q"
             },
-            "description": "City/place search query, e.g. Austin"
+            "description": "City/place query. Include a state for a single hit (e.g. 'Austin, TX'); bare names like 'Austin' may return multiple candidates for disambiguation."
           },
           {
             "name": "limit",
@@ -6938,18 +6939,6 @@
               "default": 10,
               "title": "Limit"
             }
-          },
-          {
-            "name": "details",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "Legacy flag. Coordinates are always included when Facebook exposes them. Flat 2 credits either way.",
-              "default": false,
-              "title": "Details"
-            },
-            "description": "Legacy flag. Coordinates are always included when Facebook exposes them. Flat 2 credits either way."
           },
           {
             "name": "cache",
@@ -7728,7 +7717,7 @@
           "Ad Library"
         ],
         "summary": "Search TikTok Ad Library",
-        "description": "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) as clean JSON. Flat 2 credits on the native path (Apify fallback capped at 5 — never the old ~70-credit per-result trap). Results are relevance-filtered so keyword tokens must appear in advertiser or ad copy. Schema keeps nulls for headline/cta/landingUrl/spend/advertiser.id when TikTok withholds them (DSA library does not publish Meta-style spend). firstShown/lastShown are ISO-8601. Default country is GB (EU-led; US often empty). For Creative Center Top Ads (CTR, likes, brand ranking), use /v1/ad-library/tiktok/top-ads.",
+        "description": "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) as clean JSON. Flat 2 credits on the native path when results are returned (Apify fallback capped at 5); empty results are never charged. Local keyword matching is case-insensitive substring with match=any|all (default any). When the filter reduces the set, matchedFrom / filteredOut explain how many SERP rows existed before filtering. Upstream work is capped (~40s Decodo / ~20s Apify) so clients are not billed after ALB disconnect. Default country GB. For Creative Center Top Ads use /v1/ad-library/tiktok/top-ads.",
         "operationId": "tiktok_search_v1_ad_library_tiktok_search_get",
         "security": [
           {
@@ -7761,6 +7750,18 @@
               "title": "Country"
             },
             "description": "Two-letter ISO country code (e.g. GB, DE, FR). Default GB — EU Commercial Content Library; US often empty."
+          },
+          {
+            "name": "match",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Keyword token mode: \"any\" (default, OR) or \"all\" (AND). Substring, case-insensitive.",
+              "default": "any",
+              "title": "Match"
+            },
+            "description": "Keyword token mode: \"any\" (default, OR) or \"all\" (AND). Substring, case-insensitive."
           },
           {
             "name": "limit",
@@ -7815,7 +7816,7 @@
           "Ad Library"
         ],
         "summary": "TikTok Creative Center Top Ads",
-        "description": "High-performing TikTok ads from Creative Center Top Ads (ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, likes, ctr/ctrTier, costTier, industry/objective, isSparkAd, and video{} renditions. Filter with country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), optional q/industry/objective/adFormat. Flat 2 credits on the Decodo-native path; Apify fallback is ~1 credit per returned ad (minimum 2). This is not the EU Commercial Content Library — use /v1/ad-library/tiktok/search for DSA transparency ads.",
+        "description": "High-performing TikTok ads from Creative Center Top Ads (ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — check datesPresent), likes (+likesIsApproximate), ctr/ctrTier, costTier, resolved industry/objective, isSparkAd, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis. Empty results are never charged. Upstream capped (~40s Decodo / ~20s Apify). Flat 2 credits native when ads are returned; Apify ~1/ad (min 2). For DSA firstShown/lastShown use /v1/ad-library/tiktok/search.",
         "operationId": "tiktok_top_ads_v1_ad_library_tiktok_top_ads_get",
         "security": [
           {
@@ -7836,10 +7837,22 @@
                   "type": "null"
                 }
               ],
-              "description": "Optional keyword filter (brand, product, or creative theme).",
+              "description": "Optional keyword. Case-insensitive substring match on title, brand, tags, industry, objective. See match=any|all. When literal matches are empty, Creative Center soft results may still be returned (matchBasis=creative_center) with matchedFrom populated.",
               "title": "Q"
             },
-            "description": "Optional keyword filter (brand, product, or creative theme)."
+            "description": "Optional keyword. Case-insensitive substring match on title, brand, tags, industry, objective. See match=any|all. When literal matches are empty, Creative Center soft results may still be returned (matchBasis=creative_center) with matchedFrom populated."
+          },
+          {
+            "name": "match",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Keyword token mode: \"any\" (default, OR) or \"all\" (AND).",
+              "default": "any",
+              "title": "Match"
+            },
+            "description": "Keyword token mode: \"any\" (default, OR) or \"all\" (AND)."
           },
           {
             "name": "country",
@@ -7892,10 +7905,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Optional industry filter (Creative Center industry key or label).",
+              "description": "Optional industry: Apify/Creative Center labels (Gaming, Beauty & Personal Care, …) or TikTok keys (label_25000000000). Invalid values return 400 — not a 502.",
               "title": "Industry"
             },
-            "description": "Optional industry filter (Creative Center industry key or label)."
+            "description": "Optional industry: Apify/Creative Center labels (Gaming, Beauty & Personal Care, …) or TikTok keys (label_25000000000). Invalid values return 400 — not a 502."
           },
           {
             "name": "objective",
@@ -7910,10 +7923,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Optional campaign objective filter (e.g. Traffic, Conversion).",
+              "description": "Optional campaign objective: Traffic, App Install, Conversions, Reach, Video Views, Lead Generation, Engagement (aliases: Conversion).",
               "title": "Objective"
             },
-            "description": "Optional campaign objective filter (e.g. Traffic, Conversion)."
+            "description": "Optional campaign objective: Traffic, App Install, Conversions, Reach, Video Views, Lead Generation, Engagement (aliases: Conversion)."
           },
           {
             "name": "adFormat",
@@ -8770,6 +8783,7 @@
           "GitHub"
         ],
         "summary": "List a GitHub user's repositories (cursor-paginated)",
+        "description": "List repos from GitHub REST /users/{login}/repos. Supports sort=created|updated|pushed|full_name (default updated), direction=asc|desc, and type=owner|member|all — all echoed in the response. Opaque nextCursor from the Link header. parent is omitted on this list (GitHub's list payload has no parent object) — call github/repository for fork upstream. watchers omitted here (no subscribers_count). ~0.4 credits/repo (min 3).",
         "operationId": "repositories_v1_github_repositories_get",
         "security": [
           {
@@ -8787,6 +8801,45 @@
               "title": "Username"
             },
             "description": "GitHub username or profile URL"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(created|updated|pushed|full_name)$",
+              "description": "created | updated | pushed | full_name. Not stars — GitHub's user-repos API has no stars sort.",
+              "default": "updated",
+              "title": "Sort"
+            },
+            "description": "created | updated | pushed | full_name. Not stars — GitHub's user-repos API has no stars sort."
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(asc|desc)$",
+              "description": "Sort direction. Default desc.",
+              "default": "desc",
+              "title": "Direction"
+            },
+            "description": "Sort direction. Default desc."
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(all|owner|member)$",
+              "description": "owner (default) | member | all — affiliation filter from GitHub.",
+              "default": "owner",
+              "title": "Type"
+            },
+            "description": "owner (default) | member | all — affiliation filter from GitHub."
           },
           {
             "name": "limit",
@@ -8813,10 +8866,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "description": "Opaque pagination cursor from a previous nextCursor (wraps GitHub Link page=). Leave empty for the first page.",
               "title": "Cursor"
             },
-            "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+            "description": "Opaque pagination cursor from a previous nextCursor (wraps GitHub Link page=). Leave empty for the first page."
           },
           {
             "name": "cache",
@@ -8859,6 +8912,7 @@
           "GitHub"
         ],
         "summary": "GitHub repository details",
+        "description": "Public repository metadata from GitHub REST /repos/{owner}/{repo} as camelCase JSON: stars, forks, watchers (subscribers_count — not the legacy watchers_count star alias), openIssuesAndPrs (issues + open PRs), license/licenseName (NOASSERTION → null SPDX), parent when isFork, size, visibility, hasIssues/hasDiscussions, ownerType. Flat 1 credit.",
         "operationId": "repository_v1_github_repository_get",
         "security": [
           {
@@ -8918,6 +8972,7 @@
           "GitHub"
         ],
         "summary": "List repository pull requests (cursor-paginated)",
+        "description": "List PRs from GitHub REST /repos/{owner}/{repo}/pulls. Default state=open (pass state=closed|all to override — echoed in the response). Each row includes draft, labels, author{id,login,avatar,url}, head/base, assignees, requestedReviewers, closedAt/mergedAt. Opaque nextCursor from GitHub's Link header (not a bare page number).",
         "operationId": "pull_requests_v1_github_pull_requests_get",
         "security": [
           {
@@ -8943,9 +8998,11 @@
             "schema": {
               "type": "string",
               "pattern": "^(open|closed|all)$",
+              "description": "open (default), closed, or all. Echoed as data.state.",
               "default": "open",
               "title": "State"
-            }
+            },
+            "description": "open (default), closed, or all. Echoed as data.state."
           },
           {
             "name": "limit",
@@ -8972,10 +9029,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "description": "Opaque pagination cursor from a previous nextCursor (wraps GitHub Link page=). Leave empty for the first page.",
               "title": "Cursor"
             },
-            "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+            "description": "Opaque pagination cursor from a previous nextCursor (wraps GitHub Link page=). Leave empty for the first page."
           },
           {
             "name": "cache",
@@ -9018,6 +9075,7 @@
           "GitHub"
         ],
         "summary": "GitHub user public activity (cursor-paginated)",
+        "description": "Recent public events from /users/{login}/events/public with normalized payload per type (PushEvent commits/ref/size, PullRequestEvent action+PR, IssuesEvent action+issue, …). GitHub caps this feed at 90 events (also ~90 days) — eventCeiling is echoed and hasMore stops at that limit. Opaque nextCursor from the Link header. Actor is omitted (identical to username on this endpoint).",
         "operationId": "activity_v1_github_activity_get",
         "security": [
           {
@@ -9031,10 +9089,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "GitHub username or profile URL",
+              "description": "GitHub username or profile URL, e.g. getify",
               "title": "Username"
             },
-            "description": "GitHub username or profile URL"
+            "description": "GitHub username or profile URL, e.g. getify"
           },
           {
             "name": "limit",
@@ -9042,11 +9100,13 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
+              "maximum": 90,
               "minimum": 1,
+              "description": "Max events per page (1–90; upstream ceiling).",
               "default": 30,
               "title": "Limit"
-            }
+            },
+            "description": "Max events per page (1–90; upstream ceiling)."
           },
           {
             "name": "cursor",
@@ -9061,10 +9121,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "description": "Opaque pagination cursor from a previous nextCursor. Leave empty for the first page. Pagination stops after 90 events.",
               "title": "Cursor"
             },
-            "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+            "description": "Opaque pagination cursor from a previous nextCursor. Leave empty for the first page. Pagination stops after 90 events."
           },
           {
             "name": "cache",
@@ -9107,6 +9167,7 @@
           "GitHub"
         ],
         "summary": "List GitHub followers (cursor-paginated)",
+        "description": "Followers from /users/{login}/followers as {id, login, type, url, avatar}. ~0.1 credits/row (min 3). Opaque Link cursor. No sampling parameter — paging a mega-account (e.g. ~250k followers) costs ~25k credits at this rate; for full archives call api.github.com directly. type is User or Organization.",
         "operationId": "followers_v1_github_followers_get",
         "security": [
           {
@@ -9120,8 +9181,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "description": "GitHub username or profile URL",
               "title": "Username"
-            }
+            },
+            "description": "GitHub username or profile URL"
           },
           {
             "name": "limit",
@@ -9148,10 +9211,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "description": "Opaque pagination cursor from a previous nextCursor (wraps GitHub Link page=). Leave empty for the first page.",
               "title": "Cursor"
             },
-            "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+            "description": "Opaque pagination cursor from a previous nextCursor (wraps GitHub Link page=). Leave empty for the first page."
           },
           {
             "name": "cache",
@@ -9193,7 +9256,8 @@
         "tags": [
           "GitHub"
         ],
-        "summary": "List GitHub following (cursor-paginated)",
+        "summary": "List accounts a GitHub user follows (cursor-paginated)",
+        "description": "Same shape and pricing as github/followers — /users/{login}/following as {id, login, type, url, avatar}. ~0.1 credits/row (min 3). Opaque Link cursor. No sampling parameter; large following lists are expensive to page fully.",
         "operationId": "following_v1_github_following_get",
         "security": [
           {
@@ -9207,8 +9271,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "description": "GitHub username or profile URL",
               "title": "Username"
-            }
+            },
+            "description": "GitHub username or profile URL"
           },
           {
             "name": "limit",
@@ -9235,10 +9301,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "description": "Opaque pagination cursor from a previous nextCursor (wraps GitHub Link page=). Leave empty for the first page.",
               "title": "Cursor"
             },
-            "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+            "description": "Opaque pagination cursor from a previous nextCursor (wraps GitHub Link page=). Leave empty for the first page."
           },
           {
             "name": "cache",
@@ -9280,7 +9346,8 @@
         "tags": [
           "GitHub"
         ],
-        "summary": "GitHub contribution summary",
+        "summary": "GitHub contribution graph",
+        "description": "Last-year contribution calendar from github.com/users/{login}/contributions — totalContributions, from/to, currentStreak, and days[{date,count,level}]. This is the heatmap graph, not /users/{u}/events/public (that feed caps at 90 events / 90 days and is not a contribution metric). Flat 2 credits.",
         "operationId": "contributions_v1_github_contributions_get",
         "security": [
           {
@@ -9294,10 +9361,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "GitHub username or profile URL",
+              "description": "GitHub username or profile URL, e.g. getify",
               "title": "Username"
             },
-            "description": "GitHub username or profile URL"
+            "description": "GitHub username or profile URL, e.g. getify"
           },
           {
             "name": "cache",
@@ -9339,7 +9406,8 @@
         "tags": [
           "GitHub"
         ],
-        "summary": "Trending GitHub repositories",
+        "summary": "GitHub trending repositories",
+        "description": "Repos from github.com/trending ranked by stars gained in a window (since=daily|weekly|monthly) — not REST /search/repositories sorted by all-time stars. Each row includes starsGained and source \"github.com/trending\". Optional language slug (e.g. python). Flat 2 credits. The HTML page typically lists ~25 repos (no cursor; not the Search API 1000 cap).",
         "operationId": "trending_repositories_v1_github_trending_repositories_get",
         "security": [
           {
@@ -9348,16 +9416,35 @@
         ],
         "parameters": [
           {
-            "name": "q",
+            "name": "since",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string",
-              "description": "GitHub search query",
-              "default": "stars:>1000",
-              "title": "Q"
+              "pattern": "^(daily|weekly|monthly)$",
+              "description": "Trending window on github.com/trending: daily, weekly, or monthly.",
+              "default": "daily",
+              "title": "Since"
             },
-            "description": "GitHub search query"
+            "description": "Trending window on github.com/trending: daily, weekly, or monthly."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional programming-language slug for /trending/{language} (e.g. python, typescript).",
+              "title": "Language"
+            },
+            "description": "Optional programming-language slug for /trending/{language} (e.g. python, typescript)."
           },
           {
             "name": "limit",
@@ -9367,9 +9454,11 @@
               "type": "integer",
               "maximum": 100,
               "minimum": 1,
-              "default": 20,
+              "description": "Max rows to return (GitHub's page usually has ≤25).",
+              "default": 25,
               "title": "Limit"
-            }
+            },
+            "description": "Max rows to return (GitHub's page usually has ≤25)."
           },
           {
             "name": "cache",
@@ -9411,7 +9500,8 @@
         "tags": [
           "GitHub"
         ],
-        "summary": "Trending GitHub developers",
+        "summary": "GitHub trending developers",
+        "description": "Developers from github.com/trending/developers ranked for a time window (since=daily|weekly|monthly) — not REST /search/users with followers:>1000. Each row: rank, login, name, avatar, popularRepo, plus followers/bio/company/location/publicRepos hydrated from GET /users/{login}. source is always \"github.com/trending/developers\". Flat 2 credits. No Search relevance score.",
         "operationId": "trending_developers_v1_github_trending_developers_get",
         "security": [
           {
@@ -9420,16 +9510,35 @@
         ],
         "parameters": [
           {
-            "name": "q",
+            "name": "since",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string",
-              "description": "GitHub user search query",
-              "default": "followers:>1000",
-              "title": "Q"
+              "pattern": "^(daily|weekly|monthly)$",
+              "description": "Trending window on github.com/trending/developers: daily, weekly, or monthly.",
+              "default": "daily",
+              "title": "Since"
             },
-            "description": "GitHub user search query"
+            "description": "Trending window on github.com/trending/developers: daily, weekly, or monthly."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional programming-language slug for /trending/developers/{language}.",
+              "title": "Language"
+            },
+            "description": "Optional programming-language slug for /trending/developers/{language}."
           },
           {
             "name": "limit",
@@ -9439,9 +9548,11 @@
               "type": "integer",
               "maximum": 100,
               "minimum": 1,
-              "default": 20,
+              "description": "Max rows (GitHub's page usually has ≤25).",
+              "default": 25,
               "title": "Limit"
-            }
+            },
+            "description": "Max rows (GitHub's page usually has ≤25)."
           },
           {
             "name": "cache",
@@ -12384,6 +12495,7 @@
           "Kwai"
         ],
         "summary": "Kwai user posts",
+        "description": "Public posts for a Kwai profile as clean JSON. Each post includes caption when Kwai publishes one (placeholder \"...\" descriptions are omitted), engagement, mp4 videoUrl + videoType, mediaUrlsExpireAt from the signed CDN tag, and transcript when Kwai's JSON-LD exposes auto-captions (deduped). Author{} is hoisted once at the top. Opaque cursor pages within the posts returned from one profile fetch (Kwai's public web surface does not expose deep archive pagination). ~1 credit per post returned (min 2).",
         "operationId": "user_posts_v1_kwai_user_posts_get",
         "security": [
           {
@@ -12413,6 +12525,24 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque pagination cursor from the previous nextCursor. Leave empty for the first page. Pages within the posts Kwai exposes on one profile fetch.",
+              "title": "Cursor"
+            },
+            "description": "Opaque pagination cursor from the previous nextCursor. Leave empty for the first page. Pages within the posts Kwai exposes on one profile fetch."
           },
           {
             "name": "cache",
@@ -12455,6 +12585,7 @@
           "Kwai"
         ],
         "summary": "Kwai post",
+        "description": "Single Kwai video as clean JSON: caption when published (placeholder \"...\" omitted), author{}, engagement, videoUrl/videoType=mp4, mediaUrlsExpireAt from the signed CDN tag, hashtags[] from the caption, and transcript when Kwai JSON-LD exposes auto-captions (deduped). Same core card as user-posts rows, plus hashtags. Flat 2 credits.",
         "operationId": "post_v1_kwai_post_get",
         "security": [
           {
@@ -12748,6 +12879,7 @@
           "Creator Pages"
         ],
         "summary": "Linkme profile",
+        "description": "Public Linkme profile as clean JSON from the dehydrated SSR profile payload (not HTML meta/footer). Returns displayName/bio, avatar + isDefaultProfilePicture, profileVisitCount, totalLinks, verifiedAccount/isAmbassador/isPrivate, createdAt/updatedAt, featured links[], webLinks[] (social icons), infoLinks[] (email/contact), stripeStatus{tipsEnabled,stripeEnabled}, socials{}, and other[]. Flat 1 credit. Example: https://link.me/danucd.",
         "operationId": "linkme_profile_v1_linkme_profile_get",
         "security": [
           {
@@ -12761,10 +12893,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Linkme profile URL or username",
+              "description": "Linkme profile URL or username (e.g. link.me/danucd)",
               "title": "Url"
             },
-            "description": "Linkme profile URL or username"
+            "description": "Linkme profile URL or username (e.g. link.me/danucd)"
           },
           {
             "name": "cache",
@@ -12777,6 +12909,24 @@
               "title": "Cache"
             },
             "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits."
           }
         ],
         "responses": {
@@ -13156,7 +13306,7 @@
           "Spotify"
         ],
         "summary": "Spotify artist details",
-        "description": "Artist profile from Spotify's web-player GraphQL as clean JSON: followers, monthlyListeners, worldRank, topCities, externalLinks, verified, topTracks (with playCount), concerts, relatedArtists, and albums/singles. Flat 1 credit. monthlyListeners / topCities / worldRank are not on Spotify's public Web API — they require this GraphQL path. raw keeps the upstream payload for advanced use (shape may change); prefer the normalized fields.",
+        "description": "Artist profile from Spotify's web-player GraphQL as clean JSON: followers, monthlyListeners, worldRank, topCities, externalLinks, verified, topTracks (with playCount), concerts, relatedArtists, and albums/singles samples. Flat 1 credit. monthlyListeners / topCities / worldRank are not on Spotify's public Web API. albums[]/singles[] are overview samples — albumsCount/singlesCount plus albumsHasMore/singlesHasMore tell you when the catalog is larger; chain each release URI into /spotify/album. Pass raw=true only when you need the full GraphQL payload (omitted by default).",
         "operationId": "artist_v1_spotify_artist_get",
         "security": [
           {
@@ -13174,6 +13324,18 @@
               "title": "Url"
             },
             "description": "Spotify artist URL, URI, or ID"
+          },
+          {
+            "name": "raw",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Include the upstream GraphQL payload as data.raw. Default false.",
+              "default": false,
+              "title": "Raw"
+            },
+            "description": "Include the upstream GraphQL payload as data.raw. Default false."
           },
           {
             "name": "cache",
@@ -13216,7 +13378,7 @@
           "Spotify"
         ],
         "summary": "Spotify track details",
-        "description": "Track from Spotify's web-player GraphQL as clean JSON: id, playCount, trackNumber, contentRating/explicit, artistItems[{id,uri,name,url}], albumInfo[{id,uri,name,url,releaseDate}], duration, and previewUrl when Spotify exposes one. Flat artist name strings and album name kept for back-compat. Flat 1 credit. No bulky raw discography dump.",
+        "description": "Track from Spotify's web-player GraphQL as clean JSON: id, playCount (stream count), trackNumber, contentRating/explicit, durationMs, artists[{id,uri,name,url}], album{id,uri,name,url,releaseDate}, releaseDate, and previewUrl/isrc/popularity when Spotify exposes them on this surface. Flat 1 credit (same as artist). Pass raw=true only for the full GraphQL payload (omitted by default — getTrack embeds bulky artist discography). Note: Pathfinder getTrack often omits Web API popularity (0–100) and ISRC — playCount is the listen metric here.",
         "operationId": "track_v1_spotify_track_get",
         "security": [
           {
@@ -13234,6 +13396,18 @@
               "title": "Url"
             },
             "description": "Spotify track URL, URI, or ID"
+          },
+          {
+            "name": "raw",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Include the upstream GraphQL payload as data.raw. Default false.",
+              "default": false,
+              "title": "Raw"
+            },
+            "description": "Include the upstream GraphQL payload as data.raw. Default false."
           },
           {
             "name": "cache",
@@ -13276,6 +13450,7 @@
           "Spotify"
         ],
         "summary": "Spotify album details",
+        "description": "Album from Spotify's web-player GraphQL as clean JSON: name, artists[{id,uri,name,url}], tracks[{trackNumber,discNumber,name,uri,url,durationMs,playCount,explicit,artists}], totalTracks, releaseDate, releaseYear, explicit, and cover image. Flat 1 credit (same as artist/track). Pass raw=true only when you need the full GraphQL payload (omitted by default).",
         "operationId": "album_v1_spotify_album_get",
         "security": [
           {
@@ -13293,6 +13468,18 @@
               "title": "Url"
             },
             "description": "Spotify album URL, URI, or ID"
+          },
+          {
+            "name": "raw",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Include the upstream GraphQL payload as data.raw. Default false.",
+              "default": false,
+              "title": "Raw"
+            },
+            "description": "Include the upstream GraphQL payload as data.raw. Default false."
           },
           {
             "name": "cache",
@@ -13335,6 +13522,7 @@
           "Spotify"
         ],
         "summary": "Spotify podcast/show details",
+        "description": "Podcast/show from Spotify's web-player GraphQL as clean JSON: id, name, description, publisher{name}, rating{average, totalRatings}, topics[], contentRating/explicit, mediaType, showTypes, totalEpisodes, and cover image. Flat 1 credit per call. Does not ship Spotify's UI color palette (visualIdentity) or a bulky raw dump. Chain into /spotify/podcast-episodes for the episode archive (cursor pagination).",
         "operationId": "podcast_v1_spotify_podcast_get",
         "security": [
           {
@@ -13348,22 +13536,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Spotify show/podcast URL, URI, or ID",
+              "description": "Spotify show/podcast URL, URI, or ID (not an artist URL)",
               "title": "Url"
             },
-            "description": "Spotify show/podcast URL, URI, or ID"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 50,
-              "minimum": 1,
-              "default": 20,
-              "title": "Limit"
-            }
+            "description": "Spotify show/podcast URL, URI, or ID (not an artist URL)"
           },
           {
             "name": "cache",
@@ -13406,6 +13582,7 @@
           "Spotify"
         ],
         "summary": "Spotify podcast episodes",
+        "description": "Paginated episode archive for a Spotify show: id, name, description, releaseDate (full ISO), durationMs, previewUrl, audioUrls[], mediaTypes/hasVideo, contentRating/explicit, hasTranscripts, paywallContent, showTypes. Same show object as /spotify/podcast (totalEpisodes from this episodes query — no drift). Flat 2 credits per call on native Pathfinder. Cursor pagination via nextCursor/hasMore (offset into the archive; limit max 50). Pass raw=true only for a slimmed upstream payload — visualIdentity color dumps, playedState, and per-episode podcastV2 show copies are never shipped (same decision as /spotify/podcast).",
         "operationId": "podcast_episodes_v1_spotify_podcast_episodes_get",
         "security": [
           {
@@ -13419,10 +13596,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Spotify show/podcast URL, URI, or ID",
+              "description": "Spotify show/podcast URL, URI, or ID (not an artist URL)",
               "title": "Url"
             },
-            "description": "Spotify show/podcast URL, URI, or ID"
+            "description": "Spotify show/podcast URL, URI, or ID (not an artist URL)"
           },
           {
             "name": "limit",
@@ -13432,9 +13609,41 @@
               "type": "integer",
               "maximum": 50,
               "minimum": 1,
+              "description": "Max episodes per page (default 20, max 50). Flat 2 credits per call on native Pathfinder.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "Max episodes per page (default 20, max 50). Flat 2 credits per call on native Pathfinder."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination offset from a prior nextCursor (e.g. \"20\"). Omit for the newest page.",
+              "title": "Cursor"
+            },
+            "description": "Pagination offset from a prior nextCursor (e.g. \"20\"). Omit for the newest page."
+          },
+          {
+            "name": "raw",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Include slimmed per-episode upstream payload as episodes[].raw. Default false.",
+              "default": false,
+              "title": "Raw"
+            },
+            "description": "Include slimmed per-episode upstream payload as episodes[].raw. Default false."
           },
           {
             "name": "cache",
@@ -13477,6 +13686,7 @@
           "Spotify"
         ],
         "summary": "Search Spotify",
+        "description": "Search Spotify tracks, albums, artists, podcasts, or episodes. Primary path is web-player Pathfinder GraphQL (same family as /spotify/artist|track|album); Apify scraper is fallthrough only — its raw shape differs (flat albumName/isExplicit/scrapedAt vs GraphQL __typename). Each result ships a canonical spotify:{type}:{id} URI, url, name, explicit/playable when known, and scrapedAt. Envelope includes fetchedAt. Flat 2 credits on native; Apify fallthrough scales per result. No cursor (max limit 50). Pass raw=true to include per-result upstream payloads (omitted by default).",
         "operationId": "search_v1_spotify_search_get",
         "security": [
           {
@@ -13513,9 +13723,23 @@
               "type": "integer",
               "maximum": 50,
               "minimum": 1,
+              "description": "Max results (default 20, max 50). Flat 2 credits on native Pathfinder.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "Max results (default 20, max 50). Flat 2 credits on native Pathfinder."
+          },
+          {
+            "name": "raw",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Include per-result upstream payload as results[].raw. Default false.",
+              "default": false,
+              "title": "Raw"
+            },
+            "description": "Include per-result upstream payload as results[].raw. Default false."
           },
           {
             "name": "cache",
@@ -13558,7 +13782,7 @@
           "SoundCloud"
         ],
         "summary": "SoundCloud artist profile",
-        "description": "Fetch a SoundCloud artist — bio, counts, verified, badges (pro / proUnlimited), creator subscription tier, and lastModified.",
+        "description": "SoundCloud artist as clean JSON: id, handle (permalink slug), username, name, description, avatar, city/countryCode, verified, subscriptionTier (pro-unlimited|pro|mid-tier|free), followers/followings/trackCount/playlistCount/likesCount, externalLinks[{url,network,title}], createdAt when SoundCloud exposes it, and lastModified. Flat 1 credit. Accepts cache / cacheMaxAge.",
         "operationId": "artist_v1_soundcloud_artist_get",
         "security": [
           {
@@ -13583,11 +13807,29 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits."
           }
         ],
         "responses": {
@@ -13618,6 +13860,7 @@
           "SoundCloud"
         ],
         "summary": "SoundCloud artist tracks (cursor-paginated)",
+        "description": "Tracks for one SoundCloud artist as clean JSON. Track rows match /soundcloud/track (title, plays/likes/…, license, artwork, tags) — without per-row artist{} (single-artist list). Top-level artistId + artist{} join to /soundcloud/artist. Opaque nextCursor (not an upstream URL). Flat 2 credits per call.",
         "operationId": "artist_tracks_v1_soundcloud_artist_tracks_get",
         "security": [
           {
@@ -13661,10 +13904,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "description": "Opaque pagination cursor from the previous response's nextCursor. Leave empty for the first page. Do not edit or invent values.",
               "title": "Cursor"
             },
-            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+            "description": "Opaque pagination cursor from the previous response's nextCursor. Leave empty for the first page. Do not edit or invent values."
           },
           {
             "name": "cache",
@@ -13707,6 +13950,7 @@
           "SoundCloud"
         ],
         "summary": "SoundCloud track details",
+        "description": "SoundCloud track as clean JSON: title, artist{id,handle,name,url,avatar,followers,verified}, plays/likes/reposts/comments/downloads, license, genre/tags, publishedAt, streamable/downloadable permission flags, and when the public api-v2 allows it — streamUrl (progressive MP3), hlsUrl, downloadUrl, plus mediaUrlsExpireAt for signed CDN links. waveformUrl is the waveform JSON, not audio. Flat 1 credit. Accepts cache / cacheMaxAge.",
         "operationId": "track_v1_soundcloud_track_get",
         "security": [
           {
@@ -13731,11 +13975,29 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits."
           }
         ],
         "responses": {
@@ -14006,7 +14268,7 @@
           "Analytics"
         ],
         "summary": "Cross-platform post analytics (unified metrics)",
-        "description": "Detects the platform from the URL (YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble) and returns one normalized metrics object including engagementRate with engagementRateBasis=interactions/views. Costs 1 credit.",
+        "description": "Cross-platform post analytics for 11 networks (YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble) — not the full Captapi catalog (Kwai, Twitch, Spotify, Snapchat, and others are out of scope). Platform is auto-detected from the URL; mix freely. Returns one normalized metrics object including engagementRate with engagementRateBasis=interactions/views. Compact UI counts (e.g. YouTube '2.4M' comments) set commentsIsApproximate / interactionsIsApproximate. Costs 1 credit.",
         "operationId": "post_analytics_v1_analytics_post_get",
         "security": [
           {
@@ -14020,10 +14282,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "A public post, video, or reel URL",
+              "description": "Public post/video/reel URL from one of 11 supported platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble). Platform is auto-detected — cross-platform URLs are the point of this endpoint.",
               "title": "Url"
             },
-            "description": "A public post, video, or reel URL"
+            "description": "Public post/video/reel URL from one of 11 supported platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble). Platform is auto-detected — cross-platform URLs are the point of this endpoint."
           },
           {
             "name": "cache",
@@ -14126,7 +14388,7 @@
           "Video Files"
         ],
         "summary": "Transcribe an uploaded video/audio file via Whisper",
-        "description": "1 credit per minute of audio. Max upload size and duration configured server-side.",
+        "description": "POST multipart form field `file`. 1 credit per minute of audio (rounded up, minimum 1) — see durationSeconds / creditsCharged in the response. Max upload 200MB / 60 minutes (server config). Optional language (ISO-639-1 hint), translate=true (English), timestampGranularity=segment|word. Empty/no-speech audio returns transcript=\"\" with noSpeech=true (still billed for duration).",
         "operationId": "video_transcript_v1_video_transcript_post",
         "requestBody": {
           "content": {
@@ -14171,7 +14433,7 @@
           "Video Files"
         ],
         "summary": "Transcribe + AI summary of an uploaded video/audio file",
-        "description": "1 credit per minute of audio + 1 credit for the summary.",
+        "description": "POST multipart form field `file` (not a query string). Returns AI summary/keyPoints/topics/sentiment PLUS the full Whisper transcript (transcript, transcriptSegments, language, durationSeconds, creditsCharged). Summary length scales with the transcript — short clips may be one paragraph / fewer bullets; longer audio aims for 2–3 paragraphs and 4–8 key points (GPT-4o-mini). Billing: 1 credit per minute of audio (rounded up) + 1 for the summary. Same 200MB / 60 min limits and Whisper controls as /v1/video/transcript. Empty/no-speech audio → HTTP 422.",
         "operationId": "video_summarize_v1_video_summarize_post",
         "requestBody": {
           "content": {
@@ -14264,6 +14526,7 @@
           "Account"
         ],
         "summary": "Get credit balance",
+        "description": "Live credit balance for the calling API key — never cached. camelCase fields are canonical; snake_case aliases are emitted for one release. Includes usedThisMonth, quotaResetsAt, keyName, and rateLimitPerMinute for usage alerting. 0 credits.",
         "operationId": "get_credit_balance_v1_account_balance_get",
         "responses": {
           "200": {
@@ -14288,6 +14551,7 @@
           "Account"
         ],
         "summary": "Get request history",
+        "description": "Live (never cached) request log for the calling key owner — 0 credits. Each row includes requestId (same UUID as the response envelope / x-captapi-request-id header) for support matching. Filter with endpoint, statusCode, since, and until. resource is a URL or an internal cache key — not always a URL.",
         "operationId": "get_request_history_v1_account_request_history_get",
         "security": [
           {
@@ -14303,9 +14567,85 @@
               "type": "integer",
               "maximum": 500,
               "minimum": 1,
+              "description": "Max rows (default 50, max 500). Free.",
               "default": 50,
               "title": "Limit"
-            }
+            },
+            "description": "Max rows (default 50, max 500). Free."
+          },
+          {
+            "name": "endpoint",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Exact Captapi path filter, e.g. /v1/instagram/basic-profile",
+              "title": "Endpoint"
+            },
+            "description": "Exact Captapi path filter, e.g. /v1/instagram/basic-profile"
+          },
+          {
+            "name": "statusCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 599,
+                  "minimum": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by HTTP status code (e.g. 500 for 5xx investigation).",
+              "title": "Statuscode"
+            },
+            "description": "Filter by HTTP status code (e.g. 500 for 5xx investigation)."
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Inclusive lower bound on createdAt (ISO date or datetime).",
+              "title": "Since"
+            },
+            "description": "Inclusive lower bound on createdAt (ISO date or datetime)."
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Exclusive upper bound on createdAt (ISO date or datetime).",
+              "title": "Until"
+            },
+            "description": "Exclusive upper bound on createdAt (ISO date or datetime)."
           }
         ],
         "responses": {
@@ -15479,7 +15819,36 @@
           "file": {
             "type": "string",
             "format": "binary",
-            "title": "File"
+            "title": "File",
+            "description": "Video or audio file to transcribe and summarize"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language",
+            "description": "ISO-639-1 language hint for Whisper, e.g. \"en\" or \"tr\". Omit to auto-detect."
+          },
+          "translate": {
+            "type": "boolean",
+            "title": "Translate",
+            "description": "When true, translate speech to English before summarizing.",
+            "default": false
+          },
+          "timestampGranularity": {
+            "type": "string",
+            "enum": [
+              "segment",
+              "word"
+            ],
+            "title": "Timestampgranularity",
+            "description": "segment (default) or word.",
+            "default": "segment"
           }
         },
         "type": "object",
@@ -15493,7 +15862,36 @@
           "file": {
             "type": "string",
             "format": "binary",
-            "title": "File"
+            "title": "File",
+            "description": "Video or audio file to transcribe"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language",
+            "description": "ISO-639-1 language hint for Whisper, e.g. \"en\" or \"tr\". Omit to auto-detect."
+          },
+          "translate": {
+            "type": "boolean",
+            "title": "Translate",
+            "description": "When true, translate speech to English (Whisper translations API).",
+            "default": false
+          },
+          "timestampGranularity": {
+            "type": "string",
+            "enum": [
+              "segment",
+              "word"
+            ],
+            "title": "Timestampgranularity",
+            "description": "segment (default) or word — word-level timings when Whisper exposes them.",
+            "default": "segment"
           }
         },
         "type": "object",

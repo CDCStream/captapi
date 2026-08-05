@@ -66,7 +66,7 @@ MAX_COMPARE = 10
 # those numbers to this field without reading engagementRateBasis.
 ENGAGEMENT_RATE_BASIS = "interactions/views"
 # Bump when unified metrics shape or YouTube enrich policy changes.
-ANALYTICS_CACHE_VERSION = 8
+ANALYTICS_CACHE_VERSION = 9
 
 
 def _mark_source(source: str) -> None:
@@ -139,6 +139,26 @@ def _youtube_analytics_row(v: dict[str, Any], *, norm: str, video_id: str | None
     verified = v.get("channelVerified")
     if not isinstance(verified, bool):
         verified = v.get("verified") if isinstance(v.get("verified"), bool) else None
+    comments = safe_int(
+        v.get("commentsCount") or v.get("commentCount") or v.get("comment_count")
+    )
+    # YouTube often exposes comments as compact UI text ("2.4M"). When the
+    # upstream flag is missing, treat present comment counts as approximate
+    # (same default as youtube/video-details).
+    if comments is None:
+        comments_approx: bool | None = None
+    elif isinstance(v.get("commentCountIsApproximate"), bool):
+        comments_approx = v["commentCountIsApproximate"]
+    else:
+        comments_approx = True
+    views = safe_int(v.get("viewCount") or v.get("views") or v.get("view_count"))
+    views_approx = (
+        bool(v["viewCountIsApproximate"])
+        if isinstance(v.get("viewCountIsApproximate"), bool) and views is not None
+        else False
+        if views is not None
+        else None
+    )
     return {
         "platform": "youtube",
         "url": norm,
@@ -154,14 +174,14 @@ def _youtube_analytics_row(v: dict[str, Any], *, norm: str, video_id: str | None
             "verified": verified,
         },
         "engagement": {
-            "views": safe_int(v.get("viewCount") or v.get("views") or v.get("view_count")),
+            "views": views,
             "likes": safe_int(v.get("likes") or v.get("likeCount") or v.get("like_count")),
-            "comments": safe_int(
-                v.get("commentsCount") or v.get("commentCount") or v.get("comment_count")
-            ),
+            "comments": comments,
             # Stable keys; YouTube has no public share/save counts.
             "shares": None,
             "saves": None,
+            "viewsIsApproximate": views_approx,
+            "commentsIsApproximate": comments_approx,
         },
     }
 
@@ -557,8 +577,9 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
     """Collapse a per-platform normalized post into one consistent metrics shape.
 
     Schema is stable: metrics always includes views/likes/comments/shares/saves/
-    interactions/engagementRate/engagementRateBasis; author always includes
-    verified. Unavailable values are null — keys are never omitted.
+    interactions/engagementRate/engagementRateBasis (+ approximate flags when
+    a count is present); author always includes verified. Unavailable values
+    are null — keys are never omitted.
     """
     eng = n.get("engagement") or {}
     views = eng.get("views")
@@ -578,6 +599,22 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
         and engagement_vals
         else None
     )
+    views_approx = eng.get("viewsIsApproximate") if views is not None else None
+    comments_approx = eng.get("commentsIsApproximate") if comments is not None else None
+    likes_approx = eng.get("likesIsApproximate") if likes is not None else None
+    shares_approx = eng.get("sharesIsApproximate") if shares is not None else None
+    saves_approx = eng.get("savesIsApproximate") if saves is not None else None
+    # Derived totals inherit uncertainty from any approximate numerator that
+    # contributed (and from views when the rate uses them).
+    if interactions is None:
+        interactions_approx: bool | None = None
+    else:
+        interactions_approx = bool(
+            (isinstance(likes, int) and likes_approx)
+            or (isinstance(comments, int) and comments_approx)
+            or (isinstance(shares, int) and shares_approx)
+            or (isinstance(saves, int) and saves_approx)
+        )
     author = dict(n.get("author") or {})
     if "verified" not in author or not isinstance(author.get("verified"), bool):
         author["verified"] = None
@@ -599,11 +636,22 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
         "author": author,
         "metrics": {
             "views": views,
+            "viewsIsApproximate": (
+                bool(views_approx) if isinstance(views_approx, bool) else False if views is not None else None
+            ),
             "likes": likes,
             "comments": comments,
+            "commentsIsApproximate": (
+                bool(comments_approx)
+                if isinstance(comments_approx, bool)
+                else False
+                if comments is not None
+                else None
+            ),
             "shares": shares,
             "saves": saves,
             "interactions": interactions,
+            "interactionsIsApproximate": interactions_approx,
             "engagementRate": engagement_rate,
             "engagementRateBasis": ENGAGEMENT_RATE_BASIS,
         },
@@ -614,15 +662,27 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
     "/post",
     summary="Cross-platform post analytics (unified metrics)",
     description=(
-        "Detects the platform from the URL (YouTube, TikTok, Instagram, "
-        "Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, "
-        f"Rumble) and returns one normalized metrics object including "
-        f"engagementRate with engagementRateBasis={ENGAGEMENT_RATE_BASIS}. "
+        "Cross-platform post analytics for 11 networks (YouTube, TikTok, "
+        "Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, "
+        "LinkedIn, Rumble) — not the full Captapi catalog (Kwai, Twitch, "
+        "Spotify, Snapchat, and others are out of scope). Platform is "
+        "auto-detected from the URL; mix freely. Returns one normalized "
+        f"metrics object including engagementRate with engagementRateBasis="
+        f"{ENGAGEMENT_RATE_BASIS}. Compact UI counts (e.g. YouTube '2.4M' "
+        "comments) set commentsIsApproximate / interactionsIsApproximate. "
         f"Costs {CREDIT_POST_ANALYTICS} credit."
     ),
 )
 async def post_analytics(
-    url: str = Query(..., description="A public post, video, or reel URL"),
+    url: str = Query(
+        ...,
+        description=(
+            "Public post/video/reel URL from one of 11 supported platforms "
+            "(YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, "
+            "Bluesky, Pinterest, LinkedIn, Rumble). Platform is auto-detected "
+            "— cross-platform URLs are the point of this endpoint."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):

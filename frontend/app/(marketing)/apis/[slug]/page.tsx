@@ -78,7 +78,12 @@ export async function generateMetadata({
   const ep = getEndpoint(slug);
   if (!ep) return {};
   const title = `${ep.name} — ${platformLabel(ep.platform)} Data via REST`;
-  const description = `${tagline(ep)} No OAuth and no scraping — send a URL and get clean, structured JSON back. Pass cache=true for a free 24h cache hit; default is always fresh.`;
+  const description =
+    ep.platform === "account"
+      ? `${tagline(ep)} Live account data for your Captapi API key — never cached. Clean JSON, 0 credits.`
+      : ep.method === "POST"
+        ? `${tagline(ep)} Authenticated ${ep.method} to ${ep.path} — multipart file upload. Clean structured JSON.`
+        : `${tagline(ep)} No OAuth and no scraping — send a URL and get clean, structured JSON back. Pass cache=true for a free 24h cache hit; default is always fresh.`;
   const url = `${SITE_URL}/apis/${ep.slug}`;
   return {
     title: `${ep.name} | Captapi`,
@@ -251,8 +256,13 @@ export default async function ApiDetailPage({
             {tagline(ep)} The <strong>{ep.name}</strong> (
             {platformLabel(ep.platform)}) is a single authenticated{" "}
             <code>{ep.method ?? "GET"}</code> request to <code>{ep.path}</code>{" "}
-            that responds with clean JSON and costs {creditLabel(ep)}. Pass cache=true for a free 24h cache hit; default is always fresh. Start with 100 free
-            credits — no credit card.
+            that responds with clean JSON and costs {creditLabel(ep)}.
+            {ep.platform === "account"
+              ? " Account endpoints are always live (never cached)."
+              : ep.method === "POST"
+                ? " Upload via multipart form (see the cURL sample)."
+                : " Pass cache=true for a free 24h cache hit; default is always fresh."}{" "}
+            Start with 100 free credits — no credit card.
           </Tldr>
           <h2 className="text-2xl font-semibold">
             What is the {ep.name}?
@@ -413,34 +423,40 @@ export default async function ApiDetailPage({
         {/* Parameters */}
         <section className="mt-12">
           <h2 className="text-2xl font-semibold">Parameters</h2>
-          <div className="mt-4 overflow-hidden rounded-lg border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-left">
-                <tr>
-                  <th className="px-4 py-2.5 font-medium">Name</th>
-                  <th className="px-4 py-2.5 font-medium">Type</th>
-                  <th className="px-4 py-2.5 font-medium">Required</th>
-                  <th className="px-4 py-2.5 font-medium">Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {epParams.map((p) => (
-                  <tr key={p.name} className="border-t">
-                    <td className="px-4 py-2.5 font-mono text-xs">{p.name}</td>
-                    <td className="px-4 py-2.5 text-muted-foreground">
-                      {p.type}
-                    </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">
-                      {p.required ? "Yes" : "No"}
-                    </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">
-                      {p.description}
-                    </td>
+          {epParams.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              None — authenticate with your Captapi API key only.
+            </p>
+          ) : (
+            <div className="mt-4 overflow-hidden rounded-lg border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-left">
+                  <tr>
+                    <th className="px-4 py-2.5 font-medium">Name</th>
+                    <th className="px-4 py-2.5 font-medium">Type</th>
+                    <th className="px-4 py-2.5 font-medium">Required</th>
+                    <th className="px-4 py-2.5 font-medium">Description</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {epParams.map((p) => (
+                    <tr key={p.name} className="border-t">
+                      <td className="px-4 py-2.5 font-mono text-xs">{p.name}</td>
+                      <td className="px-4 py-2.5 text-muted-foreground">
+                        {p.type}
+                      </td>
+                      <td className="px-4 py-2.5 text-muted-foreground">
+                        {p.required ? "Yes" : "No"}
+                      </td>
+                      <td className="px-4 py-2.5 text-muted-foreground">
+                        {p.description}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
           <p className="mt-3 text-sm text-muted-foreground">
             Authentication: send your key as{" "}
             <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
@@ -451,8 +467,15 @@ export default async function ApiDetailPage({
             {ep.creditsPerResult
               ? " — billed per result, so the exact amount scales with how many items you request"
               : ""}
-            . Pass cache=true for a free 24h cache hit; default is always fresh
-            {ep.creditsPerResult ? " (metrics refresh within ~1 hour)" : ""}.
+            {ep.platform === "account"
+              ? ". Always live — account endpoints are never cached"
+              : ep.method === "POST"
+                ? ". Upload with multipart form field file (see cURL)"
+                : ". Pass cache=true for a free 24h cache hit; default is always fresh"}
+            {ep.creditsPerResult && ep.platform !== "account"
+              ? " (metrics refresh within ~1 hour)"
+              : ""}
+            .
           </p>
           <div className="mt-4 rounded-lg border bg-muted/30 px-4 py-3 text-sm">
             <span className="text-muted-foreground">Using an AI agent? This endpoint is the MCP tool </span>

@@ -14,8 +14,11 @@ def utc_now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
 
+_KWAI_TAG_TS_RE = re.compile(r"^\d+-(\d{10,})(?:-|$)")
+
+
 def cdn_expires_at(url: str | None) -> str | None:
-    """Parse TikTok/YouTube-style signed URL expiry (``x-expires`` / ``expire``)."""
+    """Parse signed CDN expiry (``x-expires`` / ``expire`` / Kwai ``tag=``)."""
     if not url:
         return None
     try:
@@ -36,6 +39,19 @@ def cdn_expires_at(url: str | None) -> str | None:
         return datetime.fromtimestamp(ts, tz=timezone.utc).strftime(
             "%Y-%m-%dT%H:%M:%S.000Z"
         )
+    # Kwai / Kuaishou: tag=1-{unix}-s-0-{nonce}-{sig}
+    tag = (qs.get("tag") or [None])[0]
+    if tag:
+        m = _KWAI_TAG_TS_RE.match(str(tag))
+        if m:
+            try:
+                ts = int(m.group(1))
+            except (TypeError, ValueError):
+                ts = 0
+            if ts >= 1_000_000_000:
+                return datetime.fromtimestamp(ts, tz=timezone.utc).strftime(
+                    "%Y-%m-%dT%H:%M:%S.000Z"
+                )
     return None
 
 

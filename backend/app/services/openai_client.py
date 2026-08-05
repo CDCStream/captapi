@@ -23,9 +23,11 @@ def get_openai() -> AsyncOpenAI:
 
 SUMMARY_SYSTEM = """You are an expert at distilling video content into structured summaries.
 Given a transcript, produce JSON with:
-- "summary": 2-3 paragraph executive summary
-- "keyPoints": array of 4-8 bullet points of the most important takeaways
-- "topics": array of 3-8 short topic/keyword tags
+- "summary": executive summary — aim for 2-3 paragraphs when the transcript
+  has enough content; for very short clips a single tight paragraph is fine
+- "keyPoints": array of the most important takeaways — aim for 4-8 when the
+  transcript supports it; fewer is OK for short clips (never pad with filler)
+- "topics": array of 3-8 short topic/keyword tags (fewer OK for short clips)
 - "sentiment": "positive" | "neutral" | "negative" | "mixed"
 
 Write "summary", "keyPoints" and "topics" in the output language given by the
@@ -247,30 +249,53 @@ async def transcribe_video_url(
 
 
 async def transcribe_audio(
-    file_bytes: bytes, filename: str, language: str | None = None
+    file_bytes: bytes,
+    filename: str,
+    language: str | None = None,
+    *,
+    translate: bool = False,
+    timestamp_granularity: str = "segment",
 ) -> dict[str, Any]:
-    """Whisper-transcribe audio/video bytes.
+    """Whisper-transcribe (or translate-to-English) audio/video bytes.
 
     `language` (ISO-639-1, e.g. "tr") pins Whisper's language instead of
     auto-detection — important for short clips where detection is unreliable
     (a toddler shouting "Baba!" is phonetically Spanish "Papa!").
+    `translate=True` uses the translations endpoint (always English output).
+    `timestamp_granularity` is ``segment`` (default) or ``word``.
     """
     settings = get_settings()
     client = get_openai()
+    gran = "word" if (timestamp_granularity or "").lower() == "word" else "segment"
+    # Word timings require both granularities in the OpenAI verbose_json API.
+    granularities = ["word", "segment"] if gran == "word" else ["segment"]
 
     async def _request(**extra: Any):
-        if language:
+        if language and not translate:
             extra.setdefault("language", language)
-        return await client.audio.transcriptions.create(
-            model=settings.OPENAI_MODEL_TRANSCRIPTION,
-            file=(filename, file_bytes),
-            response_format="verbose_json",
-            timestamp_granularities=["segment"],
-            **extra,
+        create = (
+            client.audio.translations.create
+            if translate
+            else client.audio.transcriptions.create
         )
+        kwargs: dict[str, Any] = {
+            "model": settings.OPENAI_MODEL_TRANSCRIPTION,
+            "file": (filename, file_bytes),
+            "response_format": "verbose_json",
+            **extra,
+        }
+        # translations.create historically ignores timestamp_granularities on
+        # some models — pass when supported; fall back without on TypeError.
+        if not translate:
+            kwargs["timestamp_granularities"] = granularities
+        try:
+            return await create(**kwargs)
+        except TypeError:
+            kwargs.pop("timestamp_granularities", None)
+            return await create(**kwargs)
 
     resp = await _request()
-    result = _parse_verbose(resp)
+    result = _parse_verbose(resp, include_words=(gran == "word"))
     if _is_valid_transcript(result):
         return result
 
@@ -280,44 +305,52 @@ async def transcribe_audio(
     # degenerate into a repetition loop ("Ben de." x29), so each attempt is
     # validated before being trusted.
     iso = language or _LANG_NAME_TO_ISO.get((getattr(resp, "language", None) or "").lower())
-    for temperature in (0.2, 0.4):
-        extra: dict[str, Any] = {"temperature": temperature}
-        if iso:
-            extra["language"] = iso
-        retry = _parse_verbose(await _request(**extra))
-        # Raised temperature can itself hallucinate a tiny fragment on silent
-        # clips, so an unpinned-language retry must find substantial speech
-        # (a real recovery yields multiple words); a caller-pinned language is
-        # trusted for short exclamations.
-        substantial = language is not None or retry["wordCount"] >= 6
-        if _is_valid_transcript(retry) and substantial:
-            log.info("whisper_retry_recovered_speech", language=iso, temperature=temperature)
-            return retry
+    if not translate:
+        for temperature in (0.2, 0.4):
+            extra: dict[str, Any] = {"temperature": temperature}
+            if iso:
+                extra["language"] = iso
+            retry = _parse_verbose(
+                await _request(**extra), include_words=(gran == "word")
+            )
+            # Raised temperature can itself hallucinate a tiny fragment on silent
+            # clips, so an unpinned-language retry must find substantial speech
+            # (a real recovery yields multiple words); a caller-pinned language is
+            # trusted for short exclamations.
+            substantial = language is not None or retry["wordCount"] >= 6
+            if _is_valid_transcript(retry) and substantial:
+                log.info(
+                    "whisper_retry_recovered_speech",
+                    language=iso,
+                    temperature=temperature,
+                )
+                return retry
 
     # Last resort: gpt-4o-mini-transcribe is far more robust on clips whose
     # speech starts after a music intro. No segment timestamps, text only.
-    try:
-        alt_kwargs: dict[str, Any] = {}
-        if iso:
-            alt_kwargs["language"] = iso
-        alt = await client.audio.transcriptions.create(
-            model="gpt-4o-mini-transcribe",
-            file=(filename, file_bytes),
-            **alt_kwargs,
-        )
-        alt_text = (getattr(alt, "text", None) or "").strip()
-    except Exception:  # noqa: BLE001
-        alt_text = ""
-    if alt_text and not _is_hallucinated_segment(alt_text):
-        log.info("whisper_fallback_4o_mini_recovered_speech")
-        return {
-            "transcript": alt_text,
-            "transcriptSegments": [],
-            "wordCount": len(alt_text.split()),
-            "segments": 0,
-            "language": getattr(resp, "language", None),
-            "duration": float(getattr(resp, "duration", 0.0)),
-        }
+    if not translate:
+        try:
+            alt_kwargs: dict[str, Any] = {}
+            if iso:
+                alt_kwargs["language"] = iso
+            alt = await client.audio.transcriptions.create(
+                model="gpt-4o-mini-transcribe",
+                file=(filename, file_bytes),
+                **alt_kwargs,
+            )
+            alt_text = (getattr(alt, "text", None) or "").strip()
+        except Exception:  # noqa: BLE001
+            alt_text = ""
+        if alt_text and not _is_hallucinated_segment(alt_text):
+            log.info("whisper_fallback_4o_mini_recovered_speech")
+            return {
+                "transcript": alt_text,
+                "transcriptSegments": [],
+                "wordCount": len(alt_text.split()),
+                "segments": 0,
+                "language": getattr(resp, "language", None),
+                "duration": float(getattr(resp, "duration", 0.0)),
+            }
 
     # Nothing trustworthy: report no speech rather than hallucinated text.
     result["transcript"] = ""
@@ -342,7 +375,7 @@ def _is_valid_transcript(result: dict[str, Any]) -> bool:
     return True
 
 
-def _parse_verbose(resp: Any) -> dict[str, Any]:
+def _parse_verbose(resp: Any, *, include_words: bool = False) -> dict[str, Any]:
     segments = []
     for seg in (resp.segments or []):
         seg_text = (getattr(seg, "text", "") or "").strip()
@@ -354,15 +387,32 @@ def _parse_verbose(resp: Any) -> dict[str, Any]:
         end = round(float(getattr(seg, "end", start)), 3)
         mm = int(start // 60)
         ss = int(start % 60)
-        segments.append(
-            {
-                "text": seg_text,
-                "start": start,
-                "duration": round(max(end - start, 0.0), 3),
-                "end": round(max(end, start), 3),
-                "timestamp": f"{mm:02d}:{ss:02d}",
-            }
-        )
+        row: dict[str, Any] = {
+            "text": seg_text,
+            "start": start,
+            "duration": round(max(end - start, 0.0), 3),
+            "end": round(max(end, start), 3),
+            "timestamp": f"{mm:02d}:{ss:02d}",
+        }
+        if include_words:
+            words_out = []
+            for w in getattr(seg, "words", None) or []:
+                wt = (getattr(w, "word", None) or getattr(w, "text", None) or "").strip()
+                if not wt:
+                    continue
+                ws = round(float(getattr(w, "start", start)), 3)
+                we = round(float(getattr(w, "end", ws)), 3)
+                words_out.append(
+                    {
+                        "text": wt,
+                        "start": ws,
+                        "duration": round(max(we - ws, 0.0), 3),
+                        "end": we,
+                    }
+                )
+            if words_out:
+                row["words"] = words_out
+        segments.append(row)
 
     # Rebuild the full text from the kept segments so filtered hallucinations
     # don't linger in the transcript. Empty -> genuinely no speech.
@@ -373,7 +423,24 @@ def _parse_verbose(resp: Any) -> dict[str, Any]:
     else:
         raw = (resp.text or "").strip()
         text = "" if _is_hallucinated_segment(raw) else raw
-    return {
+    # Top-level words[] when Whisper returns them outside segments.
+    words: list[dict[str, Any]] = []
+    if include_words:
+        for w in getattr(resp, "words", None) or []:
+            wt = (getattr(w, "word", None) or getattr(w, "text", None) or "").strip()
+            if not wt:
+                continue
+            ws = round(float(getattr(w, "start", 0.0)), 3)
+            we = round(float(getattr(w, "end", ws)), 3)
+            words.append(
+                {
+                    "text": wt,
+                    "start": ws,
+                    "duration": round(max(we - ws, 0.0), 3),
+                    "end": we,
+                }
+            )
+    out: dict[str, Any] = {
         "transcript": text,
         "transcriptSegments": segments,
         "wordCount": len(text.split()),
@@ -381,3 +448,6 @@ def _parse_verbose(resp: Any) -> dict[str, Any]:
         "language": getattr(resp, "language", None),
         "duration": float(getattr(resp, "duration", 0.0)),
     }
+    if include_words and words:
+        out["words"] = words
+    return out

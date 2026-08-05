@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import structlog
@@ -315,15 +316,36 @@ def resolve_ad_format(raw: str | None, is_spark: bool | None) -> str | None:
     return None
 
 
+MatchMode = Literal["any", "all"]
+
+# Cap Decodo XHR so the HTTP request stays under nginx/ALB 60s defaults.
+DECODO_TIMEOUT_SECONDS = 40.0
+
+
 def query_tokens(q: str | None) -> list[str]:
     return [t for t in re.split(r"\W+", (q or "").lower()) if len(t) >= 2]
 
 
-def top_ad_matches_query(row: dict[str, Any], q: str | None) -> bool:
-    """True when every query token appears in title, brand, tags, or industry.
+def normalize_match_mode(match: str | None) -> MatchMode:
+    raw = (match or "any").strip().lower()
+    if raw in {"any", "or"}:
+        return "any"
+    if raw in {"all", "and"}:
+        return "all"
+    raise ValueError('match must be "any" or "all"')
 
-    Creative Center's ``keyword`` param is soft (often ignored with for_you).
-    Prefer empty over unrelated results the customer paid credits for.
+
+def top_ad_matches_query(
+    row: dict[str, Any],
+    q: str | None,
+    *,
+    match: MatchMode = "any",
+) -> bool:
+    """True when query tokens appear as case-insensitive substrings.
+
+    ``match=any`` (default): at least one token in title/brand/tags/industry.
+    ``match=all``: every token must appear. Creative Center's keyword param is
+    soft — local filtering is a second pass, not an exact AND dictionary match.
     """
     tokens = query_tokens(q)
     if not tokens:
@@ -346,6 +368,8 @@ def top_ad_matches_query(row: dict[str, Any], q: str | None) -> bool:
             row.get("advertiser_name"),
             industry,
             industry_key,
+            row.get("objective"),
+            row.get("objective_key") or row.get("objectiveKey"),
             " ".join(str(t) for t in tags if t),
             " ".join(str(t) for t in keywords if t),
         )
@@ -353,13 +377,22 @@ def top_ad_matches_query(row: dict[str, Any], q: str | None) -> bool:
     ).lower()
     if not hay.strip():
         return False
-    return all(t in hay for t in tokens)
+    if match == "all":
+        return all(t in hay for t in tokens)
+    return any(t in hay for t in tokens)
 
 
 def filter_top_ads_by_query(
-    rows: list[dict[str, Any]], q: str | None
+    rows: list[dict[str, Any]],
+    q: str | None,
+    *,
+    match: MatchMode = "any",
 ) -> list[dict[str, Any]]:
-    return [r for r in rows if isinstance(r, dict) and top_ad_matches_query(r, q)]
+    return [
+        r
+        for r in rows
+        if isinstance(r, dict) and top_ad_matches_query(r, q, match=match)
+    ]
 
 
 def fetch_limit_for_query(limit: int, q: str | None) -> int:
@@ -379,60 +412,212 @@ def likes_is_approximate(likes: int | None) -> bool:
     return likes % 100_000 == 0
 
 
+def _iso_from_unknown(value: Any) -> str | None:
+    """Normalize unix seconds/ms, YYYYMMDD, or ISO strings to UTC ISO-8601."""
+    if value is None or value == "":
+        return None
+    if isinstance(value, (int, float)):
+        ts = float(value)
+        if ts > 1e12:  # milliseconds
+            ts /= 1000.0
+        if ts < 1e9:  # too small to be a unix timestamp
+            return None
+        try:
+            return datetime.fromtimestamp(ts, tz=timezone.utc).strftime(
+                "%Y-%m-%dT%H:%M:%S.000Z"
+            )
+        except (OverflowError, OSError, ValueError):
+            return None
+    text = str(value).strip()
+    if not text:
+        return None
+    if re.fullmatch(r"\d{8}", text):
+        try:
+            return datetime.strptime(text, "%Y%m%d").replace(tzinfo=timezone.utc).strftime(
+                "%Y-%m-%dT%H:%M:%S.000Z"
+            )
+        except ValueError:
+            return None
+    if re.fullmatch(r"\d{10,13}", text):
+        return _iso_from_unknown(int(text))
+    # Already ISO-ish
+    try:
+        cleaned = text.replace("Z", "+00:00")
+        dt = datetime.fromisoformat(cleaned)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    except ValueError:
+        return None
+
+
+def _nested_dict(row: dict[str, Any], *keys: str) -> dict[str, Any]:
+    for key in keys:
+        val = row.get(key)
+        if isinstance(val, dict):
+            return val
+    return {}
+
+
 def _video_block(row: dict[str, Any]) -> dict[str, Any]:
     info = row.get("video_info") if isinstance(row.get("video_info"), dict) else {}
+    if not info:
+        info = row.get("videoInfo") if isinstance(row.get("videoInfo"), dict) else {}
     video_urls = info.get("video_url") if isinstance(info.get("video_url"), dict) else {}
+    if not video_urls:
+        video_urls = info.get("videoUrl") if isinstance(info.get("videoUrl"), dict) else {}
     url = safe_str(
         row.get("video_url")
         or row.get("videoUrl")
+        or row.get("videoUrl720p")
         or video_urls.get("720p")
         or video_urls.get("540p")
+        or video_urls.get("360p")
     )
-    url_hd = safe_str(row.get("video_url_hd") or row.get("videoUrlHd") or video_urls.get("1080p"))
+    url_hd = safe_str(
+        row.get("video_url_hd")
+        or row.get("videoUrlHd")
+        or row.get("videoUrl1080p")
+        or video_urls.get("1080p")
+        or video_urls.get("HD")
+        or video_urls.get("hd")
+    )
     # Drop fake HD when it's a byte-identical copy of the standard rendition.
     if url_hd and url and url_hd == url:
         url_hd = None
     cover = safe_str(
         row.get("cover_url")
         or row.get("coverUrl")
+        or row.get("cover_image")
+        or row.get("coverImageUrl")
         or info.get("cover")
         or row.get("cover")
     )
-    return {
+    out: dict[str, Any] = {
         "id": safe_str(row.get("video_id") or row.get("videoId") or info.get("vid")),
         "url": url,
-        "urlHd": url_hd,
         "cover": cover,
         "durationSeconds": duration_seconds(
             row.get("video_duration_seconds")
             or row.get("durationSeconds")
+            or row.get("videoDurationSecs")
             or info.get("duration")
         ),
-        "width": safe_int(row.get("video_width") or row.get("width") or info.get("width")),
-        "height": safe_int(row.get("video_height") or row.get("height") or info.get("height")),
+        "width": safe_int(
+            row.get("video_width") or row.get("width") or info.get("width")
+        ),
+        "height": safe_int(
+            row.get("video_height") or row.get("height") or info.get("height")
+        ),
     }
+    # Omit urlHd when upstream never ships a distinct HD rendition (was 20/20 null).
+    if url_hd:
+        out["urlHd"] = url_hd
+    return out
 
 
-def normalize_top_ad(row: dict[str, Any]) -> dict[str, Any]:
-    """Map an upstream Top Ads row to the public Captapi shape."""
-    ad_id = safe_str(row.get("ad_id") or row.get("id") or row.get("material_id"))
-    brand = safe_str(row.get("brand_name") or row.get("brandName") or row.get("advertiser_name"))
+def _extract_brand(row: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Return (brandName, advertiserId) from list/detail/author shapes."""
+    detail = _nested_dict(row, "detail", "ad_detail", "adDetail")
+    author = _nested_dict(row, "author", "creator", "tiktok_author")
+    item = _nested_dict(row, "tiktok_item", "item_info", "itemInfo", "aweme")
+    if not author and item:
+        author = _nested_dict(item, "author", "authorInfo")
+
+    brand = safe_str(
+        row.get("brand_name")
+        or row.get("brandName")
+        or row.get("advertiser_name")
+        or row.get("advertiserName")
+        or detail.get("brand_name")
+        or detail.get("brandName")
+        or detail.get("advertiser_name")
+    )
     if brand and brand.strip().lower() in {"not mention", "n/a", "unknown", "-"}:
         brand = None
-    countries = row.get("countries") or row.get("country") or []
-    if isinstance(countries, str):
-        countries = [countries]
-    if not isinstance(countries, list):
-        countries = []
-    countries = [str(c).upper() for c in countries if c]
+    # Spark Ads often omit brand_name (or ship "Not Mention") — use creator.
+    if not brand:
+        brand = safe_str(
+            author.get("nickname")
+            or author.get("unique_id")
+            or author.get("uniqueId")
+            or author.get("username")
+            or author.get("name")
+        )
+
+    advertiser_id = safe_str(
+        row.get("brand_id")
+        or row.get("brandId")
+        or row.get("advertiser_id")
+        or row.get("advertiserId")
+        or row.get("advertiser_business_id")
+        or detail.get("brand_id")
+        or detail.get("advertiser_id")
+        or author.get("id")
+        or author.get("uid")
+        or author.get("sec_uid")
+        or author.get("secUid")
+    )
+    return brand, advertiser_id
+
+
+def _extract_dates(row: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Best-effort firstSeen / lastSeen from Creative Center / actor payloads.
+
+    The public Top Ads list usually omits run dates — keys stay present as null
+    so clients have a stable schema. When upstream (or a detail hydrate) ships
+    timestamps, map them here.
+    """
+    detail = _nested_dict(row, "detail", "ad_detail", "adDetail")
+    info = _nested_dict(row, "video_info", "videoInfo")
+    first = _iso_from_unknown(
+        row.get("first_shown")
+        or row.get("firstShown")
+        or row.get("first_shown_date")
+        or row.get("firstShownDate")
+        or row.get("first_shown_at")
+        or row.get("create_time")
+        or row.get("createTime")
+        or row.get("create_timestamp")
+        or row.get("created_at")
+        or row.get("createdAt")
+        or detail.get("first_shown")
+        or detail.get("create_time")
+        or info.get("create_time")
+        or info.get("createTime")
+    )
+    last = _iso_from_unknown(
+        row.get("last_shown")
+        or row.get("lastShown")
+        or row.get("last_shown_date")
+        or row.get("lastShownDate")
+        or row.get("last_shown_at")
+        or row.get("end_time")
+        or row.get("endTime")
+        or detail.get("last_shown")
+        or detail.get("last_shown_date")
+    )
+    return first, last
+
+
+def normalize_top_ad(
+    row: dict[str, Any],
+    *,
+    query_country: str | None = None,
+) -> dict[str, Any]:
+    """Map an upstream Top Ads row to the public Captapi shape."""
+    ad_id = safe_str(row.get("ad_id") or row.get("id") or row.get("material_id"))
+    brand, advertiser_id = _extract_brand(row)
+    first_seen, last_seen = _extract_dates(row)
+
+    countries_raw = row.get("countries") or row.get("country") or row.get("countryCode") or []
+    if isinstance(countries_raw, str):
+        countries_raw = [countries_raw]
+    if not isinstance(countries_raw, list):
+        countries_raw = []
+    countries = [str(c).upper() for c in countries_raw if c]
 
     video = _video_block(row)
-    # Convenience list for clients that want flat media URLs (deduped).
-    media: list[str] = []
-    for u in (video.get("cover"), video.get("urlHd"), video.get("url")):
-        if isinstance(u, str) and u.startswith("http") and u not in media:
-            media.append(u)
-
     tags = row.get("tags") if isinstance(row.get("tags"), list) else []
     tag_list = [str(t) for t in tags if t]
     ctr = row.get("ctr")
@@ -459,12 +644,14 @@ def normalize_top_ad(row: dict[str, Any]) -> dict[str, Any]:
         safe_str(row.get("ad_format") or row.get("adFormat")),
         is_spark,
     )
-    likes = safe_int(row.get("likes") or row.get("like"))
+    likes = safe_int(row.get("likes") or row.get("like") or row.get("likeCount"))
 
     # Prefer the per-ad Creative Center detail page — never the search-page echo
     # that actors put in source_url.
     per_ad = detail_url(ad_id) if ad_id else None
-    upstream_detail = safe_str(row.get("detail_url") or row.get("detailsUrl") or row.get("details_url"))
+    upstream_detail = safe_str(
+        row.get("detail_url") or row.get("detailsUrl") or row.get("details_url")
+    )
     if upstream_detail and "/topads/" in upstream_detail and "keyword=" not in upstream_detail:
         per_ad = upstream_detail or per_ad
 
@@ -472,8 +659,14 @@ def normalize_top_ad(row: dict[str, Any]) -> dict[str, Any]:
         "platform": "tiktok_creative_center",
         "id": ad_id,
         "url": per_ad,
-        "title": safe_str(row.get("ad_title") or row.get("title") or row.get("adTitle")),
+        "title": safe_str(
+            row.get("ad_title") or row.get("title") or row.get("adTitle")
+        ),
         "brandName": brand,
+        # Grouping axis for competitive research (id may be null when CC omits it).
+        "advertiser": {"id": advertiser_id, "name": brand},
+        "firstSeen": first_seen,
+        "lastSeen": last_seen,
         "likes": likes,
         "likesIsApproximate": likes_is_approximate(likes),
         "ctr": ctr_num,
@@ -485,11 +678,17 @@ def normalize_top_ad(row: dict[str, Any]) -> dict[str, Any]:
         "industry": industry,
         "industryKey": industry_key,
         "objective": objective,
-        "adFormat": ad_format,
-        "countries": countries,
         "video": video,
-        "media": media,
     }
+    # adFormat duplicates isSparkAd when it's only Spark / Non-Spark — keep it
+    # only for richer labels (e.g. Collection Ads).
+    if ad_format and ad_format not in {"Spark Ads", "Non-Spark Ads"}:
+        out["adFormat"] = ad_format
+    # Drop per-ad countries when it only echoes the request filter (already at
+    # the response root as country). Keep multi-country targeting.
+    q_country = (query_country or "").strip().upper()
+    if countries and not (len(countries) == 1 and q_country and countries[0] == q_country):
+        out["countries"] = countries
     if objective_key:
         out["objectiveKey"] = objective_key
     if tag_list:
@@ -710,10 +909,20 @@ def filter_top_ads(
     materials: list[dict[str, Any]],
     *,
     q: str | None = None,
+    match: MatchMode = "any",
     industry: str | None = None,
     objective: str | None = None,
     ad_format: str | None = None,
-) -> list[dict[str, Any]]:
+    soft_fallback: bool = True,
+) -> dict[str, Any]:
+    """Apply dimension + keyword filters.
+
+    Returns ``{rows, matchedFrom, filteredOut, match, matchBasis, literalMatches}``.
+    ``matchedFrom`` is the count after industry/objective/format and before ``q``.
+    When local literal matching would wipe a non-empty Creative Center set and
+    ``soft_fallback`` is true, return the pre-q rows with ``matchBasis=creative_center``
+    so soft-ranked ads are not silently discarded.
+    """
     out = materials
     ind = (industry or "").strip().lower()
     if ind and ind not in _FILTER_ECHO:
@@ -744,9 +953,46 @@ def filter_top_ads(
         out = [m for m in out if m.get("is_spark_ad") is True or m.get("isSparkAd") is True]
     elif fmt in {"non_spark", "nonspark", "non_spark_ads"}:
         out = [m for m in out if m.get("is_spark_ad") is False or m.get("isSparkAd") is False]
-    if (q or "").strip():
-        out = filter_top_ads_by_query(out, q)
-    return out
+
+    matched_from = len(out)
+    if not (q or "").strip():
+        return {
+            "rows": out,
+            "matchedFrom": matched_from,
+            "filteredOut": 0,
+            "literalMatches": matched_from,
+            "match": match,
+            "matchBasis": "none",
+        }
+
+    literal = filter_top_ads_by_query(out, q, match=match)
+    if literal:
+        return {
+            "rows": literal,
+            "matchedFrom": matched_from,
+            "filteredOut": matched_from - len(literal),
+            "literalMatches": len(literal),
+            "match": match,
+            "matchBasis": match,
+        }
+    if soft_fallback and matched_from > 0:
+        # Creative Center already soft-matched via keyword on the page URL.
+        return {
+            "rows": out,
+            "matchedFrom": matched_from,
+            "filteredOut": 0,
+            "literalMatches": 0,
+            "match": match,
+            "matchBasis": "creative_center",
+        }
+    return {
+        "rows": [],
+        "matchedFrom": matched_from,
+        "filteredOut": matched_from,
+        "literalMatches": 0,
+        "match": match,
+        "matchBasis": match,
+    }
 
 
 async def search_top_ads(
@@ -756,15 +1002,15 @@ async def search_top_ads(
     order_by: str = "For You",
     limit: int = 20,
     q: str | None = None,
+    match: MatchMode = "any",
     industry: str | None = None,
     objective: str | None = None,
     ad_format: str | None = None,
-) -> list[dict[str, Any]] | None:
+) -> dict[str, Any] | None:
     """Decodo-native Top Ads via Creative Center XHR capture.
 
-    Returns raw material dicts (same keys as creative_radar ``materials``), or
-    ``None`` when Decodo is unavailable / capture failed so the router can fall
-    back to Apify.
+    Returns a filter result dict (``rows`` + match metadata), or ``None`` when
+    Decodo is unavailable / capture failed so the router can fall back to Apify.
     """
     from app.services import decodo_fetch
 
@@ -788,7 +1034,7 @@ async def search_top_ads(
     actions = [{"type": "wait", "timeout": 5}]
     got = await decodo_fetch.fetch_xhr(
         page,
-        timeout=150.0,
+        timeout=DECODO_TIMEOUT_SECONDS,
         headless="html",
         browser_actions=actions,
         geo=region if region.isalpha() and len(region) == 2 else "US",
@@ -825,11 +1071,14 @@ async def search_top_ads(
         row.setdefault("period_days", period)
         if region and not row.get("countries") and not row.get("country"):
             row["countries"] = [region]
-    rows = filter_top_ads(
+    filtered = filter_top_ads(
         rows,
         q=q,
+        match=match,
         industry=industry,
         objective=objective,
         ad_format=ad_format,
+        soft_fallback=True,
     )
-    return rows[:want]
+    filtered["rows"] = list(filtered["rows"])[:want]
+    return filtered

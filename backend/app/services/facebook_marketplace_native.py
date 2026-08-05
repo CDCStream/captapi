@@ -13,6 +13,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import json
+import math
 import re
 from datetime import datetime, timezone
 from typing import Any
@@ -359,6 +360,200 @@ def _price_fields(price_obj: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+_STATE_ABBR = {
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA",
+    "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
+    "VA", "WA", "WV", "WI", "WY", "DC",
+}
+
+
+def parse_city_state(location: str) -> tuple[str | None, str | None]:
+    """``Austin, TX`` / ``Austin TX`` → (Austin, TX)."""
+    raw = (location or "").strip()
+    if not raw:
+        return None, None
+    if "," in raw:
+        city, rest = raw.split(",", 1)
+        city = city.strip() or None
+        token = rest.strip().split()[0].upper() if rest.strip() else ""
+        state = token if token in _STATE_ABBR else None
+        return city, state
+    parts = raw.split()
+    if len(parts) >= 2 and parts[-1].upper() in _STATE_ABBR:
+        return " ".join(parts[:-1]).strip() or None, parts[-1].upper()
+    return raw, None
+
+
+def listing_status(
+    *,
+    is_sold: bool | None,
+    is_pending: bool | None,
+    is_live: bool | None = None,
+) -> str:
+    """Canonical Marketplace availability — not a livestream flag.
+
+    Facebook often keeps ``is_live=true`` on sold listings (page still published).
+    Prefer ``status`` over interpreting ``is_live`` as "on air".
+    """
+    if is_sold:
+        return "sold"
+    if is_pending:
+        return "pending"
+    if is_live is False:
+        return "unavailable"
+    return "available"
+
+
+def _haversine_miles(
+    lat1: float, lon1: float, lat2: float, lon2: float
+) -> float:
+    r = 3958.7613  # Earth radius miles
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlmb = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2
+    return 2 * r * math.asin(min(1.0, math.sqrt(a)))
+
+
+def _offers_shipping(delivery: list[Any] | None) -> bool:
+    if not delivery:
+        return False
+    for d in delivery:
+        label = str(d or "").upper()
+        if "SHIP" in label:
+            return True
+    return False
+
+
+def annotate_search_locality(
+    listing: dict[str, Any],
+    *,
+    origin_city: str | None,
+    origin_state: str | None,
+    origin_lat: float | None = None,
+    origin_lng: float | None = None,
+    radius_miles: int | None = None,
+) -> dict[str, Any]:
+    """Attach isLocal / distanceMiles / shipsOutsideRadius for search rows."""
+    out = dict(listing)
+    city = safe_str(out.get("city"))
+    state = safe_str(out.get("state"))
+    loc = safe_str(out.get("location")) or ""
+    is_local = False
+    if origin_city and city and city.lower() == origin_city.lower():
+        is_local = True
+        if origin_state and state and state.upper() != origin_state.upper():
+            is_local = False
+    elif origin_city and origin_city.lower() in loc.lower():
+        is_local = True
+        if origin_state and origin_state.upper() not in loc.upper():
+            # "Austin" substring in an unrelated string — require state when known.
+            if state and state.upper() != origin_state.upper():
+                is_local = False
+
+    lat = safe_float(out.get("latitude"))
+    lng = safe_float(out.get("longitude"))
+    distance: float | None = None
+    if (
+        origin_lat is not None
+        and origin_lng is not None
+        and lat is not None
+        and lng is not None
+    ):
+        distance = round(_haversine_miles(origin_lat, origin_lng, lat, lng), 1)
+        if radius_miles is not None and distance <= float(radius_miles):
+            is_local = True
+        elif radius_miles is not None and distance > float(radius_miles):
+            is_local = False
+
+    out["isLocal"] = is_local
+    if distance is not None:
+        out["distanceMiles"] = distance
+    if _offers_shipping(out.get("deliveryTypes") if isinstance(out.get("deliveryTypes"), list) else None) and not is_local:
+        out["shipsOutsideRadius"] = True
+    return strip_empty(out)
+
+
+def _seller(node: dict[str, Any]) -> dict[str, Any] | None:
+    """``marketplace_listing_seller`` → {id,name,url,joinedAt,rating} when exposed."""
+    raw = node.get("marketplace_listing_seller") or node.get("listing_seller")
+    if isinstance(raw, list) and raw:
+        raw = raw[0]
+    if not isinstance(raw, dict) or not raw:
+        return None
+    sid = safe_str(raw.get("id"))
+    name = safe_str(raw.get("name") or raw.get("short_name"))
+    profile = safe_str(
+        raw.get("url")
+        or raw.get("profile_url")
+        or (f"https://www.facebook.com/profile.php?id={sid}" if sid else None)
+    )
+    joined = None
+    for key in (
+        "marketplace_join_date",
+        "join_time",
+        "join_date",
+        "creation_time",
+        "created_time",
+    ):
+        val = raw.get(key)
+        if isinstance(val, (int, float)) and val > 0:
+            try:
+                joined = datetime.fromtimestamp(int(val), tz=timezone.utc).isoformat()
+            except (OSError, OverflowError, ValueError):
+                joined = None
+            if joined:
+                break
+        text = safe_str(val)
+        if text and ("T" in text or text.isdigit()):
+            if text.isdigit():
+                try:
+                    joined = datetime.fromtimestamp(int(text), tz=timezone.utc).isoformat()
+                except (OSError, OverflowError, ValueError):
+                    joined = None
+            else:
+                joined = text
+            if joined:
+                break
+    rating = safe_float(
+        raw.get("marketplace_rating_value")
+        or raw.get("rating_value")
+        or raw.get("average_rating")
+    )
+    if rating is None:
+        stats = raw.get("marketplace_ratings_stats_or_rating_value")
+        if isinstance(stats, dict):
+            rating = safe_float(
+                stats.get("rating_value") or stats.get("average_rating") or stats.get("value")
+            )
+    out = strip_empty(
+        {
+            "id": sid,
+            "name": name,
+            "url": profile,
+            "joinedAt": joined,
+            "rating": rating,
+        }
+    )
+    return out if out else None
+
+
+def _status_fields(node: dict[str, Any]) -> dict[str, Any]:
+    is_sold = bool(node.get("is_sold")) if node.get("is_sold") is not None else None
+    is_pending = bool(node.get("is_pending")) if node.get("is_pending") is not None else None
+    is_live = bool(node.get("is_live")) if node.get("is_live") is not None else None
+    return {
+        "status": listing_status(is_sold=is_sold, is_pending=is_pending, is_live=is_live),
+        "isSold": is_sold,
+        "isPending": is_pending,
+        "isHidden": bool(node.get("is_hidden")) if node.get("is_hidden") is not None else None,
+        # Deprecated livestream-shaped name — Facebook means "listing still published".
+        # Prefer status. Omitted when it would contradict status=sold/pending.
+        "isPublished": is_live if is_sold is not True and is_pending is not True else None,
+    }
+
+
 def _map_listing(node: dict[str, Any]) -> dict[str, Any] | None:
     lid = safe_str(node.get("id"))
     title = safe_str(node.get("marketplace_listing_title") or node.get("custom_title"))
@@ -381,6 +576,8 @@ def _map_listing(node: dict[str, Any]) -> dict[str, Any] | None:
     if not isinstance(delivery, list) or not delivery:
         delivery = None
     strike_fields = _price_fields(strike) if strike else {}
+    # List cards: cover is ``image``. Omit one-element photos[] (duplicate of image).
+    photos_out = photos if len(photos) > 1 else None
     return strip_empty(
         {
             "platform": "facebook",
@@ -396,19 +593,11 @@ def _map_listing(node: dict[str, Any]) -> dict[str, Any] | None:
             "city": city,
             "state": state,
             "cityPageId": safe_str(city_page.get("id")),
-            "isSold": bool(node.get("is_sold")) if node.get("is_sold") is not None else None,
-            "isLive": bool(node.get("is_live")) if node.get("is_live") is not None else None,
-            "isPending": bool(node.get("is_pending")) if node.get("is_pending") is not None else None,
-            "isHidden": bool(node.get("is_hidden")) if node.get("is_hidden") is not None else None,
-            "isViewerSeller": (
-                bool(node.get("is_viewer_seller"))
-                if node.get("is_viewer_seller") is not None
-                else None
-            ),
+            **_status_fields(node),
+            "seller": _seller(node),
             "deliveryTypes": delivery,
             "image": photos[0] if photos else None,
-            # Cover photo(s) from the search card — not the full gallery.
-            "photos": photos or None,
+            "photos": photos_out,
             "createdAt": _created_at(node),
         }
     )
@@ -430,10 +619,20 @@ def _map_item_detail(node: dict[str, Any], url: str) -> dict[str, Any] | None:
     desc = node.get("redacted_description") if isinstance(node.get("redacted_description"), dict) else {}
     loc_text = node.get("location_text") if isinstance(node.get("location_text"), dict) else {}
     coords = node.get("location") if isinstance(node.get("location"), dict) else {}
+    geo = coords.get("reverse_geocode") if isinstance(coords.get("reverse_geocode"), dict) else {}
     if coords.get("latitude") is None:
         item_loc = node.get("item_location") if isinstance(node.get("item_location"), dict) else {}
         if item_loc.get("latitude") is not None:
             coords = item_loc
+            geo = item_loc.get("reverse_geocode") if isinstance(item_loc.get("reverse_geocode"), dict) else geo
+    loc_display = safe_str(loc_text.get("text"))
+    city = safe_str(geo.get("city"))
+    state = safe_str(geo.get("state"))
+    if not city and loc_display:
+        city, state = parse_city_state(loc_display)
+    if not loc_display:
+        loc_display = ", ".join(p for p in (city, state) if p) or None
+    city_page = geo.get("city_page") if isinstance(geo.get("city_page"), dict) else {}
     photos = _photo_uris(node)
     delivery = node.get("delivery_types")
     if not isinstance(delivery, list):
@@ -452,14 +651,15 @@ def _map_item_detail(node: dict[str, Any], url: str) -> dict[str, Any] | None:
             "strikethroughPriceAmount": strike_fields.get("priceAmount"),
             "categoryId": safe_str(node.get("marketplace_listing_category_id")),
             "condition": _condition_label(node),
-            "location": safe_str(loc_text.get("text")),
+            "location": loc_display,
+            "city": city,
+            "state": state,
+            "cityPageId": safe_str(city_page.get("id")),
             "latitude": coords.get("latitude"),
             "longitude": coords.get("longitude"),
-            "isSold": bool(node.get("is_sold")) if node.get("is_sold") is not None else None,
-            "isLive": bool(node.get("is_live")) if node.get("is_live") is not None else None,
-            "isPending": bool(node.get("is_pending")) if node.get("is_pending") is not None else None,
-            "isHidden": bool(node.get("is_hidden")) if node.get("is_hidden") is not None else None,
-            "deliveryTypes": delivery,
+            **_status_fields(node),
+            "seller": _seller(node),
+            "deliveryTypes": delivery or None,
             "image": photos[0] if photos else None,
             "photos": photos or None,
             "createdAt": _created_at(node),
@@ -523,11 +723,26 @@ async def marketplace_search_native(
     if status != 200 or not body or "marketplace_listing_title" not in body:
         return None
 
+    origin_city, origin_state = parse_city_state(location)
+    radius = None
+    if filters and filters.get("radius"):
+        try:
+            radius = int(filters["radius"])
+        except (TypeError, ValueError):
+            radius = None
+
     mapped: list[dict[str, Any]] = []
     for node in _extract_nodes(body):
         row = _map_listing(node)
         if row:
-            mapped.append(row)
+            mapped.append(
+                annotate_search_locality(
+                    row,
+                    origin_city=origin_city,
+                    origin_state=origin_state,
+                    radius_miles=radius,
+                )
+            )
 
     page_cursor, has_next = _extract_page_info(body)
     if end_cursor_in and not page_cursor:
@@ -595,6 +810,9 @@ def _merge_detail_into_listing(
         "latitude",
         "longitude",
         "location",
+        "city",
+        "state",
+        "cityPageId",
         "price",
         "priceFormatted",
         "priceAmount",
@@ -603,10 +821,12 @@ def _merge_detail_into_listing(
         "strikethroughPriceFormatted",
         "strikethroughPriceAmount",
         "categoryId",
+        "status",
         "isSold",
-        "isLive",
         "isPending",
         "isHidden",
+        "isPublished",
+        "seller",
         "deliveryTypes",
         "createdAt",
         "image",
@@ -615,6 +835,9 @@ def _merge_detail_into_listing(
     ):
         if not _empty(detail.get(key)):
             out[key] = detail[key]
+    # Drop legacy livestream-shaped key if an old cached row still has it.
+    out.pop("isLive", None)
+    out.pop("isViewerSeller", None)
     return strip_empty(out)
 
 
@@ -636,14 +859,40 @@ async def marketplace_search_details_native(
     if not listings:
         return page
 
+    origin_city, origin_state = parse_city_state(location)
+    radius = None
+    if filters and filters.get("radius"):
+        try:
+            radius = int(filters["radius"])
+        except (TypeError, ValueError):
+            radius = None
+
+    # Resolve search-origin coords once so enriched rows can carry distanceMiles.
+    origin_lat = origin_lng = None
+    try:
+        from app.services import facebook_marketplace_location_native as _loc_native
+
+        places = await _loc_native.marketplace_location_search_native(location, limit=1)
+        if places:
+            origin_lat = safe_float(places[0].get("latitude"))
+            origin_lng = safe_float(places[0].get("longitude"))
+    except Exception:  # noqa: BLE001 — locality annotate still works without coords
+        pass
+
     sem = asyncio.Semaphore(_ENRICH_CONCURRENCY)
 
     async def _enrich(row: dict[str, Any]) -> dict[str, Any]:
         async with sem:
             detail = await marketplace_item_native(safe_str(row.get("url")) or "")
-        if detail:
-            return _merge_detail_into_listing(row, detail)
-        return row
+        merged = _merge_detail_into_listing(row, detail) if detail else row
+        return annotate_search_locality(
+            merged,
+            origin_city=origin_city,
+            origin_state=origin_state,
+            origin_lat=origin_lat,
+            origin_lng=origin_lng,
+            radius_miles=radius,
+        )
 
     enriched = list(await asyncio.gather(*[_enrich(row) for row in listings]))
     return {

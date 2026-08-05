@@ -12,7 +12,7 @@ import asyncio
 import re
 import time
 from urllib.parse import quote
-from typing import Any
+from typing import Any, Literal
 
 import httpx
 import structlog
@@ -86,16 +86,35 @@ def _to_normalize_shape(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+MatchMode = Literal["any", "all"]
+
+# Cap Decodo HTML SERP so clients are not billed after ALB/nginx disconnect.
+DECODO_TIMEOUT_SECONDS = 40.0
+
+
 def _query_tokens(q: str) -> list[str]:
     return [t for t in re.split(r"\W+", (q or "").lower()) if len(t) >= 2]
 
 
-def ad_matches_query(row: dict[str, Any], q: str) -> bool:
-    """True when every query token appears in advertiser name or ad copy.
+def normalize_match_mode(match: str | None) -> MatchMode:
+    raw = (match or "any").strip().lower()
+    if raw in {"any", "or"}:
+        return "any"
+    if raw in {"all", "and"}:
+        return "all"
+    raise ValueError('match must be "any" or "all"')
 
-    TikTok's library SERP is noisy (keyword soft-match); without this filter
-    ``q=fashion`` can return Romanian good-morning ads. Prefer empty over
-    irrelevant — brand performance intel belongs on Creative Center Top Ads.
+
+def ad_matches_query(
+    row: dict[str, Any],
+    q: str,
+    *,
+    match: MatchMode = "any",
+) -> bool:
+    """True when query tokens appear as case-insensitive substrings in copy.
+
+    ``match=any`` (default): at least one token. ``match=all``: every token.
+    TikTok's library SERP is noisy; local filtering is a second pass.
     """
     tokens = _query_tokens(q)
     if not tokens:
@@ -119,12 +138,44 @@ def ad_matches_query(row: dict[str, Any], q: str) -> bool:
     if not hay.strip():
         # No copy yet (pre-hydrate) — keep for hydrate, filter again later.
         return True
-    return all(t in hay for t in tokens)
+    if match == "all":
+        return all(t in hay for t in tokens)
+    return any(t in hay for t in tokens)
 
 
-def filter_ads_by_query(rows: list[dict[str, Any]], q: str) -> list[dict[str, Any]]:
-    """Drop ads that do not mention the query tokens after captions are filled."""
-    return [r for r in rows if isinstance(r, dict) and ad_matches_query(r, q)]
+def filter_ads_by_query(
+    rows: list[dict[str, Any]],
+    q: str,
+    *,
+    match: MatchMode = "any",
+) -> dict[str, Any]:
+    """Apply local keyword filter; return rows + match transparency fields."""
+    matched_from = len(rows)
+    if not (q or "").strip():
+        return {
+            "rows": list(rows),
+            "matchedFrom": matched_from,
+            "filteredOut": 0,
+            "literalMatches": matched_from,
+            "match": match,
+            "matchBasis": "none",
+        }
+    # Rows without copy yet stay in (hydrate path); drop only after text exists
+    # and fails the token test.
+    kept: list[dict[str, Any]] = []
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        if ad_matches_query(r, q, match=match):
+            kept.append(r)
+    return {
+        "rows": kept,
+        "matchedFrom": matched_from,
+        "filteredOut": matched_from - len(kept),
+        "literalMatches": len(kept),
+        "match": match,
+        "matchBasis": match,
+    }
 
 
 async def _post_search(
@@ -303,18 +354,16 @@ async def search_ads(
     if not rows:
         return []
     hydrated = await _hydrate_captions(rows, country=region)
-    # Filter after hydrate — SERP rows often lack text until detail fetch.
-    matched = filter_ads_by_query(hydrated, query)
-    filled = sum(1 for r in matched if r.get("text") or r.get("body"))
+    # Caller applies filter_ads_by_query (match=any|all + matchedFrom).
+    filled = sum(1 for r in hydrated if r.get("text") or r.get("body"))
     log.info(
         "tiktok_ads_native_search_captions",
         q=query[:40],
         region=region,
         n=len(hydrated),
-        matched=len(matched),
         with_text=filled,
     )
-    return matched[:want]
+    return hydrated[: max(want * 3, want)]
 
 
 def detail_url(ad_id: str, *, region: str = "GB") -> str:
@@ -536,7 +585,7 @@ async def ad_details(
     if not aid.isdigit() or not decodo_fetch.enabled():
         return None
     url = detail_url(aid, region=country)
-    got = await decodo_fetch.fetch_url(url, timeout=120.0, headless="html")
+    got = await decodo_fetch.fetch_url(url, timeout=DECODO_TIMEOUT_SECONDS, headless="html")
     if not got:
         return None
     status, html = got
@@ -571,7 +620,7 @@ async def search_ads_via_decodo(
         return None
     region = (country or "GB").upper()
     url = f"https://library.tiktok.com/ads?region={region}&query={quote(query, safe='')}"
-    got = await decodo_fetch.fetch_url(url, timeout=120.0, headless="html")
+    got = await decodo_fetch.fetch_url(url, timeout=DECODO_TIMEOUT_SECONDS, headless="html")
     if not got:
         return None
     status, body = got

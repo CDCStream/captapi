@@ -118,13 +118,6 @@ def _seconds_to_clock(seconds: int | None) -> str | None:
     return f"{minutes}:{secs:02d}"
 
 
-def _duration_formatted(seconds: int | None) -> str | None:
-    """YouTube-style zero-padded ``HH:MM:SS`` (shared helper)."""
-    from app.services.youtube_native import format_duration_hms
-
-    return format_duration_hms(seconds)
-
-
 def _parse_count(raw: str | None) -> int | None:
     """Parse ``1.2K`` / ``3M`` / ``12,345`` view strings."""
     if not raw:
@@ -503,9 +496,9 @@ def apply_embedjs(card: dict[str, Any], payload: dict[str, Any]) -> dict[str, An
     if dur is not None and dur > 0:
         card["durationSeconds"] = dur
         card["durationText"] = _seconds_to_clock(dur)
-        card["durationFormatted"] = _duration_formatted(dur)
-        # Legacy alias — prefer durationSeconds / durationText / durationFormatted.
-        card["duration"] = card["durationText"]
+        # Canonical pair only — no legacy duration string / durationFormatted.
+        card.pop("duration", None)
+        card.pop("durationFormatted", None)
 
     live_raw = payload.get("live")
     if live_raw is not None:
@@ -665,8 +658,6 @@ def parse_video_html(html: str, url: str | None = None) -> dict[str, Any] | None
         "comments": _comments_from_html(html),
         "durationSeconds": duration_seconds,
         "durationText": duration_text,
-        "durationFormatted": _duration_formatted(duration_seconds),
-        "duration": duration_text,
         "publishedAt": safe_str((video or {}).get("uploadDate")),
         "thumbnail": thumbnail,
         "width": None,

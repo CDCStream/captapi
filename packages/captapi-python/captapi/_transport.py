@@ -76,6 +76,19 @@ class SyncTransport:
             raise CaptapiError(f"Request to {path} failed: {exc}", code="network_error") from exc
         return _check(response, path)
 
+    def post_multipart(self, path: str, params: dict[str, Any]) -> dict[str, Any]:
+        clean = _clean_params(params)
+        file_path = clean.pop("file", None)
+        if not file_path or not isinstance(file_path, str):
+            raise CaptapiError("Missing required form field: file (local path)", code="missing_file")
+        data = {k: str(v) for k, v in clean.items()}
+        try:
+            with open(file_path, "rb") as fh:
+                response = self._client.post(path, data=data, files={"file": fh})
+        except httpx.HTTPError as exc:
+            raise CaptapiError(f"Request to {path} failed: {exc}", code="network_error") from exc
+        return _check(response, path)
+
     def close(self) -> None:
         self._client.close()
 
@@ -91,6 +104,19 @@ class AsyncTransport:
     async def get(self, path: str, params: dict[str, Any]) -> dict[str, Any]:
         try:
             response = await self._client.get(path, params=_clean_params(params))
+        except httpx.HTTPError as exc:
+            raise CaptapiError(f"Request to {path} failed: {exc}", code="network_error") from exc
+        return _check(response, path)
+
+    async def post_multipart(self, path: str, params: dict[str, Any]) -> dict[str, Any]:
+        clean = _clean_params(params)
+        file_path = clean.pop("file", None)
+        if not file_path or not isinstance(file_path, str):
+            raise CaptapiError("Missing required form field: file (local path)", code="missing_file")
+        data = {k: str(v) for k, v in clean.items()}
+        try:
+            with open(file_path, "rb") as fh:
+                response = await self._client.post(path, data=data, files={"file": fh})
         except httpx.HTTPError as exc:
             raise CaptapiError(f"Request to {path} failed: {exc}", code="network_error") from exc
         return _check(response, path)

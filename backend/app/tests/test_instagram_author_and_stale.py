@@ -24,12 +24,12 @@ def test_build_ig_author_stable_keys() -> None:
     assert author["displayName"] == "National Geographic"
     assert author["verified"] is True
     assert author["profileImage"] == "https://cdn.example/a.jpg"
-    assert author["url"] == "https://instagram.com/natgeo"
+    assert author["url"] == "https://www.instagram.com/natgeo/"
 
 
 def test_merge_ig_author_fills_gaps() -> None:
     merged = decodo.merge_ig_author(
-        {"username": "fan", "url": "https://instagram.com/fan"},
+        {"username": "fan", "url": "https://www.instagram.com/fan/"},
         {"verified": False, "profileImage": "https://cdn.example/f.jpg", "followers": 12},
     )
     assert merged["verified"] is False

@@ -831,22 +831,27 @@ def _normalize_marketplace_detail(item: dict, url: str) -> dict:
 
 
 def _normalize_marketplace_location(item: dict) -> dict | None:
+    """Legacy Apify row mapper — unused by the native location-search path.
+
+    Prefer facebook_marketplace_location_native (Facebook cityPageId as id).
+    """
     city = safe_str(item.get("city"))
     state = safe_str(item.get("state"))
     label = safe_str(item.get("location_display") or ", ".join(p for p in [city, state] if p))
     if not (label or city or state):
         return None
-    # Stable id by place label (not per-listing coords) so details=true can
-    # enrich latitude/longitude without exploding duplicate city rows.
-    key = "|".join(str(v or "").lower() for v in [label, city, state])
-    return {
-        "id": key,
-        "name": label or city or state,
-        "city": city,
-        "state": state,
-        "latitude": item.get("latitude"),
-        "longitude": item.get("longitude"),
-    }
+    city_page_id = safe_str(item.get("city_page_id") or item.get("cityPageId"))
+    return strip_empty(
+        {
+            "id": city_page_id,
+            "cityPageId": city_page_id,
+            "name": label or city or state,
+            "city": city,
+            "state": state,
+            "latitude": item.get("latitude"),
+            "longitude": item.get("longitude"),
+        }
+    )
 
 
 # US state abbreviations — used to pull city from free-form TEXT places.
@@ -1923,7 +1928,7 @@ async def facebook_marketplace_item(
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-item",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1964,7 +1969,12 @@ async def facebook_marketplace_search(
     ),
     deliveryMethod: str | None = Query(
         None,
-        description="Delivery filter: local_pickup, shipping, or all.",
+        description=(
+            "Delivery filter: local_pickup, shipping, or all. "
+            "Shipped listings (SHIPPING / SHIPPING_ONSITE) can appear nationwide "
+            "outside radiusMiles — use local_pickup for nearby-only results. "
+            "Each row includes isLocal / shipsOutsideRadius so you can tell."
+        ),
     ),
     availability: str | None = Query(
         None,
@@ -1972,7 +1982,10 @@ async def facebook_marketplace_search(
     ),
     radiusMiles: int | None = Query(
         None,
-        description="Search radius in miles (1,2,5,10,20,40,60,80,100,250,500). Default ~40.",
+        description=(
+            "Search radius in miles (1,2,5,10,20,40,60,80,100,250,500). Default ~40. "
+            "Does not exclude nationwide shipped listings — see deliveryMethod=local_pickup."
+        ),
     ),
     category: str | None = Query(
         None,
@@ -2054,7 +2067,7 @@ async def facebook_marketplace_search(
                 "details": details,
                 "filters": filters,
                 "cursor": cursor or "",
-                "v": 6,
+                "v": 7,
             },
             runner=_run,
             ctx=ctx,
@@ -2067,17 +2080,27 @@ async def facebook_marketplace_search(
         return ApiResponse(data=data)
 
 
-@router.get("/marketplace-location-search", summary="Search Facebook Marketplace locations")
+@router.get(
+    "/marketplace-location-search",
+    summary="Resolve Facebook Marketplace locations",
+    description=(
+        "Disambiguate a city/place name into Marketplace hubs with lat/lng and "
+        "Facebook cityPageId (same id search listings expose). marketplace-search "
+        "already accepts a city string — use this when the name is ambiguous "
+        "(Austin TX vs Austin MN) or you need coordinates / cityPageId before searching. "
+        "Flat 2 credits."
+    ),
+)
 async def facebook_marketplace_location_search(
-    q: str = Query(..., min_length=2, description="City/place search query, e.g. Austin"),
-    limit: int = Query(10, ge=1, le=50),
-    details: bool = Query(
-        False,
+    q: str = Query(
+        ...,
+        min_length=2,
         description=(
-            "Legacy flag. Coordinates are always included when Facebook exposes them. "
-            "Flat 2 credits either way."
+            "City/place query. Include a state for a single hit (e.g. 'Austin, TX'); "
+            "bare names like 'Austin' may return multiple candidates for disambiguation."
         ),
     ),
+    limit: int = Query(10, ge=1, le=50),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -2089,27 +2112,17 @@ async def facebook_marketplace_location_search(
         base_credits=CREDIT_FB_MARKETPLACE_LOCATION_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            _ = details  # accepted for API compat; coords come from marketplace page.
             results = await facebook_marketplace_location_native.marketplace_location_search_native(
                 q, limit=limit
             )
             if not results:
-                results = [
-                    {
-                        "id": q.strip().lower(),
-                        "name": q.strip(),
-                        "city": q.strip(),
-                        "state": None,
-                        "latitude": None,
-                        "longitude": None,
-                    }
-                ]
+                raise HTTPException(status_code=404, detail="Marketplace location not found")
             ctx["source"] = "direct"
             return {"query": q, "totalReturned": len(results), "locations": results}
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-location-search",
-            params={"q": q, "limit": limit, "details": details, "v": 4},
+            params={"q": q, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

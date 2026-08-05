@@ -42,6 +42,12 @@ def test_normalize_trending_item_splits_composite_id() -> None:
     assert row["shortcode"] == "DbL6n0ggXDZ"
     assert row["postType"] == "Video"
     assert row["mentions"] == ["NASAHubble"]
+    assert row["engagement"]["views"] == 13_000_000
+    assert row["engagement"]["likes"] == 485_567
+    assert "description" not in row
+    assert "topic" not in row
+    assert "section" not in row
+    assert row["author"]["url"] == "https://www.instagram.com/nasa/"
     assert ig_router._filter_trending_reels_only([row]) == [row]
 
 
@@ -90,6 +96,8 @@ def test_freshness_marks_stale_after_refresh_window() -> None:
     assert fresh["cached"] is True
     assert fresh["stale"] is False
     assert fresh["ageHours"] < 6
+    assert "snapshotAt" in fresh
+    assert fresh["cachedAt"] == fresh["snapshotAt"]
 
     old = ig_router._trending_freshness(
         cached_at=datetime.now(timezone.utc) - timedelta(hours=32),
@@ -98,6 +106,22 @@ def test_freshness_marks_stale_after_refresh_window() -> None:
     assert old["cached"] is True
     assert old["stale"] is True
     assert old["ageHours"] >= 30
+
+    native = ig_router._trending_freshness(cached_at=None, from_snapshot=False)
+    assert native["cached"] is False
+    assert "cachedAt" not in native
+    assert "snapshotAt" not in native
+    assert native["ageHours"] == 0
+
+
+def test_trending_payload_includes_iso_country_code() -> None:
+    payload = ig_router._trending_payload(
+        [],
+        country="United States",
+        freshness={"cached": False, "stale": False, "ageHours": 0},
+    )
+    assert payload["country"] == "United States"
+    assert payload["countryCode"] == "US"
 
 
 def test_sync_wait_budget_is_gateway_safe() -> None:

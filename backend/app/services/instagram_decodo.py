@@ -197,6 +197,14 @@ _HASHTAG_RE = re.compile(r"#(\w*[^\W\d]\w*)", re.UNICODE)
 _MENTION_RE = re.compile(r"@([A-Za-z0-9_](?:[A-Za-z0-9_.]*[A-Za-z0-9_])?)")
 
 
+def _canonical_profile_url(username: str | None) -> str | None:
+    """``https://www.instagram.com/{user}/`` — join-safe with channel-details."""
+    uname = safe_str(username)
+    if not uname:
+        return None
+    return f"https://www.instagram.com/{uname.lstrip('@')}/"
+
+
 def build_ig_author(
     user: dict[str, Any] | None = None,
     *,
@@ -207,8 +215,9 @@ def build_ig_author(
     """One author shape for hashtag / reels / tagged / channel list items.
 
     Always emits the same keys when values exist: id, username, displayName,
-    url, verified, profileImage, followers, postCount, private. Callers that
-    only have a lean owner still get username + url; enrich fills the rest.
+    url (www + trailing slash), verified, profileImage, followers, postCount,
+    isPrivate. Callers that only have a lean owner still get username + url;
+    enrich fills the rest.
     """
     src = user if isinstance(user, dict) else {}
     uname = safe_str(username or src.get("username"))
@@ -216,6 +225,8 @@ def build_ig_author(
     if verified is None:
         verified = src.get("verified")
     private = src.get("is_private")
+    if private is None:
+        private = src.get("isPrivate")
     if private is None:
         private = src.get("private")
     followers_n = followers
@@ -232,14 +243,14 @@ def build_ig_author(
         "id": safe_str(src.get("id") or src.get("pk") or src.get("pk_id")),
         "username": uname,
         "displayName": safe_str(src.get("full_name") or src.get("displayName")),
-        "url": f"https://instagram.com/{uname}" if uname else None,
+        "url": _canonical_profile_url(uname),
         "verified": verified,
         "profileImage": _image_url(src)
         or safe_str(src.get("profile_pic_url") or src.get("profileImage"))
         or None,
         "followers": followers_n,
         "postCount": posts_n,
-        "private": private,
+        "isPrivate": private,
     }
     return {k: v for k, v in out.items() if v is not None}
 
@@ -250,6 +261,13 @@ def merge_ig_author(
     """Fill missing author fields from a richer profile/stats dict."""
     base = dict(author) if isinstance(author, dict) else {}
     extra = enrich if isinstance(enrich, dict) else {}
+    # Prefer isPrivate; accept legacy private from older enrich blobs.
+    if base.get("isPrivate") is None and base.get("private") is not None:
+        base["isPrivate"] = base.pop("private")
+    elif "private" in base:
+        base.pop("private", None)
+    if extra.get("isPrivate") is None and extra.get("private") is not None:
+        extra = {**extra, "isPrivate": extra["private"]}
     for key in (
         "id",
         "username",
@@ -259,14 +277,14 @@ def merge_ig_author(
         "profileImage",
         "followers",
         "postCount",
-        "private",
+        "isPrivate",
     ):
         if base.get(key) is None and extra.get(key) is not None:
             base[key] = extra[key]
     uname = safe_str(base.get("username"))
-    if uname and not base.get("url"):
-        base["url"] = f"https://instagram.com/{uname}"
-    return {k: v for k, v in base.items() if v is not None}
+    if uname:
+        base["url"] = _canonical_profile_url(uname)
+    return {k: v for k, v in base.items() if v is not None and k != "private"}
 
 
 def hidden_count(value: Any) -> int | None:

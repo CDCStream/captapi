@@ -25,9 +25,10 @@ router = APIRouter()
 RATE = 1.15
 # Native Pathfinder (web-player) — flat fee; our cost ~$0.
 CREDIT_NATIVE = 2
-# Artist / track / podcast details: Pathfinder GraphQL, priced at 1 credit (SC parity).
+# Artist / track / album / podcast details: Pathfinder GraphQL, priced at 1 credit.
 CREDIT_ARTIST = 1
 CREDIT_TRACK = 1
+CREDIT_ALBUM = 1
 CREDIT_PODCAST = 1
 
 
@@ -380,7 +381,7 @@ def _artist_fields(item: dict[str, Any]) -> dict[str, Any]:
     """Lift GraphQL-only artist intel into a stable top-level shape.
 
     Keys are always present (lists may be empty; scalars may be null) so clients
-    never special-case missing keys. ``raw`` remains for advanced use.
+    never special-case missing keys. ``raw`` is opt-in on the artist route.
     """
     stats = item.get("stats") if isinstance(item.get("stats"), dict) else {}
     profile = item.get("profile") if isinstance(item.get("profile"), dict) else {}
@@ -389,6 +390,12 @@ def _artist_fields(item: dict[str, Any]) -> dict[str, Any]:
     related = item.get("relatedContent") if isinstance(item.get("relatedContent"), dict) else {}
     albums_block = discography.get("albums") if isinstance(discography.get("albums"), dict) else {}
     singles_block = discography.get("singles") if isinstance(discography.get("singles"), dict) else {}
+    # queryArtistOverview only embeds a short sample (often 2) even when
+    # totalCount is dozens — surface that so callers don't think albums[] is complete.
+    albums = _artist_releases(albums_block, limit=50)
+    singles = _artist_releases(singles_block, limit=50)
+    albums_count = safe_int(albums_block.get("totalCount"))
+    singles_count = safe_int(singles_block.get("totalCount"))
     return {
         "worldRank": safe_int(stats.get("worldRank")),
         "topCities": _artist_top_cities(stats),
@@ -397,10 +404,16 @@ def _artist_fields(item: dict[str, Any]) -> dict[str, Any]:
         "topTracks": _artist_top_tracks(discography),
         "concerts": _artist_concerts(goods),
         "relatedArtists": _artist_related(related),
-        "albums": _artist_releases(albums_block, limit=20),
-        "singles": _artist_releases(singles_block, limit=20),
-        "albumsCount": safe_int(albums_block.get("totalCount")),
-        "singlesCount": safe_int(singles_block.get("totalCount")),
+        "albums": albums,
+        "singles": singles,
+        "albumsCount": albums_count,
+        "singlesCount": singles_count,
+        "albumsHasMore": bool(
+            albums_count is not None and albums_count > len(albums)
+        ),
+        "singlesHasMore": bool(
+            singles_count is not None and singles_count > len(singles)
+        ),
     }
 
 
@@ -464,6 +477,97 @@ def _track_preview_url(item: dict[str, Any]) -> str | None:
             if url:
                 return url
     return safe_str(item.get("previewUrl") or item.get("preview_url"))
+
+
+def _slim_episode_raw(item: dict[str, Any]) -> dict[str, Any]:
+    """Drop UI color dumps, play state, and per-episode show copies from raw."""
+    cleaned = _strip_empty_keys(item)
+    if not isinstance(cleaned, dict):
+        return {}
+    for key in ("visualIdentity", "playedState", "podcastV2"):
+        cleaned.pop(key, None)
+    # htmlDescription duplicates description — keep description only in raw.
+    if cleaned.get("description") and cleaned.get("htmlDescription"):
+        cleaned.pop("htmlDescription", None)
+    return cleaned
+
+
+def _episode_fields(item: dict[str, Any]) -> dict[str, Any]:
+    """Lift episode GraphQL fields the podcast page already treats as first-class."""
+    uri = safe_str(item.get("uri"))
+    eid = safe_str(item.get("id")) or _spotify_id(uri, "episode")
+
+    preview = item.get("previewPlayback") if isinstance(item.get("previewPlayback"), dict) else {}
+    audio_preview = (
+        preview.get("audioPreview") if isinstance(preview.get("audioPreview"), dict) else {}
+    )
+    preview_url = safe_str(audio_preview.get("cdnUrl") or item.get("previewUrl"))
+
+    audio_urls: list[str] = []
+    audio = item.get("audio") if isinstance(item.get("audio"), dict) else {}
+    for row in audio.get("items") or []:
+        if isinstance(row, dict):
+            u = safe_str(row.get("url"))
+            if u and u not in audio_urls:
+                audio_urls.append(u)
+
+    media_types = [
+        str(t).strip()
+        for t in (item.get("mediaTypes") or [])
+        if isinstance(t, str) and str(t).strip()
+    ]
+    has_video = "VIDEO" in {t.upper() for t in media_types} if media_types else None
+
+    rating = item.get("contentRating") if isinstance(item.get("contentRating"), dict) else {}
+    label = safe_str(rating.get("label") or item.get("contentRating"))
+    explicit = True if label == "EXPLICIT" else (False if label else None)
+    if explicit is None:
+        explicit = _as_bool(item.get("isExplicit") or item.get("explicit"))
+
+    release_date = _release_date_of(item.get("releaseDate")) or _release_date_of(item.get("date"))
+
+    transcripts = item.get("transcripts") if isinstance(item.get("transcripts"), dict) else {}
+    transcript_items = list(transcripts.get("items") or [])
+    has_transcripts = bool(transcript_items)
+
+    restrictions = item.get("restrictions") if isinstance(item.get("restrictions"), dict) else {}
+    paywall = restrictions.get("paywallContent")
+    paywall_content = bool(paywall) if isinstance(paywall, bool) else None
+
+    show_types: list[str] = []
+    for t in item.get("showTypes") or []:
+        if isinstance(t, str) and t.strip():
+            show_types.append(t.strip())
+    if not show_types:
+        podcast_v2 = item.get("podcastV2") if isinstance(item.get("podcastV2"), dict) else {}
+        show = podcast_v2.get("data") if isinstance(podcast_v2.get("data"), dict) else {}
+        for t in show.get("showTypes") or []:
+            if isinstance(t, str) and t.strip():
+                show_types.append(t.strip())
+
+    playability = item.get("playability") if isinstance(item.get("playability"), dict) else {}
+    playable = playability.get("playable") if isinstance(playability.get("playable"), bool) else None
+    if playable is None:
+        playable = _as_bool(item.get("isPlayable") or item.get("playable"))
+
+    out: dict[str, Any] = {
+        "id": eid,
+        "previewUrl": preview_url,
+        "audioUrls": audio_urls,
+        "releaseDate": release_date,
+        "mediaTypes": media_types,
+        "hasVideo": has_video,
+        "contentRating": label,
+        "explicit": explicit,
+        "hasTranscripts": has_transcripts,
+        "paywallContent": paywall_content,
+        "showTypes": show_types,
+        "playable": playable,
+        "htmlDescription": safe_str(item.get("htmlDescription")),
+    }
+    if has_transcripts:
+        out["transcripts"] = transcript_items
+    return {k: v for k, v in out.items() if v not in (None, "", []) or k in ("hasTranscripts", "explicit", "playable", "hasVideo", "paywallContent")}
 
 
 def _podcast_fields(item: dict[str, Any]) -> dict[str, Any]:
@@ -544,8 +648,102 @@ def _podcast_fields(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _track_isrc(item: dict[str, Any]) -> str | None:
+    """ISRC when Pathfinder/Apify exposes it (often absent on getTrack)."""
+    for key in ("isrc", "ISRC"):
+        val = safe_str(item.get(key))
+        if val:
+            return val
+    for nest_key in ("externalIds", "external_ids", "externalId"):
+        nest = item.get(nest_key)
+        if isinstance(nest, dict):
+            val = safe_str(nest.get("isrc") or nest.get("ISRC"))
+            if val:
+                return val
+        elif isinstance(nest, str) and nest.strip():
+            return nest.strip()
+    return None
+
+
+def _release_date_of(value: Any) -> str | None:
+    if isinstance(value, dict):
+        return safe_str(value.get("isoString") or value.get("releaseDate") or value.get("year"))
+    return safe_str(value)
+
+
+def _album_track_row(entry: Any) -> dict[str, Any] | None:
+    """One tracksV2 item → clean track row for album.tracks[]."""
+    if not isinstance(entry, dict):
+        return None
+    track = entry.get("track") if isinstance(entry.get("track"), dict) else entry
+    if not isinstance(track, dict):
+        return None
+    uri = safe_str(track.get("uri"))
+    tid = _spotify_id(uri, "track") or safe_str(track.get("id"))
+    duration = track.get("duration") if isinstance(track.get("duration"), dict) else {}
+    duration_ms = safe_int(duration.get("totalMilliseconds") or track.get("durationMs"))
+    rating = track.get("contentRating") if isinstance(track.get("contentRating"), dict) else {}
+    label = safe_str(rating.get("label") or track.get("contentRating"))
+    explicit = True if label == "EXPLICIT" else (False if label else None)
+    if explicit is None:
+        explicit = _as_bool(track.get("isExplicit") or track.get("explicit"))
+    artists = _track_artist_items(track)
+    row = {
+        "trackNumber": safe_int(track.get("trackNumber") or track.get("track_number")),
+        "discNumber": safe_int(track.get("discNumber") or track.get("disc_number")),
+        "name": safe_str(track.get("name")),
+        "uri": uri or (f"spotify:track:{tid}" if tid else None),
+        "url": f"https://open.spotify.com/track/{tid}" if tid else None,
+        "durationMs": duration_ms,
+        "playCount": safe_int(track.get("playcount") or track.get("playCount")),
+        "explicit": explicit,
+        "artists": artists or None,
+    }
+    return {k: v for k, v in row.items() if v not in (None, "", [])}
+
+
+def _album_fields(item: dict[str, Any]) -> dict[str, Any]:
+    """Lift getAlbum: tracks[], joinable artists, releaseDate, album-level explicit."""
+    tracks_block = item.get("tracksV2") or item.get("tracks") or item.get("content") or {}
+    track_rows: list[dict[str, Any]] = []
+    if isinstance(tracks_block, dict):
+        for entry in _items(tracks_block):
+            row = _album_track_row(entry)
+            if row:
+                track_rows.append(row)
+    total_tracks = (
+        safe_int(tracks_block.get("totalCount")) if isinstance(tracks_block, dict) else None
+    ) or len(track_rows)
+
+    artists: list[dict[str, Any]] = []
+    for row in _items(item.get("artists")):
+        ref = _artist_ref(row)
+        if ref:
+            artists.append({k: v for k, v in ref.items() if v not in (None, "", [])})
+
+    release_date = _release_date_of(item.get("date")) or _release_date_of(item.get("releaseDate"))
+
+    flags = [t.get("explicit") for t in track_rows if isinstance(t.get("explicit"), bool)]
+    if any(flags):
+        explicit: bool | None = True
+    elif flags and all(f is False for f in flags):
+        explicit = False
+    else:
+        explicit = _as_bool(item.get("isExplicit") or item.get("explicit"))
+
+    out: dict[str, Any] = {
+        "artists": artists,
+        "tracks": track_rows,
+        "totalTracks": total_tracks,
+        "tracksHasMore": bool(total_tracks and total_tracks > len(track_rows)),
+        "releaseDate": release_date,
+        "explicit": explicit,
+    }
+    return {k: v for k, v in out.items() if v not in (None, "", []) or k in ("tracks", "artists")}
+
+
 def _track_fields(item: dict[str, Any], album: dict[str, Any]) -> dict[str, Any]:
-    """Lift getTrack fields: playCount, ids, rating, albumInfo. Omits bulky raw."""
+    """Lift getTrack fields: playCount, structured artists/album, rating. No bulky raw."""
     uri = safe_str(item.get("uri"))
     tid = safe_str(item.get("id")) or _spotify_id(uri, "track")
     rating = item.get("contentRating") if isinstance(item.get("contentRating"), dict) else {}
@@ -559,10 +757,10 @@ def _track_fields(item: dict[str, Any], album: dict[str, Any]) -> dict[str, Any]
     if isinstance(album, dict):
         date = album.get("date") if isinstance(album.get("date"), dict) else {}
         release_date = safe_str(date.get("isoString") or album.get("releaseDate") or album.get("release_date"))
-    artist_items = _track_artist_items(item)
-    album_info = None
+    artists = _track_artist_items(item)
+    album_obj = None
     if album_id or (isinstance(album, dict) and album.get("name")):
-        album_info = {
+        album_obj = {
             k: v
             for k, v in {
                 "id": album_id,
@@ -586,7 +784,9 @@ def _track_fields(item: dict[str, Any], album: dict[str, Any]) -> dict[str, Any]
     return {
         "id": tid,
         "playCount": safe_int(item.get("playcount") or item.get("playCount")),
+        # Spotify Web API 0–100 popularity is not on Pathfinder getTrack.
         "popularity": safe_int(item.get("popularity")),
+        "isrc": _track_isrc(item),
         "trackNumber": safe_int(item.get("trackNumber") or item.get("track_number")),
         "discNumber": safe_int(item.get("discNumber") or item.get("disc_number")),
         "contentRating": label,
@@ -595,8 +795,9 @@ def _track_fields(item: dict[str, Any], album: dict[str, Any]) -> dict[str, Any]
         "playable": playable,
         "previewUrl": _track_preview_url(item),
         "releaseDate": release_date,
-        "artistItems": artist_items,
-        "albumInfo": album_info,
+        # Joinable shapes (chain into /spotify/artist and /spotify/album).
+        "artists": artists,
+        "album": album_obj,
     }
 
 
@@ -669,22 +870,18 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
         "scrapedAt": scraped_at,
         "raw": _strip_empty_keys(item),
     }
+    # searchTerm belongs on the search envelope (query), not every result.raw.
+    raw_payload = out.get("raw")
+    if isinstance(raw_payload, dict):
+        raw_payload.pop("searchTerm", None)
     if sid and not out.get("url"):
         out["url"] = f"https://open.spotify.com/{uri_kind}/{sid}"
     if kind == "artist":
         out.update(_artist_fields(item))
     if kind == "track":
-        # getTrack payload embeds full artist discographies — do not leak as raw.
-        out.pop("raw", None)
         track_extra = _track_fields(item, album if isinstance(album, dict) else {})
+        # Structured artists[] / album{} overwrite the bare string forms from above.
         out.update(track_extra)
-        # Prefer structured artist names when string list was empty.
-        if not out.get("artists") and track_extra.get("artistItems"):
-            out["artists"] = [
-                a["name"] for a in track_extra["artistItems"] if isinstance(a, dict) and a.get("name")
-            ]
-        if not out.get("album") and isinstance(track_extra.get("albumInfo"), dict):
-            out["album"] = track_extra["albumInfo"].get("name")
         tid = track_extra.get("id") or sid
         if tid:
             # Always ship full spotify:track:… URI (search Apify used bare ids).
@@ -693,6 +890,20 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
             out["url"] = f"https://open.spotify.com/track/{tid}"
         if not out.get("releaseYear") and track_extra.get("releaseDate"):
             out["releaseYear"] = _year_of(track_extra["releaseDate"])
+        # Lift Apify search flags when Pathfinder fields absent.
+        if out.get("explicit") is None:
+            lifted = _as_bool(item.get("isExplicit"))
+            if lifted is not None:
+                out["explicit"] = lifted
+        if out.get("playable") is None:
+            lifted_p = _as_bool(item.get("isPlayable"))
+            if lifted_p is not None:
+                out["playable"] = lifted_p
+    if kind == "album":
+        album_extra = _album_fields(item)
+        out.update(album_extra)
+        if album_extra.get("releaseDate") and not out.get("releaseYear"):
+            out["releaseYear"] = _year_of(album_extra["releaseDate"])
     if kind == "podcast":
         # Pathfinder show payload includes visualIdentity color dumps + episode stubs — drop raw.
         out.pop("raw", None)
@@ -701,17 +912,36 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
         if podcast_extra.get("id"):
             out["url"] = f"https://open.spotify.com/show/{podcast_extra['id']}"
             out["uri"] = f"spotify:show:{podcast_extra['id']}"
-    elif kind in ("album", "artist", "episode") and sid:
+        # showTypes from metadata when present
+        show_types = [
+            str(t).strip()
+            for t in (item.get("showTypes") or [])
+            if isinstance(t, str) and str(t).strip()
+        ]
+        if show_types:
+            out["showTypes"] = show_types
+    if kind == "episode":
+        episode_extra = _episode_fields(item)
+        out.update(episode_extra)
+        out["raw"] = _slim_episode_raw(item)
+        if episode_extra.get("releaseDate") and not out.get("releaseYear"):
+            out["releaseYear"] = _year_of(episode_extra["releaseDate"])
+        eid = episode_extra.get("id") or sid
+        if eid:
+            out["id"] = eid
+            out["uri"] = f"spotify:episode:{eid}"
+            out["url"] = f"https://open.spotify.com/episode/{eid}"
+    elif kind in ("album", "artist") and sid:
         out.setdefault("id", sid)
         out["uri"] = f"spotify:{uri_kind}:{sid}"
         if not out.get("url") or "open.spotify.com" not in str(out.get("url")):
             out["url"] = f"https://open.spotify.com/{uri_kind}/{sid}"
-    # Episodes/albums/artists: lift Apify explicit/playable when Pathfinder fields absent.
-    if kind in ("album", "artist", "episode", "podcast") and out.get("explicit") is None:
+    # Artists/podcasts: lift Apify explicit/playable when Pathfinder fields absent.
+    if kind in ("artist", "podcast") and out.get("explicit") is None:
         lifted = _as_bool(item.get("isExplicit"))
         if lifted is not None:
             out["explicit"] = lifted
-    if kind in ("album", "artist", "episode", "podcast") and out.get("playable") is None:
+    if kind in ("album", "artist", "podcast") and out.get("playable") is None:
         lifted_p = _as_bool(item.get("isPlayable"))
         if lifted_p is not None:
             out["playable"] = lifted_p
@@ -729,14 +959,15 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
         for key in (
             "playCount",
             "popularity",
+            "isrc",
             "trackNumber",
             "discNumber",
             "contentRating",
             "mediaType",
             "previewUrl",
             "releaseDate",
-            "artistItems",
-            "albumInfo",
+            "artists",
+            "album",
             "id",
         ):
             if out.get(key) in (None, "", []):
@@ -744,6 +975,14 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
         for key in ("explicit", "playable"):
             if out.get(key) is None:
                 out.pop(key, None)
+    if kind == "album":
+        for key in ("releaseDate", "id"):
+            if out.get(key) in (None, "", []):
+                out.pop(key, None)
+        if out.get("explicit") is None:
+            out.pop("explicit", None)
+        if out.get("tracksHasMore") is None:
+            out.pop("tracksHasMore", None)
     if kind == "podcast":
         for key in (
             "id",
@@ -755,10 +994,28 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
             "mediaType",
             "htmlDescription",
             "consumptionOrder",
+            "showTypes",
         ):
             if out.get(key) in (None, "", []):
                 out.pop(key, None)
         for key in ("explicit", "playable"):
+            if out.get(key) is None:
+                out.pop(key, None)
+    if kind == "episode":
+        for key in (
+            "id",
+            "previewUrl",
+            "audioUrls",
+            "releaseDate",
+            "mediaTypes",
+            "contentRating",
+            "showTypes",
+            "transcripts",
+            "htmlDescription",
+        ):
+            if out.get(key) in (None, "", []):
+                out.pop(key, None)
+        for key in ("explicit", "playable", "hasVideo", "hasTranscripts", "paywallContent"):
             if out.get(key) is None:
                 out.pop(key, None)
     return out
@@ -830,14 +1087,20 @@ async def _details(kind: str, uri: str, limit: int | None = None, *, ctx: dict[s
     description=(
         "Artist profile from Spotify's web-player GraphQL as clean JSON: followers, "
         "monthlyListeners, worldRank, topCities, externalLinks, verified, topTracks "
-        "(with playCount), concerts, relatedArtists, and albums/singles. Flat 1 credit. "
-        "monthlyListeners / topCities / worldRank are not on Spotify's public Web API — "
-        "they require this GraphQL path. raw keeps the upstream payload for advanced use "
-        "(shape may change); prefer the normalized fields."
+        "(with playCount), concerts, relatedArtists, and albums/singles samples. Flat "
+        "1 credit. monthlyListeners / topCities / worldRank are not on Spotify's public "
+        "Web API. albums[]/singles[] are overview samples — albumsCount/singlesCount "
+        "plus albumsHasMore/singlesHasMore tell you when the catalog is larger; chain "
+        "each release URI into /spotify/album. Pass raw=true only when you need the "
+        "full GraphQL payload (omitted by default)."
     ),
 )
 async def artist(
     url: str = Query(..., description="Spotify artist URL, URI, or ID"),
+    raw: bool = Query(
+        False,
+        description="Include the upstream GraphQL payload as data.raw. Default false.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -854,12 +1117,14 @@ async def artist(
 
         data = await cached_or_run(
             "spotify.artist",
-            {"uri": uri, "v": 8},
+            {"uri": uri, "v": 9, "raw": bool(raw)},
             _run,
             ctx,
             ttl=get_settings().CACHE_TTL_STATIC,
             use_cache=cache,
         )
+        if not raw:
+            data.pop("raw", None)
         return ApiResponse(data=data)
 
 
@@ -867,15 +1132,22 @@ async def artist(
     "/track",
     summary="Spotify track details",
     description=(
-        "Track from Spotify's web-player GraphQL as clean JSON: id, playCount, "
-        "trackNumber, contentRating/explicit, artistItems[{id,uri,name,url}], "
-        "albumInfo[{id,uri,name,url,releaseDate}], duration, and previewUrl when "
-        "Spotify exposes one. Flat artist name strings and album name kept for "
-        "back-compat. Flat 1 credit. No bulky raw discography dump."
+        "Track from Spotify's web-player GraphQL as clean JSON: id, playCount "
+        "(stream count), trackNumber, contentRating/explicit, durationMs, "
+        "artists[{id,uri,name,url}], album{id,uri,name,url,releaseDate}, releaseDate, "
+        "and previewUrl/isrc/popularity when Spotify exposes them on this surface. "
+        "Flat 1 credit (same as artist). Pass raw=true only for the full GraphQL "
+        "payload (omitted by default — getTrack embeds bulky artist discography). "
+        "Note: Pathfinder getTrack often omits Web API popularity (0–100) and ISRC — "
+        "playCount is the listen metric here."
     ),
 )
 async def track(
     url: str = Query(..., description="Spotify track URL, URI, or ID"),
+    raw: bool = Query(
+        False,
+        description="Include the upstream GraphQL payload as data.raw. Default false.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -886,6 +1158,86 @@ async def track(
 
         data = await cached_or_run(
             "spotify.track",
+            {"uri": uri, "v": 11, "raw": bool(raw)},
+            _run,
+            ctx,
+            ttl=get_settings().CACHE_TTL_STATIC,
+            use_cache=cache,
+        )
+        if not raw:
+            data.pop("raw", None)
+        return ApiResponse(data=data)
+
+
+@router.get(
+    "/album",
+    summary="Spotify album details",
+    description=(
+        "Album from Spotify's web-player GraphQL as clean JSON: name, "
+        "artists[{id,uri,name,url}], tracks[{trackNumber,discNumber,name,uri,url,"
+        "durationMs,playCount,explicit,artists}], totalTracks, releaseDate, "
+        "releaseYear, explicit, and cover image. Flat 1 credit (same as artist/track). "
+        "Pass raw=true only when you need the full GraphQL payload (omitted by default)."
+    ),
+)
+async def album(
+    url: str = Query(..., description="Spotify album URL, URI, or ID"),
+    raw: bool = Query(
+        False,
+        description="Include the upstream GraphQL payload as data.raw. Default false.",
+    ),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    uri = _url(url, "album")
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/spotify/album",
+        platform="spotify",
+        resource_url=uri,
+        base_credits=CREDIT_ALBUM,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            return await _details("album", uri, limit=300, ctx=ctx)
+
+        data = await cached_or_run(
+            "spotify.album",
+            {"uri": uri, "v": 11, "raw": bool(raw)},
+            _run,
+            ctx,
+            ttl=get_settings().CACHE_TTL_STATIC,
+            use_cache=cache,
+        )
+        if not raw:
+            data.pop("raw", None)
+        return ApiResponse(data=data)
+
+
+@router.get(
+    "/podcast",
+    summary="Spotify podcast/show details",
+    description=(
+        "Podcast/show from Spotify's web-player GraphQL as clean JSON: id, name, "
+        "description, publisher{name}, rating{average, totalRatings}, topics[], "
+        "contentRating/explicit, mediaType, showTypes, totalEpisodes, and cover image. "
+        "Flat 1 credit per call. Does not ship Spotify's UI color palette "
+        "(visualIdentity) or a bulky raw dump. Chain into /spotify/podcast-episodes "
+        "for the episode archive (cursor pagination)."
+    ),
+)
+async def podcast(
+    url: str = Query(..., description="Spotify show/podcast URL, URI, or ID (not an artist URL)"),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    uri = _url(url, "show")
+    async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=CREDIT_PODCAST) as ctx:
+        async def _run() -> dict[str, Any]:
+            # Single show — no list to limit.
+            return await _details("podcast", uri, ctx=ctx)
+
+        data = await cached_or_run(
+            "spotify.podcast",
             {"uri": uri, "v": 9},
             _run,
             ctx,
@@ -895,59 +1247,46 @@ async def track(
         return ApiResponse(data=data)
 
 
-@router.get("/album", summary="Spotify album details")
-async def album(
-    url: str = Query(..., description="Spotify album URL, URI, or ID"),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    uri = _url(url, "album")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/album", platform="spotify", resource_url=uri, base_credits=CREDIT_NATIVE) as ctx:
-        async def _run() -> dict[str, Any]:
-            return await _details("album", uri, limit=1, ctx=ctx)
-
-        data = await cached_or_run(
-            "spotify.album",
-            {"uri": uri, "v": 7},
-            _run,
-            ctx,
-            ttl=get_settings().CACHE_TTL_STATIC,
-            use_cache=cache,
-        )
-        return ApiResponse(data=data)
-
-
-@router.get("/podcast", summary="Spotify podcast/show details")
-async def podcast(
-    url: str = Query(..., description="Spotify show/podcast URL, URI, or ID"),
-    limit: int = Query(20, ge=1, le=50),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    uri = _url(url, "show")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=CREDIT_PODCAST) as ctx:
-        async def _run() -> dict[str, Any]:
-            return await _details("podcast", uri, limit, ctx=ctx)
-
-        data = await cached_or_run(
-            "spotify.podcast",
-            {"uri": uri, "limit": limit, "v": 8},
-            _run,
-            ctx,
-            ttl=get_settings().CACHE_TTL_STATIC,
-            use_cache=cache,
-        )
-        return ApiResponse(data=data)
-
-
-@router.get("/podcast-episodes", summary="Spotify podcast episodes")
+@router.get(
+    "/podcast-episodes",
+    summary="Spotify podcast episodes",
+    description=(
+        "Paginated episode archive for a Spotify show: id, name, description, "
+        "releaseDate (full ISO), durationMs, previewUrl, audioUrls[], mediaTypes/"
+        "hasVideo, contentRating/explicit, hasTranscripts, paywallContent, showTypes. "
+        "Same show object as /spotify/podcast (totalEpisodes from this episodes query — "
+        "no drift). Flat 2 credits per call on native Pathfinder. Cursor pagination via "
+        "nextCursor/hasMore (offset into the archive; limit max 50). Pass raw=true only "
+        "for a slimmed upstream payload — visualIdentity color dumps, playedState, and "
+        "per-episode podcastV2 show copies are never shipped (same decision as /spotify/podcast)."
+    ),
+)
 async def podcast_episodes(
-    url: str = Query(..., description="Spotify show/podcast URL, URI, or ID"),
-    limit: int = Query(20, ge=1, le=50),
+    url: str = Query(..., description="Spotify show/podcast URL, URI, or ID (not an artist URL)"),
+    limit: int = Query(
+        20,
+        ge=1,
+        le=50,
+        description="Max episodes per page (default 20, max 50). Flat 2 credits per call on native Pathfinder.",
+    ),
+    cursor: str | None = Query(
+        None,
+        description="Pagination offset from a prior nextCursor (e.g. \"20\"). Omit for the newest page.",
+    ),
+    raw: bool = Query(
+        False,
+        description="Include slimmed per-episode upstream payload as episodes[].raw. Default false.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "show")
+    offset = 0
+    if cursor is not None and str(cursor).strip() != "":
+        try:
+            offset = max(0, int(str(cursor).strip()))
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail="cursor must be an integer offset") from exc
     # Flat fee: native Pathfinder first; Apify only on fallthrough.
     async with billed_call(
         caller=caller,
@@ -957,20 +1296,35 @@ async def podcast_episodes(
         base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await spotify_native.podcast_episodes_native(uri, limit)
+            native = await spotify_native.podcast_episodes_native(uri, limit, offset=offset)
             if native is not None:
-                podcast_raw, episode_rows = native
+                podcast_raw, episode_rows, total_episodes = native
                 podcast = _normalize(podcast_raw, "podcast")
+                if total_episodes is not None:
+                    podcast["totalEpisodes"] = total_episodes
                 episodes = [_normalize(i, "episode") for i in episode_rows]
                 ctx["source"] = "direct"
+                next_offset = offset + len(episodes)
+                if total_episodes is not None:
+                    has_more = next_offset < total_episodes and len(episodes) > 0
+                else:
+                    has_more = len(episodes) >= limit
                 return {
                     "platform": "spotify",
                     "podcast": podcast,
+                    "totalEpisodes": total_episodes or podcast.get("totalEpisodes"),
                     "totalReturned": len(episodes),
                     "episodes": episodes,
+                    "nextCursor": str(next_offset) if has_more else None,
+                    "hasMore": has_more,
                 }
 
-            # Apify details actor (normalize drops raw — extract episodes from actor item).
+            # Apify details actor — single page, no reliable deep archive cursor.
+            if offset > 0:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Pagination past the first page requires the native Pathfinder path; retry shortly.",
+                )
             settings = get_settings()
             try:
                 actor_items = await get_apify().run_actor_sync(
@@ -1000,32 +1354,63 @@ async def podcast_episodes(
                 # episodesV2 wraps each episode as {entity: {data: {...}}}
                 entity = (entry.get("entity") or {}).get("data") if isinstance(entry.get("entity"), dict) else None
                 rows.append(entity if isinstance(entity, dict) else entry)
-            normalized = [_normalize(i, "episode") for i in rows]
+            normalized = [_normalize(i, "episode") for i in rows[:limit]]
+            podcast = _normalize(item, "podcast")
+            total = safe_int(
+                episodes_block.get("totalCount") if isinstance(episodes_block, dict) else None
+            ) or podcast.get("totalEpisodes")
+            if isinstance(total, int):
+                podcast["totalEpisodes"] = total
             ctx["source"] = "apify"
+            has_more = bool(isinstance(total, int) and len(normalized) < total and len(normalized) >= limit)
             return {
                 "platform": "spotify",
-                "podcast": _normalize(item, "podcast"),
-                "totalReturned": len(normalized[:limit]),
-                "episodes": normalized[:limit],
+                "podcast": podcast,
+                "totalEpisodes": total,
+                "totalReturned": len(normalized),
+                "episodes": normalized,
+                "nextCursor": str(len(normalized)) if has_more else None,
+                "hasMore": has_more,
             }
 
         data = await cached_or_run(
             "spotify.podcast-episodes",
-            {"uri": uri, "limit": limit, "v": 8},
+            {"uri": uri, "limit": limit, "offset": offset, "v": 10, "raw": bool(raw)},
             _run,
             ctx,
             use_cache=cache,
         )
+        if not raw:
+            for row in data.get("episodes") or []:
+                if isinstance(row, dict):
+                    row.pop("raw", None)
         if ctx.get("source") != "direct":
             ctx["credits_override"] = _scaled(len(data["episodes"]))
         return ApiResponse(data=data)
 
 
-@router.get("/search", summary="Search Spotify")
+@router.get(
+    "/search",
+    summary="Search Spotify",
+    description=(
+        "Search Spotify tracks, albums, artists, podcasts, or episodes. Primary path is "
+        "web-player Pathfinder GraphQL (same family as /spotify/artist|track|album); "
+        "Apify scraper is fallthrough only — its raw shape differs (flat albumName/"
+        "isExplicit/scrapedAt vs GraphQL __typename). Each result ships a canonical "
+        "spotify:{type}:{id} URI, url, name, explicit/playable when known, and "
+        "scrapedAt. Envelope includes fetchedAt. Flat 2 credits on native; Apify "
+        "fallthrough scales per result. No cursor (max limit 50). Pass raw=true to "
+        "include per-result upstream payloads (omitted by default)."
+    ),
+)
 async def search(
     q: str = Query(..., min_length=2),
     type: str = Query("tracks", pattern="^(tracks|albums|artists|podcasts|episodes)$"),
-    limit: int = Query(20, ge=1, le=50),
+    limit: int = Query(20, ge=1, le=50, description="Max results (default 20, max 50). Flat 2 credits on native Pathfinder."),
+    raw: bool = Query(
+        False,
+        description="Include per-result upstream payload as results[].raw. Default false.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -1057,6 +1442,8 @@ async def search(
                     "platform": "spotify",
                     "query": q,
                     "type": type,
+                    "fetchedAt": fetched_at,
+                    "source": "pathfinder",
                     "totalReturned": len(results),
                     "results": results,
                 }
@@ -1084,15 +1471,27 @@ async def search(
                 )
             results = _stamp([_normalize(i, kind) for i in items[:limit] if not i.get("error")])
             ctx["source"] = "apify"
-            return {"platform": "spotify", "query": q, "type": type, "totalReturned": len(results), "results": results}
+            return {
+                "platform": "spotify",
+                "query": q,
+                "type": type,
+                "fetchedAt": fetched_at,
+                "source": "apify",
+                "totalReturned": len(results),
+                "results": results,
+            }
 
         data = await cached_or_run(
             "spotify.search",
-            {"q": q, "type": type, "limit": limit, "v": 8},
+            {"q": q, "type": type, "limit": limit, "v": 10, "raw": bool(raw)},
             _run,
             ctx,
             use_cache=cache,
         )
+        if not raw:
+            for row in data.get("results") or []:
+                if isinstance(row, dict):
+                    row.pop("raw", None)
         if ctx.get("source") != "direct":
             ctx["credits_override"] = _scaled(len(data["results"]))
         return ApiResponse(data=data)

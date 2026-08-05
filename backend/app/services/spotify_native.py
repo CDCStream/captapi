@@ -376,17 +376,50 @@ async def _hydrate_episodes(
 async def _hydrate_albums(
     client: httpx.AsyncClient, token: str, uris: list[str]
 ) -> list[dict[str, Any]]:
+    """Hydrate albums with full tracksV2 pages (getAlbum ``limit`` is page size)."""
+
     async def one(uri: str) -> dict[str, Any] | None:
-        data = await _pathfinder(
-            client,
-            token,
-            "getAlbum",
-            {"uri": uri, "locale": "", "offset": 0, "limit": 1},
-        )
-        album = (data or {}).get("albumUnion")
-        if isinstance(album, dict) and album.get("__typename") == "Album":
-            return _with_url(album)
-        return await _oembed(client, uri)
+        page_size = 50
+        offset = 0
+        album: dict[str, Any] | None = None
+        all_items: list[Any] = []
+        total: int | None = None
+        while True:
+            data = await _pathfinder(
+                client,
+                token,
+                "getAlbum",
+                {"uri": uri, "locale": "", "offset": offset, "limit": page_size},
+            )
+            page = (data or {}).get("albumUnion")
+            if not isinstance(page, dict) or page.get("__typename") != "Album":
+                break
+            if album is None:
+                album = dict(page)
+            tracks = page.get("tracksV2") if isinstance(page.get("tracksV2"), dict) else {}
+            if total is None:
+                tc = tracks.get("totalCount")
+                total = int(tc) if isinstance(tc, int) else None
+            batch = list(tracks.get("items") or [])
+            if not batch:
+                break
+            all_items.extend(batch)
+            if total is not None and len(all_items) >= total:
+                break
+            if len(batch) < page_size:
+                break
+            offset += page_size
+            if offset > 500:
+                break
+        if album is None:
+            return await _oembed(client, uri)
+        tv = album.get("tracksV2") if isinstance(album.get("tracksV2"), dict) else {}
+        album["tracksV2"] = {
+            **tv,
+            "items": all_items,
+            "totalCount": total if total is not None else len(all_items),
+        }
+        return _with_url(album)
 
     rows = await asyncio.gather(*[one(u) for u in uris])
     return [r for r in rows if isinstance(r, dict)]
@@ -496,12 +529,21 @@ def _show_uri(url_or_uri: str) -> str | None:
 
 
 async def podcast_episodes_native(
-    url_or_uri: str, limit: int
-) -> tuple[dict[str, Any], list[dict[str, Any]]] | None:
-    """Return ``(podcast_raw, episode_raws)`` or None."""
+    url_or_uri: str,
+    limit: int,
+    *,
+    offset: int = 0,
+) -> tuple[dict[str, Any], list[dict[str, Any]], int | None] | None:
+    """Return ``(podcast_raw, episode_raws, total_episodes)`` or None.
+
+    ``total_episodes`` comes from the same episodesV2 page as the rows so the
+    embedded show count cannot drift from a separate metadata fetch.
+    """
     show_uri = _show_uri(url_or_uri)
     if not show_uri:
         return None
+    offset = max(0, int(offset or 0))
+    limit = max(1, min(int(limit or 1), 50))
 
     async with httpx.AsyncClient(timeout=25, follow_redirects=True, headers=_UA) as client:
         await _refresh_hashes(client)
@@ -525,7 +567,7 @@ async def podcast_episodes_native(
             "queryPodcastEpisodes",
             {
                 "uri": show_uri,
-                "offset": 0,
+                "offset": offset,
                 "limit": limit,
                 "includeEpisodeContentRatingsV2": False,
             },
@@ -544,6 +586,18 @@ async def podcast_episodes_native(
 
         v2 = (eps_data or {}).get("podcastUnionV2") or {}
         episodes_block = v2.get("episodesV2") if isinstance(v2, dict) else None
+        total_raw = (
+            episodes_block.get("totalCount") if isinstance(episodes_block, dict) else None
+        )
+        total_episodes = int(total_raw) if isinstance(total_raw, int) else None
+        # Keep show.totalEpisodes aligned with this episodes query (not a stale meta copy).
+        if total_episodes is not None:
+            podcast["totalEpisodes"] = total_episodes
+            podcast["episodesV2"] = {
+                "totalCount": total_episodes,
+                "items": (episodes_block or {}).get("items") or [],
+            }
+
         items = (episodes_block or {}).get("items") if isinstance(episodes_block, dict) else []
         rows: list[dict[str, Any]] = []
         for entry in items if isinstance(items, list) else []:
@@ -560,7 +614,7 @@ async def podcast_episodes_native(
 
         if not rows and podcast.get("__typename") != "Podcast":
             return None
-        return podcast, rows[:limit]
+        return podcast, rows[:limit], total_episodes
 
 
 def _entity_uri(url_or_uri: str, kind: str) -> str | None:
