@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-05",
     category: "fix",
+    title: "Truth Social posts: reblog/quote/reply chain + mentions/tags/poll",
+    description:
+      "GET /v1/truth-social/post and /user-posts share one status mapper. Added SC-critical chain fields (reblog{}, quote{}/quoteId, inReplyToId/inReplyToAccountId/inReplyTo{}), platform mentions[]/tags[], poll{}, visibility, spoilerText, sponsored, pinned, and post-level group — so a boost is not mistaken for an original in monitoring. Session-only favourited/reblogged/muted/bookmarked stay omitted. links[]/card/media.meta/externalVideoId were already on the shared mapper for both endpoints.",
+    items: [
+      "reblog / quote / inReplyTo nested once (depth 1)",
+      "mentions[] + tags[] from platform lists",
+      "poll / visibility / spoilerText / sponsored / pinned",
+      "Docs: user-posts uses the same mapper as /post",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "fix",
     title: "Stop kicking fresh signups out of the dashboard",
     description:
       "Middleware no longer treats every failed getUser() as a dead session. Transient Auth/network/refresh races used to hard-signOut users ~30–60s after api_key_created, bouncing them to /login → /signup. Now only definitive Auth failures clear cookies (no Auth-side signOut revocation), and signup no longer fires analytics for already-registered emails.",

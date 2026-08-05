@@ -2018,15 +2018,18 @@ const TRUTH_SOCIAL: Spec[] = [
     credits: 2,
     creditsPerResult: 0.85,
     tagline:
-      "Recent Truths from a prominent public account — cursor, links[], top-level author. 2 credits native.",
+      "Recent Truths — same post mapper as /post (links, card, reblog/quote, mentions). 2 credits native.",
     longDescription:
-      `Pass a Truth Social @username or profile URL and get recent public posts as clean JSON. Full author{} once at the top (same shape as Profile); each post keeps a slim author {id,username,displayName,avatar,verified}. text preserves real URLs (Truth Social <span> soft-wraps are not turned into spaces) and links[] lists authoritative <a href> targets. Also: engagement (replies/reblogs/likes/upvotes/downvotes), card link previews, media.meta (width/height/duration/blurhash), externalVideoId → Rumble when present, nextCursor/hasMore. Max limit 80 (upstream page ~40 — page with cursor). ${TRUTH_AUTH_LIMIT} Native path flat 2 credits; Apify fallback ~0.85/post (min 2).`,
+      `Pass a Truth Social @username or profile URL and get recent public posts as clean JSON — same status mapper as /post (not a slim sibling). Full author{} once at the top; each post keeps a slim author {id,username,displayName,avatar,verified}. text + links[] (unbroken URLs), card, media.meta, externalVideoId→Rumble, engagement (incl. upvotes/downvotes). Chain fields when present: reblog{}, quote{}/quoteId, inReplyToId/inReplyToAccountId/inReplyTo{} — so a boost is not mistaken for an original. Also mentions[]/tags[] (platform lists), poll{}, visibility, spoilerText, sponsored, pinned, group. Session-only flags (favourited/reblogged/muted/bookmarked) are omitted. Native timeline excludes replies (Truth Social exclude_replies); reblogs and quotes still appear. nextCursor/hasMore; max limit 80. ${TRUTH_AUTH_LIMIT} Native path flat 2 credits; Apify fallback ~0.85/post (min 2).`,
     delivers: [
-      "Top-level author{} once — no 80× repeated profile blobs",
-      "links[] from <a href> (usable URLs, not span-broken text)",
-      "externalVideoId bridge to Captapi Rumble endpoints",
-      "Cursor pagination (nextCursor / hasMore)",
-      "Honest prominent-only access limit",
+      "Same _normalize_post mapper as /post (links/card/media.meta/externalVideoId)",
+      "reblog / quote / inReplyTo chain fields for monitoring accuracy",
+      "Platform mentions[] + tags[] (not regex-from-text)",
+      "Cursor pagination; honest prominent-only access limit",
+    ],
+    platformLimits: [
+      "Native timeline uses exclude_replies — reply posts are not listed (use /post for a specific reply URL).",
+      "Most non-prominent accounts require auth and 404.",
     ],
   },
   {
@@ -2038,9 +2041,9 @@ const TRUTH_SOCIAL: Spec[] = [
     path: "/v1/truth-social/post",
     credits: 1,
     tagline:
-      "One Truth — text, links[], card, media.meta, externalVideoId. Flat 1 credit.",
+      "One Truth — text, links[], card, reblog/quote chain, media.meta, externalVideoId. Flat 1 credit.",
     longDescription:
-      `Pass a Truth Social post URL or numeric ID and get the public status as clean JSON: text with unbroken URLs, links[] from <a href>, full author{}, engagement (incl. upvotes/downvotes), card link preview, media[] with meta/durationSeconds, externalVideoId when the clip is on Rumble. ${TRUTH_AUTH_LIMIT} Flat 1 credit.`,
+      `Pass a Truth Social post URL or numeric ID and get the public status as clean JSON (same mapper as user-posts rows): text with unbroken URLs, links[], full author{}, engagement (incl. upvotes/downvotes), card, media[] with meta/durationSeconds, externalVideoId when the clip is on Rumble, plus reblog/quote/inReplyTo chain fields, mentions[]/tags[], poll, visibility, spoilerText, sponsored, pinned when present. Session-only favourited/reblogged/muted/bookmarked are omitted. ${TRUTH_AUTH_LIMIT} Flat 1 credit.`,
   },
 ];
 
@@ -6047,12 +6050,26 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     text:
       "Plain text from the status HTML. <a href> is replaced by the real URL so Truth Social span soft-wraps do not insert spaces into links.",
     links: "Authoritative http(s) URLs from <a href> attributes (deduped). Prefer this over regex on text.",
+    reblog:
+      "Nested original status when this row is a boost/repost. Engagement on the wrapper is usually empty — use reblog.engagement and reblog.author for the real post.",
+    quote: "Nested quoted status when present (Truth Social quote-truth).",
+    quoteId: "Id of the quoted status when present.",
+    inReplyToId: "Parent status id when this post is a reply (rare on user-posts — native feed excludes replies).",
+    inReplyToAccountId: "Parent author's account id when this post is a reply.",
+    inReplyTo: "Nested parent status when Truth Social embeds it.",
+    mentions: "Platform mention list [{id,username,acct,url}] — not regex-from-text.",
+    tags: "Platform hashtag list [{name,url}] — not regex-from-text.",
+    poll: "Poll block {id,expiresAt,expired,multiple,votesCount,votersCount,options[{title,votes}]} when the status is a poll.",
+    visibility: 'Mastodon visibility string when set (e.g. "public", "unlisted").',
+    spoilerText: "Content warning / CW text when set.",
+    sponsored: "Truth Social ad flag when the status payload includes it.",
+    pinned: "Whether the status is pinned on the profile when exposed.",
     language:
       "Language code from Truth Social/Mastodon auto-detect — often wrong on short posts (e.g. fy for English). Not a Captapi detection.",
     locked: "Top-level author locked flag when the account payload is rich.",
     isPrivate: "Alias of author.locked on the top-level author card.",
     bot: "Top-level author bot flag when present.",
-    group: "Top-level author group flag when present.",
+    group: "Author.group on the top-level card; posts[].group when the status itself is a group post.",
     lastStatusAt:
       "Top-level author's last status time as ISO-8601 UTC (date-only upstream → midnight Z).",
     fields: "Top-level author profile fields ({name, value, verifiedAt}).",
@@ -6068,12 +6085,26 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     text:
       "Plain text from the status HTML with unbroken URLs (href preferred over span-broken visible text).",
     links: "Authoritative http(s) URLs from <a href> attributes (deduped).",
+    reblog:
+      "Nested original when this status is a boost — use for accurate attribution in monitoring.",
+    quote: "Nested quoted status when present.",
+    quoteId: "Id of the quoted status when present.",
+    inReplyToId: "Parent status id when this is a reply.",
+    inReplyToAccountId: "Parent author's account id when this is a reply.",
+    inReplyTo: "Nested parent status when Truth Social embeds it.",
+    mentions: "Platform mention list [{id,username,acct,url}].",
+    tags: "Platform hashtag list [{name,url}].",
+    poll: "Poll block when the status is a poll.",
+    visibility: 'e.g. "public" / "unlisted" when set.',
+    spoilerText: "Content warning text when set.",
+    sponsored: "Truth Social ad flag when present.",
+    pinned: "Pinned-on-profile flag when present.",
     language:
       "Language code from Truth Social/Mastodon auto-detect — unreliable on short posts. Not Captapi-detected.",
     locked: "Author locked flag when the embedded account is rich.",
     isPrivate: "Alias of author.locked.",
     bot: "Author bot flag when present.",
-    group: "Author group flag when present.",
+    group: "Author group flag, or post-level group when the status itself is a group post.",
     lastStatusAt:
       "Author's last status time as ISO-8601 UTC (date-only upstream → midnight Z).",
     fields: "Author profile fields ({name, value, verifiedAt}) when present.",

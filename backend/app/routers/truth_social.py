@@ -412,6 +412,75 @@ def _normalize_card(raw: Any) -> dict[str, Any] | None:
     return cleaned or None
 
 
+def _normalize_mentions(raw: Any) -> list[dict[str, Any]]:
+    """Platform mention list (not regex-from-text)."""
+    out: list[dict[str, Any]] = []
+    if not isinstance(raw, list):
+        return out
+    for m in raw:
+        if not isinstance(m, dict):
+            continue
+        row = {
+            "id": safe_str(m.get("id")),
+            "username": safe_str(m.get("username")),
+            "acct": safe_str(m.get("acct")),
+            "url": safe_str(m.get("url")),
+        }
+        cleaned = {k: v for k, v in row.items() if v not in (None, "")}
+        if cleaned.get("id") or cleaned.get("username") or cleaned.get("url"):
+            out.append(cleaned)
+    return out
+
+
+def _normalize_tags(raw: Any) -> list[dict[str, Any]]:
+    """Platform hashtag list (not regex-from-text)."""
+    out: list[dict[str, Any]] = []
+    if not isinstance(raw, list):
+        return out
+    for t in raw:
+        if not isinstance(t, dict):
+            continue
+        name = safe_str(t.get("name"))
+        if not name:
+            continue
+        row: dict[str, Any] = {"name": name.lstrip("#")}
+        url = safe_str(t.get("url"))
+        if url:
+            row["url"] = url
+        out.append(row)
+    return out
+
+
+def _normalize_poll(raw: Any) -> dict[str, Any] | None:
+    if not isinstance(raw, dict):
+        return None
+    options_raw = raw.get("options") if isinstance(raw.get("options"), list) else []
+    options: list[dict[str, Any]] = []
+    for opt in options_raw:
+        if not isinstance(opt, dict):
+            continue
+        title = safe_str(opt.get("title"))
+        if not title:
+            continue
+        options.append(
+            {
+                "title": title,
+                "votes": safe_int(opt.get("votes_count") or opt.get("votesCount") or opt.get("votes")),
+            }
+        )
+    out: dict[str, Any] = {
+        "id": safe_str(raw.get("id")),
+        "expiresAt": safe_str(raw.get("expires_at") or raw.get("expiresAt")),
+        "expired": _bool_or_none(raw.get("expired")),
+        "multiple": _bool_or_none(raw.get("multiple")),
+        "votesCount": safe_int(raw.get("votes_count") or raw.get("votesCount")),
+        "votersCount": safe_int(raw.get("voters_count") or raw.get("votersCount")),
+        "options": options,
+    }
+    cleaned = {k: v for k, v in out.items() if v not in (None, "", [])}
+    return cleaned or None
+
+
 def _external_video_id(item: dict[str, Any], media: list[dict[str, Any]]) -> str | None:
     """Rumble video id when Truth Social hosts the clip on Rumble (cross-link to /v1/rumble/*)."""
     for key in ("external_video_id", "externalVideoId"):
@@ -443,7 +512,14 @@ def _normalize_post(
     item: dict[str, Any],
     *,
     author_mode: str = "full",
+    _depth: int = 0,
 ) -> dict[str, Any]:
+    """Normalize a Truth Social / Mastodon status.
+
+    Shared by ``/post`` and ``/user-posts`` — list cards use ``author_mode="slim"``.
+    Nested ``reblog`` / ``quote`` / ``inReplyTo`` stop at depth 1.
+    Session-only flags (favourited/reblogged/muted/bookmarked) are omitted.
+    """
     account = item.get("account") if isinstance(item.get("account"), dict) else {}
     content_html = item.get("content") or item.get("text") or item.get("contentHtml") or ""
     media_raw = item.get("media_attachments") if isinstance(item.get("media_attachments"), list) else item.get("media")
@@ -488,6 +564,74 @@ def _normalize_post(
     if external:
         out["externalVideoId"] = external
         out["externalVideoUrl"] = f"https://rumble.com/{external}"
+
+    # --- SC / Mastodon structure (omit when absent — not session junk) ---
+    visibility = safe_str(item.get("visibility"))
+    if visibility:
+        out["visibility"] = visibility
+    spoiler = safe_str(item.get("spoiler_text") or item.get("spoilerText"))
+    if spoiler:
+        out["spoilerText"] = spoiler
+    if "sponsored" in item:
+        out["sponsored"] = bool(item.get("sponsored"))
+    if "pinned" in item:
+        out["pinned"] = bool(item.get("pinned"))
+    # Post-level group flag (distinct from author.group on the profile card).
+    if "group" in item and not isinstance(item.get("group"), dict):
+        out["group"] = bool(item.get("group"))
+
+    mentions = _normalize_mentions(item.get("mentions"))
+    if mentions:
+        out["mentions"] = mentions
+    tags = _normalize_tags(item.get("tags"))
+    if tags:
+        out["tags"] = tags
+    poll = _normalize_poll(item.get("poll"))
+    if poll:
+        out["poll"] = poll
+
+    in_reply_to_id = safe_str(item.get("in_reply_to_id") or item.get("inReplyToId"))
+    in_reply_to_account_id = safe_str(
+        item.get("in_reply_to_account_id") or item.get("inReplyToAccountId")
+    )
+    if in_reply_to_id:
+        out["inReplyToId"] = in_reply_to_id
+    if in_reply_to_account_id:
+        out["inReplyToAccountId"] = in_reply_to_account_id
+
+    quote_id = safe_str(item.get("quote_id") or item.get("quoteId"))
+    if quote_id:
+        out["quoteId"] = quote_id
+
+    # Nested statuses: one level only (reblog-of-reblog would explode list payloads).
+    if _depth < 1:
+        nested_author = "slim" if author_mode == "slim" else "full"
+        reblog_raw = item.get("reblog")
+        if isinstance(reblog_raw, dict) and (
+            reblog_raw.get("id") or reblog_raw.get("content") or reblog_raw.get("account")
+        ):
+            out["reblog"] = _normalize_post(
+                reblog_raw, author_mode=nested_author, _depth=_depth + 1
+            )
+        quote_raw = item.get("quote")
+        if isinstance(quote_raw, dict) and (
+            quote_raw.get("id") or quote_raw.get("content") or quote_raw.get("account")
+        ):
+            out["quote"] = _normalize_post(
+                quote_raw, author_mode=nested_author, _depth=_depth + 1
+            )
+            if not out.get("quoteId"):
+                out["quoteId"] = safe_str(quote_raw.get("id"))
+        in_reply_raw = item.get("in_reply_to") or item.get("inReplyTo")
+        if isinstance(in_reply_raw, dict) and (
+            in_reply_raw.get("id") or in_reply_raw.get("content") or in_reply_raw.get("account")
+        ):
+            out["inReplyTo"] = _normalize_post(
+                in_reply_raw, author_mode=nested_author, _depth=_depth + 1
+            )
+            if not out.get("inReplyToId"):
+                out["inReplyToId"] = safe_str(in_reply_raw.get("id"))
+
     return out
 
 
@@ -763,7 +907,7 @@ async def user_posts(
 
         data = await cached_or_run(
             "truth-social.user-posts",
-            {"username": username, "limit": limit, "cursor": cursor or "", "v": 5},
+            {"username": username, "limit": limit, "cursor": cursor or "", "v": 6},
             _run,
             ctx,
             use_cache=cache,
@@ -804,5 +948,5 @@ async def post(
                     raise
             return await _actor_post(post_id, url)
 
-        data = await cached_or_run("truth-social.post", {"post_id": post_id, "v": 4}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("truth-social.post", {"post_id": post_id, "v": 5}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
