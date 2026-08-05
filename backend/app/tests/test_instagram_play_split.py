@@ -11,7 +11,9 @@ def test_split_play_counts_three_way() -> None:
         likes=10_000,
         is_video=True,
     )
-    assert split["views"] == 293_700  # no distinct video_view_count → fallback
+    # No distinct video_view_count → views stays null (never echo plays).
+    assert split["views"] is None
+    assert split["viewsSource"] is None
     assert split["plays"] == 293_700
     assert split["viewsInstagram"] == 235_383
     assert split["viewsFacebook"] == 58_317
@@ -26,7 +28,24 @@ def test_split_play_counts_views_vs_plays_distinct() -> None:
         is_video=True,
     )
     assert split["views"] == 21_808
+    assert split["viewsSource"] == "video_view_count"
     assert split["plays"] == 46_018
+
+
+def test_split_play_counts_drops_identical_views_plays() -> None:
+    """Same number labeled as both view_count and play_count → keep plays only."""
+    split = decodo.split_play_counts(
+        play_count=1_157_752,
+        video_view_count=1_157_752,
+        ig_play_count=1_157_752,
+        likes=117_977,
+        is_video=True,
+    )
+    assert split["plays"] == 1_157_752
+    assert split["views"] is None
+    assert split["viewsSource"] is None
+    assert split["viewsInstagram"] == 1_157_752
+    assert split["viewsFacebook"] is None
 
 
 def test_split_play_counts_derives_facebook() -> None:
@@ -48,10 +67,47 @@ def test_engagement_with_play_split_on_video() -> None:
         likes=100,
         is_video=True,
     )
-    assert eng["views"] == 293_700
+    assert eng["views"] is None
+    assert eng["viewsSource"] is None
     assert eng["plays"] == 293_700
     assert eng["viewsInstagram"] == 235_383
     assert eng["viewsFacebook"] == 58_317
+
+
+def test_engagement_keeps_null_plays_on_video() -> None:
+    eng = decodo.engagement_with_play_split(
+        {"likes": 1_647_990, "comments": 50_177},
+        play_count=None,
+        likes=1_647_990,
+        is_video=True,
+    )
+    assert eng["views"] is None
+    assert eng["viewsSource"] is None
+    assert eng["plays"] is None
+    assert "plays" in eng
+
+
+def test_strip_keeps_null_play_keys_on_video() -> None:
+    post = {
+        "postType": "Video",
+        "productType": "clips",
+        "videoUrl": "https://cdn.example/r.mp4",
+        "durationSeconds": 12,
+        "engagement": {
+            "views": None,
+            "viewsSource": None,
+            "viewsInstagram": None,
+            "viewsFacebook": None,
+            "likes": 100,
+            "comments": 5,
+            "plays": None,
+        },
+    }
+    out = decodo.strip_null_post_fields(post)
+    assert out["engagement"]["views"] is None
+    assert out["engagement"]["viewsSource"] is None
+    assert out["engagement"]["plays"] is None
+    assert out["engagement"]["viewsInstagram"] is None
 
 
 def test_strip_keeps_instagram_facebook_view_keys_on_video() -> None:
@@ -62,6 +118,7 @@ def test_strip_keeps_instagram_facebook_view_keys_on_video() -> None:
         "durationSeconds": 12,
         "engagement": {
             "views": 21_808,
+            "viewsSource": "video_view_count",
             "viewsInstagram": 235_383,
             "viewsFacebook": 58_317,
             "likes": 100,
@@ -71,6 +128,7 @@ def test_strip_keeps_instagram_facebook_view_keys_on_video() -> None:
     }
     out = decodo.strip_null_post_fields(post)
     assert out["engagement"]["views"] == 21_808
+    assert out["engagement"]["viewsSource"] == "video_view_count"
     assert out["engagement"]["plays"] == 46_018
     assert out["engagement"]["viewsInstagram"] == 235_383
     assert out["engagement"]["viewsFacebook"] == 58_317

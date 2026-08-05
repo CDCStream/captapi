@@ -2152,6 +2152,26 @@ async def instagram_trending_reels(
                     if not i.get("error")
                 ]
 
+            async def _enrich_trending(reels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+                """Author-feed backfill — Apify/Polaris often omit play_count."""
+                if not reels:
+                    return reels
+                need = [
+                    r
+                    for r in reels
+                    if isinstance(r.get("engagement"), dict)
+                    and (
+                        r["engagement"].get("plays") is None
+                        and r["engagement"].get("viewsInstagram") is None
+                    )
+                ]
+                if not need:
+                    return [decodo.strip_null_post_fields(r) for r in reels]
+                filled = await instagram_native.enrich_posts_from_author_feeds(
+                    reels, max_authors=min(12, len(reels))
+                )
+                return [decodo.strip_null_post_fields(r) for r in filled]
+
             async def _ensure_refresh(*, force: bool = False) -> dict[str, Any] | None:
                 active = await client.find_active_run(actor, input_match=match)
                 if active is not None:
@@ -2191,6 +2211,7 @@ async def instagram_trending_reels(
                 )
                 if reels:
                     ctx["source"] = "apify"
+                    reels = await _enrich_trending(reels)
                     snapshot_payload = _trending_payload(
                         reels,
                         country=country,
@@ -2231,6 +2252,7 @@ async def instagram_trending_reels(
             )
             if reels:
                 ctx["source"] = "apify"
+                reels = await _enrich_trending(reels)
                 return _trending_payload(
                     reels,
                     country=country,
@@ -2240,7 +2262,7 @@ async def instagram_trending_reels(
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 16},
+            params={"country": country, "limit": limit, "v": 17},
             runner=_run,
             ctx=ctx,
             stale_while_revalidate=True,

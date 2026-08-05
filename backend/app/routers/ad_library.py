@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
-import asyncio
 import base64
 import json
 import math
 import re
-from collections.abc import Awaitable, Callable
 from typing import Any, Literal
 from urllib.parse import urlencode
 
-import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
@@ -19,7 +16,6 @@ from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
-from app.services.cache import cache_set, cache_try_lock, default_ttl_for, make_cache_key
 from app.services.cached_runner import cached_or_run
 from app.services import (
     facebook_ads_native,
@@ -33,11 +29,7 @@ from app.utils.formatters import safe_float, safe_int, safe_str
 from app.utils.media_urls import utc_now_iso
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
-log = structlog.get_logger(__name__)
 router = APIRouter()
-
-# Keep strong refs so fire-and-forget Apify warm tasks aren't GC'd mid-flight.
-_apify_warm_tasks: set[asyncio.Task] = set()
 
 RATE_AD_LIST = 3.5
 RATE_GOOGLE_COMPANY_ADS = 3.35
@@ -57,18 +49,16 @@ CREDIT_AD_LIBRARY_NATIVE = 2
 # Apify fallback is capped — never the old ~70-credit trap.
 CREDIT_TIKTOK_AD_SEARCH = 2
 CREDIT_TIKTOK_AD_SEARCH_APIFY = 5
-# Creative Center Top Ads: flat 2 on both Decodo-native and Apify when ads return
-# (empty/timeout free). Never scale with limit/returned ads.
+# Creative Center Top Ads: flat 2 on Decodo-native; Apify ~1 credit/result (min 2).
+# Empty/timeout free. Sync wait for the real upstream JSON (no background warm).
 CREDIT_TIKTOK_TOP_ADS = 2
-CREDIT_TIKTOK_TOP_ADS_MIN = 2  # used by _bill_ads Apify path if ever re-enabled
-# Stay under nginx/ALB 60s defaults (same fast-fail spirit as IG trending-reels).
-# Sync wait is short; Apify keeps running and warms Redis for the next retry.
-_TIKTOK_AD_APIFY_TIMEOUT_SECS = 20.0
-_TIKTOK_AD_APIFY_SYNC_WAIT_SECS = 20.0
-_TIKTOK_AD_APIFY_WARM_WAIT_SECS = 180.0
-_TIKTOK_AD_SNAPSHOT_MAX_AGE_SECS = 3600.0
-# Actor often needs ~60–90s; 30s was too optimistic once warm was missing.
-_TIKTOK_AD_RETRY_AFTER_SECS = 60
+RATE_TIKTOK_TOP_ADS = 1.0
+CREDIT_TIKTOK_TOP_ADS_MIN = 2
+# Measured Apify success ~74–79s. Cap at 90s — Cloudflare Proxy Read Timeout
+# defaults to 125s, so 90s fits with headroom (524s only after that default).
+# Exceeding 125s needs Cloudflare Enterprise (up to 6000s via Cache Rule / API).
+_TIKTOK_AD_APIFY_TIMEOUT_SECS = 90.0
+_TIKTOK_AD_RETRY_AFTER_SECS = 30
 
 _DKI_RE = re.compile(
     r"\{(?:KeyWord|KEYWORD|Keyword|param\d*|CUSTOMIZER\.[^}:]+)(?::[^}]*)?\}",
@@ -1419,7 +1409,7 @@ async def _run_actor(actor: str, payload: dict[str, Any], limit: int) -> list[di
 async def _run_actor_fast(
     actor: str, payload: dict[str, Any], limit: int, *, timeout: float
 ) -> list[dict[str, Any]]:
-    """Apify sync with a hard timeout — never hold the client past ALB defaults."""
+    """Apify sync — wait for the real dataset (timeout under CF 125s default)."""
     client = ApifyClient(timeout=timeout, max_attempts=1)
     try:
         items = await client.run_actor_sync(actor, payload, max_items=limit)
@@ -1431,159 +1421,24 @@ async def _run_actor_fast(
     return items[:limit]
 
 
-def _tiktok_ad_timeout_http(wait_secs: float, *, warming: bool = False) -> HTTPException:
-    """503 used when the sync wait elapsed; Apify may still be warming Redis."""
-    hint = (
-        "Upstream is still fetching in the background — retry with cache=true "
-        f"after ~{_TIKTOK_AD_RETRY_AFTER_SECS}s (empty/timeout responses are not billed)."
-        if warming
-        else "Retry shortly — empty/timeout responses are not billed."
-    )
+def _tiktok_ad_timeout_http(wait_secs: float) -> HTTPException:
+    """503 when the upstream genuinely exceeds the sync budget — not billed."""
     return HTTPException(
         status_code=503,
         detail={
             "error": {
                 "code": "upstream_timeout",
                 "retryAfterSeconds": _TIKTOK_AD_RETRY_AFTER_SECS,
-                "warming": warming,
             },
             "message": (
-                f"TikTok Ad Library upstream timed out after {wait_secs:g}s. {hint}"
+                f"TikTok Ad Library upstream timed out after {wait_secs:g}s. "
+                "Retry shortly — empty/timeout responses are not billed. "
+                "Set your HTTP client timeout to at least 120s; nginx/ALB "
+                "defaults (60s) and Heroku (30s) often cut the connection earlier."
             ),
         },
         headers={"Retry-After": str(_TIKTOK_AD_RETRY_AFTER_SECS)},
     )
-
-
-def _top_ads_apify_match(payload: dict[str, Any]) -> dict[str, Any]:
-    """Stable INPUT keys for joining / snapshotting — omit maxResults so
-    different limits can share one warm run."""
-    keys = (
-        "countryCode",
-        "period",
-        "orderBy",
-        "keyword",
-        "industry",
-        "objective",
-        "adFormat",
-    )
-    return {k: payload[k] for k in keys if payload.get(k) not in (None, "")}
-
-
-def _spawn_apify_warm_to_cache(
-    *,
-    run_id: str,
-    max_items: int,
-    cache_endpoint: str,
-    cache_params: dict[str, Any],
-    map_items: Callable[[list[dict[str, Any]]], Awaitable[dict[str, Any]]],
-    wait_secs: float = _TIKTOK_AD_APIFY_WARM_WAIT_SECS,
-) -> None:
-    """After a sync timeout, keep waiting on the Apify run and write Redis."""
-
-    async def _warm() -> None:
-        key = make_cache_key(cache_endpoint, cache_params)
-        lock = key + ":warming"
-        try:
-            if not await cache_try_lock(lock, int(wait_secs) + 60):
-                return
-            client = ApifyClient(timeout=30, max_attempts=1)
-            items = await client.wait_for_run_items(
-                run_id, wait_secs=wait_secs, max_items=max_items
-            )
-            if not items:
-                log.info("tiktok_ad_apify_warm_empty", runId=run_id, endpoint=cache_endpoint)
-                return
-            result = await map_items([i for i in items if isinstance(i, dict)])
-            if not isinstance(result, dict) or int(result.get("totalReturned") or 0) <= 0:
-                return
-            if not result.get("fetchedAt"):
-                result["fetchedAt"] = utc_now_iso()
-            ttl = default_ttl_for(cache_endpoint)
-            if ttl > 0:
-                await cache_set(key, result, ttl=ttl)
-                await cache_set(key + ":stale", result, ttl=ttl * 4)
-            log.info(
-                "tiktok_ad_apify_warm_cached",
-                runId=run_id,
-                endpoint=cache_endpoint,
-                totalReturned=result.get("totalReturned"),
-            )
-        except Exception:  # noqa: BLE001 — client already got 503; next retry rejoins
-            log.exception("tiktok_ad_apify_warm_failed", runId=run_id, endpoint=cache_endpoint)
-
-    task = asyncio.create_task(_warm())
-    _apify_warm_tasks.add(task)
-    task.add_done_callback(_apify_warm_tasks.discard)
-
-
-async def _run_top_ads_apify_warm(
-    *,
-    actor: str,
-    payload: dict[str, Any],
-    limit: int,
-    cache_endpoint: str,
-    cache_params: dict[str, Any],
-    map_items: Callable[[list[dict[str, Any]]], Awaitable[dict[str, Any]]],
-) -> dict[str, Any]:
-    """Apify Top Ads: snapshot → join/start → short wait → background warm + 503."""
-    client = ApifyClient(timeout=30, max_attempts=1)
-    match = _top_ads_apify_match(payload)
-
-    # 1) Recent SUCCEEDED run for this filter set (covers retries without cache=true).
-    snapshot = await client.last_succeeded_items(
-        actor,
-        _TIKTOK_AD_SNAPSHOT_MAX_AGE_SECS,
-        max_items=limit,
-        input_match=match or None,
-    )
-    if snapshot:
-        log.info(
-            "tiktok_top_ads_apify_snapshot",
-            match=match,
-            items=len(snapshot),
-        )
-        return await map_items([i for i in snapshot if isinstance(i, dict)])
-
-    # 2) Join in-flight run or start a new one (actor keeps going after sync wait).
-    active = await client.find_active_run(actor, input_match=match or None)
-    if active is None:
-        active = await client.start_run(actor, payload)
-        log.info(
-            "tiktok_top_ads_apify_start",
-            runId=(active or {}).get("id"),
-            status=(active or {}).get("status"),
-            match=match,
-        )
-    else:
-        log.info(
-            "tiktok_top_ads_apify_join",
-            runId=active.get("id"),
-            status=active.get("status"),
-            match=match,
-        )
-
-    run_id = (active or {}).get("id")
-    items: list[dict[str, Any]] = []
-    if run_id:
-        items = await client.wait_for_run_items(
-            run_id,
-            wait_secs=_TIKTOK_AD_APIFY_SYNC_WAIT_SECS,
-            max_items=limit,
-        )
-    if items:
-        return await map_items([i for i in items if isinstance(i, dict)])
-
-    # 3) Sync budget spent — warm Redis while the actor finishes (~60–90s typical).
-    if run_id:
-        _spawn_apify_warm_to_cache(
-            run_id=run_id,
-            max_items=limit,
-            cache_endpoint=cache_endpoint,
-            cache_params=cache_params,
-            map_items=map_items,
-        )
-    raise _tiktok_ad_timeout_http(_TIKTOK_AD_APIFY_SYNC_WAIT_SECS, warming=bool(run_id))
 
 
 def _match_meta(filt: dict[str, Any]) -> dict[str, Any]:
@@ -2177,9 +2032,11 @@ async def tiktok_search(
         "resolved industry/objective, isSparkAd, and video{} (urlHd only when a "
         "distinct HD rendition exists; no duplicate media[]). Keyword q uses "
         "match=any|all with matchedFrom/filteredOut/matchBasis. Empty results "
-        "are never charged. Sync wait ~20s on Apify; the actor keeps running and "
-        "warms the cache — retry with cache=true after retryAfterSeconds (~60). "
-        "Flat 2 credits when ads are returned (native or Apify — not per result). "
+        "are never charged. This endpoint queries TikTok Creative Center directly "
+        "and typically takes 60–90 seconds — set your HTTP client timeout to at "
+        "least 120s (nginx/ALB default 60s and Heroku 30s will cut the connection). "
+        "Sync upstream wait up to 90s (Cloudflare Proxy Read Timeout default 125s). "
+        "Flat 2 credits on Decodo-native; Apify ~1 credit per returned ad (min 2). "
         "For DSA firstShown/lastShown use /v1/ad-library/tiktok/search."
     ),
 )
@@ -2314,40 +2171,23 @@ async def tiktok_top_ads(
                 objective=objective,
                 ad_format=ad_format,
             )
-            cache_params = {
-                "q": q or "",
-                "match": match_mode,
-                "country": region,
-                "period": period_days,
-                "orderBy": order_label,
-                "industry": industry or "",
-                "objective": objective or "",
-                "adFormat": ad_format or "",
-                "limit": limit,
-                "v": 4,
-            }
-
-            async def _map_apify(items: list[dict[str, Any]]) -> dict[str, Any]:
-                filt = tiktok_creative_center.filter_top_ads(
-                    items,
-                    q=q,
-                    match=match_mode,
-                    industry=industry,
-                    objective=objective,
-                    ad_format=ad_format,
-                    soft_fallback=True,
-                )
-                return await _payload(filt, want=want)
-
-            ctx["source"] = "apify"
-            return await _run_top_ads_apify_warm(
-                actor=settings.APIFY_ACTOR_TIKTOK_CREATIVE_CENTER,
-                payload=payload,
-                limit=overfetch,
-                cache_endpoint="ad-library.tiktok.top-ads",
-                cache_params=cache_params,
-                map_items=_map_apify,
+            items = await _run_actor_fast(
+                settings.APIFY_ACTOR_TIKTOK_CREATIVE_CENTER,
+                payload,
+                overfetch,
+                timeout=_TIKTOK_AD_APIFY_TIMEOUT_SECS,
             )
+            ctx["source"] = "apify"
+            filt = tiktok_creative_center.filter_top_ads(
+                [i for i in items if isinstance(i, dict)],
+                q=q,
+                match=match_mode,
+                industry=industry,
+                objective=objective,
+                ad_format=ad_format,
+                soft_fallback=True,
+            )
+            return await _payload(filt, want=want)
 
         data = await cached_or_run(
             "ad-library.tiktok.top-ads",
@@ -2361,19 +2201,19 @@ async def tiktok_top_ads(
                 "objective": objective or "",
                 "adFormat": ad_format or "",
                 "limit": limit,
-                "v": 4,
+                "v": 5,
             },
             _run,
             ctx,
             stale_while_revalidate=True,
             use_cache=cache,
         )
-        # Flat 2 whether Decodo or Apify served the page — never ~1/ad.
+        # Flat 2 native; Apify ~1/returned ad (min 2). Empty/timeout free.
         _bill_ads(
             ctx,
             data.get("ads") or [],
             flat=CREDIT_TIKTOK_TOP_ADS,
-            apify_rate=None,
+            apify_rate=RATE_TIKTOK_TOP_ADS if ctx.get("source") != "direct" else None,
         )
         return ApiResponse(data=data)
 

@@ -928,18 +928,18 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Snapshot-backed trending Reels (typical freshness <24h) — videos only, flat 1 credit. Use reels-search for live results.",
     longDescription:
-      "Trending Reels is served from a periodic snapshot (native /reels when available, otherwise any-age Apify country snapshot). Typical snapshot freshness is under 24 hours — check cached / snapshotAt / stale / ageHours. Each reel includes engagement.views (+ viewsInstagram/viewsFacebook when Instagram exposes the split), caption (not a duplicated description), author.url as https://www.instagram.com/{user}/, and countryCode (ISO) alongside the country name. Photos/carousels are never returned. Instagram only yields a small overlapping batch per scrape, so duplicates across calls are expected. Content older than ~180 days is dropped as Explore resurfacing — not a strict 24h content window. For live keyword search use Instagram Reels Search. Cold countries return 503 warming + Retry-After: 600. Flat 1 credit per successful call.",
+      "Trending Reels is served from a periodic snapshot (native /reels when available, otherwise any-age Apify country snapshot). Typical snapshot freshness is under 24 hours — check cached / snapshotAt / stale / ageHours. Each reel includes engagement.views with viewsSource (video_view_count when reach-style is distinct; null when unknown — never a silent copy of plays), plays / viewsInstagram / viewsFacebook as null keys when unknown on videos, caption (not a duplicated description), author.url as https://www.instagram.com/{user}/, and countryCode (ISO). Photos/carousels are never returned. Instagram only yields a small overlapping batch per scrape, so duplicates across calls are expected. Content older than ~180 days is dropped as Explore resurfacing. For live keyword search use Instagram Reels Search. Cold countries return 503 warming + Retry-After: 600. Flat 1 credit per successful call.",
     delivers: [
       "Snapshot freshness: cached / snapshotAt / stale / ageHours",
-      "engagement.views (+ IG/FB split when available)",
-      "countryCode ISO + canonical author.url",
+      "viewsSource honesty (never silent plays→views)",
+      "plays/views null keys kept on videos after enrich",
       "Video Reels only — never Explore photos; flat 1 credit",
     ],
     platformLimits: [
       "Not a live feed — typical snapshot freshness under 24h; use /v1/instagram/reels-search for immediate keyword scrapes.",
       "Cold country (never snapshotted) returns 503 warming with Retry-After: 600 while Apify refreshes in the background.",
       "Photos / carousels / Explore resurfaces older than ~180 days are filtered out.",
-      "Logged-out Polaris sometimes withholds play counts — we backfill from author feeds when possible; views may still be null.",
+      "Logged-out Polaris/Apify often omit play counts — we backfill from author feeds when the reel is still on their recent timeline; plays/views may stay null.",
     ],
   },
   {
@@ -2813,16 +2813,20 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     category: "search",
     method: "GET",
     path: "/v1/ad-library/tiktok/top-ads",
-    credits: 2,
+    credits: 20,
+    creditsPerResult: 1,
     tagline:
-      "TikTok Creative Center Top Ads — advertiser, dates when present, CTR/likes, video (flat 2 credits).",
+      "TikTok Creative Center Top Ads — advertiser, dates when present, CTR/likes, video (~1 credit/result Apify).",
     longDescription:
-      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — datesPresent counts filled rows), likes + likesIsApproximate, ctr/ctrTier, costTier, isSparkAd, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Spark/Non-Spark-only adFormat and single-country query echoes are omitted. Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis (soft creative_center fallback when literal matches are empty). Empty results and upstream timeouts are never charged. Decodo first; Apify sync wait ~20s then continues in the background and warms cache — retry with cache=true after retryAfterSeconds (~60). Flat 2 credits per successful call with ads (not per result). For DSA firstShown/lastShown use /tiktok/search.",
+      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — datesPresent counts filled rows), likes + likesIsApproximate, ctr/ctrTier, costTier, isSparkAd, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Spark/Non-Spark-only adFormat and single-country query echoes are omitted. Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis (soft creative_center fallback when literal matches are empty). Empty results and upstream timeouts are never charged. This endpoint queries TikTok Creative Center directly and typically takes 60-90 seconds — every request waits for the real upstream JSON (sync up to 90s; Cloudflare Proxy Read Timeout default 125s). Flat 2 credits on Decodo-native; Apify ~1 credit per returned ad (min 2; ~20 at default limit). Pass cache=true for a 24h hit (0 credits). For DSA firstShown/lastShown use /tiktok/search.",
     delivers: [
       "advertiser{id,name} for grouping + Spark author fallback",
       "firstSeen/lastSeen + datesPresent (often null on CC list)",
-      "Fast-fail + background Apify warm (cache=true on retry)",
-      "Flat 2 credits when ads return; empty/timeout free",
+      "Real upstream JSON (60–90s typical); empty/timeout free",
+      "~1 credit/result Apify (flat 2 native); cache=true is free",
+    ],
+    platformLimits: [
+      "This endpoint queries TikTok Creative Center directly and typically takes 60-90 seconds. Set your HTTP client timeout to at least 120 seconds. Note that nginx and AWS ALB default to 60s and Heroku caps at 30s.",
     ],
   },
   {
@@ -4982,7 +4986,13 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       required: false,
       description: "Optional format filter: spark or non_spark.",
     },
-    lpFlat(20, 100, 2),
+    {
+      name: "limit",
+      type: "integer",
+      required: false,
+      description:
+        "Max items to return (default 20, max 100). Flat 2 credits on Decodo-native; Apify ~1 credit per returned ad (min 2).",
+    },
     cacheP(),
   ],
   "tiktok-ad-library-ad-details": [
@@ -6355,15 +6365,15 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     });
     list.push({
       q: `How many credits does Top Ads cost?`,
-      a: `Flat 2 credits per successful call when ads are returned — same on Decodo-native and Apify fallback (not per result). Empty results and upstream timeouts are never charged.`,
+      a: `Flat 2 credits on Decodo-native when ads are returned. Apify fallback bills ~1 credit per returned ad (min 2) — about 20 credits at the default limit of 20. Empty results and upstream timeouts are never charged. cache=true hits are free.`,
     });
     list.push({
-      q: `Why did Top Ads return 503 upstream_timeout — and will retry work?`,
-      a: `Apify often needs ~60–90s. We wait ~20s on the request, leave the actor running, and warm the Redis cache in the background. Retry with cache=true after retryAfterSeconds (~60). A later call may also reuse a recent SUCCEEDED Apify snapshot without cache=true. Timeouts are never billed.`,
+      q: `Why is this endpoint so slow — and what timeout should I set?`,
+      a: `This endpoint queries TikTok Creative Center directly and typically takes 60–90 seconds. We wait up to 90s for the real JSON (Cloudflare Proxy Read Timeout defaults to 125s — room enough for that wait). Set your HTTP client timeout to at least 120 seconds. nginx and AWS ALB default to 60s and Heroku caps at 30s — those cut the connection on your side and look like our failure. On timeout we return 503 upstream_timeout (not billed); retry shortly or use cache=true after a successful fill.`,
     });
     list.push({
       q: `Why did my keyword return zero — or soft Creative Center ads?`,
-      a: `Read matchedFrom, filteredOut, literalMatches, and matchBasis. match=any (default) keeps rows with any token as a substring; match=all requires every token. When literal matches are empty but Creative Center returned a soft-ranked set, matchBasis=creative_center serves that set instead of a silent zero. Upstream work is capped (~40s) under ALB/nginx defaults.`,
+      a: `Read matchedFrom, filteredOut, literalMatches, and matchBasis. match=any (default) keeps rows with any token as a substring; match=all requires every token. When literal matches are empty but Creative Center returned a soft-ranked set, matchBasis=creative_center serves that set instead of a silent zero.`,
     });
     list.push({
       q: `What does ctr mean, and where are ad dates?`,
@@ -7822,7 +7832,9 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "instagram-channel-reels": {
     views:
-      "video_view_count (reach-style) when exposed; otherwise falls back to total plays. Not the same as plays — the gap can be ~2×.",
+      "Reach-style video_view_count when distinct from plays; null otherwise. Read viewsSource — never assume views means unique people.",
+    viewsSource:
+      '"video_view_count" | null. Same honesty pattern as engagementRateBasis.',
     plays:
       "Total play count including replays (video_play_count). Often higher than views. Prefer viewsInstagram for Instagram-only reports.",
   },
@@ -7838,9 +7850,13 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     note: "Honesty copy: snapshot-backed, duplicates expected, ~180d content-age filter, points to reels-search for live scrapes.",
     reels: "Video Reels only (productType clips). Photos / carousels / multi-year Explore resurfaces are never included.",
     "engagement.views":
-      "Primary view/play metric when Instagram exposes it (video_view_count or total plays). Null when logged-out hydrate withholds plays.",
-    "engagement.viewsInstagram": "Instagram-only plays when the split is available.",
-    "engagement.viewsFacebook": "Facebook cross-post plays when available (or total−IG).",
+      "Reach-style video_view_count only when Instagram exposes a value distinct from plays. Null when unknown — never a silent copy of plays. Read viewsSource.",
+    "engagement.viewsSource":
+      '"video_view_count" when views is that metric; null when views is null. Same honesty pattern as engagementRateBasis. Do not report views as "people watched" unless viewsSource is video_view_count.',
+    "engagement.plays":
+      "Total play count including replays when known; null (key present) when Instagram withheld it after enrich. Never omitted on video reels while views is null.",
+    "engagement.viewsInstagram": "Instagram-only plays when the split is available; null when unknown.",
+    "engagement.viewsFacebook": "Facebook cross-post plays when available (or total−IG); null when unknown.",
     caption: "Reel caption. description is not duplicated on this endpoint.",
     "author.url": "Canonical https://www.instagram.com/{username}/ (www + trailing slash).",
     "author.isPrivate": "Whether the account is private. Canonical privacy flag (not private).",
@@ -7863,14 +7879,16 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "instagram-reels-search": {
     views:
-      "video_view_count (reach-style) when exposed; otherwise falls back to total plays. Not the same as plays — the gap can be ~2×.",
+      "Reach-style video_view_count when distinct from plays; null otherwise. Read viewsSource.",
+    viewsSource: '"video_view_count" | null — do not treat views as unique reach without this.',
     plays:
       "Total play count including replays (video_play_count). Often higher than views. Prefer viewsInstagram for Instagram-only reports.",
   },
   "instagram-details": {
     views:
-      "video_view_count (reach-style) when exposed; otherwise falls back to total plays. Not the same as plays.",
-    plays: "Total play count including replays when Instagram exposes it.",
+      "Reach-style video_view_count when distinct from plays; null otherwise. Read viewsSource.",
+    viewsSource: '"video_view_count" | null.',
+    plays: "Total play count including replays when Instagram exposes it; null key kept on videos when unknown.",
   },
   "tiktok-song-details": {
     duration: "Alias of durationSeconds on this endpoint (length in seconds).",

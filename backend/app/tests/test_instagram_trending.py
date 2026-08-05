@@ -42,7 +42,10 @@ def test_normalize_trending_item_splits_composite_id() -> None:
     assert row["shortcode"] == "DbL6n0ggXDZ"
     assert row["postType"] == "Video"
     assert row["mentions"] == ["NASAHubble"]
-    assert row["engagement"]["views"] == 13_000_000
+    # plays alone — views stays null (not a silent plays copy); viewsSource null.
+    assert row["engagement"]["views"] is None
+    assert row["engagement"]["viewsSource"] is None
+    assert row["engagement"]["plays"] == 13_000_000
     assert row["engagement"]["likes"] == 485_567
     assert "description" not in row
     assert "topic" not in row

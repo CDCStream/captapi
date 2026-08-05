@@ -318,8 +318,9 @@ def resolve_ad_format(raw: str | None, is_spark: bool | None) -> str | None:
 
 MatchMode = Literal["any", "all"]
 
-# Cap Decodo XHR so the HTTP request stays under nginx/ALB 60s defaults.
-DECODO_TIMEOUT_SECONDS = 40.0
+# Cap Decodo XHR so a slow native attempt still leaves headroom for Apify under
+# Cloudflare's default Proxy Read Timeout (125s). Apify sync wait is 90s.
+DECODO_TIMEOUT_SECONDS = 15.0
 
 
 def query_tokens(q: str | None) -> list[str]:
@@ -706,8 +707,15 @@ def apify_input(
     industry: str | None = None,
     objective: str | None = None,
     ad_format: str | None = None,
+    proxy_group: str = "SHADER",
 ) -> dict[str, Any]:
-    """Build ``khadinakbar/tiktok-ads-scraper`` (and compatible) actor input."""
+    """Build ``khadinakbar/tiktok-ads-scraper`` (and compatible) actor input.
+
+    Default proxy is Apify datacenter (``SHADER``). Measured wall-clock for the
+    same Top Ads call: datacenter ~57s vs residential ~65s, both returning ads —
+    Creative Center does not require residential here. Pass
+    ``proxy_group="RESIDENTIAL"`` only if datacenter starts failing.
+    """
     payload: dict[str, Any] = {
         "countryCode": (country or "US").upper(),
         "country": (country or "US").upper(),
@@ -715,6 +723,10 @@ def apify_input(
         "orderBy": order_by,
         "maxResults": max(1, min(int(limit), 100)),
         "maxItems": max(1, min(int(limit), 100)),
+        "proxyConfiguration": {
+            "useApifyProxy": True,
+            "apifyProxyGroups": [proxy_group or "SHADER"],
+        },
     }
     query = (q or "").strip()
     if query:

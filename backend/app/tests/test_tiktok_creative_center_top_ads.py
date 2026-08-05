@@ -158,6 +158,10 @@ def test_apify_industry_maps_keys_and_rejects_unknown() -> None:
     )
     assert payload["industry"] == "Gaming"
     assert payload["keyword"] == "casino"
+    assert payload["proxyConfiguration"] == {
+        "useApifyProxy": True,
+        "apifyProxyGroups": ["SHADER"],
+    }
     with pytest.raises(ValueError, match="must be one of"):
         cc.normalize_apify_industry("not-a-real-industry-xyz")
 

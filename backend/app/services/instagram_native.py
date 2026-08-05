@@ -2854,8 +2854,10 @@ async def trending_reels_native(
     if not posts:
         return None
     # Polaris hydrate often omits play_count logged-out — author feeds fill
-    # views / viewsInstagram so the trending list has a real primary metric.
-    posts = await enrich_posts_from_author_feeds(posts, max_authors=min(12, len(posts)))
+    # plays / viewsInstagram (and distinct views when GraphQL had them).
+    posts = await enrich_posts_from_author_feeds(
+        posts, max_authors=min(16, max(len(posts), 8))
+    )
     reels: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
     for post in posts:
@@ -2970,7 +2972,7 @@ async def enrich_posts_from_author_feeds(
             profile_task = asyncio.create_task(fetch_web_profile_info_via_decodo(username))
             uid = user_id
             if uid:
-                page = await fetch_user_feed_page(uid, count=33)
+                page = await fetch_user_feed_page(uid, count=50)
                 if page:
                     for item in page[0]:
                         _remember_feed_item(item)
@@ -2980,7 +2982,7 @@ async def enrich_posts_from_author_feeds(
                 stats_by_user[username] = stats
                 if not uid and stats.get("id"):
                     uid = stats["id"]
-                    page = await fetch_user_feed_page(uid, count=33)
+                    page = await fetch_user_feed_page(uid, count=50)
                     if page:
                         for item in page[0]:
                             _remember_feed_item(item)

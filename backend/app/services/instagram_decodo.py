@@ -1,4 +1,4 @@
-﻿"""Instagram data through Decodo's managed Social Media Scraping API.
+"""Instagram data through Decodo's managed Social Media Scraping API.
 
 Only Decodo targets with a documented Instagram GraphQL equivalent are used.
 Every public function returns ``None`` on transport, auth, parsing, or data
@@ -345,7 +345,7 @@ def split_play_counts(
     video_view_count: int | None = None,
     likes: int | None = None,
     is_video: bool = True,
-) -> dict[str, int | None]:
+) -> dict[str, Any]:
     """Split Instagram view/play metrics into public engagement fields.
 
     Upstream signals (often all present on the same Reel):
@@ -356,21 +356,23 @@ def split_play_counts(
       - ``fb_play_count`` — Facebook cross-post plays
 
     Public shape:
-      - ``views`` — ``video_view_count`` when present and sane; otherwise falls
-        back to total plays so typed clients always have a primary metric
-      - ``plays`` — total play count when Instagram exposes it (may be ~2×
-        ``views`` when both are present — they are different metrics)
-      - ``viewsInstagram`` — IG-only plays (use for Instagram-only analytics)
-      - ``viewsFacebook`` — FB cross-post (derived as total−IG when missing)
+      - ``views`` — reach-style only when Instagram exposes a **distinct**
+        ``video_view_count``. Never copied from ``plays`` (that lie used to
+        make views==plays==viewsInstagram and look like "people watched").
+      - ``viewsSource`` — ``"video_view_count"`` when ``views`` is that metric;
+        ``null`` when ``views`` is null. ``"plays_fallback"`` is reserved if a
+        caller path intentionally mirrors plays into views (not used here).
+      - ``plays`` — total play count when exposed (may be ~2× ``views``)
+      - ``viewsInstagram`` / ``viewsFacebook`` — IG-only / FB cross-post plays
 
     GraphQL ``video_view_count`` undercounts many Reels (e.g. 112k vs 485k
     likes) — reject when ``likes > video_view_count``. Prefer null over a lie
-    when that is the only signal. Image/Sidecar always return null views
-    (key kept by strip_null_post_fields).
+    when that is the only signal. Image/Sidecar omit play keys via strip.
     """
     if not is_video:
         return {
             "views": None,
+            "viewsSource": None,
             "viewsInstagram": None,
             "viewsFacebook": None,
             "plays": None,
@@ -389,18 +391,21 @@ def split_play_counts(
     # Total plays: prefer play_count, else IG-only.
     plays = total if total is not None else ig
 
-    # Distinct view metric when sane; never use the NASA undercount as views.
+    # Distinct reach-style metric only — never echo plays into views.
     views: int | None = None
+    views_source: str | None = None
     if gql is not None and (likes is None or likes <= gql):
-        views = gql
-    if views is None and plays is not None:
-        # Backward compatible primary metric when Instagram omitted view_count.
-        views = plays
+        if plays is None or gql != plays:
+            views = gql
+            views_source = "video_view_count"
+        # Identical gql==plays → one undifferentiated signal; keep plays only.
     if likes is not None and views is not None and likes > views:
         views = None
+        views_source = None
 
     return {
         "views": views,
+        "viewsSource": views_source,
         "viewsInstagram": ig,
         "viewsFacebook": fb,
         "plays": plays,
@@ -450,13 +455,14 @@ def engagement_with_play_split(
     )
     out["views"] = split["views"]
     if is_video:
+        # Always emit play/view keys on videos — null means "tried, unknown"
+        # (never omit plays while leaving views:null).
+        out["viewsSource"] = split["viewsSource"]
         out["viewsInstagram"] = split["viewsInstagram"]
         out["viewsFacebook"] = split["viewsFacebook"]
-        if split["plays"] is not None:
-            out["plays"] = split["plays"]
-        else:
-            out.pop("plays", None)
+        out["plays"] = split["plays"]
     else:
+        out.pop("viewsSource", None)
         out.pop("viewsInstagram", None)
         out.pop("viewsFacebook", None)
         out.pop("plays", None)
@@ -529,11 +535,17 @@ def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
             views = None
         keep_null = {"views"}
         if is_video:
-            keep_null |= {"viewsInstagram", "viewsFacebook"}
+            # Video: null = unknown after attempt. Omit these keys only on images.
+            keep_null |= {
+                "viewsInstagram",
+                "viewsFacebook",
+                "plays",
+                "viewsSource",
+            }
         # Hidden counts: keep likes:null so clients can pair with
         # likeAndViewCountsDisabled (0 ≠ omitted ≠ hidden).
         if post.get("likeAndViewCountsDisabled"):
-            keep_null |= {"likes", "plays", "viewsInstagram", "viewsFacebook"}
+            keep_null |= {"likes", "plays", "viewsInstagram", "viewsFacebook", "viewsSource"}
             engagement.setdefault("likes", None)
         cleaned = {
             k: v for k, v in engagement.items() if v is not None or k in keep_null
@@ -541,9 +553,12 @@ def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
         # Typed clients always read engagement.views (null when unknown / N/A).
         cleaned["views"] = views
         if is_video:
+            cleaned.setdefault("viewsSource", engagement.get("viewsSource"))
             cleaned.setdefault("viewsInstagram", engagement.get("viewsInstagram"))
             cleaned.setdefault("viewsFacebook", engagement.get("viewsFacebook"))
+            cleaned.setdefault("plays", engagement.get("plays"))
         else:
+            cleaned.pop("viewsSource", None)
             cleaned.pop("viewsInstagram", None)
             cleaned.pop("viewsFacebook", None)
             cleaned.pop("plays", None)

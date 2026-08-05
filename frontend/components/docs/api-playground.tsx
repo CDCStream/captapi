@@ -33,13 +33,28 @@ export function ApiPlayground({
   const [values, setValues] = useState<Record<string, string>>(defaults);
   const [apiKey, setApiKey] = useState("");
   const [loading, setLoading] = useState(false);
+  const [elapsedSecs, setElapsedSecs] = useState(0);
   const [result, setResult] = useState<RunResult | null>(null);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const slowUpstream = ep.slug === "tiktok-ad-library-top-ads";
 
   useEffect(() => {
     setValues(defaults);
     setResult(null);
   }, [ep, defaults]);
+
+  useEffect(() => {
+    if (!loading) {
+      setElapsedSecs(0);
+      return;
+    }
+    const started = Date.now();
+    setElapsedSecs(0);
+    const id = window.setInterval(() => {
+      setElapsedSecs(Math.floor((Date.now() - started) / 1000));
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [loading]);
 
   // Docs mode only: detect session so we can offer "Run with your account".
   useEffect(() => {
@@ -299,8 +314,17 @@ export function ApiPlayground({
             )}
           </div>
           {loading ? (
-            <div className="flex items-center justify-center gap-2 rounded-xl border bg-[#0d1117] py-16 text-sm text-slate-400">
-              <Loader2 className="size-4 animate-spin" /> Fetching response…
+            <div className="flex flex-col items-center justify-center gap-2 rounded-xl border bg-[#0d1117] py-16 px-6 text-center text-sm text-slate-400">
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="size-4 animate-spin" />
+                Fetching response… {elapsedSecs}s
+              </span>
+              {slowUpstream ? (
+                <p className="max-w-md text-xs leading-relaxed text-slate-500">
+                  TikTok Creative Center is slow to respond; this can take 60–90
+                  seconds. Set client timeouts to at least 120s.
+                </p>
+              ) : null}
             </div>
           ) : result ? (
             <CodeTabs
