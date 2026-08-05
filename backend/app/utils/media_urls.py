@@ -25,8 +25,10 @@ def cdn_expires_at(url: str | None) -> str | None:
         qs = parse_qs(urlparse(url).query)
     except Exception:
         return None
+    # Case-insensitive: Google CDN uses ``Expires``, others ``expire`` / ``e``.
+    lowered = {str(k).lower(): v for k, v in qs.items()}
     for key in ("x-expires", "expire", "expires", "e"):
-        raw = (qs.get(key) or [None])[0]
+        raw = (lowered.get(key) or [None])[0]
         if not raw:
             continue
         try:

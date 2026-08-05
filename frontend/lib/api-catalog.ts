@@ -7884,13 +7884,19 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     durationSeconds: "Length in seconds (integer). Canonical with durationText — same pair as channel-videos.",
     durationText: "Human clock duration (e.g. 1:26:25). Not zero-padded HH:MM:SS.",
     "streams[].expiresAt":
-      "ISO expiry parsed from signed CDN query params (expire / e / x-expires) when present.",
+      "ISO expiry from signed CDN query params (expire / Expires / e / x-expires) when present. Omitted on unsigned progressive URLs (common for 1a-1791.com mp4).",
+    "streams[].quality":
+      "Video height label (e.g. 1080p). Deduped per type; Rumble's 1081 bitrate key maps to 1080p via meta.h. Audio is under media.audio, not streams.",
     type: 'Content kind: "video" | "short" | "live".',
     likes: "Rumble upvotes when the vote UI is present; null when unknown (never invent 0).",
+    likesIsApproximate:
+      "true when likes came from a compact K/M/B display (e.g. 15.5K → 15500); false/omitted when the integer is exact.",
     dislikes: "Rumble downvotes when present; null when unknown.",
     comments: "Public comment count when Rumble exposes it; null when unknown.",
     views: "View count from JSON-LD / page chrome.",
-    streams: "Playable mp4/hls rows ({url, type, quality}) for this video.",
+    streams: "Playable mp4/hls rows ({url, type, quality[, expiresAt]}) — video only; audio is media.audio.",
+    media: "Raw embedJS buckets {mp4, timeline, audio, …} when available — use media.audio for AAC bitrates.",
+    isLive: "true while the upload is a livestream; false for VODs.",
   },
   "rumble-channel-videos": {
     channel: "Top-level: channel slug you queried. Per-video channel is the display name string.",
@@ -7899,6 +7905,8 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     durationSeconds: "Length in seconds (integer). Same pair as video-details.",
     durationText: "Human clock duration (e.g. 1:30:56).",
     type: 'Content kind: "video" | "short" | "live" (from /shorts/ URL or isLive).',
+    isLive:
+      "Always present. true only when upstream marks the row live; false otherwise (including fresh VODs with 0 views — not omitted).",
     likes: "Upvotes when the channel scrape exposes rumbleVotes; null when unknown.",
     views: "View count for the upload.",
     streams: "Playable stream rows when the channel scrape includes media URLs.",

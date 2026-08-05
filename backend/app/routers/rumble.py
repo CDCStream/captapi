@@ -146,6 +146,8 @@ def _dedupe_streams(streams: list[dict[str, Any]]) -> list[dict[str, Any]]:
             continue
         quality = (safe_str(s.get("quality")) or "").lower()
         stype = (safe_str(s.get("type")) or "").lower()
+        if stype == "audio":
+            continue
         # Keep first HLS auto; dedupe repeated 1080p mp4 rows.
         qkey = f"{stype}:{quality}" if quality else url
         if quality and quality != "auto" and qkey in seen_quality:
@@ -235,8 +237,19 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
         item.get("duration") if item.get("duration") is not None else item.get("durationSeconds")
     )
     streams = [v for v in item.get("videos") or [] if isinstance(v, dict) and v.get("url")]
-    live_raw = first_present(item.get("is_live"), item.get("livestream_status"))
-    is_live = bool(live_raw) if live_raw is not None else None
+    live_raw = first_present(
+        item.get("is_live"),
+        item.get("livestream_status"),
+        item.get("live"),
+    )
+    # Always emit isLive on channel lists so clients can separate fresh VODs
+    # (zeros) from live — unknown upstream → false, not omitted.
+    if live_raw is None:
+        is_live = False
+    elif isinstance(live_raw, str):
+        is_live = live_raw.strip().lower() in {"1", "true", "live", "livestream"}
+    else:
+        is_live = bool(live_raw)
     url = _clean_url(item.get("url"))
     out: dict[str, Any] = {
         "platform": "rumble",
@@ -267,6 +280,7 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
                     "expiresAt": safe_str(v.get("expiresAt")),
                 }
                 for v in streams
+                if (safe_str(v.get("type")) or "").lower() != "audio"
             ]
         ),
     }
@@ -412,6 +426,19 @@ async def video_details(
             native = await rumble_video_native.video_details_native(_canonical_video_url(url))
             if native and native.get("title"):
                 ctx["source"] = "direct"
+                streams = native.get("streams")
+                if isinstance(streams, list):
+                    native["streams"] = _dedupe_streams(streams)
+                # Drop null optional flags (likesIsApproximate when likes unknown).
+                for key in list(native.keys()):
+                    if native.get(key) is None and key in {
+                        "likesIsApproximate",
+                        "width",
+                        "height",
+                        "captions",
+                        "media",
+                    }:
+                        native.pop(key, None)
                 return _stamp_duration(native)
 
             apify = get_apify()
@@ -432,7 +459,7 @@ async def video_details(
 
         data = await cached_or_run(
             endpoint="rumble.video-details",
-            params={"url": url, "v": 8},
+            params={"url": url, "v": 9},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -477,7 +504,7 @@ async def channel_videos(
 
         data = await cached_or_run(
             endpoint="rumble.channel-videos",
-            params={"channel": channel, "limit": limit, "v": 7},
+            params={"channel": channel, "limit": limit, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

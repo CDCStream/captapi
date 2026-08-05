@@ -120,23 +120,33 @@ def _seconds_to_clock(seconds: int | None) -> str | None:
 
 def _parse_count(raw: str | None) -> int | None:
     """Parse ``1.2K`` / ``3M`` / ``12,345`` view strings."""
+    value, _approx = _parse_count_ex(raw)
+    return value
+
+
+def _parse_count_ex(raw: str | None) -> tuple[int | None, bool]:
+    """Like ``_parse_count`` plus whether the source used a K/M/B compact suffix."""
     if not raw:
-        return None
+        return None, False
     text = raw.strip().replace(",", "").upper()
     mult = 1
+    approx = False
     if text.endswith("K"):
         mult = 1_000
         text = text[:-1]
+        approx = True
     elif text.endswith("M"):
         mult = 1_000_000
         text = text[:-1]
+        approx = True
     elif text.endswith("B"):
         mult = 1_000_000_000
         text = text[:-1]
+        approx = True
     try:
-        return int(float(text) * mult)
+        return int(float(text) * mult), approx
     except ValueError:
-        return safe_int(re.sub(r"[^\d]", "", raw))
+        return safe_int(re.sub(r"[^\d]", "", raw)), False
 
 
 def _og_map(html: str) -> dict[str, str]:
@@ -260,19 +270,20 @@ def _streams_from_html(html: str) -> list[dict[str, Any]]:
     return out
 
 
-def _votes_from_html(html: str) -> tuple[int | None, int | None]:
-    """Likes/dislikes when the vote UI is present; otherwise ``(None, None)``."""
+def _votes_from_html(html: str) -> tuple[int | None, int | None, bool]:
+    """Likes/dislikes + whether likes came from a compact K/M/B display."""
     title_m = _VOTES_TITLE_RE.search(html or "")
     if title_m:
-        return _parse_count(title_m.group(1)), _parse_count(title_m.group(2))
+        likes, likes_approx = _parse_count_ex(title_m.group(1))
+        dislikes, _ = _parse_count_ex(title_m.group(2))
+        return likes, dislikes, likes_approx
     up_m = _VOTES_UP_RE.search(html or "")
     down_m = _VOTES_DOWN_RE.search(html or "")
     if not up_m and not down_m:
-        return None, None
-    return (
-        _parse_count(up_m.group(1)) if up_m else None,
-        _parse_count(down_m.group(1)) if down_m else None,
-    )
+        return None, None, False
+    likes, likes_approx = _parse_count_ex(up_m.group(1)) if up_m else (None, False)
+    dislikes, _ = _parse_count_ex(down_m.group(1)) if down_m else (None, False)
+    return likes, dislikes, likes_approx
 
 
 def _comments_from_html(html: str) -> int | None:
@@ -375,56 +386,84 @@ def _media_from_embed(payload: dict[str, Any]) -> dict[str, Any] | None:
     return out or None
 
 
+def _video_quality_label(key: Any, node: dict[str, Any] | None = None) -> str | None:
+    """Prefer ``meta.h`` so Rumble's ``1081`` high-bitrate key becomes ``1080p``."""
+    meta = node.get("meta") if isinstance(node, dict) and isinstance(node.get("meta"), dict) else {}
+    h = safe_int(meta.get("h")) if meta else None
+    if h and h > 0:
+        return f"{h}p"
+    key_s = str(key)
+    if key_s.isdigit():
+        n = int(key_s)
+        # Known embedJS bitrate-variant keys that are still 1080p frames.
+        if n in {1081, 1082}:
+            return "1080p"
+        return f"{n}p"
+    return safe_str(key)
+
+
+def _media_node_sort_key(kv: tuple[Any, Any]) -> tuple[int, int]:
+    key, node = kv
+    meta = node.get("meta") if isinstance(node, dict) and isinstance(node.get("meta"), dict) else {}
+    h = safe_int(meta.get("h")) if meta else None
+    if not h or h <= 0:
+        h = int(key) if str(key).isdigit() else 0
+    br = safe_int(meta.get("bitrate")) if meta else None
+    return (h or 0, br or 0)
+
+
 def _streams_from_media(media: dict[str, Any] | None) -> list[dict[str, Any]]:
-    """Build a flat playable ``streams`` list from ``media`` (+ keep mp4 first)."""
+    """Build a flat playable video ``streams`` list from ``media`` (mp4/hls first).
+
+    Audio stays under ``media.audio`` only — never mixed into ``streams[].quality``.
+    """
     if not media:
         return []
     from app.utils.media_urls import cdn_expires_at
 
     out: list[dict[str, Any]] = []
-    seen: set[str] = set()
+    seen_url: set[str] = set()
+    seen_quality: set[str] = set()
 
     def _add(url: str | None, typ: str, quality: str | None) -> None:
         clean = safe_str(url)
-        if not clean or clean in seen:
+        if not clean or clean in seen_url:
             return
-        seen.add(clean)
+        q = (quality or "").lower()
+        qkey = f"{typ}:{q}" if q and q != "auto" else ""
+        if qkey and qkey in seen_quality:
+            return
+        seen_url.add(clean)
+        if qkey:
+            seen_quality.add(qkey)
         row: dict[str, Any] = {"url": clean, "type": typ, "quality": quality}
         expires = cdn_expires_at(clean)
         if expires:
             row["expiresAt"] = expires
         out.append(row)
 
-    def _quality_label(q: Any, *, suffix: str = "p") -> str | None:
-        if str(q).isdigit():
-            return f"{q}{suffix}"
-        return safe_str(q)
-
-    # Progressive MP4 qualities first (incl. timeline preview + ua.mp4).
+    # Progressive MP4: highest height, then bitrate (keeps 8051kbps before 3985kbps).
     mp4 = media.get("mp4") if isinstance(media.get("mp4"), dict) else {}
-    for q, node in sorted(mp4.items(), key=lambda kv: int(kv[0]) if str(kv[0]).isdigit() else 0, reverse=True):
+    for q, node in sorted(mp4.items(), key=_media_node_sort_key, reverse=True):
         if isinstance(node, dict):
-            _add(node.get("url"), "mp4", _quality_label(q))
+            _add(node.get("url"), "mp4", _video_quality_label(q, node))
 
     timeline = media.get("timeline") if isinstance(media.get("timeline"), dict) else {}
-    for q, node in timeline.items():
+    for q, node in sorted(timeline.items(), key=_media_node_sort_key, reverse=True):
         if isinstance(node, dict):
-            _add(node.get("url"), "mp4", _quality_label(q))
+            _add(node.get("url"), "mp4", _video_quality_label(q, node))
 
     tar = media.get("tar") if isinstance(media.get("tar"), dict) else {}
-    for q, node in tar.items():
+    for q, node in sorted(tar.items(), key=_media_node_sort_key, reverse=True):
         if isinstance(node, dict):
-            _add(node.get("url"), "hls", _quality_label(q))
+            _add(node.get("url"), "hls", _video_quality_label(q, node))
 
     hls = media.get("hls") if isinstance(media.get("hls"), dict) else {}
     for q, node in hls.items():
         if isinstance(node, dict):
             _add(node.get("url"), "hls", safe_str(q) or "auto")
 
-    audio = media.get("audio") if isinstance(media.get("audio"), dict) else {}
-    for q, node in audio.items():
-        if isinstance(node, dict):
-            _add(node.get("url"), "audio", _quality_label(q, suffix="k"))
+    # Intentionally omit media.audio — clients use media.audio[{bitrate}k].
 
     return out[:12]
 
@@ -460,14 +499,27 @@ def _width_height_from_embed(payload: dict[str, Any], media: dict[str, Any] | No
 
 
 def _merge_streams(*groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    seen: set[str] = set()
+    """Merge stream groups; drop audio rows and duplicate type:quality labels."""
+    seen_url: set[str] = set()
+    seen_quality: set[str] = set()
     out: list[dict[str, Any]] = []
     for group in groups:
         for item in group:
-            url = safe_str(item.get("url"))
-            if not url or url in seen:
+            if not isinstance(item, dict):
                 continue
-            seen.add(url)
+            stype = (safe_str(item.get("type")) or "").lower()
+            if stype == "audio":
+                continue
+            url = safe_str(item.get("url"))
+            if not url or url in seen_url:
+                continue
+            quality = (safe_str(item.get("quality")) or "").lower()
+            qkey = f"{stype}:{quality}" if quality and quality != "auto" else ""
+            if qkey and qkey in seen_quality:
+                continue
+            seen_url.add(url)
+            if qkey:
+                seen_quality.add(qkey)
             out.append(item)
             if len(out) >= 12:
                 return out
@@ -619,7 +671,7 @@ def parse_video_html(html: str, url: str | None = None) -> dict[str, Any] | None
     channel_name, channel_slug = _channel_from_html(html)
     channel_url = f"https://rumble.com/c/{channel_slug}" if channel_slug else None
     streams = _streams_from_html(html)
-    likes, dislikes = _votes_from_html(html)
+    likes, dislikes, likes_approx = _votes_from_html(html)
     iso_dur = safe_str((video or {}).get("duration"))
     duration_seconds = _iso_duration_seconds(iso_dur)
     duration_text = _seconds_to_clock(duration_seconds) if duration_seconds is not None else _parse_iso_duration(iso_dur)
@@ -654,6 +706,7 @@ def parse_video_html(html: str, url: str | None = None) -> dict[str, Any] | None
         # Missing engagement must stay null — never invent 0.
         "views": views,
         "likes": likes,
+        "likesIsApproximate": bool(likes_approx) if likes is not None else None,
         "dislikes": dislikes,
         "comments": _comments_from_html(html),
         "durationSeconds": duration_seconds,
