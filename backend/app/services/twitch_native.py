@@ -16,7 +16,7 @@ import json
 import uuid
 from datetime import datetime, timezone
 from typing import Any
-from urllib.parse import unquote
+from urllib.parse import unquote, urlencode, urlparse
 
 import httpx
 
@@ -108,6 +108,7 @@ def _video_node(
     broadcaster: str | None = None,
     profile_image: str | None = None,
     broadcaster_meta: dict[str, Any] | None = None,
+    lean: bool = False,
 ) -> dict[str, Any]:
     game = node.get("game") if isinstance(node.get("game"), dict) else {}
     game_name, game_box = _game_fields(node.get("game"))
@@ -126,19 +127,22 @@ def _video_node(
         "createdAt": safe_str(node.get("createdAt")),
         "durationSeconds": safe_int(node.get("lengthSeconds")),
         "views": safe_int(node.get("viewCount")),
-        "thumbnail": safe_str(node.get("previewThumbnailURL")),
+        "thumbnail": _thumb_url(node.get("previewThumbnailURL")),
+        "thumbnailTemplate": _thumb_template(node.get("previewThumbnailURL")),
         "animatedPreviewUrl": safe_str(node.get("animatedPreviewURL") or node.get("animatedPreviewUrl")),
         "broadcastType": btype,
         "game": game_name,
         "gameId": safe_str(game.get("id")),
         "gameSlug": safe_str(game.get("slug")),
         "gameBoxArtUrl": _box_art(game_box) if game_box and "{width}" in (game_box or "") else game_box,
-        "language": safe_str(node.get("language")),
-        # Flat string kept for back-compat; structured channel is additive.
-        "broadcaster": broadcaster,
-        "broadcasterProfileImage": profile_image,
-        "channel": broadcaster_meta,
+        "language": _language(node.get("language")),
     }
+    # user-videos is a single-channel list — channel identity lives once at the
+    # top-level broadcaster{}. Profile recentVideos keep the flat aliases.
+    if not lean:
+        out["broadcaster"] = broadcaster
+        out["broadcasterProfileImage"] = profile_image
+        out["channel"] = broadcaster_meta
     return strip_empty(out)
 
 
@@ -212,14 +216,16 @@ async def user_videos_native(
     login: str,
     *,
     limit: int = 20,
-    offset: int = 0,
+    cursor: str | None = None,
     filter_by: str | None = None,
     sort_by: str = "TIME",
 ) -> dict[str, Any] | None:
     """Channel videos with type filter + sort. Returns None on failure.
 
-    Twitch anonymous GQL ``after`` cursors are unreliable, so we fetch up to
-    100 newest matching videos in one shot and slice by ``offset`` for paging.
+    Twitch anonymous GQL rejects ``videos(after:)`` with IntegrityCheckFailed, so
+    we fetch up to 100 matching videos in one shot (the hard ceiling) and page
+    with a stable video-id cursor — not a raw offset that shifts when new VODs
+    land between pages.
     """
     login_key = (login or "").strip().lstrip("@")
     if not login_key:
@@ -236,64 +242,83 @@ async def user_videos_native(
         else:
             filter_key = None
 
-    offset = max(0, offset)
     limit = min(max(limit, 1), 100)
-    # Fetch one extra when possible so hasMore/nextCursor are accurate.
-    fetch_n = min(100, offset + limit + 1)
+    after_id = (cursor or "").strip() or None
 
     if types:
         data = await _gql(
             _VIDEOS_QUERY,
-            {"login": login_key, "first": fetch_n, "types": types, "sort": sort_key},
+            {"login": login_key, "first": 100, "types": types, "sort": sort_key},
         )
     else:
         data = await _gql(
             _VIDEOS_QUERY_ALL,
-            {"login": login_key, "first": fetch_n, "sort": sort_key},
+            {"login": login_key, "first": 100, "sort": sort_key},
         )
     u = (data or {}).get("user") if isinstance(data, dict) else None
     if not isinstance(u, dict) or not u.get("id"):
         return None
 
     login_val = safe_str(u.get("login")) or login_key
-    profile_image = safe_str(u.get("profileImageURL"))
     channel = _broadcaster_meta(u, login_val)
     edges = ((u.get("videos") or {}).get("edges")) or []
     mapped = [
-        _video_node(
-            e["node"],
-            broadcaster=login_val,
-            profile_image=profile_image,
-            broadcaster_meta=channel,
-        )
+        _video_node(e["node"], lean=True)
         for e in edges
         if isinstance(e, dict) and isinstance(e.get("node"), dict)
     ]
-    page = mapped[offset : offset + limit]
-    next_offset = offset + len(page)
-    has_more = next_offset < len(mapped)
+    start = 0
+    if after_id:
+        for i, row in enumerate(mapped):
+            if safe_str(row.get("id")) == after_id:
+                start = i + 1
+                break
+        else:
+            # Unknown/stale cursor — empty page rather than silently restarting.
+            return {
+                "username": login_val,
+                "filterBy": filter_key,
+                "sortBy": sort_key,
+                "broadcaster": channel,
+                "videos": [],
+                "nextCursor": None,
+                "hasMore": False,
+                "fetched": len(mapped),
+                "windowMax": 100,
+            }
+    page = mapped[start : start + limit]
+    has_more = (start + len(page)) < len(mapped)
+    next_cursor = safe_str(page[-1].get("id")) if page and has_more else None
     return {
         "username": login_val,
         "filterBy": filter_key,
         "sortBy": sort_key,
         "broadcaster": channel,
         "videos": page,
-        "nextOffset": next_offset if has_more else None,
+        "nextCursor": next_cursor,
         "hasMore": has_more,
         "fetched": len(mapped),
+        "windowMax": 100,
     }
 
 
 _GAME_FIELDS = "game { name boxArtURL(width: 144, height: 192) }"
 
 _PROFILE_QUERY = f"""
-query($login: String!, $videoLimit: Int!) {{
+query($login: String!, $videoLimit: Int!, $clipLimit: Int!) {{
   user(login: $login) {{
     id login displayName description createdAt
     profileImageURL(width: 300)
     bannerImageURL
     roles {{ isPartner isAffiliate }}
     followers {{ totalCount }}
+    channel {{
+      socialMedias {{ id name title url }}
+    }}
+    panels {{
+      id
+      ... on DefaultPanel {{ title linkURL imageURL description }}
+    }}
     stream {{
       id title viewersCount type createdAt
       previewImageURL(width: 640, height: 360)
@@ -306,6 +331,15 @@ query($login: String!, $videoLimit: Int!) {{
           id title lengthSeconds viewCount createdAt
           previewThumbnailURL animatedPreviewURL language
           {_GAME_FIELDS}
+        }}
+      }}
+    }}
+    clips(first: $clipLimit) {{
+      edges {{
+        node {{
+          id slug title viewCount createdAt
+          thumbnailURL url embedURL
+          game {{ name boxArtURL(width: 144, height: 192) }}
         }}
       }}
     }}
@@ -322,6 +356,13 @@ query($login: String!) {{
     bannerImageURL
     roles {{ isPartner isAffiliate }}
     followers {{ totalCount }}
+    channel {{
+      socialMedias {{ id name title url }}
+    }}
+    panels {{
+      id
+      ... on DefaultPanel {{ title linkURL imageURL description }}
+    }}
     stream {{
       id title viewersCount type createdAt
       previewImageURL(width: 640, height: 360)
@@ -332,36 +373,136 @@ query($login: String!) {{
 }}
 """
 
+_SOCIAL_HOSTS: list[tuple[str, tuple[str, ...]]] = [
+    ("instagram", ("instagram.com",)),
+    ("twitter", ("twitter.com", "x.com", "mobile.twitter.com")),
+    ("tiktok", ("tiktok.com",)),
+    ("youtube", ("youtube.com", "youtu.be", "m.youtube.com")),
+    ("discord", ("discord.gg", "discord.com")),
+    ("facebook", ("facebook.com", "fb.com")),
+    ("reddit", ("reddit.com",)),
+    ("kick", ("kick.com",)),
+]
 
-def _map_channel(u: dict[str, Any], login: str, recent: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+
+def _platform_from_url(url: str) -> str | None:
+    try:
+        host = (urlparse(url).hostname or "").lower().removeprefix("www.")
+    except Exception:
+        return None
+    if not host:
+        return None
+    for platform, hosts in _SOCIAL_HOSTS:
+        if host == hosts[0] or host.endswith("." + hosts[0]) or host in hosts:
+            return platform
+    return None
+
+
+def _socials_from_user(u: dict[str, Any]) -> list[dict[str, Any]]:
+    """Linked accounts from channel.socialMedias + DefaultPanel linkURLs."""
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+
+    def _add(platform: str | None, url: str | None, title: str | None = None) -> None:
+        if not url:
+            return
+        key = url.rstrip("/").lower()
+        if key in seen:
+            return
+        seen.add(key)
+        plat = platform or _platform_from_url(url) or "link"
+        out.append(strip_empty({"platform": plat, "url": url, "title": title}))
+
+    channel = u.get("channel") if isinstance(u.get("channel"), dict) else {}
+    for row in channel.get("socialMedias") or []:
+        if not isinstance(row, dict):
+            continue
+        _add(safe_str(row.get("name")), safe_str(row.get("url")), safe_str(row.get("title")))
+
+    for panel in u.get("panels") or []:
+        if not isinstance(panel, dict):
+            continue
+        _add(None, safe_str(panel.get("linkURL")), safe_str(panel.get("title")))
+
+    return out
+
+
+def _clip_node(node: dict[str, Any], *, broadcaster: str | None = None) -> dict[str, Any]:
+    game_name, game_box = _game_fields(node.get("game"))
+    slug = safe_str(node.get("slug"))
+    thumb = safe_str(node.get("thumbnailURL") or node.get("thumbnailUrl"))
+    embed = safe_str(node.get("embedURL") or node.get("embedUrl"))
+    if not embed and slug:
+        embed = f"https://clips.twitch.tv/embed?clip={slug}&parent=captapi.com"
+    return strip_empty(
+        {
+            "platform": "twitch",
+            "id": safe_str(node.get("id")),
+            "slug": slug,
+            "url": safe_str(node.get("url"))
+            or (f"https://www.twitch.tv/{broadcaster}/clip/{slug}" if broadcaster and slug else None),
+            "embedUrl": embed,
+            "title": safe_str(node.get("title")),
+            "views": safe_int(node.get("viewCount")),
+            "createdAt": safe_str(node.get("createdAt")),
+            "thumbnail": _thumb_url(thumb) if thumb and "{width}" in thumb else thumb,
+            "thumbnailTemplate": _thumb_template(thumb),
+            "game": game_name,
+            "gameBoxArtUrl": _box_art(game_box) if game_box and "{width}" in (game_box or "") else game_box,
+            "broadcaster": broadcaster,
+        }
+    )
+
+
+def _map_channel(
+    u: dict[str, Any],
+    login: str,
+    *,
+    recent: list[dict[str, Any]] | None = None,
+    top_clips: list[dict[str, Any]] | None = None,
+    schedule: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    from app.utils.profile_core import stamp_profile_core as _stamp
+
     roles = u.get("roles") or {}
     stream = u.get("stream")
     last = u.get("lastBroadcast") or {}
     login_val = safe_str(u.get("login")) or login
     profile_image = safe_str(u.get("profileImageURL"))
+    banner = safe_str(u.get("bannerImageURL"))
     stream_game, stream_box = _game_fields((stream or {}).get("game") if stream else None)
     last_game, last_box = _game_fields(last.get("game"))
-    stream_block = {
-        "title": safe_str((stream or {}).get("title")),
-        "game": stream_game if stream else None,
-        "gameBoxArtUrl": stream_box if stream else None,
-        "viewers": safe_int((stream or {}).get("viewersCount")) if stream else None,
-        "startedAt": safe_str((stream or {}).get("createdAt")) if stream else None,
-        "thumbnail": safe_str((stream or {}).get("previewImageURL")) if stream else None,
-    }
-    return {
+    is_live = bool(stream)
+    stream_block = (
+        {
+            "title": safe_str(stream.get("title")),
+            "game": stream_game,
+            "gameBoxArtUrl": stream_box,
+            "viewers": safe_int(stream.get("viewersCount")),
+            "startedAt": safe_str(stream.get("createdAt")),
+            "thumbnail": safe_str(stream.get("previewImageURL")),
+        }
+        if is_live and isinstance(stream, dict)
+        else None
+    )
+    out = {
         "platform": "twitch",
         "id": safe_str(u.get("id")),
+        "handle": login_val,
         "login": login_val,
+        "username": login_val,
         "displayName": safe_str(u.get("displayName")),
         "url": f"https://www.twitch.tv/{login_val}",
+        "bio": safe_str(u.get("description")),
         "description": safe_str(u.get("description")),
         "followers": safe_int((u.get("followers") or {}).get("totalCount")),
-        "profileImage": safe_str(u.get("profileImageURL")),
-        "bannerImage": safe_str(u.get("bannerImageURL")),
+        "avatar": profile_image,
+        "profileImage": profile_image,  # deprecated alias — prefer avatar
+        "banner": banner,
+        "bannerImage": banner,  # deprecated alias — prefer banner
         "isPartner": bool(roles.get("isPartner")),
         "isAffiliate": bool(roles.get("isAffiliate")),
-        "isLive": bool(stream),
+        "isLive": is_live,
         "stream": stream_block,
         "lastBroadcast": {
             "title": safe_str(last.get("title")),
@@ -370,10 +511,13 @@ def _map_channel(u: dict[str, Any], login: str, recent: list[dict[str, Any]] | N
             "startedAt": safe_str(last.get("startedAt")),
         },
         "recentVideos": recent if recent is not None else [],
-        "topClips": [],
-        "schedule": [],
+        "topClips": top_clips if top_clips is not None else [],
+        # Lean preview — full schedule lives on /v1/twitch/user-schedule.
+        "schedule": schedule if schedule is not None else [],
+        "socials": _socials_from_user(u),
         "createdAt": safe_str(u.get("createdAt")),
     }
+    return _stamp(out, platform="twitch")
 
 
 async def channel_native(login: str, video_limit: int = 30) -> dict[str, Any] | None:
@@ -381,26 +525,80 @@ async def channel_native(login: str, video_limit: int = 30) -> dict[str, Any] | 
     if not login_key:
         return None
     vlim = min(max(video_limit, 1), 100)
+    clip_limit = 10
 
-    data = await _gql(_PROFILE_QUERY, {"login": login_key, "videoLimit": vlim})
+    data = await _gql(
+        _PROFILE_QUERY,
+        {"login": login_key, "videoLimit": vlim, "clipLimit": clip_limit},
+    )
     u = (data or {}).get("user") if isinstance(data, dict) else None
+    lite = False
     if not isinstance(u, dict) or not u.get("id"):
         # Full query occasionally trips complexity limits — retry lite shape.
         data = await _gql(_PROFILE_LITE_QUERY, {"login": login_key})
         u = (data or {}).get("user") if isinstance(data, dict) else None
         if not isinstance(u, dict) or not u.get("id"):
             return None
-        return _map_channel(u, login_key, recent=[])
+        lite = True
 
     login_val = safe_str(u.get("login")) or login_key
     profile_image = safe_str(u.get("profileImageURL"))
-    edges = ((u.get("videos") or {}).get("edges")) or []
-    recent = [
-        _video_node(e["node"], broadcaster=login_val, profile_image=profile_image)
-        for e in edges
-        if isinstance(e, dict) and isinstance(e.get("node"), dict)
-    ]
-    return _map_channel(u, login_key, recent=recent)
+    recent: list[dict[str, Any]] = []
+    top_clips: list[dict[str, Any]] = []
+    if not lite:
+        edges = ((u.get("videos") or {}).get("edges")) or []
+        recent = [
+            _video_node(e["node"], broadcaster=login_val, profile_image=profile_image)
+            for e in edges
+            if isinstance(e, dict) and isinstance(e.get("node"), dict)
+        ]
+        clip_edges = ((u.get("clips") or {}).get("edges")) or []
+        top_clips = [
+            _clip_node(e["node"], broadcaster=login_val)
+            for e in clip_edges
+            if isinstance(e, dict) and isinstance(e.get("node"), dict)
+        ]
+    if not top_clips:
+        # Lite path (or empty clips on full query) — dedicated clips fetch.
+        clips_data = await _gql(
+            """
+query($login: String!, $clipLimit: Int!) {
+  user(login: $login) {
+    clips(first: $clipLimit) {
+      edges {
+        node {
+          id slug title viewCount createdAt
+          thumbnailURL url embedURL
+          game { name boxArtURL(width: 144, height: 192) }
+        }
+      }
+    }
+  }
+}
+""",
+            {"login": login_key, "clipLimit": clip_limit},
+        )
+        cu = (clips_data or {}).get("user") if isinstance(clips_data, dict) else None
+        if isinstance(cu, dict):
+            clip_edges = ((cu.get("clips") or {}).get("edges")) or []
+            top_clips = [
+                _clip_node(e["node"], broadcaster=login_val)
+                for e in clip_edges
+                if isinstance(e, dict) and isinstance(e.get("node"), dict)
+            ]
+
+    # Lean preview only — canonical full schedule: GET /v1/twitch/user-schedule.
+    schedule = await schedule_native(login_key, limit=10)
+    if schedule is None:
+        schedule = []
+
+    return _map_channel(
+        u,
+        login_key,
+        recent=recent,
+        top_clips=top_clips,
+        schedule=schedule,
+    )
 
 
 _CLIP_QUERY = """
@@ -432,6 +630,24 @@ def _box_art(url: str | None, *, width: int = 285, height: int = 380) -> str | N
     return url.replace("{width}", str(width)).replace("{height}", str(height))
 
 
+def _thumb_template(url: Any) -> str | None:
+    """Keep the unsubstituted Twitch template when present (callers pick size)."""
+    text = safe_str(url)
+    if text and "{width}" in text and "{height}" in text:
+        return text
+    return None
+
+
+def _thumb_url(url: Any, *, width: int = 320, height: int = 180) -> str | None:
+    """VOD thumbnails ship as ``…/{width}x{height}.jpg`` — substitute a default size."""
+    text = safe_str(url)
+    if not text:
+        return None
+    if "{width}" in text or "{height}" in text:
+        return text.replace("{width}", str(width)).replace("{height}", str(height))
+    return text
+
+
 def _person(raw: Any) -> dict[str, Any] | None:
     if not isinstance(raw, dict):
         return None
@@ -448,6 +664,26 @@ def _person(raw: Any) -> dict[str, Any] | None:
             "profileImage": safe_str(raw.get("profileImageURL") or raw.get("profileImageUrl")),
         }
     )
+
+
+def _language(value: Any) -> str | None:
+    """BCP-47 style lowercase — Twitch clips often return EN/ES; VODs return es."""
+    text = safe_str(value)
+    return text.lower() if text else None
+
+
+def _frame_rate(value: Any) -> float | int | None:
+    """Round Twitch's raw float frame rates to 2dp (field doc example: 60)."""
+    if isinstance(value, bool) or value is None:
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return round(value, 2)
+    try:
+        return round(float(value), 2)
+    except (TypeError, ValueError):
+        return None
 
 
 def _token_expires(value: Any) -> tuple[int | None, str | None]:
@@ -472,6 +708,57 @@ def _token_expires(value: Any) -> tuple[int | None, str | None]:
     except (OverflowError, OSError, ValueError):
         iso = None
     return expires, iso
+
+
+def _parse_playback_token(token_raw: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Unwrap playbackAccessToken.value JSON string into typed fields.
+
+    Drops the escaped-JSON ``value`` string (same unwrap we do for TikTok
+    live-info). ``clipUri`` is Twitch's reference URI inside the token — often
+    a mid/low rendition; it is not the quality we pick for videoUrl.
+    """
+    if not isinstance(token_raw, dict):
+        return None
+    signature = safe_str(token_raw.get("signature"))
+    raw_value = safe_str(token_raw.get("value"))
+    expires, expires_at = _token_expires(raw_value)
+    payload: dict[str, Any] = {}
+    if raw_value:
+        for candidate in (raw_value, unquote(raw_value)):
+            try:
+                parsed = json.loads(candidate)
+            except (TypeError, ValueError, json.JSONDecodeError):
+                continue
+            if isinstance(parsed, dict):
+                payload = parsed
+                break
+    out = strip_empty(
+        {
+            "signature": signature,
+            "expires": expires,
+            "expiresAt": expires_at,
+            "clipUri": safe_str(payload.get("clip_uri") or payload.get("clipUri")),
+            "clipSlug": safe_str(payload.get("clip_slug") or payload.get("clipSlug")),
+            "deviceId": safe_str(payload.get("device_id") or payload.get("deviceId")),
+            "version": safe_int(payload.get("version")),
+            "authorization": payload.get("authorization")
+            if isinstance(payload.get("authorization"), dict)
+            else None,
+        }
+    )
+    # Internal only — used to build signedVideoUrl; never returned to clients.
+    if out and raw_value:
+        out["_rawValue"] = raw_value
+    return out or None
+
+
+def _sign_clip_url(
+    source_url: str | None, signature: str | None, token_value: str | None
+) -> str | None:
+    """Append Twitch clip playback ``?sig=&token=`` (required for /nauth/ URLs)."""
+    if not source_url or not signature or not token_value:
+        return None
+    return f"{source_url}?{urlencode({'sig': signature, 'token': token_value})}"
 
 
 def _map_clip(c: dict[str, Any]) -> dict[str, Any]:
@@ -503,35 +790,36 @@ def _map_clip(c: dict[str, Any]) -> dict[str, Any]:
             }
         )
 
+    token_raw = c.get("playbackAccessToken") if isinstance(c.get("playbackAccessToken"), dict) else {}
+    token = _parse_playback_token(token_raw)
+    raw_token_value = (token or {}).pop("_rawValue", None) if token else None
+    signature = safe_str((token or {}).get("signature"))
+
     qualities_out: list[dict[str, Any]] = []
     for q in c.get("videoQualities") or []:
         if not isinstance(q, dict):
             continue
+        source = safe_str(q.get("sourceURL") or q.get("sourceUrl") or q.get("url"))
         row = strip_empty(
             {
                 "quality": safe_str(q.get("quality")),
-                "frameRate": q.get("frameRate") if isinstance(q.get("frameRate"), (int, float)) else None,
-                "url": safe_str(q.get("sourceURL") or q.get("sourceUrl") or q.get("url")),
+                "frameRate": _frame_rate(q.get("frameRate")),
+                "url": source,
+                "signedUrl": _sign_clip_url(source, signature, raw_token_value),
             }
         )
         if row.get("url"):
             qualities_out.append(row)
     # Prefer highest listed quality for the flat videoUrl (Twitch returns 1080 first).
     mp4 = qualities_out[0]["url"] if qualities_out else None
-
-    token_raw = c.get("playbackAccessToken") if isinstance(c.get("playbackAccessToken"), dict) else {}
-    expires, expires_at = _token_expires(token_raw.get("value"))
-    token = strip_empty(
-        {
-            "signature": safe_str(token_raw.get("signature")),
-            "value": safe_str(token_raw.get("value")),
-            "expires": expires,
-            "expiresAt": expires_at,
-        }
-    ) or None
+    # /nauth/ clip MP4s require ?sig=&token= — unsigned HEAD is 401. The same
+    # token signs every listed quality (token.clipUri may be 360 while videoUrl
+    # is 1080; both return 200 when signed).
+    signed_mp4 = qualities_out[0].get("signedUrl") if qualities_out else None
 
     login = safe_str(b.get("login") or b.get("displayName")) or safe_str(channel.get("username"))
     slug = safe_str(c.get("slug"))
+    related = c.get("_relatedClips") if isinstance(c.get("_relatedClips"), list) else None
     return strip_empty(
         {
             "platform": "twitch",
@@ -546,8 +834,9 @@ def _map_clip(c: dict[str, Any]) -> dict[str, Any]:
             "views": safe_int(c.get("viewCount")),
             "thumbnail": safe_str(c.get("thumbnailURL")),
             "videoUrl": mp4,
+            "signedVideoUrl": signed_mp4,
             "videoQualities": qualities_out or None,
-            "language": safe_str(c.get("language")),
+            "language": _language(c.get("language")),
             "isFeatured": c.get("isFeatured") if isinstance(c.get("isFeatured"), bool) else None,
             "isPublished": c.get("isPublished") if isinstance(c.get("isPublished"), bool) else None,
             "videoOffsetSeconds": safe_int(c.get("videoOffsetSeconds")),
@@ -562,8 +851,25 @@ def _map_clip(c: dict[str, Any]) -> dict[str, Any]:
             "channel": channel or None,
             "curator": curator,
             "playbackAccessToken": token,
+            "relatedClips": related,
         }
     )
+
+
+_RELATED_CLIPS_QUERY = """
+query($login: String!, $limit: Int!) {
+  user(login: $login) {
+    clips(first: $limit) {
+      edges {
+        node {
+          id slug title createdAt viewCount durationSeconds language
+          url thumbnailURL
+        }
+      }
+    }
+  }
+}
+"""
 
 
 async def clip_native(slug: str) -> dict[str, Any] | None:
@@ -573,6 +879,40 @@ async def clip_native(slug: str) -> dict[str, Any] | None:
     c = data.get("clip")
     if not isinstance(c, dict) or not c.get("id"):
         return None
+    # Additional clips from the same broadcaster (SC ships these).
+    b = c.get("broadcaster") if isinstance(c.get("broadcaster"), dict) else {}
+    login = safe_str(b.get("login"))
+    if login:
+        rel = await _gql(_RELATED_CLIPS_QUERY, {"login": login, "limit": 8})
+        u = (rel or {}).get("user") if isinstance(rel, dict) else None
+        edges = (((u or {}).get("clips") or {}).get("edges")) or []
+        related: list[dict[str, Any]] = []
+        for e in edges:
+            if not isinstance(e, dict):
+                continue
+            node = e.get("node") if isinstance(e.get("node"), dict) else None
+            if not node:
+                continue
+            rslug = safe_str(node.get("slug"))
+            if not rslug or rslug == slug:
+                continue
+            related.append(
+                strip_empty(
+                    {
+                        "id": safe_str(node.get("id")),
+                        "slug": rslug,
+                        "url": safe_str(node.get("url")) or f"https://clips.twitch.tv/{rslug}",
+                        "title": safe_str(node.get("title")),
+                        "createdAt": safe_str(node.get("createdAt")),
+                        "views": safe_int(node.get("viewCount")),
+                        "durationSeconds": safe_int(node.get("durationSeconds")),
+                        "language": _language(node.get("language")),
+                        "thumbnail": safe_str(node.get("thumbnailURL")),
+                    }
+                )
+            )
+        if related:
+            c = {**c, "_relatedClips": related[:6]}
     return _map_clip(c)
 
 
@@ -581,9 +921,17 @@ query($login: String!) {
   user(login: $login) {
     channel {
       schedule {
+        id
         segments {
-          title startAt endAt
-          categories { name }
+          id
+          title
+          startAt
+          endAt
+          isCancelled
+          cancelledUntil
+          firstOccurrenceDate
+          repeatEndsAfterCount
+          categories { id name }
         }
       }
     }
@@ -592,9 +940,51 @@ query($login: String!) {
 """
 
 
-async def schedule_native(login: str) -> list[dict[str, Any]] | None:
+def _map_schedule_segment(seg: dict[str, Any]) -> dict[str, Any]:
+    cats = seg.get("categories") or []
+    cat0 = cats[0] if cats and isinstance(cats[0], dict) else {}
+    started = safe_str(seg.get("startAt") or seg.get("startedAt"))
+    ended = safe_str(seg.get("endAt") or seg.get("endedAt"))
+    # GQL uses British cancelledUntil; Helix uses canceled_until — emit US spelling.
+    canceled_until = safe_str(seg.get("cancelledUntil") or seg.get("canceledUntil"))
+    is_cancelled = seg.get("isCancelled") if isinstance(seg.get("isCancelled"), bool) else None
+    repeat = safe_int(seg.get("repeatEndsAfterCount"))
+    # repeatEndsAfterCount == 1 → one-off; 0 / >1 → recurring series (Helix isRecurring).
+    is_recurring: bool | None
+    if repeat is None and seg.get("firstOccurrenceDate") is None:
+        is_recurring = None
+    elif repeat == 1:
+        is_recurring = False
+    else:
+        is_recurring = True
+    return strip_empty(
+        {
+            "id": safe_str(seg.get("id")),
+            "title": safe_str(seg.get("title")),
+            # Canonical timestamps match stream/lastBroadcast (startedAt).
+            "startedAt": started,
+            "endedAt": ended,
+            # Deprecated aliases — Twitch GQL field names; prefer startedAt/endedAt.
+            "startAt": started,
+            "endAt": ended,
+            "game": safe_str(cat0.get("name")),
+            "gameId": safe_str(cat0.get("id")),
+            "isRecurring": is_recurring,
+            "isCancelled": is_cancelled,
+            "canceledUntil": canceled_until,
+            "firstOccurrenceAt": safe_str(seg.get("firstOccurrenceDate")),
+        }
+    )
+
+
+async def schedule_native(
+    login: str, *, limit: int | None = None
+) -> list[dict[str, Any]] | None:
     """Upcoming schedule segments. Returns None on error, [] when the channel
-    simply has no schedule set (a valid empty result)."""
+    simply has no schedule set (a valid empty result).
+
+    Anonymous GQL Schedule has no timezone/vacation fields — those stay on Helix.
+    """
     data = await _gql(_SCHEDULE_QUERY, {"login": login})
     if data is None:
         return None
@@ -607,14 +997,7 @@ async def schedule_native(login: str) -> list[dict[str, Any]] | None:
     for seg in segments:
         if not isinstance(seg, dict):
             continue
-        cats = seg.get("categories") or []
-        game = safe_str(cats[0].get("name")) if cats and isinstance(cats[0], dict) else None
-        out.append(
-            {
-                "title": safe_str(seg.get("title")),
-                "startAt": safe_str(seg.get("startAt")),
-                "endAt": safe_str(seg.get("endAt")),
-                "game": game,
-            }
-        )
+        out.append(_map_schedule_segment(seg))
+    if limit is not None:
+        out = out[: max(0, min(int(limit), 100))]
     return out

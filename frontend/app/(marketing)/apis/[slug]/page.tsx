@@ -256,18 +256,20 @@ export default async function ApiDetailPage({
           </p>
         </section>
 
-        {/* What you get */}
-        <section className="mt-12">
-          <h2 className="text-2xl font-semibold">What you get</h2>
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-            {delivers(ep).map((d) => (
-              <li key={d} className="flex items-start gap-2.5 text-sm">
-                <Check className="mt-0.5 size-4 shrink-0 text-primary" />
-                <span>{d}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+        {/* What you get — omit when the endpoint sets delivers: [] (longDescription already covers it). */}
+        {delivers(ep).length > 0 ? (
+          <section className="mt-12">
+            <h2 className="text-2xl font-semibold">What you get</h2>
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+              {delivers(ep).map((d) => (
+                <li key={d} className="flex items-start gap-2.5 text-sm">
+                  <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                  <span>{d}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {ep.platformLimits && ep.platformLimits.length > 0 ? (
           <section className="mt-12">

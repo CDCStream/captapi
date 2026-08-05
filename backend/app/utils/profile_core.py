@@ -124,6 +124,7 @@ def stamp_profile_core(
                 "twitter",
                 "threads",
                 "tiktok",
+                "twitch",
             }:
                 out.setdefault("profileImage", avatar)
             if "thumbnailUrl" in card or plat == "youtube":
@@ -131,7 +132,7 @@ def stamp_profile_core(
         if banner is not None:
             if "bannerUrl" in card or plat == "youtube":
                 out.setdefault("bannerUrl", banner)
-            if "bannerImage" in card or plat == "twitter":
+            if "bannerImage" in card or plat in {"twitter", "twitch"}:
                 out.setdefault("bannerImage", banner)
         if post_count is not None:
             if "posts" in card or plat == "bluesky":
@@ -147,6 +148,8 @@ def stamp_profile_core(
             or plat in {"instagram", "truth_social", "twitter", "threads", "tiktok"}
         ):
             out.setdefault("username", handle if not str(handle).startswith("@") else str(handle)[1:])
+        if handle is not None and ("login" in card or plat == "twitch"):
+            out.setdefault("login", handle if not str(handle).startswith("@") else str(handle)[1:])
         if created is not None and ("joinedAt" in card or plat == "youtube"):
             out.setdefault("joinedAt", created)
 

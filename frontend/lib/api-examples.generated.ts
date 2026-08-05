@@ -14138,19 +14138,27 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "twitch-user-schedule": {
     "platform": "twitch",
     "username": "criticalrole",
+    "totalReturned": 1,
     "schedule": [
       {
+        "id": "eyJzZWdtZW50SUQiOiI1MWYyNGJjNS02ZmY2LTRhOTgtYjk4Ni04ZGIyNzVhMWE2MmEiLCJpc29ZZWFyIjoyMDI2LCJpc29XZWVrIjozMn0=",
         "title": "Age of Umbra: Sallowlands",
-        "startAt": "2026-07-17T02:00:00Z",
-        "endAt": "2026-07-17T06:00:00Z",
-        "game": "Tabletop RPGs"
+        "startedAt": "2026-08-07T02:00:00Z",
+        "endedAt": "2026-08-07T06:00:00Z",
+        "startAt": "2026-08-07T02:00:00Z",
+        "endAt": "2026-08-07T06:00:00Z",
+        "game": "Tabletop RPGs",
+        "gameId": "509664",
+        "isRecurring": false,
+        "isCancelled": false,
+        "firstOccurrenceAt": "2026-08-07T02:00:00Z"
       }
     ]
   },
   "twitch-user-videos": {
     "platform": "twitch",
     "username": "shroud",
-    "filterBy": "ARCHIVE",
+    "filterBy": null,
     "sortBy": "TIME",
     "broadcaster": {
       "id": "37402112",
@@ -14158,13 +14166,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "displayName": "shroud",
       "url": "https://www.twitch.tv/shroud",
       "profileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png",
-      "followers": 11293766,
+      "followers": 11293237,
       "isPartner": true,
       "isAffiliate": false
     },
-    "totalReturned": 5,
-    "nextCursor": "5",
+    "totalReturned": 3,
+    "nextCursor": "2827054673",
     "hasMore": true,
+    "windowMax": 100,
     "videos": [
       {
         "platform": "twitch",
@@ -14174,27 +14183,16 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "title": "ME N THE GIRLS R GONNA POP OFF IN THIS 100K TWITCH RIVALS",
         "createdAt": "2026-07-24T17:56:52Z",
         "durationSeconds": 20988,
-        "views": 206744,
-        "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/c43d1ce993fae5a15f69_shroud_317074350583_1784915807//thumb/thumb0-{width}x{height}.jpg",
+        "views": 212833,
+        "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/c43d1ce993fae5a15f69_shroud_317074350583_1784915807//thumb/thumb0-320x180.jpg",
+        "thumbnailTemplate": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/c43d1ce993fae5a15f69_shroud_317074350583_1784915807//thumb/thumb0-{width}x{height}.jpg",
         "animatedPreviewUrl": "https://d2nvs31859zcd8.cloudfront.net/c43d1ce993fae5a15f69_shroud_317074350583_1784915807/storyboards/2827992810-strip-0.jpg",
         "broadcastType": "ARCHIVE",
         "game": "VALORANT",
         "gameId": "516575",
         "gameSlug": "valorant",
         "gameBoxArtUrl": "https://static-cdn.jtvnw.net/ttv-boxart/516575-144x192.jpg",
-        "language": "en",
-        "broadcaster": "shroud",
-        "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png",
-        "channel": {
-          "id": "37402112",
-          "username": "shroud",
-          "displayName": "shroud",
-          "url": "https://www.twitch.tv/shroud",
-          "profileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png",
-          "followers": 11293766,
-          "isPartner": true,
-          "isAffiliate": false
-        }
+        "language": "en"
       },
       {
         "platform": "twitch",
@@ -14204,27 +14202,16 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "title": "HALO CE REMAKE! TIME TO CO-OP LEGENDARY AND GET OUR MEAT BEAT",
         "createdAt": "2026-07-23T18:19:36Z",
         "durationSeconds": 20254,
-        "views": 175611,
-        "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/43c3501090df2005acdf_shroud_319635395040_1784830770//thumb/thumb0-{width}x{height}.jpg",
+        "views": 175717,
+        "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/43c3501090df2005acdf_shroud_319635395040_1784830770//thumb/thumb0-320x180.jpg",
+        "thumbnailTemplate": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/43c3501090df2005acdf_shroud_319635395040_1784830770//thumb/thumb0-{width}x{height}.jpg",
         "animatedPreviewUrl": "https://d2vi6trrdongqn.cloudfront.net/43c3501090df2005acdf_shroud_319635395040_1784830770/storyboards/2827192082-strip-0.jpg",
         "broadcastType": "ARCHIVE",
         "game": "Halo: Campaign Evolved",
         "gameId": "796500915",
         "gameSlug": "halo-campaign-evolved",
         "gameBoxArtUrl": "https://static-cdn.jtvnw.net/ttv-boxart/796500915_IGDB-144x192.jpg",
-        "language": "en",
-        "broadcaster": "shroud",
-        "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png",
-        "channel": {
-          "id": "37402112",
-          "username": "shroud",
-          "displayName": "shroud",
-          "url": "https://www.twitch.tv/shroud",
-          "profileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png",
-          "followers": 11293766,
-          "isPartner": true,
-          "isAffiliate": false
-        }
+        "language": "en"
       },
       {
         "platform": "twitch",
@@ -14234,87 +14221,16 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "title": "HALO CE REMAKE! TIME TO CO-OP LEGENDARY AND GET OUR MEAT BEAT",
         "createdAt": "2026-07-23T14:57:52Z",
         "durationSeconds": 12076,
-        "views": 164190,
-        "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/6c4ca61b9211a873ec53_shroud_319633557216_1784818667//thumb/thumb0-{width}x{height}.jpg",
+        "views": 164254,
+        "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/6c4ca61b9211a873ec53_shroud_319633557216_1784818667//thumb/thumb0-320x180.jpg",
+        "thumbnailTemplate": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/6c4ca61b9211a873ec53_shroud_319633557216_1784818667//thumb/thumb0-{width}x{height}.jpg",
         "animatedPreviewUrl": "https://d2vi6trrdongqn.cloudfront.net/6c4ca61b9211a873ec53_shroud_319633557216_1784818667/storyboards/2827054673-strip-0.jpg",
         "broadcastType": "ARCHIVE",
         "game": "Halo: Campaign Evolved",
         "gameId": "796500915",
         "gameSlug": "halo-campaign-evolved",
         "gameBoxArtUrl": "https://static-cdn.jtvnw.net/ttv-boxart/796500915_IGDB-144x192.jpg",
-        "language": "en",
-        "broadcaster": "shroud",
-        "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png",
-        "channel": {
-          "id": "37402112",
-          "username": "shroud",
-          "displayName": "shroud",
-          "url": "https://www.twitch.tv/shroud",
-          "profileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png",
-          "followers": 11293766,
-          "isPartner": true,
-          "isAffiliate": false
-        }
-      },
-      {
-        "platform": "twitch",
-        "id": "2826283398",
-        "url": "https://www.twitch.tv/videos/2826283398",
-        "embedUrl": "https://player.twitch.tv/?video=2826283398&parent=captapi.com",
-        "title": "BEATING LEGENDARY INFINITE CO-OP BEFORE HALO CE REMAKE TMRW",
-        "createdAt": "2026-07-22T16:18:24Z",
-        "durationSeconds": 15014,
-        "views": 116518,
-        "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/52e9715af5a3a208de07_shroud_319620010720_1784737099//thumb/thumb0-{width}x{height}.jpg",
-        "animatedPreviewUrl": "https://d2vi6trrdongqn.cloudfront.net/52e9715af5a3a208de07_shroud_319620010720_1784737099/storyboards/2826283398-strip-0.jpg",
-        "broadcastType": "ARCHIVE",
-        "game": "Halo Infinite",
-        "gameId": "506416",
-        "gameSlug": "halo-infinite",
-        "gameBoxArtUrl": "https://static-cdn.jtvnw.net/ttv-boxart/506416-144x192.jpg",
-        "language": "en",
-        "broadcaster": "shroud",
-        "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png",
-        "channel": {
-          "id": "37402112",
-          "username": "shroud",
-          "displayName": "shroud",
-          "url": "https://www.twitch.tv/shroud",
-          "profileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png",
-          "followers": 11293766,
-          "isPartner": true,
-          "isAffiliate": false
-        }
-      },
-      {
-        "platform": "twitch",
-        "id": "2824697770",
-        "url": "https://www.twitch.tv/videos/2824697770",
-        "embedUrl": "https://player.twitch.tv/?video=2824697770&parent=captapi.com",
-        "title": "LEGENDARY CAMPAIGN BEFORE HALO 1 REMAKE with my bROY",
-        "createdAt": "2026-07-20T17:20:23Z",
-        "durationSeconds": 24019,
-        "views": 238942,
-        "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/08ea9e21bb94f98046e1_shroud_317044416375_1784568018//thumb/thumb0-{width}x{height}.jpg",
-        "animatedPreviewUrl": "https://d2nvs31859zcd8.cloudfront.net/08ea9e21bb94f98046e1_shroud_317044416375_1784568018/storyboards/2824697770-strip-0.jpg",
-        "broadcastType": "ARCHIVE",
-        "game": "Halo Infinite",
-        "gameId": "506416",
-        "gameSlug": "halo-infinite",
-        "gameBoxArtUrl": "https://static-cdn.jtvnw.net/ttv-boxart/506416-144x192.jpg",
-        "language": "en",
-        "broadcaster": "shroud",
-        "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png",
-        "channel": {
-          "id": "37402112",
-          "username": "shroud",
-          "displayName": "shroud",
-          "url": "https://www.twitch.tv/shroud",
-          "profileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png",
-          "followers": 11293766,
-          "isPartner": true,
-          "isAffiliate": false
-        }
+        "language": "en"
       }
     ]
   },

@@ -178,7 +178,10 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
     }
     # Never invent embedUrl from the page permalink id — Rumble's embed id is
     # often different (page v7cv2cc → embed v7aoh22). Fabricated embeds 404.
+    video_id = safe_str(item.get("id") or item.get("permalink_id"))
     embed_id = safe_str(item.get("embedId") or item.get("embed_id"))
+    if embed_id and video_id and embed_id == video_id:
+        embed_id = None
     if embed_id:
         out["embedId"] = embed_id
         out["embedUrl"] = f"https://rumble.com/embed/{embed_id}/"

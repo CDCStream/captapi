@@ -50,6 +50,56 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-05",
+    category: "improvement",
+    title: "Twitch user-videos lean rows + real video-id cursor; schedule fields",
+    description:
+      "GET /v1/twitch/user-videos drops per-video channel{}/broadcaster bloat (identity stays on top-level broadcaster{}). nextCursor is now the last video id within the first-100 window (not offset \"5\") — Twitch anonymous GQL rejects after-cursors. filterBy echoes null when omitted (no silent ARCHIVE default). Thumbnails substitute {width}x{height}. windowMax documented in the limit param. GET /v1/twitch/user-schedule adds id, isRecurring, isCancelled, canceledUntil, startedAt/endedAt (+ deprecated startAt/endAt), gameId, and limit. Canonical full schedule; profile.schedule[] stays a max-10 preview. Use cases no longer talk about sounds or mediaUrlsExpireAt.",
+    items: [
+      "user-videos: lean rows + video-id cursor + filterBy null default",
+      "user-schedule: id / isRecurring / canceledUntil / startedAt + limit",
+      "Docs: windowMax ceiling, preview vs full schedule, fixed use cases",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "improvement",
+    title: "Twitch clip: lowercase language, signedVideoUrl, unwrapped token",
+    description:
+      "GET /v1/twitch/clip now normalizes language to BCP-47 lowercase (same as twitch/profile recentVideos — Twitch returns EN/ES on clips). playbackAccessToken drops the escaped JSON value string and exposes parsed fields (signature, expires, expiresAt, clipUri, clipSlug, …). /nauth/ MP4s need a signature (unsigned 401) — we add signedVideoUrl and videoQualities[].signedUrl with ?sig=&token=. frameRate rounds to 2dp. relatedClips[] from the same broadcaster. cacheMaxAge documented. broadcaster / broadcasterProfileImage marked deprecated. Empty delivers[] removes the generic What you get block under the strong What is paragraph.",
+    items: [
+      "language lowercase shared with profile VODs",
+      "signedVideoUrl + unwrapped playbackAccessToken",
+      "relatedClips[] + cacheMaxAge + deprecated flat broadcaster fields",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "improvement",
+    title: "Twitch profile: socials, clips, schedule, offline stream null",
+    description:
+      "GET /v1/twitch/profile now returns socials[] from DefaultPanel linkURLs (instagram/x/youtube/…), populated topClips[], and a schedule[] preview (full schedule stays on /user-schedule). Offline channels get stream: null instead of six null fields. VOD thumbnails substitute {width}x{height} → 320x180 (thumbnailTemplate kept). cacheMaxAge documented. Canonical avatar/banner/displayName aliases applied. Rumble search now also drops embedUrl when embed id equals the page permalink — same rule as channel-videos / video-details.",
+    items: [
+      "socials[] from panels + socialMedias",
+      "topClips[] + schedule[] preview; stream null when offline",
+      "VOD thumb 320x180 + thumbnailTemplate",
+      "cacheMaxAge + canonical profile aliases",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "feature",
+    title: "Bluesky post-details: thread, facets, rich author",
+    description:
+      "GET /v1/bluesky/post-details was a byte-identical copy of a user-posts row at 10× the price. It now calls getPostThread: nested replies[] (depth 0–6), parentUri/rootUri/isReply, facet-derived links/mentions/hashtags (full URIs — not regex over truncated text), post labels + langs, and rich author{verification, labels, createdAt} including !no-unauthenticated. This is the only Captapi path to Bluesky reply content. Flat 1 credit stays justified.",
+    items: [
+      "getPostThread + replies[] with depth param",
+      "links[] / mentions[{did}] / hashtags[] from facets",
+      "Rich author verification{} / labels[] / createdAt",
+      "Docs: no 'views/videos' boilerplate on this text surface",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
     category: "fix",
     title: "Bluesky user-posts: mark reposts, normalize quotes, opaque cursor",
     description:

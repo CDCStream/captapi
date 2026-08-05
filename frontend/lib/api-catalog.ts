@@ -1020,7 +1020,7 @@ const INSTAGRAM: Spec[] = [
       "0 or 1 users[] — not a paginated discovery feed. Use relatedProfiles[] for adjacent accounts.",
     ],
     longDescription:
-      "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, instagram.com/natgeo) and this endpoint resolves it to the matching public Instagram account — a name→handle resolver, not a Google-style niche discovery search (queries like \"fitness coach\" will not return a creator list). Response: mode=resolve (the only mode; Instagram keyword search is login-gated), users[0] with platform, id (numeric), username, displayName, url (canonical https://www.instagram.com/{user}/), bio, bioLinks[], externalUrl, categoryName, fbid, relatedProfiles[], businessAddress, likeAndViewCountsDisabled, followers/following/postCount, verified, isPrivate, isBusinessAccount/isProfessionalAccount, profileImage/profileImageHd, and imageExpiresAt when the CDN oe= param is present. No nextCursor — resolve returns at most one user. Walk relatedProfiles for niche discovery without a separate creator-search endpoint. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+      "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, instagram.com/natgeo) and this endpoint resolves it to the matching public Instagram account — a name→handle resolver, not a Google-style niche discovery search (queries like \"fitness coach\" will not return a creator list). Response: mode=resolve (the only mode; Instagram keyword search is login-gated), users[0] with platform, id (numeric), username, displayName, url (canonical https://www.instagram.com/{user}/), bio, bioLinks[], externalUrl, categoryName, fbid, relatedProfiles[], businessAddress, likeAndViewCountsDisabled, followers/following/postCount, verified, isPrivate, isBusinessAccount/isProfessionalAccount, avatar (+ deprecated profileImage)/profileImageHd, and imageExpiresAt when the CDN oe= param is present. No nextCursor — resolve returns at most one user. Walk relatedProfiles for niche discovery without a separate creator-search endpoint. Flat 1 credit. Pass cache=true for the 24h shared cache.",
   },
   { slug: "instagram-embed", name: "Instagram Embed HTML API", shortName: "Embed HTML", category: "details", method: "GET", path: "/v1/instagram/embed", credits: 1, tagline: "Get Instagram's own self-contained embed HTML for any post, reel, or profile — ready to drop into an iframe on your site.", longDescription: "Pass an Instagram post, reel, or profile URL (or an @handle) and get back Instagram's own self-contained embed page as ready-to-use HTML — the full <html> document Instagram serves at /embed/, which you can drop straight into an <iframe srcdoc> or render server-side. The response also returns embedUrl, so you can point an <iframe src> at it directly instead. Posts and reels come back as a rich media card (with caption); profiles come back as a profile card that links to the account. No login or OAuth needed — it's fast, costs just 1 credit. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh. If Instagram's embed page is ever unavailable, the response falls back to the classic blockquote + embed.js snippet.", delivers: ["Instagram's full self-contained embed HTML document", "embedUrl you can load directly in an <iframe src>", "Canonical Instagram permalink for the post/reel/profile", "Type flag (post/reel/profile) plus shortcode or username"] },
   {
@@ -1577,7 +1577,29 @@ const BLUESKY: Spec[] = [
       "Feed order is by feed/repost time, not publishedAt — always pass nextCursor through.",
     ],
   },
-  { slug: "bluesky-post-details", name: "Bluesky Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/bluesky/post-details", credits: 1 , tagline: "Get a Bluesky post — text, author, likes, reposts, and replies as structured JSON." },
+  {
+    slug: "bluesky-post-details",
+    name: "Bluesky Post Details API",
+    shortName: "Post Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/bluesky/post-details",
+    credits: 1,
+    tagline:
+      "Post thread via getPostThread — nested replies[], facet links/mentions/hashtags, rich author (1 credit).",
+    longDescription:
+      "Pass a Bluesky post URL and get the public thread (app.bsky.feed.getPostThread) — not a duplicate of a user-posts row. Beyond the list card you get: nested replies[] with per-reply author/text/engagement (depth, default 1, max 6), parentUri/rootUri/isReply so a reply is never mistaken for a root post, facet-derived links[] (full URIs — Bluesky truncates long URLs inside text), mentions[] with did, and hashtags[], post-level labels[] + langs[], and a rich author{handle,displayName,did,avatar,createdAt,labels[],verification{},verified} matching bluesky/profile (including !no-unauthenticated compliance labels). Embeds use the same normalized type namespace as user-posts (external | images | video | quote). Flat 1 credit. This is the only Captapi surface that returns Bluesky reply content.",
+    delivers: [
+      "Nested replies[] from getPostThread (depth 0–6)",
+      "Facet links[] / mentions[{did}] / hashtags[] — not regex over truncated text",
+      "Rich author: verification{}, labels[], createdAt",
+      "parentUri / rootUri / isReply + post labels[] + langs[]",
+    ],
+    platformLimits: [
+      "depth defaults to 1; large threads can return many reply rows in one credit.",
+      "Bluesky has no view/play metric — engagement is likes/reposts/replies/quotes only.",
+    ],
+  },
 ];
 
 const PINTEREST: Spec[] = [
@@ -1906,12 +1928,60 @@ const TWITCH: Spec[] = [
     path: "/v1/twitch/profile",
     credits: 1,
     tagline:
-      "Twitch channel — live stream, last broadcast, recent videos with embedUrl, game box art, and storyboard previews (1 credit).",
+      "Twitch channel — socials[], topClips, schedule preview, live stream block (null when offline), clean VODs (1 credit).",
     longDescription:
-      "Pass a Twitch channel URL or username and get a clean profile: id, login, displayName, description, followers, profileImage/bannerImage, isPartner/isAffiliate, createdAt, isLive, stream{title, game, gameBoxArtUrl, viewers, startedAt, thumbnail}, lastBroadcast{}, recentVideos[] (with embedUrl, language, animatedPreviewUrl, gameBoxArtUrl), topClips[], and schedule[]. Flat 1 credit. game stays the category name string; gameBoxArtUrl and animatedPreviewUrl are additive media fields (no GraphQL junk).",
+      "Pass a Twitch channel URL or username and get a clean profile (no GraphQL junk). Canonical core: platform, id, handle, url, displayName, bio, avatar, banner, followers, createdAt — plus deprecated aliases login/username/description/profileImage/bannerImage for one release. Also: isPartner/isAffiliate, isLive, stream{title, game, gameBoxArtUrl, viewers, startedAt, thumbnail} when live (null when offline — not six null fields), lastBroadcast{}, socials[{platform,url,title}] from channel panels / socialMedias, recentVideos[] (embedUrl from real video id, thumbnail with {width}x{height} substituted to 320x180, thumbnailTemplate kept for custom sizes, language, animatedPreviewUrl, gameBoxArtUrl), topClips[], and schedule[] (lean preview, max 10). Canonical full schedule with id/isRecurring/canceledUntil: GET /v1/twitch/user-schedule. game stays the category name string; gameBoxArtUrl and animatedPreviewUrl are additive media fields. Accepts cache / cacheMaxAge=1d|3d|7d|14d|30d. Flat 1 credit.",
+    delivers: [
+      "socials[] from DefaultPanel linkURLs + socialMedias",
+      "topClips[] + schedule[] preview (user-schedule is the dedicated schedule endpoint)",
+      "stream null when offline; VOD thumbs substituted to 320x180",
+      "Canonical avatar/banner/displayName (+ deprecated aliases)",
+    ],
+    platformLimits: [
+      "schedule[] on profile is a short upcoming preview — use /twitch/user-schedule for the full schedule surface.",
+      "embedUrl is only emitted when a real embed id is known (Twitch video/clip id) — never invented from an unrelated page id.",
+    ],
   },
-  { slug: "twitch-user-videos", name: "Twitch User Videos API", shortName: "User Videos", category: "list", method: "GET", path: "/v1/twitch/user-videos", credits: 2, tagline: "Twitch channel VODs — filter ARCHIVE/HIGHLIGHT/UPLOAD, sort TIME/VIEWS, cursor, broadcaster id/followers. Flat 2 credits.", longDescription: "Pass a Twitch channel URL or username and get a clean videos[] list (not a full profile dump): id, url, embedUrl, title, createdAt, durationSeconds, views, thumbnail, animatedPreviewUrl, broadcastType, game (+ gameId/gameSlug/box art), language, and broadcaster string plus channel{id,username,displayName,followers,profileImage,isPartner}. Filter with filterBy=ARCHIVE|HIGHLIGHT|UPLOAD; sort with sortBy=TIME|VIEWS. Cursor pagination via nextCursor/hasMore over the first 100 matching videos. Flat 2 credits on the native path. Pass cache=true for the 24h shared cache." },
-  { slug: "twitch-user-schedule", name: "Twitch User Schedule API", shortName: "User Schedule", category: "list", method: "GET", path: "/v1/twitch/user-schedule", credits: 1 },
+  {
+    slug: "twitch-user-videos",
+    name: "Twitch User Videos API",
+    shortName: "User Videos",
+    category: "list",
+    method: "GET",
+    path: "/v1/twitch/user-videos",
+    credits: 2,
+    tagline:
+      "Twitch channel VODs — lean rows, video-id cursor, filter/sort, top-level broadcaster{} (flat 2).",
+    longDescription:
+      "Pass a Twitch channel URL or username and get a clean videos[] list (not a profile dump). Each row: id, url, embedUrl, title, createdAt, durationSeconds, views, thumbnail (320x180 — {width}x{height} substituted; thumbnailTemplate kept), animatedPreviewUrl, broadcastType, game (+ gameId/gameSlug/box art), lowercase language. Channel identity is once at the top as broadcaster{} — videos[] do not repeat channel{}/broadcaster/broadcasterProfileImage. filterBy=ARCHIVE|HIGHLIGHT|UPLOAD (omit for all types — no default filter; filterBy echoes null when omitted). sortBy=TIME|VIEWS. nextCursor is the last video id on the page (stable within the window — not a raw offset). Hard ceiling: first 100 matching videos (windowMax=100); Twitch anonymous GQL rejects after-cursors with IntegrityCheckFailed, so deeper history is not available. Flat 2 credits per call.",
+    platformLimits: [
+      "At most the first 100 matching videos (windowMax). Deeper VOD history is not available on this surface.",
+      "nextCursor is a video id within that 100-video window — not Twitch's GQL after-cursor (anonymous integrity check blocks it).",
+    ],
+  },
+  {
+    slug: "twitch-user-schedule",
+    name: "Twitch User Schedule API",
+    shortName: "User Schedule",
+    category: "list",
+    method: "GET",
+    path: "/v1/twitch/user-schedule",
+    credits: 1,
+    tagline:
+      "Twitch channel schedule — segment id, isRecurring, canceledUntil, startedAt/endedAt (1 credit).",
+    longDescription:
+      "Pass a Twitch channel URL or username and get upcoming schedule segments as clean JSON. Each segment: id (stable segment key for dedup), title, startedAt/endedAt (canonical — same tense as stream.startedAt; startAt/endAt kept as deprecated aliases), game/gameId, isRecurring, isCancelled, canceledUntil (skip segments where this is set — a canceled broadcast still appears in Twitch's list), firstOccurrenceAt. This is the canonical full schedule; twitch/profile.schedule[] is only a short preview (up to 10). Anonymous GQL does not expose timezone or vacation mode. Flat 1 credit. Pass limit (default 50, max 100).",
+    delivers: [
+      "Segment id + isRecurring + canceledUntil / isCancelled",
+      "startedAt/endedAt (startAt/endAt deprecated aliases)",
+      "game + gameId when the segment has a category",
+      "Canonical full schedule — profile.schedule[] is a lean preview only",
+    ],
+    platformLimits: [
+      "timezone and vacation mode are not on Twitch's anonymous Schedule type — not inventable here.",
+      "Canceled segments still appear; filter client-side on canceledUntil / isCancelled.",
+    ],
+  },
   {
     slug: "twitch-clip",
     name: "Twitch Clip API",
@@ -1921,9 +1991,10 @@ const TWITCH: Spec[] = [
     path: "/v1/twitch/clip",
     credits: 1,
     tagline:
-      "Twitch clip — curator vs channel, followers, multi-quality video, and token expiry as clean JSON.",
+      "Twitch clip — curator vs channel, signedVideoUrl, unwrapped token, relatedClips (1 credit).",
     longDescription:
-      "Pass a Twitch clip URL (or channel URL/username for a recent clip) and get a clean structured object — not Twitch's raw GraphQL envelope. Includes curator (who cut the clip) separate from channel/broadcaster (id, followers, isPartner, lastBroadcast), language, isFeatured/isPublished, videoOffsetSeconds, gameId/gameSlug/gameBoxArtUrl, videoQualities[{quality,frameRate,url}], and playbackAccessToken with expires/expiresAt. Flat broadcaster string kept for back-compat. Flat 1 credit.",
+      "Pass a Twitch clip URL (or channel URL/username for a recent clip) and get a clean structured object — not Twitch's raw GraphQL envelope. Includes curator (who cut the clip) separate from channel (id, followers, isPartner, lastBroadcast), BCP-47 lowercase language (same as twitch/profile recentVideos), isFeatured/isPublished, videoOffsetSeconds, gameId/gameSlug/gameBoxArtUrl, videoQualities[{quality,frameRate,url,signedUrl}] with frameRate rounded to 2dp, videoUrl (unsigned source) plus signedVideoUrl (?sig=&token= — required for /nauth/ MP4s; unsigned returns 401), playbackAccessToken as parsed fields (signature, expires, expiresAt, clipUri, clipSlug, deviceId, version, authorization — no escaped JSON value string), and relatedClips[] from the same broadcaster. Flat broadcaster / broadcasterProfileImage kept as deprecated aliases of channel{}. Accepts cache / cacheMaxAge=1d|3d|7d|14d|30d. Flat 1 credit.",
+    delivers: [],
   },
 ];
 
@@ -3738,7 +3809,17 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     },
     cacheP(),
   ],
-  "bluesky-post-details": [up("Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY.")],
+  "bluesky-post-details": [
+    up("Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY."),
+    {
+      name: "depth",
+      type: "integer",
+      required: false,
+      description:
+        "Reply nesting levels under the post (0 = post only with no replies[], default 1, max 6). Maps to Bluesky getPostThread depth.",
+    },
+    cacheP(),
+  ],
   // Pinterest
   "pinterest-pin-details": [up("Pinterest pin URL, e.g. https://pinterest.com/pin/ID/.")],
   "pinterest-user-pins": [up("Pinterest profile URL or username."), lp(25, 200)],
@@ -3773,16 +3854,42 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "rumble-search": [qp("Keywords or search query (min 2 characters)."), lp(20, 200)],
   "rumble-comments": [up("Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."), lpFlat(50, 500, 2)],
   // Twitch
-  "twitch-profile": [up(TWITCH_PROFILE)],
+  "twitch-profile": [up(TWITCH_PROFILE), cachePWithMaxAge(), cacheMaxAgeP()],
   "twitch-user-videos": [
     up(TWITCH_PROFILE),
-    lpFlat(20, 100, 2),
-    { name: "filterBy", type: "string", required: false, description: "ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types." },
+    {
+      name: "limit",
+      type: "integer",
+      required: false,
+      description:
+        "Max items to return (default 20, max 100). Flat 2 credits per call. Hard ceiling: first 100 matching videos only — deeper history is not available (windowMax=100).",
+    },
+    {
+      name: "filterBy",
+      type: "string",
+      required: false,
+      description:
+        "ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types — there is no default filter (filterBy is null when omitted).",
+    },
     { name: "sortBy", type: "string", required: false, description: "TIME (default, newest first) or VIEWS." },
-    CURSOR,
+    {
+      name: "cursor",
+      type: "string",
+      required: false,
+      description:
+        "Pagination cursor = last video id from the previous nextCursor. Leave empty for the first page. Pages the first 100 matching videos only (not a raw offset).",
+    },
   ],
-  "twitch-user-schedule": [up(TWITCH_PROFILE)],
-  "twitch-clip": [up("Twitch clip URL, channel URL, or username.")],
+  "twitch-user-schedule": [
+    up(TWITCH_PROFILE),
+    {
+      name: "limit",
+      type: "integer",
+      required: false,
+      description: "Max schedule segments to return (default 50, max 100). Flat 1 credit per call.",
+    },
+  ],
+  "twitch-clip": [up("Twitch clip URL, channel URL, or username."), cachePWithMaxAge(), cacheMaxAgeP()],
   // Spotify
   "spotify-artist": [up(SPOTIFY_URL), cacheP()],
   "spotify-track": [up(SPOTIFY_URL), cacheP()],
@@ -4616,6 +4723,11 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       // Pinterest board — never fall through to the platform pin exampleUrl.
       if (ep.slug === "pinterest-board") {
         return "https://www.pinterest.com/potterybarn/rustic-lodge-lookbook/";
+      }
+      if (ep.slug === "twitch-user-schedule") {
+        const u = API_EXAMPLES[ep.slug]?.username;
+        if (typeof u === "string" && u.trim()) return `https://www.twitch.tv/${u}`;
+        return "https://www.twitch.tv/criticalrole";
       }
       if (ep.slug === "facebook-marketplace-item" || d.includes("marketplace item"))
         return "https://www.facebook.com/marketplace/item/2228870800986975/";
@@ -5907,9 +6019,67 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     creator: "Who created/cut the Kick clip (distinct from the broadcaster channel).",
     channel: "Kick broadcaster channel for the clip.",
   },
+  "twitch-profile": {
+    platform: "Platform identifier for this response (matches the endpoint's platform).",
+    displayName: "Channel display name. Canonical across profile endpoints (prefer over name).",
+    handle: "Twitch login. Canonical; login/username kept as deprecated aliases for one release.",
+    login: "Deprecated alias of handle — prefer handle.",
+    avatar: "Profile image URL. Canonical; profileImage is a deprecated alias for one release.",
+    profileImage: "Deprecated alias of avatar — prefer avatar.",
+    banner: "Channel banner URL. Canonical; bannerImage is a deprecated alias for one release.",
+    bannerImage: "Deprecated alias of banner — prefer banner.",
+    bio: "Channel description / about text. Canonical; description is a deprecated alias.",
+    description: "Deprecated alias of bio — prefer bio.",
+    isLive: "Whether the channel is currently live.",
+    stream:
+      "Live stream block when isLive — {title, game, gameBoxArtUrl, viewers, startedAt, thumbnail}. null when offline (not an object of nulls).",
+    socials:
+      "Linked social accounts [{platform, url, title}] from channel.socialMedias and DefaultPanel linkURLs (instagram/x/tiktok/youtube/…). Empty when the channel exposes none.",
+    topClips: "Top public clips for the channel (slug, embedUrl, views, thumbnail).",
+    schedule:
+      "Lean upcoming schedule preview (max 10) — same segment shape as /twitch/user-schedule (id, startedAt/endedAt, isRecurring, canceledUntil, …). Canonical full schedule: GET /v1/twitch/user-schedule.",
+    thumbnail:
+      "VOD/clip thumbnail URL with Twitch's {width}x{height} placeholders substituted to 320x180 so the URL loads. See thumbnailTemplate for the raw template.",
+    thumbnailTemplate:
+      "Unsubstituted Twitch thumbnail template (…/{width}x{height}.jpg) when the source used placeholders — pick your own size.",
+    embedUrl:
+      "Platform embed URL when a real embed id is known. Do not invent from a page/permalink id.",
+    game: "Category / game name string (not a GraphQL Game object).",
+    gameBoxArtUrl: "Category box art URL (additive media field).",
+    animatedPreviewUrl: "VOD storyboard / animated preview strip when Twitch exposes it.",
+  },
+  "twitch-user-videos": {
+    broadcaster: "Top-level channel card for this single-channel list (id, username, displayName, url, profileImage, followers, isPartner, isAffiliate). Not repeated on each video.",
+    filterBy: "ARCHIVE | HIGHLIGHT | UPLOAD when set; null when omitted (all types — there is no default filter).",
+    nextCursor: "Last video id on this page. Pass as cursor for the next page within the first 100 matching videos. Not a raw offset.",
+    windowMax: "Always 100 — Twitch anonymous GQL only exposes the first 100 matching videos; deeper history is not available.",
+    thumbnail: "VOD thumbnail with {width}x{height} substituted to 320x180. See thumbnailTemplate for the raw template.",
+    language: "BCP-47 lowercase (same as twitch/clip and profile recentVideos).",
+  },
+  "twitch-user-schedule": {
+    id: "Stable schedule segment id — use for dedup and change tracking.",
+    startedAt: "Segment start (ISO-8601 UTC). Canonical; matches stream.startedAt naming. startAt is a deprecated alias.",
+    endedAt: "Segment end (ISO-8601 UTC). Canonical; endAt is a deprecated alias.",
+    startAt: "Deprecated alias of startedAt — prefer startedAt.",
+    endAt: "Deprecated alias of endedAt — prefer endedAt.",
+    isRecurring: "Whether the segment is a weekly recurring series (derived from Twitch repeatEndsAfterCount).",
+    isCancelled: "Whether this occurrence is cancelled.",
+    canceledUntil: "When set, this occurrence (or the series through this time) will not air — filter these out for calendar integrations. Still present in the list when Twitch returns them.",
+    firstOccurrenceAt: "First occurrence of a recurring series when Twitch exposes it.",
+    game: "Category / game name string for the segment.",
+  },
   "twitch-clip": {
     curator: "Who created/cut the Twitch clip (distinct from the broadcaster channel).",
-    channel: "Twitch broadcaster channel object (id, username, followers, isPartner, lastBroadcast).",
+    channel: "Twitch broadcaster channel object (id, username, followers, isPartner, lastBroadcast). Prefer this over deprecated broadcaster / broadcasterProfileImage.",
+    broadcaster: "Deprecated alias of channel.username — prefer channel{}. Kept for back-compat one release.",
+    broadcasterProfileImage: "Deprecated alias of channel.profileImage — prefer channel{}. Kept for back-compat one release.",
+    language: "BCP-47 language, lowercase (e.g. en, es). Normalized the same way as twitch/profile recentVideos[].language — Twitch's raw clip field is often uppercase.",
+    videoUrl: "Unsigned highest-quality source MP4 path (often /nauth/). Does not play by itself — Twitch returns 401 without a signature. Use signedVideoUrl for ready-to-play playback.",
+    signedVideoUrl: "Ready-to-play highest-quality URL with ?sig=&token= appended (same shape ScrapeCreators returns as videoURL). Required for current /nauth/ clip CDN paths. Expires with playbackAccessToken.expiresAt.",
+    videoQualities: "Available renditions [{quality, frameRate, url, signedUrl}]. frameRate is rounded to 2 decimal places. url is unsigned; signedUrl has ?sig=&token=.",
+    frameRate: "Frames per second for a videoQualities row, rounded to 2 decimal places (Twitch returns raw floats like 60.023…). Example: 60.",
+    playbackAccessToken: "Parsed playback token — signature, expires (unix), expiresAt (ISO-8601), clipUri (Twitch's reference URI inside the token — often a mid/low rendition, not necessarily videoUrl), clipSlug, deviceId, version, authorization{}. The escaped JSON value string is not returned; use signedVideoUrl / videoQualities[].signedUrl instead of assembling query params yourself.",
+    relatedClips: "Other public clips from the same broadcaster [{id,slug,url,title,views,thumbnail,language,…}] — discovery surface ScrapeCreators also ships.",
   },
   "spotify-track": {
     mediaType: "Spotify media type (e.g. AUDIO).",
@@ -6001,9 +6171,11 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     platform: 'Always "instagram" on each users[] row.',
     url: "Canonical profile URL: https://www.instagram.com/{username}/ (www + trailing slash) — join-safe with channel-details / basic-profile.",
     isPrivate: "Whether the account is private. Canonical privacy flag (no separate private alias).",
+    avatar:
+      "Profile photo URL (HD when available). Canonical across profile endpoints (prefer over profileImage). Signed Instagram CDN — expires; see imageExpiresAt.",
     profileImage:
-      "Profile photo URL (HD when available). Signed Instagram CDN — expires; see imageExpiresAt. Canonical name across Instagram endpoints (not avatar).",
-    profileImageHd: "HD profile photo URL when Instagram exposes one; may equal profileImage.",
+      "Deprecated alias of avatar for one release — prefer avatar. Signed Instagram CDN; see imageExpiresAt.",
+    profileImageHd: "HD profile photo URL when Instagram exposes one; may equal avatar/profileImage.",
     imageExpiresAt:
       "ISO-8601 expiry parsed from the CDN oe= hex timestamp when present. Re-host the image for long-term storage — do not treat the CDN URL as permanent.",
     users: "0 or 1 resolved public profile(s). Not a paginated discovery list.",
@@ -6287,19 +6459,28 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     uri: "AT URI of the post (at://did…/app.bsky.feed.post/rkey).",
     url: "bsky.app permalink for the post.",
     cid: "Content ID (CID) of this post record — stable content-addressed hash.",
-    text: "Post text body.",
+    text: "Post text body. Long URLs may be truncated here — use links[] from facets for the full URI.",
     publishedAt: "When the original post was created (record createdAt). Not repost time.",
     indexedAt:
       "When the AppView indexed this post. For reposts, feed order follows repostedAt — not this field.",
     author:
-      "Author of the underlying post: {handle, displayName, did, avatar}. On reposts this is the original author — not the profile you queried.",
+      "Author of the underlying post: {handle, displayName, did, avatar}. On reposts this is the original author — not the profile you queried. For verification/labels use post-details.",
     isRepost:
       "true when this feed row is a repost (reasonRepost). Engagement and author belong to the original post — use repostedBy for the account that boosted it.",
     repostedBy:
       "Who reposted: {handle, displayName, did, avatar}. Present only when isRepost is true (usually the requested handle).",
     repostedAt: "When the repost happened (ISO-8601). Present only when isRepost is true.",
+    isReply: "true when parentUri is set (this post replies to another).",
+    parentUri: "AT URI of the immediate parent when this is a reply.",
+    rootUri: "AT URI of the thread root when this is a reply.",
+    links:
+      "Outbound URLs from rich-text facets [{url, text}]. url is the full target — text may be Bluesky's truncated display form.",
+    mentions: "Mention facets [{did, handle, text}]. did is the stable identity.",
+    hashtags: "Hashtag strings from facets (no # prefix) — not regex over text.",
+    langs: "Language tags from the post record (e.g. en).",
+    labels: "Moderation labels on the post [{src, uri, cid, val, neg, createdAt, expiresAt}].",
     engagement:
-      "Engagement on the underlying post: {likes, reposts, replies, quotes}. On isRepost rows these counts are the original author's — do not average them onto the requested handle without filtering.",
+      "Engagement on the underlying post: {likes, reposts, replies, quotes}. On isRepost rows these counts are the original author's — do not average them onto the requested handle without filtering. No view count on Bluesky.",
     embed:
       "Normalized embed: type external {url,title,description,thumb} | images {images[{url,alt}]} | video {playlist,thumbnail,alt} | quote {uri,url,text,author,cid,publishedAt}. Never a raw lexicon NSID.",
     nextCursor:
@@ -6307,6 +6488,34 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     hasMore: "true when nextCursor is present.",
     filter: "Echo of the filter query param when set (Bluesky getAuthorFeed filter).",
     includeReposts: "Echo of includeReposts (default true).",
+  },
+  "bluesky-post-details": {
+    platform: "Platform identifier for this response (matches the endpoint's platform).",
+    uri: "AT URI of the post (at://did…/app.bsky.feed.post/rkey).",
+    url: "bsky.app permalink for the post.",
+    cid: "Content ID (CID) of this post record — stable content-addressed hash.",
+    text: "Post text body. Long URLs may be truncated here — prefer links[].url from facets.",
+    publishedAt: "When the post record was created (ISO-8601).",
+    indexedAt: "When the AppView indexed this post (ISO-8601).",
+    author:
+      "Rich author card: {handle, displayName, did, avatar, createdAt, labels[], verification{}, verified}. labels may include !no-unauthenticated (account opts out of unauthenticated visibility).",
+    isReply: "true when this post is a reply (parentUri set).",
+    parentUri: "AT URI of the immediate parent post when isReply.",
+    rootUri: "AT URI of the thread root when isReply.",
+    links:
+      "Facet-derived outbound links [{url, text}]. url is the real target; text is the (possibly truncated) display slice.",
+    mentions: "Facet mentions [{did, handle, text}] — did is authoritative.",
+    hashtags: "Facet hashtags without #.",
+    langs: "Language tags on the post record (e.g. en).",
+    labels:
+      "Post-level moderation labels [{src, uri, cid, val, neg, createdAt, expiresAt}] (nsfw/spam/etc. when applied).",
+    engagement:
+      "Engagement on this post: {likes, reposts, replies, quotes}. replies is the count; reply bodies live in replies[]. No view metric on Bluesky.",
+    embed:
+      "Normalized embed: type external | images | video | quote (same namespace as user-posts).",
+    replies:
+      "Nested reply tree from getPostThread. Each node matches the post shape (rich author, facets, engagement) plus its own replies[]. Depth controlled by the depth query param.",
+    depth: "Echo of the depth query param used for this response.",
   },
   "facebook-ad-library-search": {
     status: "Ad delivery filter/status: ACTIVE, INACTIVE, or ALL.",
@@ -6857,6 +7066,10 @@ const PROFILE_CHANNEL_SLUGS = new Set([
   "github-user",
   "snapchat-user-profile",
   "truth-social-profile",
+  "twitch-profile",
+  "bluesky-profile",
+  "twitter-profile",
+  "threads-profile",
   "komi-page",
   "pillar-page",
   "linkbio-page",
@@ -6880,7 +7093,6 @@ const VIDEOISH_DETAILS_SLUGS = new Set([
   "twitter-tweet-details",
   "reddit-post-details",
   "threads-post-details",
-  "bluesky-post-details",
   "pinterest-pin-details",
   "linkedin-post-details",
   "truth-social-post",
@@ -6896,6 +7108,36 @@ const VIDEO_DETAILS_USE_CASES: UseCase[] = [
 
 /** Slug-specific use cases when category defaults would mislead. */
 const SLUG_USE_CASES: Record<string, UseCase[]> = {
+  "twitch-user-videos": [
+    { title: "Content Pipelines", desc: "Ingest a channel's recent VODs (up to 100) with broadcastType and game metadata." },
+    { title: "Monitoring", desc: "Detect new ARCHIVE uploads via video id + createdAt within the 100-video window." },
+    { title: "Highlights", desc: "filterBy=HIGHLIGHT to pull edited clips Twitch stores as VODs." },
+    { title: "Analytics", desc: "Aggregate views across recent VODs without repeating channel{} on every row." },
+  ],
+  "twitch-user-schedule": [
+    { title: "Calendar sync", desc: "Build a stream calendar; skip rows where canceledUntil or isCancelled is set." },
+    { title: "Recurring series", desc: "Use isRecurring + id to track weekly slots without mistaking one-offs." },
+    { title: "Category planning", desc: "Read game/gameId per segment for upcoming content mix." },
+    { title: "Preview vs full", desc: "profile.schedule[] is a short preview — this endpoint is the canonical full schedule." },
+  ],
+  "bluesky-post-details": [
+    {
+      title: "Thread reading",
+      desc: "Pull a post and its nested replies[] in one call — the only Captapi path to Bluesky reply content.",
+    },
+    {
+      title: "Link integrity",
+      desc: "Use links[] from facets for full URLs; Bluesky truncates long links inside text.",
+    },
+    {
+      title: "Compliance signals",
+      desc: "Respect author.labels and post labels (e.g. !no-unauthenticated) before storing or displaying content.",
+    },
+    {
+      title: "Conversation context",
+      desc: "parentUri / rootUri tell you whether the URL is a reply and which thread it belongs to.",
+    },
+  ],
   "bluesky-user-posts": [
     {
       title: "Creator monitoring",
@@ -7201,7 +7443,6 @@ const CHANNEL_CATALOG_LIST_SLUGS = new Set([
   "twitter-user-tweets",
   "threads-user-posts",
   "reddit-subreddit-posts",
-  "twitch-user-videos",
   "rumble-channel-videos",
   "linkedin-company-posts",
   "pinterest-user-pins",

@@ -95,6 +95,71 @@ def _author(a: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _author_rich(a: dict[str, Any]) -> dict[str, Any]:
+    """Profile-card author — verification/labels/createdAt (list cards stay slim)."""
+    verification = _verification(a)
+    verified_status = (verification.get("verifiedStatus") or "").lower()
+    out = _author(a)
+    out["createdAt"] = safe_str(a.get("createdAt"))
+    out["labels"] = _labels(a)
+    out["verification"] = verification
+    out["verified"] = verified_status == "valid" if verified_status else None
+    return out
+
+
+def _utf8_slice(text: str, start: Any, end: Any) -> str | None:
+    """AT Protocol facet indexes are UTF-8 byte offsets into ``text``."""
+    if start is None or end is None:
+        return None
+    try:
+        s, e = int(start), int(end)
+    except (TypeError, ValueError):
+        return None
+    raw = text.encode("utf-8")
+    if s < 0 or e < s or s > len(raw):
+        return None
+    return raw[s : min(e, len(raw))].decode("utf-8", errors="replace")
+
+
+def _facets_from_record(record: dict[str, Any]) -> dict[str, list[Any]]:
+    """Derive links/mentions/hashtags from facets — never regex over truncated text."""
+    text = safe_str(record.get("text")) or ""
+    links: list[dict[str, Any]] = []
+    mentions: list[dict[str, Any]] = []
+    hashtags: list[str] = []
+    for facet in record.get("facets") or []:
+        if not isinstance(facet, dict):
+            continue
+        idx = facet.get("index") if isinstance(facet.get("index"), dict) else {}
+        slice_text = _utf8_slice(text, idx.get("byteStart"), idx.get("byteEnd"))
+        for feat in facet.get("features") or []:
+            if not isinstance(feat, dict):
+                continue
+            ftype = safe_str(feat.get("$type")) or ""
+            if ftype.endswith("#link") or "facet#link" in ftype:
+                uri = safe_str(feat.get("uri"))
+                if uri:
+                    links.append({"url": uri, "text": slice_text})
+            elif ftype.endswith("#mention") or "facet#mention" in ftype:
+                did = safe_str(feat.get("did"))
+                handle = None
+                if slice_text:
+                    handle = slice_text.lstrip("@") or None
+                mentions.append({"did": did, "handle": handle, "text": slice_text})
+            elif ftype.endswith("#tag") or "facet#tag" in ftype:
+                tag = safe_str(feat.get("tag")) or (slice_text or "").lstrip("#")
+                if tag:
+                    hashtags.append(tag.lstrip("#"))
+    return {"links": links, "mentions": mentions, "hashtags": hashtags}
+
+
+def _reply_uris(record: dict[str, Any]) -> tuple[str | None, str | None]:
+    reply = record.get("reply") if isinstance(record.get("reply"), dict) else {}
+    parent = reply.get("parent") if isinstance(reply.get("parent"), dict) else {}
+    root = reply.get("root") if isinstance(reply.get("root"), dict) else {}
+    return safe_str(parent.get("uri")), safe_str(root.get("uri"))
+
+
 def _web_url(post: dict[str, Any]) -> str | None:
     """Build the bsky.app permalink from the AT-URI rkey + author handle."""
     uri = post.get("uri") or ""
@@ -258,10 +323,18 @@ def _repost_reason(reason: Any) -> tuple[bool, dict[str, Any] | None, str | None
     return True, _author(by) if by else None, safe_str(reason.get("indexedAt"))
 
 
-def _normalize_post(post: dict[str, Any], *, reason: Any = None) -> dict[str, Any]:
-    record = post.get("record") or {}
-    author = post.get("author") or {}
+def _normalize_post(
+    post: dict[str, Any],
+    *,
+    reason: Any = None,
+    rich_author: bool = False,
+) -> dict[str, Any]:
+    record = post.get("record") if isinstance(post.get("record"), dict) else {}
+    author_raw = post.get("author") if isinstance(post.get("author"), dict) else {}
     is_repost, reposted_by, reposted_at = _repost_reason(reason)
+    parent_uri, root_uri = _reply_uris(record)
+    facets = _facets_from_record(record)
+    langs = record.get("langs") if isinstance(record.get("langs"), list) else []
     out: dict[str, Any] = {
         "platform": "bluesky",
         "uri": safe_str(post.get("uri")),
@@ -270,8 +343,16 @@ def _normalize_post(post: dict[str, Any], *, reason: Any = None) -> dict[str, An
         "text": safe_str(record.get("text")),
         "publishedAt": safe_str(record.get("createdAt") or post.get("indexedAt")),
         "indexedAt": safe_str(post.get("indexedAt")),
-        "author": _author(author),
+        "author": _author_rich(author_raw) if rich_author else _author(author_raw),
         "isRepost": is_repost,
+        "isReply": bool(parent_uri),
+        "parentUri": parent_uri,
+        "rootUri": root_uri,
+        "langs": [safe_str(x) for x in langs if x],
+        "labels": _labels(post),
+        "links": facets["links"],
+        "mentions": facets["mentions"],
+        "hashtags": facets["hashtags"],
         "engagement": {
             "likes": safe_int(post.get("likeCount")),
             "reposts": safe_int(post.get("repostCount")),
@@ -290,7 +371,86 @@ def _normalize_feed_item(item: dict[str, Any]) -> dict[str, Any] | None:
     post = item.get("post")
     if not isinstance(post, dict):
         return None
-    return _normalize_post(post, reason=item.get("reason"))
+    return _normalize_post(post, reason=item.get("reason"), rich_author=False)
+
+
+def _normalize_thread_node(
+    node: dict[str, Any],
+    *,
+    depth: int,
+    max_depth: int,
+) -> dict[str, Any] | None:
+    """Map ``threadViewPost`` (and notFound/blocked) into our post + nested replies."""
+    if not isinstance(node, dict):
+        return None
+    ntype = safe_str(node.get("$type")) or ""
+    if "notFoundPost" in ntype:
+        return {"notFound": True, "uri": safe_str(node.get("uri")), "replies": []}
+    if "blockedPost" in ntype:
+        return {"blocked": True, "uri": safe_str(node.get("uri")), "replies": []}
+    post = node.get("post")
+    if not isinstance(post, dict):
+        return None
+    out = _normalize_post(post, rich_author=True)
+    children: list[dict[str, Any]] = []
+    if depth < max_depth:
+        for child in node.get("replies") or []:
+            if not isinstance(child, dict):
+                continue
+            nested = _normalize_thread_node(child, depth=depth + 1, max_depth=max_depth)
+            if nested:
+                children.append(nested)
+    out["replies"] = children
+    return out
+
+
+async def _enrich_thread_verification_issuers(root: dict[str, Any]) -> None:
+    """Batch-resolve issuer DIDs across the thread's rich authors (one getProfiles)."""
+    blocks: list[dict[str, Any]] = []
+    stack = [root]
+    while stack:
+        node = stack.pop()
+        if not isinstance(node, dict):
+            continue
+        author = node.get("author")
+        if isinstance(author, dict) and isinstance(author.get("verification"), dict):
+            blocks.append(author["verification"])
+        for child in node.get("replies") or []:
+            if isinstance(child, dict):
+                stack.append(child)
+    if not blocks:
+        return
+    need: list[str] = []
+    seen: set[str] = set()
+    for verification in blocks:
+        for item in verification.get("verifications") or []:
+            if not isinstance(item, dict):
+                continue
+            did = safe_str(item.get("issuer"))
+            if did and not item.get("issuerHandle") and did not in seen:
+                seen.add(did)
+                need.append(did)
+    if not need:
+        return
+    try:
+        data = await _xrpc("app.bsky.actor.getProfiles", {"actors": need})
+    except Exception:
+        return
+    by_did: dict[str, dict[str, Any]] = {}
+    for prof in data.get("profiles") or []:
+        if isinstance(prof, dict) and prof.get("did"):
+            by_did[safe_str(prof.get("did"))] = prof
+    for verification in blocks:
+        for item in verification.get("verifications") or []:
+            if not isinstance(item, dict):
+                continue
+            prof = by_did.get(safe_str(item.get("issuer")))
+            if not prof:
+                continue
+            if not item.get("issuerHandle"):
+                item["issuerHandle"] = safe_str(prof.get("handle"))
+            if not item.get("issuerDisplayName"):
+                item["issuerDisplayName"] = safe_str(prof.get("displayName"))
 
 
 def _verification(p: dict[str, Any]) -> dict[str, Any]:
@@ -659,7 +819,7 @@ async def bluesky_user_posts(
                 "cursor": cursor or "",
                 "filter": feed_filter or "",
                 "includeReposts": includeReposts,
-                "v": 5,
+                "v": 6,
             },
             runner=_run,
             ctx=ctx,
@@ -669,10 +829,31 @@ async def bluesky_user_posts(
         return ApiResponse(data=result)
 
 
-@router.get("/post-details", summary="Bluesky post metadata + engagement")
+@router.get(
+    "/post-details",
+    summary="Bluesky post + reply thread (getPostThread)",
+    description=(
+        "Public post thread via app.bsky.feed.getPostThread — not a duplicate of a "
+        "user-posts row. Returns the post with rich author (verification/labels/"
+        "createdAt), facet-derived links/mentions/hashtags, post labels + langs, "
+        "parentUri/rootUri, and nested replies[] (depth, default 1). Flat 1 credit."
+    ),
+)
 async def bluesky_post_details(
-    url: str = Query(..., description="Bluesky post URL"),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    url: str = Query(..., description="Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY"),
+    depth: int = Query(
+        1,
+        ge=0,
+        le=6,
+        description=(
+            "How many reply levels to include under the post (0 = post only, no replies[]. "
+            "Default 1. Max 6 — Bluesky getPostThread depth)."
+        ),
+    ),
+    cache: bool = Query(
+        False,
+        description="Set true to use the 24h cache. Default false — always fetch fresh data.",
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
     parsed = _require_bluesky_post_url(url)
@@ -690,15 +871,29 @@ async def bluesky_post_details(
                 profile = await _xrpc("app.bsky.actor.getProfile", {"actor": handle})
                 did = profile.get("did") or handle
             at_uri = f"at://{did}/app.bsky.feed.post/{rkey}"
-            data = await _xrpc("app.bsky.feed.getPosts", {"uris": at_uri})
-            posts = data.get("posts") or []
-            if not posts:
+            data = await _xrpc(
+                "app.bsky.feed.getPostThread",
+                {"uri": at_uri, "depth": depth},
+            )
+            thread = data.get("thread")
+            if not isinstance(thread, dict):
                 raise HTTPException(status_code=404, detail="Post not found")
-            return _normalize_post(posts[0])
+            ttype = safe_str(thread.get("$type")) or ""
+            if "notFoundPost" in ttype:
+                raise HTTPException(status_code=404, detail="Post not found")
+            if "blockedPost" in ttype:
+                raise HTTPException(status_code=404, detail="Post not available")
+            out = _normalize_thread_node(thread, depth=0, max_depth=depth)
+            if out is None:
+                raise HTTPException(status_code=404, detail="Post not found")
+            await _enrich_thread_verification_issuers(out)
+            out["depth"] = depth
+            ctx["source"] = "direct"
+            return out
 
         result = await cached_or_run(
             endpoint="bluesky.post-details",
-            params={"handle": handle, "rkey": rkey, "v": 3},
+            params={"handle": handle, "rkey": rkey, "depth": depth, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

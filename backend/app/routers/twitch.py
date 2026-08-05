@@ -119,6 +119,16 @@ def _video(item: dict[str, Any]) -> dict[str, Any]:
         or game_obj.get("boxArtURL")
         or game_obj.get("boxArtUrl")
     )
+    if game_box and "{width}" in game_box:
+        game_box = game_box.replace("{width}", "144").replace("{height}", "192")
+    raw_thumb = safe_str(
+        item.get("thumbnailUrl") or item.get("thumbnailURL") or item.get("thumbnail")
+    )
+    thumb = raw_thumb
+    thumb_template = None
+    if raw_thumb and ("{width}" in raw_thumb or "{height}" in raw_thumb):
+        thumb_template = raw_thumb
+        thumb = raw_thumb.replace("{width}", "320").replace("{height}", "180")
     return strip_empty(
         {
             "platform": "twitch",
@@ -132,7 +142,8 @@ def _video(item: dict[str, Any]) -> dict[str, Any]:
                 item.get("durationSeconds") or item.get("lengthSeconds") or item.get("duration")
             ),
             "views": safe_int(item.get("viewCount") or item.get("views") or item.get("clipViewCount")),
-            "thumbnail": safe_str(item.get("thumbnailUrl") or item.get("thumbnailURL") or item.get("thumbnail")),
+            "thumbnail": thumb,
+            "thumbnailTemplate": thumb_template,
             "animatedPreviewUrl": safe_str(
                 item.get("animatedPreviewUrl")
                 or item.get("animatedPreviewURL")
@@ -148,7 +159,10 @@ def _video(item: dict[str, Any]) -> dict[str, Any]:
             ),
             "game": game_name,
             "gameBoxArtUrl": game_box,
-            "language": safe_str(item.get("language") or item.get("broadcastLanguage")),
+            "language": (
+                (safe_str(item.get("language") or item.get("broadcastLanguage")) or "").lower()
+                or None
+            ),
             "broadcaster": broadcaster,
             "broadcasterProfileImage": safe_str(
                 item.get("broadcasterProfileImageUrl")
@@ -216,7 +230,8 @@ def _profile(item: dict[str, Any]) -> dict[str, Any]:
         "gameBoxArtUrl": safe_str(item.get("lastBroadcastGameBoxArtUrl")),
         "startedAt": safe_str(item.get("lastBroadcastDate") or item.get("lastBroadcastStartedAt")),
     }
-    out["stream"] = stream if any(v is not None for v in stream.values()) else _empty_stream()
+    # Offline → stream null (not six null fields). Live → filled stream block.
+    out["stream"] = stream if (out.get("isLive") and any(v is not None for v in stream.values())) else None
     out["lastBroadcast"] = (
         last if any(v is not None for v in last.values()) else _empty_last_broadcast()
     )
@@ -225,24 +240,30 @@ def _profile(item: dict[str, Any]) -> dict[str, Any]:
     ]
     out["topClips"] = [_video(v) for v in item.get("topClips", []) if isinstance(v, dict)]
     out["schedule"] = _schedule_segments(item.get("nextSchedule") or item.get("schedule"))
+    out["socials"] = item.get("socials") if isinstance(item.get("socials"), list) else []
     return out
 
 
 def _schedule_segments(value: Any) -> list[dict[str, Any]]:
+    from app.services.twitch_native import _map_schedule_segment
+
     segments = value if isinstance(value, list) else [value] if isinstance(value, dict) else []
     out: list[dict[str, Any]] = []
     for seg in segments:
         if not isinstance(seg, dict):
             continue
-        game = seg.get("game") or seg.get("category")
-        out.append(
-            {
-                "title": safe_str(seg.get("title")),
-                "startAt": safe_str(seg.get("startAt") or seg.get("startTime")),
-                "endAt": safe_str(seg.get("endAt") or seg.get("endTime")),
-                "game": safe_str(game.get("name") if isinstance(game, dict) else game),
-            }
-        )
+        # Actor rows often use startTime / category; normalize to the native shape.
+        if "startAt" not in seg and seg.get("startTime"):
+            seg = {**seg, "startAt": seg.get("startTime")}
+        if "endAt" not in seg and seg.get("endTime"):
+            seg = {**seg, "endAt": seg.get("endTime")}
+        if not seg.get("categories") and (seg.get("game") or seg.get("category")):
+            game = seg.get("game") or seg.get("category")
+            if isinstance(game, dict):
+                seg = {**seg, "categories": [game]}
+            elif game:
+                seg = {**seg, "categories": [{"name": game}]}
+        out.append(_map_schedule_segment(seg))
     return out
 
 
@@ -282,12 +303,28 @@ async def _channel(username: str) -> dict[str, Any]:
 @router.get("/profile", summary="Twitch channel profile")
 async def profile(
     url: str = Query(..., description="Twitch channel URL or username"),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    cache: bool = Query(
+        False,
+        description=(
+            "Set true to serve from the response cache (default TTL). Default false — "
+            "always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
+        ),
+    ),
+    cacheMaxAge: str | None = Query(
+        None,
+        description=(
+            "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. "
+            "When set, enables caching with that TTL. Envelope includes cached + cachedAt."
+        ),
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    from app.core.cache_params import resolve_cache_options
+
     username = _target(url)
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Twitch channel")
+    use_cache, ttl = resolve_cache_options(cache, cacheMaxAge)
     async with billed_call(caller=caller, endpoint="/v1/twitch/profile", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=1) as ctx:
         async def _run() -> dict[str, Any]:
             from app.utils.retry import retry_none
@@ -296,28 +333,50 @@ async def profile(
                 lambda: channel_native(username), attempts=2, delay=0.35
             )
             if native is not None:
-                # Contract keys always present (native already sets them).
-                native.setdefault("stream", _empty_stream())
+                # Contract keys — stream is null when offline (not an object of nulls).
+                native.setdefault("stream", None)
                 native.setdefault("lastBroadcast", _empty_last_broadcast())
                 native.setdefault("recentVideos", [])
                 native.setdefault("topClips", [])
                 native.setdefault("schedule", [])
+                native.setdefault("socials", [])
+                if not native.get("isLive"):
+                    native["stream"] = None
                 ctx["source"] = "direct"
                 return native
             ctx["source"] = "apify"
             return await _channel(username)
 
-        data = await cached_or_run("twitch.profile", {"username": username, "v": 6}, _run, ctx, use_cache=cache)
+        data = await cached_or_run(
+            "twitch.profile",
+            {"username": username, "v": 7, "cacheMaxAge": cacheMaxAge},
+            _run,
+            ctx,
+            use_cache=use_cache,
+            ttl=ttl,
+        )
         return ApiResponse(data=data)
 
 
 @router.get("/user-videos", summary="Twitch channel videos")
 async def user_videos(
     url: str = Query(..., description="Twitch channel URL or username"),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(
+        20,
+        ge=1,
+        le=100,
+        description=(
+            "Max items to return (default 20, max 100). Flat 2 credits per call. "
+            "Twitch's anonymous surface only exposes the first 100 matching videos — "
+            "deeper history is not available."
+        ),
+    ),
     filterBy: str | None = Query(
         None,
-        description="Video type filter: ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types.",
+        description=(
+            "Video type filter: ARCHIVE | HIGHLIGHT | UPLOAD. "
+            "Omit (or null) for all types — there is no default filter."
+        ),
     ),
     sortBy: str = Query(
         "TIME",
@@ -326,8 +385,9 @@ async def user_videos(
     cursor: str | None = Query(
         None,
         description=(
-            "Pagination cursor (offset into the first 100 matching videos). "
-            "Leave empty for the first page; then pass nextCursor from the previous response."
+            "Opaque pagination cursor = the last video id from the previous page "
+            "(nextCursor). Leave empty for the first page. Pages within the first "
+            "100 matching videos only — Twitch rejects GQL after-cursors on this surface."
         ),
     ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -347,45 +407,51 @@ async def user_videos(
                 status_code=400,
                 detail="Invalid filterBy. Use ARCHIVE, HIGHLIGHT, or UPLOAD.",
             )
-    offset = 0
-    if cursor:
-        try:
-            offset = max(0, int(str(cursor).strip()))
-        except ValueError as exc:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid cursor. Pass the nextCursor integer from the previous response.",
-            ) from exc
+    cursor_key = (cursor or "").strip() or None
+    # Old clients sent integer offsets ("5"); those are no longer valid.
+    if cursor_key and cursor_key.isdigit() and len(cursor_key) < 8:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Invalid cursor. Pass nextCursor (a Twitch video id) from the previous "
+                "response — integer offsets are no longer supported."
+            ),
+        )
 
-    cost = _scaled(limit)
+    cost = CREDIT_TWITCH_NATIVE
     async with billed_call(caller=caller, endpoint="/v1/twitch/user-videos", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=cost) as ctx:
         async def _run() -> dict[str, Any]:
             # 1) Public Twitch web GraphQL (datacenter) — no Apify.
             native = await user_videos_native(
                 username,
                 limit=limit,
-                offset=offset,
+                cursor=cursor_key,
                 filter_by=filter_key,
                 sort_by=sort_key,
             )
             if native is not None:
                 ctx["source"] = "direct"
                 videos = [strip_empty(v) for v in (native.get("videos") or [])]
-                next_off = native.get("nextOffset")
-                return {
+                out: dict[str, Any] = {
                     "platform": "twitch",
                     "username": native.get("username") or username,
-                    "filterBy": native.get("filterBy"),
                     "sortBy": native.get("sortBy") or sort_key,
                     "broadcaster": native.get("broadcaster"),
                     "totalReturned": len(videos),
-                    "nextCursor": str(next_off) if next_off is not None else None,
+                    "nextCursor": native.get("nextCursor"),
                     "hasMore": bool(native.get("hasMore")),
+                    "windowMax": 100,
                     "videos": videos,
                 }
+                # Echo filter only when the caller set one — omit ≠ ARCHIVE.
+                if native.get("filterBy"):
+                    out["filterBy"] = native["filterBy"]
+                else:
+                    out["filterBy"] = None
+                return out
 
             # 2) Apify fallback (first page only; no type/sort/cursor).
-            if offset or filter_key or sort_key != "TIME":
+            if cursor_key or filter_key or sort_key != "TIME":
                 raise HTTPException(
                     status_code=502,
                     detail="Twitch videos temporarily unavailable for that filter/sort/page.",
@@ -401,6 +467,11 @@ async def user_videos(
                 for v in (items[0].get("recentVideos") if items else []) or []
                 if isinstance(v, dict)
             ]
+            # Apify path: drop per-row channel bloat — single-channel list.
+            for v in videos:
+                v.pop("channel", None)
+                v.pop("broadcaster", None)
+                v.pop("broadcasterProfileImage", None)
             ctx["source"] = "apify"
             page = videos[:limit]
             return {
@@ -412,6 +483,7 @@ async def user_videos(
                 "totalReturned": len(page),
                 "nextCursor": None,
                 "hasMore": False,
+                "windowMax": 100,
                 "videos": page,
             }
 
@@ -422,8 +494,8 @@ async def user_videos(
                 "limit": limit,
                 "filterBy": filter_key or "",
                 "sortBy": sort_key,
-                "cursor": str(offset),
-                "v": 5,
+                "cursor": cursor_key or "",
+                "v": 6,
             },
             _run,
             ctx,
@@ -439,6 +511,12 @@ async def user_videos(
 @router.get("/user-schedule", summary="Twitch channel schedule")
 async def user_schedule(
     url: str = Query(..., description="Twitch channel URL or username"),
+    limit: int = Query(
+        50,
+        ge=1,
+        le=100,
+        description="Max schedule segments to return (default 50, max 100). Flat 1 credit per call.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -447,19 +525,36 @@ async def user_schedule(
         raise HTTPException(status_code=400, detail="Invalid Twitch channel")
     async with billed_call(caller=caller, endpoint="/v1/twitch/user-schedule", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=1) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await schedule_native(username)
+            native = await schedule_native(username, limit=limit)
             if native is not None:
                 ctx["source"] = "direct"
-                return {"platform": "twitch", "username": username, "schedule": native}
+                return {
+                    "platform": "twitch",
+                    "username": username,
+                    "totalReturned": len(native),
+                    "schedule": native,
+                }
 
             ctx["source"] = "apify"
             schedule = await _schedule_actor(username)
             if not schedule:
                 channel = await _channel(username)
                 schedule = _schedule_segments(channel.get("schedule"))
-            return {"platform": "twitch", "username": username, "schedule": schedule}
+            schedule = schedule[:limit]
+            return {
+                "platform": "twitch",
+                "username": username,
+                "totalReturned": len(schedule),
+                "schedule": schedule,
+            }
 
-        data = await cached_or_run("twitch.user-schedule", {"username": username, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run(
+            "twitch.user-schedule",
+            {"username": username, "limit": limit, "v": 3},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
         return ApiResponse(data=data)
 
 
@@ -468,16 +563,32 @@ async def user_schedule(
     summary="Twitch clip metadata",
     description=(
         "Fetch a Twitch clip as clean JSON — curator vs channel (broadcaster), "
-        "followers/isPartner, language, multi-quality videoQualities, and "
-        "playbackAccessToken.expires. Not the raw GraphQL envelope."
+        "followers/isPartner, lowercase language, multi-quality videoQualities, "
+        "signedVideoUrl, and playbackAccessToken.expiresAt. Not the raw GraphQL envelope."
     ),
 )
 async def clip(
     url: str = Query(..., description="Twitch clip URL, channel URL, or username"),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    cache: bool = Query(
+        False,
+        description=(
+            "Set true to serve from the response cache (default TTL). Default false — "
+            "always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
+        ),
+    ),
+    cacheMaxAge: str | None = Query(
+        None,
+        description=(
+            "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. "
+            "When set, enables caching with that TTL. Envelope includes cached + cachedAt."
+        ),
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    from app.core.cache_params import resolve_cache_options
+
     settings = get_settings()
+    use_cache, ttl = resolve_cache_options(cache, cacheMaxAge)
     async with billed_call(caller=caller, endpoint="/v1/twitch/clip", platform="twitch", resource_url=url, base_credits=1) as ctx:
         async def _run() -> dict[str, Any]:
             is_clip_url = "clips.twitch.tv" in url or "/clip/" in url
@@ -523,5 +634,12 @@ async def clip(
             ctx["source"] = "apify"
             return _video(items[0])
 
-        data = await cached_or_run("twitch.clip", {"url": url, "v": 5}, _run, ctx, use_cache=cache)
+        data = await cached_or_run(
+            "twitch.clip",
+            {"url": url, "v": 6, "cacheMaxAge": cacheMaxAge},
+            _run,
+            ctx,
+            use_cache=use_cache,
+            ttl=ttl,
+        )
         return ApiResponse(data=data)
