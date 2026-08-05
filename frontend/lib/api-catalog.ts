@@ -5368,7 +5368,6 @@ const FIELD_DESCS: Record<string, string> = {
     "Lifetime total entries for the last/current room session. May remain on offline payloads as last-known; viewerCount is only set while isLive.",
   viewerCount:
     "Concurrent viewers while isLive. Omitted when offline — a leftover userCount on an ended room is not current.",
-  hashTagId: "TikTok live hashtag/category id when set.",
   streamId: "TikTok live stream id (distinct from room id when both exist).",
   isVideo: "Whether the item is a video.",
   isPinned: "Whether the item is pinned.",
@@ -5637,7 +5636,6 @@ const FIELD_DESCS: Record<string, string> = {
   channelVerified: "Whether the channel is verified.",
   game: "Game or category being streamed.",
   viewers: "Current live viewer count.",
-  viewerCount: "Current live viewer count.",
   broadcaster: "Name of the broadcaster.",
   isAffiliate: "Whether the channel is an affiliate.",
 
