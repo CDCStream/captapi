@@ -12592,6 +12592,7 @@
           "Creator Pages"
         ],
         "summary": "Pillar page",
+        "description": "Public Pillar page as clean JSON — identity (id, displayName, bio, location, email), socials{} (instagram/tiktok/youtube/twitter/spotify/patreon/discord/twitch/…), links[] with per-link clicks/id/type/order, and products[] (title, price, url, image). Flat 1 credit via Pillar's public GraphQL API (not HTML scrape).",
         "operationId": "pillar_page_v1_pillar_page_get",
         "security": [
           {
@@ -12621,6 +12622,24 @@
               "title": "Cache"
             },
             "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits."
           }
         ],
         "responses": {
@@ -12651,6 +12670,7 @@
           "Creator Pages"
         ],
         "summary": "Linkbio page",
+        "description": "Public lnk.bio page as clean JSON — id, handle, avatar, email/website/whatsapp when published, socials{} (incl. triller/website; SC often leaves these null), other[] for unmapped social networks, and links[] with titles from icon labels + content buttons. displayName/name are omitted when lnk.bio only exposes @handle. Flat 1 credit.",
         "operationId": "linkbio_page_v1_linkbio_page_get",
         "security": [
           {
@@ -12680,6 +12700,24 @@
               "title": "Cache"
             },
             "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits."
           }
         ],
         "responses": {

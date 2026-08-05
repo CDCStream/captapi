@@ -87,6 +87,8 @@ _SOCIAL_HOSTS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("twitch", ("twitch.tv",)),
     ("pinterest", ("pinterest.com",)),
     ("threads", ("threads.net", "threads.com")),
+    ("whatsapp", ("wa.me", "api.whatsapp.com", "whatsapp.com")),
+    ("triller", ("triller.co",)),
 )
 
 
@@ -100,42 +102,61 @@ def _youtube_rank(url: str) -> int:
     return 1
 
 
-def _social_accounts(social_links: list[Any], links: list[dict[str, Any]]) -> dict[str, str]:
-    """HTTP social profile URLs for cross-endpoint joins (no email/phone).
+def _social_accounts(
+    social_links: list[Any], links: list[dict[str, Any]]
+) -> tuple[dict[str, str], list[dict[str, Any]]]:
+    """HTTP social profile URLs for cross-endpoint joins + other[] leftovers.
 
-    ``socials[]`` keeps the full icon list (including EMAIL_ADDRESS). Email is
-    also exposed as top-level ``email`` — it is intentionally omitted here so
-    clients can pipe values into TikTok/Instagram/Spotify/… endpoints.
+    ``socials[]`` keeps the full icon list (including EMAIL_ADDRESS). Email/phone
+    stay out of ``socialAccounts`` (use top-level ``email``). Typed icons we
+    cannot map to a known key land in ``other[]`` so nothing disappears.
     """
     accounts: dict[str, str] = {}
     ranks: dict[str, int] = {}
-    candidates: list[str] = []
+    other: list[dict[str, Any]] = []
+    typed_rows: list[tuple[str | None, str]] = []
     for item in social_links:
         if not isinstance(item, dict):
             if isinstance(item, str):
-                candidates.append(item)
+                typed_rows.append((None, item))
             continue
-        stype = str(item.get("type") or "").upper()
-        if stype in ("EMAIL_ADDRESS", "EMAIL", "PHONE", "WHATSAPP"):
+        stype = str(item.get("type") or "").upper() or None
+        url = str(item.get("url") or "")
+        if not url:
             continue
-        if item.get("url"):
-            candidates.append(str(item["url"]))
+        if stype in ("EMAIL_ADDRESS", "EMAIL", "PHONE") or url.lower().startswith("mailto:"):
+            continue
+        typed_rows.append((stype, url))
     for link in links:
-        candidates.extend(_iter_link_urls(link))
-    for url in candidates:
+        for url in _iter_link_urls(link):
+            typed_rows.append((None, url))
+
+    seen_other: set[str] = set()
+    for stype, url in typed_rows:
         if not url or url.lower().startswith("mailto:"):
             continue
         low = url.lower()
-        for key, hosts in _SOCIAL_HOSTS:
-            if not any(h in low for h in hosts):
-                continue
-            rank = _youtube_rank(url) if key == "youtube" else 1
-            prev = ranks.get(key)
+        matched: str | None = None
+        if stype in ("WHATSAPP", "WHATS_APP"):
+            matched = "whatsapp"
+        elif stype in ("WEBSITE", "URL", "LINK"):
+            matched = "website"
+        else:
+            for key, hosts in _SOCIAL_HOSTS:
+                if any(h in low for h in hosts):
+                    matched = key
+                    break
+        if matched:
+            rank = _youtube_rank(url) if matched == "youtube" else 1
+            prev = ranks.get(matched)
             if prev is None or rank < prev:
-                accounts[key] = url
-                ranks[key] = rank
-            break
-    return accounts
+                accounts[matched] = url
+                ranks[matched] = rank
+            continue
+        if stype and url not in seen_other:
+            seen_other.add(url)
+            other.append({"type": stype, "url": safe_str(url) or url})
+    return accounts, other
 
 
 def _iter_link_urls(link: dict[str, Any]) -> list[str]:
@@ -346,6 +367,7 @@ def _normalize(data: dict[str, Any], url: str, page_html: str = "") -> dict[str,
     cleaned_socials = _clean_socials(social_list)
     email = _extract_email(social_list, page_html)
     display = _display_name(account, username)
+    social_accounts, other = _social_accounts(social_list, normalized_links)
 
     out: dict[str, Any] = {
         "platform": "linktree",
@@ -366,12 +388,15 @@ def _normalize(data: dict[str, Any], url: str, page_html: str = "") -> dict[str,
         "linkPlatforms": link_platforms,
         "timezone": safe_str(account.get("timezone")),
         "email": email,
+        "website": social_accounts.get("website"),
         "linkCount": total_links,
         "links": normalized_links,
         # socials = Linktree icon list (incl. EMAIL_ADDRESS mailto).
         # socialAccounts = HTTP profile URLs for catalog joins (no email).
+        # other = typed social icons that did not map into socialAccounts.
         "socials": cleaned_socials,
-        "socialAccounts": _social_accounts(social_list, normalized_links),
+        "socialAccounts": social_accounts,
+        "other": other,
     }
     stamp_profile_core(out, platform="linktree")
     for key in (
@@ -385,9 +410,12 @@ def _normalize(data: dict[str, Any], url: str, page_html: str = "") -> dict[str,
         "linkPlatforms",
         "email",
         "handle",
+        "website",
     ):
         if out.get(key) in (None, "", []):
             out.pop(key, None)
+    if not out.get("other"):
+        out.pop("other", None)
     return out
 
 

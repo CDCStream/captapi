@@ -612,6 +612,20 @@ class TiktokApi:
         """
         return self._t.get("/v1/tiktok/popular-hashtags", {"query": query, "limit": limit, "cache": cache})
 
+    def popular_songs(self, *, country: str | None = None, period: str | None = None, page: float | None = None, rankType: str | None = None, newOnBoard: bool | None = None, commercialMusic: bool | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Popular Songs — Creative Center popular/surging sounds — rankDiff, trend[], commercialMusic. Flat 2 credits. (2 credits)
+
+        :param country: Two-letter ISO country. Default US.
+        :param period: 7, 30, or 120 days. Default 7.
+        :param page: Page number (default 1).
+        :param rankType: popular | surging. Default popular.
+        :param newOnBoard: Only sounds newly on the Top 100.
+        :param commercialMusic: Only Commercial Music Library-cleared sounds.
+        :param limit: Max items to return. Default 20, max 20. Flat 2 credits per call.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/tiktok/popular-songs", {"country": country, "period": period, "page": page, "rankType": rankType, "newOnBoard": newOnBoard, "commercialMusic": commercialMusic, "limit": limit, "cache": cache})
+
     def live(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Live — isLive/status, creator.id/secUid, streamQualities with flv/hls/cmaf/dash. Flat 1 credit. (1 credit)
 
@@ -821,6 +835,20 @@ class AsyncTiktokApi:
         """
         return await self._t.get("/v1/tiktok/popular-hashtags", {"query": query, "limit": limit, "cache": cache})
 
+    async def popular_songs(self, *, country: str | None = None, period: str | None = None, page: float | None = None, rankType: str | None = None, newOnBoard: bool | None = None, commercialMusic: bool | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Popular Songs — Creative Center popular/surging sounds — rankDiff, trend[], commercialMusic. Flat 2 credits. (2 credits)
+
+        :param country: Two-letter ISO country. Default US.
+        :param period: 7, 30, or 120 days. Default 7.
+        :param page: Page number (default 1).
+        :param rankType: popular | surging. Default popular.
+        :param newOnBoard: Only sounds newly on the Top 100.
+        :param commercialMusic: Only Commercial Music Library-cleared sounds.
+        :param limit: Max items to return. Default 20, max 20. Flat 2 credits per call.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/tiktok/popular-songs", {"country": country, "period": period, "page": page, "rankType": rankType, "newOnBoard": newOnBoard, "commercialMusic": commercialMusic, "limit": limit, "cache": cache})
+
     async def live(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Live — isLive/status, creator.id/secUid, streamQualities with flv/hls/cmaf/dash. Flat 1 credit. (1 credit)
 
@@ -928,9 +956,9 @@ class InstagramApi:
         return self._t.get("/v1/instagram/reels-search", {"q": q, "limit": limit, "datePosted": datePosted, "cache": cache})
 
     def trending_reels(self, *, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Trending Reels — Trending Reels from instagram.com/reels — videos only, flat 1 credit. Duplicates across calls expected. (1 credit)
+        """Instagram Trending Reels — Snapshot-backed trending Reels (typical freshness <24h) — videos only, flat 1 credit. Use reels-search for live scrapes. (1 credit)
 
-        :param country: Country name for Explore localization. Default United States.
+        :param country: Country name or ISO code. Unsupported → 400 with supportedCountries.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -980,6 +1008,23 @@ class InstagramApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/embed", {"url": url, "cache": cache})
+
+    def highlights(self, *, url: str | None = None, userId: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Highlights — Persistent Story Highlight albums for a public profile — id, title, cover, owner. Flat 1 credit. (1 credit)
+
+        :param url: Instagram profile URL, @handle, or username. Omit when userId is set.
+        :param userId: Numeric Instagram user ID. Prefer when known — skips handle→ID resolve.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/instagram/highlights", {"url": url, "userId": userId, "cache": cache})
+
+    def highlights_details(self, *, id_: str, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Highlight Details — Items inside one Instagram Story Highlight album — media URLs, type, takenAt. Flat 1 credit. (1 credit)
+
+        :param id_: Highlight id from /v1/instagram/highlights (with or without highlight: prefix).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/instagram/highlights-details", {"id": id_, "cache": cache})
 
     def basic_profile(self, *, userId: str, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Basic Profile — Instagram profile by user ID/@handle — camelCase (followers, externalUrl, businessAddress). (1 credit)
@@ -1069,9 +1114,9 @@ class AsyncInstagramApi:
         return await self._t.get("/v1/instagram/reels-search", {"q": q, "limit": limit, "datePosted": datePosted, "cache": cache})
 
     async def trending_reels(self, *, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Trending Reels — Trending Reels from instagram.com/reels — videos only, flat 1 credit. Duplicates across calls expected. (1 credit)
+        """Instagram Trending Reels — Snapshot-backed trending Reels (typical freshness <24h) — videos only, flat 1 credit. Use reels-search for live scrapes. (1 credit)
 
-        :param country: Country name for Explore localization. Default United States.
+        :param country: Country name or ISO code. Unsupported → 400 with supportedCountries.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -1121,6 +1166,23 @@ class AsyncInstagramApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/embed", {"url": url, "cache": cache})
+
+    async def highlights(self, *, url: str | None = None, userId: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Highlights — Persistent Story Highlight albums for a public profile — id, title, cover, owner. Flat 1 credit. (1 credit)
+
+        :param url: Instagram profile URL, @handle, or username. Omit when userId is set.
+        :param userId: Numeric Instagram user ID. Prefer when known — skips handle→ID resolve.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/instagram/highlights", {"url": url, "userId": userId, "cache": cache})
+
+    async def highlights_details(self, *, id_: str, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Highlight Details — Items inside one Instagram Story Highlight album — media URLs, type, takenAt. Flat 1 credit. (1 credit)
+
+        :param id_: Highlight id from /v1/instagram/highlights (with or without highlight: prefix).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/instagram/highlights-details", {"id": id_, "cache": cache})
 
     async def basic_profile(self, *, userId: str, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Basic Profile — Instagram profile by user ID/@handle — camelCase (followers, externalUrl, businessAddress). (1 credit)
@@ -2048,16 +2110,16 @@ class TiktokShopApi:
         return self._t.get("/v1/tiktok-shop/shop-search", {"q": q, "region": region, "limit": limit, "cache": cache})
 
     def products(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop Products — List products from a TikTok Shop store. (2 credits)
+        """TikTok Shop Products — Store catalog + shopInfo. Flat 2 credits on native SSR (limit does not multiply). (2 credits)
 
         :param url: TikTok Shop store URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok-shop/shop-products", {"url": url, "limit": limit, "cache": cache})
 
     def product_details(self, *, url: str, region: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop Product Details — TikTok Shop product details with seller id, pricing, SKUs, and region. (14 credits)
+        """TikTok Shop Product Details — PDP with price/originalPrice/discount, skus[]+saleProps, images, categories. 2 credits native. (2 credits)
 
         :param url: TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param region: Market region ISO code for Apify fallback (default US).
@@ -2066,7 +2128,7 @@ class TiktokShopApi:
         return self._t.get("/v1/tiktok-shop/product-details", {"url": url, "region": region, "cache": cache})
 
     def product_reviews(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop Product Reviews — Customer reviews for a TikTok Shop product. (45 credits)
+        """TikTok Shop Product Reviews — Shop product reviews — stars, text, SKU, verified, country, review photos. Not video comments. (45 credits)
 
         :param url: TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -2075,9 +2137,9 @@ class TiktokShopApi:
         return self._t.get("/v1/tiktok-shop/product-reviews", {"url": url, "limit": limit, "cache": cache})
 
     def user_showcase(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop User Showcase — Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id. (45 credits)
+        """TikTok Shop User Showcase — Creator affiliate shelf — sold, rating, originalPrice, seller name/url (PDP-hydrated). (45 credits)
 
-        :param username: TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug.
+        :param username: TikTok username, @handle, or profile URL, e.g. jeffreestar or https://www.tiktok.com/@jeffreestar.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -2099,16 +2161,16 @@ class AsyncTiktokShopApi:
         return await self._t.get("/v1/tiktok-shop/shop-search", {"q": q, "region": region, "limit": limit, "cache": cache})
 
     async def products(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop Products — List products from a TikTok Shop store. (2 credits)
+        """TikTok Shop Products — Store catalog + shopInfo. Flat 2 credits on native SSR (limit does not multiply). (2 credits)
 
         :param url: TikTok Shop store URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok-shop/shop-products", {"url": url, "limit": limit, "cache": cache})
 
     async def product_details(self, *, url: str, region: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop Product Details — TikTok Shop product details with seller id, pricing, SKUs, and region. (14 credits)
+        """TikTok Shop Product Details — PDP with price/originalPrice/discount, skus[]+saleProps, images, categories. 2 credits native. (2 credits)
 
         :param url: TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param region: Market region ISO code for Apify fallback (default US).
@@ -2117,7 +2179,7 @@ class AsyncTiktokShopApi:
         return await self._t.get("/v1/tiktok-shop/product-details", {"url": url, "region": region, "cache": cache})
 
     async def product_reviews(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop Product Reviews — Customer reviews for a TikTok Shop product. (45 credits)
+        """TikTok Shop Product Reviews — Shop product reviews — stars, text, SKU, verified, country, review photos. Not video comments. (45 credits)
 
         :param url: TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -2126,9 +2188,9 @@ class AsyncTiktokShopApi:
         return await self._t.get("/v1/tiktok-shop/product-reviews", {"url": url, "limit": limit, "cache": cache})
 
     async def user_showcase(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop User Showcase — Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id. (45 credits)
+        """TikTok Shop User Showcase — Creator affiliate shelf — sold, rating, originalPrice, seller name/url (PDP-hydrated). (45 credits)
 
-        :param username: TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug.
+        :param username: TikTok username, @handle, or profile URL, e.g. jeffreestar or https://www.tiktok.com/@jeffreestar.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -3440,7 +3502,7 @@ class KomiApi:
         self._t = transport
 
     def page(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Komi Page — Public Komi page links and profile metadata. (4 credits)
+        """Komi Page — Komi page — id/displayName/bio, socials{} (incl. website), content LINK/PRODUCT rows with price/currency. Flat 1 credit. (1 credit)
 
         :param url: Komi page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -3453,7 +3515,7 @@ class AsyncKomiApi:
         self._t = transport
 
     async def page(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Komi Page — Public Komi page links and profile metadata. (4 credits)
+        """Komi Page — Komi page — id/displayName/bio, socials{} (incl. website), content LINK/PRODUCT rows with price/currency. Flat 1 credit. (1 credit)
 
         :param url: Komi page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -3466,7 +3528,7 @@ class PillarApi:
         self._t = transport
 
     def page(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Pillar Page — Public Pillar page links and profile metadata. (4 credits)
+        """Pillar Page — Pillar page — id/displayName/bio/location/email, socials{}, links[] with clicks, products[]. Flat 1 credit. (1 credit)
 
         :param url: Pillar page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -3479,7 +3541,7 @@ class AsyncPillarApi:
         self._t = transport
 
     async def page(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Pillar Page — Public Pillar page links and profile metadata. (4 credits)
+        """Pillar Page — Pillar page — id/displayName/bio/location/email, socials{}, links[] with clicks, products[]. Flat 1 credit. (1 credit)
 
         :param url: Pillar page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -3492,7 +3554,7 @@ class LinkbioApi:
         self._t = transport
 
     def page(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Linkbio Page — Public Linkbio page links and profile metadata. (4 credits)
+        """Linkbio Page — lnk.bio page — id, socials{} (often filled where SC is null), titled links[], website/email/whatsapp, other[]. Flat 1 credit. (1 credit)
 
         :param url: Linkbio page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -3505,7 +3567,7 @@ class AsyncLinkbioApi:
         self._t = transport
 
     async def page(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Linkbio Page — Public Linkbio page links and profile metadata. (4 credits)
+        """Linkbio Page — lnk.bio page — id, socials{} (often filled where SC is null), titled links[], website/email/whatsapp, other[]. Flat 1 credit. (1 credit)
 
         :param url: Linkbio page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

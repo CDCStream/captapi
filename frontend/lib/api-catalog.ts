@@ -2319,11 +2319,47 @@ const KOMI: Spec[] = [
 ];
 
 const PILLAR: Spec[] = [
-  { slug: "pillar-page", name: "Pillar Page API", shortName: "Page", category: "channel", method: "GET", path: "/v1/pillar/page", credits: 4 , tagline: "Extract the public links and profile fields from a Pillar page.", longDescription: "Paste a Pillar page URL and get the creator's public page as structured JSON — profile fields plus the links listed on the page." },
+  {
+    slug: "pillar-page",
+    name: "Pillar Page API",
+    shortName: "Page",
+    category: "channel",
+    method: "GET",
+    path: "/v1/pillar/page",
+    credits: 1,
+    tagline:
+      "Pillar link-in-bio → identity, socials{}, links[] with per-link clicks, products[]. Flat 1 credit.",
+    longDescription:
+      "Paste a Pillar URL (pillar.io/user) and get the public page as clean JSON. Identity: id (string UUID), handle/username, url, displayName (name is a deprecated alias), firstName/lastName, bio (description is a deprecated alias — may be an empty string), avatar, location, email. socials{} maps Pillar banner + connected channels (instagram/tiktok/youtube/twitter/facebook/spotify/soundcloud/linkedin/snapchat/patreon/discord/twitch/medium/amazon/appleAppStore/googleAppStore/…). links[] are custom link rows with id, type, title, url, clicks (public per-link click counts — Pillar's unique performance signal), and order. products[] carries featured commerce rows (id, title/name, price, url, description, image). Pillar does not expose follower counts or a verified badge on this endpoint. Flat 1 credit via Pillar's public GraphQL API (not HTML scrape). Pass cache=true or cacheMaxAge (1d/3d/7d/14d/30d) for the shared response cache.",
+    delivers: [
+      "Page id + displayName + bio + location + email",
+      "socials{} incl. patreon/discord/twitch/amazon/app stores when published",
+      "links[] with clicks / id / type / order",
+      "products[] with title, price, url, description, image",
+    ],
+  },
 ];
 
 const LINKBIO: Spec[] = [
-  { slug: "linkbio-page", name: "Linkbio Page API", shortName: "Page", category: "channel", method: "GET", path: "/v1/linkbio/page", credits: 4 , tagline: "Extract the public links and profile fields from a Linkbio page.", longDescription: "Paste a Linkbio page URL and get the creator's public page as structured JSON — profile fields plus the links listed on the page." },
+  {
+    slug: "linkbio-page",
+    name: "Linkbio Page API",
+    shortName: "Page",
+    category: "channel",
+    method: "GET",
+    path: "/v1/linkbio/page",
+    credits: 1,
+    tagline:
+      "lnk.bio → id, socials{} (SC often null), titled links[], website/email/whatsapp, other[]. Flat 1 credit.",
+    longDescription:
+      "Paste an lnk.bio URL and get the public page as clean JSON. Identity: id (lnk.bio numeric string, e.g. \"-1344625\"), handle/username, url, avatar. displayName/name are emitted only when lnk.bio publishes a real display name — @handle OG titles are not synthesised (null/omitted). socials{} is derived from data-network icon rows and username CTAs (facebook/twitter/instagram/tiktok/youtube/snapchat/triller/website/whatsapp/…) — ScrapeCreators often leaves these null even when the matching URL sits in links[]. other[] holds typed social networks we could not map to a known key so nothing disappears. Top-level website / email / whatsapp when published. links[] includes content buttons (pb-linkbox) plus primary social icons with titles from icon labels (Facebook, Instagram, Triller, …) — not null. lnk.bio does not expose follower counts or a verified badge. Flat 1 credit. Pass cache=true or cacheMaxAge (1d/3d/7d/14d/30d).",
+    delivers: [
+      "lnk.bio id + avatar + handle (no fabricated displayName)",
+      "socials{} filled from icon rows — beats SC's null social fields",
+      "links[] with titles on social rows + content buttons",
+      "website / email / whatsapp + other[] for unmapped networks",
+    ],
+  },
 ];
 
 const LINKME: Spec[] = [
@@ -2417,7 +2453,7 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     tagline:
       "TikTok Creative Center Top Ads — CTR, likes, industry/objective, and video URLs (2 credits native).",
     longDescription:
-      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, title, brandName, likes, ctr/ctrTier, costTier, favorite, isSparkAd, industry/industryKey, objective, countries, and video{url,urlHd,cover,durationSeconds,width,height}. Filter with country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), and optional q/industry/objective/adFormat. Flat 2 credits on the Decodo-native path; Apify fallback is ~1 credit per returned ad (minimum 2). This is Creative Center — not the EU Commercial Content Library (use /tiktok/search for DSA transparency).",
+      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad Creative Center detail page), title, brandName, likes + likesIsApproximate, ctr/ctrTier (TikTok-normalized 0–1 score + bucket), costTier, isSparkAd, resolved industry/industryKey, objective, adFormat, countries, and video{url,urlHd,cover,durationSeconds,width,height}. Keyword q is relevance-filtered so every token must appear in title, brand, tags, or industry — Creative Center soft-matches (and often ignores keyword with for_you); empty beats unrelated ads. The public list API has no firstSeen/lastSeen and no cursor pagination. Filter with country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), and optional industry/objective/adFormat. Flat 2 credits on the Decodo-native path; Apify fallback is ~1 credit per returned ad (minimum 2). This is Creative Center — not the EU Commercial Content Library (use /tiktok/search for DSA transparency).",
   },
   {
     slug: "tiktok-ad-library-ad-details",
@@ -2819,16 +2855,16 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "pillar",
     name: "Pillar",
-    blurb: "Extract public Pillar page links and creator profile metadata.",
+    blurb: "Pillar pages as JSON — per-link clicks, products[], socials{}, identity. Flat 1 credit.",
     icon: "link",
     color: "text-cyan-600",
-    exampleUrl: "https://pillar.io/example",
+    exampleUrl: "https://pillar.io/angelstrife",
     endpoints: PILLAR.map((s) => ({ ...s, platform: "pillar" as const })),
   },
   {
     id: "linkbio",
     name: "Linkbio",
-    blurb: "Extract public Linkbio page links and profile metadata.",
+    blurb: "lnk.bio pages as JSON — filled socials{} (SC often null), titled links, id/website. Flat 1 credit.",
     icon: "link",
     color: "text-pink-500",
     exampleUrl: "https://lnk.bio/charlidamelio",
@@ -4052,8 +4088,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "kwai-user-posts": [up(KWAI_PROFILE), lp(20, 200)],
   "kwai-post": [up(KWAI_POST)],
   "komi-page": [up(KOMI_PAGE), cachePWithMaxAge(), cacheMaxAgeP()],
-  "pillar-page": [up(PILLAR_PAGE)],
-  "linkbio-page": [up(LINKBIO_PAGE)],
+  "pillar-page": [up(PILLAR_PAGE), cachePWithMaxAge(), cacheMaxAgeP()],
+  "linkbio-page": [up(LINKBIO_PAGE), cachePWithMaxAge(), cacheMaxAgeP()],
   "linkme-profile": [up(LINKME_PROFILE)],
   // GitHub
   "github-user": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL, e.g. getify or https://github.com/getify." }],
@@ -4212,7 +4248,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       name: "q",
       type: "string",
       required: false,
-      description: "Optional keyword filter (brand, product, or creative theme).",
+      description:
+        "Optional keyword. Every token must appear in title, brand, tags, or industry — empty when Creative Center soft-matches.",
     },
     {
       name: "country",
@@ -4711,7 +4748,7 @@ const PROFILE_URL: Record<PlatformId, string> = {
   utilities: "https://www.tiktok.com/@tiktok/video/7234567890123456789",
   kwai: "https://www.kwai.com/@topfilmeseseriesnatv",
   komi: "https://komi.io/kimkardashian",
-  pillar: "https://pillar.io/example",
+  pillar: "https://pillar.io/angelstrife",
   linkbio: "https://lnk.bio/charlidamelio",
   linkme: "https://link.me/example",
 };
@@ -5319,6 +5356,18 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `How many credits does Top Ads cost?`,
       a: `Flat 2 credits on the Decodo-native Creative Center path. If that path is unavailable, the Apify fallback bills about 1 credit per returned ad (minimum 2).`,
+    });
+    list.push({
+      q: `Why did my keyword return zero ads?`,
+      a: `Creative Center soft-matches keywords (and often ignores them with orderBy=for_you). We relevance-filter so every query token must appear in title, brand, tags, or resolved industry — empty beats paying for unrelated landlord/brows/concert ads. Try a brand name, orderBy=likes|ctr, or an industry key (e.g. Games / Casino).`,
+    });
+    list.push({
+      q: `What does ctr mean, and where are ad dates?`,
+      a: `ctr is TikTok's normalized 0–1 Creative Center score (not a raw click-through percent); ctrTier is the bucket TikTok assigns. The public Top Ads list API does not expose firstSeen/lastSeen — only your period lookback window. For DSA start/end dates use /tiktok/search.`,
+    });
+    list.push({
+      q: `Why did Top Ads return 502 with industry set?`,
+      a: `The Apify fallback only accepts its fixed industry enum (All Industries, Gaming, E-commerce & Shopping, Beauty & Personal Care, …). We now map TikTok keys/aliases (label_25000000000, Games→Gaming) before the actor call; unsupported values return HTTP 400 with the allowed list — not upstream_actor_error 502. Omit industry or use Gaming / All Industries to unblock.`,
     });
   }
   list.push({
@@ -6170,7 +6219,50 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     type: "On links[]: Komi module type (LINK, PRODUCT, TIKTOK_VIDEO, …).",
     socials:
       "CamelCase social URL map from Komi's socialProfileLinks — instagram/tiktok/youtube/twitter/facebook/snapchat/spotify/appleMusic/… plus website when a WEBSITE row (or website field) is published.",
+    other:
+      "Typed social rows that did not map into socials{} [{url, title?, type?}]. Empty when every published social mapped.",
+    website: "Top-level convenience copy of socials.website when Komi publishes a WEBSITE row.",
     url: "On the page: https://komi.io/{username}. On a link row: outbound destination.",
+  },
+  "pillar-page": {
+    id: "Pillar influencer id as a string UUID (catalog-wide id convention).",
+    displayName: "Creator display name from Pillar (banner user_alias / full name). Canonical; name is a deprecated alias.",
+    name: "Deprecated alias of displayName — prefer displayName.",
+    handle: "Pillar page url_key (path slug). Canonical alongside username.",
+    bio: "Creator bio. Always present — empty string when Pillar has none. description is a deprecated alias.",
+    description: "Deprecated alias of bio — prefer bio.",
+    location: "Public location string from Pillar page customizations (e.g. México). Null when unset.",
+    email: "Public email from Pillar EMAIL social and/or account email when published.",
+    linkCount: "Number of ACTIVE custom-link rows in links[] (DELETED + referral chrome excluded).",
+    links:
+      "Custom links [{id, type, title, url, clicks, order, thumbnail?, description?}]. clicks is Pillar's public per-link click count — the performance signal unique to this platform among link-in-bio sources.",
+    type: "On links[]: host-derived social key when obvious (twitter, spotify, …), otherwise lowercase title.",
+    clicks: "On links[]: cumulative public click count for that custom link.",
+    products:
+      "Featured commerce rows [{id, title, name, price, url, description, image, order?, showPrice?}]. title and name are the same string (SC parity).",
+    socials:
+      "CamelCase social URL map from Pillar banner socials + connected channels — instagram/tiktok/youtube/twitter/facebook/spotify/soundcloud/linkedin/snapchat/patreon/discord/twitch/medium/amazon/appleAppStore/googleAppStore/… Empty Pillar slots are omitted.",
+    other:
+      "Typed social channels that did not map into socials{} [{url, type?}]. Empty when every published channel mapped.",
+    url: "On the page: https://pillar.io/{url_key}. On a link/product row: outbound destination.",
+  },
+  "linkbio-page": {
+    id: "lnk.bio numeric profile id as a string (e.g. \"-1344625\"). From data-uid / avatar path.",
+    displayName:
+      "Real display name when lnk.bio publishes one. Omitted/null when the page only has @handle OG titles — we do not synthesise \"@\" + username.",
+    name: "Deprecated alias of displayName — prefer displayName. Same null policy (no @handle fabrication).",
+    handle: "lnk.bio path slug. Canonical alongside username.",
+    website: "Official website URL when published (hero TYPE_BUTTON / official-website CTA or SOCIAL_WEB). Null when unset.",
+    email: "Public email when lnk.bio exposes a mailto / EMAIL social. Null when unset.",
+    whatsapp: "WhatsApp URL when published on the page. Null when unset.",
+    linkCount: "Content buttons + primary social icon rows (family deep-link dupes excluded).",
+    links:
+      "[{url, title, id?, type?}]. Social icon rows carry platform titles (Facebook, Instagram, Triller, …) from icon labels — not null. Content biolinks keep their button text.",
+    socials:
+      "CamelCase URL map from data-network icons + @handle username CTAs — facebook/twitter/instagram/tiktok/youtube/snapchat/triller/website/whatsapp/…. Often filled where ScrapeCreators returns null.",
+    other:
+      "Typed social networks that did not map into socials{} [{url, title?, type?}]. Empty when every icon mapped.",
+    url: "On the page: https://lnk.bio/{username}. On a link row: outbound destination.",
   },
   "linktree-page": {
     id: "Linktree account id as a string (catalog-wide id convention).",
@@ -6190,7 +6282,10 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     socials:
       "Linktree social icon list [{type, url}] including EMAIL_ADDRESS mailto entries. Prefer top-level email for the address string.",
     socialAccounts:
-      "CamelCase HTTP profile URL map for catalog joins (instagram, tiktok, spotify, soundcloud, appleMusic, youtube, …). Email/phone are intentionally omitted — use top-level email. Watch URLs under youtube are resolved to the channel via oEmbed when possible.",
+      "CamelCase HTTP profile URL map for catalog joins (instagram, tiktok, spotify, soundcloud, appleMusic, youtube, website, whatsapp, …). Email/phone are intentionally omitted — use top-level email. Watch URLs under youtube are resolved to the channel via oEmbed when possible.",
+    other:
+      "Typed Linktree social icons that did not map into socialAccounts{} [{type, url}] (EMAIL_ADDRESS stays in socials[] / top-level email only).",
+    website: "Top-level convenience copy of socialAccounts.website when a WEBSITE social is published.",
     url: "On the page: Linktree profile URL. On a link row: outbound destination (PRODUCT may use shopUrl when Linktree leaves url empty).",
   },
   "twitch-profile": {
@@ -7310,8 +7405,6 @@ const PROFILE_CHANNEL_SLUGS = new Set([
   "bluesky-profile",
   "twitter-profile",
   "threads-profile",
-  "pillar-page",
-  "linkbio-page",
   "linkme-profile",
 ]);
 
@@ -7604,6 +7697,24 @@ const SLUG_USE_CASES: Record<string, UseCase[]> = {
       desc: "Stable link id + visible/order for dedupe and inventory diffs (hidden products included).",
     },
   ],
+  "pillar-page": [
+    {
+      title: "Link performance ranking",
+      desc: "Sort links[] by clicks to see which destinations actually convert — the signal Linktree/Komi do not expose.",
+    },
+    {
+      title: "Merch + product inventory",
+      desc: "Read products[] (title, price, url, image) alongside custom links for affiliate and storefront research.",
+    },
+    {
+      title: "Monetization channel map",
+      desc: "Pipe socials.patreon/discord/twitch/spotify/amazon into deeper Captapi enrichment.",
+    },
+    {
+      title: "Contact + location",
+      desc: "Collect public email and location without scraping the Pillar SPA.",
+    },
+  ],
   "linktree-page": [
     {
       title: "Creator graph fan-out",
@@ -7620,6 +7731,24 @@ const SLUG_USE_CASES: Record<string, UseCase[]> = {
     {
       title: "Link-in-bio inventory",
       desc: "Typed links[] with GROUP nesting, thumbnails, and stable string ids.",
+    },
+  ],
+  "linkbio-page": [
+    {
+      title: "Social graph where SC returns null",
+      desc: "Read socials.instagram/tiktok/youtube/… even when ScrapeCreators leaves those fields null despite URLs in links[].",
+    },
+    {
+      title: "Titled link inventory",
+      desc: "Use links[].title on social rows (Facebook, Triller, …) plus content button labels for UI and dedupe.",
+    },
+    {
+      title: "Website + contact",
+      desc: "Top-level website / email / whatsapp when lnk.bio publishes them — not buried only as an untitled link.",
+    },
+    {
+      title: "Unmapped networks",
+      desc: "Inspect other[] for niche social icons that do not fit the fixed socials{} key list.",
     },
   ],
   "facebook-marketplace-item": [

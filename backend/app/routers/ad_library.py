@@ -1943,18 +1943,26 @@ async def tiktok_search(
     description=(
         "High-performing TikTok ads from Creative Center Top Ads "
         "(ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, "
-        "likes, ctr/ctrTier, costTier, industry/objective, isSparkAd, and video{} "
-        "renditions. Filter with country (default US), period (7/30/180), orderBy "
-        "(for_you|likes|ctr|impressions|cost), optional q/industry/objective/adFormat. "
-        "Flat 2 credits on the Decodo-native path; Apify fallback is ~1 credit per "
-        "returned ad (minimum 2). This is not the EU Commercial Content Library — "
-        "use /v1/ad-library/tiktok/search for DSA transparency ads."
+        "likes (+likesIsApproximate), ctr/ctrTier (normalized 0–1 score + TikTok "
+        "bucket), costTier, resolved industry/objective, isSparkAd, and video{} "
+        "renditions. url is the per-ad Creative Center detail page. Keyword q is "
+        "relevance-filtered client-side (Creative Center soft-matches and often "
+        "ignores keyword with for_you — empty beats unrelated ads). No firstSeen/"
+        "lastSeen on the public list API; no cursor pagination. Filter with country "
+        "(default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|"
+        "cost), optional industry/objective/adFormat. Flat 2 credits on the "
+        "Decodo-native path; Apify fallback is ~1 credit per returned ad (minimum 2). "
+        "Not the EU Commercial Content Library — use /v1/ad-library/tiktok/search "
+        "for DSA transparency ads."
     ),
 )
 async def tiktok_top_ads(
     q: str | None = Query(
         None,
-        description="Optional keyword filter (brand, product, or creative theme).",
+        description=(
+            "Optional keyword. Results must mention every token in title, brand, "
+            "tags, or industry — empty is intentional when Creative Center soft-matches."
+        ),
     ),
     country: str = Query(
         "US",
@@ -1973,11 +1981,18 @@ async def tiktok_top_ads(
     ),
     industry: str | None = Query(
         None,
-        description="Optional industry filter (Creative Center industry key or label).",
+        description=(
+            "Optional industry: Apify/Creative Center labels "
+            "(Gaming, Beauty & Personal Care, …) or TikTok keys "
+            "(label_25000000000). Invalid values return 400 — not a 502."
+        ),
     ),
     objective: str | None = Query(
         None,
-        description="Optional campaign objective filter (e.g. Traffic, Conversion).",
+        description=(
+            "Optional campaign objective: Traffic, App Install, Conversions, "
+            "Reach, Video Views, Lead Generation, Engagement (aliases: Conversion)."
+        ),
     ),
     ad_format: str | None = Query(
         None,
@@ -1993,6 +2008,10 @@ async def tiktok_top_ads(
     try:
         period_days = tiktok_creative_center.normalize_period(period)
         order_label = tiktok_creative_center.normalize_order_by(order_by)
+        # Validate/map before Apify fallback — actor enum mismatch used to
+        # surface as upstream_actor_error 502 instead of a clear 400.
+        tiktok_creative_center.normalize_apify_industry(industry)
+        tiktok_creative_center.normalize_apify_objective(objective)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -2006,12 +2025,14 @@ async def tiktok_top_ads(
         order_key = order_by.strip().lower().replace(" ", "_").replace("-", "_")
 
         async def _run() -> dict[str, Any]:
+            want = max(1, min(int(limit), 100))
+            overfetch = tiktok_creative_center.fetch_limit_for_query(want, q)
             # Decodo XHR capture of creative_radar top_ads/v2/list first.
             native = await tiktok_creative_center.search_top_ads(
                 country=region,
                 period=period_days,
                 order_by=order_label,
-                limit=limit,
+                limit=overfetch,
                 q=q,
                 industry=industry,
                 objective=objective,
@@ -2028,7 +2049,7 @@ async def tiktok_top_ads(
                     tiktok_creative_center.normalize_top_ad(i)
                     for i in native
                     if isinstance(i, dict) and (i.get("ad_id") or i.get("id"))
-                ]
+                ][:want]
                 ctx["credits_override"] = CREDIT_TIKTOK_TOP_ADS
                 return {
                     "query": (q or "").strip() or None,
@@ -2043,7 +2064,7 @@ async def tiktok_top_ads(
                 country=region,
                 period=period_days,
                 order_by=order_label,
-                limit=limit,
+                limit=overfetch,
                 q=q,
                 industry=industry,
                 objective=objective,
@@ -2052,14 +2073,21 @@ async def tiktok_top_ads(
             items = await _run_actor(
                 settings.APIFY_ACTOR_TIKTOK_CREATIVE_CENTER,
                 payload,
-                limit,
+                overfetch,
             )
             ctx["source"] = "apify"
+            matched = tiktok_creative_center.filter_top_ads(
+                [i for i in items if isinstance(i, dict)],
+                q=q,
+                industry=industry,
+                objective=objective,
+                ad_format=ad_format,
+            )
             ads = [
                 tiktok_creative_center.normalize_top_ad(i)
-                for i in items
-                if isinstance(i, dict) and (i.get("ad_id") or i.get("id"))
-            ]
+                for i in matched
+                if i.get("ad_id") or i.get("id")
+            ][:want]
             return {
                 "query": (q or "").strip() or None,
                 "country": region,
@@ -2080,7 +2108,7 @@ async def tiktok_top_ads(
                 "objective": objective or "",
                 "adFormat": ad_format or "",
                 "limit": limit,
-                "v": 2,
+                "v": 3,
             },
             _run,
             ctx,

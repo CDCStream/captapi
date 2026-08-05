@@ -5,6 +5,7 @@ from __future__ import annotations
 import html
 import json
 import re
+import time
 from typing import Any
 
 import httpx
@@ -35,12 +36,12 @@ EXAMPLES = {
     "linkme": "https://link.me/username",
 }
 
-# Flat credit cost per platform. Komi is a direct JSON API (profile + modules)
-# — same class as Linktree (1). Pillar/Linkbio/Linkme still need HTML fetch.
+# Flat credit cost per platform. Link-in-bio JSON/HTML scrapes that return a
+# full page are 1 credit (SC parity). Linkme still needs heavier HTML work.
 CREDIT_PAGE = {
     "komi": 1,
-    "pillar": 4,
-    "linkbio": 4,
+    "pillar": 1,
+    "linkbio": 1,
     "linkme": 4,
 }
 
@@ -52,6 +53,39 @@ _KOMI_HEADERS = {
     "Accept": "application/json",
     "Origin": "https://komi.io",
     "Referer": "https://komi.io/",
+}
+
+_PILLAR_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+)
+_PILLAR_CLOUDINARY_CLOUD = "pillario"
+# Public registration-role JWT is baked into Pillar's frontend bundle; refresh
+# from the vendors chunk when stale.
+_PILLAR_GQL_CACHE: dict[str, Any] = {"endpoint": None, "token": None, "fetched_at": 0.0}
+_PILLAR_GQL_TTL_SEC = 6 * 3600
+
+_PILLAR_SOCIAL_CHANNELS: dict[str, str] = {
+    "INSTAGRAM": "instagram",
+    "TIKTOK": "tiktok",
+    "YOUTUBE": "youtube",
+    "TWITTER": "twitter",
+    "FACEBOOK": "facebook",
+    "SNAPCHAT": "snapchat",
+    "SPOTIFY": "spotify",
+    "SOUNDCLOUD": "soundcloud",
+    "LINKEDIN": "linkedin",
+    "TWITCH": "twitch",
+    "DISCORD": "discord",
+    "PATREON": "patreon",
+    "MEDIUM": "medium",
+    "AMAZON": "amazon",
+    "APPLE_APP_STORE": "appleAppStore",
+    "GOOGLE_APP_STORE": "googleAppStore",
+    "PINTEREST": "pinterest",
+    "THREADS": "threads",
+    "TELEGRAM": "telegram",
+    "WHATSAPP": "whatsapp",
 }
 
 # Komi socialProfileLinks[].type → socials{} key (incl. website).
@@ -127,23 +161,90 @@ _SOCIAL_HOSTS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("threads", ("threads.net", "threads.com")),
     ("discord", ("discord.gg", "discord.com")),
     ("telegram", ("t.me", "telegram.me")),
-    ("whatsapp", ("wa.me", "whatsapp.com")),
+    ("whatsapp", ("wa.me", "api.whatsapp.com", "whatsapp.com")),
+    ("triller", ("triller.co",)),
 )
+
+# lnk.bio data-network → socials{} key (email stays top-level only).
+_LINKBIO_NETWORKS: dict[str, str] = {
+    "SOCIAL_FB": "facebook",
+    "SOCIAL_TW": "twitter",
+    "SOCIAL_IG": "instagram",
+    "SOCIAL_TK": "tiktok",
+    "SOCIAL_YT": "youtube",
+    "SOCIAL_TRILLER": "triller",
+    "CONTACT_SN": "snapchat",
+    "SOCIAL_SN": "snapchat",
+    "SOCIAL_WA": "whatsapp",
+    "CONTACT_WA": "whatsapp",
+    "SOCIAL_WHATSAPP": "whatsapp",
+    "CONTACT_WHATSAPP": "whatsapp",
+    "SOCIAL_EMAIL": "email",
+    "CONTACT_EMAIL": "email",
+    "SOCIAL_WEB": "website",
+    "CONTACT_WEB": "website",
+    "SOCIAL_SPOTIFY": "spotify",
+    "SOCIAL_SOUNDCLOUD": "soundcloud",
+    "SOCIAL_LINKEDIN": "linkedin",
+    "SOCIAL_TWITCH": "twitch",
+    "SOCIAL_PINTEREST": "pinterest",
+    "SOCIAL_THREADS": "threads",
+    "SOCIAL_DISCORD": "discord",
+    "SOCIAL_TELEGRAM": "telegram",
+}
 
 _EMAIL_RE = re.compile(r"mailto:([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})", re.IGNORECASE)
 
 
-def _detect_socials(links: list[dict[str, Any]]) -> dict[str, str]:
-    """Map link URLs to well-known social platforms (SC-parity `socials` block)."""
+def _social_key_for_url(url: str) -> str | None:
+    low = (url or "").lower()
+    if not low:
+        return None
+    for key, hosts in _SOCIAL_HOSTS:
+        if any(h in low for h in hosts):
+            return key
+    return None
+
+
+def _partition_socials(
+    candidates: list[dict[str, Any]],
+) -> tuple[dict[str, str], list[dict[str, Any]]]:
+    """Split social candidates into socials{} + other[] (nothing silently dropped).
+
+    ``other[]`` holds typed/URL rows we could not map to a known socials key
+    (e.g. niche networks). Email candidates are skipped — callers set top-level email.
+    """
     socials: dict[str, str] = {}
-    for link in links:
-        url = (link.get("url") or "").lower()
+    other: list[dict[str, Any]] = []
+    for link in candidates:
+        if not isinstance(link, dict):
+            continue
+        url = safe_str(link.get("url"))
         if not url:
             continue
-        for key, hosts in _SOCIAL_HOSTS:
-            if key not in socials and any(h in url for h in hosts):
-                socials[key] = link["url"]
-                break
+        key = safe_str(link.get("socialKey")) or _social_key_for_url(url)
+        type_hint = safe_str(link.get("type"))
+        if not key and type_hint:
+            key = _LINKBIO_NETWORKS.get(type_hint.upper())
+        if key == "email" or url.lower().startswith("mailto:"):
+            continue
+        if key:
+            if key not in socials:
+                socials[key] = url
+            continue
+        row: dict[str, Any] = {"url": url}
+        title = safe_str(link.get("title"))
+        if title:
+            row["title"] = title
+        if type_hint:
+            row["type"] = type_hint
+        other.append(row)
+    return socials, other
+
+
+def _detect_socials(links: list[dict[str, Any]]) -> dict[str, str]:
+    """Map link URLs to well-known social platforms (SC-parity `socials` block)."""
+    socials, _other = _partition_socials(links)
     return socials
 
 
@@ -275,32 +376,56 @@ def _is_platform_noise_link(url: str, page_url: str | None = None) -> bool:
     return False
 
 
+def _anchor_label(attrs: str, inner: str) -> str | None:
+    """Visible text, else title/aria-label on the <a> or a child icon."""
+    text = re.sub(r"<[^>]+>", " ", inner or "")
+    text = re.sub(r"\s+", " ", html.unescape(text)).strip()
+    if text:
+        return text
+    for attr in ("title", "aria-label"):
+        m = re.search(rf'\b{attr}=["\']([^"\']+)["\']', attrs or "", flags=re.IGNORECASE)
+        if m:
+            val = html.unescape(m.group(1)).strip()
+            if val and val.lower() not in {"lnk", "link"}:
+                return val
+    m = re.search(r'<i[^>]+title=["\']([^"\']+)["\']', inner or "", flags=re.IGNORECASE)
+    if m:
+        val = html.unescape(m.group(1)).strip()
+        if val:
+            return val
+    return None
+
+
 def _anchor_links(page: str, page_url: str | None = None) -> list[dict[str, Any]]:
     """Fallback link extraction for server-rendered pages (e.g. lnk.bio) that
     don't ship a hydration blob. Pulls outbound <a href> targets, drops the
     platform's own nav/share links, and de-dupes."""
     seen: set[str] = set()
     links: list[dict[str, Any]] = []
-    for match in re.finditer(r'<a[^>]+href=["\'](https?://[^"\']+)["\'][^>]*>(.*?)</a>', page, flags=re.IGNORECASE | re.DOTALL):
-        href = html.unescape(match.group(1)).strip()
+    for match in re.finditer(
+        r'<a\s([^>]*\bhref=["\'](https?://[^"\']+)["\'][^>]*)>(.*?)</a>',
+        page,
+        flags=re.IGNORECASE | re.DOTALL,
+    ):
+        attrs, href_raw, inner = match.group(1), match.group(2), match.group(3)
+        href = html.unescape(href_raw).strip()
         if _is_platform_noise_link(href, page_url):
             continue
         if href in seen:
             continue
         seen.add(href)
-        text = re.sub(r"<[^>]+>", " ", match.group(2))
-        text = re.sub(r"\s+", " ", html.unescape(text)).strip()
         url = safe_str(href)
         if not url:
             continue
-        links.append(_link_item(url, title=safe_str(text)))
+        links.append(_link_item(url, title=safe_str(_anchor_label(attrs, inner))))
     return links[:200]
 
 
 def _strip_page(data: dict[str, Any]) -> dict[str, Any]:
     """strip_empty, but keep links[].title even when null for a stable schema."""
     links = data.get("links")
-    cleaned = strip_empty({k: v for k, v in data.items() if k != "links"})
+    other = data.get("other")
+    cleaned = strip_empty({k: v for k, v in data.items() if k not in ("links", "other")})
     if isinstance(links, list):
         cleaned["links"] = [
             _link_item(
@@ -314,6 +439,8 @@ def _strip_page(data: dict[str, Any]) -> dict[str, Any]:
             if isinstance(link, dict) and (url := safe_str(link.get("url")))
         ]
         cleaned["linkCount"] = len(cleaned["links"])
+    if isinstance(other, list):
+        cleaned["other"] = other
     return cleaned
 
 
@@ -337,35 +464,36 @@ def _komi_username(value: str) -> str:
     return raw.lstrip("@")
 
 
-def _komi_socials(profile: dict[str, Any], data: dict[str, Any]) -> dict[str, str]:
-    """Map Komi socialProfileLinks (+ website field) into socials{}."""
-    socials: dict[str, str] = {}
+def _komi_socials(
+    profile: dict[str, Any], data: dict[str, Any]
+) -> tuple[dict[str, str], list[dict[str, Any]]]:
+    """Map Komi socialProfileLinks (+ website field) into socials{} + other[]."""
+    candidates: list[dict[str, Any]] = []
     for link in profile.get("socialProfileLinks") or []:
         if not isinstance(link, dict):
             continue
         url = safe_str(link.get("link") or link.get("url"))
         if not url:
             continue
-        key = _KOMI_SOCIAL_TYPES.get((safe_str(link.get("type")) or "").upper())
-        if not key:
-            # Unknown type — fall back to host detection (still skip if neither).
-            detected = _detect_socials([{"url": url}])
-            if detected:
-                key = next(iter(detected))
-                url = detected[key]
-            else:
-                continue
-        if key not in socials:
-            socials[key] = url
+        type_hint = (safe_str(link.get("type")) or "").upper()
+        key = _KOMI_SOCIAL_TYPES.get(type_hint) or _social_key_for_url(url)
+        candidates.append(
+            {
+                "url": url,
+                "type": type_hint or None,
+                "socialKey": key,
+                "title": safe_str(link.get("title") or link.get("label")),
+            }
+        )
     for candidate in (profile.get("website"), data.get("website")):
         if isinstance(candidate, dict):
             url = safe_str(candidate.get("url") or candidate.get("link"))
         else:
             url = safe_str(candidate)
-        if url and "website" not in socials:
-            socials["website"] = url
+        if url:
+            candidates.append({"url": url, "socialKey": "website", "type": "WEBSITE"})
             break
-    return socials
+    return _partition_socials(candidates)
 
 
 def _komi_flatten_module_links(modules: list[Any]) -> list[dict[str, Any]]:
@@ -457,7 +585,7 @@ async def _fetch_komi(value: str) -> dict[str, Any] | None:
                     modules = payload
 
     links = _komi_flatten_module_links(modules)
-    socials = _komi_socials(profile, data)
+    socials, other = _komi_socials(profile, data)
     display = (
         safe_str(profile.get("displayName"))
         or safe_str(data.get("displayName"))
@@ -485,15 +613,643 @@ async def _fetch_komi(value: str) -> dict[str, Any] | None:
         "linkCount": len(links),
         "links": links,
         "socials": socials,
+        "other": other,
         "email": safe_str(data.get("email") or profile.get("email")),
+        "website": socials.get("website"),
     }
     # strip_empty drops "" — re-attach bio/description for SC-stable empty string.
-    cleaned = strip_empty({k: v for k, v in page.items() if k not in ("bio", "description", "links")})
+    cleaned = strip_empty(
+        {k: v for k, v in page.items() if k not in ("bio", "description", "links", "other")}
+    )
     cleaned["bio"] = bio
     cleaned["description"] = bio
     cleaned["links"] = links
     cleaned["linkCount"] = len(links)
+    cleaned["other"] = other
     return cleaned
+
+
+def _pillar_username(value: str) -> str:
+    """Accept pillar.io/user or bare username."""
+    raw = (value or "").strip().rstrip("/")
+    if "://" in raw:
+        return raw.rsplit("/", 1)[-1].lstrip("@")
+    return raw.lstrip("@")
+
+
+def _pillar_cloudinary_url(value: str | None) -> str | None:
+    """Resolve Pillar's cloudinary:public_id tokens to res.cloudinary.com URLs."""
+    raw = safe_str(value)
+    if not raw:
+        return None
+    if raw.startswith("http://") or raw.startswith("https://"):
+        return raw
+    if raw.startswith("cloudinary:"):
+        public_id = raw[len("cloudinary:") :].lstrip("/")
+        if not public_id:
+            return None
+        return f"https://res.cloudinary.com/{_PILLAR_CLOUDINARY_CLOUD}/image/upload/{public_id}"
+    return raw
+
+
+def _pillar_link_type(title: str | None, url: str | None) -> str | None:
+    """SC uses lowercase title as type; prefer a host social key when obvious."""
+    if url:
+        detected = _detect_socials([{"url": url}])
+        if detected:
+            return next(iter(detected))
+    if title:
+        return title.strip().lower() or None
+    return None
+
+
+def _pillar_socials(
+    banner_customizations: dict[str, Any] | None,
+    influencer_socials: list[Any] | None,
+) -> tuple[dict[str, str], list[dict[str, Any]]]:
+    """Merge banner.customizations.socials + influencer.socials → socials{} + other[]."""
+    candidates: list[dict[str, Any]] = []
+    custom = banner_customizations if isinstance(banner_customizations, dict) else {}
+    custom_socials = custom.get("socials") if isinstance(custom.get("socials"), dict) else {}
+    for channel, payload in custom_socials.items():
+        channel_u = str(channel).upper()
+        if isinstance(payload, dict):
+            url = safe_str(payload.get("value") or payload.get("url"))
+        else:
+            url = safe_str(payload)
+        if not url:
+            continue
+        candidates.append(
+            {
+                "url": url,
+                "type": channel_u,
+                "socialKey": _PILLAR_SOCIAL_CHANNELS.get(channel_u) or _social_key_for_url(url),
+            }
+        )
+    for row in influencer_socials or []:
+        if not isinstance(row, dict):
+            continue
+        channel_u = (safe_str(row.get("channel")) or "").upper()
+        url = safe_str(row.get("url"))
+        if not url:
+            continue
+        candidates.append(
+            {
+                "url": url,
+                "type": channel_u or None,
+                "socialKey": _PILLAR_SOCIAL_CHANNELS.get(channel_u) or _social_key_for_url(url),
+            }
+        )
+    return _partition_socials(candidates)
+
+
+def _pillar_map_links(raw_links: list[Any] | None) -> list[dict[str, Any]]:
+    """Map shop_custom_link rows → links[{id,type,title,url,clicks,order}]."""
+    out: list[dict[str, Any]] = []
+    for row in raw_links or []:
+        if not isinstance(row, dict):
+            continue
+        status = (safe_str(row.get("status")) or "").upper()
+        if status == "DELETED":
+            continue
+        data = row.get("data") if isinstance(row.get("data"), dict) else {}
+        url = safe_str(data.get("url"))
+        if not url:
+            continue
+        # Platform self-promo / referral chrome — not creator content.
+        if "pillar.io/referral" in url.lower():
+            continue
+        if data.get("visible") is False:
+            continue
+        title = safe_str(data.get("tagline") or data.get("title") or data.get("cta"))
+        link: dict[str, Any] = {
+            "id": safe_str(row.get("link_id")),
+            "type": _pillar_link_type(title, url),
+            "title": title,
+            "url": url,
+            "clicks": int(row["clicks"]) if isinstance(row.get("clicks"), int) else 0,
+            "order": row.get("order") if isinstance(row.get("order"), int) else None,
+        }
+        thumb = _pillar_cloudinary_url(safe_str(data.get("thumbnail_image")))
+        if thumb:
+            link["thumbnail"] = thumb
+        desc = safe_str(data.get("description"))
+        if desc:
+            link["description"] = desc
+        out.append(link)
+    # Stable sort: explicit order first, then nulls (SC keeps null order).
+    out.sort(key=lambda x: (x.get("order") is None, x.get("order") if isinstance(x.get("order"), int) else 0))
+    return out
+
+
+def _pillar_map_products(raw_products: list[Any] | None) -> list[dict[str, Any]]:
+    """Map shop_featured_product → products[{id,title,name,price,url,description,image}]."""
+    out: list[dict[str, Any]] = []
+    for row in raw_products or []:
+        if not isinstance(row, dict):
+            continue
+        status = (safe_str(row.get("status")) or "").upper()
+        if status == "DELETED":
+            continue
+        title = safe_str(row.get("name") or row.get("title"))
+        url = safe_str(row.get("url"))
+        if not title and not url:
+            continue
+        product: dict[str, Any] = {
+            "id": safe_str(row.get("product_id") or row.get("id")),
+            "title": title,
+            "name": title,
+            "url": url,
+            "description": safe_str(row.get("description")),
+            "image": safe_str(row.get("image")),
+        }
+        if row.get("price") is not None:
+            product["price"] = row.get("price")
+        if isinstance(row.get("order"), int):
+            product["order"] = row["order"]
+        if isinstance(row.get("show_price"), bool):
+            product["showPrice"] = row["show_price"]
+        out.append(product)
+    return out
+
+
+def _pillar_map_page(payload: dict[str, Any], *, page_key: str) -> dict[str, Any] | None:
+    """Turn a Pillar GraphQL page payload into Captapi JSON."""
+    data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+    if not isinstance(data, dict):
+        return None
+    influencer = data.get("influencer") if isinstance(data.get("influencer"), dict) else None
+    if not influencer:
+        return None
+    banner = data.get("banner") if isinstance(data.get("banner"), dict) else {}
+    user = influencer.get("user") if isinstance(influencer.get("user"), dict) else {}
+    custom = banner.get("customizations") if isinstance(banner.get("customizations"), dict) else {}
+
+    username = (
+        safe_str(banner.get("url_key"))
+        or safe_str(page_key)
+        or safe_str(influencer.get("alias"))
+    )
+    if not username:
+        return None
+
+    display = (
+        safe_str(custom.get("user_alias"))
+        or safe_str(user.get("full_name"))
+        or " ".join(
+            p for p in (safe_str(user.get("first_name")), safe_str(user.get("last_name"))) if p
+        ).strip()
+        or username
+    )
+    bio_raw = user.get("bio")
+    bio = "" if bio_raw is None else (safe_str(bio_raw) or "")
+
+    email = None
+    email_social = custom.get("socials") if isinstance(custom.get("socials"), dict) else {}
+    email_payload = email_social.get("EMAIL")
+    if isinstance(email_payload, dict):
+        email = safe_str(email_payload.get("value"))
+    email = email or safe_str(user.get("email")) or safe_str(influencer.get("contact_email"))
+
+    links = _pillar_map_links(data.get("links") if isinstance(data.get("links"), list) else [])
+    products = _pillar_map_products(
+        data.get("products") if isinstance(data.get("products"), list) else []
+    )
+    socials, other = _pillar_socials(
+        custom, influencer.get("socials") if isinstance(influencer.get("socials"), list) else []
+    )
+
+    page = {
+        "platform": "pillar",
+        "id": safe_str(influencer.get("id")),
+        "url": f"https://pillar.io/{username}",
+        "username": username,
+        "handle": username,
+        "displayName": display,
+        "name": display,  # deprecated alias of displayName
+        "firstName": safe_str(user.get("first_name")),
+        "lastName": safe_str(user.get("last_name")),
+        "bio": bio,
+        "description": bio,  # deprecated alias of bio
+        "avatar": _pillar_cloudinary_url(safe_str(user.get("profile_image"))),
+        "location": safe_str(custom.get("location")),
+        "email": email,
+        "linkCount": len(links),
+        "links": links,
+        "products": products,
+        "socials": socials,
+        "other": other,
+    }
+    cleaned = strip_empty(
+        {
+            k: v
+            for k, v in page.items()
+            if k not in ("bio", "description", "links", "products", "other")
+        }
+    )
+    cleaned["bio"] = bio
+    cleaned["description"] = bio
+    cleaned["links"] = links
+    cleaned["linkCount"] = len(links)
+    cleaned["products"] = products
+    cleaned["other"] = other
+    return cleaned
+
+
+async def _pillar_graphql_creds(*, page_url: str | None = None) -> tuple[str, str]:
+    """Load Pillar Hasura endpoint + public JWT from the creator SPA bundle.
+
+    The marketing homepage (pillar.io/) does not ship the Vue vendors chunk —
+    any creator path (or /login) does.
+    """
+    now = time.time()
+    cached_ep = _PILLAR_GQL_CACHE.get("endpoint")
+    cached_tok = _PILLAR_GQL_CACHE.get("token")
+    fetched_at = float(_PILLAR_GQL_CACHE.get("fetched_at") or 0)
+    if (
+        isinstance(cached_ep, str)
+        and isinstance(cached_tok, str)
+        and cached_ep
+        and cached_tok
+        and now - fetched_at < _PILLAR_GQL_TTL_SEC
+    ):
+        return cached_ep, cached_tok
+
+    boot_url = page_url or "https://pillar.io/login"
+    resp = await fetch_html(boot_url, timeout=30.0, prefer_impersonate=True)
+    endpoint: str | None = None
+    token: str | None = None
+    async with httpx.AsyncClient(
+        timeout=30,
+        headers={"User-Agent": _PILLAR_UA, "Referer": "https://pillar.io/"},
+        follow_redirects=True,
+    ) as client:
+        # Prefer the s-z vendors chunk (holds env constants); fall back to any vendors.
+        srcs = re.findall(r'src="(/js/chunk-vendors[^"]+\.js)"', resp.text)
+        ordered = sorted(srcs, key=lambda s: (0 if "s-z" in s else 1, s))
+        for src in ordered:
+            js = (await client.get(f"https://pillar.io{src}")).text
+            if "VUE_APP_GRAPHQL_TOKEN" not in js:
+                continue
+            ep_m = re.search(r'VUE_APP_GRAPHQL_ENDPOINT:"([^"]+)"', js)
+            tok_m = re.search(r'VUE_APP_GRAPHQL_TOKEN:"([^"]+)"', js)
+            if ep_m and tok_m:
+                host = ep_m.group(1).strip()
+                endpoint = host if host.startswith("http") else f"https://{host}/v1/graphql"
+                if not endpoint.endswith("/v1/graphql"):
+                    endpoint = endpoint.rstrip("/") + "/v1/graphql"
+                token = tok_m.group(1).strip()
+                break
+    if not endpoint or not token:
+        # Fall back to last good creds if refresh failed mid-flight.
+        if isinstance(cached_ep, str) and isinstance(cached_tok, str) and cached_ep and cached_tok:
+            return cached_ep, cached_tok
+        raise HTTPException(status_code=502, detail="Pillar GraphQL credentials unavailable")
+    _PILLAR_GQL_CACHE["endpoint"] = endpoint
+    _PILLAR_GQL_CACHE["token"] = token
+    _PILLAR_GQL_CACHE["fetched_at"] = now
+    return endpoint, token
+
+
+async def _fetch_pillar(value: str) -> dict[str, Any] | None:
+    """Pillar HTML is a Vue SPA; public Hasura GraphQL holds the page.
+
+    Resolve slug via shop_banner.url_key / alias / builder slug, then load
+    influencer + custom links (with clicks) + featured products + socials.
+    """
+    username = _pillar_username(value)
+    if not username:
+        return None
+    page_url = f"https://pillar.io/{username}"
+    endpoint, token = await _pillar_graphql_creds(page_url=page_url)
+    headers = {
+        "User-Agent": _PILLAR_UA,
+        "Content-Type": "application/json",
+        "Origin": "https://pillar.io",
+        "Referer": page_url,
+        "Authorization": f"Bearer {token}",
+    }
+    resolve_q = """
+    query($key: String!) {
+      byBanner: shop_banner(where: {url_key: {_ilike: $key}}, limit: 3) {
+        influencer_id url_key
+      }
+      bySlug: shop_builder_item_url_slug(where: {slug: {_ilike: $key}}, limit: 3) {
+        slug influencer_id
+      }
+      byAlias: users_influencer(where: {alias: {_ilike: $key}}, limit: 3) {
+        id alias
+      }
+    }
+    """
+    page_q = """
+    query($id: uuid!) {
+      influencer: users_influencer_by_pk(id: $id) {
+        id alias contact_email
+        socials { channel handle url channel_name primary_connection }
+        user {
+          id first_name last_name full_name email bio profile_image title verified
+        }
+      }
+      banner: shop_banner_by_pk(influencer_id: $id) {
+        url_key clicks customizations
+      }
+      links: shop_custom_link(
+        where: {influencer_id: {_eq: $id}}
+        order_by: {order: asc_nulls_last}
+      ) {
+        link_id order clicks status data
+      }
+      products: shop_featured_product(
+        where: {influencer_id: {_eq: $id}, status: {_neq: "DELETED"}}
+        order_by: {order: asc_nulls_last}
+      ) {
+        product_id name description price url image order show_price brand_name brand_url status
+      }
+    }
+    """
+    async with httpx.AsyncClient(timeout=45, headers=headers) as client:
+        resolved = await client.post(
+            endpoint, json={"query": resolve_q, "variables": {"key": username}}
+        )
+        if resolved.status_code != 200:
+            return None
+        try:
+            resolve_body = resolved.json()
+        except json.JSONDecodeError:
+            return None
+        bags = resolve_body.get("data") if isinstance(resolve_body.get("data"), dict) else {}
+        influencer_id: str | None = None
+        page_key = username
+        for bag_name in ("byBanner", "bySlug", "byAlias"):
+            rows = bags.get(bag_name) if isinstance(bags, dict) else None
+            if not isinstance(rows, list) or not rows:
+                continue
+            row = rows[0]
+            if not isinstance(row, dict):
+                continue
+            influencer_id = safe_str(row.get("influencer_id") or row.get("id"))
+            page_key = safe_str(row.get("url_key") or row.get("slug") or username) or username
+            if influencer_id:
+                break
+        if not influencer_id:
+            return None
+        page_resp = await client.post(
+            endpoint, json={"query": page_q, "variables": {"id": influencer_id}}
+        )
+        if page_resp.status_code != 200:
+            return None
+        try:
+            page_body = page_resp.json()
+        except json.JSONDecodeError:
+            return None
+        if page_body.get("errors"):
+            return None
+        return _pillar_map_page(page_body, page_key=page_key)
+
+
+def _linkbio_username(value: str) -> str:
+    raw = (value or "").strip().rstrip("/")
+    if "://" in raw:
+        return raw.rsplit("/", 1)[-1].lstrip("@")
+    return raw.lstrip("@")
+
+
+def _linkbio_network_title(network: str | None, fallback: str | None) -> str | None:
+    if fallback:
+        return fallback
+    key = _LINKBIO_NETWORKS.get((network or "").upper())
+    if not key:
+        return None
+    labels = {
+        "facebook": "Facebook",
+        "twitter": "Twitter",
+        "instagram": "Instagram",
+        "tiktok": "TikTok",
+        "youtube": "YouTube",
+        "triller": "Triller",
+        "snapchat": "Snapchat",
+        "whatsapp": "WhatsApp",
+        "website": "Website",
+        "spotify": "Spotify",
+        "soundcloud": "SoundCloud",
+        "linkedin": "LinkedIn",
+        "twitch": "Twitch",
+        "pinterest": "Pinterest",
+        "threads": "Threads",
+        "discord": "Discord",
+        "telegram": "Telegram",
+    }
+    return labels.get(key, key.title())
+
+
+def _linkbio_parse_page(page: str, page_url: str) -> dict[str, Any] | None:
+    """Parse lnk.bio HTML into identity + content links + social icons."""
+    username = _linkbio_username(page_url)
+    if not username:
+        return None
+
+    profile_id: str | None = None
+    m_uid = re.search(
+        r'data-type=["\']TYPE_PROFILEPIC["\'][^>]*data-uid=["\']([^"\']+)["\']',
+        page,
+        flags=re.IGNORECASE,
+    ) or re.search(
+        r'data-uid=["\']([^"\']+)["\'][^>]*data-type=["\']TYPE_PROFILEPIC["\']',
+        page,
+        flags=re.IGNORECASE,
+    )
+    if m_uid:
+        profile_id = m_uid.group(1)
+    if not profile_id:
+        m_av = re.search(r"profilepics/(-?\d+)_", page)
+        if m_av:
+            profile_id = m_av.group(1)
+
+    content_links: list[dict[str, Any]] = []
+    social_candidates: list[dict[str, Any]] = []
+    social_links: list[dict[str, Any]] = []
+    seen_content: set[str] = set()
+    seen_network: set[str] = set()
+
+    for match in re.finditer(
+        r'<a\s([^>]*\bhref=["\'](https?://[^"\']+)["\'][^>]*)>(.*?)</a>',
+        page,
+        flags=re.IGNORECASE | re.DOTALL,
+    ):
+        attrs, href_raw, inner = match.group(1), match.group(2), match.group(3)
+        href = html.unescape(href_raw).strip()
+        if _is_platform_noise_link(href, page_url):
+            continue
+        url = safe_str(href)
+        if not url:
+            continue
+        # Prefer data-url when present (canonical).
+        m_data_url = re.search(r'\bdata-url=["\']([^"\']+)["\']', attrs, flags=re.IGNORECASE)
+        if m_data_url:
+            url = safe_str(html.unescape(m_data_url.group(1))) or url
+
+        data_type = None
+        m_type = re.search(r'\bdata-type=["\']([^"\']+)["\']', attrs, flags=re.IGNORECASE)
+        if m_type:
+            data_type = m_type.group(1)
+        network = None
+        m_net = re.search(r'\bdata-network=["\']([^"\']+)["\']', attrs, flags=re.IGNORECASE)
+        if m_net:
+            network = m_net.group(1)
+        link_id = None
+        m_id = re.search(r'\bdata-id=["\']([^"\']+)["\']', attrs, flags=re.IGNORECASE)
+        if m_id:
+            link_id = m_id.group(1)
+
+        label = _anchor_label(attrs, inner)
+        is_icon = bool(network) or "lb-icon-pub" in attrs
+        is_content = (data_type or "").upper() in {
+            "TYPE_BUTTON",
+            "TYPE_BIOLINK",
+            "TYPE_LINK",
+        } or "pb-linkbox" in attrs
+        is_username_cta = "pb-username" in attrs and not url.lower().startswith("https://lnk.bio/")
+
+        if is_icon and network:
+            social_key = _LINKBIO_NETWORKS.get(network.upper()) or _social_key_for_url(url)
+            # First occurrence per social key / network = primary deep-links row
+            # (skip family dupes and CONTACT_SN vs SOCIAL_SN doubles).
+            net_key = (social_key or network).upper()
+            if net_key in seen_network:
+                continue
+            seen_network.add(net_key)
+            title = _linkbio_network_title(network, label)
+            row = {
+                "url": url,
+                "title": title,
+                "type": network,
+                "socialKey": social_key,
+                "id": safe_str(link_id),
+            }
+            social_candidates.append(row)
+            if social_key != "email":
+                social_links.append(
+                    _link_item(url, title=title, link_id=safe_str(link_id), link_type=social_key or network)
+                )
+            continue
+
+        if is_content or is_username_cta:
+            if url in seen_content:
+                continue
+            seen_content.add(url)
+            # TYPE_BUTTON / biolink title often lives only on the title= attr.
+            if not label:
+                label = _anchor_label(attrs, "")
+            content_links.append(
+                _link_item(
+                    url,
+                    title=safe_str(label),
+                    link_id=safe_str(link_id),
+                    link_type=safe_str(data_type) or ("USERNAME" if is_username_cta else None),
+                )
+            )
+
+    # Fallback: if structured parse found nothing, use improved anchor scrape.
+    if not content_links and not social_links:
+        return None
+
+    socials, other = _partition_socials(social_candidates)
+
+    # Username CTAs (e.g. Jenna's @handle → Instagram) enrich socials{} without
+    # treating every content biolink (YouTube playlist, campaign "website") as a social.
+    for link in content_links:
+        title = link.get("title") or ""
+        ltype = (link.get("type") or "").upper()
+        if ltype == "USERNAME" or title.startswith("@"):
+            key = _social_key_for_url(link.get("url") or "")
+            if key and key not in socials:
+                socials[key] = link["url"]
+
+    # Personal / official-website hero only (TYPE_BUTTON or explicit "official website").
+    # Do not treat campaign biolinks titled "… Website" as the creator website field.
+    website = socials.get("website")
+    if not website:
+        for link in content_links:
+            title_l = (link.get("title") or "").lower()
+            ltype = (link.get("type") or "").upper()
+            if "official website" in title_l or title_l.startswith("official site"):
+                website = link.get("url")
+                break
+            if ltype == "TYPE_BUTTON" and ("website" in title_l or "official site" in title_l):
+                website = link.get("url")
+                break
+    if website and "website" not in socials:
+        socials["website"] = website
+
+    # WhatsApp / email may appear only as icon rows.
+    email = None
+    for cand in social_candidates:
+        if cand.get("socialKey") == "email" or (cand.get("url") or "").lower().startswith("mailto:"):
+            m = _EMAIL_RE.search(cand.get("url") or "")
+            email = (m.group(1) if m else safe_str(cand.get("url"))) or email
+    if not email:
+        email = _detect_email(page, content_links + social_links)
+
+    links = content_links + social_links
+    avatar = _meta(page, "og:image") or _meta(page, "twitter:image")
+    if avatar and "avatar.svg" in avatar.lower():
+        avatar = None
+
+    # Never synthesise displayName from @handle OG titles.
+    raw_title = _meta(page, "og:title") or _meta(page, "twitter:title")
+    display = None
+    if raw_title:
+        cleaned = _LINKBIO_TITLE_SUFFIX.sub("", raw_title).strip() or None
+        if cleaned:
+            handle = username.lstrip("@").lower()
+            if cleaned.lstrip("@").lower() != handle and cleaned.lower() not in {
+                "not found - lnk.bio",
+                "not found",
+            }:
+                display = cleaned
+
+    description = _meta(page, "og:description") or _meta(page, "description")
+    if description and _LINKBIO_DESC_TEMPLATE.search(description):
+        description = None
+
+    return {
+        "platform": "linkbio",
+        "id": safe_str(profile_id),
+        "url": f"https://lnk.bio/{username}",
+        "username": username,
+        "handle": username,
+        "displayName": display,
+        "name": display,  # deprecated alias — null when lnk.bio has no real name
+        "description": safe_str(description),
+        "avatar": safe_str(avatar),
+        "email": email,
+        "website": website,
+        "whatsapp": socials.get("whatsapp"),
+        "linkCount": len(links),
+        "links": links,
+        "socials": socials,
+        "other": other,
+    }
+
+
+async def _fetch_linkbio(value: str) -> dict[str, Any] | None:
+    """lnk.bio is server-rendered HTML with data-network social icons + pb-linkbox rows."""
+    profile = _url("linkbio", value)
+    try:
+        resp = await fetch_html(profile, timeout=30.0, prefer_impersonate=True)
+    except httpx.HTTPError:
+        return None
+    if resp.status_code == 404:
+        return None
+    if resp.status_code >= 400 or _is_cloudflare_block(resp.status_code, resp.text):
+        return None
+    parsed = _linkbio_parse_page(resp.text, str(resp.url))
+    if not parsed:
+        return None
+    if not (parsed.get("username") or parsed.get("links")):
+        return None
+    return _strip_page(parsed)
 
 
 async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
@@ -501,6 +1257,14 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
         komi = await _fetch_komi(value)
         if komi:
             return komi
+    if platform == "pillar":
+        pillar = await _fetch_pillar(value)
+        if pillar:
+            return pillar
+    if platform == "linkbio":
+        linkbio = await _fetch_linkbio(value)
+        if linkbio:
+            return linkbio
     profile = _url(platform, value)
     # lnk.bio (and occasionally peers) sit behind Cloudflare bot checks that
     # reject plain httpx — browser_fetch uses Chrome TLS impersonation first.
@@ -604,7 +1368,7 @@ async def _page(
     ) as ctx:
         data = await cached_or_run(
             f"{platform}.page",
-            {"url": profile, "v": 10, "cacheMaxAge": cache_max_age},
+            {"url": profile, "v": 12, "cacheMaxAge": cache_max_age},
             lambda: _fetch_page(platform, profile),
             ctx,
             use_cache=use_cache,
@@ -612,9 +1376,12 @@ async def _page(
         )
         if data.pop("_marketingShell", None) or not (data.get("username") or data.get("links")):
             raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")
-        # Pillar soft-404s to a marketing shell with the path username but no creator links.
-        if platform == "pillar" and not data.get("links"):
-            raise HTTPException(status_code=404, detail="Pillar page not found or has no public links")
+        # Pillar soft-404s used to return a marketing shell; GraphQL pages are real when
+        # they carry links, products, or socials — empty shells still 404.
+        if platform == "pillar" and not (
+            data.get("links") or data.get("products") or data.get("socials")
+        ):
+            raise HTTPException(status_code=404, detail="Pillar page not found or has no public content")
         return ApiResponse(data=data)
 
 
@@ -645,14 +1412,48 @@ async def komi_page(
     )
 
 
-@router.get("/pillar/page", summary="Pillar page")
-async def pillar_page(url: str = Query(..., description="Pillar page URL or username"), cache: bool = Query(False, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
-    return await _page("pillar", url, caller, use_cache=cache)
+@router.get(
+    "/pillar/page",
+    summary="Pillar page",
+    description=(
+        "Public Pillar page as clean JSON — identity (id, displayName, bio, location, email), "
+        "socials{} (instagram/tiktok/youtube/twitter/spotify/patreon/discord/twitch/…), "
+        "links[] with per-link clicks/id/type/order, and products[] (title, price, url, image). "
+        "Flat 1 credit via Pillar's public GraphQL API (not HTML scrape)."
+    ),
+)
+async def pillar_page(
+    url: str = Query(..., description="Pillar page URL or username"),
+    cache: bool = Query(False, description=_CACHE_DESC),
+    cacheMaxAge: str | None = Query(None, description=CACHE_MAX_AGE_DESC),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    use_cache, ttl = resolve_cache_options(cache, cacheMaxAge)
+    return await _page(
+        "pillar", url, caller, use_cache=use_cache, ttl=ttl, cache_max_age=cacheMaxAge
+    )
 
 
-@router.get("/linkbio/page", summary="Linkbio page")
-async def linkbio_page(url: str = Query(..., description="Linkbio (lnk.bio) page URL or username"), cache: bool = Query(False, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
-    return await _page("linkbio", url, caller, use_cache=cache)
+@router.get(
+    "/linkbio/page",
+    summary="Linkbio page",
+    description=(
+        "Public lnk.bio page as clean JSON — id, handle, avatar, email/website/whatsapp when "
+        "published, socials{} (incl. triller/website; SC often leaves these null), other[] for "
+        "unmapped social networks, and links[] with titles from icon labels + content buttons. "
+        "displayName/name are omitted when lnk.bio only exposes @handle. Flat 1 credit."
+    ),
+)
+async def linkbio_page(
+    url: str = Query(..., description="Linkbio (lnk.bio) page URL or username"),
+    cache: bool = Query(False, description=_CACHE_DESC),
+    cacheMaxAge: str | None = Query(None, description=CACHE_MAX_AGE_DESC),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    use_cache, ttl = resolve_cache_options(cache, cacheMaxAge)
+    return await _page(
+        "linkbio", url, caller, use_cache=use_cache, ttl=ttl, cache_max_age=cacheMaxAge
+    )
 
 
 @router.get("/linkme/profile", summary="Linkme profile")

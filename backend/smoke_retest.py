@@ -23,7 +23,7 @@ KWAI_PROFILE = "https://www.kwai.com/@topfilmeseseriesnatv"
 KWAI_VIDEO = "https://www.kwai.com/@topfilmeseseriesnatv/video/5240932700689736196"
 LINKBIO = "https://lnk.bio/charlidamelio"
 KOMI = "https://komi.io/charlidamelio"
-PILLAR = "https://pillar.io/cocoao"
+PILLAR = "https://pillar.io/angelstrife"
 LINKME = "https://link.me/nasa"
 KICK = "https://kick.com/xqc"
 

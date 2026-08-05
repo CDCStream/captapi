@@ -67,7 +67,8 @@ def test_social_accounts_skips_email():
         {"type": "EMAIL_ADDRESS", "url": "mailto:miguel@irlangel.com"},
         {"type": "YOUTUBE", "url": "https://www.youtube.com/watch?v=xiFUzOJaiC4"},
     ]
-    accounts = lt._social_accounts(socials, [])
+    accounts, other = lt._social_accounts(socials, [])
+    assert isinstance(other, list)
     assert "email" not in accounts
     assert accounts["instagram"].endswith("miguelangeles/")
     assert "youtube" in accounts
@@ -79,3 +80,16 @@ def test_resolve_youtube_watch_to_channel():
     )
     assert "/@" in channel or "/channel/" in channel
     assert "watch?v=" not in channel
+
+
+def test_social_accounts_other_unmapped_type():
+    accounts, other = lt._social_accounts(
+        [
+            {"type": "INSTAGRAM", "url": "https://www.instagram.com/x/"},
+            {"type": "EMAIL_ADDRESS", "url": "mailto:x@y.com"},
+            {"type": "CUSTOM_APP", "url": "https://custom.example/x"},
+        ],
+        [],
+    )
+    assert "instagram" in accounts
+    assert any(o.get("type") == "CUSTOM_APP" for o in other)

@@ -494,6 +494,25 @@ export interface TiktokPopularHashtagsParams {
   cache?: boolean;
 }
 
+export interface TiktokPopularSongsParams {
+  /** Two-letter ISO country. Default US. */
+  country?: string;
+  /** 7, 30, or 120 days. Default 7. */
+  period?: string;
+  /** Page number (default 1). */
+  page?: number;
+  /** popular | surging. Default popular. */
+  rankType?: string;
+  /** Only sounds newly on the Top 100. */
+  newOnBoard?: boolean;
+  /** Only Commercial Music Library-cleared sounds. */
+  commercialMusic?: boolean;
+  /** Max items to return. Default 20, max 20. Flat 2 credits per call. */
+  limit?: number;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
 export interface TiktokLiveParams {
   /** TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
@@ -599,6 +618,10 @@ export class TiktokApi {
   popularHashtags(params: TiktokPopularHashtagsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/popular-hashtags", params);
   }
+  /** TikTok Popular Songs — Creative Center popular/surging sounds — rankDiff, trend[], commercialMusic. Flat 2 credits. (2 credits) */
+  popularSongs(params: TiktokPopularSongsParams = {}): Promise<ApiEnvelope> {
+    return this.core.get("/v1/tiktok/popular-songs", params);
+  }
   /** TikTok Live — isLive/status, creator.id/secUid, streamQualities with flv/hls/cmaf/dash. Flat 1 credit. (1 credit) */
   live(params: TiktokLiveParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/live", params);
@@ -690,7 +713,7 @@ export interface InstagramReelsSearchParams {
 }
 
 export interface InstagramTrendingReelsParams {
-  /** Country name for Explore localization. Default United States. */
+  /** Country name or ISO code. Unsupported → 400 with supportedCountries. */
   country?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
@@ -743,6 +766,22 @@ export interface InstagramEmbedParams {
   cache?: boolean;
 }
 
+export interface InstagramHighlightsParams {
+  /** Instagram profile URL, @handle, or username. Omit when userId is set. */
+  url?: string;
+  /** Numeric Instagram user ID. Prefer when known — skips handle→ID resolve. */
+  userId?: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface InstagramHighlightsDetailsParams {
+  /** Highlight id from /v1/instagram/highlights (with or without highlight: prefix). */
+  id: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
 export interface InstagramBasicProfileParams {
   /** Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically. */
   userId: string;
@@ -784,7 +823,7 @@ export class InstagramApi {
   reelsSearch(params: InstagramReelsSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/reels-search", params);
   }
-  /** Instagram Trending Reels — Trending Reels from instagram.com/reels — videos only, flat 1 credit. Duplicates across calls expected. (1 credit) */
+  /** Instagram Trending Reels — Snapshot-backed trending Reels (typical freshness <24h) — videos only, flat 1 credit. Use reels-search for live scrapes. (1 credit) */
   trendingReels(params: InstagramTrendingReelsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/trending-reels", params);
   }
@@ -807,6 +846,14 @@ export class InstagramApi {
   /** Instagram Embed HTML — Embed HTML for an Instagram post, reel, or profile. (1 credit) */
   embed(params: InstagramEmbedParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/embed", params);
+  }
+  /** Instagram Highlights — Persistent Story Highlight albums for a public profile — id, title, cover, owner. Flat 1 credit. (1 credit) */
+  highlights(params: InstagramHighlightsParams = {}): Promise<ApiEnvelope> {
+    return this.core.get("/v1/instagram/highlights", params);
+  }
+  /** Instagram Highlight Details — Items inside one Instagram Story Highlight album — media URLs, type, takenAt. Flat 1 credit. (1 credit) */
+  highlightsDetails(params: InstagramHighlightsDetailsParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/instagram/highlights-details", params);
   }
   /** Instagram Basic Profile — Instagram profile by user ID/@handle — camelCase (followers, externalUrl, businessAddress). (1 credit) */
   basicProfile(params: InstagramBasicProfileParams): Promise<ApiEnvelope> {
@@ -1452,7 +1499,7 @@ export interface TiktokShopSearchParams {
 export interface TiktokShopProductsParams {
   /** TikTok Shop store URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
+  /** Max items to return. Default 20, max 200. Flat 2 credits per call. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -1477,7 +1524,7 @@ export interface TiktokShopProductReviewsParams {
 }
 
 export interface TiktokShopUserShowcaseParams {
-  /** TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug. */
+  /** TikTok username, @handle, or profile URL, e.g. jeffreestar or https://www.tiktok.com/@jeffreestar. */
   username: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
@@ -1491,19 +1538,19 @@ export class TiktokShopApi {
   search(params: TiktokShopSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/shop-search", params);
   }
-  /** TikTok Shop Products — List products from a TikTok Shop store. (2 credits) */
+  /** TikTok Shop Products — Store catalog + shopInfo. Flat 2 credits on native SSR (limit does not multiply). (2 credits) */
   products(params: TiktokShopProductsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/shop-products", params);
   }
-  /** TikTok Shop Product Details — TikTok Shop product details with seller id, pricing, SKUs, and region. (14 credits) */
+  /** TikTok Shop Product Details — PDP with price/originalPrice/discount, skus[]+saleProps, images, categories. 2 credits native. (2 credits) */
   productDetails(params: TiktokShopProductDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/product-details", params);
   }
-  /** TikTok Shop Product Reviews — Customer reviews for a TikTok Shop product. (45 credits) */
+  /** TikTok Shop Product Reviews — Shop product reviews — stars, text, SKU, verified, country, review photos. Not video comments. (45 credits) */
   productReviews(params: TiktokShopProductReviewsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/product-reviews", params);
   }
-  /** TikTok Shop User Showcase — Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id. (45 credits) */
+  /** TikTok Shop User Showcase — Creator affiliate shelf — sold, rating, originalPrice, seller name/url (PDP-hydrated). (45 credits) */
   userShowcase(params: TiktokShopUserShowcaseParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/user-showcase", params);
   }
@@ -2412,7 +2459,7 @@ export interface KomiPageParams {
 
 export class KomiApi {
   constructor(private readonly core: HttpCore) {}
-  /** Komi Page — Public Komi page links and profile metadata. (4 credits) */
+  /** Komi Page — Komi page — id/displayName/bio, socials{} (incl. website), content LINK/PRODUCT rows with price/currency. Flat 1 credit. (1 credit) */
   page(params: KomiPageParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/komi/page", params);
   }
@@ -2427,7 +2474,7 @@ export interface PillarPageParams {
 
 export class PillarApi {
   constructor(private readonly core: HttpCore) {}
-  /** Pillar Page — Public Pillar page links and profile metadata. (4 credits) */
+  /** Pillar Page — Pillar page — id/displayName/bio/location/email, socials{}, links[] with clicks, products[]. Flat 1 credit. (1 credit) */
   page(params: PillarPageParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/pillar/page", params);
   }
@@ -2442,7 +2489,7 @@ export interface LinkbioPageParams {
 
 export class LinkbioApi {
   constructor(private readonly core: HttpCore) {}
-  /** Linkbio Page — Public Linkbio page links and profile metadata. (4 credits) */
+  /** Linkbio Page — lnk.bio page — id, socials{} (often filled where SC is null), titled links[], website/email/whatsapp, other[]. Flat 1 credit. (1 credit) */
   page(params: LinkbioPageParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/linkbio/page", params);
   }

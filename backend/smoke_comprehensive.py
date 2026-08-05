@@ -75,7 +75,7 @@ async def main() -> None:
         ("tiktok_shop",  "/v1/tiktok-shop/shop-search",     {"q": "phone case", "limit": 5}, False),
         ("ad_library",   "/v1/ad-library/facebook/search",  {"q": "nike", "limit": 5}, False),
         ("komi",         "/v1/komi/page",                   {"url": "https://komi.io/charlidamelio"}, False),
-        ("pillar",       "/v1/pillar/page",                 {"url": "https://pillar.io/cocoao"}, False),
+        ("pillar",       "/v1/pillar/page",                 {"url": "https://pillar.io/angelstrife"}, False),
         ("linkbio",      "/v1/linkbio/page",                {"url": "https://lnk.bio/charlidamelio"}, False),
         ("linkme",       "/v1/linkme/profile",              {"url": "https://link.me/nasa"}, False),
         # Known environmental constraints (actor must be rented / datacenter IP blocked):

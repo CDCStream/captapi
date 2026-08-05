@@ -80,7 +80,8 @@ def test_socials_include_website_type():
             {"type": "SPOTIFY", "link": "https://open.spotify.com/artist/x"},
         ]
     }
-    socials = cp._komi_socials(profile, {})
+    socials, other = cp._komi_socials(profile, {})
+    assert other == []
     assert socials["instagram"].endswith("/ksi")
     assert socials["website"] == "https://www.sidemen.com/"
     assert socials["spotify"].startswith("https://open.spotify.com/")

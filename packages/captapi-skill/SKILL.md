@@ -401,13 +401,13 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `pillar_page` | `/v1/pillar/page` | `url` (string), `cache`? (boolean) | 4 |
+| `pillar_page` | `/v1/pillar/page` | `url` (string), `cache`? (boolean) | 1 |
 
 ### Linkbio
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `linkbio_page` | `/v1/linkbio/page` | `url` (string), `cache`? (boolean) | 4 |
+| `linkbio_page` | `/v1/linkbio/page` | `url` (string), `cache`? (boolean) | 1 |
 
 ### Linkme
 

@@ -577,11 +577,11 @@ const KOMI: Omit<Endpoint, "platform">[] = [
 ];
 
 const PILLAR: Omit<Endpoint, "platform">[] = [
-  { tool: "pillar_page", name: "Pillar Page", path: "/v1/pillar/page", credits: 4, summary: "Public Pillar page links and profile metadata.", params: [url(PILLAR_PAGE)] },
+  { tool: "pillar_page", name: "Pillar Page", path: "/v1/pillar/page", credits: 1, summary: "Pillar page — id/displayName/bio/location/email, socials{}, links[] with clicks, products[]. Flat 1 credit.", params: [url(PILLAR_PAGE), cacheParam()] },
 ];
 
 const LINKBIO: Omit<Endpoint, "platform">[] = [
-  { tool: "linkbio_page", name: "Linkbio Page", path: "/v1/linkbio/page", credits: 4, summary: "Public Linkbio page links and profile metadata.", params: [url(LINKBIO_PAGE)] },
+  { tool: "linkbio_page", name: "Linkbio Page", path: "/v1/linkbio/page", credits: 1, summary: "lnk.bio page — id, socials{} (often filled where SC is null), titled links[], website/email/whatsapp, other[]. Flat 1 credit.", params: [url(LINKBIO_PAGE), cacheParam()] },
 ];
 
 const LINKME: Omit<Endpoint, "platform">[] = [

@@ -15959,78 +15959,236 @@
     "status": 200,
     "data": {
       "platform": "pillar",
-      "url": "https://pillar.io/example",
-      "username": "example",
-      "name": "Example Creator",
-      "description": "Creator bio",
-      "linkCount": 2,
+      "id": "d8a5cbb4-a64d-44f2-830d-27a489bbc608",
+      "url": "https://pillar.io/angelstrife",
+      "username": "angelstrife",
+      "handle": "angelstrife",
+      "displayName": "Ángel Strife",
+      "name": "Ángel Strife",
+      "firstName": "Angel",
+      "lastName": "Blanco",
+      "avatar": "https://res.cloudinary.com/pillario/image/upload/user-image/page/96024b21-566f-405a-b4f2-2784526b380b",
+      "location": "México",
+      "email": "angelrafaelcovablanco@gmail.com",
+      "linkCount": 5,
+      "socials": {
+        "tiktok": "https://tiktok.com/@angelstrifeoficial",
+        "spotify": "https://open.spotify.com/artist/3Lse4fAlOchY8msotsYMA6?si=4nKqeTSRRsSDoNj1tfvNtA",
+        "twitter": "https://twitter.com/SoyAngelStrife",
+        "youtube": "https://www.youtube.com/channel/UCgZSHuBjHSFADbFQOCN1ifg",
+        "facebook": "https://www.facebook.com/AngelStrifeOficial",
+        "linkedin": "https://mx.linkedin.com/in/angelcovablanco",
+        "instagram": "https://www.instagram.com/angelstrifeoficial",
+        "soundcloud": "https://soundcloud.com/contienda-records"
+      },
+      "bio": "Awarded as Ángel Strife for the nomination for best #RealityShow at the KidsChoiceAwards 2020 for his participation in the TheVoice México Season 9 Program with the Acunmedya production company on the television network TvAzteca, Awarded in Film Score for the Epstein Mention of the Fotogenia Festival 2020, as well as the Special Selection of the Hidalgo Film Fest 2020, Guanajuato 3.0 Experimental Film Festival 2020 & the international festival of film sur l'art \"Le Fife\" 2021 (Canada)",
+      "description": "Awarded as Ángel Strife for the nomination for best #RealityShow at the KidsChoiceAwards 2020 for his participation in the TheVoice México Season 9 Program with the Acunmedya production company on the television network TvAzteca, Awarded in Film Score for the Epstein Mention of the Fotogenia Festival 2020, as well as the Special Selection of the Hidalgo Film Fest 2020, Guanajuato 3.0 Experimental Film Festival 2020 & the international festival of film sur l'art \"Le Fife\" 2021 (Canada)",
       "links": [
         {
-          "title": "Website",
-          "url": "https://example.com"
+          "id": "669fef70-1ba7-11ee-b33b-e5396daf72e9",
+          "type": "spotify",
+          "title": "30 Mil Pies De Altura Para Morir de Amor",
+          "url": "https://open.spotify.com/album/14jqUYFbuBs0HcftvQ7jC3?si=bX_bInR7R9Wu-mC9_77Fvw&context=spotify%3Aalbum%3A14jqUYFbuBs0HcftvQ7jC3",
+          "clicks": 0,
+          "order": 2
         },
         {
-          "title": "YouTube",
-          "url": "https://www.youtube.com/@example"
+          "id": "657440b0-1ba7-11ee-b33b-e5396daf72e9",
+          "type": "instagram",
+          "title": "SINCRONICIDAD",
+          "url": "https://www.instagram.com/contiendarecords",
+          "clicks": 5,
+          "order": null,
+          "description": "Sigue Nuestra Contienda"
+        },
+        {
+          "id": "65e66370-1ba7-11ee-b33b-e5396daf72e9",
+          "type": "contienda récords",
+          "title": "Contienda Récords",
+          "url": "https://angel-strife.ueniweb.com",
+          "clicks": 10,
+          "order": null
+        },
+        {
+          "id": "66472110-1ba7-11ee-b33b-e5396daf72e9",
+          "type": "twitter",
+          "title": "Twitter",
+          "url": "https://twitter.com/SoyAngelStrife",
+          "clicks": 2,
+          "order": null
+        },
+        {
+          "id": "53b927f0-540f-11ee-9d78-2f8e637f163e",
+          "type": "ponte hype",
+          "title": "Ponte Hype",
+          "url": "https://pontehype.com/talento/72",
+          "clicks": 4,
+          "order": null,
+          "description": "Contrataciones"
+        }
+      ],
+      "products": [
+        {
+          "id": "254c8681-1d52-11ee-b065-850167411bb1",
+          "title": "\"30 Mil Pies De Altura Para Morir de Amor\" - LP",
+          "name": "\"30 Mil Pies De Altura Para Morir de Amor\" - LP",
+          "url": "https://angel-strife.ueniweb.com/products/merchandise/30-mil-pies-de-altura-para-morir-de-amor-lp-especial-edition-vynil-deluxe-53106871",
+          "description": "Especial Edition Vynil Deluxe",
+          "image": "https://athlane-file-management-prod.s3.amazonaws.com/a925f7b5-77ba-4095-b755-27b2bc221baa",
+          "price": 0,
+          "showPrice": false
+        },
+        {
+          "id": "1ade72a0-5720-11ee-abe2-f1c4530bf5e3",
+          "title": "Sweater Negro Gōruden Tsukoyomi (Edición Especial)",
+          "name": "Sweater Negro Gōruden Tsukoyomi (Edición Especial)",
+          "url": "https://angel-strife.ueniweb.com/products/merchandise/sweater-negro-goruden-tsukoyomi-edicion-especial-52958670",
+          "description": "Sweater Negro Gōruden Tsukoyomi (Edición Especial) en todas las tallas con diseño Tsukoyomi (Dios de la Luna) & letras Rojas Sweater Negro. disponible en todas las tallas y entrega en territorio nacional e internacional.",
+          "image": "https://athlane-file-management-prod.s3.amazonaws.com/8b2ac54c-21cd-4339-9cef-49bec35f26b4",
+          "price": 0,
+          "showPrice": false
+        },
+        {
+          "id": "3c0630c0-5721-11ee-abe2-f1c4530bf5e3",
+          "title": "Sweater Blanco Gōruden Tsukoyomi (Edición Especial)",
+          "name": "Sweater Blanco Gōruden Tsukoyomi (Edición Especial)",
+          "url": "https://angel-strife.ueniweb.com/products/merchandise/sweater-blanco-goruden-tsukoyomi-edicion-especial-52958678",
+          "description": "Sweater Blanco con logotipo rojo al frente y Tsukoyomi con letras rojas en las mangas",
+          "image": "https://athlane-file-management-prod.s3.amazonaws.com/711d4917-023a-4739-83f6-b09c471303d1",
+          "price": 0,
+          "showPrice": false
+        },
+        {
+          "id": "7e82a5e1-5722-11ee-965e-43735d1a8bef",
+          "title": "Sweater Negro Edición \"ÁNGEL STRIFE\"",
+          "name": "Sweater Negro Edición \"ÁNGEL STRIFE\"",
+          "url": "https://angel-strife.ueniweb.com/products/merchandise/sweater-negro-edicion-angel-strife-52416306",
+          "description": "Sweater Negro con logotipo en la espalda e insignia al frente disponible en todas las tallas y entrega en territorio nacional e internacional.",
+          "image": "https://athlane-file-management-prod.s3.amazonaws.com/9ad1715a-96f6-4350-bf6c-d963bcbb045a",
+          "price": 0,
+          "showPrice": false
         }
       ]
     },
-    "note": "Illustrative shape; live empty/marketing shells now 404."
+    "note": "Live GraphQL capture via Pillar Hasura (https://pillar.io/angelstrife)."
   },
   "linkbio-page": {
     "ok": true,
     "status": 200,
-    "credits": null,
     "data": {
       "platform": "linkbio",
+      "id": "-1344625",
       "url": "https://lnk.bio/charlidamelio",
       "username": "charlidamelio",
-      "name": "@charlidamelio",
+      "handle": "charlidamelio",
       "avatar": "https://s3.us-west-2.amazonaws.com/cdn.lnk.bio/profilepics/-1344625_20220123667.jpg",
-      "linkCount": 8,
+      "website": "https://www.charlidamelio.com",
+      "linkCount": 15,
       "socials": {
         "facebook": "https://facebook.com/thecharlidamelio",
         "twitter": "https://twitter.com/charlidamelio",
         "instagram": "https://instagram.com/charlidamelio",
+        "triller": "https://triller.co/m/@charlidamelio",
         "tiktok": "https://tiktok.com/@charlidamelio",
         "youtube": "https://youtube.com/c/charlidamelio",
-        "snapchat": "https://www.snapchat.com/add/damelioc"
+        "snapchat": "https://www.snapchat.com/add/damelioc",
+        "website": "https://www.charlidamelio.com"
       },
       "links": [
         {
           "url": "https://www.charlidamelio.com",
-          "title": "official website of charli d'amelio"
+          "title": "official website of charli d'amelio",
+          "id": "61ec9244a0fa03.74794466",
+          "type": "TYPE_BUTTON"
+        },
+        {
+          "url": "https://www.hollisterco.com/shop/us/social-tourist/shop-all?%20cmp=SOC:SPR21:ST:D:US:Brand:X:BioINF:PInf:X:X:CD:STHP-ST:x:Charli%20IG",
+          "title": "shop social tourist january 2022 drop",
+          "id": "2733218",
+          "type": "TYPE_BIOLINK"
+        },
+        {
+          "url": "https://vip.amplify.ai/60db91667cb29640beaf839e/sms.html?ex=60db91667cb29640beaf839e&affid=1704",
+          "title": "join charli's vip text community",
+          "id": "2733215",
+          "type": "TYPE_BIOLINK"
+        },
+        {
+          "url": "https://www.snapchat.com/discover/Charli_VS_Dixie/4107127141",
+          "title": "charli vs dixie snapchat show",
+          "id": "2733212",
+          "type": "TYPE_BIOLINK"
+        },
+        {
+          "url": "https://dixiecharliringlights.com/collections/shop-all-products",
+          "title": "shop dixie & charli ring lights",
+          "id": "2733208",
+          "type": "TYPE_BIOLINK"
+        },
+        {
+          "url": "http://bit.ly/mymusecharlidixie",
+          "title": "shop mymuse",
+          "id": "2733206",
+          "type": "TYPE_BIOLINK"
+        },
+        {
+          "url": "https://www.hulu.com/series/the-damelio-show-ad993806-7961-4eb3-9f92-e7b9a349ae22",
+          "title": "watch the d'amelio show on hulu",
+          "id": "2733205",
+          "type": "TYPE_BIOLINK"
+        },
+        {
+          "url": "https://m.youtube.com/channel/UCIoBuVIZ9F30lmZ4ddTGnzw",
+          "title": "d'amelio family youtube channel",
+          "id": "2733198",
+          "type": "TYPE_BIOLINK"
         },
         {
           "url": "https://facebook.com/thecharlidamelio",
-          "title": null
+          "title": "Facebook",
+          "id": "SOCIAL_FB",
+          "type": "facebook"
         },
         {
           "url": "https://twitter.com/charlidamelio",
-          "title": null
+          "title": "Twitter",
+          "id": "SOCIAL_TW",
+          "type": "twitter"
         },
         {
           "url": "https://instagram.com/charlidamelio",
-          "title": null
+          "title": "Instagram",
+          "id": "SOCIAL_IG",
+          "type": "instagram"
         },
         {
           "url": "https://triller.co/m/@charlidamelio",
-          "title": null
+          "title": "Triller",
+          "id": "SOCIAL_TRILLER",
+          "type": "triller"
         },
         {
           "url": "https://tiktok.com/@charlidamelio",
-          "title": null
+          "title": "TikTok",
+          "id": "SOCIAL_TK",
+          "type": "tiktok"
         },
         {
           "url": "https://youtube.com/c/charlidamelio",
-          "title": null
+          "title": "YouTube",
+          "id": "SOCIAL_YT",
+          "type": "youtube"
         },
         {
           "url": "https://www.snapchat.com/add/damelioc",
-          "title": null
+          "title": "Snapchat",
+          "id": "CONTACT_SN",
+          "type": "snapchat"
         }
-      ]
-    }
+      ],
+      "other": []
+    },
+    "note": "Live lnk.bio capture (https://lnk.bio/charlidamelio)."
   },
   "linkme-profile": {
     "ok": true,

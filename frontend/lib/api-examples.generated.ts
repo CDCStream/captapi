@@ -1,6 +1,7 @@
 // AUTO-GENERATED — do not edit by hand.
 // Real example responses captured live from https://api.captapi.com.
-// Arrays are truncated to 2 items and long strings shortened for display.
+// Arrays truncated to 2 items; HTML/poison strings stubbed for SSR safety.
+// Mode variants: frontend/lib/api-example-variants.ts (not overwritten).
 // Regenerate: python backend/gen_examples.py (source: backend/api_snapshots.json).
 
 export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
@@ -45,30 +46,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "creditsUsed": 2,
         "successfulRequests": 3,
         "failedRequests": 0
-      },
-      {
-        "endpoint": "/v1/tiktok/live-info",
-        "platform": "tiktok",
-        "requests": 2,
-        "creditsUsed": 14,
-        "successfulRequests": 2,
-        "failedRequests": 0
-      },
-      {
-        "endpoint": "/v1/tiktok/search-suggestions",
-        "platform": "tiktok",
-        "requests": 2,
-        "creditsUsed": 14,
-        "successfulRequests": 0,
-        "failedRequests": 2
-      },
-      {
-        "endpoint": "/v1/tiktok-shop/user-showcase",
-        "platform": "tiktok_shop",
-        "requests": 2,
-        "creditsUsed": 12,
-        "successfulRequests": 1,
-        "failedRequests": 1
       }
     ]
   },
@@ -96,39 +73,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "responseTimeMs": 4980,
         "errorMessage": null,
         "createdAt": "2026-07-18T11:31:21.584147+00:00"
-      },
-      {
-        "endpoint": "/v1/instagram/basic-profile",
-        "platform": "instagram",
-        "resourceUrl": "instagram_user:adencylnozturk",
-        "creditsUsed": 1,
-        "cacheHit": false,
-        "statusCode": 200,
-        "responseTimeMs": 4168,
-        "errorMessage": null,
-        "createdAt": "2026-07-18T11:31:20.30634+00:00"
-      },
-      {
-        "endpoint": "/v1/pinterest/board",
-        "platform": "pinterest",
-        "resourceUrl": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/",
-        "creditsUsed": 3,
-        "cacheHit": false,
-        "statusCode": 200,
-        "responseTimeMs": 17558,
-        "errorMessage": null,
-        "createdAt": "2026-07-18T11:29:07.873651+00:00"
-      },
-      {
-        "endpoint": "/v1/facebook/marketplace-item",
-        "platform": "facebook",
-        "resourceUrl": "https://www.facebook.com/marketplace/item/2228870800986975/",
-        "creditsUsed": 1,
-        "cacheHit": false,
-        "statusCode": 200,
-        "responseTimeMs": 10482,
-        "errorMessage": null,
-        "createdAt": "2026-07-18T11:28:59.677517+00:00"
       }
     ]
   },
@@ -172,48 +116,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "reviews": null,
         "isPrime": false,
         "isBestSeller": false,
-        "isSponsored": false
-      },
-      {
-        "asin": "B088NRLMPV",
-        "title": "Anker USB C to USB C Cable, 60W Fast Charging Cable (2-Pack, 6 ft, Black) | For iPhone 17 Series, iPad mini 6, and More",
-        "url": "https://www.amazon.com/dp/B088NRLMPV",
-        "image": "https://m.media-amazon.com/images/I/71IE9dLBduL._AC_UY218_.jpg",
-        "price": 9.99,
-        "currency": "USD",
-        "priceFormatted": "$9.99",
-        "rating": 4.7,
-        "reviews": null,
-        "isPrime": false,
-        "isBestSeller": true,
-        "isSponsored": false
-      },
-      {
-        "asin": "B09SG2Q23M",
-        "title": "Anker Power Strip with 2100J Surge Protector, Outlet Extender, 20W, 12 AC | 5ft Extension Cord with Multiple Outlets, 1 USB C, 2 USB A, Home Office, Dorm Room Essentials, TUV Listed",
-        "url": "https://www.amazon.com/dp/B09SG2Q23M",
-        "image": "https://m.media-amazon.com/images/I/71FtSiqsK3L._AC_UY218_.jpg",
-        "price": 23.99,
-        "currency": "USD",
-        "priceFormatted": "$23.99",
-        "rating": 4.8,
-        "reviews": null,
-        "isPrime": false,
-        "isBestSeller": false,
-        "isSponsored": false
-      },
-      {
-        "asin": "B0BQLLB61B",
-        "title": "Anker USB C Hub, 5-in-1 USBC to HDMI Splitter with 4K Display | 85W Max PD, 1 Powered USB-C 5Gbps & 2 Powered USB-A 3.0 5Gbps Data Ports, for MacBook Pro, MacBook Air, Dell and More (Black)",
-        "url": "https://www.amazon.com/dp/B0BQLLB61B",
-        "image": "https://m.media-amazon.com/images/I/615HRY2dnML._AC_UY218_.jpg",
-        "price": 17.99,
-        "currency": "USD",
-        "priceFormatted": "$17.99",
-        "rating": 4.4,
-        "reviews": null,
-        "isPrime": false,
-        "isBestSeller": true,
         "isSponsored": false
       }
     ]
@@ -424,82 +326,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "description": "The tiny beast has been spotted twice in Ballard this summer and appears to be doing well, despite a likely congenital deformity, an animal expert said.",
           "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:xtg6uhgsy2j7k2a6qtcood2w/bafkreidmxsn5szs7i4vpq7kpjbwh44kwnkwu5b2n44vjhtye4hfpqfhzxq"
         }
-      },
-      {
-        "platform": "bluesky",
-        "uri": "at://did:plc:oky5czdrnfjpqslsw2a5iclo/app.bsky.feed.post/3mqunv4oepk2y",
-        "url": "https://bsky.app/profile/jay.bsky.team/post/3mqunv4oepk2y",
-        "cid": "bafyreic4yrxocxxcvnya2gchfhidq46do7reuxtwjekpnbfzrnljattu5m",
-        "text": "once upon a time in the land of gnomes…",
-        "publishedAt": "2026-07-17T21:08:43.276Z",
-        "indexedAt": "2026-07-17T21:08:48.864Z",
-        "author": {
-          "handle": "jay.bsky.team",
-          "displayName": "Jay 🦋",
-          "did": "did:plc:oky5czdrnfjpqslsw2a5iclo",
-          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:oky5czdrnfjpqslsw2a5iclo/bafkreihxtnc37g7jqdcgidtkknwuswtjiijcdnc6cx4imc4oq33cnsc5da"
-        },
-        "engagement": {
-          "likes": 178,
-          "reposts": 7,
-          "replies": 17,
-          "quotes": 2
-        },
-        "embed": {
-          "type": "images",
-          "images": [
-            {
-              "url": "https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:oky5czdrnfjpqslsw2a5iclo/bafkreigdszebo7yhsvzp43vbtzr7hxq2iyw3dkdwg6hgeeewzkrvqs3y6i",
-              "alt": "collectively written gnome story on typewriter"
-            }
-          ]
-        }
-      },
-      {
-        "platform": "bluesky",
-        "uri": "at://did:plc:oky5czdrnfjpqslsw2a5iclo/app.bsky.feed.post/3mqcwx2ddok2r",
-        "url": "https://bsky.app/profile/jay.bsky.team/post/3mqcwx2ddok2r",
-        "cid": "bafyreifhr757k3xlszwuo7dihhpbporh42nrzwaiiywqn77n3h4ytnspma",
-        "text": "I’m thrilled Toni is staying to lead us into this next chapter. He’s spent the past four months proving it, leading with curiosity and courage. Welcome (again) Toni!",
-        "publishedAt": "2026-07-10T20:02:56.314Z",
-        "indexedAt": "2026-07-10T20:02:56.964Z",
-        "author": {
-          "handle": "jay.bsky.team",
-          "displayName": "Jay 🦋",
-          "did": "did:plc:oky5czdrnfjpqslsw2a5iclo",
-          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:oky5czdrnfjpqslsw2a5iclo/bafkreihxtnc37g7jqdcgidtkknwuswtjiijcdnc6cx4imc4oq33cnsc5da"
-        },
-        "engagement": {
-          "likes": 335,
-          "reposts": 23,
-          "replies": 17,
-          "quotes": 2
-        },
-        "embed": {
-          "type": "app.bsky.embed.record#view"
-        }
-      },
-      {
-        "platform": "bluesky",
-        "uri": "at://did:plc:oky5czdrnfjpqslsw2a5iclo/app.bsky.feed.post/3mp75kuens22h",
-        "url": "https://bsky.app/profile/jay.bsky.team/post/3mp75kuens22h",
-        "cid": "bafyreiheoivsjwscc5duma6373lcrwycerg4mzcjpvgopozhipayaib5qy",
-        "text": "It really is. I hear Baltic reserve is a real thing, but the people I met were wonderfully warm and welcoming",
-        "publishedAt": "2026-06-26T14:25:33.024Z",
-        "indexedAt": "2026-06-26T14:25:34.266Z",
-        "author": {
-          "handle": "jay.bsky.team",
-          "displayName": "Jay 🦋",
-          "did": "did:plc:oky5czdrnfjpqslsw2a5iclo",
-          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:oky5czdrnfjpqslsw2a5iclo/bafkreihxtnc37g7jqdcgidtkknwuswtjiijcdnc6cx4imc4oq33cnsc5da"
-        },
-        "engagement": {
-          "likes": 13,
-          "reposts": 0,
-          "replies": 1,
-          "quotes": 0
-        },
-        "embed": null
       }
     ]
   },
@@ -544,20 +370,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "speaker": "body",
         "text": "The Voting Information Center—one-tap voting registration information from election experts and authorities in one place.",
-        "start": 0,
-        "duration": 0,
-        "timestamp": "00:00"
-      },
-      {
-        "speaker": "cta",
-        "text": "Learn more",
-        "start": 0,
-        "duration": 0,
-        "timestamp": "00:00"
-      },
-      {
-        "speaker": "landingUrl",
-        "text": "http://facebook.com/votinginformationcenter",
         "start": 0,
         "duration": 0,
         "timestamp": "00:00"
@@ -626,80 +438,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQOW2b9UEJoszgGizc9hrdAjx8h2PNmX5EFioCovqhnhZrPmWYYs2jrz2_k4rgn72viqiAXdYrPWHCU-Gie0kjeq.mp4?_nc_cat=103&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=nys365hpMxcQ7kNvwHgMgqj&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzIwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo2NjAxMjk2OTAzNjcwMTMsImFzc2V0X2FnZV9kYXlzIjoyNDksInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjozMCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=SxD9styajND2_8-5Hiv5XQ&_nc_ss=72289&_nc_zt=28&oh=00_AQBnmCAlNRahN4AsgdZ38Ac5EdAxMjL50nCNBkLLyltBwA&oe=6A678B84",
           "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120102604_752266025568907_2538374744503325031_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=zOy1dkRrjNwQ7kNvwE6UWb4&_nc_oc=AdoeR4HjsR3dT59BfJw-cJn13C_EDqxVPAUcXGvB7N-aH8ENNZZDwhMcyf83dUgpiPo&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=SxD9styajND2_8-5Hiv5XQ&_nc_ss=72289&oh=00_AQAeRefR3xV4gR8tcoNYd2lM6c7GaZUDOV0GYx4rVDnAiA&oe=6A677DC7"
         ]
-      },
-      {
-        "platform": "facebook_ad_library",
-        "id": "629251157856827",
-        "url": "https://www.facebook.com/ads/library/?id=629251157856827",
-        "text": "Tune in here at 1:30pm PT to a Facebook Live discussion with Mark Zuckerberg, Dr. Priscilla Chan and Governor Gavin Newsom, where they will talk about California’s response to the COVID-19 outbreak.",
-        "headline": "Live with California Governor, Gavin Newsom",
-        "cta": null,
-        "landingUrl": null,
-        "adFormat": "VIDEO",
-        "firstShown": "2020-03-30T07:00:00.000Z",
-        "lastShown": "2020-04-02T07:00:00.000Z",
-        "impressions": ">1M",
-        "spend": "$700K - $800K",
-        "country": "US",
-        "advertiser": {
-          "id": "108824017345866",
-          "name": "Meta",
-          "url": "https://www.facebook.com/Meta/",
-          "logo": "https://scontent-atl3-3.xx.fbcdn.net/v/t1.6435-9/87284588_124830725745195_9124219877853233152_n.png?stp=dst-png_s60x60&_nc_cat=110&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=DLCYhBDvg8wQ7kNvwGKpCeK&_nc_oc=AdqTTNAeb0KjgOR-sELgSafS1uCDI7jm58uEzI_ccHW_Vv7wb_6ctaBpXcL4ECBM9Mc&_nc_zt=23&_nc_ht=scontent-atl3-3.xx&_nc_gid=SxD9styajND2_8-5Hiv5XQ&_nc_ss=72289&oh=00_AQCT690005DnAkhA-AeoJVLlwyEYFb-3e-9dVsCLPcYB5w&oe=6A892BC3"
-        },
-        "media": [
-          "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/122500852_364361851568920_5617757942998938181_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=pm7Q4VB48VwQ7kNvwG9vHzb&_nc_oc=AdpNy95zoqLhPKJekY8d2_cTdICH5kgFM8aqlhk5Ltz3J2JkhM5xQ9zizbmkWeI3QAM&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=SxD9styajND2_8-5Hiv5XQ&_nc_ss=72289&oh=00_AQDVoxPlWOkQmNjXV9vbz-k3WFO5s2ugyaq1EcBSpJZi1A&oe=6A6796D8"
-        ]
-      },
-      {
-        "platform": "facebook_ad_library",
-        "id": "372804137235499",
-        "url": "https://www.facebook.com/ads/library/?id=372804137235499",
-        "text": "The Voting Information Center on Facebook—one-tap voting info from election experts and authorities in one place.",
-        "headline": "Voting Information Center",
-        "cta": "Learn more",
-        "landingUrl": "http://facebook.com/votinginformationcenter",
-        "adFormat": "VIDEO",
-        "firstShown": "2020-10-05T07:00:00.000Z",
-        "lastShown": "2020-10-13T07:00:00.000Z",
-        "impressions": ">1M",
-        "spend": ">$1M",
-        "country": "US",
-        "advertiser": {
-          "id": "108824017345866",
-          "name": "Meta",
-          "url": "https://www.facebook.com/Meta/",
-          "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwH_c6S1&_nc_oc=Adq6Kf5L_Tkx2E3_ZTPgkkJBqBFrUF2yFzbizYtSLVcyom-ZAmB0zM6FgNhqa6CE4bQ&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=SxD9styajND2_8-5Hiv5XQ&_nc_ss=72289&oh=00_AQB38PZJl2olGB2U4-yzTIbucPjM7a_5C-sAcPDMbf_TKA&oe=6A89438E"
-        },
-        "media": [
-          "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQPYrtdWcXYzwK9kZxgDiAgoU_IImyeS9Q8adbGcircR7RR1dDdUBrAQ0LiHO2OJoauE5pf8F4GyEcPVDLQ94uo.mp4?_nc_cat=100&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=TJVBi21FSYoQ7kNvwHRm88L&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4OTE2MjkwMDA0NTQwNDEsImFzc2V0X2FnZV9kYXlzIjoxNTcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=SxD9styajND2_8-5Hiv5XQ&_nc_ss=72289&_nc_zt=28&oh=00_AQCLyxYoox1xemvUeI90AbxJ8kemKuquBtAnyxKy227kcA&oe=6A678682",
-          "https://scontent-atl3-1.xx.fbcdn.net/v/t39.35426-6/120439450_1980569842077757_2547343747583380554_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=ghBwQrPN7IYQ7kNvwFk7y92&_nc_oc=AdoxOVy424HY2clI0huJHzMUy0ttXPlLXz4ukfQ9jlfbJpaFpvZ94fEGgw_5sU2S5N4&_nc_zt=14&_nc_ht=scontent-atl3-1.xx&_nc_gid=SxD9styajND2_8-5Hiv5XQ&_nc_ss=72289&oh=00_AQBpi4Ex6cD2sbwj411KBUG_ducK8rDg9VU2aCRBAUaMig&oe=6A678BF4"
-        ]
-      },
-      {
-        "platform": "facebook_ad_library",
-        "id": "317161109571794",
-        "url": "https://www.facebook.com/ads/library/?id=317161109571794",
-        "text": "The Voting Information Center—one-tap voting registration information from election experts and authorities in one place.",
-        "headline": "Voting Information Center",
-        "cta": "Learn more",
-        "landingUrl": "http://facebook.com/votinginformationcenter",
-        "adFormat": "VIDEO",
-        "firstShown": "2020-09-22T07:00:00.000Z",
-        "lastShown": "2020-10-05T07:00:00.000Z",
-        "impressions": ">1M",
-        "spend": ">$1M",
-        "country": "US",
-        "advertiser": {
-          "id": "108824017345866",
-          "name": "Meta",
-          "url": "https://www.facebook.com/Meta/",
-          "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwH_c6S1&_nc_oc=Adq6Kf5L_Tkx2E3_ZTPgkkJBqBFrUF2yFzbizYtSLVcyom-ZAmB0zM6FgNhqa6CE4bQ&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=SxD9styajND2_8-5Hiv5XQ&_nc_ss=72289&oh=00_AQB38PZJl2olGB2U4-yzTIbucPjM7a_5C-sAcPDMbf_TKA&oe=6A89438E"
-        },
-        "media": [
-          "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=VIhm6QH6QpYQ7kNvwEHI2aO&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyMzcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=SxD9styajND2_8-5Hiv5XQ&_nc_ss=72289&_nc_zt=28&oh=00_AQAUb2ZdeD0DLfCJeJpBm16sng8aprWDv3yFHJOCy43t1w&oe=6A677448",
-          "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XJsOGtccv7UQ7kNvwHTw_Vt&_nc_oc=AdrFXP-r_O9o2rS9rG1ysBygItOayq2_Cj4bMsCHZADpFaGsNTmj6Lf8bw32HDPoBGw&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=SxD9styajND2_8-5Hiv5XQ&_nc_ss=72289&oh=00_AQDAy1RxUJJMdmYVDPqFU-sRrmeavgHD8krZun6tp5dxQg&oe=6A67964A"
-        ]
       }
     ]
   },
@@ -757,81 +495,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQPYrtdWcXYzwK9kZxgDiAgoU_IImyeS9Q8adbGcircR7RR1dDdUBrAQ0LiHO2OJoauE5pf8F4GyEcPVDLQ94uo.mp4?_nc_cat=100&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=TJVBi21FSYoQ7kNvwGc3J8g&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4OTE2MjkwMDA0NTQwNDEsImFzc2V0X2FnZV9kYXlzIjoxNTcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQCMG2KnWhkyJxkleqImsnYBBqDKo2-gU04sjFZY6UOemA&oe=6A678682",
           "https://scontent-atl3-1.xx.fbcdn.net/v/t39.35426-6/120439450_1980569842077757_2547343747583380554_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=ghBwQrPN7IYQ7kNvwEK1Ioe&_nc_oc=Adq-eL0xdnXQzWG8i4nmzYYnwcV_Aa55yUcMBwzE5_rk0sejWdtPX_5QJKW6xounlWk&_nc_zt=14&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQB1w19aEluVfs5pAiHsky2u5dZ4bgAW_AohS8QzRc8Wkg&oe=6A678BF4"
         ]
-      },
-      {
-        "platform": "facebook_ad_library",
-        "id": "352695862528588",
-        "url": "https://www.facebook.com/ads/library/?id=352695862528588",
-        "text": "Queen Latifah hosts a series of candid conversations honoring the 57th anniversary of the #MarchOnWashington and this new era of the civil rights movement. Change Together features notable civil rights leaders such as Patrisse Cullors, Reverend Al Sharpton, and Kendrick Sampson, as well as social justice advocates Amanda Seales, Common and musical guest, CHIKA. Let’s come together to #LiftBlackVoices, learn and move as one toward equality and freedom.",
-        "headline": "Change Together: From the March on Washington to Today",
-        "cta": null,
-        "landingUrl": null,
-        "adFormat": "VIDEO",
-        "firstShown": "2020-08-27T07:00:00.000Z",
-        "lastShown": "2020-08-30T07:00:00.000Z",
-        "impressions": ">1M",
-        "spend": ">$1M",
-        "country": "US",
-        "advertiser": {
-          "id": "20531316728",
-          "name": "Facebook",
-          "url": "https://www.facebook.com/facebook/",
-          "logo": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.35426-6/123254501_376431443560946_8642123156381274111_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=uPcoVSVedoQQ7kNvwHgmWWe&_nc_oc=AdqwXTjc5hWqxKmTPliHRnVkbtl62MNcyuFRVtYt5e11rm_kKl_7cbhn2U6FxOqfz_4&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQAwgOXSH-Za4uSlnK2E_DN8SP8iELP-mBG2Fa6sq_k6fA&oe=6A678FB0"
-        },
-        "media": [
-          "https://video-atl3-3.xx.fbcdn.net/o1/v/t2/f2/m412/AQOhKuKthAVVa0rFEi41ggsiGpIjueM36xj6WP_vqqtBOe-ys_sa5nUBYG9fKBArU14yCLHp-zR-F0aBPcYRtpg.mp4?_nc_cat=107&_nc_sid=ef5aa3&_nc_ht=video-atl3-3.xx.fbcdn.net&_nc_ohc=_t6jTcvDRokQ7kNvwGEF3JZ&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuNDAwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjoxMDUzMzI1NDAzNjA2NjM5LCJhc3NldF9hZ2VfZGF5cyI6Mzg1LCJ2aV91c2VjYXNlX2lkIjoxMDY4MCwiZHVyYXRpb25fcyI6MzY5OSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQB-yxRDZCNErGWI1fXJCz3c7uPPshjVivWZcuMY_fXKRg&oe=6A6795FF",
-          "https://scontent-atl3-3.xx.fbcdn.net/v/t39.35426-6/123131854_3586232378268717_4745383357747290556_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=CBujsK3_RAYQ7kNvwGLIslX&_nc_oc=AdqugE8L4r1IjoIQfZPloPL5zYCw9T2PvW36W--FM6EwKE0s97CMYl5vHS5uvgucOB8&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCdtQbYirMkwB6MPN1xoagoP9ljGYKRFTeMNVXwrXJFng&oe=6A678230"
-        ]
-      },
-      {
-        "platform": "facebook_ad_library",
-        "id": "661142788113430",
-        "url": "https://www.facebook.com/ads/library/?id=661142788113430",
-        "text": "Get ready to vote and make your voice heard! Liza Koshy hosts Will Smith, Matthew McConaughey, Alicia Keys and more in Vote-A-Thon 2020, a #NationalVoterRegistrationDay celebration. \n\nFor information from election authorities, visit fb.com/votinginfocenter #Vote2020",
-        "headline": "Vote-A-Thon 2020: Get Ready to Vote!",
-        "cta": null,
-        "landingUrl": null,
-        "adFormat": "VIDEO",
-        "firstShown": "2020-09-23T07:00:00.000Z",
-        "lastShown": "2020-09-29T07:00:00.000Z",
-        "impressions": ">1M",
-        "spend": "$600K - $700K",
-        "country": "US",
-        "advertiser": {
-          "id": "20531316728",
-          "name": "Facebook App",
-          "url": "https://www.facebook.com/facebook/",
-          "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/58818464_10158354585756729_7126855515920924672_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=cYlKOt4-GcUQ7kNvwEj2rPB&_nc_oc=AdoHGqorRQuAh1NodHbHYx2T0SKwlVlZZE9WmznEqmn2uvvLFB0aMuR8fLJef7D2itA&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQDFaJlAcj-4tia3IQ417oX2bxs7hepULywCIcQUtORkmQ&oe=6A893E2F"
-        },
-        "media": [
-          "https://video-atl3-2.xx.fbcdn.net/o1/v/t2/f2/m560/AQPTgFuknRcBF4Lc_DtMcH-qlZGFfCQi83pEJd1S2Rx7uirTcJhniVVQrX29KTbwpbmeEofg6qllV-Nw4oOwynbGFVZfEUoYqWo.mp4?_nc_cat=104&_nc_sid=ef5aa3&_nc_ht=video-atl3-2.xx.fbcdn.net&_nc_ohc=LAgfvy6KENoQ7kNvwG84FTD&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuNDI0LmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo5ODIzODk2MDc3OTIzNDQsImFzc2V0X2FnZV9kYXlzIjo5NiwidmlfdXNlY2FzZV9pZCI6MTA2ODAsImR1cmF0aW9uX3MiOjE5MzAsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQBP9B0O5L1XPrYbIA2nQ2YSQw58tY1oD2VaGk-pgOling&oe=6A63B26A",
-          "https://scontent-atl3-1.xx.fbcdn.net/v/t39.35426-6/125381272_280240523411642_8369623856772259236_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XyRK_lkth9MQ7kNvwGlTTfu&_nc_oc=AdpyKVXDhj9Y251dtE2MPybdoOcTQgK5aQOVfVoqrYjtlDDpADiKgCuUxnHKDgfCHj4&_nc_zt=14&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQAo0Nzhu6femzVim7KW66JDEQAcuBXpTFdCPmF5uUi0RQ&oe=6A677FEC"
-        ]
-      },
-      {
-        "platform": "facebook_ad_library",
-        "id": "475114446742483",
-        "url": "https://www.facebook.com/ads/library/?id=475114446742483",
-        "text": "Have you reviewed your ballot? Get to know what's on your ballot before Election Day through the Voting Information Center.",
-        "headline": "Double-Check Your Ballot",
-        "cta": "Learn more",
-        "landingUrl": "http://facebook.com/votinginfocenter/ballot?entry_point=Qmx1ZV9PTlA=",
-        "adFormat": "VIDEO",
-        "firstShown": "2020-10-23T07:00:00.000Z",
-        "lastShown": "2020-11-03T08:00:00.000Z",
-        "impressions": ">1M",
-        "spend": "$600K - $700K",
-        "country": "US",
-        "advertiser": {
-          "id": "20531316728",
-          "name": "Facebook App",
-          "url": "https://www.facebook.com/facebook/",
-          "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/58818464_10158354585756729_7126855515920924672_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=cYlKOt4-GcUQ7kNvwEj2rPB&_nc_oc=AdoHGqorRQuAh1NodHbHYx2T0SKwlVlZZE9WmznEqmn2uvvLFB0aMuR8fLJef7D2itA&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQDFaJlAcj-4tia3IQ417oX2bxs7hepULywCIcQUtORkmQ&oe=6A893E2F"
-        },
-        "media": [
-          "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQODMEZl7iplcGXJPBxXGuuh-WjlAPqsPLHH9EB0i7PARypul43ZBvenVloxoYkD-IUaEdBSmyDbTc5-kHBNxECY.mp4?_nc_cat=103&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=aQxYnWw9DrwQ7kNvwFxGOa7&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjozNjE0ODg2NTI1MzE5NjczLCJhc3NldF9hZ2VfZGF5cyI6MjQwLCJ2aV91c2VjYXNlX2lkIjoxMDY4MCwiZHVyYXRpb25fcyI6MTUsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQDqlY-6Yt6F59kxtTMPrLsinAzaSpmAW9wChSkDXKdL_w&oe=6A67715C",
-          "https://scontent-atl3-3.xx.fbcdn.net/v/t39.35426-6/122569736_390651732307808_5011321040623151549_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=s0Jpfvn4SlgQ7kNvwFI6q5l&_nc_oc=Adq5xXs14dBn6M1y89p-mhFN_7LDpRUUYu4kxAyvKoR9GkLwN7rCAW9i2mxTNW3UcqE&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQAgInYoqIeK9Jq1kfsK47MfkfCHaI7EtgSg_lCE8MlVuQ&oe=6A6773AC"
-        ]
       }
     ]
   },
@@ -851,12 +514,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "Nike",
         "url": "https://www.facebook.com/nike/",
         "logo": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.35426-6/366635364_819887626183060_5665913834577832309_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=cpw1LHoxRRMQ7kNvwF0VELk&_nc_oc=Adp4gYKupQoA3SFulWbqwUFHqP4Hb9COtOidu_sWgA0fqGKhHNgkorx0YOcUbNCeAek&_nc_zt=14&_nc_ht=scontent-iad6-1.xx&_nc_gid=WFVhUXC3vFhp5HqXMO2_vg&_nc_ss=72289&oh=00_AQCzxYXtTr8L2PBX03C3WTbVmtXlrB0ZHR45OVmp6Pv9mA&oe=6A612326"
-      },
-      {
-        "id": "721404351056614",
-        "name": "IControl: Easy Widgets Themes",
-        "url": "https://www.facebook.com/61578892468353/",
-        "logo": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.35426-6/695177587_1511487320476777_920753808075681498_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=ymXmwsmzZqIQ7kNvwE2kif9&_nc_oc=AdrjQG4Qk6k7RYor663OBc3KYDml9EWij735hvCXNqbLvnje1pwp4JEzlGGYcxOAigU&_nc_zt=14&_nc_ht=scontent-iad6-1.xx&_nc_gid=WFVhUXC3vFhp5HqXMO2_vg&_nc_ss=72289&oh=00_AQBS8dexsIwImNwFM5phyZrj9jrF4PSW61cknXtjYUI1IA&oe=6A612EE7"
       }
     ]
   },
@@ -927,95 +584,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 3,
         "publishedAt": "2026-06-03T12:30:24+00:00",
         "replyCount": 0,
-        "reactionCount": 3,
-        "reactions": {
-          "like": 3,
-          "love": 0,
-          "care": 0,
-          "haha": 0,
-          "wow": 0,
-          "sad": 0,
-          "anger": 0,
-          "thankful": 0,
-          "pride": 0,
-          "confused": 0
-        }
-      },
-      {
-        "id": "3207368056140091",
-        "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=3207368056140091",
-        "text": "This is the era of space initiatives. 👏",
-        "author": {
-          "id": "pfbid0exampleAuthorIdFor32073680",
-          "name": "Megan Kelly",
-          "shortName": "Megan",
-          "gender": "FEMALE",
-          "avatarUrl": "https://scontent.fsgn13-2.fna.fbcdn.net/v/t39.30808-1/699650025_27974478592140854_2536163107065285396_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1536x1539&ctp=s32x32&_nc_cat=108&ccb=1-7&_nc_sid=e99d92&_nc_ohc=DLdsVhSx314Q7kNvwFPFx_P&_nc_oc=AdoywI2Pu2eRocI1x08wKLm5TPLL1p0dcZv2yCYoyXem_bje8s-ShUWiB9XjGXJ4DjY&_nc_zt=24&_nc_ht=scontent.fsgn13-2.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQAx63COUzJwva3qfF26jgiDtZQTS3ztq6nx5_jg4waN-Q&oe=6A6C0909"
-        },
-        "authorAvatarUrl": "https://scontent.fsgn13-2.fna.fbcdn.net/v/t39.30808-1/699650025_27974478592140854_2536163107065285396_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1536x1539&ctp=s32x32&_nc_cat=108&ccb=1-7&_nc_sid=e99d92&_nc_ohc=DLdsVhSx314Q7kNvwFPFx_P&_nc_oc=AdoywI2Pu2eRocI1x08wKLm5TPLL1p0dcZv2yCYoyXem_bje8s-ShUWiB9XjGXJ4DjY&_nc_zt=24&_nc_ht=scontent.fsgn13-2.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQAx63COUzJwva3qfF26jgiDtZQTS3ztq6nx5_jg4waN-Q&oe=6A6C0909",
-        "likeCount": 4,
-        "publishedAt": "2026-06-03T13:15:11+00:00",
-        "replyCount": 0,
-        "reactionCount": 4,
-        "reactions": {
-          "like": 4,
-          "love": 0,
-          "care": 0,
-          "haha": 0,
-          "wow": 0,
-          "sad": 0,
-          "anger": 0,
-          "thankful": 0,
-          "pride": 0,
-          "confused": 0
-        }
-      },
-      {
-        "id": "2545567982564356",
-        "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=2545567982564356",
-        "text": "For those confused about whom this was named after. Nancy Grace Roman (May 16, 1925 – December 25, 2018) was an American astronomer who made important contributions to stellar classification and stellar motions. The first female executive at NASA, Roman served as NASA's first Chief of Astronomy throughout the 1960s and 1970s, establishing her as one of the \"visionary founders of the US civilian space program\"",
-        "author": {
-          "id": "pfbid0exampleAuthorIdFor25455679",
-          "name": "Michael Johnson",
-          "shortName": "Michael",
-          "gender": "MALE",
-          "avatarUrl": "https://scontent.fsgn4-1.fna.fbcdn.net/v/t39.30808-1/715464960_1534487678342523_3205477696229619791_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1200x1200&ctp=s32x32&_nc_cat=101&ccb=1-7&_nc_sid=e99d92&_nc_ohc=CJj1uW-M8GwQ7kNvwEtSEkj&_nc_oc=AdqxXLSgPh7vA23eS3lVfR0fcPu5vszVJRfA1BgRw1bFuOuA89aeo3wyIsF17qX4b3g&_nc_zt=24&_nc_ht=scontent.fsgn4-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQCKv92W24kCoyyAyQ5pt-ZgDDeNu4IqJ9g6RbFvJd9qfQ&oe=6A6C180B"
-        },
-        "authorAvatarUrl": "https://scontent.fsgn4-1.fna.fbcdn.net/v/t39.30808-1/715464960_1534487678342523_3205477696229619791_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1200x1200&ctp=s32x32&_nc_cat=101&ccb=1-7&_nc_sid=e99d92&_nc_ohc=CJj1uW-M8GwQ7kNvwEtSEkj&_nc_oc=AdqxXLSgPh7vA23eS3lVfR0fcPu5vszVJRfA1BgRw1bFuOuA89aeo3wyIsF17qX4b3g&_nc_zt=24&_nc_ht=scontent.fsgn4-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQCKv92W24kCoyyAyQ5pt-ZgDDeNu4IqJ9g6RbFvJd9qfQ&oe=6A6C180B",
-        "likeCount": 5,
-        "publishedAt": "2026-06-05T19:10:38+00:00",
-        "replyCount": 0,
-        "reactionCount": 5,
-        "reactions": {
-          "like": 5,
-          "love": 0,
-          "care": 0,
-          "haha": 0,
-          "wow": 0,
-          "sad": 0,
-          "anger": 0,
-          "thankful": 0,
-          "pride": 0,
-          "confused": 0
-        }
-      },
-      {
-        "id": "1009195248315125",
-        "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=1009195248315125",
-        "text": "Anxious to see what the new scope sees.",
-        "author": {
-          "id": "pfbid0exampleAuthorIdFor10091952",
-          "name": "Richard Alexandrowich",
-          "shortName": "Richard",
-          "gender": "MALE",
-          "avatarUrl": "https://scontent.fsgn13-1.fna.fbcdn.net/v/t39.30808-1/449687176_1970527473417419_1705720154636413099_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x957&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=bCu8aO2reIoQ7kNvwHtIyP4&_nc_oc=Ado8EmORytYJyvsPBBz8rKe1pliFYfaZhRWBiXTfIt1RBjFh-vpPtTWvhICw9rQTuUg&_nc_zt=24&_nc_ht=scontent.fsgn13-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQBA1O-NdA_rsrXqOjaw5n4Nvuuk27jRjIyAC9M0AgwvyQ&oe=6A6C31C4",
-          "url": "https://www.facebook.com/richard.alexandrowich.1"
-        },
-        "authorUrl": "https://www.facebook.com/richard.alexandrowich.1",
-        "authorAvatarUrl": "https://scontent.fsgn13-1.fna.fbcdn.net/v/t39.30808-1/449687176_1970527473417419_1705720154636413099_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x957&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=bCu8aO2reIoQ7kNvwHtIyP4&_nc_oc=Ado8EmORytYJyvsPBBz8rKe1pliFYfaZhRWBiXTfIt1RBjFh-vpPtTWvhICw9rQTuUg&_nc_zt=24&_nc_ht=scontent.fsgn13-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQBA1O-NdA_rsrXqOjaw5n4Nvuuk27jRjIyAC9M0AgwvyQ&oe=6A6C31C4",
-        "likeCount": 3,
-        "publishedAt": "2026-06-03T02:04:15+00:00",
-        "replyCount": 7,
         "reactionCount": 3,
         "reactions": {
           "like": 3,
@@ -1172,81 +740,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "verified": false
           }
         ]
-      },
-      {
-        "platform": "facebook",
-        "id": "1544111680677964",
-        "url": "https://www.facebook.com/events/1544111680677964/",
-        "name": "Julian McCullough at Zanies Rosemont",
-        "startDate": "2026-08-06T19:00:00-05:00",
-        "timezone": "America/Chicago",
-        "startTime": "Thu, Aug 6 at 7:00 PM CDT",
-        "eventType": "PUBLIC_TYPE",
-        "isPast": false,
-        "isCanceled": false,
-        "location": {
-          "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
-          "city": "Rosemont, IL",
-          "countryCode": "US"
-        },
-        "organizers": [
-          {
-            "id": "100064546187809",
-            "name": "Zanies Rosemont Comedy Club",
-            "url": "https://www.facebook.com/RosemontZanies",
-            "verified": false
-          }
-        ]
-      },
-      {
-        "platform": "facebook",
-        "id": "2539973679819733",
-        "url": "https://www.facebook.com/events/2539973676486400/?event_time_id=2539973679819733",
-        "name": "Casey Rocket at Zanies Rosemont",
-        "startDate": "2026-08-07T19:00:00-05:00",
-        "timezone": "America/Chicago",
-        "startTime": "Fri, Aug 7 at 7:00 PM CDT",
-        "eventType": "PUBLIC_TYPE",
-        "isPast": false,
-        "isCanceled": false,
-        "location": {
-          "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
-          "city": "Rosemont, IL",
-          "countryCode": "US"
-        },
-        "organizers": [
-          {
-            "id": "100064546187809",
-            "name": "Zanies Rosemont Comedy Club",
-            "url": "https://www.facebook.com/RosemontZanies",
-            "verified": false
-          }
-        ]
-      },
-      {
-        "platform": "facebook",
-        "id": "2539973683153066",
-        "url": "https://www.facebook.com/events/2539973676486400/?event_time_id=2539973683153066",
-        "name": "Casey Rocket at Zanies Rosemont",
-        "startDate": "2026-08-08T18:30:00-05:00",
-        "timezone": "America/Chicago",
-        "startTime": "Sat, Aug 8 at 6:30 PM CDT",
-        "eventType": "PUBLIC_TYPE",
-        "isPast": false,
-        "isCanceled": false,
-        "location": {
-          "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
-          "city": "Rosemont, IL",
-          "countryCode": "US"
-        },
-        "organizers": [
-          {
-            "id": "100064546187809",
-            "name": "Zanies Rosemont Comedy Club",
-            "url": "https://www.facebook.com/RosemontZanies",
-            "verified": false
-          }
-        ]
       }
     ]
   },
@@ -1288,126 +781,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "isVideo": false,
         "permalink": "https://www.facebook.com/groups/dogspotting/posts/10165913663824467/"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/groups/dogspotting/posts/10165912136809467/",
-        "id": "10165912136809467",
-        "caption": "🥹",
-        "description": "🥹",
-        "publishedAt": "2026-07-24T15:45:47.000Z",
-        "thumbnailUrl": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/753343843_27704228762540395_7618880549288864734_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx1536x2048&ctp=p526x296&_nc_cat=108&ccb=1-7&_nc_s...",
-        "author": {
-          "displayName": "Dóra Almási"
-        },
-        "engagement": {
-          "likes": 182,
-          "comments": 2
-        },
-        "isVideo": false,
-        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10165912136809467/"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/groups/dogspotting/posts/10165911376684467/",
-        "id": "10165911376684467",
-        "caption": "Konbini (7/11) doggo! 🐕",
-        "description": "Konbini (7/11) doggo! 🐕",
-        "publishedAt": "2026-07-24T11:52:33.000Z",
-        "thumbnailUrl": "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-6/753702691_963642156683059_393037493943314975_n.jpg?stp=dst-jpg_tt6&cstp=mx750x1334&ctp=p526x296&_nc_cat=100&ccb=1-7&_nc_sid=aa7b4...",
-        "author": {
-          "displayName": "Adam Steele",
-          "url": "https://www.facebook.com/100091118505588",
-          "id": "100091118505588",
-          "username": "100091118505588"
-        },
-        "engagement": {
-          "likes": 115,
-          "comments": 2
-        },
-        "isVideo": false,
-        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10165911376684467/"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/groups/dogspotting/posts/10161487929709467/",
-        "id": "10161487929709467",
-        "caption": "Hey guys, happy pride month! We ban for anti-LGBT posts and comments, thanks and have a good June! I forgot to post this in Dogspotting. \n\nRemember, Dogspotting is definitely the gay agenda. \n*dog photo stolen from another mod*",
-        "description": "Hey guys, happy pride month! We ban for anti-LGBT posts and comments, thanks and have a good June! I forgot to post this in Dogspotting. \n\nRemember, Dogspotting is definitely the gay agenda. \n*dog photo stolen from another mod*",
-        "publishedAt": "2023-06-04T23:32:57.000Z",
-        "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.30808-6/499529333_10229703762722775_2097200119742123101_n.jpg?stp=dst-jpg_tt6&cstp=mx626x636&ctp=p526x296&_nc_cat=109&ccb=1-7&_nc_sid=aa7...",
-        "author": {
-          "displayName": "Tiberius Bertea"
-        },
-        "engagement": {
-          "likes": 516,
-          "comments": 26
-        },
-        "isVideo": false,
-        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10161487929709467/"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/groups/dogspotting/posts/10161384058399467/",
-        "id": "10161384058399467",
-        "caption": "Hello all, \n\nYou’re probably familiar with our admin Amber, affectionately known to her friends as Yams. Amber is an incredibly caring and special person who pours her all into her hobbies, convictions, and her friendships. Whenever something happens, she’s the first to jump in determining how to help others. This rings especially true in her efforts to support peers in emergencies, and her work fostering pups for the Humane Society.\n\nToday, Amber needs our help. She was injured in a tragic accident and is presently in the hospital. So we’re reaching out to the communities she’s spent many years putting love into, in the hopes that we can help her now. \n\nThank you for your time in reading this, and thank you if you choose to give. Anything helps.",
-        "description": "Hello all, \n\nYou’re probably familiar with our admin Amber, affectionately known to her friends as Yams. Amber is an incredibly caring and special person who pours her all into her hobbies, convictions, and her friendships. Whenever something happens, she’s the first to jump in determining how to help others. This rings especially true in her efforts to support peers in emergencies, and her work fostering pups for the Humane Society.\n\nToday, Amber needs our help. She was injured in a tragic accident and is presently in the hospital. So we’re reaching out to the communities she’s spent many years putting love into, in the hopes that we can help her now. \n\nThank you for your time in reading this, and thank you if you choose to give. Anything helps.",
-        "publishedAt": "2023-04-21T17:50:53.000Z",
-        "thumbnailUrl": "https://scontent-iad3-2.xx.fbcdn.net/v/t1.6435-9/103961332_2591579321116865_8247201645454706872_n.jpg?stp=dst-jpg_tt6&cstp=mx960x502&ctp=s960x502&_nc_cat=103&ccb=1-7&_nc_sid=0b1479...",
-        "author": {
-          "displayName": "Dogspotting",
-          "url": "https://www.facebook.com/100069522984491",
-          "id": "100069522984491",
-          "username": "100069522984491"
-        },
-        "engagement": {
-          "likes": 70,
-          "comments": 19
-        },
-        "isVideo": false,
-        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10161384058399467/"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/groups/dogspotting/posts/10159514349104467/",
-        "id": "10159514349104467",
-        "caption": "**Happy New Year, spotters! We have an exciting update for everyone [🐶](https://emojipedia.org/dog-face/)**\n\nThis past year has been a difficult one for everyone, and like many others, we wanted to ring in the new year with a fresh start. What this means for the group is an awesome new points system!\n\nMany from the last iteration of bonus points remain, but we’ve added some new ones and brought back some old favorites. We’ve created an instructional Powerpoint for everyone to learn about these changes, as well as a handy cheat sheet to take with you as you spot!\n\nFeel free to post your own dog or a favorite spot in the comments and let us know which new bonus point is your favorite!\n\nMay the Dogs flow!",
-        "description": "**Happy New Year, spotters! We have an exciting update for everyone [🐶](https://emojipedia.org/dog-face/)**\n\nThis past year has been a difficult one for everyone, and like many others, we wanted to ring in the new year with a fresh start. What this means for the group is an awesome new points system!\n\nMany from the last iteration of bonus points remain, but we’ve added some new ones and brought back some old favorites. We’ve created an instructional Powerpoint for everyone to learn about these changes, as well as a handy cheat sheet to take with you as you spot!\n\nFeel free to post your own dog or a favorite spot in the comments and let us know which new bonus point is your favorite!\n\nMay the Dogs flow!",
-        "publishedAt": "2021-01-01T05:00:02.000Z",
-        "thumbnailUrl": "https://scontent-hou1-1.xx.fbcdn.net/v/t1.6435-9/133293956_2757029211238541_8556362737627446916_n.jpg?stp=dst-jpg_tt6&cstp=mx1178x664&ctp=p600x600&_nc_cat=103&ccb=1-7&_nc_sid=9fe6e...",
-        "author": {
-          "displayName": "Dogspotting",
-          "url": "https://www.facebook.com/100069522984491",
-          "id": "100069522984491",
-          "username": "100069522984491"
-        },
-        "engagement": {
-          "likes": 214,
-          "comments": 53
-        },
-        "isVideo": false,
-        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10159514349104467/"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/groups/dogspotting/posts/10159050659364467/",
-        "id": "10159050659364467",
-        "caption": "Welcome to Dogspotting, the sport of spotting unknown dogs! ***Please click on or tap the following images to review our introduction, rules, list of team members, and scoring information.***",
-        "description": "Welcome to Dogspotting, the sport of spotting unknown dogs! ***Please click on or tap the following images to review our introduction, rules, list of team members, and scoring information.***",
-        "publishedAt": "2020-07-12T07:32:41.000Z",
-        "thumbnailUrl": "https://scontent.fagc1-1.fna.fbcdn.net/v/t1.6435-9/109276728_2614404018834395_7966348785768951769_n.jpg?stp=dst-jpg_tt6&cstp=mx820x820&ctp=s600x600&_nc_cat=101&ccb=1-7&_nc_sid=9fe6...",
-        "author": {
-          "displayName": "Dogspotting",
-          "url": "https://www.facebook.com/100069522984491",
-          "id": "100069522984491",
-          "username": "100069522984491"
-        },
-        "engagement": {
-          "likes": 131,
-          "comments": 10
-        },
-        "isVideo": false,
-        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10159050659364467/"
       }
     ],
     "sortBy": "CHRONOLOGICAL"
@@ -1434,8 +807,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "image": "https://scontent-mad1-1.xx.fbcdn.net/v/t39.84726-6/749377945_1746854896315726_817991790771142418_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=Td50J02FhxwQ7kNvwEMS5Gk&_nc_oc=Adq3GF3R5f05eu3AlZfXV5BYX7n-dl-fGhjd7L4VfCb2IZztMYgOGJOLqDwEA8uVUvU&_nc_zt=14&_nc_ht=scontent-mad1-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQC6x7FebWsdvTVd2WTXik82gabWPwTIgqcmEHjtOn9PRA&oe=6A6D9DBB",
     "photos": [
       "https://scontent-mad1-1.xx.fbcdn.net/v/t39.84726-6/749377945_1746854896315726_817991790771142418_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=Td50J02FhxwQ7kNvwEMS5Gk&_nc_oc=Adq3GF3R5f05eu3AlZfXV5BYX7n-dl-fGhjd7L4VfCb2IZztMYgOGJOLqDwEA8uVUvU&_nc_zt=14&_nc_ht=scontent-mad1-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQC6x7FebWsdvTVd2WTXik82gabWPwTIgqcmEHjtOn9PRA&oe=6A6D9DBB",
-      "https://scontent-mad2-1.xx.fbcdn.net/v/t45.5328-4/750643688_1384573667068640_514500939676617077_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=111&ccb=1-7&_nc_sid=247b10&_nc_ohc=Aa-65J_vFfcQ7kNvwF56W3U&_nc_oc=AdqZo7FznGIikAd34m8FI2BzTOz3YUC3qQQ7lZPPYOm6lxpve9wXM1XMfZkSG1T1N-k&_nc_zt=23&_nc_ht=scontent-mad2-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQADpKLF9okchpYthAq_g22eIr1EZlOHwgG-Ih5jzyIFyQ&oe=6A6D812F",
-      "https://scontent-mad2-1.xx.fbcdn.net/v/t45.5328-4/750146978_1059729840108608_2219865786574902059_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=109&ccb=1-7&_nc_sid=247b10&_nc_ohc=Od7eQQlkVhIQ7kNvwGRxsbk&_nc_oc=AdqFpqYUQXur41TQG2apzKrDL1Lnw8X0iotSUeRWCLQ68cuWGvaUF7Mu9Ch_I1qHnJo&_nc_zt=23&_nc_ht=scontent-mad2-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQApBoZAQ3QJWoCeL0zE2VgUqNONBN79IgUmmDTgELpcAQ&oe=6A6D971E"
+      "https://scontent-mad2-1.xx.fbcdn.net/v/t45.5328-4/750643688_1384573667068640_514500939676617077_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=111&ccb=1-7&_nc_sid=247b10&_nc_ohc=Aa-65J_vFfcQ7kNvwF56W3U&_nc_oc=AdqZo7FznGIikAd34m8FI2BzTOz3YUC3qQQ7lZPPYOm6lxpve9wXM1XMfZkSG1T1N-k&_nc_zt=23&_nc_ht=scontent-mad2-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQADpKLF9okchpYthAq_g22eIr1EZlOHwgG-Ih5jzyIFyQ&oe=6A6D812F"
     ],
     "createdAt": "2026-07-17T18:23:51+00:00"
   },
@@ -1464,7 +836,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     },
     "totalReturned": 5,
     "hasMore": true,
-    "nextCursor": "eyJ2IjoxLCJxIjoiZGVzayBjaGFpciIsImxvYyI6IkF1c3RpbiwgVFgiLCJmIjp7Im1pblByaWNlIjoiNTAiLCJtYXhQcmljZSI6IjIwMCIsInNvcnRCeSI6InByaWNlX2FzY2VuZCIsImRheXNTaW5jZUxpc3RlZCI6IjMwIn0sInNraXAiOjUsImVjIjoie1wicGdcIjowLFwiYjJjXCI6e1wiYnJcIjpcIlwiLFwiaXRcIjowLFwiaG1zclwiOmZhbHNlLFwidGJpXCI6MH0sXCJjMmNcIjp7XCJiclwiOlwiQWJwaXVWdElpSVhFajlWV0ZVZEl4czFJUi13SldycGx1NWlNTGNYOURiMTBTQzhFQk93YzFXZi1RcmpOcDM3elBFWlg5ZGJNdlNDa0ZUay1sclBucTlCTnJGWURUdHg5bFZlMFhGd2FGdEQ0RG03T3RkemJBMU5MVWdkLUFrclRhc3hPZHVmWldmVkJTZlJTTG1SYmZydWVBVW85QTRNZXBqc1I0cm0zV09FejNSYlhIVnRrcm9SV21JZ1liUUZYN0Y0WnpfNnlhQTRkdThSY1BRbzJJeUwtcC1Ca3hlTVhHblFLSHZ1ZXJyZ2J2alN0M2hXNEFNdDZlclE1UkpGOUhSdFk3b1RLbGI2bTVfTUZEd2FqcXdMbUJhSzBKWlVKN3ZsUnczVFlQMm9SSjVoMDFxSndUU2Z6enduMkFodEFlcVFaUEs0eWV5OEc0WGZ0bm81cERJYzZDUWNzTWtRdEJjZDE2R3FNanQwQXhybkNJM1A0OFZINmZqcG9vM3hGTnJqU3ZvRDhOOGNxbVFMaVJzVy1SRlF2am9CNTdGWkkzVkpMLXhLN204cUVNaUczcnZKUlRJd2ZLS2VHdTlBckJXbi1SODJuNkVPUU9MU2loUkppTlY4Q0Rxamw0WnIyUVJmcXFMN3hmNzZPSnBzaEVxWi05Z1JWRWlzaFdJcUx1eWY0YzF6NE1zMUZ5YTNDeUZxamgtdDBtei1nR3dTZGhEOEhxelloQXhYWGZsU0NkdGUxVWIwaVBiRVctSUhqQmVjXCIsXCJpdFwiOjI0LFwicnBiclwiOlwiXCIsXCJycGhyXCI6ZmFsc2UsXCJybWhyXCI6ZmFsc2UsXCJzc2lcIjpmYWxzZSxcInNzY29cIjowLFwic3NwaVwiOltdfSxcImlyclwiOmZhbHNlLFwic2VycF9jdGFcIjpmYWxzZSxcInJ1aVwiOltdLFwibXBpZFwiOltdLFwidWJwXCI6bnVsbCxcIm5jcm5kXCI6MCxcImlyc3JcIjpmYWxzZSxcImJtcHJcIjpbXSxcImJtcGVpZFwiOltdLFwibm1ibXBcIjpmYWxzZSxcInNrcnJcIjpmYWxzZSxcImlvb3VyXCI6ZmFsc2UsXCJpc2VcIjp0cnVlLFwic21zX2N1cnNvclwiOntcInBhZ2VfaW5kZXhcIjowLFwiYmxlbmRlZF9hZF9pbmRleFwiOjAsXCJvcmdhbmljc19zaW5jZV9sYXN0X2FkXCI6MCxcInBhZ2Vfb3JnYW5pY19jb3VudFwiOjAsXCJibGVuZGVkX29yZ2FuaWNfaW5kZXhcIjowLFwicmV0dXJuZWRfYWRfaW5kZXhcIjowLFwidG90YWxfaW5kZXhcIjowfX0ifQ",
+    "nextCursor": "eyJ2IjoxLCJxIjoiZGVzayBjaGFpciIsImxvYyI6IkF1c3RpbiwgVFgiLCJmIjp7Im1pblByaWNlIjoiNTAiLCJtYXhQcmljZSI6IjIwMCIsInNvcnRCeSI6InByaWNlX2FzY2VuZCIsImRheXNTaW5jZUxpc3RlZCI6IjMwIn0sInNraXAiOjUsImVjIjoie1wicGdcIjowLFwiYjJjXCI6e1wiYnJcIjpcIlwiLFwiaXRcIjowLFwiaG1zclwiOmZhbHNlLFwidGJpXCI6MH0sXCJjMmNcIjp7XCJiclwiOlwiQWJwaXVWdElpSVhFajlWV0ZVZEl4czFJUi13SldycGx1NWlNTGNYOURiMTBTQzhFQk93YzFXZi1RcmpOcDM3elBFWlg5ZGJNdlNDa0ZUay1sclBucTlCTnJGWURUdHg5bFZlMFhGd2FGdEQ0RG03T3RkemJBMU5MVWdkLUFrclRhc3hPZHVmWldmVkJTZlJTTG1SYmZydWVBVW85QTRNZXBqc1I0cm0zV09FejNSYlhIVnRrcm9SV21JZ1liUUZYN0Y0WnpfNnlhQTRkdThSY1BRbzJJeUwtcC1Ca3hlTVhHblFLSHZ1ZXJyZ2J2alN0M2hXNEFNdDZlclE1UkpGOUhSdFk3b1RLbGI2bTVfTUZEd2FqcXdMbUJhSzBKWlVKN3ZsUnczVFlQMm9SSjVoMDFxSndUU2Z6enduMkFodEFlcVFaUEs0eWV5OEc0WGZ0bm81cERJYzZDUWNzTWtRdEJjZDE2R3FNanQwQXhybkNJM1A0OFZINmZqcG9vM3hGTnJqU3ZvRDhOOGNxbVFMaVJzVy1SRlF2am9CNTdGWkkzVkpMLXhLN204cUVNaUczcnZKUlRJd2ZLS2VHdTlBckJXbi1SODJuNkVPUU9MU2loUkppTlY4Q0Rxamw0WnIyUVJmcXFMN3hmNzZPSnBzaEVxWi05Z1JWRWlzaFdJcUx1eWY0YzF6NE1zMUZ5YTNDeUZxamgtdDBtei1nR3dTZGhEOEhxelloQXhYWGZsU0NkdGUxVWIwaVBiRVctSUhqQmVjXCIsXCJpdFwiOjI0LFwicnBi …",
     "listings": [
       {
         "platform": "facebook",
@@ -1523,95 +895,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/749286700_1116782047845292_1788708914246608626_n.jpg?stp=c0.81.526.526a_dst-jpg_p526x395_tt6&_nc_cat=110&ccb=1-7&_nc_sid=92e707&_nc_ohc=gbzkYGqnXmYQ7kNvwGzH1qf&_nc_oc=AdqLUHLAdzpxyU4TF9F6Xf5v9Tib9M6UCrmYThgY8kMR7j8y-uMyvFm3zwMzYYMwX1rcrfF1-yMiBdhJbknk-W2-&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQHJWOlgp25sCHb9Xzuo5yQVzSCjOZpSF6EaQpKDCudKZA&oe=6A751DFD"
         ],
         "createdAt": "2026-07-18T17:45:28+00:00"
-      },
-      {
-        "platform": "facebook",
-        "id": "2923413478020563",
-        "title": "Vintage1970s Nichols & Stone Co.Rocking Chair",
-        "url": "https://www.facebook.com/marketplace/item/2923413478020563/",
-        "price": 50.0,
-        "priceFormatted": "$50",
-        "priceAmount": 5000,
-        "currency": "USD",
-        "strikethroughPrice": 100.0,
-        "strikethroughPriceFormatted": "$100",
-        "categoryId": "393860164117441",
-        "location": "Rome, GA",
-        "city": "Rome",
-        "state": "GA",
-        "cityPageId": "107963899224102",
-        "isSold": false,
-        "isLive": true,
-        "isPending": false,
-        "isHidden": false,
-        "isViewerSeller": false,
-        "deliveryTypes": [
-          "IN_PERSON",
-          "SHIPPING_ONSITE"
-        ],
-        "image": "https://scontent-atl3-2.xx.fbcdn.net/v/t39.84726-6/749315387_1673120763899840_2089201881053873382_n.jpg?stp=c90.0.540.540a_dst-jpg_p180x540_tt6&_nc_cat=101&ccb=1-7&_nc_sid=92e707&_nc_ohc=yzjaBCMGrMMQ7kNvwGfHl6m&_nc_oc=AdqiHHMNN2qvUfzBzmJ6q9wS97vlPFf4F-wRzvmtx-qFyOdbSsq4Aji2cCitIRxWt3iZWwzWr0PYKUcTLL98O7J7&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQH_n97Ur_wuC5aujGv1-I6KEFId_1VfGGX1xC0UpCQc6Q&oe=6A753AD8",
-        "photos": [
-          "https://scontent-atl3-2.xx.fbcdn.net/v/t39.84726-6/749315387_1673120763899840_2089201881053873382_n.jpg?stp=c90.0.540.540a_dst-jpg_p180x540_tt6&_nc_cat=101&ccb=1-7&_nc_sid=92e707&_nc_ohc=yzjaBCMGrMMQ7kNvwGfHl6m&_nc_oc=AdqiHHMNN2qvUfzBzmJ6q9wS97vlPFf4F-wRzvmtx-qFyOdbSsq4Aji2cCitIRxWt3iZWwzWr0PYKUcTLL98O7J7&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQH_n97Ur_wuC5aujGv1-I6KEFId_1VfGGX1xC0UpCQc6Q&oe=6A753AD8"
-        ],
-        "createdAt": "2026-07-18T02:52:50+00:00"
-      },
-      {
-        "platform": "facebook",
-        "id": "1017066137601706",
-        "title": "Vintage vanity chair, wardrobe assistant, great for putting on shoes, accent chair in living room.",
-        "url": "https://www.facebook.com/marketplace/item/1017066137601706/",
-        "price": 50.0,
-        "priceFormatted": "$50",
-        "priceAmount": 5000,
-        "currency": "USD",
-        "categoryId": "393860164117441",
-        "location": "Maryville, TN",
-        "city": "Maryville",
-        "state": "TN",
-        "cityPageId": "112258735456868",
-        "isSold": false,
-        "isLive": true,
-        "isPending": false,
-        "isHidden": false,
-        "isViewerSeller": false,
-        "deliveryTypes": [
-          "IN_PERSON",
-          "SHIPPING_ONSITE"
-        ],
-        "image": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/741215085_852313984369406_1199345941718414788_n.jpg?stp=c0.0.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=1rWcQdyGDVkQ7kNvwFqYy36&_nc_oc=AdpU7HoeqvlHL9o_N9JOFFwP4AjJebYky0kIUeH_AF9v0dqoDq4pWdxRGzMlSVSIpF6QKH4sbjMcRi7o-RS7LSbq&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQEqWptcpVP9NCT1UFRFTfDjcdjzHfl2aISSZ3d1tj-7Kg&oe=6A7533E5",
-        "photos": [
-          "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/741215085_852313984369406_1199345941718414788_n.jpg?stp=c0.0.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=1rWcQdyGDVkQ7kNvwFqYy36&_nc_oc=AdpU7HoeqvlHL9o_N9JOFFwP4AjJebYky0kIUeH_AF9v0dqoDq4pWdxRGzMlSVSIpF6QKH4sbjMcRi7o-RS7LSbq&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQEqWptcpVP9NCT1UFRFTfDjcdjzHfl2aISSZ3d1tj-7Kg&oe=6A7533E5"
-        ],
-        "createdAt": "2026-07-09T08:31:52+00:00"
-      },
-      {
-        "platform": "facebook",
-        "id": "881051264629414",
-        "title": "Vintage Amber Shell Bowls. (1 Lg, 4 small included.)",
-        "url": "https://www.facebook.com/marketplace/item/881051264629414/",
-        "price": 50.0,
-        "priceFormatted": "$50",
-        "priceAmount": 5000,
-        "currency": "USD",
-        "categoryId": "393860164117441",
-        "location": "Fredericksburg, VA",
-        "city": "Fredericksburg",
-        "state": "VA",
-        "cityPageId": "113115852035715",
-        "isSold": false,
-        "isLive": true,
-        "isPending": false,
-        "isHidden": false,
-        "isViewerSeller": false,
-        "deliveryTypes": [
-          "IN_PERSON",
-          "SHIPPING_ONSITE"
-        ],
-        "image": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/752497517_1511663550122072_1173419982088349245_n.jpg?stp=c89.0.540.540a_dst-jpg_p180x540_tt6&_nc_cat=109&ccb=1-7&_nc_sid=92e707&_nc_ohc=sera2ZomqWAQ7kNvwGSF1lp&_nc_oc=AdqITSx-NaNloczS3k1wp8xihTAjYYb0y10n7UOeZWDKTydDSaVoG4-37EHGiZJRsi3Ah6IwReJt0KGUq5phIu99&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQEA8yZzcg5BBISfEWS39nFNBpk3W3GmWNKXweosR4MRAg&oe=6A752917",
-        "photos": [
-          "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/752497517_1511663550122072_1173419982088349245_n.jpg?stp=c89.0.540.540a_dst-jpg_p180x540_tt6&_nc_cat=109&ccb=1-7&_nc_sid=92e707&_nc_ohc=sera2ZomqWAQ7kNvwGSF1lp&_nc_oc=AdqITSx-NaNloczS3k1wp8xihTAjYYb0y10n7UOeZWDKTydDSaVoG4-37EHGiZJRsi3Ah6IwReJt0KGUq5phIu99&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQEA8yZzcg5BBISfEWS39nFNBpk3W3GmWNKXweosR4MRAg&oe=6A752917"
-        ],
-        "createdAt": "2026-07-20T06:20:50+00:00"
       }
     ]
   },
@@ -1668,51 +951,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "location": {
           "name": "Madison Square Garden"
         }
-      },
-      {
-        "platform": "facebook",
-        "id": "1139174624874547",
-        "url": "https://www.facebook.com/events/1139174624874547/",
-        "name": "Hilary Duff: the lucky me tour",
-        "startDate": "2026-08-06T19:00:00-04:00",
-        "timezone": "America/New_York",
-        "startTime": "Thu, Aug 6 at 7:00 PM EDT",
-        "eventType": "PUBLIC_TYPE",
-        "isPast": false,
-        "isCanceled": false,
-        "location": {
-          "name": "Madison Square Garden"
-        }
-      },
-      {
-        "platform": "facebook",
-        "id": "4268299330087191",
-        "url": "https://www.facebook.com/events/4268299330087191/",
-        "name": "Kill Tony 2-Day Ticket (8/7-8/8) VALID BOTH DAYS",
-        "startDate": "2026-08-07T00:00:00-04:00",
-        "timezone": "America/New_York",
-        "startTime": "Fri, Aug 7 at 12:00 AM EDT",
-        "eventType": "PUBLIC_TYPE",
-        "isPast": false,
-        "isCanceled": false,
-        "location": {
-          "name": "Madison Square Garden"
-        }
-      },
-      {
-        "platform": "facebook",
-        "id": "2210401519764764",
-        "url": "https://www.facebook.com/events/2210401519764764/",
-        "name": "Kill Tony",
-        "startDate": "2026-08-07T19:00:00-04:00",
-        "timezone": "America/New_York",
-        "startTime": "Fri, Aug 7 at 7:00 PM EDT",
-        "eventType": "PUBLIC_TYPE",
-        "isPast": false,
-        "isCanceled": false,
-        "location": {
-          "name": "Madison Square Garden"
-        }
       }
     ]
   },
@@ -1737,60 +975,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "width": 1884,
         "height": 1054,
         "accessibilityCaption": "An aerial view of a spacecraft about to land on Earth; the capsule is barely visible, but a large white-and-red parachute billows above it. The plain around it is flat and featureless. Credit: NASA+"
-      },
-      {
-        "platform": "facebook",
-        "id": "1585138822981488",
-        "url": "https://www.facebook.com/photo.php?fbid=1585138822981488",
-        "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/754498097_1529437744896067_7884542055079848706_n.png?stp=dst-jpg_tt6&cstp=mx2048x2048&ctp=s2048x2048&_nc_cat=111&ccb=1-7&_nc_sid=...",
-        "width": 2048,
-        "height": 2048,
-        "accessibilityCaption": "The scene is cloaked in a cool, blue haze, decorated with the warm light of galaxies and stars. Around the center is a jagged ring where the haze appears absent and dark space peeks through. Credit: NASA, ESA, M.J. Jee and H. Ford (Johns Hopkins University)"
-      },
-      {
-        "platform": "facebook",
-        "id": "1583701686458535",
-        "url": "https://www.facebook.com/photo.php?fbid=1583701686458535",
-        "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/752620057_1361351692793736_6372731408048785122_n.png?stp=dst-jpg_tt6&cstp=mx2048x1713&ctp=s2048x1713&_nc_cat=105&ccb=1-7&_nc_sid=...",
-        "width": 2048,
-        "height": 1713,
-        "accessibilityCaption": "The Lighthouse Nebula (upper left) and a pulsar (lower right) are illuminated against a spotty starfield. The part of the nebula shown in this image looks like a diffuse, purple cloud with a bright star in the center. The pulsar looks like a bright white streak of light with a purple jet extending from one end, forming the shape of a checkmark. Credits: X-ray: Chandra: NASA/CXC/Stanford Univ./J.T. Dinsmore et al.; IXPE: NASA/MSFC/J.T. Dinsmore et al., Radio: CSIRO/ATNF/ATCA; Optical: 2MASS/UMass/IPAC-Caltech/NASA/NSF; Image processing: NASA/CXC/SAO/L. Frattare"
-      },
-      {
-        "platform": "facebook",
-        "id": "1582125049949532",
-        "url": "https://www.facebook.com/photo.php?fbid=1582125049949532",
-        "image": "https://scontent-dfw6-2.xx.fbcdn.net/v/t39.30808-6/752699303_1582125053282865_6907261101135459632_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=110&ccb=1-7&_nc_sid=...",
-        "width": 1080,
-        "height": 1080,
-        "accessibilityCaption": "Astronaut Buzz Aldrin, wearing his spacesuit, descends the ladder of the Apollo 11 Lunar Module, a large structure with golden foil covering its lower half. The Moon's surface is bright and flat; above the horizon, which slopes downward from right-to-left, the sky is completely black. Credit: NASA"
-      },
-      {
-        "platform": "facebook",
-        "id": "1578224950339542",
-        "url": "https://www.facebook.com/photo.php?fbid=1578224950339542",
-        "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/747931162_1667321021008266_4517886636206841967_n.png?stp=dst-jpg_tt6&cstp=mx2048x1365&ctp=s2048x1365&_nc_cat=111&ccb=1-7&_nc_sid=...",
-        "width": 2048,
-        "height": 1365,
-        "accessibilityCaption": "Anil and Anna Menon pose for a photograph at the Cosmonaut Hotel in Baikonur. Anil, in pre-launch quarantine at the time of this photo, is behind glass, but Anil and Anna are leaning close to each other. Both Anil and Anna are looking at the camera with big grins. Credit: NASA/John Kraus"
-      },
-      {
-        "platform": "facebook",
-        "id": "1578224920339545",
-        "url": "https://www.facebook.com/photo.php?fbid=1578224920339545",
-        "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/748527781_2080772216199706_6612040318485045639_n.png?stp=dst-jpg_tt6&cstp=mx2048x1365&ctp=s2048x1365&_nc_cat=106&ccb=1-7&_nc_sid=...",
-        "width": 2048,
-        "height": 1365,
-        "accessibilityCaption": "Astronaut candidate Anna Menon and her two children watch a Soyuz rocket lift off in the distance. The three are standing in the middle of a scrubby field, wearing dark t-shirts with \"Team Menon\" on the back; Anna is carrying one of her children on her shoulders. Credit: NASA/John Kraus"
-      },
-      {
-        "platform": "facebook",
-        "id": "1578224907006213",
-        "url": "https://www.facebook.com/photo.php?fbid=1578224907006213",
-        "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/746343278_880948677971054_703395191772258474_n.png?stp=dst-jpg_tt6&cstp=mx2048x1365&ctp=s2048x1365&_nc_cat=106&ccb=1-7&_nc_sid=12...",
-        "width": 2048,
-        "height": 1365,
-        "accessibilityCaption": "A closer shot of the Soyuz lifting off at Baikonur. Its flaming rockets flare out from a central column, with the spacecraft on top. Two large, antenna-like stands frame the rocket, with metal tracks running from the launch site into the foreground. Credit: NASA/Bill Ingalls"
       }
     ]
   },
@@ -1844,84 +1028,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "isVideo": true,
         "link": "https://go.nasa.gov/3RavGXj"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/reel/1376651124309650",
-        "id": "1567272851434752",
-        "caption": "There will be more than just fireworks to see in the night sky this month!\n\nYou can look forward to these celestial sights in July:\n- A lunar-planetary alignment\n- A visiting comet\n- A good look at Saturn and the Milky Way\n\nHappy skywatching! https://go.nasa.gov/3QvQc4k",
-        "description": "There will be more than just fireworks to see in the night sky this month!\n\nYou can look forward to these celestial sights in July:\n- A lunar-planetary alignment\n- A visiting comet\n- A good look at Saturn and the Milky Way\n\nHappy skywatching! https://go.nasa.gov/3QvQc4k",
-        "publishedAt": "2026-07-02T15:03:11.000Z",
-        "durationSeconds": 200.016,
-        "thumbnailUrl": "https://scontent-iad3-2.xx.fbcdn.net/v/t15.5256-10/735149954_4435586749988646_521208314578416779_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=111&ccb=1-7&_nc_sid=be830...",
-        "videoUrl": "https://video-iad3-2.xx.fbcdn.net/o1/v/t2/f2/m366/AQOh7ZLRZfB5SIGETu_uz2jbsqvY3dW7G3sGdKsNsX627DpYoTuCxs26FyYE4T4rDzRdvIV2tOCYJi5hs8Gs1EaQEL7_LhQnAXKuILiY508JFg.mp4?_nc_cat=103&_nc...",
-        "author": {
-          "username": "NASA",
-          "displayName": "NASA - National Aeronautics and Space Administration",
-          "url": "https://www.facebook.com/NASA",
-          "profileImage": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_n...",
-          "verified": true
-        },
-        "engagement": {
-          "views": 598000,
-          "likes": 6582,
-          "comments": 89,
-          "shares": 531
-        },
-        "isVideo": true,
-        "link": "https://go.nasa.gov/3QvQc4k"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/reel/1023344310547434",
-        "id": "1565523918276312",
-        "caption": "Come watch a spacewalk with us!\n\nNASA astronauts Chris Williams and Jessica Meir are stepping outside the International Space Station for about six and a half hours to make repairs to the station's Canadarm2 robotic arm. Tune in: https://youtu.be/D0dd8X4g3Eg",
-        "description": "Come watch a spacewalk with us!\n\nNASA astronauts Chris Williams and Jessica Meir are stepping outside the International Space Station for about six and a half hours to make repairs to the station's Canadarm2 robotic arm. Tune in: https://youtu.be/D0dd8X4g3Eg",
-        "publishedAt": "2026-06-30T14:00:41.000Z",
-        "durationSeconds": 16.362,
-        "thumbnailUrl": "https://scontent-sjc6-1.xx.fbcdn.net/v/t15.5256-10/736384680_1034463129116372_1847611548688510946_n.jpg?stp=dst-jpg_tt6&cstp=mx3840x2160&ctp=s960x960&_nc_cat=100&ccb=1-7&_nc_sid=be...",
-        "videoUrl": "https://video-sjc3-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQNuYSZM6m65K0Fk1iuF6LfY4iw2glvoNgX93Y-dmgWocy6hgsX_5hBee2XwT2P17RKnX8kug-hdZWZOgsxFOs6KpmZMXw8ZoqZxkouUJIzbRQ.mp4?_nc_cat=106&_nc...",
-        "author": {
-          "username": "NASA",
-          "displayName": "NASA - National Aeronautics and Space Administration",
-          "url": "https://www.facebook.com/NASA",
-          "profileImage": "https://scontent-sjc3-1.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_n...",
-          "verified": true
-        },
-        "engagement": {
-          "views": 5000000,
-          "likes": 75366,
-          "comments": 1960,
-          "shares": 1900
-        },
-        "isVideo": true,
-        "link": "https://youtu.be/D0dd8X4g3Eg"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/reel/1736519150699488",
-        "id": "1561248945370476",
-        "caption": "We are at the Great American State Fair in Washington, D.C.!\n \nDiscover the technology and science driving our most exciting missions by visiting the NASA Pavilion—today through July 10: https://www.nasa.gov/freedom250/#american-state-fair",
-        "description": "We are at the Great American State Fair in Washington, D.C.!\n \nDiscover the technology and science driving our most exciting missions by visiting the NASA Pavilion—today through July 10: https://www.nasa.gov/freedom250/#american-state-fair",
-        "publishedAt": "2026-06-25T16:14:35.000Z",
-        "durationSeconds": 120.0,
-        "thumbnailUrl": "https://scontent-sjc3-1.xx.fbcdn.net/v/t15.5256-10/730182605_1314642917513572_6743020664352329210_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=103&ccb=1-7&_nc_sid=be83...",
-        "videoUrl": "https://video-sjc3-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQNw1vJID4pcVr5SpV62MejQDC3RWwcnlksqsPLAyq80dayfLcF2ZrUq_2WUXkvRjeDWpROR6cNqkK_ViG-PJvhZRxdrheFypJ1tHPUXtaqYMg.mp4?_nc_cat=110&_nc...",
-        "author": {
-          "username": "NASA",
-          "displayName": "NASA - National Aeronautics and Space Administration",
-          "url": "https://www.facebook.com/NASA",
-          "profileImage": "https://scontent-sjc3-1.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_n...",
-          "verified": true
-        },
-        "engagement": {
-          "views": 426000,
-          "likes": 3601,
-          "comments": 124,
-          "shares": 199
-        },
-        "isVideo": true,
-        "link": "https://www.nasa.gov/freedom250/#american-state-fair"
       }
     ],
     "scrapedAt": "2026-08-03T11:00:00Z"
@@ -1981,110 +1087,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "isVideo": true,
         "link": "https://go.nasa.gov/3QvQc4k"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/reel/1023344310547434",
-        "id": "1565523918276312",
-        "caption": "Come watch a spacewalk with us!\n\nNASA astronauts Chris Williams and Jessica Meir are stepping outside the International Space Station for about six and a half hours to make repairs to the station's Canadarm2 robotic arm. Tune in: https://youtu.be/D0dd8X4g3Eg",
-        "description": "Come watch a spacewalk with us!\n\nNASA astronauts Chris Williams and Jessica Meir are stepping outside the International Space Station for about six and a half hours to make repairs to the station's Canadarm2 robotic arm. Tune in: https://youtu.be/D0dd8X4g3Eg",
-        "publishedAt": "2026-06-30T14:00:41.000Z",
-        "durationSeconds": 16.362,
-        "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t15.5256-10/736384680_1034463129116372_1847611548688510946_n.jpg?stp=dst-jpg_tt6&cstp=mx3840x2160&ctp=s960x960&_nc_cat=100&ccb=1-7&_nc_sid=be...",
-        "videoUrl": "https://video-iad6-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQNuYSZM6m65K0Fk1iuF6LfY4iw2glvoNgX93Y-dmgWocy6hgsX_5hBee2XwT2P17RKnX8kug-hdZWZOgsxFOs6KpmZMXw8ZoqZxkouUJIzbRQ.mp4?_nc_cat=106&_nc...",
-        "author": {
-          "username": "NASA",
-          "displayName": "NASA - National Aeronautics and Space Administration",
-          "url": "https://www.facebook.com/NASA",
-          "profileImage": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s80x80&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_n...",
-          "verified": true
-        },
-        "engagement": {
-          "views": 5000000,
-          "likes": 75356,
-          "comments": 1960,
-          "shares": 1900
-        },
-        "isVideo": true,
-        "link": "https://youtu.be/D0dd8X4g3Eg"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/reel/1736519150699488",
-        "id": "1561248945370476",
-        "caption": "We are at the Great American State Fair in Washington, D.C.!\n \nDiscover the technology and science driving our most exciting missions by visiting the NASA Pavilion—today through July 10: https://www.nasa.gov/freedom250/#american-state-fair",
-        "description": "We are at the Great American State Fair in Washington, D.C.!\n \nDiscover the technology and science driving our most exciting missions by visiting the NASA Pavilion—today through July 10: https://www.nasa.gov/freedom250/#american-state-fair",
-        "publishedAt": "2026-06-25T16:14:35.000Z",
-        "durationSeconds": 120.0,
-        "thumbnailUrl": "https://scontent.fagc1-1.fna.fbcdn.net/v/t15.5256-10/730182605_1314642917513572_6743020664352329210_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=103&ccb=1-7&_nc_sid=be...",
-        "videoUrl": "https://video.fagc1-1.fna.fbcdn.net/o1/v/t2/f2/m366/AQNw1vJID4pcVr5SpV62MejQDC3RWwcnlksqsPLAyq80dayfLcF2ZrUq_2WUXkvRjeDWpROR6cNqkK_ViG-PJvhZRxdrheFypJ1tHPUXtaqYMg.mp4?_nc_cat=110&_...",
-        "author": {
-          "username": "NASA",
-          "displayName": "NASA - National Aeronautics and Space Administration",
-          "url": "https://www.facebook.com/NASA",
-          "profileImage": "https://scontent.fagc1-2.fna.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s80x80&_nc_cat=108&ccb=1-7&_nc_sid=2d3e1...",
-          "verified": true
-        },
-        "engagement": {
-          "views": 426000,
-          "likes": 3600,
-          "comments": 124,
-          "shares": 199
-        },
-        "isVideo": true,
-        "link": "https://www.nasa.gov/freedom250/#american-state-fair"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/reel/1284450976822099",
-        "id": "1556903142471723",
-        "caption": "The official FIFA World Cup ball went to space! \n\nWe're working to inspire the next generation by showing how space exploration inspires innovation in sports science — and everyday life. Learn more: https://go.nasa.gov/43G4Bhc",
-        "description": "The official FIFA World Cup ball went to space! \n\nWe're working to inspire the next generation by showing how space exploration inspires innovation in sports science — and everyday life. Learn more: https://go.nasa.gov/43G4Bhc",
-        "publishedAt": "2026-06-20T14:00:00.000Z",
-        "durationSeconds": 32.265,
-        "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t15.5256-10/725733247_1380772853937295_3761258904677594278_n.jpg?stp=dst-jpg_tt6&cstp=mx1920x1080&ctp=s960x960&_nc_cat=102&ccb=1-7&_nc_sid=be...",
-        "videoUrl": "https://video-iad3-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQPQKyLHqF5Wqx429Aupk5vSBIi8Fn5ZJlsk0t70-dGunM6qNJJ6X0h59alUxvB-NhU530Ni3B170IMkX5nvGlw5Igi0wUR6d3kODwjPB2xNcQ.mp4?_nc_cat=104&_nc...",
-        "author": {
-          "username": "NASA",
-          "displayName": "NASA - National Aeronautics and Space Administration",
-          "url": "https://www.facebook.com/NASA",
-          "profileImage": "https://scontent-iad3-2.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_n...",
-          "verified": true
-        },
-        "engagement": {
-          "views": 859000,
-          "likes": 18191,
-          "comments": 484,
-          "shares": 1300
-        },
-        "isVideo": true,
-        "link": "https://go.nasa.gov/43G4Bhc"
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/reel/2043044306290042",
-        "id": "1548129933349044",
-        "caption": "Get ready for Earth joy!\n \nEarlier today, we announced the four astronauts who will go to space as part of Artemis III. This mission will undertake a series of challenging tests in low Earth orbit in 2027, setting future NASA Artemis missions up to return humanity to the Moon. \n\nLearn more about Artemis III: https://www.nasa.gov/mission/artemis-iii/",
-        "description": "Get ready for Earth joy!\n \nEarlier today, we announced the four astronauts who will go to space as part of Artemis III. This mission will undertake a series of challenging tests in low Earth orbit in 2027, setting future NASA Artemis missions up to return humanity to the Moon. \n\nLearn more about Artemis III: https://www.nasa.gov/mission/artemis-iii/",
-        "publishedAt": "2026-06-10T00:54:38.000Z",
-        "durationSeconds": 127.193,
-        "thumbnailUrl": "https://scontent.fagc1-1.fna.fbcdn.net/v/t15.5256-10/719149300_1675536716897455_292426081350600923_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=110&ccb=1-7&_nc_sid=be8...",
-        "videoUrl": "https://video.fagc1-1.fna.fbcdn.net/o1/v/t2/f2/m366/AQP-Z-CqEDushDYS5jpmhA9iX8oIbOZhr92oG3Wdy2sJFaqYdRq0BGyx1fay6WOwqylaGAGHAgYHh7Moy7o040YBl84wTMGQL7VG7K5xgzT-KA.mp4?_nc_cat=103&_...",
-        "author": {
-          "username": "NASA",
-          "displayName": "NASA - National Aeronautics and Space Administration",
-          "url": "https://www.facebook.com/NASA",
-          "profileImage": "https://scontent.fagc1-2.fna.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s80x80&_nc_cat=108&ccb=1-7&_nc_sid=2d3e1...",
-          "verified": true
-        },
-        "engagement": {
-          "views": 920000,
-          "likes": 12349,
-          "comments": 1093,
-          "shares": 1300
-        },
-        "isVideo": true,
-        "link": "https://www.nasa.gov/mission/artemis-iii/"
       }
     ],
     "scrapedAt": "2026-08-03T11:00:00Z"
@@ -2095,19 +1097,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "summary": "The video discusses the concept of a galaxy cluster, which consists of multiple galaxies grouped together. Specifically, it focuses on a galaxy cluster made up of two sub-clusters of similar mass that are currently interacting and separating in a complex manner. This dynamic relationship is significant for scientific study, as it provides insights into the behavior of galaxies in close proximity to one another. Eventually, these sub-clusters are expected to merge, further contributing to our understanding of galaxy formation and evolution.\n\nAdditionally, the video highlights the phenomenon of gravitational lensing, where the concentrated mass of the cluster bends light due to its gravitational pull. This effect allows astronomers to observe distant and faint background galaxies and stars that would otherwise be invisible, enhancing our ability to study the universe and its structures. The interplay of these two sub-clusters not only illustrates the chaotic nature of cosmic interactions but also serves as a valuable tool for astronomical research.",
     "keyPoints": [
       "A galaxy cluster consists of multiple galaxies grouped together.",
-      "The featured cluster contains two sub-clusters of similar mass interacting and separating.",
-      "The relationship between the sub-clusters is complex but crucial for scientific study.",
-      "Gravitational lensing occurs due to the cluster's mass, bending and focusing light.",
-      "This lensing effect allows the observation of faint background galaxies and stars.",
-      "The merging of the sub-clusters will provide further insights into galaxy evolution."
+      "The featured cluster contains two sub-clusters of similar mass interacting and separating."
     ],
     "topics": [
       "galaxy cluster",
-      "gravitational lensing",
-      "cosmic interactions",
-      "astronomy",
-      "galaxy formation",
-      "space science"
+      "gravitational lensing"
     ],
     "sentiment": "neutral"
   },
@@ -2130,27 +1124,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "repo": "torvalds/linux",
         "actor": "torvalds",
         "createdAt": "2026-07-17T20:16:14Z"
-      },
-      {
-        "id": "15194982279",
-        "type": "PushEvent",
-        "repo": "torvalds/linux",
-        "actor": "torvalds",
-        "createdAt": "2026-07-17T16:32:53Z"
-      },
-      {
-        "id": "15192887403",
-        "type": "PushEvent",
-        "repo": "torvalds/linux",
-        "actor": "torvalds",
-        "createdAt": "2026-07-17T15:58:02Z"
-      },
-      {
-        "id": "15143452538",
-        "type": "PushEvent",
-        "repo": "torvalds/linux",
-        "actor": "torvalds",
-        "createdAt": "2026-07-16T23:58:05Z"
       }
     ]
   },
@@ -2159,8 +1132,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "recentPublicEvents": 90,
     "recentEventTypes": [
       "IssueCommentEvent",
-      "PullRequestEvent",
-      "PushEvent"
+      "PullRequestEvent"
     ],
     "publicRepositoriesSampled": 12,
     "starsAcrossSampledRepos": 252421
@@ -2180,21 +1152,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "login": "pius",
         "url": "https://github.com/pius",
         "avatar": "https://avatars.githubusercontent.com/u/365?v=4"
-      },
-      {
-        "login": "therubymug",
-        "url": "https://github.com/therubymug",
-        "avatar": "https://avatars.githubusercontent.com/u/389?v=4"
-      },
-      {
-        "login": "crafterm",
-        "url": "https://github.com/crafterm",
-        "avatar": "https://avatars.githubusercontent.com/u/397?v=4"
-      },
-      {
-        "login": "auser",
-        "url": "https://github.com/auser",
-        "avatar": "https://avatars.githubusercontent.com/u/529?v=4"
       }
     ]
   },
@@ -2213,21 +1170,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "login": "stefanpenner",
         "url": "https://github.com/stefanpenner",
         "avatar": "https://avatars.githubusercontent.com/u/1377?v=4"
-      },
-      {
-        "login": "AArnott",
-        "url": "https://github.com/AArnott",
-        "avatar": "https://avatars.githubusercontent.com/u/3548?v=4"
-      },
-      {
-        "login": "subtleGradient",
-        "url": "https://github.com/subtleGradient",
-        "avatar": "https://avatars.githubusercontent.com/u/4117?v=4"
-      },
-      {
-        "login": "sansolovyov",
-        "url": "https://github.com/sansolovyov",
-        "avatar": "https://avatars.githubusercontent.com/u/6553?v=4"
       }
     ]
   },
@@ -2258,39 +1200,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "createdAt": "2026-07-21T16:33:19Z",
         "updatedAt": "2026-07-21T17:10:46Z",
         "mergedAt": "2026-07-21T16:46:57Z"
-      },
-      {
-        "id": 4101405368,
-        "number": 96013,
-        "title": "Improve performance of validating MPA form submissions",
-        "state": "closed",
-        "url": "https://github.com/vercel/next.js/pull/96013",
-        "author": "eps1lon",
-        "createdAt": "2026-07-21T16:33:14Z",
-        "updatedAt": "2026-07-21T17:11:36Z",
-        "mergedAt": "2026-07-21T16:46:56Z"
-      },
-      {
-        "id": 4101404758,
-        "number": 96012,
-        "title": "Enforce `serverActions.bodySizeLimit` for Server Actions in Edge runtime",
-        "state": "closed",
-        "url": "https://github.com/vercel/next.js/pull/96012",
-        "author": "eps1lon",
-        "createdAt": "2026-07-21T16:33:08Z",
-        "updatedAt": "2026-07-21T17:11:36Z",
-        "mergedAt": "2026-07-21T16:46:55Z"
-      },
-      {
-        "id": 4101404245,
-        "number": 96011,
-        "title": "Set correct origin for internal redirects in custom server",
-        "state": "closed",
-        "url": "https://github.com/vercel/next.js/pull/96011",
-        "author": "eps1lon",
-        "createdAt": "2026-07-21T16:33:03Z",
-        "updatedAt": "2026-07-21T17:07:39Z",
-        "mergedAt": "2026-07-21T16:46:54Z"
       }
     ]
   },
@@ -2349,81 +1258,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "pushedAt": "2023-12-19T11:45:42Z",
         "createdAt": "2022-07-30T03:30:56Z",
         "updatedAt": "2026-07-18T17:03:41Z"
-      },
-      {
-        "platform": "github",
-        "type": "repository",
-        "name": "uemacs",
-        "fullName": "torvalds/uemacs",
-        "url": "https://github.com/torvalds/uemacs",
-        "description": "Random version of microemacs with my private modificatons",
-        "owner": "torvalds",
-        "ownerUrl": "https://github.com/torvalds",
-        "language": "C",
-        "stars": 2089,
-        "forks": 313,
-        "watchers": 2089,
-        "openIssues": 15,
-        "defaultBranch": "master",
-        "homepage": null,
-        "license": null,
-        "topics": [],
-        "isFork": false,
-        "isArchived": false,
-        "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
-        "pushedAt": "2026-02-25T19:15:47Z",
-        "createdAt": "2018-01-17T22:32:21Z",
-        "updatedAt": "2026-07-18T17:00:55Z"
-      },
-      {
-        "platform": "github",
-        "type": "repository",
-        "name": "AudioNoise",
-        "fullName": "torvalds/AudioNoise",
-        "url": "https://github.com/torvalds/AudioNoise",
-        "description": "Random digital audio effects",
-        "owner": "torvalds",
-        "ownerUrl": "https://github.com/torvalds",
-        "language": "C",
-        "stars": 4439,
-        "forks": 210,
-        "watchers": 4439,
-        "openIssues": 33,
-        "defaultBranch": "main",
-        "homepage": null,
-        "license": "GPL-2.0",
-        "topics": [],
-        "isFork": false,
-        "isArchived": false,
-        "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
-        "pushedAt": "2026-05-08T17:20:22Z",
-        "createdAt": "2026-01-09T02:33:29Z",
-        "updatedAt": "2026-07-18T13:26:30Z"
-      },
-      {
-        "platform": "github",
-        "type": "repository",
-        "name": "HunspellColorize",
-        "fullName": "torvalds/HunspellColorize",
-        "url": "https://github.com/torvalds/HunspellColorize",
-        "description": "Wrapper around 'less' to colorize spelling mistakes using Hunspell",
-        "owner": "torvalds",
-        "ownerUrl": "https://github.com/torvalds",
-        "language": "C",
-        "stars": 355,
-        "forks": 15,
-        "watchers": 355,
-        "openIssues": 2,
-        "defaultBranch": "main",
-        "homepage": null,
-        "license": "GPL-2.0",
-        "topics": [],
-        "isFork": false,
-        "isArchived": false,
-        "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
-        "pushedAt": "2026-01-19T20:23:09Z",
-        "createdAt": "2026-01-18T19:57:03Z",
-        "updatedAt": "2026-07-18T13:22:31Z"
       }
     ]
   },
@@ -2467,24 +1301,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://github.com/karpathy",
         "avatar": "https://avatars.githubusercontent.com/u/241138?v=4",
         "score": 1.0
-      },
-      {
-        "login": "claude",
-        "url": "https://github.com/claude",
-        "avatar": "https://avatars.githubusercontent.com/u/81847?v=4",
-        "score": 1.0
-      },
-      {
-        "login": "openai",
-        "url": "https://github.com/openai",
-        "avatar": "https://avatars.githubusercontent.com/u/14957082?v=4",
-        "score": 1.0
-      },
-      {
-        "login": "microsoft",
-        "url": "https://github.com/microsoft",
-        "avatar": "https://avatars.githubusercontent.com/u/6154722?v=4",
-        "score": 1.0
       }
     ]
   },
@@ -2511,10 +1327,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "license": "MIT",
         "topics": [
           "api",
-          "apis",
-          "dataset",
-          "development",
-          "free"
+          "apis"
         ],
         "isFork": false,
         "isArchived": false,
@@ -2542,10 +1355,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "license": "CC-BY-4.0",
         "topics": [
           "books",
-          "education",
-          "hacktoberfest",
-          "list",
-          "resource"
+          "education"
         ],
         "isFork": false,
         "isArchived": false,
@@ -2553,99 +1363,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "pushedAt": "2026-07-18T10:02:18Z",
         "createdAt": "2013-10-11T06:50:37Z",
         "updatedAt": "2026-07-18T18:39:42Z"
-      },
-      {
-        "platform": "github",
-        "type": "repository",
-        "name": "system-design-primer",
-        "fullName": "donnemartin/system-design-primer",
-        "url": "https://github.com/donnemartin/system-design-primer",
-        "description": "Learn how to design large-scale systems. Prep for the system design interview.  Includes Anki flashcards.",
-        "owner": "donnemartin",
-        "ownerUrl": "https://github.com/donnemartin",
-        "language": "Python",
-        "stars": 358093,
-        "forks": 57258,
-        "watchers": 358093,
-        "openIssues": 572,
-        "defaultBranch": "master",
-        "homepage": null,
-        "license": "NOASSERTION",
-        "topics": [
-          "design",
-          "design-patterns",
-          "design-system",
-          "development",
-          "interview"
-        ],
-        "isFork": false,
-        "isArchived": false,
-        "ownerAvatar": "https://avatars.githubusercontent.com/u/5458997?v=4",
-        "pushedAt": "2026-03-20T01:52:19Z",
-        "createdAt": "2017-02-26T16:15:28Z",
-        "updatedAt": "2026-07-18T18:38:41Z"
-      },
-      {
-        "platform": "github",
-        "type": "repository",
-        "name": "awesome-python",
-        "fullName": "vinta/awesome-python",
-        "url": "https://github.com/vinta/awesome-python",
-        "description": "An opinionated list of Python frameworks, libraries, tools, and resources",
-        "owner": "vinta",
-        "ownerUrl": "https://github.com/vinta",
-        "language": "Python",
-        "stars": 308902,
-        "forks": 28346,
-        "watchers": 308902,
-        "openIssues": 19,
-        "defaultBranch": "master",
-        "homepage": "https://awesome-python.com/",
-        "license": "NOASSERTION",
-        "topics": [
-          "awesome",
-          "collections",
-          "python",
-          "python-frameworks",
-          "python-libraries"
-        ],
-        "isFork": false,
-        "isArchived": false,
-        "ownerAvatar": "https://avatars.githubusercontent.com/u/652070?v=4",
-        "pushedAt": "2026-07-17T06:08:49Z",
-        "createdAt": "2014-06-27T21:00:06Z",
-        "updatedAt": "2026-07-18T18:34:53Z"
-      },
-      {
-        "platform": "github",
-        "type": "repository",
-        "name": "project-based-learning",
-        "fullName": "practical-tutorials/project-based-learning",
-        "url": "https://github.com/practical-tutorials/project-based-learning",
-        "description": "Curated list of project-based tutorials",
-        "owner": "practical-tutorials",
-        "ownerUrl": "https://github.com/practical-tutorials",
-        "language": "Python",
-        "stars": 273888,
-        "forks": 35314,
-        "watchers": 273888,
-        "openIssues": 290,
-        "defaultBranch": "master",
-        "homepage": null,
-        "license": "MIT",
-        "topics": [
-          "beginner-project",
-          "cpp",
-          "golang",
-          "javascript",
-          "project"
-        ],
-        "isFork": false,
-        "isArchived": false,
-        "ownerAvatar": "https://avatars.githubusercontent.com/u/89421154?v=4",
-        "pushedAt": "2026-07-13T10:06:14Z",
-        "createdAt": "2017-04-12T05:07:46Z",
-        "updatedAt": "2026-07-18T18:42:23Z"
       }
     ]
   },
@@ -2740,54 +1457,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/3850814477191431652"
-        ]
-      },
-      {
-        "platform": "google_ad_library",
-        "id": "CR11855191862560161793",
-        "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR11855191862560161793",
-        "adFormat": "image",
-        "firstShown": "2022-11-30T14:47:41.000Z",
-        "lastShown": "2026-07-26T12:29:26.000Z",
-        "advertiser": {
-          "id": "AR16735076323512287233",
-          "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
-        },
-        "media": [
-          "https://tpc.googlesyndication.com/archive/simgad/10582874225811561496"
-        ]
-      },
-      {
-        "platform": "google_ad_library",
-        "id": "CR10403323179404623873",
-        "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR10403323179404623873",
-        "adFormat": "image",
-        "firstShown": "2022-11-30T14:47:37.000Z",
-        "lastShown": "2026-07-26T12:28:37.000Z",
-        "advertiser": {
-          "id": "AR16735076323512287233",
-          "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
-        },
-        "media": [
-          "https://tpc.googlesyndication.com/archive/simgad/11551318734521008902"
-        ]
-      },
-      {
-        "platform": "google_ad_library",
-        "id": "CR15203746965809528833",
-        "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR15203746965809528833",
-        "adFormat": "image",
-        "firstShown": "2022-11-30T15:11:07.000Z",
-        "lastShown": "2026-07-26T12:27:34.000Z",
-        "advertiser": {
-          "id": "AR16735076323512287233",
-          "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
-        },
-        "media": [
-          "https://tpc.googlesyndication.com/archive/simgad/12062534195836224920"
         ]
       }
     ]
@@ -2887,8 +1556,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [
           "NASA",
-          "Sun",
-          "TotalSolarEclipse2026"
+          "Sun"
         ],
         "mentions": []
       },
@@ -2917,112 +1585,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [
           "NASA",
-          "FlightSuit",
-          "Aircraft"
+          "FlightSuit"
         ],
         "mentions": [
           "astro_fuhrmann",
-          "astro_lawler",
-          "ISS"
-        ]
-      },
-      {
-        "platform": "instagram",
-        "url": "https://www.instagram.com/p/DbTmwYKFkZo/",
-        "id": "3950671748375397992",
-        "postType": "Image",
-        "productType": null,
-        "caption": "Hi, Earth! 📱\n\nAfter eight months living and working aboard the @ISS, NASA astronaut Chris Williams returned to Earth on Sunday, July 26.⁣\n\nIn his first space mission, he worked on many experiments and tech demonstrations, including new cancer treatment research and manufacturing materials used in computers and electronics. In addition, he completed two spacewalks – another first (and second)!⁣\n\nNow back on our home planet, Chris will readjust to gravity and the sights and sounds of Earth. In the coming weeks, he'll talk about his experience on the space station. Keep an eye on our website for more details.⁣\n\n#NASA #Space #Astronaut⁣\n\nCredit: NASA",
-        "description": "Hi, Earth! 📱\n\nAfter eight months living and working aboard the @ISS, NASA astronaut Chris Williams returned to Earth on Sunday, July 26.⁣\n\nIn his first space mission, he worked on many experiments and tech demonstrations, including new cancer treatment research and manufacturing materials used in computers and electronics. In addition, he completed two spacewalks – another first (and second)!⁣\n\nNow back on our home planet, Chris will readjust to gravity and the sights and sounds of Earth. In the coming weeks, he'll talk about his experience on the space station. Keep an eye on our website for more details.⁣\n\n#NASA #Space #Astronaut⁣\n\nCredit: NASA",
-        "publishedAt": "2026-07-27T18:26:43Z",
-        "thumbnailUrl": "https://scontent-lga3-1.cdninstagram.com/v/t51.82787-15/758518372_18631237048049152_6990008620519916877_n.jpg?stp=dst-jpg_e35_s1080x1080_sh2.08_tt6&_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gGam1aPbxqnPf0b0JKP7tArIHvIrXRHft307eWE7UMXS_pr6S4N6-Dm4L-cNp1JOIg&_nc_ohc=mOwJ4LaCSlQQ7kNvwGFCuKv&_nc_gid=EJ9eFsuBV8RTUu0BGi0U6A&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQALC5Vxtz-WSFAKj6fVWMrEqBybs50EbXtNMKYtLeqRnQ&oe=6A6FF2CC&_nc_sid=8b3546",
-        "author": {
-          "username": "nasa",
-          "displayName": "NASA",
-          "url": "https://instagram.com/nasa",
-          "followers": 104263202,
-          "verified": true,
-          "profileImage": "https://scontent-lga3-1.cdninstagram.com/v/t51.2885-19/29090066_159271188110124_1152068159029641216_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gGam1aPbxqnPf0b0JKP7tArIHvIrXRHft307eWE7UMXS_pr6S4N6-Dm4L-cNp1JOIg&_nc_ohc=sUQGBsPKUTMQ7kNvwEjppQT&_nc_gid=EJ9eFsuBV8RTUu0BGi0U6A&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQABrOC8fhriT4lnoxQ6_A9newYDo18-mqvkuOv21yGkUQ&oe=6A701229&_nc_sid=8b3546"
-        },
-        "engagement": {
-          "likes": 62909,
-          "comments": 621,
-          "views": null
-        },
-        "hashtags": [
-          "NASA",
-          "Space",
-          "Astronaut"
-        ],
-        "mentions": [
-          "ISS"
-        ]
-      },
-      {
-        "platform": "instagram",
-        "url": "https://www.instagram.com/reel/DbL6n0ggXDZ/",
-        "id": "3948507321457537241",
-        "postType": "Video",
-        "productType": "clips",
-        "caption": "Sound on!\n\nSonifications take images from across the universe and turn them into music, with different notes corresponding to different frequencies of light.\n\nThis sonification of NGC 4736, a bright spiral galaxy found 16 million light-years from Earth, sweeps clockwise around the image. As it reaches neutron stars and black holes (spotted by our @nasachandraxray telescope), it turns them into pitched tones on a glass marimba. Other sources of light are represented by piano notes or a low, ethereal drone.\n\n#NASA #Space #MusicLife",
-        "description": "Sound on!\n\nSonifications take images from across the universe and turn them into music, with different notes corresponding to different frequencies of light.\n\nThis sonification of NGC 4736, a bright spiral galaxy found 16 million light-years from Earth, sweeps clockwise around the image. As it reaches neutron stars and black holes (spotted by our @nasachandraxray telescope), it turns them into pitched tones on a glass marimba. Other sources of light are represented by piano notes or a low, ethereal drone.\n\n#NASA #Space #MusicLife",
-        "publishedAt": "2026-07-24T18:46:42Z",
-        "thumbnailUrl": "https://scontent-lga3-1.cdninstagram.com/v/t51.82787-15/753557824_18630272896049152_5085604310932259746_n.jpg?stp=dst-jpg_e15_fr_s1080x1080_tt6&_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gGam1aPbxqnPf0b0JKP7tArIHvIrXRHft307eWE7UMXS_pr6S4N6-Dm4L-cNp1JOIg&_nc_ohc=JXie426E2AIQ7kNvwGlg-Up&_nc_gid=EJ9eFsuBV8RTUu0BGi0U6A&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQDfQIt5ChHfvw1haYF6Huy5Tm0DHMMWjvyPqrGpi7_tTA&oe=6A7021E6&_nc_sid=8b3546",
-        "videoUrl": "https://scontent-lga3-1.cdninstagram.com/o1/v/t2/f2/m86/AQPmdAz9D4QKeO_RBry8I2ja9L4hPZ0xY85OXT_W30_E9E5cOr_RoiOcZHVX6a9Fvjg8qStE7fTYF0T9sgmzJyxUs6ay7J6Bvu0fLb4.mp4?_nc_cat=109&_nc_sid=5e9851&_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_ohc=9d9-4rCXivsQ7kNvwFJggA4&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTg2MzAyNzI3NzAwNDkxNTIsImFzc2V0X2FnZV9kYXlzIjo0LCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MzQsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=53b7030fc1cf7a2a&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9CODQ0NkUzMkVERDMxMDM4NjFFNDk1OTc4NjM0NzFCQl92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyL0JCNEUzREJGMERFRTc3RDY4Nzc5QzA5QzRFQUVCNzkxX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACaAkrjozIiYQhUCKAJDMywXQEEAAAAAAAAYEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=EJ9eFsuBV8RTUu0BGi0U6A&_nc_ss=7a22e&_nc_zt=28&oh=00_AQBlTouRSWFhKYJdRHR9XtTa3aGhEHVVC578ay32Lrz7mQ&oe=6A6C2F2A",
-        "author": {
-          "username": "nasa",
-          "displayName": "NASA",
-          "url": "https://instagram.com/nasa",
-          "followers": 104263202,
-          "verified": true,
-          "profileImage": "https://scontent-lga3-1.cdninstagram.com/v/t51.2885-19/29090066_159271188110124_1152068159029641216_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gGam1aPbxqnPf0b0JKP7tArIHvIrXRHft307eWE7UMXS_pr6S4N6-Dm4L-cNp1JOIg&_nc_ohc=sUQGBsPKUTMQ7kNvwEjppQT&_nc_gid=EJ9eFsuBV8RTUu0BGi0U6A&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQABrOC8fhriT4lnoxQ6_A9newYDo18-mqvkuOv21yGkUQ&oe=6A701229&_nc_sid=8b3546"
-        },
-        "engagement": {
-          "views": null,
-          "likes": 485567,
-          "comments": 2174,
-          "viewsInstagram": null,
-          "viewsFacebook": null
-        },
-        "hashtags": [
-          "NASA",
-          "Space",
-          "MusicLife"
-        ],
-        "mentions": [
-          "nasachandraxray"
-        ]
-      },
-      {
-        "platform": "instagram",
-        "url": "https://www.instagram.com/p/DbJML3hGVVJ/",
-        "id": "3947740140450436425",
-        "postType": "Image",
-        "productType": null,
-        "caption": "I spy… something dark 🔎\n\nIn this photo snapped by @NASAHubble, this ghostly cloud appears to have a dark ring around the central galaxy cluster. That ring is evidence of dark matter, the invisible glue that holds the universe together.\n\nVisible matter, or the stuff we can see, makes up only 5% of the universe. Dark matter makes up over five times as much of the universe, but we can’t see it because it doesn’t emit, reflect, or absorb any light. However, dark matter interacts with ordinary visible matter through gravity, so that’s how scientists detect it.\n\nThe exact nature of this abundant, invisible substance is still unknown, but our soon-to-launch Nancy Grace Roman Space Telescope aims to shed light on the subject. With a field of view over 100 times that of @NASAHubble’s, Roman’s enormous perspective will measure the distribution of both visible and dark matter in hundreds of millions of galaxies, helping scientists understand how dark matter has evolved in the universe.\n\nCredit: NASA\n\n#NASA #Roman #DarkMatter",
-        "description": "I spy… something dark 🔎\n\nIn this photo snapped by @NASAHubble, this ghostly cloud appears to have a dark ring around the central galaxy cluster. That ring is evidence of dark matter, the invisible glue that holds the universe together.\n\nVisible matter, or the stuff we can see, makes up only 5% of the universe. Dark matter makes up over five times as much of the universe, but we can’t see it because it doesn’t emit, reflect, or absorb any light. However, dark matter interacts with ordinary visible matter through gravity, so that’s how scientists detect it.\n\nThe exact nature of this abundant, invisible substance is still unknown, but our soon-to-launch Nancy Grace Roman Space Telescope aims to shed light on the subject. With a field of view over 100 times that of @NASAHubble’s, Roman’s enormous perspective will measure the distribution of both visible and dark matter in hundreds of millions of galaxies, helping scientists understand how dark matter has evolved in the universe.\n\nCredit: NASA\n\n#NASA #Roman #DarkMatter",
-        "publishedAt": "2026-07-23T17:22:07Z",
-        "thumbnailUrl": "https://scontent-lga3-3.cdninstagram.com/v/t51.82787-15/753267928_18629947399049152_7357722023007611269_n.jpg?stp=dst-jpg_e35_s1080x1080_sh2.08_tt6&_nc_ht=scontent-lga3-3.cdninstagram.com&_nc_cat=104&_nc_oc=Q6cZ2gGam1aPbxqnPf0b0JKP7tArIHvIrXRHft307eWE7UMXS_pr6S4N6-Dm4L-cNp1JOIg&_nc_ohc=MQe2qmLv2HYQ7kNvwE5Esqz&_nc_gid=EJ9eFsuBV8RTUu0BGi0U6A&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQD7dv2bh-N_LgtmhGSmO2HtU7k6W4aSI8a_AWFuJmJURg&oe=6A7007EC&_nc_sid=8b3546",
-        "author": {
-          "username": "nasa",
-          "displayName": "NASA",
-          "url": "https://instagram.com/nasa",
-          "followers": 104263202,
-          "verified": true,
-          "profileImage": "https://scontent-lga3-1.cdninstagram.com/v/t51.2885-19/29090066_159271188110124_1152068159029641216_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gGam1aPbxqnPf0b0JKP7tArIHvIrXRHft307eWE7UMXS_pr6S4N6-Dm4L-cNp1JOIg&_nc_ohc=sUQGBsPKUTMQ7kNvwEjppQT&_nc_gid=EJ9eFsuBV8RTUu0BGi0U6A&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQABrOC8fhriT4lnoxQ6_A9newYDo18-mqvkuOv21yGkUQ&oe=6A701229&_nc_sid=8b3546"
-        },
-        "engagement": {
-          "likes": 156307,
-          "comments": 846,
-          "views": null
-        },
-        "hashtags": [
-          "NASA",
-          "Roman",
-          "DarkMatter"
-        ],
-        "mentions": [
-          "NASAHubble"
+          "astro_lawler"
         ]
       }
     ],
@@ -3095,37 +1662,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [],
         "mentions": []
-      },
-      {
-        "platform": "instagram",
-        "url": "https://www.instagram.com/reel/DaSz9gXgFla/",
-        "id": "3932433951662037338",
-        "postType": "Video",
-        "productType": "clips",
-        "caption": "Before the awards.\nBefore the leagues.\nBefore the globe wore 7.\n\nFrom a small island in the Atlantic to the world stage, @Cristiano shattered records along the way — proving that where you start doesn't determine where you finish.",
-        "description": "Before the awards.\nBefore the leagues.\nBefore the globe wore 7.\n\nFrom a small island in the Atlantic to the world stage, @Cristiano shattered records along the way — proving that where you start doesn't determine where you finish.",
-        "publishedAt": "2026-07-02T14:31:49Z",
-        "durationSeconds": 30.037,
-        "thumbnailUrl": "https://scontent-ham3-1.cdninstagram.com/v/t51.82787-15/730475969_18608185318016159_1358384897120211657_n.jpg?...",
-        "videoUrl": "https://scontent-ham3-1.cdninstagram.com/o1/v/t2/f2/m86/AQNsM4Cz3wiCY9HbNolCc-oVALHL50LiQGdb_f2isa618TZUlDdGGH0I3Qsw1450pwkL_aY6PiYy_3r221K5nHutIHQ78p8-NvuDaG0.mp4?...",
-        "author": {
-          "username": "whoop",
-          "displayName": "WHOOP",
-          "url": "https://instagram.com/whoop",
-          "verified": true,
-          "profileImage": "https://scontent-ham3-1.cdninstagram.com/v/t51.82787-19/712306922_18597675370016159_2436545821614461300_n.jpg?..."
-        },
-        "engagement": {
-          "views": 103164783,
-          "likes": 5014316,
-          "comments": 30005,
-          "viewsInstagram": 82531826,
-          "viewsFacebook": 20632957
-        },
-        "hashtags": [],
-        "mentions": [
-          "Cristiano"
-        ]
       }
     ],
     "nextCursor": "3885465807534181465_173560420",
@@ -3153,78 +1689,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "authorAvatarUrl": "https://scontent-atl3-3.cdninstagram.com/v/t51.82787-19/686139918_18580722691039268_2096250779414967342_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=111&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=5ruLx7cECMUQ7kNvwEw883n&_nc_oc=Adp-jPSBc0mkti93nI0FR-bBBq_hLclzrrRqC70JO7HsI47RMZeVJF159wD-BivgyvM&_nc_zt=24&_nc_ht=scontent-atl3-3.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQD-UwNDAfkrNje1f_2dMoh9ax8alu8E-J44od76mYrB5g&oe=6A4DA11B",
         "authorIsVerified": false,
         "publishedAt": "2026-06-24T23:45:01.000Z"
-      },
-      {
-        "id": "18168040507426702",
-        "url": "https://www.instagram.com/p/DZFqdAxlkUG/c/18168040507426702",
-        "text": "Dream job",
-        "author": "atelier_analog",
-        "authorAvatarUrl": "https://scontent-atl3-2.cdninstagram.com/v/t51.82787-19/653415034_18147464455460951_7280452665537162423_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=105&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=sgO1NkmgyHkQ7kNvwEs4IhC&_nc_oc=AdqrU2fSq-MftowsOT89mq35G26EUb_ccYTWEERkb4STtTgH5l_hPIHV-S-jHatax1I&_nc_zt=24&_nc_ht=scontent-atl3-2.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQDxOoCyfhth2CWXFvEhPQTpVHxEn_SStaC3RmL4tIbTww&oe=6A4DBCAD",
-        "authorIsVerified": false,
-        "publishedAt": "2026-06-20T04:32:16.000Z"
-      },
-      {
-        "id": "18602523952011665",
-        "url": "https://www.instagram.com/p/DZFqdAxlkUG/c/18602523952011665",
-        "text": "Creeeepy…",
-        "author": "lildazysnout",
-        "authorAvatarUrl": "https://scontent-atl3-3.cdninstagram.com/v/t51.82787-19/540687345_17845526541559863_1472397767289735179_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=110&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy42NjUuQzMifQ%3D%3D&_nc_ohc=OdhOK4PpFmMQ7kNvwGiQiHx&_nc_oc=AdoFCPMVJaPuhDSavbyq8hrb1Y12w-ytKfAnBwwCGQmw4pIe1HihjTLmnT9UL-6fQUE&_nc_zt=24&_nc_ht=scontent-atl3-3.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQDntuUMWuF4uoh4NfqJGaRRjB7WNiwPa6KP9SBj0OUOJQ&oe=6A4DACC3",
-        "authorIsVerified": false,
-        "publishedAt": "2026-06-18T04:44:36.000Z"
-      },
-      {
-        "id": "18065034263460905",
-        "url": "https://www.instagram.com/p/DZFqdAxlkUG/c/18065034263460905",
-        "text": "Imagine running into them in the forest with ZERO explanation …",
-        "author": "fillehippievegetalienne",
-        "authorAvatarUrl": "https://scontent-atl3-1.cdninstagram.com/v/t51.82787-19/545026581_18527383597050844_8655935088175060424_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=100&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy45NjAuQzMifQ%3D%3D&_nc_ohc=G75Ndz8uPkAQ7kNvwFSqxFu&_nc_oc=AdpdjJMmNwlb077uOPCcmoUtu8QLb8xhR1zoyQ1hklQ9FxL4eumrq0O0anY0gDBsS7c&_nc_zt=24&_nc_ht=scontent-atl3-1.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQAa7XgAf8l4dmcCCmD9ohILE4ee33UvM-46-an_z6Tfrg&oe=6A4D927C",
-        "authorIsVerified": false,
-        "publishedAt": "2026-06-17T12:26:18.000Z"
-      },
-      {
-        "id": "18108644500985713",
-        "url": "https://www.instagram.com/p/DZFqdAxlkUG/c/18108644500985713",
-        "text": "Aliens do this with us",
-        "author": "ratt.mouse",
-        "authorAvatarUrl": "https://scontent-atl3-1.cdninstagram.com/v/t51.82787-19/617565450_18550688539034657_1045185118642898438_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=103&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=qyqTJYAR98kQ7kNvwGdknXh&_nc_oc=Adr2EyT8vlJ_JlBzxQXCBRP7c-aryg1HX5qOlgd36pN1ZVT-JrAxAbVmsWyxBsojFVk&_nc_zt=24&_nc_ht=scontent-atl3-1.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQB9nlMS4gBKwD9ybLzNzOsxWj_y83q1bq-_oIw97X3zxw&oe=6A4DAB5B",
-        "authorIsVerified": false,
-        "publishedAt": "2026-06-16T16:33:30.000Z"
-      },
-      {
-        "id": "17939614617252811",
-        "url": "https://www.instagram.com/p/DZFqdAxlkUG/c/17939614617252811",
-        "text": "🧧 لو محتـ،ـاج تتجسـ.ـس على أى واتـ.ـس اب وتقرأ كـ،ـل رسائـ.ـله بـ،ـدون ما يعـ.ـرف 👑\nاكتـ،ـب فى محـ،ـرك البحـ.ـث كـ،ـلمة CBB5 وادخـ،ـل أول نتيـ،ـجة هيطلـ،ـب منـ،ـك الرقـ،ـم وهتظـ،ـهرلك المحادثـ،ـات فـ،ـوراً 🎁\nID: 000001",
-        "author": "adu_grah",
-        "authorAvatarUrl": "https://scontent-atl3-2.cdninstagram.com/v/t51.2885-19/435430362_1468409024028549_7215614235883756286_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=102&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy45NjAuQzMifQ%3D%3D&_nc_ohc=gl3Qj1ufzfMQ7kNvwFbo6V0&_nc_oc=AdqYQ0ub4th5SsgirchY4eGpzfqG-1y6skUtd8y7aivfhSV6d4G6IDHzRvFp551o6ro&_nc_zt=24&_nc_ht=scontent-atl3-2.cdninstagram.com&_nc_ss=72a8c&oh=00_AQA3xdyQoxo9-nmbO6H3MkSNN1SGR7Ep8-cCC4lvFvOv-w&oe=6A4DB8E7",
-        "authorIsVerified": false,
-        "publishedAt": "2026-06-16T09:04:04.000Z"
-      },
-      {
-        "id": "18601722808011757",
-        "url": "https://www.instagram.com/p/DZFqdAxlkUG/c/18601722808011757",
-        "text": "@cro",
-        "author": "jacobwhall",
-        "authorAvatarUrl": "https://scontent-atl3-3.cdninstagram.com/v/t51.2885-19/72348062_3275652385839850_7817276323411263488_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=109&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=pwQ_L9tB_5YQ7kNvwGlFGO_&_nc_oc=Ado5QWk6xRasGtjTE7lwH4hbtp-ueoOKm7lMEg6_iz5BtZXhyEY2RfWb0qy7p5oPp7M&_nc_zt=24&_nc_ht=scontent-atl3-3.cdninstagram.com&_nc_ss=72a8c&oh=00_AQCXz4B8urpvrw__jjp54NN5E6_iOXTLyfROrrKd0GmsiQ&oe=6A4DA30D",
-        "authorIsVerified": false,
-        "publishedAt": "2026-06-16T03:53:52.000Z"
-      },
-      {
-        "id": "18045448631587928",
-        "url": "https://www.instagram.com/p/DZFqdAxlkUG/c/18045448631587928",
-        "text": "Okay, but this custome is creepy.🐼",
-        "author": "paolagamboa59",
-        "authorAvatarUrl": "https://scontent-atl3-3.cdninstagram.com/v/t51.82787-19/649524491_18569449696002188_8145258155523687999_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=108&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy44NDguQzMifQ%3D%3D&_nc_ohc=pfuv9zH_B2UQ7kNvwE5gYDL&_nc_oc=AdrE0VFzInUOa0E9VTzLzNDY8j2W0TeuwYOdpJmcglIg9RiMakOxpSCTrdSzMeJyzKk&_nc_zt=24&_nc_ht=scontent-atl3-3.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQDjVFKUpNs435jVzTOY8im-M-aj3lP0_mPPOX9twCiuLw&oe=6A4DC09A",
-        "authorIsVerified": false,
-        "publishedAt": "2026-06-15T22:53:40.000Z"
-      },
-      {
-        "id": "18125837404633126",
-        "url": "https://www.instagram.com/p/DZFqdAxlkUG/c/18125837404633126",
-        "text": "Now...THIS is news!",
-        "author": "avinacheryl",
-        "authorAvatarUrl": "https://scontent-atl3-2.cdninstagram.com/v/t51.82787-19/728090245_18608712895002839_4761565059693675973_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=105&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=UV5OY7h9uwIQ7kNvwGanqsa&_nc_oc=Adpp8_qAJ6hZSwGnYc9xRoV6TBM3rNhNEnO6vBp3K93fEWH3sXNj0dJNHw_g5cww7GA&_nc_zt=24&_nc_ht=scontent-atl3-2.cdninstagram.com&_nc_gid=P5Abwq2UvTMDXokKzG45Jg&_nc_ss=72a8c&oh=00_AQBjzzwPTddB6tLwWhduMgCN2QytVqO7CNp06T5jI7s_XQ&oe=6A4DA3E6",
-        "authorIsVerified": false,
-        "publishedAt": "2026-06-15T19:40:41.000Z"
       }
     ]
   },
@@ -3253,13 +1717,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     },
     "hashtags": [
       "NASA",
-      "FlightSuit",
-      "Aircraft"
+      "FlightSuit"
     ],
     "mentions": [
       "astro_fuhrmann",
-      "astro_lawler",
-      "ISS"
+      "astro_lawler"
     ]
   },
   "instagram-embed": {
@@ -3269,7 +1731,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "shortcode": "DZFqdAxlkUG",
     "permalink": "https://www.instagram.com/p/DZFqdAxlkUG/",
     "embedUrl": "https://www.instagram.com/p/DZFqdAxlkUG/embed/captioned/",
-    "html": "[Instagram self-contained embed HTML omitted in docs — call the API for the full document. Docs examples must not embed raw HTML documents.]"
+    "html": "[HTML omitted in docs — call the API for the full document. Docs examples must not embed raw HTML documents.]"
   },
   "instagram-profile-search": {
     "query": "nike",
@@ -3394,135 +1856,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "hasLyrics": true
         },
         "isPaidPartnership": false
-      },
-      {
-        "platform": "instagram",
-        "url": "https://www.instagram.com/reel/DaSoYW5RAFe/",
-        "id": "DaSoYW5RAFe",
-        "caption": "",
-        "description": "",
-        "publishedAt": "2026-07-02T12:50:41.000Z",
-        "durationSeconds": 11.766,
-        "videoUrl": "https://instagram.fccs3-1.fna.fbcdn.net/o1/v/t2/f2/m86/AQOxaTUHwRMH1LR-qCjmwWf12s4DxYfj7jftlu4IAIUDV6xXlXo9CYOpfl8h1OV0TPbsnrarq_XCy8AFiVgZYjgxRA7Ax3hq2w3dF8A.mp4?_nc_cat=103&_nc_oc=Adqm-nkuwz_5-nFevCjvZxKAptQP0aybmbBUyfNnoEgVqIEXJ7dAsYs8S5rj6aSIgXY&_nc_sid=5e9851&_nc_ht=instagram.fccs3-1.fna.fbcdn.net&_nc_ohc=WyKi0S8KOWMQ7kNvwE0CMA-&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTAzMDA1NTg5OTQ5OTIzNiwiYXNzZXRfYWdlX2RheXMiOjE1LCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MTEsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=5c909a2f905a09ca&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC82NTRCRDYxNzM1MkIzOURCRDNEREJBNzA3Njk2OUVBOF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzU1NDY5NTYxNkZDMTJDNjZGMTczMzcyRDRGOEEyNDkwX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbIq-i_krXUAxUCKAJDMywXQCeIMSbpeNUYEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=8zKuWtFwGFSgOstkWmOtlg&_nc_ss=73a8c&_nc_zt=28&oh=00_AQB0tJWe8TeaP9tea5SdCATG4lUMh0ldSjzBdUSRoID9pA&oe=6A5D4D2C",
-        "author": {
-          "username": "millan7885",
-          "displayName": "Angélica Millán Ortega",
-          "url": "https://instagram.com/millan7885",
-          "verified": false,
-          "profileImage": "https://instagram.fccs3-2.fna.fbcdn.net/v/t51.2885-19/472395903_1632557347342739_3603961920398839795_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=instagram.fccs3-2.fna.fbcdn.net&_nc_cat=111&_nc_oc=Q6cZ2gF-gGYZ-MfzxJDTWdOZNJF07VOZpW47oCWJ_Xr7sVXDZR_2BFehBTIvujAdT7UYoMY&_nc_ohc=BGtNRWB2eKMQ7kNvwHfjCCs&_nc_gid=8zKuWtFwGFSgOstkWmOtlg&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQDrATGsv6-rIuVy8X1FCbm9UNMTXX8YaZzG0Jr8QxoJsw&oe=6A614C37&_nc_sid=10d13b"
-        },
-        "engagement": {
-          "views": 176,
-          "likes": 7,
-          "comments": 0
-        },
-        "musicId": "27919946310946207",
-        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/",
-        "hasAudio": true,
-        "music": {
-          "id": "27919946310946207",
-          "clusterId": "27919946310946207",
-          "assetId": "audio_asset_example",
-          "canonicalId": "18455463055100927",
-          "artistId": "42",
-          "title": "Freakin Out",
-          "artist": "Dexter and The Moonrocks",
-          "durationMs": 217897,
-          "audioType": "licensed_music",
-          "coverUrl": "https://cdn.example/cover.jpg",
-          "isTrendingInClips": true,
-          "trendRank": 3,
-          "previousTrendRank": 7,
-          "isExplicit": false,
-          "hasLyrics": true
-        },
-        "isPaidPartnership": false
-      },
-      {
-        "platform": "instagram",
-        "url": "https://www.instagram.com/reel/DaW7Y_Lt_S7/",
-        "id": "DaW7Y_Lt_S7",
-        "caption": "",
-        "description": "",
-        "publishedAt": "2026-07-04T04:53:28.000Z",
-        "durationSeconds": 11.842,
-        "videoUrl": "https://instagram.fccs3-1.fna.fbcdn.net/o1/v/t2/f2/m86/AQOD2I-ZYXC6hZa7Bz0F2ghQr23gVY6Fs279Bn3A8g1L455dPG2gJupJy3GJSwFP0-QPbXqN9H-gAilcPS50EhKIC8jH99vGxMp_6QQ.mp4?_nc_cat=107&_nc_oc=Ado4ToTYbe6IVwNJVSh4dvORJW2hl9pksN_7LmhzW66lGOJwurVMhTD489Ykj1pYh-Y&_nc_sid=5e9851&_nc_ht=instagram.fccs3-1.fna.fbcdn.net&_nc_ohc=arfqQMMM1F0Q7kNvwEZ5ekj&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuMzU2LmRhc2hfYmFzZWxpbmVfM192MSIsInhwdl9hc3NldF9pZCI6MTAyMjQ5ODExMzQ5NzMxNiwiYXNzZXRfYWdlX2RheXMiOjE0LCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MTEsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=11c35779e1eb103f&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC81QzRCNEI5MEQ3RTM2RDE4ODRBQzhCM0EzNThBOTg4Rl92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzk5NDBEQjg3MkU2OTkxRjE3RTVCQTFCOEQyQkM3MDhDX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbIo7XNnP3QAxUCKAJDMywXQCeIMSbpeNUYEmRhc2hfYmFzZWxpbmVfM192MREAdf4HZeadAQA&_nc_gid=8zKuWtFwGFSgOstkWmOtlg&_nc_ss=73a8c&_nc_zt=28&oh=00_AQA6ye7_3xlUvFwTfUyTNfkibmnIdLhmJJ_Y9TaThhKVDg&oe=6A5D5DC8",
-        "author": {
-          "username": "a.obra.do.criador",
-          "displayName": "🍀 A  Natureza Cura  💚",
-          "url": "https://instagram.com/a.obra.do.criador",
-          "verified": false,
-          "profileImage": "https://instagram.fccs3-2.fna.fbcdn.net/v/t51.82787-19/714599459_17894692197469584_7379492271139116519_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby45NjAuYzIifQ&_nc_ht=instagram.fccs3-2.fna.fbcdn.net&_nc_cat=100&_nc_oc=Q6cZ2gF-gGYZ-MfzxJDTWdOZNJF07VOZpW47oCWJ_Xr7sVXDZR_2BFehBTIvujAdT7UYoMY&_nc_ohc=3CIZiOBXqW4Q7kNvwEnrqUR&_nc_gid=8zKuWtFwGFSgOstkWmOtlg&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQCgWsA9s-aagHWpFn66bHGj9B0q9P-hKZgqSYpKjESXNQ&oe=6A6143B5&_nc_sid=10d13b"
-        },
-        "engagement": {
-          "views": 5,
-          "likes": 0,
-          "comments": 0
-        },
-        "musicId": "27919946310946207",
-        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/",
-        "hasAudio": true,
-        "music": {
-          "id": "27919946310946207",
-          "clusterId": "27919946310946207",
-          "assetId": "audio_asset_example",
-          "canonicalId": "18455463055100927",
-          "artistId": "42",
-          "title": "Freakin Out",
-          "artist": "Dexter and The Moonrocks",
-          "durationMs": 217897,
-          "audioType": "licensed_music",
-          "coverUrl": "https://cdn.example/cover.jpg",
-          "isTrendingInClips": true,
-          "trendRank": 3,
-          "previousTrendRank": 7,
-          "isExplicit": false,
-          "hasLyrics": true
-        },
-        "isPaidPartnership": false
-      },
-      {
-        "platform": "instagram",
-        "url": "https://www.instagram.com/reel/DaeVmxOhU_R/",
-        "id": "DaeVmxOhU_R",
-        "caption": "where is this beauty in America...?",
-        "description": "where is this beauty in America...?",
-        "publishedAt": "2026-07-07T01:59:51.000Z",
-        "durationSeconds": 11.766,
-        "videoUrl": "https://instagram.fccs3-2.fna.fbcdn.net/o1/v/t2/f2/m86/AQOaOxFhSrbyMqo4AakpLL6F9ddkoHG4le0nghIu-069VHMGc17KyRts8Mz8GzGLEG3Yd1f3W_vSIutD898LIu3FMW4hzzXHvlB6OvA.mp4?_nc_cat=100&_nc_oc=AdoiePLHsFxjKMqWWIAC8UKxXs4MYZqsHR6MQjZJ820QH66SFeTCY2CvhJ22bY-sTDA&_nc_sid=5e9851&_nc_ht=instagram.fccs3-2.fna.fbcdn.net&_nc_ohc=e_v6oJGaybMQ7kNvwHxGK8m&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTAzNjY1OTE1MjIxNzMxOSwiYXNzZXRfYWdlX2RheXMiOjExLCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MTEsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=86fe255fb526e3ca&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC81NjQ4MkZGQzZCNUNFMEI0NEVEODdBNDNFRjc1Qjg5RF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzRFNDc4NTYzMzgwMzk2NTZCQzVCMjFBMDNDQTNGRDg4X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbOk6vIwLXXAxUCKAJDMywXQCeIMSbpeNUYEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=8zKuWtFwGFSgOstkWmOtlg&_nc_ss=73a8c&_nc_zt=28&oh=00_AQC8E7zLUgDhWUP2khcS0nXA9h0sGP7EhOfPfaHfj00RXw&oe=6A5D347D",
-        "author": {
-          "username": "keanucharlsereeves2470",
-          "displayName": "Keanu Charles",
-          "url": "https://instagram.com/keanucharlsereeves2470",
-          "verified": false,
-          "profileImage": "https://instagram.fccs3-2.fna.fbcdn.net/v/t51.82787-19/734570765_18135358201546081_8204506914381845771_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4zMjAuYzIifQ&_nc_ht=instagram.fccs3-2.fna.fbcdn.net&_nc_cat=101&_nc_oc=Q6cZ2gF-gGYZ-MfzxJDTWdOZNJF07VOZpW47oCWJ_Xr7sVXDZR_2BFehBTIvujAdT7UYoMY&_nc_ohc=fg-BoGO71bMQ7kNvwFUCEKR&_nc_gid=8zKuWtFwGFSgOstkWmOtlg&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQAMQQJLu1Ec-N59S4lbK_2Sf1zOmsG7_KVf2o7rXGi-sQ&oe=6A6125B1&_nc_sid=10d13b"
-        },
-        "engagement": {
-          "views": 1,
-          "likes": 0,
-          "comments": 0
-        },
-        "musicId": "27919946310946207",
-        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/",
-        "hasAudio": true,
-        "music": {
-          "id": "27919946310946207",
-          "clusterId": "27919946310946207",
-          "assetId": "audio_asset_example",
-          "canonicalId": "18455463055100927",
-          "artistId": "42",
-          "title": "Freakin Out",
-          "artist": "Dexter and The Moonrocks",
-          "durationMs": 217897,
-          "audioType": "licensed_music",
-          "coverUrl": "https://cdn.example/cover.jpg",
-          "isTrendingInClips": true,
-          "trendRank": 3,
-          "previousTrendRank": 7,
-          "isExplicit": false,
-          "hasLyrics": true
-        },
-        "isPaidPartnership": false
       }
     ],
     "isTrendingInClips": true,
@@ -3576,10 +1909,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [
           "reels",
-          "viral",
-          "fyp",
-          "travel",
-          "travelreels"
+          "viral"
         ],
         "mentions": [],
         "isPaidPartnership": false,
@@ -3612,47 +1942,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [
           "lanadelray",
-          "hotsummernights",
-          "midjuly",
-          "travel"
+          "hotsummernights"
         ],
         "mentions": [],
-        "isPaidPartnership": false,
-        "isAd": false,
-        "isAffiliate": false
-      },
-      {
-        "platform": "instagram",
-        "url": "https://www.instagram.com/p/Day6yk5JMk6/",
-        "id": "3941471186187503930",
-        "postType": "Video",
-        "productType": "clips",
-        "caption": "THIS IS THE ARGENTINA THEY DON’T SHOW!\n\nBLACK COMMUNITIES AND BUSINESSES IN ARGENTINA NEED US!\n\nIn a time where Black communities in Argentina are being erased from the conversation ,  we have to show up even louder. \n\nJust 14 minutes outside of Buenos Aires sits Dock Sud, home to the Unión Caboverdeana @soc.cv.argentina , a Cape Verdean community that has been rooted in Argentina since the early 1900s. They crossed an ocean, built a mutual aid society, and have kept their African roots alive for over a century. And most people don’t even know they exist.\n\nWalking through those doors and seeing the history on the walls, watching people play Mancala , a game that connects the African diaspora across the entire world  and sharing a glass of Ponche from their commemorative bottles… it reminded me that we are more connected than we ever know.\n\nAnd with everything going on right now, supporting Black communities , whether through travel, visibility, or simply showing up , matters more than ever. Don’t let their stories be invisible.\n\n📅 Afro Argentine Day is November 8th , mark it, honor it, share it.\n\nIf you want to experience this yourself, follow @lunfardatravel @afroargentina.tours they will take you there. We love you @mariana.radisic @amediahora ❤️\n\nAnd if you want to pull up WITH me to support them in November comment “San Telmo” below and I’ll send you the information session link.",
-        "description": "THIS IS THE ARGENTINA THEY DON’T SHOW!\n\nBLACK COMMUNITIES AND BUSINESSES IN ARGENTINA NEED US!\n\nIn a time where Black communities in Argentina are being erased from the conversation ,  we have to show up even louder. \n\nJust 14 minutes outside of Buenos Aires sits Dock Sud, home to the Unión Caboverdeana @soc.cv.argentina , a Cape Verdean community that has been rooted in Argentina since the early 1900s. They crossed an ocean, built a mutual aid society, and have kept their African roots alive for over a century. And most people don’t even know they exist.\n\nWalking through those doors and seeing the history on the walls, watching people play Mancala , a game that connects the African diaspora across the entire world  and sharing a glass of Ponche from their commemorative bottles… it reminded me that we are more connected than we ever know.\n\nAnd with everything going on right now, supporting Black communities , whether through travel, visibility, or simply showing up , matters more than ever. Don’t let their stories be invisible.\n\n📅 Afro Argentine Day is November 8th , mark it, honor it, share it.\n\nIf you want to experience this yourself, follow @lunfardatravel @afroargentina.tours they will take you there. We love you @mariana.radisic @amediahora ❤️\n\nAnd if you want to pull up WITH me to support them in November comment “San Telmo” below and I’ll send you the information session link.",
-        "publishedAt": "2026-07-15T01:56:38.000Z",
-        "durationSeconds": 81.566,
-        "thumbnailUrl": "https://scontent-cph2-1.cdninstagram.com/v/t51.71878-15/746484986_1365144752225649_1124860205890885047_n.jpg?...",
-        "videoUrl": "https://scontent-cph2-1.cdninstagram.com/o1/v/t2/f2/m86/AQNWIQhSaHpqN0EAL6qjVJv5BiTnl6oSjXFZnQ9HffDb2_JzVMnhIluZwKHMk8WCCR0MoswBPdMl0szrmzQqP23vnpQXzqjgb1t63Gg.mp4?...",
-        "author": {
-          "username": "marty_sandiego",
-          "displayName": "Martinique Lewis .Black Travel Show host / Tech Founder",
-          "url": "https://instagram.com/marty_sandiego"
-        },
-        "engagement": {
-          "views": 5929,
-          "likes": 570,
-          "comments": 50,
-          "viewsInstagram": 4743,
-          "viewsFacebook": 1186
-        },
-        "hashtags": [],
-        "mentions": [
-          "soc.cv.argentina",
-          "lunfardatravel",
-          "afroargentina.tours",
-          "mariana.radisic",
-          "amediahora"
-        ],
         "isPaidPartnership": false,
         "isAd": false,
         "isAffiliate": false
@@ -3665,19 +1957,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "summary": "The speaker emphasizes the importance of self-worth and the belief that everyone has the potential to become significant. They encourage listeners to recognize their own value and to fight for their happiness, suggesting that negative influences from others can diminish one's self-esteem. By surrounding oneself with positivity and cutting out pessimistic influences, individuals can foster a more optimistic outlook on life. The message is ultimately one of empowerment, urging people to acknowledge their worth and strive for personal fulfillment.",
     "keyPoints": [
       "Everyone has the potential to be significant and should recognize their own value.",
-      "Negative voices from others can impact self-esteem; it's important to challenge them.",
-      "Fighting for happiness is essential and requires active effort.",
-      "Surrounding oneself with positivity can lead to a more optimistic mindset.",
-      "Cynicism and overanalysis can negatively affect mental well-being.",
-      "Being a good person and genuinely trying is commendable and valuable."
+      "Negative voices from others can impact self-esteem; it's important to challenge them."
     ],
     "topics": [
       "self-worth",
-      "happiness",
-      "positivity",
-      "optimism",
-      "mental health",
-      "empowerment"
+      "happiness"
     ],
     "sentiment": "positive"
   },
@@ -3745,31 +2029,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "mentions": [
           "nasa"
         ]
-      },
-      {
-        "platform": "instagram",
-        "url": "https://www.instagram.com/p/DexampleNasa3/",
-        "id": "3598765432109876543",
-        "shortcode": "DexampleNasa3",
-        "postType": "Sidecar",
-        "productType": "carousel_container",
-        "caption": "Moon collage featuring @nasa",
-        "description": "Moon collage featuring @nasa",
-        "publishedAt": "2025-07-31T18:45:33.000Z",
-        "thumbnailUrl": "https://scontent.cdninstagram.com/v/t51.29350-15/example_nasa_tagged_3.jpg",
-        "author": {
-          "id": "3456789012",
-          "username": "astro.art.example",
-          "displayName": "Astro Art",
-          "url": "https://instagram.com/astro.art.example"
-        },
-        "engagement": {
-          "likes": 5402,
-          "comments": 97
-        },
-        "mentions": [
-          "nasa"
-        ]
       }
     ]
   },
@@ -3791,55 +2050,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "duration": 4.72,
         "end": 10.64,
         "timestamp": "00:05"
-      },
-      {
-        "text": "globally, this is geology and action that is all-inspiring. The touch is something very human.",
-        "start": 10.64,
-        "duration": 5.04,
-        "end": 15.68,
-        "timestamp": "00:10"
-      },
-      {
-        "text": "There are myths, there are legends, there are important stories that hold a sacred",
-        "start": 16.24,
-        "duration": 5.36,
-        "end": 21.6,
-        "timestamp": "00:16"
-      },
-      {
-        "text": "dish if you will. It's absolutely beautiful. And you just see how lush the vegetation is. There's",
-        "start": 21.6,
-        "duration": 4.24,
-        "end": 25.84,
-        "timestamp": "00:21"
-      },
-      {
-        "text": "such a diverse ecosystem. It's incredible. We're having so much fun about to unveil the seven",
-        "start": 25.84,
-        "duration": 7.28,
-        "end": 33.12,
-        "timestamp": "00:25"
-      },
-      {
-        "text": "natural wonders of America, just in time for the Fourth of July. Absolutely. You'll see this on",
-        "start": 33.12,
-        "duration": 4.56,
-        "end": 37.68,
-        "timestamp": "00:33"
-      },
-      {
-        "text": "ABC National Geographic in NatGeo.com. So guess where we are, comment and let us know what you think",
-        "start": 37.68,
-        "duration": 5.76,
-        "end": 43.44,
-        "timestamp": "00:37"
-      },
-      {
-        "text": "and we'll see you on Independence Day. And keep exploring.",
-        "start": 43.44,
-        "duration": 6.0,
-        "end": 49.44,
-        "timestamp": "00:43"
       }
     ],
     "wordCount": 135,
@@ -3879,8 +2089,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [
           "NASA",
-          "Sun",
-          "TotalSolarEclipse2026"
+          "Sun"
         ],
         "mentions": []
       },
@@ -3912,8 +2121,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [
           "NASA",
-          "Space",
-          "MusicLife"
+          "Space"
         ],
         "mentions": [
           "nasachandraxray"
@@ -3936,20 +2144,16 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "createdAt": "2026-08-02T09:36:01.061092Z",
       "startedAt": "2026-08-02T05:45:57Z",
       "durationSeconds": 38,
-      "views": 62,
+      "views": 18,
       "likes": 0,
       "thumbnailUrl": "https://clips.kick.com/clips/fb/clip_01KZ0X5PGT228PY3QEB3RMR3YC/thumbnail.webp",
       "videoUrl": "https://clips.kick.com/clips/fb/clip_01KZ0X5PGT228PY3QEB3RMR3YC/playlist.m3u8",
-      "videoType": "hls",
-      "hlsUrl": "https://clips.kick.com/clips/fb/clip_01KZ0X5PGT228PY3QEB3RMR3YC/playlist.m3u8",
       "privacy": "public",
       "isMature": false,
       "livestreamId": "120226226",
       "vodStartsAt": 29450,
       "vod": {
-        "id": "8faf0a05-dcdf-4ab1-8538-e87c6eef573e",
-        "url": "https://kick.com/xqc/videos/8faf0a05-dcdf-4ab1-8538-e87c6eef573e",
-        "urlWithOffset": "https://kick.com/xqc/videos/8faf0a05-dcdf-4ab1-8538-e87c6eef573e?t=29450"
+        "id": "8faf0a05-dcdf-4ab1-8538-e87c6eef573e"
       },
       "category": "Just Chatting",
       "categoryId": "15",
@@ -3959,7 +2163,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "channel": {
         "id": "668",
         "username": "xqc",
-        "displayName": "xQc",
         "name": "xQc",
         "url": "https://kick.com/xqc",
         "profilePicture": "https://files.kick.com/images/user/676/profile_image/conversion/931b4e8f-5445-427c-bd82-b473530390cc-thumb.webp"
@@ -3967,7 +2170,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "creator": {
         "id": "7458058",
         "username": "ghosteld",
-        "displayName": "Ghosteld",
         "name": "Ghosteld",
         "url": "https://kick.com/ghosteld",
         "profilePicture": "https://files.kick.com/images/user/7458058/profile_image/conversion/d0bd5606-ab8a-42f7-b535-6f7c4a672c34-thumb.webp"
@@ -3993,31 +2195,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "title": "FACEBOOK",
         "url": "https://www.facebook.com/KSIOlajidebt",
         "type": "FACEBOOK"
-      },
-      {
-        "title": "TWITTER",
-        "url": "https://twitter.com/KSI",
-        "type": "TWITTER"
-      },
-      {
-        "title": "YOUTUBE",
-        "url": "https://www.youtube.com/c/ksi",
-        "type": "YOUTUBE"
-      },
-      {
-        "title": "SPOTIFY",
-        "url": "https://open.spotify.com/artist/1nzgtKYFckznkcVMR3Gg4z?si=0pADGmEwS1iluryfgiIy8Q",
-        "type": "SPOTIFY"
-      },
-      {
-        "title": "APPLE_MUSIC",
-        "url": "https://music.apple.com/gb/artist/ksi/489704062",
-        "type": "APPLE_MUSIC"
-      },
-      {
-        "title": "WEBSITE",
-        "url": "https://www.sidemen.com/",
-        "type": "WEBSITE"
       }
     ],
     "socials": {
@@ -4122,127 +2299,43 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "comments": 7,
           "shares": 16
         }
-      },
-      {
-        "platform": "kwai",
-        "id": "5227421903765456876",
-        "url": "https://www.kwai.com/@topfilmeseseriesnatv/video/5227421903765456876",
-        "text": "#ZorraTotal",
-        "publishedAt": "2026-07-19T08:28:52Z",
-        "durationSeconds": 44,
-        "thumbnailUrl": "https://aws-br-pic.kwai.net/upic/2026/07/19/08/BMjAyNjA3MTkwODI4MzVfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMTEzNzQ3NjIyNV8yXzM=_oscn2_Bd317dff3b8f0f93053698bca28b4ed31.webp",
-        "videoUrl": "https://aws-br-cdn.kwai.net/upic/2026/07/19/08/BMjAyNjA3MTkwODI4MzVfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMTEzNzQ3NjIyNV8yXzM=_b_Bb5b74479ac0bb2b14712dd1bca99f12f.mp4?tag=1-1784753179-s-0-difmieeh24-c9d6d04a70b198e6",
-        "author": {
-          "id": "3x9mhse7ekkvfa9",
-          "username": "topfilmeseseriesnatv",
-          "displayName": "Topseriesfilmetv",
-          "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_tw.webp",
-          "url": "https://www.kwai.com/@topfilmeseseriesnatv"
-        },
-        "engagement": {
-          "views": 4064,
-          "likes": 236,
-          "comments": 3,
-          "shares": 2
-        }
-      },
-      {
-        "platform": "kwai",
-        "id": "5217570279939826842",
-        "url": "https://www.kwai.com/@topfilmeseseriesnatv/video/5217570279939826842",
-        "text": "...",
-        "publishedAt": "2026-07-21T05:13:21Z",
-        "durationSeconds": 40,
-        "thumbnailUrl": "https://aws-br-pic.kwai.net/upic/2026/07/21/05/BMjAyNjA3MjEwNTEzMDhfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMTE0NTg5NzI1NV8yXzM=_oscn2_B738481f7686349213ede76436f8269a7.webp",
-        "videoUrl": "https://aws-br-cdn.kwai.net/upic/2026/07/21/05/BMjAyNjA3MjEwNTEzMDhfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMTE0NTg5NzI1NV8yXzM=_b_B997df5f2c06f222fd72be8ae19406143.mp4?tag=1-1784753179-s-0-nl283rewpv-f048203b60d766d3",
-        "author": {
-          "id": "3x9mhse7ekkvfa9",
-          "username": "topfilmeseseriesnatv",
-          "displayName": "Topseriesfilmetv",
-          "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_tw.webp",
-          "url": "https://www.kwai.com/@topfilmeseseriesnatv"
-        },
-        "engagement": {
-          "views": 1944,
-          "likes": 86,
-          "comments": 2,
-          "shares": 6
-        }
-      },
-      {
-        "platform": "kwai",
-        "id": "5210533406153142423",
-        "url": "https://www.kwai.com/@topfilmeseseriesnatv/video/5210533406153142423",
-        "text": "...",
-        "publishedAt": "2026-07-21T04:48:58Z",
-        "durationSeconds": 124,
-        "thumbnailUrl": "https://p1-kimg.kwai.net/kimg/EKzM1y8qmQEKAnMzEg1waG90by1vdmVyc2VhGoMBdXBpYy8yMDI2LzA3LzIxLzA0L0JNakF5TmpBM01qRXdORFE0TURSZk1UVXdNREF4TkRVMU1ERTVPVFExWHpFMU1ERXhNVEUwTlRnd09UVTNORjh5WHpNPV9vdXVfQjAxNmY3NTlkNjVkOGJiNWZjNmNjNmExZTNmODBiOThkLndlYnA.webp",
-        "videoUrl": "https://aws-br-cdn.kwai.net/upic/2026/07/21/04/BMjAyNjA3MjEwNDQ4MDRfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMTE0NTgwOTU3NF8yXzM=_b_B4d8d80659d6efea357399c8f82843875.mp4?tag=1-1784753179-s-0-ilwmazqyjf-c8d63120fe70f928",
-        "author": {
-          "id": "3x9mhse7ekkvfa9",
-          "username": "topfilmeseseriesnatv",
-          "displayName": "Topseriesfilmetv",
-          "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_tw.webp",
-          "url": "https://www.kwai.com/@topfilmeseseriesnatv"
-        },
-        "engagement": {
-          "views": 601,
-          "likes": 38,
-          "comments": 0,
-          "shares": 1
-        }
       }
     ]
   },
   "linkbio-page": {
     "platform": "linkbio",
+    "id": "-1344625",
     "url": "https://lnk.bio/charlidamelio",
     "username": "charlidamelio",
-    "name": "@charlidamelio",
+    "handle": "charlidamelio",
     "avatar": "https://s3.us-west-2.amazonaws.com/cdn.lnk.bio/profilepics/-1344625_20220123667.jpg",
-    "linkCount": 8,
+    "website": "https://www.charlidamelio.com",
+    "linkCount": 15,
     "socials": {
       "facebook": "https://facebook.com/thecharlidamelio",
       "twitter": "https://twitter.com/charlidamelio",
       "instagram": "https://instagram.com/charlidamelio",
+      "triller": "https://triller.co/m/@charlidamelio",
       "tiktok": "https://tiktok.com/@charlidamelio",
       "youtube": "https://youtube.com/c/charlidamelio",
-      "snapchat": "https://www.snapchat.com/add/damelioc"
+      "snapchat": "https://www.snapchat.com/add/damelioc",
+      "website": "https://www.charlidamelio.com"
     },
     "links": [
       {
         "url": "https://www.charlidamelio.com",
-        "title": "official website of charli d'amelio"
+        "title": "official website of charli d'amelio",
+        "id": "61ec9244a0fa03.74794466",
+        "type": "TYPE_BUTTON"
       },
       {
-        "url": "https://facebook.com/thecharlidamelio",
-        "title": null
-      },
-      {
-        "url": "https://twitter.com/charlidamelio",
-        "title": null
-      },
-      {
-        "url": "https://instagram.com/charlidamelio",
-        "title": null
-      },
-      {
-        "url": "https://triller.co/m/@charlidamelio",
-        "title": null
-      },
-      {
-        "url": "https://tiktok.com/@charlidamelio",
-        "title": null
-      },
-      {
-        "url": "https://youtube.com/c/charlidamelio",
-        "title": null
-      },
-      {
-        "url": "https://www.snapchat.com/add/damelioc",
-        "title": null
+        "url": "https://www.hollisterco.com/shop/us/social-tourist/shop-all?%20cmp=SOC:SPR21:ST:D:US:Brand:X:BioINF:PInf:X:X:CD:STHP-ST:x:Charli%20IG",
+        "title": "shop social tourist january 2022 drop",
+        "id": "2733218",
+        "type": "TYPE_BIOLINK"
       }
-    ]
+    ],
+    "other": []
   },
   "linkedin-ad-library-ad-details": {
     "platform": "linkedin_ad_library",
@@ -4278,10 +2371,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "country": "Canada",
         "impressions": "3%"
-      },
-      {
-        "country": "United Kingdom",
-        "impressions": "less than 1%"
       }
     ],
     "targeting": {
@@ -4343,10 +2432,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "country": "Canada",
             "impressions": "3%"
-          },
-          {
-            "country": "United Kingdom",
-            "impressions": "less than 1%"
           }
         ],
         "targeting": {
@@ -4389,37 +2474,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "countries": [
           "US"
         ]
-      },
-      {
-        "platform": "linkedin_ad_library",
-        "id": "1527291136",
-        "url": "https://www.linkedin.com/ad-library/detail/1527291136",
-        "text": "See how Rhenus scaled secure IT automation",
-        "headline": "See how Rhenus scaled secure IT automation",
-        "cta": null,
-        "landingUrl": null,
-        "adFormat": null,
-        "firstShown": null,
-        "lastShown": null,
-        "impressions": null,
-        "country": "US",
-        "advertiser": {
-          "name": "See how Rhenus scaled secure IT automation"
-        },
-        "media": [],
-        "description": null,
-        "destinationUrl": null,
-        "adDuration": null,
-        "startDate": null,
-        "endDate": null,
-        "totalImpressions": null,
-        "impressionsByCountry": [],
-        "targeting": null,
-        "carouselImages": [],
-        "paidForBy": null,
-        "countries": [
-          "US"
-        ]
       }
     ]
   },
@@ -4439,26 +2493,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "organizationType": "Public Company",
     "specialties": [
       "ecommerce",
-      "API",
-      "applications",
-      "customer service",
-      "hardware",
-      "marketplace",
-      "AR/VR",
-      "marketing automation",
-      "User Experience",
-      "Design",
-      "Production Engineering",
-      "POS",
-      "Payments",
-      "Software Engineering",
-      "Finance",
-      "Retail",
-      "Mobile Apps",
-      "Instagram",
-      "Google Pay",
-      "Dropshipping",
-      "Shipping"
+      "API"
     ],
     "headquarters": "Ottawa, ON, CA",
     "location": {
@@ -4479,46 +2514,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "name": "Spotify",
         "link": "https://se.linkedin.com/company/spotify",
-        "image": null
-      },
-      {
-        "name": "Airbnb",
-        "link": "https://www.linkedin.com/company/airbnb",
-        "image": null
-      },
-      {
-        "name": "GitLab",
-        "link": "https://www.linkedin.com/company/gitlab-com",
-        "image": null
-      },
-      {
-        "name": "Atlassian",
-        "link": "https://au.linkedin.com/company/atlassian",
-        "image": null
-      },
-      {
-        "name": "Google",
-        "link": "https://www.linkedin.com/company/google",
-        "image": null
-      },
-      {
-        "name": "HubSpot",
-        "link": "https://www.linkedin.com/company/hubspot",
-        "image": null
-      },
-      {
-        "name": "Amazon",
-        "link": "https://www.linkedin.com/company/amazon",
-        "image": null
-      },
-      {
-        "name": "Wealthsimple",
-        "link": "https://ca.linkedin.com/company/wealthsimple",
-        "image": null
-      },
-      {
-        "name": "Salesforce",
-        "link": "https://www.linkedin.com/company/salesforce",
         "image": null
       }
     ]
@@ -4548,7 +2543,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "linkedin",
         "type": "post",
         "url": "https://www.linkedin.com/posts/satyanadella_just-wrapped-our-earnings-call-it-was-a-activity-7488369807969370112-3kA1",
-        "text": "Just wrapped our earnings call. It was a very strong close to what was a record fiscal year for Microsoft.\n  \n· Annual revenue: $331B, +18%\n· MS Cloud: $214B, + 27%\n· And Azure: $100B+, +41%\n  \nAnd even bigger opportunity ahead!\n  \nI wanted to share some more perspective on two areas of focus for us:\n  \nFirst, we are building a new model system, where the harness, context, memory, and action space are separate from any one model family, thereby moving the frontier on the cost -to-outcome curve. \n  \nAnd it’s not just about cost. It also has the added benefit of business continuity and resilience because every model is substitutable. \n  \nThis is the system we are using in our products, with great results. And we are making it available for our customers via Foundry too.\n\nYou can read more about this from Mustafa Suleyman here: https://lnkd.in/gQwfAbuc\n \nSecond, when it comes to Copilot, we are innovating rapidly, from chat to Cowork to Autopilots.\n  \nWe have also been super focused on improving the quality and performance of Copilot. Over the last three quarters, user satisfaction scores have doubled. And this quarter alone, we cut latency by 25 percent.\n  \nCopilot usage intensity speaks for itself:\n  \n· Number of conversations per user nearly doubled year over year\n· Average weekly engagement on par with Outlook and Teams\n· Number of customers with over 50K seats up 7X Y/Y\n· Customers deploying Copilot to majority of information workers, up nearly 75% QoQ\n  \nAnd this quarter we will bring all our Copilot experiences together in one “super app” spanning both our consumer and commercial experiences. I’m greatly looking forward to this!\n  \nA big Thank you to our employees and to our customers for continuing to put their trust in us. Read more here: https://lnkd.in/gR3xdrUb",
+        "text": "Just wrapped our earnings call. It was a very strong close to what was a record fiscal year for Microsoft.\n  \n· Annual revenue: $331B, +18%\n· MS Cloud: $214B, + 27%\n· And Azure: $100B+, +41%\n  \nAnd even bigger opportunity ahead!\n  \nI wanted to share some more perspective on two areas of focus for us:\n  \nFirst, we are building a new model system, where the harness, context, memory, and action space are separate from any one model family, thereby moving the frontier on the cost -to-outcome curve. \n  \nAnd it’s not just about cost. It also has the added benefit of business continuity and resilience because every model is substitutable. \n  \nThis is the system we are using in our products, with great results. And we are making it available for our customers via Foundry too.\n\nYou can read more about this from Mustafa Suleyman here: https://lnkd.in/gQwfAbuc\n \nSecond, when it comes to Copilot, we are innovating rapidly, from chat to Cowork to Autopilots.\n  \nWe have also been super focused on improving the quality and performance of Copilot. Over the last three quarters, user satisfaction scor …",
         "publishedAt": "2026-07-29T23:08:09.380Z",
         "author": {
           "name": "Satya Nadella",
@@ -4560,57 +2555,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "reposts": null
         },
         "id": "7488369807969370112"
-      },
-      {
-        "platform": "linkedin",
-        "type": "post",
-        "url": "https://www.linkedin.com/posts/satyanadella_today-we-are-announcing-a-series-of-updates-activity-7487546696537923584-Itvi",
-        "text": "Today, we are announcing a series of updates that give customers frontier-grade security at half the cost.\n  \nMAI-Cyber-1-Flash is our first cybersecurity model, built ground up to find the most challenging vulnerabilities in complex code bases. When combined with MDASH, it delivers world-class performance at 50 percent of the cost of leading models. \n  \nWe are bringing this capability to market through Project Perception, a complete agentic security offering grounded in real-world signals and security workflows. Teams of specialized agents work together to simulate attacks, detect and triage/investigate, and fix and remediate. \n  \nThis is the benefit of building the harness, context/signals, and action space separate from one model family. By combining specialized models and data with the right agents, tools, security context, and harness, we can advance the frontier of cost to outcome.\n\nLearn more: \nhttps://lnkd.in/gZHUCuQp",
-        "publishedAt": "2026-07-27T16:37:24.328Z",
-        "author": {
-          "name": "Satya Nadella",
-          "url": "https://www.linkedin.com/in/satyanadella"
-        },
-        "engagement": {
-          "likes": 10741,
-          "comments": 426,
-          "reposts": null
-        },
-        "id": "7487546696537923584"
-      },
-      {
-        "platform": "linkedin",
-        "type": "post",
-        "url": "https://www.linkedin.com/posts/hayetegallot_how-nationwide-stays-ahead-of-attackers-with-activity-7487601519991676928-_q_y",
-        "text": "The measure of AI isn't what it finds. It's what it helps customers prevent. Using Project Perception, Nationwide Building Society compressed what was once four weeks of threat intelligence analysis into four hours, and they are using these insights to take action. \n\nI'm grateful to our partners at Nationwide for helping us shape Perception’s development through candid feedback and real-world testing.   \nhttps://lnkd.in/gd-_JFut",
-        "publishedAt": "2026-07-27T20:15:15.256Z",
-        "author": {
-          "name": "Hayete Gallot",
-          "url": "https://www.linkedin.com/in/hayetegallot"
-        },
-        "engagement": {
-          "likes": 340,
-          "comments": 16,
-          "reposts": null
-        },
-        "id": "7487601519991676928"
-      },
-      {
-        "platform": "linkedin",
-        "type": "post",
-        "url": "https://www.linkedin.com/posts/activity-7487549499318460416-mXWb",
-        "text": "500 million+ members | Manage your professional identity. Build and engage with your professional network. Access knowledge, insights and opportunities.",
-        "publishedAt": null,
-        "author": {
-          "name": "LinkedIn",
-          "url": "https://www.linkedin.com/company/microsoft"
-        },
-        "engagement": {
-          "likes": null,
-          "comments": null,
-          "reposts": null
-        },
-        "id": "7487549499318460416"
       }
     ],
     "nextCursor": "5",
@@ -4651,20 +2595,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "wordCount": 24,
         "charStart": 89,
         "charEnd": 223
-      },
-      {
-        "text": "In June’s edition of The Monthly Tech-In, we’re sharing stories from Build and beyond about the developers, founders and communities who are using AI to tackle real-world challenges, from helping creators protect their work to advancing more inclusive AI systems.",
-        "index": 2,
-        "wordCount": 40,
-        "charStart": 227,
-        "charEnd": 490
-      },
-      {
-        "text": "Read more about the people and innovations who are shaping what's next:",
-        "index": 3,
-        "wordCount": 12,
-        "charStart": 493,
-        "charEnd": 564
       }
     ],
     "wordCount": 89,
@@ -4700,7 +2630,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "linkedin",
         "type": "post",
         "url": "https://www.linkedin.com/posts/edward-hallett-9aa4406b_ai-is-a-tool-we-need-to-remember-that-activity-7460399963181617152-BX0D",
-        "text": "AI is a tool. \n\nWe need to remember that because it presents as intelligence. But intelligence is sentient.\n\nThat’s why we call it *artificial* intelligence \n\nIt’s artificial because ai only appears to create meaning. \n\nIn fact, there can be no meaning created by ai. \n\nMeaning only ever persists in the humans who engage with ai. (Meaning is the unique condition of being human).  \n\nThink of ai as a ‘magic mirror’ or an ‘echo chamber’. It returns our words and images to us with heightened grandeur and clarity.\n\nI’m grateful for AI. \n\nAi can help with the task of route optimization or translation.\n\nBut it cannot establish whether the destination is worth getting to, or whether the translated text is moving (for that someone needs to be moved). \n\nSo what? \n\nRemembering that this intelligence is artificial helps us delineate what within the province of human productivity cannot for structural reasons be substituted for by ai.\n\nThis is because human beings value intelligence (sentience) in the realm of productivity.\n\nI return to my chosen advisor (broker, therapist, architect) not just because they produce the right words or images, but because they hold me in their care.\n\nIn some industries, this grounding in relationship is at the heart of productive value. \n\nIn these industries, the goal of AI is to release the full productive value of these relationships.\n\nWhen we think like this, AI allows us to celebrate the human as well as the artificial.",
+        "text": "AI is a tool. \n\nWe need to remember that because it presents as intelligence. But intelligence is sentient.\n\nThat’s why we call it *artificial* intelligence \n\nIt’s artificial because ai only appears to create meaning. \n\nIn fact, there can be no meaning created by ai. \n\nMeaning only ever persists in the humans who engage with ai. (Meaning is the unique condition of being human).  \n\nThink of ai as a ‘magic mirror’ or an ‘echo chamber’. It returns our words and images to us with heightened grandeur and clarity.\n\nI’m grateful for AI. \n\nAi can help with the task of route optimization or translation.\n\nBut it cannot establish whether the destination is worth getting to, or whether the translated text is moving (for that someone needs to be moved). \n\nSo what? \n\nRemembering that this intelligence is artificial helps us delineate what within the province of human productivity cannot for structural reasons be substituted for by ai.\n\nThis is because human beings value intelligence (sentience) in the realm of productivity.\n\nI return to my chosen advisor (broker, therapist, architect) not just bec …",
         "publishedAt": "2026-05-13T18:45:58.726Z",
         "author": {
           "name": "Edward Hallett",
@@ -4727,54 +2657,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "comments": 18
         },
         "id": "7480663649716494336"
-      },
-      {
-        "platform": "linkedin",
-        "type": "post",
-        "url": "https://www.linkedin.com/posts/arthur-c-brooks_artificial-intelligence-is-changing-the-world-activity-7467623521242972160-giS5",
-        "text": "Artificial intelligence is changing the world at extraordinary speed. But the most important question isn't what AI can do. It's what it means for us to remain fully human.\n\nIt was a pleasure to sit down with Fr. Mike Schmitz to discuss Pope Leo XIV's new encyclical on artificial intelligence, human dignity, meaning, faith, and the responsibilities we face as this technology becomes more powerful. Together, we explored how technology shapes our attention, our relationships, and ultimately our understanding of what it means to be a person.\n\nThe conversation isn't really about AI. It's about us. You can watch the full conversation here: https://lnkd.in/etTUpfFj",
-        "publishedAt": "2026-06-02T17:09:49.184Z",
-        "author": {
-          "name": "Dr. Arthur Brooks",
-          "url": "https://www.linkedin.com/in/arthur-c-brooks"
-        },
-        "engagement": {
-          "likes": 573,
-          "comments": 30
-        },
-        "id": "7467623521242972160"
-      },
-      {
-        "platform": "linkedin",
-        "type": "post",
-        "url": "https://www.linkedin.com/posts/lukas-althoff-a57756a3_artificial-intelligence-is-enabling-people-activity-7481386565726937088-ZF9q",
-        "text": "Artificial Intelligence is enabling people to do things they were not able to do before. \n\nA short personal anecdote: My mum wrote her first book a few years ago. Without any experience, she submitted it to a few publishers and was rejected. She recently learned to use AI's help in spell-checking, layout design, and self-publish her book.\n\nMany of us have stories like my mum's. And our research paper provides a rigorous basis for optimism that these anecdotes will add up to AI working as an equalizer in the labor market, helping lower-skilled workers compete with higher-skilled ones more effectively.",
-        "publishedAt": "2026-07-10T16:39:14.695Z",
-        "author": {
-          "name": "Lukas Althoff",
-          "url": "https://www.linkedin.com/in/lukas-althoff-a57756a3"
-        },
-        "engagement": {
-          "likes": 63,
-          "comments": 1
-        },
-        "id": "7481386565726937088"
-      },
-      {
-        "platform": "linkedin",
-        "type": "post",
-        "url": "https://www.linkedin.com/posts/addyosmani_ai-leadership-motivation-activity-7397899139424043008-SPz7",
-        "text": "\"Critical thinking in the age of AI\": human critical thinking still matters\n\nMy latest article: https://lnkd.in/gHzdswnW\n\nCritical thinking has never mattered more than it does in this AI-heavy chapter of our industry. We can ask an assistant to generate code, propose a system design, or summarize a problem in seconds, but none of that replaces the human ability to question, verify, and think independently.\n\nIn my latest newsletter, I explore how to apply this classic framework to AI:\n\n✅ Who: Don’t rely on AI as an oracle. Treat it like a junior intern and verify the output.\n\n✅ What: Define the real problem before rushing to a solution. Don't just fix the symptom.\n\n✅ Where: Context is king. A fix that works in a sandbox might break in production.\n\n✅ When: Know the difference between a quick triage (heuristic) and a deep root-cause analysis.\n\n✅ Why: Use the \"5 Whys\" technique to uncover underlying causes, not just surface-level issues.\n\n✅ How: Communicate with evidence and data, not just opinions or \"gut feelings.\"\n\nThe goal isn't to stop using AI, but to pair it with \"humble curiosity\" - the willingness to ask if we might be missing something.\n\nThe more we rely on AI to accelerate the work, the more important this mindset becomes. Critical thinking is what keeps us honest. It keeps us from shipping band-aids. It helps us avoid chasing trendy ideas that don’t solve real user problems. And it keeps our teams aligned on the decisions that matter.\n\n#ai #leadership #motivation #programming #lifeatgoogle",
-        "publishedAt": "2025-11-22T07:30:01.114Z",
-        "author": {
-          "name": "Addy Osmani",
-          "url": "https://www.linkedin.com/in/addyosmani"
-        },
-        "engagement": {
-          "likes": 325,
-          "comments": 21
-        },
-        "id": "7397899139424043008"
       }
     ]
   },
@@ -4802,18 +2684,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "linktree-page": {
     "platform": "linktree",
     "url": "https://linktr.ee/miguelangeles",
-    "id": "15278008",
+    "id": 15278008,
     "username": "miguelangeles",
-    "handle": "miguelangeles",
-    "displayName": "MIGUEL ANGELES",
     "name": "MIGUEL ANGELES",
     "description": "☆☆☆☆ IRL ANGEL ☆☆☆☆\nψ EMBRACE CHAOS ψ",
     "avatar": "https://ugc.production.linktr.ee/d3141538-f586-4f3f-bc9a-a82fbebab798_DEATHRATTLE-slowed-COVER.jpeg",
     "verified": false,
     "verticals": [
       "music",
-      "creative",
-      "arts-entertainment"
+      "creative"
     ],
     "linkPlatforms": [
       "TikTok",
@@ -4836,47 +2715,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "460281204",
         "url": "https://open.spotify.com/track/62HnBMEdZjeFCd2T8g37T8?si=7bd35dd0e9f24d65",
         "thumbnail": "https://ugc.production.linktr.ee/3bd59146-cd44-4187-9601-4341b21070d2_ab67616d0000b2739ad10104c60fb9deff5b7f34.jpeg"
-      },
-      {
-        "title": "watch \"INNOCENCE\" video",
-        "type": "YOUTUBE_VIDEO",
-        "id": "460285424",
-        "url": "https://www.youtube.com/watch?v=JINmh9O-sjU",
-        "thumbnail": "https://ugc.production.linktr.ee/49049fb3-97fb-4947-b847-46c9c2f84384_maxresdefault.jpeg"
-      },
-      {
-        "title": "stream \"OBSESSED\"",
-        "type": "SPOTIFY_SONG",
-        "id": "460281376",
-        "url": "https://open.spotify.com/track/0ipHYEQf07qoReAWhVC3zO?si=8fbaee843716443f",
-        "thumbnail": "https://ugc.production.linktr.ee/8459222c-2e13-47c2-8827-55f6a4af585d_ab67616d0000b273fbf50ee1e8be73b31fa177e2.jpeg"
-      },
-      {
-        "title": "MERCH",
-        "type": "PRODUCT",
-        "id": "233892723",
-        "url": "https://irlangel.com",
-        "thumbnail": "https://ugc.production.linktr.ee/b59a3236-2d8a-4704-9c8b-16eb7acd44cb_embrace-chaos-hatv1.jpeg"
-      },
-      {
-        "title": "ALL STREAMING LINKS",
-        "type": "CLASSIC",
-        "id": "233894119",
-        "url": "https://songwhip.com/miguelangeles"
-      },
-      {
-        "title": "SPOTIFY PLAYLIST",
-        "type": "CLASSIC",
-        "id": "80367589",
-        "url": "https://open.spotify.com/playlist/1m0U7ud6CCPzMO8oLTMi3B?si=d7cb7f6e6bc94d3b",
-        "thumbnail": "https://ugc.production.linktr.ee/aPvlFMFwRO6UxX7z7Ajb_95C7BCA3-481E-426C-8EEC-E4C868C6C79D.jpg"
-      },
-      {
-        "title": "SOUNDCLOUD PLAYLIST",
-        "type": "SOUNDCLOUD_PLAYLIST",
-        "id": "102824974",
-        "url": "https://soundcloud.com/miguelangeles/sets/irl-angel-vibes",
-        "thumbnail": "https://ugc.production.linktr.ee/dspU8yloQW2ViLu1ZNGA_7B24137C-D995-425C-8670-45D8EEFBBBF5.JPG"
       }
     ],
     "socials": [
@@ -4887,52 +2725,82 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "type": "TIKTOK",
         "url": "https://tiktok.com/@irlangel"
-      },
-      {
-        "type": "SPOTIFY",
-        "url": "https://open.spotify.com/artist/14xRX3JR8H4RWh8R7V3fvZ?si=EgRxWIPiRcaEHtSnqk5PAQ"
-      },
-      {
-        "type": "YOUTUBE",
-        "url": "https://www.youtube.com/watch?v=xiFUzOJaiC4"
-      },
-      {
-        "type": "SOUNDCLOUD",
-        "url": "https://soundcloud.com/miguelangeles"
-      },
-      {
-        "type": "APPLE_MUSIC",
-        "url": "https://music.apple.com/ca/artist/miguel-angeles/1209423162"
-      },
-      {
-        "type": "EMAIL_ADDRESS",
-        "url": "mailto:miguel@irlangel.com"
       }
     ],
     "socialAccounts": {
       "instagram": "https://instagram.com/miguelangeles",
       "tiktok": "https://tiktok.com/@irlangel",
       "spotify": "https://open.spotify.com/artist/14xRX3JR8H4RWh8R7V3fvZ?si=EgRxWIPiRcaEHtSnqk5PAQ",
-      "youtube": "https://www.youtube.com/@MiguelAngeles",
+      "youtube": "https://www.youtube.com/watch?v=xiFUzOJaiC4",
       "soundcloud": "https://soundcloud.com/miguelangeles",
       "appleMusic": "https://music.apple.com/ca/artist/miguel-angeles/1209423162"
     }
   },
   "pillar-page": {
     "platform": "pillar",
-    "url": "https://pillar.io/example",
-    "username": "example",
-    "name": "Example Creator",
-    "description": "Creator bio",
-    "linkCount": 2,
+    "id": "d8a5cbb4-a64d-44f2-830d-27a489bbc608",
+    "url": "https://pillar.io/angelstrife",
+    "username": "angelstrife",
+    "handle": "angelstrife",
+    "displayName": "Ángel Strife",
+    "name": "Ángel Strife",
+    "firstName": "Angel",
+    "lastName": "Blanco",
+    "avatar": "https://res.cloudinary.com/pillario/image/upload/user-image/page/96024b21-566f-405a-b4f2-2784526b380b",
+    "location": "México",
+    "email": "angelrafaelcovablanco@gmail.com",
+    "linkCount": 5,
+    "socials": {
+      "tiktok": "https://tiktok.com/@angelstrifeoficial",
+      "spotify": "https://open.spotify.com/artist/3Lse4fAlOchY8msotsYMA6?si=4nKqeTSRRsSDoNj1tfvNtA",
+      "twitter": "https://twitter.com/SoyAngelStrife",
+      "youtube": "https://www.youtube.com/channel/UCgZSHuBjHSFADbFQOCN1ifg",
+      "facebook": "https://www.facebook.com/AngelStrifeOficial",
+      "linkedin": "https://mx.linkedin.com/in/angelcovablanco",
+      "instagram": "https://www.instagram.com/angelstrifeoficial",
+      "soundcloud": "https://soundcloud.com/contienda-records"
+    },
+    "bio": "Awarded as Ángel Strife for the nomination for best #RealityShow at the KidsChoiceAwards 2020 for his participation in the TheVoice México Season 9 Program with the Acunmedya production company on the television network TvAzteca, Awarded in Film Score for the Epstein Mention of the Fotogenia Festival 2020, as well as the Special Selection of the Hidalgo Film Fest 2020, Guanajuato 3.0 Experimental Film Festival 2020 & the international festival of film sur l'art \"Le Fife\" 2021 (Canada)",
+    "description": "Awarded as Ángel Strife for the nomination for best #RealityShow at the KidsChoiceAwards 2020 for his participation in the TheVoice México Season 9 Program with the Acunmedya production company on the television network TvAzteca, Awarded in Film Score for the Epstein Mention of the Fotogenia Festival 2020, as well as the Special Selection of the Hidalgo Film Fest 2020, Guanajuato 3.0 Experimental Film Festival 2020 & the international festival of film sur l'art \"Le Fife\" 2021 (Canada)",
     "links": [
       {
-        "title": "Website",
-        "url": "https://example.com"
+        "id": "669fef70-1ba7-11ee-b33b-e5396daf72e9",
+        "type": "spotify",
+        "title": "30 Mil Pies De Altura Para Morir de Amor",
+        "url": "https://open.spotify.com/album/14jqUYFbuBs0HcftvQ7jC3?si=bX_bInR7R9Wu-mC9_77Fvw&context=spotify%3Aalbum%3A14jqUYFbuBs0HcftvQ7jC3",
+        "clicks": 0,
+        "order": 2
       },
       {
-        "title": "YouTube",
-        "url": "https://www.youtube.com/@example"
+        "id": "657440b0-1ba7-11ee-b33b-e5396daf72e9",
+        "type": "instagram",
+        "title": "SINCRONICIDAD",
+        "url": "https://www.instagram.com/contiendarecords",
+        "clicks": 5,
+        "order": null,
+        "description": "Sigue Nuestra Contienda"
+      }
+    ],
+    "products": [
+      {
+        "id": "254c8681-1d52-11ee-b065-850167411bb1",
+        "title": "\"30 Mil Pies De Altura Para Morir de Amor\" - LP",
+        "name": "\"30 Mil Pies De Altura Para Morir de Amor\" - LP",
+        "url": "https://angel-strife.ueniweb.com/products/merchandise/30-mil-pies-de-altura-para-morir-de-amor-lp-especial-edition-vynil-deluxe-53106871",
+        "description": "Especial Edition Vynil Deluxe",
+        "image": "https://athlane-file-management-prod.s3.amazonaws.com/a925f7b5-77ba-4095-b755-27b2bc221baa",
+        "price": 0,
+        "showPrice": false
+      },
+      {
+        "id": "1ade72a0-5720-11ee-abe2-f1c4530bf5e3",
+        "title": "Sweater Negro Gōruden Tsukoyomi (Edición Especial)",
+        "name": "Sweater Negro Gōruden Tsukoyomi (Edición Especial)",
+        "url": "https://angel-strife.ueniweb.com/products/merchandise/sweater-negro-goruden-tsukoyomi-edicion-especial-52958670",
+        "description": "Sweater Negro Gōruden Tsukoyomi (Edición Especial) en todas las tallas con diseño Tsukoyomi (Dios de la Luna) & letras Rojas Sweater Negro. disponible en todas las tallas y entrega en territorio nacional e internacional.",
+        "image": "https://athlane-file-management-prod.s3.amazonaws.com/8b2ac54c-21cd-4339-9cef-49bec35f26b4",
+        "price": 0,
+        "showPrice": false
       }
     ]
   },
@@ -5010,78 +2878,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "saves": 1,
         "imageOriginal": "https://i.pinimg.com/originals/cc/2a/6a/cc2a6a49424bedc1aa29cdeb6195a48b.jpg",
-        "repinCount": 0
-      },
-      {
-        "platform": "pinterest",
-        "id": "264938390611779116",
-        "url": "https://www.pinterest.com/pin/264938390611779116/",
-        "description": "Bring the warmth and character of a heritage home into your own with our Carolina 6-Drawer Dresser. Layer artwork and home decor for a collected, lived-in feel. Tap to shop our Fall collection!",
-        "domain": "Uploaded by user",
-        "image": "https://i.pinimg.com/564x/47/73/ec/4773ecb4989747640f6f288a2d2a0946.jpg",
-        "images": {
-          "564x": {
-            "url": "https://i.pinimg.com/564x/47/73/ec/4773ecb4989747640f6f288a2d2a0946.jpg",
-            "width": 564,
-            "height": 846
-          },
-          "originals": {
-            "url": "https://i.pinimg.com/originals/47/73/ec/4773ecb4989747640f6f288a2d2a0946.jpg"
-          }
-        },
-        "isVideo": false,
-        "dominantColor": "#2e1e11",
-        "board": {
-          "name": "Rustic Lodge Lookbook",
-          "url": "https://www.pinterest.com/potterybarn/rustic-lodge-lookbook/",
-          "pinCount": 13,
-          "followers": 1021580
-        },
-        "author": {
-          "username": "potterybarn",
-          "displayName": "Pottery Barn"
-        },
-        "originAuthor": {
-          "id": "264938527987338255"
-        },
-        "saves": 1,
-        "imageOriginal": "https://i.pinimg.com/originals/47/73/ec/4773ecb4989747640f6f288a2d2a0946.jpg",
-        "repinCount": 0
-      },
-      {
-        "platform": "pinterest",
-        "id": "264938390611779108",
-        "url": "https://www.pinterest.com/pin/264938390611779108/",
-        "description": "Breakfast is served. 🍳 Our Jackson Stoneware Oval Serving Platter is perfect for those slow, cozy mornings at the cabin surrounded by family. Tap to shop our Jackson Stoneware serveware collection.",
-        "domain": "Uploaded by user",
-        "image": "https://i.pinimg.com/564x/c4/a3/66/c4a3663c41573aab6b3fad0be559bbbd.jpg",
-        "images": {
-          "564x": {
-            "url": "https://i.pinimg.com/564x/c4/a3/66/c4a3663c41573aab6b3fad0be559bbbd.jpg",
-            "width": 564,
-            "height": 846
-          },
-          "originals": {
-            "url": "https://i.pinimg.com/originals/c4/a3/66/c4a3663c41573aab6b3fad0be559bbbd.jpg"
-          }
-        },
-        "isVideo": false,
-        "dominantColor": "#705743",
-        "board": {
-          "name": "Rustic Lodge Lookbook",
-          "url": "https://www.pinterest.com/potterybarn/rustic-lodge-lookbook/",
-          "pinCount": 13,
-          "followers": 1021580
-        },
-        "author": {
-          "username": "potterybarn",
-          "displayName": "Pottery Barn"
-        },
-        "originAuthor": {
-          "id": "264938527987338255"
-        },
-        "saves": 1,
-        "imageOriginal": "https://i.pinimg.com/originals/c4/a3/66/c4a3663c41573aab6b3fad0be559bbbd.jpg",
         "repinCount": 0
       }
     ],
@@ -5203,36 +2999,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "displayName": "Christi Giannetti",
           "followers": 255
         }
-      },
-      {
-        "platform": "pinterest",
-        "id": "1128996200361011408",
-        "url": "https://www.pinterest.com/pin/1128996200361011408/",
-        "title": "The Missing Piece In Your Living Room Might Be Lighting",
-        "description": "Great rooms aren't always filled with more furniture — they often have better lighting ✨\n\nThis elegant floor lamp brings warmth, depth, and character to a space while creating the cozy glow that makes a home feel welcoming. It's perfect for anyone searching for floor lamp aesthetic inspiration, home lighting ideas for living rooms, or a statement piece that instantly upgrades the vibe.\n\nIf you love beautiful interiors and easy decorating ideas, you can find the full details in the link 🤍",
-        "destinationUrl": "https://www.ebay.com/itm/137021246378?amdata=enc:AQALAAAAoGfYFPkwiKCW4ZNSs2u11xDAO/sD8pUVTTSi6RT2Xikfuo2Dp8t0xbVTehCaXCERik/Rgu9Q8sdVVpQCXAL2xlyMzPWbz2UFMg7JonjwH2b2hpLpVb1Lu0F7HZ%2BnBbVjYQU1mAGtivLje06cloH25c%2BbtTRVjzKeMbmpKyPVEIuQn2v95m%2BFd67bxNmI7DBEkfZ5WChdGmtik28CuQk2nWE%3D&mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=5339156686&customid=Kogadecor&toolid=10001&mkevt=1",
-        "image": "https://i.pinimg.com/originals/b6/50/5e/b6505ec536a038c53dd960c4554c682b.png",
-        "saves": 1,
-        "publishedAt": "Wed, 24 Jun 2026 12:49:49 +0000",
-        "board": {
-          "name": "Aesthetic Home Lighting",
-          "url": "https://www.pinterest.com/kogadecor/aesthetic-home-lighting/"
-        },
-        "author": {
-          "username": "kogadecor",
-          "displayName": "KOGA",
-          "followers": 0
-        }
-      },
-      {
-        "platform": "pinterest",
-        "id": "Rp8MMDIq",
-        "url": "https://www.pinterest.com/pin/Rp8MMDIq/"
-      },
-      {
-        "platform": "pinterest",
-        "id": "-8702786212179256373",
-        "url": "https://www.pinterest.com/pin/-8702786212179256373/"
       }
     ]
   },
@@ -5269,57 +3035,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "sectionCount": 0,
         "coverImage": "https://i.pinimg.com/474x/13/37/dd/1337dd421b303196c96002b735618cc3.jpg",
         "createdAt": "2026-07-27T18:39:04Z",
-        "owner": {
-          "username": "potterybarn",
-          "displayName": "Pottery Barn"
-        }
-      },
-      {
-        "platform": "pinterest",
-        "id": "264938459268357928",
-        "name": "Indigo Blues Lookbook",
-        "url": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/",
-        "description": null,
-        "privacy": "public",
-        "pinCount": 24,
-        "followers": null,
-        "sectionCount": 0,
-        "coverImage": "https://i.pinimg.com/474x/01/5d/31/015d313e6442e20b89dae9bf5aa3bb1b.jpg",
-        "createdAt": "2026-07-09T15:50:19Z",
-        "owner": {
-          "username": "potterybarn",
-          "displayName": "Pottery Barn"
-        }
-      },
-      {
-        "platform": "pinterest",
-        "id": "264938459268356753",
-        "name": "The Kittles' Cozy Cabin Transformation",
-        "url": "https://www.pinterest.com/potterybarn/the-kittles-cozy-cabin-transformation/",
-        "description": null,
-        "privacy": "public",
-        "pinCount": 16,
-        "followers": null,
-        "sectionCount": 0,
-        "coverImage": "https://i.pinimg.com/474x/7e/8a/91/7e8a91975886b50e4cf66f1bf02542c4.jpg",
-        "createdAt": "2026-06-11T21:19:19Z",
-        "owner": {
-          "username": "potterybarn",
-          "displayName": "Pottery Barn"
-        }
-      },
-      {
-        "platform": "pinterest",
-        "id": "264938459268356442",
-        "name": "4th of July Shop",
-        "url": "https://www.pinterest.com/potterybarn/4th-of-july-shop/",
-        "description": null,
-        "privacy": "public",
-        "pinCount": 33,
-        "followers": null,
-        "sectionCount": 0,
-        "coverImage": "https://i.pinimg.com/474x/8a/f2/46/8af2469b8a63acbaa4f49d724c37a360.jpg",
-        "createdAt": "2026-06-03T19:22:23Z",
         "owner": {
           "username": "potterybarn",
           "displayName": "Pottery Barn"
@@ -5364,57 +3079,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "displayName": "Pottery Barn",
           "followers": 1122723
         }
-      },
-      {
-        "platform": "pinterest",
-        "id": "264938390611768272",
-        "url": "https://www.pinterest.com/pin/264938390611768272/",
-        "description": "Soft plaid flannel meets rustic design to create a table setting that's warm, welcoming, and made for gathering. Layer plaid table linens with timeless dinnerware and natural textures for a cozy fall table. Tap to shop one of our favorite table settings.",
-        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&cm_cat=Pinterest&cm_pla=stpin&cm_ite=rusticlodgetablesetting",
-        "image": "https://i.pinimg.com/564x/5a/ae/12/5aae12341bb187a4053a9ced43e2f700.jpg",
-        "board": {
-          "name": "Rustic Lodge Lookbook",
-          "url": "https://www.pinterest.com/potterybarn/rustic-lodge-lookbook/"
-        },
-        "author": {
-          "username": "potterybarn",
-          "displayName": "Pottery Barn",
-          "followers": 1122723
-        }
-      },
-      {
-        "platform": "pinterest",
-        "id": "264938390611768263",
-        "url": "https://www.pinterest.com/pin/264938390611768263/",
-        "description": "Bring subtle color and rich texture to your living room sofa by layering our mix of decorative throw pillows. Mix prints, patterns, and soft textures to create a living room that feels collected, cozy, and timeless.",
-        "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/rustic-lodge/?cm_ven=OrganicSocial&cm_cat=Pinterest&cm_pla=stpin&cm_ite=rusticlodgepillows",
-        "image": "https://i.pinimg.com/564x/13/37/dd/1337dd421b303196c96002b735618cc3.jpg",
-        "board": {
-          "name": "Rustic Lodge Lookbook",
-          "url": "https://www.pinterest.com/potterybarn/rustic-lodge-lookbook/"
-        },
-        "author": {
-          "username": "potterybarn",
-          "displayName": "Pottery Barn",
-          "followers": 1122723
-        }
-      },
-      {
-        "platform": "pinterest",
-        "id": "4598878985126594944",
-        "url": "https://www.pinterest.com/pin/4598878985126594944/",
-        "description": "Construction Slope arm. Swivel mechanism allows chair to turn 360deg.. Standard cushions have a down-blend-wrapped core for a softer feel and extra comfort. No-sag steel sinuous springs provides cushion support. Expertly crafted, kiln-dried engineered wood frame with mortise-and-tenon joinery, which provides exceptional structural integrity. Contract Grade: Thoughtfully designed and expertly engineered to meet rigorous testing standards and best practices from select ANSI/BIFMA testing protocols. Quality Exclusively designed and masterfully upholstered at our Sutter Street Factory from USA and Imported materials. Care Vacuum cushions regularly. To prevent fading, keep fabric out of direct sunlight. Blot spills immediately with a clean colorfast towel or sponge. Assembly White Glove Service",
-        "destinationUrl": "https://www.potterybarn.com/products/beaumont-upholstered-swivel-chair/?catalogId=84&sku=1078915&cm_ven=organicsocial&cm_cat=pinterest&cm_pla=organic&cm_ite=%7Bproduct_id%7D/",
-        "image": "https://i.pinimg.com/564x/03/b6/50/03b650cdee48f68e6a965f3d4a43338e.jpg",
-        "board": {
-          "name": "Products",
-          "url": "https://www.pinterest.com/potterybarn/_products/"
-        },
-        "author": {
-          "username": "potterybarn",
-          "displayName": "Pottery Barn",
-          "followers": 1122723
-        }
       }
     ]
   },
@@ -5452,25 +3116,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://www.reddit.com/r/worldnews/comments/1v9vtop/japans_population_falls_below_120_million_for/p0gpy2l/",
         "parentId": "t3_1v9vtop",
         "depth": 0,
-        "isSubmitter": false,
-        "edited": false,
-        "stickied": false,
-        "distinguished": null,
-        "controversiality": 0,
-        "subreddit": "worldnews"
-      },
-      {
-        "id": "p0gyjgf",
-        "author": "Lietenantdan",
-        "authorFullname": "t2_15w5m0",
-        "text": "And by early we mean the time you were actually supposed to leave.",
-        "upvotes": 4919,
-        "score": 4919,
-        "downs": 0,
-        "publishedAt": "2026-07-29T14:02:18.000Z",
-        "url": "https://www.reddit.com/r/worldnews/comments/1v9vtop/japans_population_falls_below_120_million_for/p0gyjgf/",
-        "parentId": "t1_p0gpy2l",
-        "depth": 1,
         "isSubmitter": false,
         "edited": false,
         "stickied": false,
@@ -5553,30 +3198,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "wordCount": 1,
         "charStart": 94,
         "charEnd": 103
-      },
-      {
-        "text": "EffingWasps: Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme",
-        "speaker": "EffingWasps",
-        "index": 2,
-        "wordCount": 19,
-        "charStart": 105,
-        "charEnd": 233
-      },
-      {
-        "text": "b407driver: Become? It has always been the greatest (unsolved) challenge.",
-        "speaker": "b407driver",
-        "index": 3,
-        "wordCount": 10,
-        "charStart": 235,
-        "charEnd": 308
-      },
-      {
-        "text": "Waarm: The current biggest challenge is funding.",
-        "speaker": "Waarm",
-        "index": 4,
-        "wordCount": 7,
-        "charStart": 310,
-        "charEnd": 358
       }
     ],
     "wordCount": 51,
@@ -5640,78 +3261,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "flair": null,
         "nsfw": false,
         "thumbnail": "https://external-preview.redd.it/MvcbMbmZOw99iMdDsy1JbsvZKf_5VGs-WQ1y5lrYGwo.jpeg?width=140&height=78&auto=webp&s=ff7d6360b316c1006ac4c27398dfc41df784e772"
-      },
-      {
-        "platform": "reddit",
-        "id": "1oqvn0t",
-        "name": "t3_1oqvn0t",
-        "url": "https://www.reddit.com/r/askastronomy/comments/1oqvn0t/james_webbs_5_strangest_discoveries_and_one_of/",
-        "title": "James Webb’s 5 strangest discoveries… and one of them completely breaks our current cosmology.",
-        "text": "Hey everyone,  \nI’ve been going down a rabbit hole recently about the James Webb Space Telescope, and some of the discoveries are honestly blowing my mind.\n\nI’m talking about things like:  \n• massive galaxies appearing way too early after the Big Bang  \n• structures that look too organized for such a young universe  \n• supermassive black holes that somehow grew insanely fast  \n• unexpected molecules detected in exoplanet atmospheres  \n• and infrared signals that still don’t have a solid explanation\n\nI’m really curious about your opinions on this:  \n**Are these just early interpretations that will be corrected later, or is Webb genuinely challenging parts of the standard cosmology model?**\n\nI figured this subreddit would have people who follow this kind of stuff closely.  \nWould love to hear what you think or if you have recommended sources.",
-        "subreddit": "askastronomy",
-        "author": "Green_Advantage_1240",
-        "authorFullname": "t2_iqg1zfviq",
-        "upvotes": 383,
-        "score": 383,
-        "downs": 0,
-        "upvoteRatio": 0.95,
-        "scoreHidden": false,
-        "comments": 39,
-        "subscriberCount": 174177,
-        "totalAwardsReceived": 0,
-        "isVideo": false,
-        "publishedAt": "2025-11-07T14:19:46.000Z",
-        "flair": null,
-        "nsfw": false,
-        "thumbnail": null
-      },
-      {
-        "platform": "reddit",
-        "id": "1ppwdeg",
-        "name": "t3_1ppwdeg",
-        "url": "https://www.reddit.com/r/spaceporn/comments/1ppwdeg/james_webb_space_telescope_confirms_1st_runaway/",
-        "title": "James Webb Space Telescope confirms 1st 'runaway' supermassive black hole (courtesy: www.space.com)",
-        "text": "Astronomers have made a truly mind-boggling discovery using the James Webb Space Telescope (JWST): a runaway black hole 10 million times larger than the sun, rocketing through space at a staggering 2.2 million miles per hour (1,000 kilometers per second).\n\nThat not only makes this the first confirmed runaway supermassive black hole, but this object is also one of the fastest-moving bodies ever detected, rocketing through its home, a pair of galaxies named the \"[Cosmic Owl](https://www.space.com/astronomy/black-holes/jwst-finds-unusual-black-hole-in-the-center-of-the-infinity-galaxy-how-can-we-make-sense-of-this),\" at 3,000 times the speed of sound at sea level here on Earth. If that isn't astounding enough, the black hole is pushing forward a literal galaxy-sized \"bow-shock\" of matter in front of it, while simultaneously dragging a 200,000 light-year-long tail behind it, within which gas is accumulating and triggering star formation.\n\nThis now-confirmed runaway supermassive black hole was [first identified by van Dokkum and colleagues](https://www.space.com/runaway-supermassive-black-hole-hubble-telescope) back in 2023 using the [Hubble Space Telescope,](https://www.space.com/15892-hubble-space-telescope.html) which spotted what appeared to be the wake of a massive body passing through space. The reason why the object was spotted is because of the impact that the passage of the black hole has on its surroundings: we now know that it drives a shock wave in the gas that is moving through, and it is this shock wave, and the wake of the shock wave behind the black hole, that we see.\n\nWith the JWST, van Dokkum's team discovered the huge displacement of the gas at the tip of the wake, where the black hole is pushing against it. The shock signatures are crystal clear, and there is just no doubt about what is happening here. The gas is pushed sideways away from the supermassive black hole at a velocity of hundreds of thousands of miles per hour (hundreds of km per second), a dynamical signature that the team saw with JWST.",
-        "subreddit": "spaceporn",
-        "author": "Professor_Moraiarkar",
-        "authorFullname": "t2_115qrunw3x",
-        "upvotes": 15111,
-        "score": 15111,
-        "downs": 0,
-        "upvoteRatio": 0.98,
-        "scoreHidden": false,
-        "comments": 704,
-        "subscriberCount": 4296779,
-        "totalAwardsReceived": 0,
-        "isVideo": false,
-        "publishedAt": "2025-12-18T17:17:07.000Z",
-        "flair": "James Webb",
-        "nsfw": false,
-        "thumbnail": "https://b.thumbs.redditmedia.com/UoaxuMRjUOvKX-4_RC7VZsk-7VLFg6jB5Vqhi0OGoQY.jpg"
-      },
-      {
-        "platform": "reddit",
-        "id": "1s1neio",
-        "name": "t3_1s1neio",
-        "url": "https://www.reddit.com/r/space/comments/1s1neio/pope_leo_james_webb_telescope_shows_us_what_the/",
-        "title": "Pope Leo: James Webb telescope shows us what the Bible couldn’t",
-        "text": null,
-        "subreddit": "space",
-        "author": "Automatic_Subject463",
-        "authorFullname": "t2_qdw3sr3p",
-        "upvotes": 7391,
-        "score": 7391,
-        "downs": 0,
-        "upvoteRatio": 0.97,
-        "scoreHidden": false,
-        "comments": 372,
-        "subscriberCount": 27940327,
-        "totalAwardsReceived": 0,
-        "isVideo": false,
-        "publishedAt": "2026-03-23T17:27:04.000Z",
-        "flair": null,
-        "nsfw": false,
-        "thumbnail": null
       }
     ]
   },
@@ -5744,13 +3293,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "kind": "all",
         "violationReason": "No sensationalist/misleading/unscientific content or titles",
         "priority": 1
-      },
-      {
-        "name": "No spam/blogspam/paywalled/pirated content",
-        "description": "This also means that news articles should be a top-level source.",
-        "kind": "link",
-        "violationReason": "No spam/blogspam/paywalled/pirated content",
-        "priority": 2
       }
     ],
     "icon": "https://styles.redditmedia.com/t5_2qh87/styles/communityIcon_ub69d1lpjlf51.png",
@@ -5809,29 +3351,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "flair": "image/gif",
         "nsfw": false,
         "thumbnail": "https://preview.redd.it/1c7e0qngjugh1.jpeg?width=140&height=140&crop=1:1,smart&auto=webp&s=904837be378093471aad053d9ce99316becf8ad9"
-      },
-      {
-        "platform": "reddit",
-        "id": "1vdd2k6",
-        "name": "t3_1vdd2k6",
-        "url": "https://www.reddit.com/r/space/comments/1vdd2k6/manned_orbital_launches_by_year_1961_2026_h1/",
-        "title": "Manned orbital launches by year, 1961 - 2026 H1",
-        "text": "Source and details: [https://spacestatsonline.com/launches/manned](https://spacestatsonline.com/launches/manned)",
-        "subreddit": "space",
-        "author": "firefly-metaverse",
-        "authorFullname": "t2_i6d091hi",
-        "upvotes": 66,
-        "score": 66,
-        "downs": 0,
-        "upvoteRatio": 0.87,
-        "comments": 10,
-        "subscriberCount": 27937807,
-        "totalAwardsReceived": 0,
-        "isVideo": false,
-        "publishedAt": "2026-08-02T08:59:23.000Z",
-        "flair": "image/gif",
-        "nsfw": false,
-        "thumbnail": "https://preview.redd.it/lofgkcmdfxgh1.png?width=140&height=77&auto=webp&s=e6b27071138762c896750a587adbc2f96356dd72"
       }
     ]
   },
@@ -5873,7 +3392,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "t3_1vdxtae",
         "url": "https://www.reddit.com/r/space/comments/1vdxtae/why_the_near_and_far_sides_of_the_moon_are_so/",
         "title": "Why the near and far sides of the moon are so different",
-        "text": "I have never seen the explanations for this difference as believable past the obvious crust being thinner on the near side allowing eruptions of magma (the dark areas) that didn't happen on the far side.\n\nI asked questions of five different sites before DeepSeek gave me the key to understanding what happened. That key is degree-one mantle convection. \n\nAfter the impact of Theia with the young Earth that resulted in the creation of the Moon, both the Earth and the Moon were molten balls of magma, with the Moon in an eccentric orbit very close to the earth. \n\nTidal friction rapidly caused the Moon to be tidally locked to the Earth so that one side continually faced Earth. However the moon was still in an eccentric orbit, so as the Moon came closer and further from Earth it flexed, causing frictional heating keeping it molten longer. However the Earth, still being enormously hot, slightly heated the surface of the moon facing it by radiative heating. The moon was some twenty times closer to earth than it is now. \n\nThis radiative heating was just enough to keep the close side a little bit hotter than the far side. This small asymmetry was enough to cause degree-one mantle convection, similar to that we see on Saturn's moon Enceladus. \n\nDegree-one mantle convection occurs when instead of normal convection of the mantle happening in lots of separate cells, as happens in the Earth, it happens as one single convection cell. ie the hot mantle from the interior rises in just one hemisphere and sinks in the other hemisphere. The radiant heat from the Earth was enough to cause this type of convection of the young Moon's mantle. \n\nOn the surface, some lighter elements solidify at a higher temperature than others, forming a scum-like crust. This eventually accumulated on the far side of the moon as the surface flow of molten rock drifted it to the sinking side of the convection cell. The end result was that the crust is thicker on the far side of the moon than on the near side, and has a somewhat different chemical composition.\n\nThe thinner crust thickness on the near side allowed asteroid impacts to break through it and allow the lava flows that we see as the dark Maria on the near side that aren't on the far side.",
+        "text": "I have never seen the explanations for this difference as believable past the obvious crust being thinner on the near side allowing eruptions of magma (the dark areas) that didn't happen on the far side.\n\nI asked questions of five different sites before DeepSeek gave me the key to understanding what happened. That key is degree-one mantle convection. \n\nAfter the impact of Theia with the young Earth that resulted in the creation of the Moon, both the Earth and the Moon were molten balls of magma, with the Moon in an eccentric orbit very close to the earth. \n\nTidal friction rapidly caused the Moon to be tidally locked to the Earth so that one side continually faced Earth. However the moon was still in an eccentric orbit, so as the Moon came closer and further from Earth it flexed, causing frictional heating keeping it molten longer. However the Earth, still being enormously hot, slightly heated the surface of the moon facing it by radiative heating. The moon was some twenty times closer to earth than it is now. \n\nThis radiative heating was just enough to keep the close side a little bi …",
         "subreddit": "space",
         "author": "grahamsuth",
         "authorFullname": "t2_17edr0epez",
@@ -5889,75 +3408,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "flair": "Discussion",
         "nsfw": false,
         "thumbnail": null
-      },
-      {
-        "platform": "reddit",
-        "id": "1vdsrwv",
-        "name": "t3_1vdsrwv",
-        "url": "https://www.reddit.com/r/space/comments/1vdsrwv/first_moon_of_the_season_with_my_new_camera_oc/",
-        "title": "First moon of the season with my new camera [OC]",
-        "text": "First light on the Moon with my recently acquired Nikon 1 J5, paired with an old TTArtisan 500mm lens and a 2× teleconverter.  \nThis image is a stack of 250 frames captured at **1/80s, ISO 200, f/8**. The final image was processed from the stacked data to maximize detail while keeping noise under control.  \nAfter a long break from lunar imaging, I think it’s fair to call this the start of a new Moon imaging season.  \nGear:  \n• Nikon 1 J5  \n• TTArtisan 500mm  \n• 2× Teleconverter  \nAcquisition:  \n• 250-frame stack  \n• 1/80s  \n• ISO 200  \n• f/8  \nHope you like it, and as always, feedback is welcome!",
-        "subreddit": "space",
-        "author": "Ok-Examination5072",
-        "authorFullname": "t2_h0l92it7",
-        "upvotes": 654,
-        "score": 654,
-        "downs": 0,
-        "upvoteRatio": 0.98,
-        "comments": 29,
-        "subscriberCount": 27939274,
-        "totalAwardsReceived": 0,
-        "isVideo": false,
-        "publishedAt": "2026-08-02T20:33:28.000Z",
-        "flair": "image/gif",
-        "nsfw": false,
-        "thumbnail": "https://preview.redd.it/jjnt0v39v0hh1.jpeg?width=140&height=140&crop=1:1,smart&auto=webp&s=61ef87d23c3e57907c4b68f4b89633c818854f41"
-      },
-      {
-        "platform": "reddit",
-        "id": "1vdot6v",
-        "name": "t3_1vdot6v",
-        "url": "https://www.reddit.com/r/space/comments/1vdot6v/all_space_questions_thread_for_week_of_august_02/",
-        "title": "All Space Questions thread for week of August 02, 2026",
-        "text": "Please sort comments by 'new' to find questions that would otherwise be buried.\n\nIn this thread you can ask any space related question that you may have.\n\nTwo examples of potential questions could be; \"How do rockets work?\", or \"How do the phases of the Moon work?\"\n\nIf you see a space related question posted in another subreddit or in this subreddit, then please politely link them to this thread.\n\n​\n\nAsk away!",
-        "subreddit": "space",
-        "author": "AutoModerator",
-        "authorFullname": "t2_6l4z3",
-        "upvotes": 2,
-        "score": 2,
-        "downs": 0,
-        "upvoteRatio": 0.56,
-        "comments": 3,
-        "subscriberCount": 27939274,
-        "totalAwardsReceived": 0,
-        "isVideo": false,
-        "publishedAt": "2026-08-02T18:00:11.000Z",
-        "flair": "Discussion",
-        "nsfw": false,
-        "thumbnail": null
-      },
-      {
-        "platform": "reddit",
-        "id": "1vcuw1e",
-        "name": "t3_1vcuw1e",
-        "url": "https://www.reddit.com/r/space/comments/1vcuw1e/neptunes_inner_moons_may_be_shattered_remains_of/",
-        "title": "Neptune's Inner Moons May Be Shattered Remains of Ancient Icy Worlds",
-        "text": null,
-        "subreddit": "space",
-        "author": "DetlefKroeze",
-        "authorFullname": "t2_4ier2",
-        "upvotes": 324,
-        "score": 324,
-        "downs": 0,
-        "upvoteRatio": 0.98,
-        "comments": 3,
-        "subscriberCount": 27939274,
-        "totalAwardsReceived": 0,
-        "isVideo": false,
-        "publishedAt": "2026-08-01T18:31:38.000Z",
-        "flair": null,
-        "nsfw": false,
-        "thumbnail": "https://external-preview.redd.it/OEHQz_n2f-ry29kH0EC58r_znFyrTNmXnA3vqqzO7-g.jpeg?width=140&height=74&auto=webp&s=3313da254ea20bbea777bab27ca083222675b499"
       }
     ]
   },
@@ -6024,151 +3474,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "url": "https://1a-1791.com/video/fwe2/b4/s8/2/W/p/J/K/WpJKA.gaa.mp4?b=1&u=6",
             "type": "mp4",
             "quality": "720p"
-          },
-          {
-            "url": "https://1a-1791.com/video/fwe2/b4/s8/2/W/p/J/K/WpJKA.caa.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "480p"
-          },
-          {
-            "url": "https://1a-1791.com/video/fwe2/b4/s8/2/W/p/J/K/WpJKA.baa.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "360p"
           }
         ],
         "shareUrl": "https://rumble.com/share/v7det4g"
-      },
-      {
-        "platform": "rumble",
-        "id": "v7defpc",
-        "url": "https://rumble.com/shorts/v7defpc",
-        "type": "short",
-        "title": "How Communists Collapse the Food Supply in 5 Easy Steps",
-        "channel": "The Dan Bongino Show",
-        "channelUrl": "https://rumble.com/c/bongino",
-        "channelHandle": "bongino",
-        "channelFollowers": 3661298,
-        "channelVerified": true,
-        "views": 6422,
-        "likes": 186,
-        "dislikes": 4,
-        "durationSeconds": 74,
-        "durationText": "1:14",
-        "publishedAt": "2026-07-28T21:35:04+00:00",
-        "thumbnail": "https://1a-1791.com/video/fww1/cb/s8/1/a/a/F/K/aaFKA.OvCc-small-How-Communists-Collapse-the..jpg",
-        "comments": 18,
-        "isLive": false,
-        "streams": [
-          {
-            "url": "https://1a-1791.com/video/fww1/cb/s8/2/a/a/F/K/aaFKA.haa.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "1080p"
-          },
-          {
-            "url": "https://1a-1791.com/video/fww1/cb/s8/2/a/a/F/K/aaFKA.gaa.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "720p"
-          },
-          {
-            "url": "https://1a-1791.com/video/fww1/cb/s8/2/a/a/F/K/aaFKA.caa.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "480p"
-          },
-          {
-            "url": "https://1a-1791.com/video/fww1/cb/s8/2/a/a/F/K/aaFKA.baa.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "360p"
-          }
-        ],
-        "shareUrl": "https://rumble.com/share/v7defpc"
-      },
-      {
-        "platform": "rumble",
-        "id": "v7deb7m",
-        "url": "https://rumble.com/shorts/v7deb7m",
-        "type": "short",
-        "title": "Fauci’s Biggest Lies EXPOSED in His Own Diary",
-        "channel": "The Dan Bongino Show",
-        "channelUrl": "https://rumble.com/c/bongino",
-        "channelHandle": "bongino",
-        "channelFollowers": 3661300,
-        "channelVerified": true,
-        "views": 6186,
-        "likes": 178,
-        "dislikes": 4,
-        "durationSeconds": 64,
-        "durationText": "1:04",
-        "publishedAt": "2026-07-28T20:02:09+00:00",
-        "thumbnail": "https://1a-1791.com/video/fww1/8b/s8/6/c/L/D/K/cLDKA.O-xb.jpg",
-        "comments": 8,
-        "isLive": false,
-        "streams": [
-          {
-            "url": "https://1a-1791.com/video/fww1/8b/s8/2/c/L/D/K/cLDKA.haa.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "1080p"
-          },
-          {
-            "url": "https://1a-1791.com/video/fww1/8b/s8/2/c/L/D/K/cLDKA.gaa.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "720p"
-          },
-          {
-            "url": "https://1a-1791.com/video/fww1/8b/s8/2/c/L/D/K/cLDKA.caa.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "480p"
-          },
-          {
-            "url": "https://1a-1791.com/video/fww1/8b/s8/2/c/L/D/K/cLDKA.baa.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "360p"
-          }
-        ],
-        "shareUrl": "https://rumble.com/share/v7deb7m"
-      },
-      {
-        "platform": "rumble",
-        "id": "v7ddmnm",
-        "url": "https://rumble.com/v7ddmnm-dear-diary-they-lied-about-everything-ep.-2562-07282026.html",
-        "type": "video",
-        "title": "Dear Diary, They Lied About Everything (Ep. 2562) - 07/28/2026",
-        "channel": "The Dan Bongino Show",
-        "channelUrl": "https://rumble.com/c/bongino",
-        "channelHandle": "bongino",
-        "channelFollowers": 3661300,
-        "channelVerified": true,
-        "views": 478253,
-        "likes": 7946,
-        "dislikes": 95,
-        "durationSeconds": 4861,
-        "durationText": "1:21:01",
-        "publishedAt": "2026-07-28T12:27:49+00:00",
-        "thumbnail": "https://1a-1791.com/video/fww1/c6/s8/1/Y/Z/v/K/YZvKA.OvCc-small-Dear-Diary-They-Lied-About-..jpg",
-        "comments": 812,
-        "isLive": false,
-        "streams": [
-          {
-            "url": "https://1a-1791.com/video/fww1/c6/s8/2/Y/Z/v/K/YZvKA.aaa.rec.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "1080p"
-          },
-          {
-            "url": "https://1a-1791.com/video/fww1/c6/s8/2/Y/Z/v/K/YZvKA.gaa.rec.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "720p"
-          },
-          {
-            "url": "https://1a-1791.com/video/fww1/c6/s8/2/Y/Z/v/K/YZvKA.caa.rec.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "480p"
-          },
-          {
-            "url": "https://1a-1791.com/video/fww1/c6/s8/2/Y/Z/v/K/YZvKA.baa.rec.mp4?b=1&u=6",
-            "type": "mp4",
-            "quality": "360p"
-          }
-        ],
-        "shareUrl": "https://rumble.com/share/v7ddmnm"
       }
     ]
   },
@@ -6201,45 +3509,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likes": 0,
         "replyCount": 1,
         "createdAt": "Monday, July 20, 2026 07:48 PM -04"
-      },
-      {
-        "platform": "rumble",
-        "id": "614672888",
-        "text": "The aides and/or the house mother often overseeing  5  of these homes housing 3 people.  Every one of their votes cancels out a citizens vote.  This is not right and it was added into \"The No Child Left Behind\" legislation.",
-        "author": {
-          "name": "connier1014",
-          "url": "https://rumble.com/user/connier1014",
-          "verified": false
-        },
-        "likes": 0,
-        "replyCount": 0,
-        "createdAt": "Tuesday, July 21, 2026 07:11 AM -04"
-      },
-      {
-        "platform": "rumble",
-        "id": "614463480",
-        "text": "yep, I worked on a campaign in TX & they(democrats) were using kids to go into nursing homes because they thought that if they were caught, the government wouldn't charge minors for voter fraud. They were paying homeless ppl to vote",
-        "author": {
-          "name": "Samoanqueen",
-          "url": "https://rumble.com/user/Samoanqueen",
-          "verified": false
-        },
-        "likes": 18,
-        "replyCount": 0,
-        "createdAt": "Friday, July 17, 2026 01:41 PM -04"
-      },
-      {
-        "platform": "rumble",
-        "id": "614477216",
-        "text": "Don’t forget the paid ballot box stuffers paid by Zuckerberg bucks… That were caught on film and Geo tracked",
-        "author": {
-          "name": "ThHess",
-          "url": "https://rumble.com/user/ThHess",
-          "verified": false
-        },
-        "likes": 17,
-        "replyCount": 1,
-        "createdAt": "Friday, July 17, 2026 05:46 PM -04"
       }
     ]
   },
@@ -6280,57 +3549,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2026-07-27T00:18:40-04:00",
         "thumbnail": "https://1a-1791.com/video/fww1/89/s8/6/y/_/8/J/y_8JA.oq1b.37.jpg",
         "comments": 7
-      },
-      {
-        "platform": "rumble",
-        "id": "v7dcipw",
-        "url": "https://rumble.com/v7dcipw-planet-earth-is-under-attack-by-space-demons.html",
-        "type": "video",
-        "title": "PLANET EARTH IS UNDER ATTACK BY SPACE DEMONS",
-        "channel": "STRANGER THAN FICTION NEWS",
-        "channelUrl": "https://rumble.com/c/c-360794",
-        "views": 1240,
-        "likes": 23,
-        "dislikes": 1,
-        "durationSeconds": 1134,
-        "durationText": "18:54",
-        "publishedAt": "2026-07-27T16:34:03-04:00",
-        "thumbnail": "https://1a-1791.com/video/fwe2/97/s8/6/e/l/j/K/eljKA.oq1b.4.jpg",
-        "comments": 12
-      },
-      {
-        "platform": "rumble",
-        "id": "v7dci9i",
-        "url": "https://rumble.com/v7dci9i-dont-force-yourself-to-be-good-twitterx-space.html",
-        "type": "video",
-        "title": "Don't Force Yourself to be GOOD! Twitter/X Space",
-        "channel": "Freedomain",
-        "channelUrl": "https://rumble.com/c/freedomain",
-        "views": 841,
-        "likes": 9,
-        "dislikes": null,
-        "durationSeconds": 3884,
-        "durationText": "1:04:44",
-        "publishedAt": "2026-07-27T15:26:25-04:00",
-        "thumbnail": "https://1a-1791.com/video/fww1/25/s8/1/2/b/j/K/2bjKA.oq1b-small-Dont-Force-Yourself-to-be-G..jpg",
-        "comments": null
-      },
-      {
-        "platform": "rumble",
-        "id": "v7ddi44",
-        "url": "https://rumble.com/v7ddi44-patriot-pals-ep.8-lets-go-to-space.html",
-        "type": "video",
-        "title": "Patriot Pals Ep.#8: Let's Go To Space!",
-        "channel": "Patriot Pals",
-        "channelUrl": "https://rumble.com/c/PatriotPals",
-        "views": 1380,
-        "likes": 20,
-        "dislikes": null,
-        "durationSeconds": 386,
-        "durationText": "6:26",
-        "publishedAt": "2026-07-28T06:39:28-04:00",
-        "thumbnail": "https://1a-1791.com/video/fwe2/36/s8/6/0/x/u/K/0xuKA.oq1b.jpg",
-        "comments": 2
       }
     ]
   },
@@ -6458,36 +3676,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.haa.rec.mp4",
         "type": "mp4",
         "quality": "1080p"
-      },
-      {
-        "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.gaa.rec.mp4",
-        "type": "mp4",
-        "quality": "720p"
-      },
-      {
-        "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.caa.rec.mp4",
-        "type": "mp4",
-        "quality": "480p"
-      },
-      {
-        "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.baa.rec.mp4",
-        "type": "mp4",
-        "quality": "360p"
-      },
-      {
-        "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.oaa.rec.mp4",
-        "type": "mp4",
-        "quality": "240p"
-      },
-      {
-        "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.Faa.rec.mp4",
-        "type": "mp4",
-        "quality": "180p"
-      },
-      {
-        "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.Gaa.rec.aac",
-        "type": "audio",
-        "quality": "192k"
       }
     ]
   },
@@ -6546,24 +3734,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/FgntIqJi6clNRLmaxXkXN.410?mo=GjcaFjIBBDoBfUIGCMuG99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
             "timestampInSec": 1780335408,
             "publishedAt": "2026-06-01T17:36:48Z"
-          },
-          {
-            "snapIndex": 2,
-            "snapMediaType": 0,
-            "mediaType": "image",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/MDhgz2NGVlp7M1wfhuT1s.400?mo=GkoaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBFgiQAyIRCg06AX1CBgjPhvfQBkgCEgCiAQ4I5wciCQoFMgF9SAMSAA%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/MDhgz2NGVlp7M1wfhuT1s.410?mo=GjcaFjIBBDoBfUIGCM-G99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
-            "timestampInSec": 1780335408,
-            "publishedAt": "2026-06-01T17:36:48Z"
-          },
-          {
-            "snapIndex": 3,
-            "snapMediaType": 0,
-            "mediaType": "image",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/V9pQZQcyVDfY0v9a5gTz6.400?mo=Gk0aDjIBBDoBfUgCUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogERCJADIgwKCEIGCMuG99AGEgCiAREI5wciDAoIQgYIyob30AYSAA%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/V9pQZQcyVDfY0v9a5gTz6.410?mo=GjcaFjIBBDoBfUIGCMuG99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
-            "timestampInSec": 1780335408,
-            "publishedAt": "2026-06-01T17:36:48Z"
           }
         ]
       },
@@ -6592,214 +3762,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/eHfqR7qRY9kuVjZbupqN4.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCP25qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
             "timestampInSec": 1779061852,
             "publishedAt": "2026-05-17T23:50:52Z"
-          },
-          {
-            "snapIndex": 2,
-            "snapMediaType": 0,
-            "mediaType": "image",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/aUFzsbb4CKroNT0pRdE4G.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/aUFzsbb4CKroNT0pRdE4G.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779062266,
-            "publishedAt": "2026-05-17T23:57:46Z"
-          },
-          {
-            "snapIndex": 3,
-            "snapMediaType": 0,
-            "mediaType": "image",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/yWteTz76gf53bxwLBNjoX.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/yWteTz76gf53bxwLBNjoX.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779062542,
-            "publishedAt": "2026-05-18T00:02:22Z"
-          },
-          {
-            "snapIndex": 4,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/bkKNcxrjrFvKcF4iJkspN.1034.IRZXSOY?mo=GmQaFjIBBDoBfUIGCPW5qdAGSANQXmABcAFQyAFaB0RmTWVkaWGiATgIiggSJgokCNWLViABMOADONQGQAFKDgoJTRgiFxgaGBwbEPQDUM6zAWgCIgsSACoHSVJaWFNPWZADzrMB&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/bkKNcxrjrFvKcF4iJkspN.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCIG6qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779062847,
-            "publishedAt": "2026-05-18T00:07:27Z"
-          },
-          {
-            "snapIndex": 5,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/z0HUGaIJfHJ4CMfZAYPgo.1034.IRZXSOY?mo=GmUaFjIBBDoBfUIGCPW5qdAGSANQXmABcAFQyAFaB0RmTWVkaWGiATkIiggSJwolCO7JpAEgATDgAzjUBkABSg4KCWwcIR4eFx8gIBD0A1DsvwJoAiILEgAqB0lSWlhTT1mQA-y_Ag%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/z0HUGaIJfHJ4CMfZAYPgo.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCI-6qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779063076,
-            "publishedAt": "2026-05-18T00:11:16Z"
-          },
-          {
-            "snapIndex": 6,
-            "snapMediaType": 0,
-            "mediaType": "image",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/Q7U6frp3B5dB2EsIvVR2y.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/Q7U6frp3B5dB2EsIvVR2y.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779063199,
-            "publishedAt": "2026-05-18T00:13:19Z"
-          },
-          {
-            "snapIndex": 7,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/5F73IW97qhCT4XrBuP22E.1322.IRZXSOY?mo=GmYaFjIBBDoBfUIGCJG6qdAGSAJQXmABcAFQwgFaB0RmTWVkaWGiAToIqgoSKAomCPyi-wIgATDgAzjUBkABSg8KCpIBQzgwNxtNTjkQ9ANQ8roDaAIiCxIAKgdJUlpYU09ZkAPyugM%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/5F73IW97qhCT4XrBuP22E.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCJG6qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779063467,
-            "publishedAt": "2026-05-18T00:17:47Z"
-          },
-          {
-            "snapIndex": 8,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/zHgfrl78n1JPlSHJ9AoVT.1322.IRZXSOY?mo=GmMaFjIBBDoBfUIGCPq5qdAGSAJQXmABcAFQwgFaB0RmTWVkaWGiATgIqgoSJgokCJiSSyABMOADONQGQAFKDwoKjAFiNDU4Tj0pPhD0A1CQTmgCIgsSACoHSVJaWFNPWZADkE4%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/zHgfrl78n1JPlSHJ9AoVT.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPq5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779043800,
-            "publishedAt": "2026-05-17T18:50:00Z"
-          },
-          {
-            "snapIndex": 9,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/e0D4pPGJLQajP0KIwOBrY.1322.IRZXSOY?mo=GmMaFjIBBDoBfUIGCP65qdAGSAJQXmABcAFQwgFaB0RmTWVkaWGiATgIqgoSJgokCLKKSyABMOADONQGQAFKDwoKkQFPQ0VFSiUzOhD0A1CQTmgCIgsSACoHSVJaWFNPWZADkE4%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/e0D4pPGJLQajP0KIwOBrY.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCP65qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779043800,
-            "publishedAt": "2026-05-17T18:50:00Z"
-          },
-          {
-            "snapIndex": 10,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/YFjgcPhNKaSagCMpgvz0G.1322.IRZXSOY?mo=GmMaFjIBBDoBfUIGCPy5qdAGSAJQXmABcAFQwgFaB0RmTWVkaWGiATgIqgoSJgokCLf4SiABMOADONQGQAFKDwoKkwFJPlI3Rjo1MBD0A1CQTmgCIgsSACoHSVJaWFNPWZADkE4%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/YFjgcPhNKaSagCMpgvz0G.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPy5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779043800,
-            "publishedAt": "2026-05-17T18:50:00Z"
-          },
-          {
-            "snapIndex": 11,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/VvRTF9fO6rH6gqTvx51iq.1322.IRZXSOY?mo=GmMaFjIBBDoBfUIGCPq5qdAGSAJQXmABcAFQwgFaB0RmTWVkaWGiATgIqgoSJgokCMGXSyABMOADONQGQAFKDwoKmwFbMUQzNj0_MRD0A1CQTmgCIgsSACoHSVJaWFNPWZADkE4%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/VvRTF9fO6rH6gqTvx51iq.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPq5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779043800,
-            "publishedAt": "2026-05-17T18:50:00Z"
-          },
-          {
-            "snapIndex": 12,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/7E9dIi2bzc0IFIz9aUylf.1322.IRZXSOY?mo=GmMaFjIBBDoBfUIGCPq5qdAGSAJQXmABcAFQwgFaB0RmTWVkaWGiATgIqgoSJgokCM-hNSABMOADONQGQAFKDwoKjgE3Q2AzPzo1LhD0A1CiNGgCIgsSACoHSVJaWFNPWZADojQ%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/7E9dIi2bzc0IFIz9aUylf.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPq5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779043800,
-            "publishedAt": "2026-05-17T18:50:00Z"
-          },
-          {
-            "snapIndex": 13,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/p7qvISq5j7n9QP9mtObXy.1322.IRZXSOY?mo=GmIaFjIBBDoBfUIGCPu5qdAGSAJQXmABcAFQwgFaB0RmTWVkaWGiATcIqgoSJQojCIfmRSABMOADONQGQAFKDgoJfUdMEisbIwxkEPQDUJBOaAIiCxIAKgdJUlpYU09ZkAOQTg%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/p7qvISq5j7n9QP9mtObXy.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPu5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779052325,
-            "publishedAt": "2026-05-17T21:12:05Z"
-          },
-          {
-            "snapIndex": 14,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/1tS3V1RB1Kjqtz2uHPdmr.1322.IRZXSOY?mo=GmMaFjIBBDoBfUIGCIC6qdAGSAJQXmABcAFQwgFaB0RmTWVkaWGiATgIqgoSJgokCPCRSSABMOADONQGQAFKDwoKgAE4S1Q1HiEaHxD0A1CQTmgCIgsSACoHSVJaWFNPWZADkE4%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/1tS3V1RB1Kjqtz2uHPdmr.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCIC6qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779052325,
-            "publishedAt": "2026-05-17T21:12:05Z"
-          },
-          {
-            "snapIndex": 15,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/1m1gnNXDTM5CW50wRV4Fx.1322.IRZXSOY?mo=GmMaFjIBBDoBfUIGCPy5qdAGSAJQXmABcAFQwgFaB0RmTWVkaWGiATgIqgoSJgokCPWxRCABMOADONQGQAFKDwoKjAFeYBoUNSw0OBD0A1CQTmgCIgsSACoHSVJaWFNPWZADkE4%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/1m1gnNXDTM5CW50wRV4Fx.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPy5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779052325,
-            "publishedAt": "2026-05-17T21:12:05Z"
-          },
-          {
-            "snapIndex": 16,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/fNL09TCw12JQKIiJcjJxS.1322.IRZXSOY?mo=GmIaFjIBBDoBfUIGCP65qdAGSAJQXmABcAFQwgFaB0RmTWVkaWGiATcIqgoSJQojCIKYQCABMOADONQGQAFKDgoJXSsqJiIbFRgXEPQDUJBOaAIiCxIAKgdJUlpYU09ZkAOQTg%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/fNL09TCw12JQKIiJcjJxS.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCP65qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779052325,
-            "publishedAt": "2026-05-17T21:12:05Z"
-          },
-          {
-            "snapIndex": 17,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/0HRD8MtVUMzV02TCQIss9.1322.IRZXSOY?mo=GmIaFjIBBDoBfUIGCPu5qdAGSAJQXmABcAFQwgFaB0RmTWVkaWGiATcIqgoSJQojCOWrLyABMOADONQGQAFKDgoJaSQiIhYQEW1cEPQDUNY6aAIiCxIAKgdJUlpYU09ZkAPWOg%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/0HRD8MtVUMzV02TCQIss9.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPu5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779052325,
-            "publishedAt": "2026-05-17T21:12:05Z"
-          },
-          {
-            "snapIndex": 18,
-            "snapMediaType": 1,
-            "mediaType": "video",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/TiDvlLPc8CG3ezFXsrsaV.1322.IRZXSOY?mo=GmYaFjIBBDoBfUIGCI-6qdAGSAJQXmABcAFQwgFaB0RmTWVkaWGiAToIqgoSKAomCPPErwIgATDgAzjUBkABSg8KCpoBR0wSKxojF1YQ9ANQlvMCaAIiCxIAKgdJUlpYU09ZkAOW8wI%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/TiDvlLPc8CG3ezFXsrsaV.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCI-6qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-            "timestampInSec": 1779063732,
-            "publishedAt": "2026-05-18T00:22:12Z"
-          }
-        ]
-      },
-      {
-        "highlightId": "918b1b3e-d60a-43e9-b5cd-651335d4687e",
-        "storyTitle": "2026 All-Star Rosters ⭐️",
-        "thumbnailUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
-        "snapCount": 5,
-        "firstSnapUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.400?mo=GkcaFDIBBDoBfUIGCNXEiswGUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogELCJADIgYKAkgCEgCiAQsI5wciBgoCSAMSAA%3D%3D&uc=94",
-        "firstSnapType": "image",
-        "snapList": [
-          {
-            "snapIndex": 0,
-            "snapMediaType": 0,
-            "mediaType": "image",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.400?mo=GkcaFDIBBDoBfUIGCNXEiswGUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogELCJADIgYKAkgCEgCiAQsI5wciBgoCSAMSAA%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
-            "timestampInSec": 1770168890,
-            "publishedAt": "2026-02-04T01:34:50Z"
-          },
-          {
-            "snapIndex": 1,
-            "snapMediaType": 0,
-            "mediaType": "image",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/9VxqlhBh839VRARSOGbNg.400?mo=GkcaFDIBBDoBfUIGCNXEiswGUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogELCJADIgYKAkgCEgCiAQsI5wciBgoCSAMSAA%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/9VxqlhBh839VRARSOGbNg.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
-            "timestampInSec": 1770168890,
-            "publishedAt": "2026-02-04T01:34:50Z"
-          },
-          {
-            "snapIndex": 2,
-            "snapMediaType": 0,
-            "mediaType": "image",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/iYsmPWO07diOdM994g8xo.400?mo=Gk8aDDIBBDoBfVBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBEwiQAyIOCgpCBgjVxIrMBkgCEgCiARMI5wciDgoKQgYI1MSKzAZIAxIA&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/iYsmPWO07diOdM994g8xo.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
-            "timestampInSec": 1770168890,
-            "publishedAt": "2026-02-04T01:34:50Z"
-          },
-          {
-            "snapIndex": 3,
-            "snapMediaType": 0,
-            "mediaType": "image",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/MjPzf75USbLSpgDtGWzjb.400?mo=Gk0aDjIBBDoBfUgCUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogERCJADIgwKCEIGCNXEiswGEgCiAREI5wciDAoIQgYI1MSKzAYSAA%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/MjPzf75USbLSpgDtGWzjb.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
-            "timestampInSec": 1770168890,
-            "publishedAt": "2026-02-04T01:34:50Z"
-          },
-          {
-            "snapIndex": 4,
-            "snapMediaType": 0,
-            "mediaType": "image",
-            "mediaUrl": "https://cf-st.sc-cdn.net/d/w7OoZSkq2abp9kNl9uOZq.400?mo=GkoaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBFgiQAyIRCg06AX1CBgjWxIrMBkgCEgCiAQ4I5wciCQoFMgF9SAMSAA%3D%3D&uc=94",
-            "mediaPreviewUrl": "https://cf-st.sc-cdn.net/d/w7OoZSkq2abp9kNl9uOZq.410?mo=GjcaFjIBBDoBfUIGCNbEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
-            "timestampInSec": 1770168890,
-            "publishedAt": "2026-02-04T01:34:50Z"
           }
         ]
       }
@@ -6916,24 +3878,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "deepLinkUrl": "https://www.snapchat.com/@nfl",
           "iosAppStoreUrl": "https://apps.apple.com/app/apple-store/id447188370?pt=614006&ct=add_user&mt=8"
         }
-      },
-      {
-        "username": "lakerssnaps",
-        "displayName": "Los Angeles Lakers",
-        "url": "https://www.snapchat.com/@lakerssnaps",
-        "avatar": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvbEplakhnM3lwRTd1dWEwdjliVjd6P2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,640_FMjpeg",
-        "profileUrl": "https://www.snapchat.com/@lakerssnaps",
-        "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvbEplakhnM3lwRTd1dWEwdjliVjd6P2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,640_FMjpeg",
-        "verified": true,
-        "isVerified": true,
-        "hasStory": false,
-        "hasCuratedHighlights": false,
-        "hasSpotlightHighlights": false,
-        "subscribeLink": {
-          "oneLinkBaseUrl": "https://click.snapchat.com/aVHG",
-          "deepLinkUrl": "https://www.snapchat.com/@lakerssnaps",
-          "iosAppStoreUrl": "https://apps.apple.com/app/apple-store/id447188370?pt=614006&ct=add_user&mt=8"
-        }
       }
     ]
   },
@@ -6999,15 +3943,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "artwork": "https://i1.sndcdn.com/artworks-yGpNDB5MzaAUMCB2-e6NVdg-large.jpg",
         "tags": [
           "johnson",
-          "space",
-          "center",
-          "jsc",
-          "houston",
-          "podcast",
-          "international space station",
-          "iss",
-          "results",
-          "stem"
+          "space"
         ]
       },
       {
@@ -7036,103 +3972,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "artwork": "https://i1.sndcdn.com/artworks-vHT95zmztFEO1K49-1BXSXA-large.jpg",
         "tags": [
           "nasa",
-          "podcast",
-          "artemis II",
-          "español"
-        ]
-      },
-      {
-        "platform": "soundcloud",
-        "id": "2364341774",
-        "url": "https://soundcloud.com/nasa/artemis-ii-el-regreso-de-la",
-        "title": "Artemis II: El regreso de la humanidad a la Luna",
-        "description": "Acompáñanos en esta edición especial de Universo curioso de la NASA mientras hacemos un recorrido por la misión Artemis II de principio a fin. Revivimos la expectación en los días previos al despegue, la potencia del histórico lanzamiento y el increíble viaje de la tripu-lación a través del espacio profundo. Exploramos los momentos más críticos de la misión —desde el emocionante sobrevuelo lunar hasta el exitoso amerizaje en el océano Pacífi-co— que completa un capítulo fundamental en esta nueva era de la exploración espacial.\nEncuentra más información sobre Artemis en: ciencia.nasa.gov/artemis",
-        "genre": "Science",
-        "artist": "NASA",
-        "artistUrl": "https://soundcloud.com/nasa",
-        "artistAvatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
-        "artistFollowers": 158701,
-        "artistVerified": true,
-        "durationMs": 3026998,
-        "plays": 77,
-        "likes": 1,
-        "reposts": 1,
-        "downloads": 0,
-        "comments": 1,
-        "publishedAt": "2026-07-20T13:58:53Z",
-        "license": "all-rights-reserved",
-        "downloadable": true,
-        "streamable": true,
-        "waveformUrl": "https://wave.sndcdn.com/T9HWxjE3giT0_m.json",
-        "artwork": "https://i1.sndcdn.com/artworks-vHT95zmztFEO1K49-1BXSXA-large.jpg",
-        "tags": [
-          "nasa",
-          "podcast",
-          "artemis II",
-          "español"
-        ]
-      },
-      {
-        "platform": "soundcloud",
-        "id": "2362781033",
-        "url": "https://soundcloud.com/nasa/houston-we-have-a-podcast-artemis-ii-lunar-science",
-        "title": "Houston We Have a Podcast: Artemis II Lunar Science",
-        "genre": "Science",
-        "artist": "NASA",
-        "artistUrl": "https://soundcloud.com/nasa",
-        "artistAvatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
-        "artistFollowers": 158701,
-        "artistVerified": true,
-        "durationMs": 3896506,
-        "plays": 218,
-        "likes": 7,
-        "reposts": 2,
-        "downloads": 2,
-        "comments": 1,
-        "publishedAt": "2026-07-17T14:14:16Z",
-        "license": "all-rights-reserved",
-        "downloadable": true,
-        "streamable": true,
-        "waveformUrl": "https://wave.sndcdn.com/qjsnPXxHkqu5_m.json",
-        "artwork": "https://i1.sndcdn.com/artworks-RgcbuFe9TuzkFA17-H8C2Ig-large.jpg",
-        "tags": [
-          "lunar",
-          "moon",
-          "exploration",
-          "artemis",
-          "flyby",
-          "photograpy"
-        ]
-      },
-      {
-        "platform": "soundcloud",
-        "id": "2359662548",
-        "url": "https://soundcloud.com/nasa/small-steps-giant-793608487",
-        "title": "Small Steps, Giant Leaps Podcast Episode 177: Transformative Aeronautics",
-        "description": "A NASA research program collaborates with universities to revolutionize the way we design, build, and operate aircraft. Angela Surgenor, deputy program director of the Transformative Aeronautics Concepts Program, explains.",
-        "genre": "Science",
-        "artist": "NASA",
-        "artistUrl": "https://soundcloud.com/nasa",
-        "artistAvatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
-        "artistFollowers": 158701,
-        "artistVerified": true,
-        "durationMs": 1030088,
-        "plays": 236,
-        "likes": 5,
-        "reposts": 1,
-        "downloads": 0,
-        "comments": 2,
-        "publishedAt": "2026-07-13T13:25:32Z",
-        "license": "all-rights-reserved",
-        "downloadable": true,
-        "streamable": true,
-        "waveformUrl": "https://wave.sndcdn.com/bWaZbrbJNeYk_m.json",
-        "artwork": "https://i1.sndcdn.com/artworks-P4yXCelBLW8JxnUB-SPPJRA-large.jpg",
-        "tags": [
-          "nasa",
-          "podcast",
-          "aeronautics",
-          "concept"
+          "podcast"
         ]
       }
     ]
@@ -7163,9 +4003,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "artwork": "https://i1.sndcdn.com/artworks-vHT95zmztFEO1K49-1BXSXA-large.jpg",
     "tags": [
       "nasa",
-      "podcast",
-      "artemis II",
-      "español"
+      "podcast"
     ]
   },
   "spotify-album": {
@@ -7207,11 +4045,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     "height": 160,
                     "url": "https://i.scdn.co/image/ab6761610000f178e2e8e7ff002a4afda1c7147e",
                     "width": 160
-                  },
-                  {
-                    "height": 320,
-                    "url": "https://i.scdn.co/image/ab67616100005174e2e8e7ff002a4afda1c7147e",
-                    "width": 320
                   }
                 ]
               }
@@ -7242,11 +4075,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "height": 64,
             "url": "https://i.scdn.co/image/ab67616d00004851bb54dde68cd23e2a268ae0f5",
             "width": 64
-          },
-          {
-            "height": 640,
-            "url": "https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5",
-            "width": 640
           }
         ]
       },
@@ -8042,10 +4870,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "name": "INSTAGRAM",
         "url": "https://instagram.com/taylorswift"
-      },
-      {
-        "name": "TWITTER",
-        "url": "https://twitter.com/taylorswift13"
       }
     ],
     "verified": true,
@@ -8214,15 +5038,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               },
               {
                 "url": "https://p.scdn.co/mp3-preview/8890ef960cf2ba6d513a689b53c0e0a34620f903"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/11526f62194c7d8ca5bd9e1a919f2b57122799ee"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/2f705e0d5358e718a0a98e03c31686174101de22"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/5ba8dfda70a8a1564ba28808d745a9501e00c4e5"
               }
             ]
           },
@@ -8240,11 +5055,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                 "height": 300,
                 "url": "https://i.scdn.co/image/ab67656300005f1fae7eda3fb0261372fba3e18c",
                 "width": 300
-              },
-              {
-                "height": 640,
-                "url": "https://i.scdn.co/image/ab6765630000ba8aae7eda3fb0261372fba3e18c",
-                "width": 640
               }
             ]
           },
@@ -8281,11 +5091,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     "height": 300,
                     "url": "https://i.scdn.co/image/ab67656300005f1f1e1acaebe06610165612f1ef",
                     "width": 300
-                  },
-                  {
-                    "height": 640,
-                    "url": "https://i.scdn.co/image/ab6765630000ba8a1e1acaebe06610165612f1ef",
-                    "width": 640
                   }
                 ]
               },
@@ -8464,15 +5269,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               },
               {
                 "url": "https://p.scdn.co/mp3-preview/e3b623e752a46a58c80a2cbeb45d299ec8a43b6b"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/e290eec9503c09202a2d195a402cfcfb6d7600ee"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/5a3a2149687091dc69d8979a9bfa69458c910d08"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/4278357f280cda29f19e320886179b093e261078"
               }
             ]
           },
@@ -8490,11 +5286,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                 "height": 300,
                 "url": "https://i.scdn.co/image/ab67656300005f1fca6df7e6f0bea75e26aa81e8",
                 "width": 300
-              },
-              {
-                "height": 640,
-                "url": "https://i.scdn.co/image/ab6765630000ba8aca6df7e6f0bea75e26aa81e8",
-                "width": 640
               }
             ]
           },
@@ -8531,11 +5322,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     "height": 300,
                     "url": "https://i.scdn.co/image/ab67656300005f1f1e1acaebe06610165612f1ef",
                     "width": 300
-                  },
-                  {
-                    "height": 640,
-                    "url": "https://i.scdn.co/image/ab6765630000ba8a1e1acaebe06610165612f1ef",
-                    "width": 640
                   }
                 ]
               },
@@ -8580,756 +5366,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "maxHeight": 360,
                       "maxWidth": 640,
                       "url": "https://image-cdn-ak.spotifycdn.com/image/ab6772ab0000e0e76836d7fb3ec70a76a4d3d03c"
-                    }
-                  ]
-                }
-              }
-            },
-            "squareCoverImage": {
-              "__typename": "VisualIdentityImage",
-              "extractedColorSet": {
-                "encoreBaseSetTextColor": {
-                  "alpha": 255,
-                  "blue": 110,
-                  "green": 165,
-                  "red": 255
-                },
-                "highContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 48,
-                    "red": 145
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 9,
-                    "red": 97
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 154,
-                    "green": 192,
-                    "red": 255
-                  }
-                },
-                "higherContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 10,
-                    "red": 101
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 40,
-                    "green": 55,
-                    "red": 144
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 96,
-                    "green": 215,
-                    "red": 30
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 154,
-                    "green": 192,
-                    "red": 255
-                  }
-                },
-                "minContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 111,
-                    "red": 247
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 83,
-                    "red": 217
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      {
-        "platform": "spotify",
-        "type": "episode",
-        "uri": "spotify:episode:10TcPJFzFUDyyBzsj72nxi",
-        "url": "https://open.spotify.com/episode/10TcPJFzFUDyyBzsj72nxi?si=byEZRMiRS4aX_MSrQ-fxgQ",
-        "name": "#2525 - Nick Bostrom",
-        "description": "Nick Bostrom is a philosopher whose work focuses on artificial intelligence, existential risk, and the future of humanity. He is Principal Researcher at the Macrostrategy Research Initiative and the author of several books, the most recent of which is “Deep Utopia: Life and Meaning in a Solved World.”www.simonandschuster.com/books/Deep-Utopia/Nick-Bostrom/9781646871643www.nickbostrom.com  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  Switch today at https://Visible.com for just 25/mo. Or Save $10 on your first month of Visible+ Pro with code ROGAN.  Learn more about your ad choices. Visit podcastchoices.com/adchoices",
-        "durationMs": 8081918,
-        "releaseYear": 2026,
-        "image": "https://i.scdn.co/image/ab6765630000f68d010b1c625a39274e7a41e347",
-        "raw": {
-          "__typename": "Episode",
-          "audio": {
-            "items": [
-              {
-                "url": "https://p.scdn.co/mp3-preview/dc9dce35f8172cb8cb36e5249619fa5778eda411"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/c50b2d689e1b270d54af3a4e711b326dfc220c57"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/f231631aa10e95171e60fcd85427cc9e321adb0d"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/39e349e03c2e565bd53e7abab3bb60679df9f897"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/3e6c52bc966b6a826865f11be9be2003ac29e722"
-              }
-            ]
-          },
-          "contentRating": {
-            "label": "EXPLICIT"
-          },
-          "coverArt": {
-            "sources": [
-              {
-                "height": 64,
-                "url": "https://i.scdn.co/image/ab6765630000f68d010b1c625a39274e7a41e347",
-                "width": 64
-              },
-              {
-                "height": 300,
-                "url": "https://i.scdn.co/image/ab67656300005f1f010b1c625a39274e7a41e347",
-                "width": 300
-              },
-              {
-                "height": 640,
-                "url": "https://i.scdn.co/image/ab6765630000ba8a010b1c625a39274e7a41e347",
-                "width": 640
-              }
-            ]
-          },
-          "description": "Nick Bostrom is a philosopher whose work focuses on artificial intelligence, existential risk, and the future of humanity. He is Principal Researcher at the Macrostrategy Research Initiative and the author of several books, the most recent of which is “Deep Utopia: Life and Meaning in a Solved World.”www.simonandschuster.com/books/Deep-Utopia/Nick-Bostrom/9781646871643www.nickbostrom.com  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  Switch today at https://Visible.com for just 25/mo. Or Save $10 on your first month of Visible+ Pro with code ROGAN.  Learn more about your ad choices. Visit podcastchoices.com/adchoices",
-          "duration": {
-            "totalMilliseconds": 8081918
-          },
-          "htmlDescription": "<p>Nick Bostrom is a philosopher whose work focuses on artificial intelligence, existential risk, and the future of humanity. He is Principal Researcher at the Macrostrategy Research Initiative and the author of several books, the most recent of which is “Deep Utopia: Life and Meaning in a Solved World.”<br />www.simonandschuster.com/books/Deep-Utopia/Nick-Bostrom/9781646871643<br />www.nickbostrom.com</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Switch today at <a href=\"https://Visible.com\" rel=\"nofollow\">https://Visible.com</a> for just 25/mo. Or Save $10 on your first month of Visible+ Pro with code ROGAN. </p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
-          "id": "10TcPJFzFUDyyBzsj72nxi",
-          "mediaTypes": [
-            "AUDIO",
-            "VIDEO"
-          ],
-          "name": "#2525 - Nick Bostrom",
-          "playability": {
-            "playable": true,
-            "reason": "PLAYABLE"
-          },
-          "playedState": {
-            "playPositionMilliseconds": 0,
-            "state": "NOT_STARTED"
-          },
-          "podcastV2": {
-            "data": {
-              "__typename": "Podcast",
-              "coverArt": {
-                "sources": [
-                  {
-                    "height": 64,
-                    "url": "https://i.scdn.co/image/ab6765630000f68d1e1acaebe06610165612f1ef",
-                    "width": 64
-                  },
-                  {
-                    "height": 300,
-                    "url": "https://i.scdn.co/image/ab67656300005f1f1e1acaebe06610165612f1ef",
-                    "width": 300
-                  },
-                  {
-                    "height": 640,
-                    "url": "https://i.scdn.co/image/ab6765630000ba8a1e1acaebe06610165612f1ef",
-                    "width": 640
-                  }
-                ]
-              },
-              "name": "The Joe Rogan Experience",
-              "showTypes": [
-                "SHOW_TYPE_EXCLUSIVE"
-              ],
-              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
-            }
-          },
-          "previewPlayback": {
-            "audioPreview": {
-              "cdnUrl": "https://p.scdn.co/mp3-preview/ba46b42f2f38bb09f50e5a8a91877265c577cf44.mp3"
-            }
-          },
-          "releaseDate": {
-            "isoString": "2026-07-14T17:00:00Z",
-            "precision": "MINUTE"
-          },
-          "restrictions": {
-            "paywallContent": false
-          },
-          "sharingInfo": {
-            "shareId": "byEZRMiRS4aX_MSrQ-fxgQ",
-            "shareUrl": "https://open.spotify.com/episode/10TcPJFzFUDyyBzsj72nxi?si=byEZRMiRS4aX_MSrQ-fxgQ"
-          },
-          "transcripts": {},
-          "type": "PODCAST_EPISODE",
-          "uri": "spotify:episode:10TcPJFzFUDyyBzsj72nxi",
-          "visualIdentity": {
-            "sixteenByNineCoverImage": {
-              "image": {
-                "data": {
-                  "__typename": "ImageV2",
-                  "sources": [
-                    {
-                      "maxHeight": 720,
-                      "maxWidth": 1280,
-                      "url": "https://image-cdn-fa.spotifycdn.com/image/ab6772ab000030ae7648ac2ed841cbe3a7aa6d79"
-                    },
-                    {
-                      "maxHeight": 360,
-                      "maxWidth": 640,
-                      "url": "https://image-cdn-fa.spotifycdn.com/image/ab6772ab0000e0e77648ac2ed841cbe3a7aa6d79"
-                    }
-                  ]
-                }
-              }
-            },
-            "squareCoverImage": {
-              "__typename": "VisualIdentityImage",
-              "extractedColorSet": {
-                "encoreBaseSetTextColor": {
-                  "alpha": 255,
-                  "blue": 110,
-                  "green": 165,
-                  "red": 255
-                },
-                "highContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 48,
-                    "red": 145
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 9,
-                    "red": 97
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 154,
-                    "green": 192,
-                    "red": 255
-                  }
-                },
-                "higherContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 10,
-                    "red": 101
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 40,
-                    "green": 55,
-                    "red": 144
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 96,
-                    "green": 215,
-                    "red": 30
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 154,
-                    "green": 192,
-                    "red": 255
-                  }
-                },
-                "minContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 111,
-                    "red": 247
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 83,
-                    "red": 217
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      {
-        "platform": "spotify",
-        "type": "episode",
-        "uri": "spotify:episode:4imTpV50bg8l1lIccXTqoC",
-        "url": "https://open.spotify.com/episode/4imTpV50bg8l1lIccXTqoC?si=-Bi4yBNXRnenXdEttOlHwQ",
-        "name": "JRE MMA Show #182 - Protect Ya Neck",
-        "description": "Joe is joined by mixed martial artists John Rallo, Matt Serra, and Din Thomas. John Rallo owns Shogun Fights and is the owner and head coach of Ground Control Mixed Martial Arts Academy.www.groundcontrolbaltimore.comwww.shogunfights.com Matt Serra is a mixed martial artist and host of \"UFC Unfiltered\" with Jim Norton and \"Geeking Out with Matt Serra.\" He is the owner and an instructor at Serra BJJ.www.youtube.com/@MattSerraBJJwww.serrabjjacademy.com Din Thomas is a mixed martial arts analyst, actor, and host of \"Din Thomas' Fight Court.\"www.youtube.com/@FightCourt  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  Don’t miss out on all the action this week at DraftKings! Download the DraftKings app today! Sign-up using https://dkng.co/rogan or through my promo code ROGAN.  Get watch party snacks and groceries on Uber Eats. Learn more about your ad choices. Visit podcastchoices.com/adchoices",
-        "durationMs": 9543167,
-        "releaseYear": 2026,
-        "image": "https://i.scdn.co/image/ab6765630000f68dc31c4e7f94756b105c94914c",
-        "raw": {
-          "__typename": "Episode",
-          "audio": {
-            "items": [
-              {
-                "url": "https://p.scdn.co/mp3-preview/cc89c0abf536eb97de41b98330fdde309bce37e5"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/67bd280d3daaec5d2e6970cc0c6e4d0b607beda0"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/6b4756382c5050ad7ffb6177cd030bca47577499"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/57460ace6e3270464976529438184a90dcc4b2d9"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/b28cb79e3c220ef1fe1146c87fa08b117da9b946"
-              }
-            ]
-          },
-          "contentRating": {
-            "label": "EXPLICIT"
-          },
-          "coverArt": {
-            "sources": [
-              {
-                "height": 64,
-                "url": "https://i.scdn.co/image/ab6765630000f68dc31c4e7f94756b105c94914c",
-                "width": 64
-              },
-              {
-                "height": 300,
-                "url": "https://i.scdn.co/image/ab67656300005f1fc31c4e7f94756b105c94914c",
-                "width": 300
-              },
-              {
-                "height": 640,
-                "url": "https://i.scdn.co/image/ab6765630000ba8ac31c4e7f94756b105c94914c",
-                "width": 640
-              }
-            ]
-          },
-          "description": "Joe is joined by mixed martial artists John Rallo, Matt Serra, and Din Thomas. John Rallo owns Shogun Fights and is the owner and head coach of Ground Control Mixed Martial Arts Academy.www.groundcontrolbaltimore.comwww.shogunfights.com Matt Serra is a mixed martial artist and host of \"UFC Unfiltered\" with Jim Norton and \"Geeking Out with Matt Serra.\" He is the owner and an instructor at Serra BJJ.www.youtube.com/@MattSerraBJJwww.serrabjjacademy.com Din Thomas is a mixed martial arts analyst, actor, and host of \"Din Thomas' Fight Court.\"www.youtube.com/@FightCourt  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  Don’t miss out on all the action this week at DraftKings! Download the DraftKings app today! Sign-up using https://dkng.co/rogan or through my promo code ROGAN.  Get watch party snacks and groceries on Uber Eats. Learn more about your ad choices. Visit podcastchoices.com/adchoices",
-          "duration": {
-            "totalMilliseconds": 9543167
-          },
-          "htmlDescription": "<p>Joe is joined by mixed martial artists John Rallo, Matt Serra, and Din Thomas.</p><br/><p>John Rallo owns Shogun Fights and is the owner and head coach of Ground Control Mixed Martial Arts Academy.<br />www.groundcontrolbaltimore.com<br />www.shogunfights.com</p><br/><p>Matt Serra is a mixed martial artist and host of \"UFC Unfiltered\" with Jim Norton and \"Geeking Out with Matt Serra.\" He is the owner and an instructor at Serra BJJ.<br />www.youtube.com/@MattSerraBJJ<br />www.serrabjjacademy.com</p><br/><p>Din Thomas is a mixed martial arts analyst, actor, and host of \"Din Thomas' Fight Court.\"<br />www.youtube.com/@FightCourt</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Don’t miss out on all the action this week at DraftKings! Download the DraftKings app today! Sign-up using <a href=\"https://dkng.co/rogan\" rel=\"nofollow\">https://dkng.co/rogan</a> or through my promo code ROGAN.</p><br/><p><br /></p><br/><p>Get watch party snacks and groceries on Uber Eats.</p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
-          "id": "4imTpV50bg8l1lIccXTqoC",
-          "mediaTypes": [
-            "AUDIO",
-            "VIDEO"
-          ],
-          "name": "JRE MMA Show #182 - Protect Ya Neck",
-          "playability": {
-            "playable": true,
-            "reason": "PLAYABLE"
-          },
-          "playedState": {
-            "playPositionMilliseconds": 0,
-            "state": "NOT_STARTED"
-          },
-          "podcastV2": {
-            "data": {
-              "__typename": "Podcast",
-              "coverArt": {
-                "sources": [
-                  {
-                    "height": 64,
-                    "url": "https://i.scdn.co/image/ab6765630000f68d1e1acaebe06610165612f1ef",
-                    "width": 64
-                  },
-                  {
-                    "height": 300,
-                    "url": "https://i.scdn.co/image/ab67656300005f1f1e1acaebe06610165612f1ef",
-                    "width": 300
-                  },
-                  {
-                    "height": 640,
-                    "url": "https://i.scdn.co/image/ab6765630000ba8a1e1acaebe06610165612f1ef",
-                    "width": 640
-                  }
-                ]
-              },
-              "name": "The Joe Rogan Experience",
-              "showTypes": [
-                "SHOW_TYPE_EXCLUSIVE"
-              ],
-              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
-            }
-          },
-          "previewPlayback": {
-            "audioPreview": {
-              "cdnUrl": "https://p.scdn.co/mp3-preview/e8a322b467ac820b6646eb3f789b2f9992ff320c.mp3"
-            }
-          },
-          "releaseDate": {
-            "isoString": "2026-07-09T17:00:00Z",
-            "precision": "MINUTE"
-          },
-          "restrictions": {
-            "paywallContent": false
-          },
-          "sharingInfo": {
-            "shareId": "-Bi4yBNXRnenXdEttOlHwQ",
-            "shareUrl": "https://open.spotify.com/episode/4imTpV50bg8l1lIccXTqoC?si=-Bi4yBNXRnenXdEttOlHwQ"
-          },
-          "transcripts": {},
-          "type": "PODCAST_EPISODE",
-          "uri": "spotify:episode:4imTpV50bg8l1lIccXTqoC",
-          "visualIdentity": {
-            "sixteenByNineCoverImage": {
-              "image": {
-                "data": {
-                  "__typename": "ImageV2",
-                  "sources": [
-                    {
-                      "maxHeight": 720,
-                      "maxWidth": 1280,
-                      "url": "https://image-cdn-fa.spotifycdn.com/image/ab6772ab000030aee781082c1d0b2280f811a5da"
-                    },
-                    {
-                      "maxHeight": 360,
-                      "maxWidth": 640,
-                      "url": "https://image-cdn-fa.spotifycdn.com/image/ab6772ab0000e0e7e781082c1d0b2280f811a5da"
-                    }
-                  ]
-                }
-              }
-            },
-            "squareCoverImage": {
-              "__typename": "VisualIdentityImage",
-              "extractedColorSet": {
-                "encoreBaseSetTextColor": {
-                  "alpha": 255,
-                  "blue": 110,
-                  "green": 165,
-                  "red": 255
-                },
-                "highContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 48,
-                    "red": 145
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 9,
-                    "red": 97
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 154,
-                    "green": 192,
-                    "red": 255
-                  }
-                },
-                "higherContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 10,
-                    "red": 101
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 40,
-                    "green": 55,
-                    "red": 144
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 96,
-                    "green": 215,
-                    "red": 30
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 154,
-                    "green": 192,
-                    "red": 255
-                  }
-                },
-                "minContrast": {
-                  "backgroundBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 111,
-                    "red": 247
-                  },
-                  "backgroundTintedBase": {
-                    "alpha": 255,
-                    "blue": 0,
-                    "green": 83,
-                    "red": 217
-                  },
-                  "textBase": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textBrightAccent": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  },
-                  "textSubdued": {
-                    "alpha": 255,
-                    "blue": 255,
-                    "green": 255,
-                    "red": 255
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      {
-        "platform": "spotify",
-        "type": "episode",
-        "uri": "spotify:episode:1f6tXaeR1XNYwSF0tqpEDT",
-        "url": "https://open.spotify.com/episode/1f6tXaeR1XNYwSF0tqpEDT?si=Co0hsETLQr2JxhnuJeQp-g",
-        "name": "#2524 - Rupert Lowe",
-        "description": "Rupert Lowe is a British politician who has served as the member of Parliament for Great Yarmouth since 2024 and the leader of Restore Britain.  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  onX Offroad: Try onX Offroad for 50% off- go to https://onXmaps.com/joerogan  This video is sponsored by BetterHelp. Visit https://BetterHelp.com/JRE Learn more about your ad choices. Visit podcastchoices.com/adchoices",
-        "durationMs": 7385641,
-        "releaseYear": 2026,
-        "image": "https://i.scdn.co/image/ab6765630000f68d0531ec0d584e51f31ca132ed",
-        "raw": {
-          "__typename": "Episode",
-          "audio": {
-            "items": [
-              {
-                "url": "https://p.scdn.co/mp3-preview/79d00facffbf57d9bad25910812d7af541131a63"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/b348d674403423ddbaa7619f7868fe24ba01b695"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/0f50bcd22706355dad3d825b2d3dd3ea635169b5"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/ecfad3e5334c0c3c516eeca1d8bd1d4f1e04a41e"
-              },
-              {
-                "url": "https://p.scdn.co/mp3-preview/ef72da5afac7d1e978bf98033d7d3d42e7c25c10"
-              }
-            ]
-          },
-          "contentRating": {
-            "label": "EXPLICIT"
-          },
-          "coverArt": {
-            "sources": [
-              {
-                "height": 64,
-                "url": "https://i.scdn.co/image/ab6765630000f68d0531ec0d584e51f31ca132ed",
-                "width": 64
-              },
-              {
-                "height": 300,
-                "url": "https://i.scdn.co/image/ab67656300005f1f0531ec0d584e51f31ca132ed",
-                "width": 300
-              },
-              {
-                "height": 640,
-                "url": "https://i.scdn.co/image/ab6765630000ba8a0531ec0d584e51f31ca132ed",
-                "width": 640
-              }
-            ]
-          },
-          "description": "Rupert Lowe is a British politician who has served as the member of Parliament for Great Yarmouth since 2024 and the leader of Restore Britain.  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  onX Offroad: Try onX Offroad for 50% off- go to https://onXmaps.com/joerogan  This video is sponsored by BetterHelp. Visit https://BetterHelp.com/JRE Learn more about your ad choices. Visit podcastchoices.com/adchoices",
-          "duration": {
-            "totalMilliseconds": 7385641
-          },
-          "htmlDescription": "<p>Rupert Lowe is a British politician who has served as the member of Parliament for Great Yarmouth since 2024 and the leader of Restore Britain.</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>onX Offroad: Try onX Offroad for 50% off- go to <a href=\"https://onXmaps.com/joerogan\" rel=\"nofollow\">https://onXmaps.com/joerogan</a></p><br/><p><br /></p><br/><p>This video is sponsored by BetterHelp. Visit <a href=\"https://BetterHelp.com/JRE\" rel=\"nofollow\">https://BetterHelp.com/JRE</a></p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
-          "id": "1f6tXaeR1XNYwSF0tqpEDT",
-          "mediaTypes": [
-            "AUDIO",
-            "VIDEO"
-          ],
-          "name": "#2524 - Rupert Lowe",
-          "playability": {
-            "playable": true,
-            "reason": "PLAYABLE"
-          },
-          "playedState": {
-            "playPositionMilliseconds": 0,
-            "state": "NOT_STARTED"
-          },
-          "podcastV2": {
-            "data": {
-              "__typename": "Podcast",
-              "coverArt": {
-                "sources": [
-                  {
-                    "height": 64,
-                    "url": "https://i.scdn.co/image/ab6765630000f68d1e1acaebe06610165612f1ef",
-                    "width": 64
-                  },
-                  {
-                    "height": 300,
-                    "url": "https://i.scdn.co/image/ab67656300005f1f1e1acaebe06610165612f1ef",
-                    "width": 300
-                  },
-                  {
-                    "height": 640,
-                    "url": "https://i.scdn.co/image/ab6765630000ba8a1e1acaebe06610165612f1ef",
-                    "width": 640
-                  }
-                ]
-              },
-              "name": "The Joe Rogan Experience",
-              "showTypes": [
-                "SHOW_TYPE_EXCLUSIVE"
-              ],
-              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
-            }
-          },
-          "previewPlayback": {
-            "audioPreview": {
-              "cdnUrl": "https://p.scdn.co/mp3-preview/d9a20bdf0277625f2a094ad311845d3fb61d13d9.mp3"
-            }
-          },
-          "releaseDate": {
-            "isoString": "2026-07-08T17:00:00Z",
-            "precision": "MINUTE"
-          },
-          "restrictions": {
-            "paywallContent": false
-          },
-          "sharingInfo": {
-            "shareId": "Co0hsETLQr2JxhnuJeQp-g",
-            "shareUrl": "https://open.spotify.com/episode/1f6tXaeR1XNYwSF0tqpEDT?si=Co0hsETLQr2JxhnuJeQp-g"
-          },
-          "transcripts": {},
-          "type": "PODCAST_EPISODE",
-          "uri": "spotify:episode:1f6tXaeR1XNYwSF0tqpEDT",
-          "visualIdentity": {
-            "sixteenByNineCoverImage": {
-              "image": {
-                "data": {
-                  "__typename": "ImageV2",
-                  "sources": [
-                    {
-                      "maxHeight": 720,
-                      "maxWidth": 1280,
-                      "url": "https://image-cdn-fa.spotifycdn.com/image/ab6772ab000030ae90386d50241a150d4bcbc8e9"
-                    },
-                    {
-                      "maxHeight": 360,
-                      "maxWidth": 640,
-                      "url": "https://image-cdn-fa.spotifycdn.com/image/ab6772ab0000e0e790386d50241a150d4bcbc8e9"
                     }
                   ]
                 }
@@ -9489,62 +5525,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "explicit": false,
         "playable": true,
         "scrapedAt": "2026-07-18T11:28:01.901Z"
-      },
-      {
-        "platform": "spotify",
-        "type": "track",
-        "uri": "spotify:track:5yw15MbdXGw2ngbqmd7E3m",
-        "url": "https://open.spotify.com/track/5yw15MbdXGw2ngbqmd7E3m",
-        "name": "Lofi Beats",
-        "artists": [
-          "Lo Fi Hip Hop"
-        ],
-        "album": "Lofi Dreams: Soft Lofi Beats",
-        "durationMs": 120000,
-        "durationFormatted": "2:00",
-        "image": "https://i.scdn.co/image/ab67616d0000b2730cea6601096d5b32c8b28f71",
-        "id": "5yw15MbdXGw2ngbqmd7E3m",
-        "explicit": false,
-        "playable": true,
-        "scrapedAt": "2026-07-18T11:28:01.961Z"
-      },
-      {
-        "platform": "spotify",
-        "type": "track",
-        "uri": "spotify:track:7zGzS7L6LnI5qQqMm8wTPB",
-        "url": "https://open.spotify.com/track/7zGzS7L6LnI5qQqMm8wTPB",
-        "name": "New Look - Wii U Mii Maker Lofi Mix",
-        "artists": [
-          "Secret Potion",
-          "Lofi Beats To Chill Study Sleep",
-          "Nostalgiacore"
-        ],
-        "album": "Frutiger Aero Remixes",
-        "durationMs": 162897,
-        "durationFormatted": "2:42",
-        "image": "https://i.scdn.co/image/ab67616d0000b27365bc1eef471caed82cd5c3d9",
-        "id": "7zGzS7L6LnI5qQqMm8wTPB",
-        "explicit": false,
-        "playable": true,
-        "scrapedAt": "2026-07-18T11:28:02.011Z"
-      },
-      {
-        "platform": "spotify",
-        "type": "track",
-        "uri": "spotify:track:4LQ0TjIFk38xXNJVNoonSW",
-        "url": "https://open.spotify.com/track/4LQ0TjIFk38xXNJVNoonSW",
-        "name": "slow river",
-        "artists": [
-          "ourchase"
-        ],
-        "album": "slow river",
-        "durationMs": 103317,
-        "durationFormatted": "1:43",
-        "image": "https://i.scdn.co/image/ab67616d0000b273396a89f358a81646ed6259b8",
-        "id": "4LQ0TjIFk38xXNJVNoonSW",
-        "explicit": false,
-        "playable": true,
-        "scrapedAt": "2026-07-18T11:28:02.289Z"
       }
     ]
   },
@@ -9612,11 +5592,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     },
     "media": [
       "https://scontent-arn2-1.cdninstagram.com/v/t51.71878-15/729466804_1549760159886177_1883659439515397370_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=105&ig_cache_key=MzkyNTg1NzYxNDQ3NTQyMzA5NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=gwtwKMHXGY0Q7kNvwFs8O_B&_nc_oc=AdoeAgtu1iFjbAXZR03M0jk5mHDyXG-V4YkfEgAhFcL9ShW87MFpF6dbSvT0ivhLv8A&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_ss=7a22e&oh=00_AQGstcY-xX--otMYSGqFyYqoIP73kZ_8D8RHL_quEES13w&oe=6A77F376",
-      "https://scontent-arn2-1.cdninstagram.com/o1/v/t16/f2/m84/AQOTRrCQTl1fyJz7fqBninvUdgWeil7BncTOhD-RfiP256I4PY_ioi8UAxdGl0WLEByzkS3XiObR8E2yNiSbmnE634ktoS1hPNebBYI.mp4?_nc_cat=107&_nc_sid=5e9851&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_ohc=fSXEPxW14JIQ7kNvwHBncdf&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0FST1VTRUxfSVRFTS5DMy43MjAuZGFzaF9iYXNlbGluZV8xX3YxIiwieHB2X2Fzc2V0X2lkIjoxNzk2ODE3MTU3ODA4OTg4OCwiYXNzZXRfYWdlX2RheXMiOjQwLCJ2aV91c2VjYXNlX2lkIjoxMDE2NCwiZHVyYXRpb25fcyI6MjQsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=cefa3ff17e61a968&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC81NDQyODFEMkZCRDg0MzU4MzZBQUE0QzI5MzE4MzlBRF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzYwNEVGNDk2M0EwQzdFNTY4QTIyNDRDRkI4MDZBMkIwX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbAhufCnv3qPxUCKAJDMywXQDgF41P3ztkYEmRhc2hfYmFzZWxpbmVfMV92MREAde4HZeieAQA&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQHxRBBUCqh74vHFVtIRloUxKv6fQJnkF0rhbfQ9oLWYUw&oe=6A73E2B5",
-      "https://scontent-arn2-1.cdninstagram.com/v/t51.82787-15/728809712_17974875099103224_2528686373104860184_n.webp?_nc_cat=103&ig_cache_key=MzkyNTg1NzU3NTcwNjYwODc2NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=hcbMLGiW8xwQ7kNvwFEpLPb&_nc_oc=Adp53D-Pdh8YLEndpuRY0wdf55qTyWpQ3EHjpbRvpcciOubZ0K0xiJUOd2TabARJ0u4&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_ss=7a22e&oh=00_AQFv2NH8LmdUPaoC1Av3ZRLD7t9hzF0f8Oh7YMogVMvWMg&oe=6A77C450",
-      "https://scontent-arn2-1.cdninstagram.com/v/t51.71878-15/727566051_958314003924963_5283054625475303262_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=102&ig_cache_key=MzkyNTg1NzkxNjQyMzMxMzMwMA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=LdYJdScudXEQ7kNvwEqWHSi&_nc_oc=AdqKmmomTPIVLcZtpe7N6eQ3GQBIqSuNdCbB7emtsuWYO-MkD2glRd4edbtC0KjiXsw&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_ss=7a22e&oh=00_AQGFg_EpnLAZWh9VOZRPNGhbBDXpwWHONMMLtBFdDmLTfQ&oe=6A77F10D",
-      "https://scontent-arn2-1.cdninstagram.com/o1/v/t16/f2/m84/AQMq6Zzrg22F9r5ID02lab-TQjcYUfKnqpC2_w06THGl8MZ-tKE8-YxokKyN1Yjw_Nwgwpv-xkP4ApHqJoOKrA3b9z01kZ1S4Kgf9ts.mp4?_nc_cat=101&_nc_sid=5e9851&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_ohc=OqRq-AujzmMQ7kNvwHtu9BR&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0FST1VTRUxfSVRFTS5DMy43MjAuZGFzaF9iYXNlbGluZV8xX3YxIiwieHB2X2Fzc2V0X2lkIjoxNzk3NDg3NTE5ODEwMzIyNCwiYXNzZXRfYWdlX2RheXMiOjQyLCJ2aV91c2VjYXNlX2lkIjoxMDE2NCwiZHVyYXRpb25fcyI6MjgsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=727caf249a0595d&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC8zMTQ2RkM2Q0JBNkVFMzhBMDIwQzk0MkZEQzRGMEE4NV92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzQzNEQwMTM2OTM3NzEyNTk0MkEwNDFERTgyODAyNzg0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbw-oSxuIPuPxUCKAJDMywXQDwPnbItDlYYEmRhc2hfYmFzZWxpbmVfMV92MREAde4HZeieAQA&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_ss=7a22e&_nc_zt=28&oh=00_AQHjRSb_yOOcdvx_MfP1iGC_MnJwPeyEB_KAMLO9HoNDwQ&oe=6A73EEB3",
-      "https://scontent-arn2-1.cdninstagram.com/v/t51.71878-15/729466804_1549760159886177_1883659439515397370_n.jpg?stp=c0.80.640.640a_dst-jpg_e15_s640x640_tt6&_nc_cat=105&ig_cache_key=MzkyNTg1NzYxNDQ3NTQyMzA5NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=gwtwKMHXGY0Q7kNvwFs8O_B&_nc_oc=AdoeAgtu1iFjbAXZR03M0jk5mHDyXG-V4YkfEgAhFcL9ShW87MFpF6dbSvT0ivhLv8A&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_ss=7a22e&oh=00_AQEGr-aOyoW9YGStHdLdv4m8v2mSpWs0k2FhPeGAakF2lw&oe=6A77F376"
+      "https://scontent-arn2-1.cdninstagram.com/o1/v/t16/f2/m84/AQOTRrCQTl1fyJz7fqBninvUdgWeil7BncTOhD-RfiP256I4PY_ioi8UAxdGl0WLEByzkS3XiObR8E2yNiSbmnE634ktoS1hPNebBYI.mp4?_nc_cat=107&_nc_sid=5e9851&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_ohc=fSXEPxW14JIQ7kNvwHBncdf&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0FST1VTRUxfSVRFTS5DMy43MjAuZGFzaF9iYXNlbGluZV8xX3YxIiwieHB2X2Fzc2V0X2lkIjoxNzk2ODE3MTU3ODA4OTg4OCwiYXNzZXRfYWdlX2RheXMiOjQwLCJ2aV91c2VjYXNlX2lkIjoxMDE2NCwiZHVyYXRpb25fcyI6MjQsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=cefa3ff17e61a968&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC81NDQyODFEMkZCRDg0MzU4MzZBQUE0QzI5MzE4MzlBRF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzYwNEVGNDk2M0EwQzdFNTY4QTIyNDRDRkI4MDZBMkIwX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbAhufCnv3qPxUCKAJDMywXQDgF41P3ztkYEmRhc2hfYmFzZWxpbmVfMV92MREAde4HZeieAQA&_nc_gid=vNCBwQPT-0NDIFQsV3MGZQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQHxRBBUCqh74vHFVtIRloUxKv6fQJnkF0rhbfQ9oLWYUw&oe=6A73E2B5"
     ],
     "comments": [],
     "relatedPosts": [
@@ -9765,88 +5741,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "https://scontent-arn2-1.cdninstagram.com/o1/v/t16/f2/m84/AQPR4zUqReqf-s4ildWOQeBb718tDuYqeErpvd3aGhr4jI7THlrcuR7esStJjWXCkmLl-XURcNSrf7AsUKFmac0NgM-QfunN0v1quQo.mp4?_nc_cat=109&_nc_sid=5e9851&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_ohc=wtd19Chl-HEQ7kNvwGng7Cc&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uRkVFRC5DMy4xMjgwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6OTU1NDY3MDkxNzkyNDE0MiwiYXNzZXRfYWdlX2RheXMiOjU1MCwidmlfdXNlY2FzZV9pZCI6MTAxNjQsImR1cmF0aW9uX3MiOjI2MiwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=6df3e1b4c37b0184&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC9FRjRCRkY3RkY3NEM5REZERjE1QUJDQUI1OEU4Rjk4Ql92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYOnBhc3N0aHJvdWdoX2V2ZXJzdG9yZS9HTFRwVkJ6VThfSDFnalVIQUtJNTJLZkhlbVZ2YmtZTEFBQUYVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAm3NSR4IX7-CEVAigCQzMsF0BwYAAAAAAAGBJkYXNoX2Jhc2VsaW5lXzFfdjERAHXqB2XongEA&_nc_gid=2OcSzrbqz_izuGJcwi-1qQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQF8bFsn29XzqRjQkrRFQrTZklFBON9dC84Y-XO4UOk-iw&oe=6A73E02B",
           "https://scontent-arn2-1.cdninstagram.com/v/t51.71878-15/474888843_486869244173785_943828438724363456_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=111&ig_cache_key=MzU1NzM0ODQyMjI2ODg3MTcyMg%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=3FblhuYndyEQ7kNvwEjz1O7&_nc_oc=Adp7qot7ziRgosQn26lzhfHrzzD_m2TOH814YQ1H8ASPezYzNdAr9tGFpJn46kg9I_o&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=2OcSzrbqz_izuGJcwi-1qQ&_nc_ss=7a22e&oh=00_AQEidlufgTbrLRvAeY_lttMaLW7uUuDWfGwhwIjT5ImsRQ&oe=6A77F4AA"
         ]
-      },
-      {
-        "platform": "threads",
-        "id": "3928882651670873164",
-        "code": "DaGMfShCYRM",
-        "url": "https://www.threads.net/@aiwithanju/post/DaGMfShCYRM",
-        "text": "All Paid Courses (Free for First 4500 People)\n\n𝗣𝗮𝗶𝗱 𝗖𝗼𝘂𝗿𝘀𝗲 𝗙𝗥𝗘𝗘 (PART - 1)\n1. Artificial Intelligence\n2. Machine Learning\n3. Prompt Engineering\n4. Claude,Chatgpt,Grok\n5. Data Analytics\n6. AWS Certified\n7. Data Science\n8. BIG DATA\n9. Python\n10. Ethical Hacking\n\n(72 Hours only )\n\nLike + RT + comment 'Drive'\n\nMust Follow me so I can DM you.",
-        "publishedAt": "2026-06-27T16:55:31.000Z",
-        "threadId": "3928882651670873164",
-        "replyToId": null,
-        "quoteId": null,
-        "isReply": false,
-        "isQuote": false,
-        "author": {
-          "username": "aiwithanju",
-          "displayName": "Anjana | AI Strategist & Coach",
-          "verified": true
-        },
-        "engagement": {
-          "views": null,
-          "likes": 649,
-          "replies": 721,
-          "reposts": 195,
-          "quotes": 4
-        },
-        "media": [
-          "https://scontent-arn2-1.cdninstagram.com/v/t51.82787-15/728627202_17977076481105005_209164695399005645_n.jpg?stp=c0.200.799.799a_dst-jpg_e35_s799x799_tt6&_nc_cat=108&ig_cache_key=MzkyODg4MjY1MTY3MDg3MzE2NA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNzk5LnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=MxEGK-HxQXkQ7kNvwFGtDeU&_nc_oc=AdqdW4mwvqSB-iu2komzQ45HoOgx2wZilMkKDL2pS5DAJngoEHAEhp_Hi23r2OWLmnw&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=2OcSzrbqz_izuGJcwi-1qQ&_nc_ss=7a22e&oh=00_AQEidEbZvqpA1seY5mZlHI1dkNAtYXzsoHC8wv9Jabpkgg&oe=6A77FC0F"
-        ]
-      },
-      {
-        "platform": "threads",
-        "id": "3733107777255010279",
-        "code": "DPOqb6biG_n",
-        "url": "https://www.threads.net/@mit/post/DPOqb6biG_n",
-        "text": "MIT researchers are seeking ways to mitigate AI’s ballooning carbon footprint, from boosting algorithms’ efficiency to rethinking data centers’ designs. “This is a once-in-a-lifetime opportunity to innovate and make AI systems less carbon-intense,” Jennifer Turliuk says. https://news.mit.edu/2025/responding-to-generative-ai-climate-impact-0930",
-        "publishedAt": "2025-09-30T14:05:53.000Z",
-        "threadId": "3733107777255010279",
-        "replyToId": null,
-        "quoteId": null,
-        "isReply": false,
-        "isQuote": false,
-        "author": {
-          "username": "mit",
-          "displayName": "MIT",
-          "verified": true
-        },
-        "engagement": {
-          "views": null,
-          "likes": 110,
-          "replies": 2,
-          "reposts": 10,
-          "quotes": null
-        },
-        "media": [
-          "https://scontent-arn2-1.cdninstagram.com/v/t51.82787-15/556308117_17932509414097624_2819407881773503615_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=103&ig_cache_key=MzczMzEwNzc3NzI1NTAxMDI3OQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNTYyLnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=SRawwgfsrCAQ7kNvwEVq9H5&_nc_oc=Adppf-bdGP_tDNHWrp79mMVLA5waVwiIRmKF3xXVn8g3o0U-R9D7zZSFjbpkLKWS5lg&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-arn2-1.cdninstagram.com&_nc_gid=2OcSzrbqz_izuGJcwi-1qQ&_nc_ss=7a22e&oh=00_AQFadDcgotXkNiY2NQ3dlAOcHIIB_CYY2q66z02gMv95KA&oe=6A77DB4D"
-        ]
-      },
-      {
-        "platform": "threads",
-        "id": "3524548563043123130",
-        "code": "DDptj6FzH-6",
-        "url": "https://www.threads.net/@blairimani/post/DDptj6FzH-6",
-        "text": "I think I have to make a Smarter in Seconds episode about AI (artificial intelligence) since I just saw someone boldly state that “AI can never lie. It’s literally never wrong.” \n\nI’ll cover the basics, why it’s popular, and how it can be dangerous. What else should I add?",
-        "publishedAt": "2024-12-16T19:55:51.000Z",
-        "threadId": "3524548563043123130",
-        "replyToId": null,
-        "quoteId": null,
-        "isReply": false,
-        "isQuote": false,
-        "author": {
-          "username": "blairimani",
-          "displayName": "Blair Imani Ali • Smarter in Seconds",
-          "verified": true
-        },
-        "engagement": {
-          "views": null,
-          "likes": 1118,
-          "replies": 240,
-          "reposts": 21,
-          "quotes": 1
-        },
-        "media": []
       }
     ]
   },
@@ -9870,33 +5764,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://www.threads.net/@sgt.edsmia",
         "verified": false,
         "profileImage": "https://scontent-fml20-1.cdninstagram.com/v/t51.82787-19/616077711_17908752390297052_8918972735608639981_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDIyLmMyIn0&_nc_ht=scontent-fml20-1.cdninstagram.com&_nc_cat=104&_nc_oc=Q6cZ2gEuCNzOQBL3WLzHjDVRIUD7nfx3k_HdX2EBkqaiTQ4PmTXyR_B_-1b8j4rN_XouC9U&_nc_ohc=PVTn-IDWAVsQ7kNvwFHmDGu&_nc_gid=BMY7SQQ5QtTZglymKPVK5A&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQFFSvfmo4CklK7KwP_B_B-6LlLzoy9Vf5bVT9IRy_MtTQ&oe=6A77D171&_nc_sid=10d13b",
-        "followers": null
-      },
-      {
-        "id": "63607456922",
-        "username": "eau.dreyy",
-        "displayName": "O-Drey",
-        "url": "https://www.threads.net/@eau.dreyy",
-        "verified": true,
-        "profileImage": "https://scontent-fml20-1.cdninstagram.com/v/t51.2885-19/398502270_649271547392532_744807875067696854_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-fml20-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gEuCNzOQBL3WLzHjDVRIUD7nfx3k_HdX2EBkqaiTQ4PmTXyR_B_-1b8j4rN_XouC9U&_nc_ohc=GDhw6eKfqFsQ7kNvwEkyJxz&_nc_gid=BMY7SQQ5QtTZglymKPVK5A&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQHNZ84cIEeSDwKksKwMIFkVRRnT4siki_gg6nBpSDBCig&oe=6A77C42C&_nc_sid=10d13b",
-        "followers": null
-      },
-      {
-        "id": "63673728286",
-        "username": "juliemwenah",
-        "displayName": "Julie M. Wenah",
-        "url": "https://www.threads.net/@juliemwenah",
-        "verified": false,
-        "profileImage": "https://scontent-fml20-1.cdninstagram.com/v/t51.82787-19/658804479_17953422780120287_1128180701294910174_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby45NTcuYzIifQ&_nc_ht=scontent-fml20-1.cdninstagram.com&_nc_cat=111&_nc_oc=Q6cZ2gEuCNzOQBL3WLzHjDVRIUD7nfx3k_HdX2EBkqaiTQ4PmTXyR_B_-1b8j4rN_XouC9U&_nc_ohc=59BYiSj82N8Q7kNvwHzXmBi&_nc_gid=BMY7SQQ5QtTZglymKPVK5A&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQH823OWcHJJuoRhvrw4ellyQ6t-eP_seJCEPzx_EWYdYA&oe=6A77C499&_nc_sid=10d13b",
-        "followers": null
-      },
-      {
-        "id": "79978035604",
-        "username": "steven686079",
-        "displayName": "Steven Lamar",
-        "url": "https://www.threads.net/@steven686079",
-        "verified": false,
-        "profileImage": "https://scontent-fml20-1.cdninstagram.com/v/t51.82787-19/713643535_17877595170667605_8266358199132931574_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-fml20-1.cdninstagram.com&_nc_cat=109&_nc_oc=Q6cZ2gEuCNzOQBL3WLzHjDVRIUD7nfx3k_HdX2EBkqaiTQ4PmTXyR_B_-1b8j4rN_XouC9U&_nc_ohc=CS3jGExCtQMQ7kNvwHstSfH&_nc_gid=BMY7SQQ5QtTZglymKPVK5A&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQHac8x4oZEZill3h03QkB_aH7nraw0AZep67_jx3tRnwQ&oe=6A77F809&_nc_sid=10d13b",
         "followers": null
       }
     ]
@@ -9964,91 +5831,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "media": [
           "https://scontent-cdg4-3.cdninstagram.com/v/t51.82787-15/741068464_17977387650103224_214669101615299168_n.webp?_nc_cat=110&ig_cache_key=MzkzNzQ5MTkyODQ5NzgyNzQxNQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTYyMC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=BnavDWIpJKMQ7kNvwGW14gJ&_nc_oc=Ado5sxMS3V9I9TFA6KpOo5ZTsDLrt2liAWKAxWtcz-ea50_hZb2YjO_d70TiTHhjkGA&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-cdg4-3.cdninstagram.com&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&_nc_ss=7a22e&oh=00_AQDyLjCkW1XRN7kshX0Uybz1QIy_tJdKTcfMdl2WJNISyA&oe=6A6E32AC"
         ]
-      },
-      {
-        "platform": "threads",
-        "id": "3937491906234420856",
-        "code": "DakyAbpFA54",
-        "url": "https://www.threads.net/@zuck/post/DakyAbpFA54",
-        "text": "The Meta Model API allows developers to build using Muse Spark for the first time. Our focus is on delivering strong agentic and multimodal models at very low cost. More to come soon.",
-        "publishedAt": "2026-07-09T14:00:34.000Z",
-        "threadId": "3937491905269768921",
-        "replyToId": "3937491928497827415",
-        "quoteId": null,
-        "isReply": true,
-        "isQuote": false,
-        "author": {
-          "username": "zuck",
-          "displayName": "Mark Zuckerberg",
-          "verified": true
-        },
-        "engagement": {
-          "views": null,
-          "likes": 231,
-          "replies": 34,
-          "reposts": 6,
-          "quotes": 2
-        },
-        "media": []
-      },
-      {
-        "platform": "threads",
-        "id": "3925863854786722836",
-        "code": "DZ7eGA1G7wU",
-        "url": "https://www.threads.net/@zuck/post/DZ7eGA1G7wU",
-        "text": "Our new line of @metaglasses is available today. Three shapes, 26 style combos, with our most advanced Meta AI built in. Plus, three custom styles designed by @kyliejenner.",
-        "publishedAt": "2026-06-23T12:57:42.000Z",
-        "threadId": "3925863854786722836",
-        "replyToId": null,
-        "quoteId": null,
-        "isReply": false,
-        "isQuote": false,
-        "author": {
-          "username": "zuck",
-          "displayName": "Mark Zuckerberg",
-          "verified": true
-        },
-        "engagement": {
-          "views": null,
-          "likes": 3620,
-          "replies": 1403,
-          "reposts": 237,
-          "quotes": 117
-        },
-        "media": [
-          "https://scontent-cdg6-1.cdninstagram.com/v/t51.71878-15/729466804_1549760159886177_1883659439515397370_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=105&ig_cache_key=MzkyNTg1NzYxNDQ3NTQyMzA5NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=CY5bsTUA0_IQ7kNvwHtRryd&_nc_oc=Adrdd9d1NeUDj_7pAoF-kV46IpIV1m4MKw9-OyFNiZEo0dnrRLUcxrUAAUgfepLThYA&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-cdg6-1.cdninstagram.com&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&_nc_ss=7a22e&oh=00_AQDh12rAv97oeQx1mlrcUAzF1tJp0ImhLpBBYyoE1SyHJw&oe=6A6E1036",
-          "https://scontent-cdg4-2.cdninstagram.com/o1/v/t16/f2/m84/AQOTRrCQTl1fyJz7fqBninvUdgWeil7BncTOhD-RfiP256I4PY_ioi8UAxdGl0WLEByzkS3XiObR8E2yNiSbmnE634ktoS1hPNebBYI.mp4?_nc_cat=107&_nc_sid=5e9851&_nc_ht=scontent-cdg4-2.cdninstagram.com&_nc_ohc=CYAcI0UX3ncQ7kNvwGMH11f&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0FST1VTRUxfSVRFTS5DMy43MjAuZGFzaF9iYXNlbGluZV8xX3YxIiwieHB2X2Fzc2V0X2lkIjoxNzk2ODE3MTU3ODA4OTg4OCwiYXNzZXRfYWdlX2RheXMiOjMzLCJ2aV91c2VjYXNlX2lkIjoxMDE2NCwiZHVyYXRpb25fcyI6MjQsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=cefa3ff17e61a968&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC81NDQyODFEMkZCRDg0MzU4MzZBQUE0QzI5MzE4MzlBRF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzYwNEVGNDk2M0EwQzdFNTY4QTIyNDRDRkI4MDZBMkIwX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbAhufCnv3qPxUCKAJDMywXQDgF41P3ztkYEmRhc2hfYmFzZWxpbmVfMV92MREAde4HZeieAQA&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&_nc_ss=7a22e&_nc_zt=28&oh=00_AQBibJlbXtfeWOFZ8W-D_YIilFmeekdgniF_tqLtGuyh4g&oe=6A6A37B5",
-          "https://scontent-cdg6-1.cdninstagram.com/v/t51.82787-15/728809712_17974875099103224_2528686373104860184_n.webp?_nc_cat=103&ig_cache_key=MzkyNTg1NzU3NTcwNjYwODc2NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=wgnGXUO07qoQ7kNvwFErMjL&_nc_oc=Adq5-EIcJLXNzkhq_4YrhgXrcuUH5sekxwRk3G7gdDobxWXucPu2eknzNN0-vzHnovU&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-cdg6-1.cdninstagram.com&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&_nc_ss=7a22e&oh=00_AQDZIg1uqyoaWYICAgAWby6CwDEbtvgH_bJqoLN-v-fMPg&oe=6A6E1950",
-          "https://scontent-cdg4-1.cdninstagram.com/v/t51.71878-15/727566051_958314003924963_5283054625475303262_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=102&ig_cache_key=MzkyNTg1NzkxNjQyMzMxMzMwMA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=cjpOMQKC2RcQ7kNvwGqCyK1&_nc_oc=AdonGNt50OyR6Ye8WodSlHoZzkJqXpiN1CU7c4aMip7u3TIddePP788D9M5OTu7NhjU&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-cdg4-1.cdninstagram.com&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&_nc_ss=7a22e&oh=00_AQA5EVOQjLQAGSxwuraxUhuDk21wdrGeWwGL6xmimvYDlw&oe=6A6E0DCD",
-          "https://scontent-cdg4-2.cdninstagram.com/o1/v/t16/f2/m84/AQMq6Zzrg22F9r5ID02lab-TQjcYUfKnqpC2_w06THGl8MZ-tKE8-YxokKyN1Yjw_Nwgwpv-xkP4ApHqJoOKrA3b9z01kZ1S4Kgf9ts.mp4?_nc_cat=101&_nc_sid=5e9851&_nc_ht=scontent-cdg4-2.cdninstagram.com&_nc_ohc=dXo8gsZ3y98Q7kNvwFqsJ19&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0FST1VTRUxfSVRFTS5DMy43MjAuZGFzaF9iYXNlbGluZV8xX3YxIiwieHB2X2Fzc2V0X2lkIjoxNzk3NDg3NTE5ODEwMzIyNCwiYXNzZXRfYWdlX2RheXMiOjM0LCJ2aV91c2VjYXNlX2lkIjoxMDE2NCwiZHVyYXRpb25fcyI6MjgsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=727caf249a0595d&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC8zMTQ2RkM2Q0JBNkVFMzhBMDIwQzk0MkZEQzRGMEE4NV92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzQzNEQwMTM2OTM3NzEyNTk0MkEwNDFERTgyODAyNzg0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbw-oSxuIPuPxUCKAJDMywXQDwPnbItDlYYEmRhc2hfYmFzZWxpbmVfMV92MREAde4HZeieAQA&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&_nc_zt=28&_nc_ss=7a22e&oh=00_AQA3i6wIXG5BDtXqCPcTuhGW7EylltG_syfPKY_TBRHVwQ&oe=6A6A43B3",
-          "https://scontent-cdg6-1.cdninstagram.com/v/t51.71878-15/729466804_1549760159886177_1883659439515397370_n.jpg?stp=c0.80.640.640a_dst-jpg_e15_s640x640_tt6&_nc_cat=105&ig_cache_key=MzkyNTg1NzYxNDQ3NTQyMzA5NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=CY5bsTUA0_IQ7kNvwHtRryd&_nc_oc=Adrdd9d1NeUDj_7pAoF-kV46IpIV1m4MKw9-OyFNiZEo0dnrRLUcxrUAAUgfepLThYA&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-cdg6-1.cdninstagram.com&_nc_gid=wkyjiyQ2aEsOml1qJ-3q-Q&_nc_ss=7a22e&oh=00_AQCd8VjTZ6ncCZ_RaLy9BpMWlxGoelCy8LQRKnudoVi5Yw&oe=6A6E1036"
-        ]
-      },
-      {
-        "platform": "threads",
-        "id": "3920731152608519405",
-        "code": "DZpPDXbCeTt",
-        "url": "https://www.threads.net/@zuck/post/DZpPDXbCeTt",
-        "text": "500M monthly actives on Threads in less than 3 years. Thanks for making this platform what it is. 🙏",
-        "publishedAt": "2026-06-16T10:59:56.000Z",
-        "threadId": "3920731152608519405",
-        "replyToId": null,
-        "quoteId": null,
-        "isReply": false,
-        "isQuote": false,
-        "author": {
-          "username": "zuck",
-          "displayName": "Mark Zuckerberg",
-          "verified": true
-        },
-        "engagement": {
-          "views": null,
-          "likes": 18057,
-          "replies": 4770,
-          "reposts": 586,
-          "quotes": 252
-        },
-        "media": []
       }
     ]
   },
@@ -10117,29 +5899,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "max": 1000,
           "raw": "0-1K"
         }
-      },
-      {
-        "platform": "tiktok_ad_library",
-        "id": "1872402620170418",
-        "url": "https://library.tiktok.com/ads/detail/?ad_id=1872402620170418",
-        "text": "Relax and Recharge with Professional Massage Services Near You. Book Today.",
-        "adFormat": "video",
-        "firstShown": "2026-08-02T00:00:00.000Z",
-        "lastShown": "2026-08-02T00:00:00.000Z",
-        "impressions": "0-1K",
-        "advertiser": {
-          "name": "HongKong AdTiger Media Co., Limited",
-          "location": "Hong Kong"
-        },
-        "media": [
-          "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/3de4a6d6aeade6ab958a291a3a5bd49c~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=d3c7a0dd&x-expires=1785686400&x-signature=GyiPUhUAFUFyEOGfF1XhsMSx4rQ%3D&t=4d5b0474&ps=13740610&",
-          "https://library.tiktok.com/api/v1/cdn/1785667307/video/aHR0cHM6Ly92MTZtLnRpa3Rva2Nkbi5jb20vNjQxZWM4ZWZiYTgwY2M1YzU0OWI4N2NhZjk5MjEyMDEvNmE2ZjczNTgvdmlkZW8vdG9zL2FsaXNnL3Rvcy1hbGlzZy12ZS0wMDUxYzAwMS1zZy9vd2dJMzRBYlZnRzBHRmZEUVVoQWZVTWdXWjhBQUNTRUdSOWVtWS8=/bb0280a2-4a63-46e8-a759-8d4b732e6d88?a=475769&bt=720&btag=e000b0000&bti=PDU2NmYwMy86&ft=.NpOcInz7Th2~INGXq8Zmo&l=202608021841474F1F2ED09C9DE84DF0AE&mime_type=video_mp4&rc=NDQ8NjQ0ZTxlM2Y2Njs5ZEBpMzhuZ245cjZqPDMzODYzNEAtLmNjXl5jNV8xMi0yLzJgYSNjMXMtMmQ0aWthLS1kMC1zcw%3D%3D&signature=2pQWORzvAEmUKgGQGmydZDn%2B0mYazq1nnnXy7NGPupQ%3D&vvpl=1"
-        ],
-        "impressionsRange": {
-          "min": 0,
-          "max": 1000,
-          "raw": "0-1K"
-        }
       }
     ]
   },
@@ -10182,8 +5941,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "media": [
           "https://p16-common-sign.tiktokcdn.com/example~tplv-noop.image",
-          "https://v16m-default.tiktokcdn.com/example-hd.mp4",
-          "https://v16m-default.tiktokcdn.com/example.mp4"
+          "https://v16m-default.tiktokcdn.com/example-hd.mp4"
         ],
         "tags": []
       },
@@ -10219,8 +5977,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "media": [
           "https://p16-common-sign.tiktokcdn.com/example~tplv-noop.image",
-          "https://v16m-default.tiktokcdn.com/example-hd.mp4",
-          "https://v16m-default.tiktokcdn.com/example.mp4"
+          "https://v16m-default.tiktokcdn.com/example-hd.mp4"
         ],
         "tags": []
       }
@@ -10246,27 +6003,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "count": 33,
         "percentage": 12.27,
         "percentageText": "12.27%"
-      },
-      {
-        "country": "Nigeria",
-        "countryCode": "NG",
-        "count": 21,
-        "percentage": 7.81,
-        "percentageText": "7.81%"
-      },
-      {
-        "country": "Senegal",
-        "countryCode": "SN",
-        "count": 8,
-        "percentage": 2.97,
-        "percentageText": "2.97%"
-      },
-      {
-        "country": "Bangladesh",
-        "countryCode": "BD",
-        "count": 8,
-        "percentage": 2.97,
-        "percentageText": "2.97%"
       }
     ],
     "basis": "commenters",
@@ -10290,24 +6026,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "count": 61,
         "percentage": 22.68,
         "percentageText": "22.68%"
-      },
-      {
-        "language": "ar",
-        "count": 28,
-        "percentage": 10.41,
-        "percentageText": "10.41%"
-      },
-      {
-        "language": "fr",
-        "count": 18,
-        "percentage": 6.69,
-        "percentageText": "6.69%"
-      },
-      {
-        "language": "es",
-        "count": 12,
-        "percentage": 4.46,
-        "percentageText": "4.46%"
       }
     ],
     "languageSampleSize": 269
@@ -10406,10 +6124,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [
           "supercat",
-          "catfunnyvideos",
-          "unitedstates",
-          "funnyvideos",
-          "cat"
+          "catfunnyvideos"
         ],
         "musicName": "original sound - Paw Dreams",
         "musicId": "7656436046934182678",
@@ -10463,50 +6178,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "isAd": false,
         "isPaidPartnership": false,
         "mentions": []
-      },
-      {
-        "platform": "tiktok",
-        "url": "https://www.tiktok.com/@paw.dreams0/video/7655295012845964566",
-        "id": "7655295012845964566",
-        "caption": "Kitten was teased for playing with a cardboard campervan, #catfunnyvideos #catcartoon #catcute catlovers #catstory",
-        "publishedAt": "2026-06-26T15:00:00.000Z",
-        "durationSeconds": 114.0,
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-no1a-p-0037-no/oMPAjCERjDDAVogUIsAiFp9FfvkAAqICEeE6UG~tplv-tiktokx-origin.image?dr=9636&x-expires=1786014000&x-signature=%2B2x2ahedE2CfjX%2B3u2ytqj3%2BpuM%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast8",
-        "mediaType": "video",
-        "contentType": "video",
-        "width": 576,
-        "height": 1024,
-        "videoUrl": "https://v16-webapp-prime.us.tiktok.com/video/tos/no1a/tos-no1a-ve-0068c001-no/okfKIBikX49XYJ7992AnEzaEwQioC1AoHOBypi/?a=1988&bti=ODszNWYuMDE6&&bt=693&ft=aEeq8qT0mIoPD12hRxRI3wURISAbMeF~O5&mime_type=video_mp4&rc=NjlpMzppNDZlMzg1Ojs5N0Bpanc7aHI5cnhrOzMzbzgzNUBeYjA2LjEyXzIxNmMvMGNeYSNfcW9mMmRzL3JhLS1kLzFzcw%3D%3D&expire=1786015208&l=202608041118135C9F6414E9C9CE1EEA0A&ply_type=2&policy=2&signature=2900e4dfe028f47226e498011d91a780&tk=tt_chain_token&btag=e000d0000",
-        "downloadUrl": "https://v16-webapp-prime.us.tiktok.com/video/tos/no1a/tos-no1a-ve-0068c001-no/oUuBCH9ypEAo9QE7OAEi9fQrXwi4kABg1IaKui/?a=1988&bti=ODszNWYuMDE6&&bt=1201&eid=5376&ft=aEeq8qT0mIoPD12hRxRI3wURISAbMeF~O5&mime_type=video_mp4&rc=ZTY8Ojk1ODQ3ZzlpZGg0OEBpanc7aHI5cnhrOzMzbzgzNUAxLS8tYGJhNWIxYWAvYTUxYSNfcW9mMmRzL3JhLS1kLzFzcw%3D%3D&expire=1786015208&l=202608041118135C9F6414E9C9CE1EEA0A&ply_type=2&policy=2&signature=58be0e151827dd46edd7f6475b7ae4ad&tk=tt_chain_token&btag=e000d0000",
-        "hasWatermark": true,
-        "mediaUrlsExpireAt": "2026-08-06T11:00:00.000Z",
-        "author": {
-          "id": "7635116029405201410",
-          "secUid": "MS4wLjABAAAAvoNLKzifeDkHLRF2sTlYvhm39FAirS8996wURRRozsE-p7I6BMVYa6vsHFzYUe86",
-          "username": "paw.dreams0",
-          "displayName": "Paw Dreams",
-          "url": "https://www.tiktok.com/@paw.dreams0",
-          "followers": 147100,
-          "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/14e5b5dbddf91912237e342a048afb2c~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=d3280f67&x-expires=1786014000&x-signature=Zq9ynnhU%2FSV7%2B1B2XFVOKSDO2xY%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
-        },
-        "engagement": {
-          "views": 1100000,
-          "likes": 52100,
-          "comments": 3129,
-          "shares": 3755,
-          "saves": 8199
-        },
-        "hashtags": [
-          "catstory"
-        ],
-        "musicName": "original sound - Paw Dreams",
-        "musicId": "7655295065816091395",
-        "musicAuthor": "Paw Dreams",
-        "descLanguage": "en",
-        "isAd": false,
-        "isPaidPartnership": false,
-        "mentions": []
       }
     ],
     "nextCursor": "1781133123000",
@@ -10544,110 +6215,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2026-06-19T09:48:12.000Z",
         "verified": false,
         "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/34e550efa4bd9aec97d7de21011f1d5d~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=2a2de674&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=bQkU37mEQOdeUjb3fGbHZXwRf8g%3D"
-      },
-      {
-        "id": "7655633248479200021",
-        "text": "iya bro gw plenger 😹",
-        "author": "evan.gunawan2037",
-        "authorId": "7442964363847697409",
-        "authorSecUid": "MS4wLjABAAAA7ax_OCYs6_dYN6ecF_wfwrsx5MWfm6ZXPq1uBd7JxHRyQV11bE_95NMCWoPh6ryo",
-        "authorName": "MAJIN_EVAN⚡",
-        "commentLanguage": "id",
-        "likeCount": 5,
-        "publishedAt": "2026-06-26T09:27:17.000Z",
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/6ea4cabf09938d71804dd2b430afbdcb~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=ac6fedfc&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=Zxy%2BmvMJIGVUUYEmnl00HSp3DAw%3D"
-      },
-      {
-        "id": "7666686478793442069",
-        "text": "[Sticker]",
-        "author": "athenaaeonzystaria",
-        "authorId": "7618207766117434389",
-        "authorSecUid": "MS4wLjABAAAA1km3MGlfJPOAttnpyQleBltAOO_cioIJkdDiyAYrejuPd6RN3kIVPlyxRSY56oql",
-        "authorName": "𝙉𝙌𝙍 | 𝐀𝐞𝐨𝐧𝐳𝐲 𝐗𝐚𝐯.",
-        "commentLanguage": "un",
-        "likeCount": 0,
-        "publishedAt": "2026-07-26T04:19:24.000Z",
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/4a961837c2ab8571b505214034a21245~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=af90b773&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=cJmwhIph9R8TXLe%2BH71RCWvkVUw%3D"
-      },
-      {
-        "id": "7655391781529469716",
-        "text": "100 sepereak doang itu mahkurang nya",
-        "author": "ical_style1",
-        "authorId": "7393546184801666064",
-        "authorSecUid": "MS4wLjABAAAAljzoWtCHn_uzu5pVPlnZDvI05gsh48drXY95hfkGdD9bcjsbvIIkFQmVypvNIktT",
-        "authorName": "Cal🦅",
-        "commentLanguage": "id",
-        "likeCount": 1,
-        "publishedAt": "2026-06-25T17:50:10.000Z",
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/a553573e0a120f841e441b1ff94db371~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=88e65905&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=ukWP3sjQ24RpcuQZ9wIFh996J00%3D"
-      },
-      {
-        "id": "7655968916204978965",
-        "text": "1 perak",
-        "author": "oppai_fans",
-        "authorId": "7386610602779460614",
-        "authorSecUid": "MS4wLjABAAAA6MaYwaCn5BGY_01IGU29S96_0E0DkZzSkMnucC7nkt3mzCn5esZtkoJeEzpTzF7a",
-        "authorName": "OPPAI FANS",
-        "commentLanguage": "ms",
-        "likeCount": 2,
-        "publishedAt": "2026-06-27T07:09:58.000Z",
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/3e676fb527590bc4a3cdca6245dd36c3~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=91fab469&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=uci5hG6Zk4gzQr%2F9sQtcrVTG%2BQ0%3D"
-      },
-      {
-        "id": "7654669552286532360",
-        "text": "emotnya si ini :😹\npemikirannya plenger",
-        "author": "rpl_fall",
-        "authorId": "6956819041202914310",
-        "authorSecUid": "MS4wLjABAAAAdzFOecdP_RwHqbpr3LCjfmjjpoE2dq6TWfhS8IpU6AziHml-Iq-Jjdk8DAcwO-ZK",
-        "authorName": "Fall",
-        "commentLanguage": "id",
-        "likeCount": 3,
-        "publishedAt": "2026-06-23T19:07:30.000Z",
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/e0101b36be56d56bf30e68797809e35a~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=7bb09b6f&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=tMnTzaJ%2BEHjBSqd%2Bv%2FgrZAppQC0%3D"
-      },
-      {
-        "id": "7652718324300563221",
-        "text": "1 rupiah kali bukan seribu",
-        "author": "oppai_fans",
-        "authorId": "7386610602779460614",
-        "authorSecUid": "MS4wLjABAAAA6MaYwaCn5BGY_01IGU29S96_0E0DkZzSkMnucC7nkt3mzCn5esZtkoJeEzpTzF7a",
-        "authorName": "OPPAI FANS",
-        "commentLanguage": "id",
-        "likeCount": 14,
-        "publishedAt": "2026-06-18T12:55:47.000Z",
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/3e676fb527590bc4a3cdca6245dd36c3~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=91fab469&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=uci5hG6Zk4gzQr%2F9sQtcrVTG%2BQ0%3D"
-      },
-      {
-        "id": "7654032829540270868",
-        "text": "ga sekolah gini",
-        "author": "zaaxz_renamamiya",
-        "authorId": "7482703678358684689",
-        "authorSecUid": "MS4wLjABAAAAKDGkOPExlauYhsZtoFg8x8Y5a3mC2f09-VwBsNzop0HsQPmW8hAWyYVVbcZCeSkh",
-        "authorName": "𝙕𝙖𝙭𝙯 𝖋𝖙 𝙆𝙂𝙉",
-        "commentLanguage": "id",
-        "likeCount": 2,
-        "publishedAt": "2026-06-22T01:56:58.000Z",
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/cdbbf04e9282ba9b34596ca100fc73f3~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=2aad6fd8&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=juEt%2Bqu53b7EKE3G3ib7k3fDSUg%3D"
-      },
-      {
-        "id": "7666445437457662738",
-        "text": "1rp bro ga ada 1ribu [Photo]",
-        "author": "arilgansss",
-        "authorId": "7085973726505059330",
-        "authorSecUid": "MS4wLjABAAAAmQtD0D_EAfzyj2jlGdjAbDlWXkU3IA8ggibxogwPTS_ZJ74rAyQ9qP8pCsfYHxpf",
-        "authorName": "Tukang mancing",
-        "commentLanguage": "id",
-        "likeCount": 0,
-        "publishedAt": "2026-07-25T12:43:57.000Z",
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/198bd808654191b078ccc269ca90ddc7~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=bf981750&s=COMMENT_LIST&sc=avatar&shcp=ff37627b&shp=30310797&t=223449c4&x-expires=1785927600&x-signature=CcdWyXq6mMEHVwOMWvvL5okMF6g%3D"
       }
     ],
     "nextCursor": "10",
@@ -10680,54 +6247,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2026-06-03T09:43:54.000Z",
         "authorId": "6958917445306926086",
         "commentLanguage": "ru",
-        "replyCount": 0,
-        "authorSecUid": null
-      },
-      {
-        "id": "7646848703109612308",
-        "text": "welcome back brother we miss your content since you got rich 🤑",
-        "author": "hassanmahadhi44",
-        "authorAvatarUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/8c3fd35abfa9ca1f0289ce7dfb474955~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=be09752c&s=COMMENT_LIST&sc=avatar&shcp=5597e28e&shp=30310797&t=223449c4&x-expires=1784300400&x-signature=xpaGPkcaLHexRPPfuBjFZh8oOGc%3D",
-        "likeCount": 405,
-        "publishedAt": "2026-06-02T17:18:38.000Z",
-        "authorId": "6958917445306926086",
-        "commentLanguage": "ar",
-        "replyCount": 0,
-        "authorSecUid": null
-      },
-      {
-        "id": "7646829101696795412",
-        "text": "Assalamualaikum all Muslim 🫶👋",
-        "author": "flamefaisal",
-        "authorAvatarUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/ccf74b3284cccc970c60ec8479d83055~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=f9e4b949&s=COMMENT_LIST&sc=avatar&shcp=5597e28e&shp=30310797&t=223449c4&x-expires=1784300400&x-signature=MDbiuKJH8omek6ps9Z%2FD9xfe4ZY%3D",
-        "likeCount": 9613,
-        "publishedAt": "2026-06-02T16:02:29.000Z",
-        "authorId": "6958917445306926086",
-        "commentLanguage": "ar",
-        "replyCount": 0,
-        "authorSecUid": null
-      },
-      {
-        "id": "7646812491309564673",
-        "text": "[Photo] who watching today",
-        "author": "pabloescoba.25666",
-        "authorAvatarUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/e64b23b557494ea765ecf470ba8e1d95~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=6adf42ed&s=COMMENT_LIST&sc=avatar&shcp=5597e28e&shp=30310797&t=223449c4&x-expires=1784300400&x-signature=Pgbx2BmKC7SAoHOH7KN%2F6mxAwa0%3D",
-        "likeCount": 2365,
-        "publishedAt": "2026-06-02T14:58:21.000Z",
-        "authorId": "6958917445306926086",
-        "commentLanguage": "en",
-        "replyCount": 0,
-        "authorSecUid": null
-      },
-      {
-        "id": "7648688233429566225",
-        "text": "[Photo] $800?\n$799?\nHmmmmm How?? Why",
-        "author": "udaymuhammed",
-        "authorAvatarUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/9f2f295378b728ea2478292e32a10122~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=902fa2e2&s=COMMENT_LIST&sc=avatar&shcp=5597e28e&shp=30310797&t=223449c4&x-expires=1784300400&x-signature=rGtZD7vu36YGKscvIUOG79999q4%3D",
-        "likeCount": 539,
-        "publishedAt": "2026-06-07T16:16:53.000Z",
-        "authorId": "6958917445306926086",
-        "commentLanguage": "en",
         "replyCount": 0,
         "authorSecUid": null
       }
@@ -10768,13 +6287,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       },
       "streamUrls": [
         "https://pull-hls-f16-tt01.tiktokcdn.com/activity/stream-3578537941258994614_hd/index.m3u8?expire=1786446578&sign=f25ce1f7dc0090406b4ce9dd93404abf",
-        "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_hd/index.mpd?expire=1786446578&sign=0366e791f991487f9c5aaa22382b596d",
-        "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_hd.flv?expire=1786446578&sign=4e2983d0d512266f6557d5f7aabe8532",
-        "https://pull-hls-f16-tt01.tiktokcdn.com/activity/stream-3578537941258994614_uhd/index.m3u8?expire=1786446578&sign=2a607ea575457021435a891b4643e17c",
-        "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_uhd/index.mpd?expire=1786446578&sign=7f9fe4060d52362c260ba310c4a79047",
-        "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_uhd.flv?expire=1786446578&sign=9ca252292b4a32583d2a4fcb721ff555",
-        "https://pull-hls-f16-tt01.tiktokcdn.com/activity/stream-3578537941258994614_sd/index.m3u8?expire=1786446578&sign=2b0c3c0cea33b5b1c1f16b3cc1522c2b",
-        "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_sd/index.mpd?expire=1786446578&sign=54f12793a9b2ec076d77333e3f87eeb7"
+        "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_hd/index.mpd?expire=1786446578&sign=0366e791f991487f9c5aaa22382b596d"
       ],
       "streamQualities": [
         {
@@ -10796,26 +6309,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "hls": "https://pull-hls-f16-tt01.tiktokcdn.com/activity/stream-3578537941258994614_uhd/index.m3u8?expire=1786446578&sign=2a607ea575457021435a891b4643e17c",
           "cmaf": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_uhd/index.mpd?expire=1786446578&sign=7f9fe4060d52362c260ba310c4a79047",
           "dash": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_uhd/index.mpd?expire=1786446578&sign=7f9fe4060d52362c260ba310c4a79047"
-        },
-        {
-          "quality": "sd",
-          "codec": "h264",
-          "resolution": "960x540",
-          "bitrate": 800000,
-          "flv": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_sd.flv?expire=1786446578&sign=861979ee452b5d3894b3c02920bd96ca",
-          "hls": "https://pull-hls-f16-tt01.tiktokcdn.com/activity/stream-3578537941258994614_sd/index.m3u8?expire=1786446578&sign=2b0c3c0cea33b5b1c1f16b3cc1522c2b",
-          "cmaf": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_sd/index.mpd?expire=1786446578&sign=54f12793a9b2ec076d77333e3f87eeb7",
-          "dash": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_sd/index.mpd?expire=1786446578&sign=54f12793a9b2ec076d77333e3f87eeb7"
-        },
-        {
-          "quality": "ld",
-          "codec": "h264",
-          "resolution": "640x360",
-          "bitrate": 600000,
-          "flv": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_ld.flv?expire=1786446578&sign=33fed68846450e6976f0c3be345a75f9",
-          "hls": "https://pull-hls-f16-tt01.tiktokcdn.com/activity/stream-3578537941258994614_ld/index.m3u8?expire=1786446578&sign=d8bfbecab958947a7b8ca5f9bf37b3b7",
-          "cmaf": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_ld/index.mpd?expire=1786446578&sign=00541c1a83a5cd336565ffe7a33f51cf",
-          "dash": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_ld/index.mpd?expire=1786446578&sign=00541c1a83a5cd336565ffe7a33f51cf"
         }
       ],
       "streams": {
@@ -10891,13 +6384,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       },
       "streamUrls": [
         "https://pull-hls-f16-tt01.tiktokcdn.com/activity/stream-3578537941258994614_hd/index.m3u8?expire=1786446578&sign=f25ce1f7dc0090406b4ce9dd93404abf",
-        "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_hd/index.mpd?expire=1786446578&sign=0366e791f991487f9c5aaa22382b596d",
-        "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_hd.flv?expire=1786446578&sign=4e2983d0d512266f6557d5f7aabe8532",
-        "https://pull-hls-f16-tt01.tiktokcdn.com/activity/stream-3578537941258994614_uhd/index.m3u8?expire=1786446578&sign=2a607ea575457021435a891b4643e17c",
-        "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_uhd/index.mpd?expire=1786446578&sign=7f9fe4060d52362c260ba310c4a79047",
-        "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_uhd.flv?expire=1786446578&sign=9ca252292b4a32583d2a4fcb721ff555",
-        "https://pull-hls-f16-tt01.tiktokcdn.com/activity/stream-3578537941258994614_sd/index.m3u8?expire=1786446578&sign=2b0c3c0cea33b5b1c1f16b3cc1522c2b",
-        "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_sd/index.mpd?expire=1786446578&sign=54f12793a9b2ec076d77333e3f87eeb7"
+        "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_hd/index.mpd?expire=1786446578&sign=0366e791f991487f9c5aaa22382b596d"
       ],
       "streamQualities": [
         {
@@ -10919,26 +6406,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "hls": "https://pull-hls-f16-tt01.tiktokcdn.com/activity/stream-3578537941258994614_uhd/index.m3u8?expire=1786446578&sign=2a607ea575457021435a891b4643e17c",
           "cmaf": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_uhd/index.mpd?expire=1786446578&sign=7f9fe4060d52362c260ba310c4a79047",
           "dash": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_uhd/index.mpd?expire=1786446578&sign=7f9fe4060d52362c260ba310c4a79047"
-        },
-        {
-          "quality": "sd",
-          "codec": "h264",
-          "resolution": "960x540",
-          "bitrate": 800000,
-          "flv": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_sd.flv?expire=1786446578&sign=861979ee452b5d3894b3c02920bd96ca",
-          "hls": "https://pull-hls-f16-tt01.tiktokcdn.com/activity/stream-3578537941258994614_sd/index.m3u8?expire=1786446578&sign=2b0c3c0cea33b5b1c1f16b3cc1522c2b",
-          "cmaf": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_sd/index.mpd?expire=1786446578&sign=54f12793a9b2ec076d77333e3f87eeb7",
-          "dash": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_sd/index.mpd?expire=1786446578&sign=54f12793a9b2ec076d77333e3f87eeb7"
-        },
-        {
-          "quality": "ld",
-          "codec": "h264",
-          "resolution": "640x360",
-          "bitrate": 600000,
-          "flv": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_ld.flv?expire=1786446578&sign=33fed68846450e6976f0c3be345a75f9",
-          "hls": "https://pull-hls-f16-tt01.tiktokcdn.com/activity/stream-3578537941258994614_ld/index.m3u8?expire=1786446578&sign=d8bfbecab958947a7b8ca5f9bf37b3b7",
-          "cmaf": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_ld/index.mpd?expire=1786446578&sign=00541c1a83a5cd336565ffe7a33f51cf",
-          "dash": "https://pull-f5-tt01.tiktokcdn.com/activity/stream-3578537941258994614_ld/index.mpd?expire=1786446578&sign=00541c1a83a5cd336565ffe7a33f51cf"
         }
       ],
       "streams": {
@@ -11049,88 +6516,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [
           "okaratiktokstar",
-          "tiktokpakastan",
-          "okaralover",
-          "alichaiwala",
-          "tiktok",
-          "support",
-          "trending",
-          "foruyou",
-          "1m"
+          "tiktokpakastan"
         ],
         "musicName": "original sound - khaby.lame",
-        "mentions": [],
-        "isAd": false,
-        "isPaidPartnership": false,
-        "musicId": "7646812079113898783"
-      },
-      {
-        "platform": "tiktok",
-        "url": "https://www.tiktok.com/@babi_batox/video/7657210703262010631",
-        "id": "7657210703262010631",
-        "caption": "Obrigado, volte sempre; THank you, come again #aprender #khaby #comed #badi_xatox #humor",
-        "description": "Obrigado, volte sempre; THank you, come again #aprender #khaby #comed #badi_xatox #humor",
-        "publishedAt": "2026-06-30T15:28:22.000Z",
-        "durationSeconds": 16.467,
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0037/oYw7iFBEEQ6IgRQz9Hf7QL2ARZkHqDcQBBfSBw~tplv-tiktokx-cropcenter-q:300:400:q70.webp?dr=14782&refresh_token=5cbaa5e5&x-expires=1785171600&x-signature=Zg1zQ4AppOFWvrVz6mtVoWf0Bbk%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=f6441914&idc=my2&biz_tag=tt_video&s=MUSIC_AWEME&sc=cover",
-        "author": {
-          "username": "babi_batox",
-          "displayName": "Loreno_Cavela",
-          "url": "https://www.tiktok.com/@babi_batox",
-          "verified": null,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/12b7a3027b147743a04d2dcd50302b61~tplv-tiktokx-cropcenter-q:1080:1080:q70.webp?dr=10796&idc=my2&ps=87d6e48a&refresh_token=06f16ad2&s=MUSIC_AWEME&sc=avatar&shcp=f6441914&shp=d05b14bd&t=223449c4&x-expires=1785171600&x-signature=QOi7%2FEEgi7Th2wcfyTFLX0QLv%2B4%3D",
-          "id": null,
-          "secUid": null,
-          "followers": null
-        },
-        "engagement": {
-          "views": 2334,
-          "likes": 127,
-          "comments": 2,
-          "saves": 6,
-          "shares": 0
-        },
-        "hashtags": [
-          "aprender",
-          "khaby",
-          "comed",
-          "badi_xatox",
-          "humor"
-        ],
-        "musicName": "original sound - khaby.lame",
-        "mentions": [],
-        "isAd": false,
-        "isPaidPartnership": false,
-        "musicId": "7646812079113898783"
-      },
-      {
-        "platform": "tiktok",
-        "url": "https://www.tiktok.com/@phearinreber8/video/7651833761398689042",
-        "id": "7651833761398689042",
-        "caption": "រឿងពិតរបស់មនុស្សយើង🫠🫠🫠",
-        "description": "រឿងពិតរបស់មនុស្សយើង🫠🫠🫠",
-        "publishedAt": "2026-06-16T03:43:08.000Z",
-        "durationSeconds": 41.168,
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0037/oIiQkNnOBDxMxcVwjmFUgYQERAm0LbmfEeBq8M~tplv-tiktokx-cropcenter-q:300:400:q70.webp?dr=14782&refresh_token=0c1a39cf&x-expires=1785171600&x-signature=9yH9ppdfvM1LDk52rO2O6JWFW0g%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=f6441914&idc=my2&biz_tag=tt_video&s=MUSIC_AWEME&sc=cover",
-        "author": {
-          "username": "phearinreber8",
-          "displayName": "Justin__IN🇰🇭",
-          "url": "https://www.tiktok.com/@phearinreber8",
-          "verified": null,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/f64c2a74679297804805ec188c038ce1~tplv-tiktokx-cropcenter-q:1080:1080:q70.webp?dr=10796&idc=my2&ps=87d6e48a&refresh_token=880d61dc&s=MUSIC_AWEME&sc=avatar&shcp=f6441914&shp=d05b14bd&t=223449c4&x-expires=1785171600&x-signature=hA%2F33ci0JsXHCAb7jN%2F%2B4NtJEio%3D",
-          "id": null,
-          "secUid": null,
-          "followers": null
-        },
-        "engagement": {
-          "views": 8542,
-          "likes": 372,
-          "comments": 6,
-          "shares": 2,
-          "saves": 6
-        },
-        "musicName": "original sound - khaby.lame",
-        "hashtags": [],
         "mentions": [],
         "isAd": false,
         "isPaidPartnership": false,
@@ -11180,63 +6568,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "Samara@tiddle.io"
           ],
           "links": []
-        }
-      },
-      {
-        "username": "nicolas_williams9",
-        "displayName": "Nicolas_williams9",
-        "url": "https://www.tiktok.com/@nicolas_williams9",
-        "bio": "Jugador del Athletic club",
-        "followers": 6002719,
-        "engagementRate": 12.5784,
-        "likes": 41527477,
-        "videos": 55,
-        "verified": true,
-        "profileImage": "https://p19-common-sign.tiktokcdn-us.com/tos-useast2a-avt-0068-euttp/afecca7121de81afa7afa9f9016d46cf~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=b3e28c5f&x-expires=1785409200&x-signature=kvobRyEykA4%2Fc%2BECKgkfPI6egqU%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
-        "rank": 3,
-        "engagementRateBasis": "avgLikesPerVideo/followers",
-        "region": null,
-        "avgViews": null
-      },
-      {
-        "username": "veranda_main",
-        "displayName": "ВЕРАНДА🚀",
-        "url": "https://www.tiktok.com/@veranda_main",
-        "bio": "Thanks for 2.5 million🚀 \n\nSt.Pb—Sevas\n\nInstagram @veranda_main🥰",
-        "followers": 2488445,
-        "engagementRate": 1.3508,
-        "likes": 34621936,
-        "videos": 1030,
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/38958cfd6c3f995abb18f122f769c620~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=709d2611&x-expires=1785409200&x-signature=r%2BV%2FYznWjwe%2BjO19qu%2F86GpiVxw%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
-        "rank": 4,
-        "engagementRateBasis": "avgLikesPerVideo/followers",
-        "region": null,
-        "avgViews": null
-      },
-      {
-        "username": "chat_n_chops",
-        "displayName": "Chef Moe",
-        "url": "https://www.tiktok.com/@chat_n_chops",
-        "bio": "Cash App $chefmoe83\nPayPal.me/chatnchops\nBusiness: chefmoe83@gmail.com",
-        "followers": 2367774,
-        "engagementRate": 1.5755,
-        "likes": 23576279,
-        "videos": 632,
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/d740219a74dc104924840c795818067f~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=3e8c1ddd&x-expires=1785409200&x-signature=2KG%2Bra5PekZo0e3dN%2F70gv%2BCLPk%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
-        "rank": 5,
-        "engagementRateBasis": "avgLikesPerVideo/followers",
-        "region": null,
-        "avgViews": null,
-        "contact": {
-          "emails": [
-            "chefmoe83@gmail.com"
-          ],
-          "links": [
-            "Cash App $chefmoe83",
-            "PayPal.me/chatnchops"
-          ]
         }
       }
     ]
@@ -11414,95 +6745,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [],
         "musicName": "original sound"
-      },
-      {
-        "platform": "tiktok",
-        "url": "https://www.tiktok.com/@comedyfunj/video/7295949816234839338",
-        "id": "7295949816234839338",
-        "caption": "#funnyvideos #funny #indiafunny #trendingfunny #videofunny #sitcomfunny #funnysitcom",
-        "description": "#funnyvideos #funny #indiafunny #trendingfunny #videofunny #sitcomfunny #funnysitcom",
-        "publishedAt": "2023-10-31T02:51:39.000Z",
-        "durationSeconds": 79.0,
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-useast5-p-0068-tx/e93a8ce787c04b99ad162ecaf71e60ac_1698720701~tplv-tiktokx-origin.image?dr=14575&x-expires=1785405600&x-signature=f6xmw0QPK0JnNx5mu6jQGEa%2FZ24%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=my",
-        "author": {
-          "username": "comedyfunj",
-          "displayName": "Comedy fun",
-          "url": "https://www.tiktok.com/@comedyfunj",
-          "followers": 61200,
-          "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/1bf62ed982f71c262c52af4641c712e8~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=d174f855&x-expires=1785405600&x-signature=xBcGo18vBUqAViuVBz6dR69XDuE%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my"
-        },
-        "engagement": {
-          "views": 11200,
-          "likes": 229,
-          "comments": 3,
-          "shares": 14,
-          "saves": 12
-        },
-        "hashtags": [
-          "funnyvideos",
-          "funny",
-          "indiafunny",
-          "trendingfunny",
-          "videofunny",
-          "sitcomfunny",
-          "funnysitcom"
-        ],
-        "musicName": "nhạc nền"
-      },
-      {
-        "platform": "tiktok",
-        "url": "https://www.tiktok.com/@6163864215898comedy/video/6989978097533603073",
-        "id": "6989978097533603073",
-        "caption": "لايك _كومنت_ فولو _اكسبلور❤️❤️",
-        "description": "لايك _كومنت_ فولو _اكسبلور❤️❤️",
-        "publishedAt": "2021-07-28T14:05:00.000Z",
-        "durationSeconds": 10.0,
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0037/dcd96fd241734c0a994710e4fbded915~tplv-tiktokx-origin.image?dr=14575&x-expires=1785405600&x-signature=OS%2BgEHBepdyW3q0pFto9MR%2BvfKI%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=my",
-        "author": {
-          "username": "6163864215898comedy",
-          "displayName": "comedy😂",
-          "url": "https://www.tiktok.com/@6163864215898comedy",
-          "followers": 207,
-          "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/0c373df8f9081b48a1f838534a9839b3~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=0fe3b20c&x-expires=1785405600&x-signature=6tKIUsvXDOPENZdUz5zHsAW05nk%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my"
-        },
-        "engagement": {
-          "views": 22400,
-          "likes": 122,
-          "comments": 0,
-          "shares": 1,
-          "saves": 9
-        },
-        "hashtags": [],
-        "musicName": "Oh No"
-      },
-      {
-        "platform": "tiktok",
-        "url": "https://www.tiktok.com/@comedyme3/video/7650141917530918151",
-        "id": "7650141917530918151",
-        "caption": null,
-        "description": null,
-        "publishedAt": "2026-06-11T14:17:51.000Z",
-        "durationSeconds": 29.0,
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0037/o8rDBeSfGGwoLibRfqIwwbI5qFQIlvsAeAG33A~tplv-tiktokx-origin.image?dr=14575&x-expires=1785405600&x-signature=GSsmcd2SoQYe2K8AdHgoIYHjf7M%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=my",
-        "author": {
-          "username": "comedyme3",
-          "displayName": "yethro lhamo",
-          "url": "https://www.tiktok.com/@comedyme3",
-          "followers": 12000,
-          "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/89ff2eefdc81e60070085bba1981ab6c~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=4209ccea&x-expires=1785405600&x-signature=kwFJWQjXhwCzLGMmgZY7RMqJ2rk%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my"
-        },
-        "engagement": {
-          "views": 2265,
-          "likes": 159,
-          "comments": 7,
-          "shares": 4,
-          "saves": 4
-        },
-        "hashtags": [],
-        "musicName": "original sound - Don🤣"
       }
     ]
   },
@@ -11524,30 +6766,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "suggestion": "makeup brush set",
         "rank": 2,
         "searchUrl": "https://www.tiktok.com/search?q=makeup+brush+set",
-        "region": "US",
-        "language": "en-US"
-      },
-      {
-        "seed": "makeup",
-        "suggestion": "Makeup brushes",
-        "rank": 3,
-        "searchUrl": "https://www.tiktok.com/search?q=Makeup+brushes",
-        "region": "US",
-        "language": "en-US"
-      },
-      {
-        "seed": "makeup",
-        "suggestion": "makeup ideas",
-        "rank": 4,
-        "searchUrl": "https://www.tiktok.com/search?q=makeup+ideas",
-        "region": "US",
-        "language": "en-US"
-      },
-      {
-        "seed": "makeup",
-        "suggestion": "makeup transition",
-        "rank": 5,
-        "searchUrl": "https://www.tiktok.com/search?q=makeup+transition",
         "region": "US",
         "language": "en-US"
       }
@@ -11584,45 +6802,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likes": 5769632093,
         "verified": true,
         "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=7e4745a7&x-expires=1786006800&x-signature=cJrkoOAcA8KBqdaAWgBgeaE6f6w%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
-      },
-      {
-        "id": "6727327145951183878",
-        "secUid": "MS4wLjABAAAA8ezUaW4ecJX222ObGXxt07F9BIh4QH3-g1P1DHyChT2LLi2cn-vAE2R53-H672ZO",
-        "username": "willsmith",
-        "displayName": "Will Smith",
-        "bio": "Same kid from West Philly.",
-        "url": "https://www.tiktok.com/@willsmith",
-        "followers": 78072574,
-        "following": 51,
-        "likes": 668719165,
-        "verified": true,
-        "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/c76a0af4944c0724130deae566637458~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=7330eb92&x-expires=1786006800&x-signature=NMfaeL%2BXxxMTn8b6FXOn4RFzyoc%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
-      },
-      {
-        "id": "134941634731003904",
-        "secUid": "MS4wLjABAAAAsny0dcfyctb1_fdyyiu7JOLnblf8y3jd64yTHQLQoc9O5m57HhjT94OdgfSmNgaG",
-        "username": "nba",
-        "displayName": "NBA",
-        "bio": "Home of NBA Hoops on TikTok 🏀",
-        "url": "https://www.tiktok.com/@nba",
-        "followers": 27157447,
-        "following": 267,
-        "likes": 1134973794,
-        "verified": true,
-        "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/8beb8b849e725f2776a11575b1e7aebf~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=2b85f252&x-expires=1786006800&x-signature=zfgWYt1dWPRNrAwTprWk1kgtowY%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
-      },
-      {
-        "id": "6614519312189947909",
-        "secUid": "MS4wLjABAAAABKjQkOz_IIzXXzEAl_9LGsWhvK-gBnlczwRPXK8EmxAp6K3X0qiaP5_OEqmm0XwG",
-        "username": "mrbeast",
-        "displayName": "MrBeast",
-        "bio": "Checkout My New Book!👇",
-        "url": "https://www.tiktok.com/@mrbeast",
-        "followers": 131127372,
-        "following": 354,
-        "likes": 1342163330,
-        "verified": true,
-        "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/1e2348ca19d394037718e3b1d3fc2958~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=8f3e1cdd&x-expires=1786006800&x-signature=skRnoQMZIE9cc9jUHrACaGsWVqM%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
       }
     ]
   },
@@ -11680,29 +6859,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "propValue": "iPhone 16"
           }
         ]
-      },
-      {
-        "id": "1731098558045721586",
-        "stock": 85,
-        "price": 22.54,
-        "originalPrice": null,
-        "status": "1",
-        "warehouseId": "7495541999400830766",
-        "purchaseLimit": null,
-        "saleProps": [
-          {
-            "propName": "Phone Models",
-            "propValue": "iPhone 16 Pro"
-          }
-        ]
       }
     ],
     "images": [
       "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/cc79ccfd6a324d548de31cb761b6c3c4~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-      "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/4fe011977a9d4350ba9d7acf0e502f52~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-      "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/9467ea9f5e88475fa7089f5d0e318bda~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-      "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/6bfcfb1d583a4f58b58b48ef68a9e0a2~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-      "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/5cac02e02e9a40988bfbd8338034b30d~tplv-fhlh96nyum-crop-webp:800:800.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839"
+      "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/4fe011977a9d4350ba9d7acf0e502f52~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839"
     ],
     "saleProperties": [
       {
@@ -11716,126 +6877,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "id": "7495574204532655878",
             "name": "iPhone 16"
-          },
-          {
-            "id": "7495575533044959022",
-            "name": "iPhone 16 Pro"
-          },
-          {
-            "id": "7495575533045024558",
-            "name": "iPhone 16 Plus"
-          },
-          {
-            "id": "7495575533044991790",
-            "name": "iPhone 16 Pro Max"
-          },
-          {
-            "id": "7495575459846457134",
-            "name": "iPhone 15"
-          },
-          {
-            "id": "7495575459846489902",
-            "name": "iPhone 15 Pro"
-          },
-          {
-            "id": "7495575533044893486",
-            "name": "iPhone 15 Plus"
-          },
-          {
-            "id": "7495575459846522670",
-            "name": "iPhone 15 Pro Max"
-          },
-          {
-            "id": "7495575459846326062",
-            "name": "iPhone 14"
-          },
-          {
-            "id": "7495575459846358830",
-            "name": "iPhone 14 Pro"
-          },
-          {
-            "id": "7495573631289231109",
-            "name": "iPhone 14 Plus"
-          },
-          {
-            "id": "7495575459846391598",
-            "name": "iPhone 14 Pro Max"
-          },
-          {
-            "id": "7494493274116310830",
-            "name": "iPhone 13"
-          },
-          {
-            "id": "7494493274116343598",
-            "name": "iPhone 13 Mini"
-          },
-          {
-            "id": "7495575459846260526",
-            "name": "iPhone 13 Pro"
-          },
-          {
-            "id": "7495575459846293294",
-            "name": "iPhone 13 Pro Max"
-          },
-          {
-            "id": "7495575459846129454",
-            "name": "iPhone 12"
-          },
-          {
-            "id": "7494493274116474670",
-            "name": "iPhone 12 Mini"
-          },
-          {
-            "id": "7495575459846162222",
-            "name": "iPhone 12 Pro"
-          },
-          {
-            "id": "7495575459846194990",
-            "name": "iPhone 12 Pro Max"
-          },
-          {
-            "id": "7495575459846031150",
-            "name": "iPhone 11"
-          },
-          {
-            "id": "7494493274116605742",
-            "name": "iPhone 11 Pro"
-          },
-          {
-            "id": "7033354712942511877",
-            "name": "iPhone 11 Pro Max "
-          },
-          {
-            "id": "7033354529169245958",
-            "name": "iPhone X "
-          },
-          {
-            "id": "7026240489779300102",
-            "name": "iPhone XR "
-          },
-          {
-            "id": "7026240489779267334",
-            "name": "iPhone XS "
-          },
-          {
-            "id": "7487887311825504002",
-            "name": "iPhone XS MAX"
-          },
-          {
-            "id": "7550657344318261006",
-            "name": "iPhone 17"
-          },
-          {
-            "id": "7550657344318244622",
-            "name": "iPhone 17 Pro"
-          },
-          {
-            "id": "7550655887937963790",
-            "name": "iPhone 17 Pro Max"
-          },
-          {
-            "id": "7550657344318326542",
-            "name": "iPhone 17 Air"
           }
         ]
       }
@@ -11848,10 +6889,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "id": "909064",
         "name": "Mobile Phone Accessories"
-      },
-      {
-        "id": "601925",
-        "name": "Cases, Screen Protectors & Stickers"
       }
     ],
     "region": "US"
@@ -11874,9 +6911,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "images": [
           "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/bc7a80f5766e438e8698430bdff2b55c~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7c513b397e2f4b019995d95dd7506914~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/2fcfd52f6a694575974084d055c318a6~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/b5cf78b2ce824b329bba9a0a1e2a9fbb~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839"
+          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7c513b397e2f4b019995d95dd7506914~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839"
         ]
       },
       {
@@ -11893,27 +6928,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "images": [
           "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/c51c9bdf430e4991aaa5d947300410de~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/f3ef2a7c10ec4dc7bd3446c373868f7e~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/6b1f7a234b4d4016b7b7ed9401132223~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/09ca5668b59b4770beb90dc8b735a83c~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839"
-        ]
-      },
-      {
-        "platform": "tiktok_shop",
-        "id": "7643464524599723789",
-        "rating": 5,
-        "text": "Fast delivery! Purchased as a gift! Love the lilac color!",
-        "createdAt": "2026-05-24T14:26:17.644Z",
-        "verifiedPurchase": true,
-        "sku": "Thicc 40oz | Lavender Fields",
-        "country": "US",
-        "author": {
-          "name": "i**u"
-        },
-        "images": [
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/3dbcc73d208c46bfb1ef5e6cb74fe593~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/b3d3128fff1f4872a913652a6d6827da~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7cb7186b70c94b93af0aa7f66f227554~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839"
+          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/f3ef2a7c10ec4dc7bd3446c373868f7e~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839"
         ]
       }
     ]
@@ -11946,11 +6961,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "score": 0,
           "scorePercentage": "0",
           "type": 2
-        },
-        {
-          "score": 0.889,
-          "scorePercentage": "89",
-          "type": 3
         }
       ]
     },
@@ -11992,69 +7002,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "reviews": 45249,
         "sold": 992721,
         "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/d3ab128a9f65482d9d8d288ccd252d50~tplv-fhlh96nyum-crop-webp:3000:3000.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=a6e80448&idc=useast5&from=2378011839",
-        "seller": {
-          "id": "7495794203056835079",
-          "name": "Goli Nutrition",
-          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079"
-        }
-      },
-      {
-        "platform": "tiktok_shop",
-        "id": "1729587769570529799",
-        "url": "https://www.tiktok.com/shop/pdp/goli-ashwagandha-gummies-with-vitamin-d-ksm-66-vegan-non-gmo/1729587769570529799",
-        "title": "3 Bottles of Goli Ashwagandha & Vitamin D Gummy - Mixed Berry, KSM-66, Vegan, Plant Based, Non-GMO, Gluten & Gelatin Free",
-        "price": 44.98,
-        "originalPrice": 74.94,
-        "currency": "USD",
-        "discount": "40%",
-        "savings": "Saving $29.96",
-        "slug": "goli-ashwagandha-gummies-with-vitamin-d-ksm-66-vegan-non-gmo",
-        "rating": 4.7,
-        "reviews": 71690,
-        "sold": 862072,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/b0d9acd7ae184c8d89e2e498941485b6~tplv-fhlh96nyum-crop-webp:1500:1500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=a6e80448&idc=useast5&from=2378011839",
-        "seller": {
-          "id": "7495794203056835079",
-          "name": "Goli Nutrition",
-          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079"
-        }
-      },
-      {
-        "platform": "tiktok_shop",
-        "id": "1729589345444205063",
-        "url": "https://www.tiktok.com/shop/pdp/goli-new-year-bundle-ashwagandha-apple-cider-vinegar-matcha-mind/1729589345444205063",
-        "title": "3 Bottles of Goli Best Seller Bundle: Ashwagandha KSM-66, Apple Cider Vinegar, Matcha Mind supplement with Cognizin, Vitamins D2 and B12",
-        "price": 32.8,
-        "originalPrice": 74.97,
-        "currency": "USD",
-        "discount": "56%",
-        "savings": "Saving $42.17",
-        "slug": "goli-new-year-bundle-ashwagandha-apple-cider-vinegar-matcha-mind",
-        "rating": 4.6,
-        "reviews": 40951,
-        "sold": 547502,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7a85d8aa9e2c4faab75a09fd9e5bff42~tplv-fhlh96nyum-crop-webp:1500:1500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=a6e80448&idc=useast5&from=2378011839",
-        "seller": {
-          "id": "7495794203056835079",
-          "name": "Goli Nutrition",
-          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079"
-        }
-      },
-      {
-        "platform": "tiktok_shop",
-        "id": "1729527774874997255",
-        "url": "https://www.tiktok.com/shop/pdp/gummy-pre-post-probiotics-by-goli-nutrition-vegan-gluten-free-formula/1729527774874997255",
-        "title": "Goli Pre, Post, Probiotics Gummy - World's First 3-in-1 Gluten-Free, Vegan, Non-GMO, and Gelatin-Free.",
-        "price": 14.98,
-        "originalPrice": 19.0,
-        "currency": "USD",
-        "discount": "21%",
-        "savings": "Saving $4.02",
-        "slug": "gummy-pre-post-probiotics-by-goli-nutrition-vegan-gluten-free-formula",
-        "rating": 4.5,
-        "reviews": 11837,
-        "sold": 206143,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/3939c5be64484010b5c2a3183ecfbec3~tplv-fhlh96nyum-crop-webp:3000:3000.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=a6e80448&idc=useast5&from=2378011839",
         "seller": {
           "id": "7495794203056835079",
           "name": "Goli Nutrition",
@@ -12107,66 +7054,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "rating": 4.6,
         "reviews": 48,
         "savings": "Saving $1.55"
-      },
-      {
-        "platform": "tiktok_shop",
-        "id": "1732210224209891836",
-        "url": "https://shop.tiktok.com/us/pdp/high-end-iphone-16-case-with-four-leaf-clover-lanyard-butterfly-pattern/1732210224209891836?source=product_detail&enter_method=url_semantic_301",
-        "title": "Suitable for [iPhone 16] high-end phone case，a beautiful four-leaf clover lanyard is included,exquisite and dreamy butterfly pattern,a variety of colors are available for you to choose from YM99",
-        "price": 14.0,
-        "originalPrice": 17.88,
-        "currency": "USD",
-        "discount": "22%",
-        "sold": 314495,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/a92993fc7a2242d9aca2322aac7cdaf6~tplv-fhlh96nyum-crop-webp:800:800.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-        "seller": {
-          "id": "7495991409431644668",
-          "name": "LIBAI-USA1",
-          "url": "https://www.tiktok.com/shop/store/LIBAI-USA1/7495991409431644668"
-        },
-        "rating": null,
-        "reviews": null,
-        "savings": null
-      },
-      {
-        "platform": "tiktok_shop",
-        "id": "1732445435684229466",
-        "url": "https://shop.tiktok.com/us/pdp/1732445435684229466",
-        "title": "Wine Cherry Pattern iPhone Case Shockproof TPU Cover",
-        "price": 7.1,
-        "originalPrice": null,
-        "currency": "USD",
-        "discount": null,
-        "sold": 3480,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/a26a3efec0ef48b6bb663fdee15deac9~tplv-fhlh96nyum-crop-webp:800:800.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-        "seller": {
-          "id": "7496146286741784922",
-          "name": "Cover Farm",
-          "url": "https://www.tiktok.com/shop/store/Cover%20Farm/7496146286741784922"
-        },
-        "rating": null,
-        "reviews": null,
-        "savings": null
-      },
-      {
-        "platform": "tiktok_shop",
-        "id": "1732319524515713953",
-        "url": "https://shop.tiktok.com/us/pdp/oppo-reno14-f-5g-phone-case-durable-stylish-matte-finish/1732319524515713953?source=product_detail&enter_method=url_semantic_301",
-        "title": "For OPPO Reno14 F 5G phone case, durable protective case, stylish phone accessories, matte colored phone case, simple matte appearance. Protective and anti drop phone case, available in multiple colors",
-        "price": 3.36,
-        "originalPrice": null,
-        "currency": "USD",
-        "discount": null,
-        "sold": 67,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/60a6605d5c9348a8841b4ec949ad8534~tplv-fhlh96nyum-crop-webp:800:800.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-        "seller": {
-          "id": "8652615240597738401",
-          "name": "JiaRongHui Store",
-          "url": "https://www.tiktok.com/shop/store/JiaRongHui%20Store/8652615240597738401"
-        },
-        "rating": null,
-        "reviews": null,
-        "savings": null
       }
     ]
   },
@@ -12227,11 +7114,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         ],
         "images": [
           "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/9ceb4f5dd37846abb870a60e99161448~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/100fdb52dee4424893af31d2ff333ad9~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/80a19e04c43342d79b3f505771d18eb9~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/b8a9e3eaaabf48b88c81073b05ab8ead~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/cab3e8ef19d24136830db7fe4babe49e~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/3310a558d93b4cc9b760cecc45db3524~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839"
+          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/100fdb52dee4424893af31d2ff333ad9~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839"
         ],
         "saleProperties": [
           {
@@ -12257,10 +7140,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "id": "848648",
             "name": "Makeup"
-          },
-          {
-            "id": "601534",
-            "name": "Lipstick & Lip Gloss"
           }
         ]
       },
@@ -12302,10 +7181,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         ],
         "images": [
           "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/ee371e4e4208468881dcc275d0679f4b~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/3cd1ce9f5c3444309ba86a47485e04cf~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/0531e8a400574cf691c7cb5a589484b7~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-          "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/2f0a2f3d8fad4789abdc9472fc6b7b2f~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/6cb5914d83264acba7bb3f20936c8631~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839"
+          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/3cd1ce9f5c3444309ba86a47485e04cf~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839"
         ],
         "saleProperties": [
           {
@@ -12327,748 +7203,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "id": "848648",
             "name": "Makeup"
-          },
-          {
-            "id": "601534",
-            "name": "Lipstick & Lip Gloss"
           }
-        ]
-      },
-      {
-        "platform": "tiktok_shop",
-        "id": "1732364669524480120",
-        "url": "https://shop.tiktok.com/us/pdp/skintific-daily-filter-perfect-skin-tint-hydrating-long-lasting/1732364669524480120?source=product_detail&enter_method=url_semantic_301",
-        "title": "Skintific Daily Filter Perfect Skin Tint - Longwear & Natural Finish",
-        "price": 14.9,
-        "originalPrice": null,
-        "currency": "USD",
-        "discount": "25%",
-        "savings": null,
-        "slug": "skintific-daily-filter-perfect-skin-tint-hydrating-long-lasting",
-        "rating": 4.5,
-        "reviews": 301,
-        "sold": 535791,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/f461de6d6540475990c2c1a1d419fe04~tplv-fhlh96nyum-crop-webp:1500:1500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-        "seller": {
-          "id": "7496252928214665336",
-          "name": "SKINTIFIC US Store",
-          "url": "https://www.tiktok.com/shop/store/SKINTIFIC%20US%20Store/7496252928214665336"
-        },
-        "skus": [
-          {
-            "id": "1732364717963186296",
-            "stock": 74,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732364717963251832",
-            "stock": 181,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732364717963317368",
-            "stock": 119,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732364717963382904",
-            "stock": 289,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732364717963448440",
-            "stock": null,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732364717963513976",
-            "stock": 321,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732426713352933496",
-            "stock": 117,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732426713352999032",
-            "stock": 203,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732426713353064568",
-            "stock": 70,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732426713353130104",
-            "stock": 38,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732426713353195640",
-            "stock": 181,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732426725080797304",
-            "stock": 63,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732426725080862840",
-            "stock": 34,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732426725080928376",
-            "stock": null,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732426725080993912",
-            "stock": 167,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          }
-        ],
-        "images": [
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/f461de6d6540475990c2c1a1d419fe04~tplv-fhlh96nyum-crop-webp:1500:1500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839"
-        ]
-      },
-      {
-        "platform": "tiktok_shop",
-        "id": "1732508862526755144",
-        "url": "https://shop.tiktok.com/us/pdp/1732508862526755144",
-        "title": "Smushy SOS Hydrating Lip Mask Hyaluronic Acid",
-        "price": 13.0,
-        "originalPrice": null,
-        "currency": "USD",
-        "discount": null,
-        "savings": null,
-        "rating": 4.8,
-        "reviews": 44,
-        "sold": 1410823,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/858ae90ffc92412d9a0df1e770e8ddba~tplv-fhlh96nyum-crop-webp:1125:1125.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-        "seller": {
-          "id": "7495306581925726536",
-          "name": "NYX Professional Makeup",
-          "url": "https://www.tiktok.com/shop/store/NYX%20Professional%20Makeup/7495306581925726536"
-        },
-        "skus": [
-          {
-            "id": "1732508867926135112",
-            "stock": 2884,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732508867926200648",
-            "stock": 3235,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732508867926266184",
-            "stock": 240,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732508875793666376",
-            "stock": 2919,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732508875793731912",
-            "stock": 1132,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732508875889283400",
-            "stock": 1071,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732508875889348936",
-            "stock": 1057,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1732508944348713288",
-            "stock": 1289,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          }
-        ],
-        "images": [
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/858ae90ffc92412d9a0df1e770e8ddba~tplv-fhlh96nyum-crop-webp:1125:1125.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839"
-        ]
-      },
-      {
-        "platform": "tiktok_shop",
-        "id": "1731195261310898587",
-        "url": "https://shop.tiktok.com/us/pdp/foundation-stick-by-essence-creamy-blendable-formula-matte-finish/1731195261310898587?source=product_detail&enter_method=url_semantic_301",
-        "title": "Essence Foundation Stick - Creamy, Natural Finish for Effortless Makeup",
-        "price": 6.99,
-        "originalPrice": null,
-        "currency": "USD",
-        "discount": null,
-        "savings": null,
-        "slug": "foundation-stick-by-essence-creamy-blendable-formula-matte-finish",
-        "rating": 4.3,
-        "reviews": 181,
-        "sold": 59804,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/13e1a335089d47f4ae07c54db9771f58~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
-        "seller": {
-          "id": "7495061418574317979",
-          "name": "essence cosmetics",
-          "url": "https://www.tiktok.com/shop/store/essence%20cosmetics/7495061418574317979"
-        },
-        "skus": [
-          {
-            "id": "1731195292297957787",
-            "stock": 320,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298023323",
-            "stock": 741,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298088859",
-            "stock": 1987,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298154395",
-            "stock": 92,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298219931",
-            "stock": 3882,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298285467",
-            "stock": 450,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298351003",
-            "stock": 2224,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298416539",
-            "stock": 298,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298482075",
-            "stock": 1742,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298547611",
-            "stock": 1856,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298613147",
-            "stock": 288,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298678683",
-            "stock": 723,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298744219",
-            "stock": 426,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298809755",
-            "stock": 5124,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298875291",
-            "stock": 1372,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292298940827",
-            "stock": 1036,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292299006363",
-            "stock": 579,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292299071899",
-            "stock": 2425,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292299137435",
-            "stock": 1513,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292299202971",
-            "stock": 4482,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292299268507",
-            "stock": 1124,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292299334043",
-            "stock": 601,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292299399579",
-            "stock": 140,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292299465115",
-            "stock": 209,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292299530651",
-            "stock": 659,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292299596187",
-            "stock": 816,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195292299661723",
-            "stock": 4167,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506193307",
-            "stock": 450,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506258843",
-            "stock": 2767,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506324379",
-            "stock": 71,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506389915",
-            "stock": 2378,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506455451",
-            "stock": 64,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506520987",
-            "stock": 76,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506586523",
-            "stock": 1756,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506652059",
-            "stock": 60,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506717595",
-            "stock": 68,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506783131",
-            "stock": 4036,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506848667",
-            "stock": 76,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506914203",
-            "stock": 1227,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294506979739",
-            "stock": 78,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294507045275",
-            "stock": 984,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294507110811",
-            "stock": 163,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          },
-          {
-            "id": "1731195294507176347",
-            "stock": 660,
-            "price": null,
-            "originalPrice": null,
-            "status": null,
-            "warehouseId": null,
-            "purchaseLimit": null,
-            "saleProps": []
-          }
-        ],
-        "images": [
-          "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/13e1a335089d47f4ae07c54db9771f58~tplv-fhlh96nyum-crop-webp:1080:1080.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839"
         ]
       }
     ]
@@ -13161,20 +7296,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "summary": "In this playful and imaginative narrative, a child and their father embark on a creative journey to build a super-fast cardboard Ferrari. Initially, the child is excited about their cardboard creation, but soon realizes that it cannot compete on a real racing track. The father reassures the child and proposes to construct a real metal Ferrari using materials from a junkyard. Together, they work on the new car, focusing on its strength and aesthetics, ultimately transforming their dream into reality with a shiny, fast white Ferrari that outshines the previous cardboard model.",
     "keyPoints": [
       "The story begins with a child excited about a cardboard Ferrari.",
-      "The realization that cardboard cannot race leads to a creative solution.",
-      "The father and child decide to build a real metal Ferrari from junkyard materials.",
-      "They focus on creating a strong and beautiful car with a powerful engine.",
-      "The transformation from cardboard to metal symbolizes creativity and resilience.",
-      "The final product is a shiny white Ferrari that is deemed the fastest on the track."
+      "The realization that cardboard cannot race leads to a creative solution."
     ],
     "topics": [
       "imagination",
-      "creativity",
-      "father-child bond",
-      "building",
-      "transformation",
-      "racing",
-      "play"
+      "creativity"
     ],
     "sentiment": "positive"
   },
@@ -13247,120 +7373,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [
           "nasa",
-          "artemis2",
-          "fy",
-          "fyp",
-          "fyptt"
+          "artemis2"
         ],
         "musicName": "sonido original",
-        "mediaType": "video",
-        "contentType": "video",
-        "isAd": false,
-        "mentions": [],
-        "isPaidPartnership": false
-      },
-      {
-        "platform": "tiktok",
-        "url": "https://www.tiktok.com/@nasa/video/7665775952454061326",
-        "id": "7665775952454061326",
-        "caption": "Mission accomplished.     On April 10, 2026, the Artemis II crew safely returned to Earth after a 10-day journey around the Moon, splashing down off the California coast. 🌎",
-        "description": "Mission accomplished.     On April 10, 2026, the Artemis II crew safely returned to Earth after a 10-day journey around the Moon, splashing down off the California coast. 🌎",
-        "publishedAt": "2026-07-23T17:26:20.000Z",
-        "durationSeconds": 36.0,
-        "thumbnailUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-useast5-p-0068-tx/ok5iHxgYfAI772ZXADRqcrBpTEDSFEK3fk8IY1~tplv-tiktokx-origin.image?dr=9636&x-expires=1785517200&x-signature=9L4vadOW5auReX39p9TTdHmWw%2Fw%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-        "author": {
-          "username": "nasa",
-          "displayName": "NASA",
-          "url": "https://www.tiktok.com/@nasa",
-          "followers": 305800,
-          "verified": true,
-          "profileImage": "https://p19-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/e5143212a59c09a008bf50f487d54d1f~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=573cc2c1&x-expires=1785517200&x-signature=VsELKHyBLl0thL%2FtAwlBnrOsPzQ%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5",
-          "id": null,
-          "secUid": null
-        },
-        "engagement": {
-          "views": 127200,
-          "likes": 5846,
-          "comments": 139,
-          "shares": 61,
-          "saves": 539
-        },
-        "musicName": "original sound",
-        "hashtags": [],
-        "mediaType": "video",
-        "contentType": "video",
-        "isAd": false,
-        "mentions": [],
-        "isPaidPartnership": false
-      },
-      {
-        "platform": "tiktok",
-        "url": "https://www.tiktok.com/@astrokobi/video/7667293385178270998",
-        "id": "7667293385178270998",
-        "caption": "China’s Rocket just got STRUCK BY LIGHTNING #space #nasa #china #rocket #astrokobi",
-        "description": "China’s Rocket just got STRUCK BY LIGHTNING #space #nasa #china #rocket #astrokobi",
-        "publishedAt": "2026-07-27T19:34:20.000Z",
-        "durationSeconds": 68.0,
-        "thumbnailUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-no1a-p-0037-no/oATsrBh419CRTg1nA6iiwyBUCMAIR4cIIVv4ye~tplv-tiktokx-dmt-logom:tos-no1a-i-0068-no/o8BiksDrEh0CSzMBWntBfCLIldAiAA9wA5G1I4.image?dr=9634&x-expires=1785517200&x-signature=xnwkLDp1%2FMiV5%2FZEL%2Bu5DMqGS0c%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-        "author": {
-          "username": "astrokobi",
-          "displayName": "AstroKobi",
-          "url": "https://www.tiktok.com/@astrokobi",
-          "followers": 3100000,
-          "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/975e8c09236aff1c5b7d93b89c178a37~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=340fcfa3&x-expires=1785517200&x-signature=1YbxI2murKyQ6YRmBU0KewhMWL4%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5",
-          "id": null,
-          "secUid": null
-        },
-        "engagement": {
-          "views": 228900,
-          "likes": 42900,
-          "comments": 283,
-          "shares": 1104,
-          "saves": 3558
-        },
-        "hashtags": [
-          "space",
-          "nasa",
-          "china",
-          "rocket",
-          "astrokobi"
-        ],
-        "musicName": "Everything In Its Right Place",
-        "mediaType": "video",
-        "contentType": "video",
-        "isAd": false,
-        "mentions": [],
-        "isPaidPartnership": false
-      },
-      {
-        "platform": "tiktok",
-        "url": "https://www.tiktok.com/@nasa/video/7665725247332601118",
-        "id": "7665725247332601118",
-        "caption": "You’re listening to one of the sounds the Artemis II crew heard on the eve of splashing down on Earth. That steady knocking isn’t a problem, it’s Orion’s reentry thrusters firing in short, precise bursts to keep the spacecraft on the correct path at nearly 25,000 mph through Earth’s atmosphere.",
-        "description": "You’re listening to one of the sounds the Artemis II crew heard on the eve of splashing down on Earth. That steady knocking isn’t a problem, it’s Orion’s reentry thrusters firing in short, precise bursts to keep the spacecraft on the correct path at nearly 25,000 mph through Earth’s atmosphere.",
-        "publishedAt": "2026-07-23T14:09:41.000Z",
-        "durationSeconds": 16.0,
-        "thumbnailUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-p-0068-tx2/os18qBiPEAUIRAiIwiKI0KdBTMCAAWfhkBIBiI~tplv-tiktokx-origin.image?dr=9636&x-expires=1785517200&x-signature=7Ebgeeo8FYL58CUHPtyylYnVMPY%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-        "author": {
-          "username": "nasa",
-          "displayName": "NASA",
-          "url": "https://www.tiktok.com/@nasa",
-          "followers": 305800,
-          "verified": true,
-          "profileImage": "https://p19-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/e5143212a59c09a008bf50f487d54d1f~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=573cc2c1&x-expires=1785517200&x-signature=VsELKHyBLl0thL%2FtAwlBnrOsPzQ%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5",
-          "id": null,
-          "secUid": null
-        },
-        "engagement": {
-          "views": 5900000,
-          "likes": 367800,
-          "comments": 3883,
-          "shares": 6882,
-          "saves": 25400
-        },
-        "musicName": "original sound",
-        "hashtags": [],
         "mediaType": "video",
         "contentType": "video",
         "isAd": false,
@@ -13389,27 +7404,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "duration": 7.2,
         "end": 16.48,
         "timestamp": "00:09"
-      },
-      {
-        "text": "I wanna make a rock and a-na I wanna make a rock and a-na",
-        "start": 16.48,
-        "duration": 6.72,
-        "end": 23.2,
-        "timestamp": "00:16"
-      },
-      {
-        "text": "Wish we never go, go, rock and a-na We need to make a rock and a-na",
-        "start": 23.2,
-        "duration": 7.28,
-        "end": 30.48,
-        "timestamp": "00:23"
-      },
-      {
-        "text": "Wish we never go, go, rock and a-na We need to make a rock and a-na",
-        "start": 30.48,
-        "duration": 2.0,
-        "end": 32.48,
-        "timestamp": "00:30"
       }
     ],
     "wordCount": 81,
@@ -13457,63 +7451,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "mediaType": "video",
         "thumbnailUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-p-0068-tx2/oIMffQHCCga9fWiRXUy8JOfP3WVUFGAL7oQtAQ~tplv-tiktokx-origin.image?dr=9636&x-expires=1785517200&x-signature=zF4ZAiNfBFLlLm4zu51g3NjykhI%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
         "isAd": false
-      },
-      {
-        "url": "https://www.tiktok.com/@nona_avantgardey/video/7663779068713716999",
-        "id": "7663779068713716999",
-        "coverUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/ooBsEKiBAVPAa2xAN1ZbC6aInAiQGIALdfBLOw~tplv-tiktokx-origin.image?dr=9636&x-expires=1785517200&x-signature=qHhLm6d5aTpwOto77KPfN0WuwDM%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-        "author": "nona_avantgardey",
-        "authorName": "nona",
-        "views": 14100000,
-        "likes": 2300000,
-        "comments": 9659,
-        "shares": 66000,
-        "rank": 3,
-        "caption": "Am I bad? 😎 #ateez #BAD @ATEEZ_Official  #avantgardey #アバンギャルディ　@アバンギャルディ avantgardey",
-        "platform": "tiktok",
-        "createTime": 1784362613,
-        "publishedAt": "2026-07-18T08:16:53.000Z",
-        "mediaType": "video",
-        "thumbnailUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/ooBsEKiBAVPAa2xAN1ZbC6aInAiQGIALdfBLOw~tplv-tiktokx-origin.image?dr=9636&x-expires=1785517200&x-signature=qHhLm6d5aTpwOto77KPfN0WuwDM%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-        "isAd": false
-      },
-      {
-        "url": "https://www.tiktok.com/@makaylaamerie/video/7652874384415198477",
-        "id": "7652874384415198477",
-        "coverUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-p-0068-tx/oEfLQQsmfGAv43AeAeLEcNRADi6ANSiogSeNRI~tplv-tiktokx-origin.image?dr=9636&x-expires=1785517200&x-signature=R5L4SSmr5qN8UFkQCCe3RUeSm6c%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-        "author": "makaylaamerie",
-        "authorName": "Makayla Marie",
-        "views": 903500,
-        "likes": 100100,
-        "comments": 265,
-        "shares": 531,
-        "rank": 4,
-        "caption": "I actually can’t believe I’m starting to get more colostrum 😭 it gets me so emotional how amazing our bodies are🫶🏻 #pregnant #thirdtrimester #realistic #morningvlog",
-        "platform": "tiktok",
-        "createTime": 1781823668,
-        "publishedAt": "2026-06-18T23:01:08.000Z",
-        "mediaType": "video",
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-p-0068-tx/oEfLQQsmfGAv43AeAeLEcNRADi6ANSiogSeNRI~tplv-tiktokx-origin.image?dr=9636&x-expires=1785517200&x-signature=R5L4SSmr5qN8UFkQCCe3RUeSm6c%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-        "isAd": false
-      },
-      {
-        "url": "https://www.tiktok.com/@evangoesoutside/video/7659618552965516557",
-        "id": "7659618552965516557",
-        "coverUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-p-0068-tx/oQ1tbOURBb6iaiXExl4AHbIjMI9BikcgknBpP~tplv-tiktokx-dmt-logom:tos-useast5-i-0068-tx/o8EAMqiEbCGAngRc1DIABFED6bDxKTAQffRUpS.image?dr=9634&x-expires=1785517200&x-signature=LGactg2Cv1hUKkezEeVESGkzgjE%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-        "author": "evangoesoutside",
-        "authorName": "EvanGoesFishing",
-        "views": 7600000,
-        "likes": 718500,
-        "comments": 1468,
-        "shares": 96600,
-        "rank": 5,
-        "caption": "#fishing #bassfishing #fishtok #fishingtiktoks #fishingvideos",
-        "platform": "tiktok",
-        "createTime": 1783393917,
-        "publishedAt": "2026-07-07T03:11:57.000Z",
-        "mediaType": "video",
-        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-p-0068-tx/oQ1tbOURBb6iaiXExl4AHbIjMI9BikcgknBpP~tplv-tiktokx-dmt-logom:tos-useast5-i-0068-tx/o8EAMqiEbCGAngRc1DIABFED6bDxKTAQffRUpS.image?dr=9634&x-expires=1785517200&x-signature=LGactg2Cv1hUKkezEeVESGkzgjE%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-        "isAd": false
       }
     ],
     "scrapedAt": "2026-08-03T11:30:00.000Z"
@@ -13556,49 +7493,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "createTimeUnix": 1777980924,
         "language": "en",
         "region": null
-      },
-      {
-        "username": "junaid_jutt924",
-        "displayName": "𝙅𝙪𝙣𝙖𝙞𝙙 𝙟𝙪𝙩𝙩 ✅",
-        "bio": "My WhatsApp number 03460250924",
-        "url": "https://www.tiktok.com/@junaid_jutt924",
-        "followers": 3043,
-        "following": 3112,
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/6508ca9751f0e8020ec9fb28eb06e5d8~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=f71c169a&x-expires=1785405600&x-signature=vnT49tPcbFXKRRKIbNvOzcLpiQ4%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
-        "id": "7074230742838379546",
-        "secUid": "MS4wLjABAAAAhxdZnpCTdh5qPQsMdpwxyUA3krVWlqY9G6G2QmEqKs6pkZYyevBlBHjfH0HdA4RM",
-        "createTime": "2022-10-25T14:43:39.000Z",
-        "createTimeUnix": 1666709019,
-        "language": "en",
-        "region": null
-      },
-      {
-        "username": "kingllamadas2",
-        "displayName": "KingLlamadas",
-        "bio": "📲Contexto y Moradito🟣",
-        "url": "https://www.tiktok.com/@kingllamadas2",
-        "followers": 25,
-        "following": 20,
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/34ffc6b458ca7d2fbbaf2c5c99df5136~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=94dc3240&x-expires=1785405600&x-signature=maO7t5UP5bAof%2BIztbSx2q7XAj8%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
-        "id": "7667457811018089490",
-        "secUid": "MS4wLjABAAAA1QXpCRqsxFvrPFGQk9aDNzJNx4prZziUd8UG_hHFay9Crar_WV97Ks73KJo-DF5b",
-        "createTime": "2026-07-28T06:12:50.000Z",
-        "createTimeUnix": 1785219170,
-        "language": "es",
-        "region": null
-      },
-      {
-        "username": "farukkolapo",
-        "displayName": "afolabi",
-        "bio": null,
-        "url": "https://www.tiktok.com/@farukkolapo",
-        "followers": null,
-        "following": 41,
-        "verified": false,
-        "profileImage": "https://p19-common-sign.tiktokcdn.com/tos-alisg-avt-0068/e0b764c22fe648efa6bfba4c91bfac13~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=4b0219f8&x-expires=1785405600&x-signature=AM%2F90JOcGDiKecFfy8sHawPF3pw%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
-        "region": null
       }
     ]
   },
@@ -13639,54 +7533,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "createTime": "2022-02-01T16:22:46.000Z",
         "createTimeUnix": 1643732566,
         "language": "en",
-        "region": null
-      },
-      {
-        "username": "tiktokcreators",
-        "displayName": "tiktok creators",
-        "bio": "The official account for TikTok Creators who inspire creativity and bring joy ✨\n\n⬇️ Creator Growth Challenge 💰⬇️",
-        "url": "https://www.tiktok.com/@tiktokcreators",
-        "followers": 8500000,
-        "following": 568,
-        "verified": true,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/7310199914919673862~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=1e72a8a7&x-expires=1785405600&x-signature=LMjOcpQXxIoqMurpObGJ%2FP7QjsQ%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
-        "id": "6551237489917432832",
-        "secUid": "MS4wLjABAAAAXqqA-cLDC0hfQPIrS5APYNsg04zkl-socWCkqkI3UIOaEe6_Qnokg0GcWpLnMNQP",
-        "createTime": "2018-05-03T06:27:21.000Z",
-        "createTimeUnix": 1525328841,
-        "language": "en",
-        "region": null
-      },
-      {
-        "username": "christianzammataro",
-        "displayName": "Zamma",
-        "bio": "Videomaker\nZammaVerse\nVision•Sketch•Backstage•Nature•Prod•Card",
-        "url": "https://www.tiktok.com/@christianzammataro",
-        "followers": 13000,
-        "following": 209,
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/acdcc4d8e8390e04aa827d01f0ec161f~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=d646a014&x-expires=1785405600&x-signature=3Tp8hVjMxhKPOKseqAQJwZRde10%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
-        "id": "222838918348439552",
-        "secUid": "MS4wLjABAAAAZUDexX-Wq7YFVG8V5DCx40AnohGQorRgMT_4xd3fvfFjJjc3TNZUjCTq-izbWsH5",
-        "createTime": "2017-04-29T13:14:13.000Z",
-        "createTimeUnix": 1493471653,
-        "language": "it",
-        "region": null
-      },
-      {
-        "username": "mouhamed.mamba",
-        "displayName": "mouhamed niang",
-        "bio": "🐍Mamba\n🥊k1 pro fighter\n🕋Fede, disciplina e sacrificio.",
-        "url": "https://www.tiktok.com/@mouhamed.mamba",
-        "followers": 15300,
-        "following": 121,
-        "verified": false,
-        "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/e4933cfd8c6de6ab18e4ae1fea6e12cb~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=1bcb3898&x-expires=1785405600&x-signature=6fpMDSKVNCJE%2FpikJbVXEryrtfk%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
-        "id": "7136282086625117190",
-        "secUid": "MS4wLjABAAAAOxGQ-KTYr2jnwUcZFdxSWDgaue4batLT1piAMbu_PAsjkzo9Buxw5wiVloPtEwBw",
-        "createTime": "2022-08-27T08:15:26.000Z",
-        "createTimeUnix": 1661588126,
-        "language": "it",
         "region": null
       }
     ]
@@ -13900,102 +7746,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           }
         ],
         "links": []
-      },
-      {
-        "platform": "truth_social",
-        "id": "116938511106455297",
-        "url": "https://truthsocial.com/@realDonaldTrump/116938511106455297",
-        "text": "Newly declassified documents show that over a period of years starting during the 2020 election cycle, the People’s Republic of China carried out what is believed to be the largest compromise of election data in history — resulting in China’s illicit acquisition of 220 million U.S. voter files. That information includes names, addresses, phone numbers, political party preferences, and other sensitive data that would be needed to register to vote, and engage in other nefarious activities. This data loss presents an unprecedented election security nightmare. The intelligence even shows that China assigned a data exploitation unit specifically to this new project. https://www. whitehouse.gov/election-integr ity/",
-        "publishedAt": "2026-07-18T02:01:14.258Z",
-        "author": {
-          "id": "107780257626128497",
-          "username": "realDonaldTrump",
-          "displayName": "Donald J. Trump",
-          "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
-          "verified": true
-        },
-        "engagement": {
-          "replies": 1029,
-          "reblogs": 3493,
-          "likes": 10641,
-          "upvotes": null,
-          "downvotes": null
-        },
-        "language": "en",
-        "sensitive": false,
-        "media": [
-          {
-            "type": "video",
-            "url": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/files/116/938/510/857/791/371/original/3d96f7ea038dea38.mp4",
-            "previewUrl": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/thumbnails/116/938/510/857/791/371/original/ba6946cca1174f7c.jpg",
-            "description": null
-          }
-        ],
-        "links": []
-      },
-      {
-        "platform": "truth_social",
-        "id": "116938505608702872",
-        "url": "https://truthsocial.com/@realDonaldTrump/116938505608702872",
-        "text": "For many years, I have called for bold, swift, and decisive action to protect the integrity of America’s elections. Every American deserves to know that when they cast their vote, that vote will be counted accurately in a system that is secure—one where cheating and interference are not just difficult, but virtually impossible. Unfortunately, the system we have today falls catastrophically short of that standard. Tonight, I am announcing the immediate declassification and release of critical intelligence revealing shocking vulnerabilities in our election infrastructure. This evidence shows that the election system we have is dangerously exposed to hacking, exploitation, and foreign interference. Just as disturbingly, this vital information has for many years been covered up and hidden from you, the American People, and that changes right now. The documents we will release starting tonight have been gathered by the White House Government Transparency Task Force, along with the staff of the President’s Intelligence Advisory Board—supported by our top intelligence agency chiefs, who have all personally reviewed the findings we are presenting this evening, and fully confirmed their authenticity. You can see these documents for yourself at: https://www. whitehouse.gov/election-integr ity/",
-        "publishedAt": "2026-07-18T01:59:50.365Z",
-        "author": {
-          "id": "107780257626128497",
-          "username": "realDonaldTrump",
-          "displayName": "Donald J. Trump",
-          "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
-          "verified": true
-        },
-        "engagement": {
-          "replies": 583,
-          "reblogs": 3027,
-          "likes": 10091,
-          "upvotes": null,
-          "downvotes": null
-        },
-        "language": "en",
-        "sensitive": false,
-        "media": [
-          {
-            "type": "video",
-            "url": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/files/116/938/499/738/796/668/original/9452acce55297397.mp4",
-            "previewUrl": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/thumbnails/116/938/499/738/796/668/original/467606ed8b25347a.jpg",
-            "description": null
-          }
-        ],
-        "links": []
-      },
-      {
-        "platform": "truth_social",
-        "id": "116936997445912023",
-        "url": "https://truthsocial.com/@realDonaldTrump/116936997445912023",
-        "text": "",
-        "publishedAt": "2026-07-17T19:36:17.631Z",
-        "author": {
-          "id": "107780257626128497",
-          "username": "realDonaldTrump",
-          "displayName": "Donald J. Trump",
-          "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
-          "verified": true
-        },
-        "engagement": {
-          "replies": 1272,
-          "reblogs": 3647,
-          "likes": 14375,
-          "upvotes": null,
-          "downvotes": null
-        },
-        "language": null,
-        "sensitive": false,
-        "media": [
-          {
-            "type": "image",
-            "url": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/files/116/936/996/952/219/927/original/0ffeda9e1e02a6aa.png",
-            "previewUrl": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/files/116/936/996/952/219/927/small/0ffeda9e1e02a6aa.png",
-            "description": null
-          }
-        ],
-        "links": []
       }
     ]
   },
@@ -14021,16 +7771,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "quality": "720",
         "frameRate": 60.02308654785156,
         "url": "https://d1ndex63qxojbr.cloudfront.net/nauth/a952a6bb-ad94-4889-8ac1-6afadf21d338/landscape/h264/720/index.mp4"
-      },
-      {
-        "quality": "480",
-        "frameRate": 30.012901306152344,
-        "url": "https://d1ndex63qxojbr.cloudfront.net/nauth/a952a6bb-ad94-4889-8ac1-6afadf21d338/landscape/h264/480/index.mp4"
-      },
-      {
-        "quality": "360",
-        "frameRate": 30.012901306152344,
-        "url": "https://d1ndex63qxojbr.cloudfront.net/nauth/a952a6bb-ad94-4889-8ac1-6afadf21d338/landscape/h264/360/index.mp4"
       }
     ],
     "language": "EN",
@@ -14214,25 +7954,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "gameSlug": "halo-campaign-evolved",
         "gameBoxArtUrl": "https://static-cdn.jtvnw.net/ttv-boxart/796500915_IGDB-144x192.jpg",
         "language": "en"
-      },
-      {
-        "platform": "twitch",
-        "id": "2827054673",
-        "url": "https://www.twitch.tv/videos/2827054673",
-        "embedUrl": "https://player.twitch.tv/?video=2827054673&parent=captapi.com",
-        "title": "HALO CE REMAKE! TIME TO CO-OP LEGENDARY AND GET OUR MEAT BEAT",
-        "createdAt": "2026-07-23T14:57:52Z",
-        "durationSeconds": 12076,
-        "views": 164254,
-        "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/6c4ca61b9211a873ec53_shroud_319633557216_1784818667//thumb/thumb0-320x180.jpg",
-        "thumbnailTemplate": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/6c4ca61b9211a873ec53_shroud_319633557216_1784818667//thumb/thumb0-{width}x{height}.jpg",
-        "animatedPreviewUrl": "https://d2vi6trrdongqn.cloudfront.net/6c4ca61b9211a873ec53_shroud_319633557216_1784818667/storyboards/2827054673-strip-0.jpg",
-        "broadcastType": "ARCHIVE",
-        "game": "Halo: Campaign Evolved",
-        "gameId": "796500915",
-        "gameSlug": "halo-campaign-evolved",
-        "gameBoxArtUrl": "https://static-cdn.jtvnw.net/ttv-boxart/796500915_IGDB-144x192.jpg",
-        "language": "en"
       }
     ]
   },
@@ -14256,22 +7977,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "name": "Screenshots, screencasts, drafts, etc",
         "description": "Visual tweets tend to grab people's attention"
-      },
-      {
-        "name": "No self-promotion",
-        "description": "Don't ask for upvotes or advertise your products/services."
-      },
-      {
-        "name": "Stay on-topic",
-        "description": "Only post about building in public. No politics or other off-topic posts. There are other communities for that."
-      },
-      {
-        "name": "No engagement farming",
-        "description": "If your goal is to get replies, likes, etc, don’t post it here. Don’t ask super generic questions like “what’s everyone working on?”"
-      },
-      {
-        "name": "Use a personal account",
-        "description": "No company accounts. No logos. Use your own name. No promotion or URLs in your name."
       }
     ]
   },
@@ -14346,105 +8051,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "hashtags": [],
         "media": [
           "https://pbs.twimg.com/media/HOWE9npXQAAqfUH.jpg"
-        ]
-      },
-      {
-        "platform": "twitter",
-        "url": "https://x.com/chetanankola/status/2083813674356191468",
-        "id": "2083813674356191468",
-        "text": "Pixel city at night - built with opus and 5.6 sol - @threejs offcourse! (the video recording drops frames - frankly its smoother..) https://t.co/Mym7bUwUet",
-        "lang": "en",
-        "publishedAt": "2026-08-02T07:14:30.000Z",
-        "author": {
-          "username": "chetanankola",
-          "displayName": "Chetan",
-          "url": "https://x.com/chetanankola",
-          "followers": 594,
-          "verified": true,
-          "profileImage": "https://pbs.twimg.com/profile_images/2068053560710037504/KnfU07Hv_normal.jpg"
-        },
-        "isReply": false,
-        "isRetweet": false,
-        "isQuote": false,
-        "possiblySensitive": false,
-        "conversationId": "2083813674356191468",
-        "engagement": {
-          "views": 21349,
-          "likes": 247,
-          "replies": 23,
-          "retweets": 8,
-          "quotes": 1,
-          "bookmarks": 114
-        },
-        "hashtags": [],
-        "media": [
-          "https://pbs.twimg.com/amplify_video_thumb/2083813223283974144/img/qEziRS1_EQfl_iR-.jpg"
-        ]
-      },
-      {
-        "platform": "twitter",
-        "url": "https://x.com/FilipPanoski/status/2082103819995902264",
-        "id": "2082103819995902264",
-        "text": "a little over a year ago I quit my $7k/mo dev job for a SaaS making $0.\n\neveryone told me to wait for traction.\n\n12 months later that $0 SaaS does $8k/mo.\n\nI traded a salary for something a salary can't buy: full control of my time and an asset that keeps growing.\n\nscariest https://t.co/uKtw1jHVYK",
-        "lang": "en",
-        "publishedAt": "2026-07-28T14:00:08.000Z",
-        "author": {
-          "username": "FilipPanoski",
-          "displayName": "Filip Panoski",
-          "url": "https://x.com/FilipPanoski",
-          "followers": 3584,
-          "verified": true,
-          "profileImage": "https://pbs.twimg.com/profile_images/1842181486587297792/Ia5ilmNs_normal.jpg"
-        },
-        "isReply": false,
-        "isRetweet": false,
-        "isQuote": false,
-        "possiblySensitive": false,
-        "conversationId": "2082103819995902264",
-        "engagement": {
-          "views": 7739,
-          "likes": 210,
-          "replies": 94,
-          "retweets": 4,
-          "quotes": 0,
-          "bookmarks": 18
-        },
-        "hashtags": [],
-        "media": [
-          "https://pbs.twimg.com/media/HOUeYyDXYAARERk.jpg"
-        ]
-      },
-      {
-        "platform": "twitter",
-        "url": "https://x.com/juiceboy_of_abj/status/2080525562804613465",
-        "id": "2080525562804613465",
-        "text": "Good morning techie 🧑‍💻 ❤️\nLet’s do more today 💪\n\nDo have a productive day ❤️ https://t.co/aSquU24A5l",
-        "lang": "en",
-        "publishedAt": "2026-07-24T05:28:43.000Z",
-        "author": {
-          "username": "juiceboy_of_abj",
-          "displayName": "Elijah 🌊",
-          "url": "https://x.com/juiceboy_of_abj",
-          "followers": 5137,
-          "verified": true,
-          "profileImage": "https://pbs.twimg.com/profile_images/2047368553309798400/e19Qhn0y_normal.jpg"
-        },
-        "isReply": false,
-        "isRetweet": false,
-        "isQuote": false,
-        "possiblySensitive": false,
-        "conversationId": "2080525562804613465",
-        "engagement": {
-          "views": 6731,
-          "likes": 206,
-          "replies": 95,
-          "retweets": 23,
-          "quotes": 1,
-          "bookmarks": 1
-        },
-        "hashtags": [],
-        "media": [
-          "https://pbs.twimg.com/media/HN-C9jJW0AAEpXL.jpg"
         ]
       }
     ]
@@ -14561,101 +8167,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "media": [
           "https://pbs.twimg.com/amplify_video_thumb/2081803656530190336/img/zUx_qij2E2oP-MsL.jpg"
         ]
-      },
-      {
-        "platform": "twitter",
-        "url": "https://x.com/NASA/status/2054251010625765655",
-        "id": "2054251010625765655",
-        "text": "Perseverance in the Wild Martian West 🤠\n\nOur Perseverance Mars rover snapped some photos beyond the western rim of Jezero Crater—the farthest west the rover has ever gone on the Red Planet. See what we found there: https://t.co/nIkwxstE26 https://t.co/6gJ9xgnVy5",
-        "lang": "en",
-        "publishedAt": "2026-05-12T17:23:01.000Z",
-        "author": {
-          "username": "NASA",
-          "displayName": "NASA",
-          "url": "https://x.com/NASA",
-          "followers": 92225387,
-          "verified": true,
-          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
-        },
-        "isReply": false,
-        "isRetweet": false,
-        "engagement": {
-          "views": 1182851,
-          "likes": 20257,
-          "replies": 962,
-          "retweets": 3777,
-          "quotes": 123,
-          "bookmarks": 693
-        },
-        "hashtags": [],
-        "media": [
-          "https://pbs.twimg.com/tweet_video_thumb/HIIqYwtWsAAcoyZ.jpg"
-        ]
-      },
-      {
-        "platform": "twitter",
-        "url": "https://x.com/NASA/status/2082511887757881648",
-        "id": "2082511887757881648",
-        "text": "There's a solar eclipse happening on Wednesday, Aug. 12 — and if you're not in the path of totality, you can watch along with us online! Get the details: https://t.co/aAYzLGEqPU https://t.co/7yrWQpTkld",
-        "lang": "en",
-        "publishedAt": "2026-07-29T17:01:39.000Z",
-        "author": {
-          "username": "NASA",
-          "displayName": "NASA",
-          "url": "https://x.com/NASA",
-          "followers": 92225387,
-          "verified": true,
-          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
-        },
-        "isReply": false,
-        "isRetweet": false,
-        "engagement": {
-          "views": 93400,
-          "likes": 549,
-          "replies": 87,
-          "retweets": 146,
-          "quotes": 13,
-          "bookmarks": 61
-        },
-        "hashtags": [],
-        "media": [
-          "https://pbs.twimg.com/media/HOaRhlyWEAA1C8Q.jpg"
-        ]
-      },
-      {
-        "platform": "twitter",
-        "url": "https://x.com/SpaceNews92/status/2082081188114808938",
-        "id": "2082081188114808938",
-        "text": "The Saturn V's mighty F-1 engine could only fire once... but SpaceX's Raptor can shut down, restart in space, then restart AGAIN before landing. How did rocket engines evolve that much?\n#spacex #starship #saturnV #nasa https://t.co/dRBxTiL5JA",
-        "lang": "en",
-        "publishedAt": "2026-07-28T12:30:13.000Z",
-        "author": {
-          "username": "SpaceNews92",
-          "displayName": "Rocketry",
-          "url": "https://x.com/SpaceNews92",
-          "followers": 5245,
-          "verified": true,
-          "profileImage": "https://pbs.twimg.com/profile_images/1978478483543044096/-hWF_un1_normal.jpg"
-        },
-        "isReply": false,
-        "isRetweet": false,
-        "engagement": {
-          "views": 31847,
-          "likes": 903,
-          "replies": 28,
-          "retweets": 72,
-          "quotes": 1,
-          "bookmarks": 166
-        },
-        "hashtags": [
-          "spacex",
-          "starship",
-          "saturnV",
-          "nasa"
-        ],
-        "media": [
-          "https://pbs.twimg.com/amplify_video_thumb/2082079317249724416/img/UdzqLA-kveH5BQdg.jpg"
-        ]
       }
     ]
   },
@@ -14678,13 +8189,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "wordCount": 15,
         "charStart": 39,
         "charEnd": 158
-      },
-      {
-        "text": "Here's your NASA Minute! https://t.co/GAZ4sUqfbZ",
-        "index": 2,
-        "wordCount": 5,
-        "charStart": 160,
-        "charEnd": 208
       }
     ],
     "wordCount": 27,
@@ -14798,103 +8302,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [],
         "media": []
-      },
-      {
-        "platform": "twitter",
-        "url": "https://x.com/elonmusk/status/1812258574049157405",
-        "id": "1812258574049157405",
-        "text": "https://t.co/6eOgN9UdOy",
-        "lang": "zxx",
-        "publishedAt": "2024-07-13T22:51:28.000Z",
-        "author": {
-          "id": "44196397",
-          "username": "elonmusk",
-          "displayName": "Elon Musk",
-          "url": "https://x.com/elonmusk",
-          "followers": 241148496,
-          "verified": true,
-          "profileImage": "https://pbs.twimg.com/profile_images/2053244804520427520/m8mdWZCG_normal.jpg"
-        },
-        "isReply": false,
-        "isRetweet": false,
-        "possiblySensitive": false,
-        "conversationId": "1812258574049157405",
-        "engagement": {
-          "views": null,
-          "likes": 3184543,
-          "replies": 69129,
-          "retweets": 372785,
-          "quotes": 40417,
-          "bookmarks": null
-        },
-        "hashtags": [],
-        "media": [
-          "https://pbs.twimg.com/media/GSZvkScbIAAwHQi.jpg"
-        ]
-      },
-      {
-        "platform": "twitter",
-        "url": "https://x.com/elonmusk/status/1518623997054918657",
-        "id": "1518623997054918657",
-        "text": "I hope that even my worst critics remain on Twitter, because that is what free speech means",
-        "lang": "en",
-        "publishedAt": "2022-04-25T16:12:30.000Z",
-        "author": {
-          "id": "44196397",
-          "username": "elonmusk",
-          "displayName": "Elon Musk",
-          "url": "https://x.com/elonmusk",
-          "followers": 241148496,
-          "verified": true,
-          "profileImage": "https://pbs.twimg.com/profile_images/2053244804520427520/m8mdWZCG_normal.jpg"
-        },
-        "isReply": false,
-        "isRetweet": false,
-        "possiblySensitive": false,
-        "conversationId": "1518623997054918657",
-        "engagement": {
-          "views": null,
-          "likes": 2850750,
-          "replies": 153260,
-          "retweets": 314888,
-          "quotes": 68462,
-          "bookmarks": null
-        },
-        "hashtags": [],
-        "media": []
-      },
-      {
-        "platform": "twitter",
-        "url": "https://x.com/elonmusk/status/1854026234339938528",
-        "id": "1854026234339938528",
-        "text": "🇺🇸🇺🇸The future is gonna be so 🔥 🇺🇸🇺🇸 https://t.co/x56cqb6oT5",
-        "lang": "en",
-        "publishedAt": "2024-11-06T05:01:15.000Z",
-        "author": {
-          "id": "44196397",
-          "username": "elonmusk",
-          "displayName": "Elon Musk",
-          "url": "https://x.com/elonmusk",
-          "followers": 241148496,
-          "verified": true,
-          "profileImage": "https://pbs.twimg.com/profile_images/2053244804520427520/m8mdWZCG_normal.jpg"
-        },
-        "isReply": false,
-        "isRetweet": false,
-        "possiblySensitive": false,
-        "conversationId": "1854026234339938528",
-        "engagement": {
-          "views": null,
-          "likes": 2492631,
-          "replies": 56889,
-          "retweets": 193724,
-          "quotes": 12167,
-          "bookmarks": null
-        },
-        "hashtags": [],
-        "media": [
-          "https://pbs.twimg.com/media/GbrTB8GXEAYrk2N.jpg"
-        ]
       }
     ]
   },
@@ -14920,14 +8327,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "text": "Follow",
         "url": "https://instagram.com/mrbeast"
-      },
-      {
-        "text": "Twitter",
-        "url": "https://twitter.com/MrBeast"
-      },
-      {
-        "text": "Facebook",
-        "url": "https://facebook.com/mrbeast"
       }
     ],
     "platform": "youtube",
@@ -14936,8 +8335,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "joinedAt": "2012-02-19",
     "tags": [
       "challenge",
-      "philanthropy",
-      "giveaway"
+      "philanthropy"
     ]
   },
   "youtube-channel-playlists": {
@@ -14955,24 +8353,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "title": "Helping People In Need",
         "videoCount": 10,
         "thumbnailUrl": "https://i.ytimg.com/tvfilm_banner/PLoSWVnSA9vG_s-XT40oPKF0iWFGw8pOp2/16_9_.jpg?sqp=CIK3qNMG-oaymwEICNYGEOADSFqi85f_AwYIsPuCygY=&rs=AOn4CLCIBDlHX0ennRaBJ6KUK7hIIyYqJQ"
-      },
-      {
-        "url": "https://www.youtube.com/playlist?list=PLoSWVnSA9vG8SK6-_45PAu6RVTaP1zXHf",
-        "title": "MrBeast Tries To Survive",
-        "videoCount": 9,
-        "thumbnailUrl": "https://i.ytimg.com/vi/yhB3BgJyGl8/hqdefault.jpg?sqp=-oaymwEXCOADEI4CSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLAlUeAgqFlcajDo_SwhI8D8yjpM5w"
-      },
-      {
-        "url": "https://www.youtube.com/playlist?list=PLoSWVnSA9vG_PuIrGMfUtJ2wwKSUb2CFd",
-        "title": "Cheapest Vs Most Expensive",
-        "videoCount": 9,
-        "thumbnailUrl": "https://i.ytimg.com/vi/iogcY_4xGjo/hqdefault.jpg?sqp=-oaymwEXCOADEI4CSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLCHkaK4BD0daxla9yDQvS8Hop3Xlg"
-      },
-      {
-        "url": "https://www.youtube.com/playlist?list=PLoSWVnSA9vG9hJNdgr-81MG59EYT9eEYn",
-        "title": "MrBeast’s Most Viewed Videos",
-        "videoCount": 25,
-        "thumbnailUrl": "https://i.ytimg.com/vi/yXWw0_UfSFg/hqdefault.jpg?sqp=-oaymwEXCOADEI4CSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLD93aJIeUK-Qgt-LOUSL7njyz1kcg"
       }
     ]
   },
@@ -14994,33 +8374,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "title": "Don't Pop the Balloon",
         "publishedAt": null,
         "viewCount": 90000000,
-        "durationSeconds": null,
-        "thumbnailUrl": null,
-        "channelName": "MrBeast"
-      },
-      {
-        "url": "https://www.youtube.com/shorts/LgbyEFILLJI",
-        "title": "$1 vs $10,000 Cake",
-        "publishedAt": null,
-        "viewCount": 87000000,
-        "durationSeconds": null,
-        "thumbnailUrl": null,
-        "channelName": "MrBeast"
-      },
-      {
-        "url": "https://www.youtube.com/shorts/YA_kX8hu1gg",
-        "title": "This Plane Takes Off in 12 Seconds",
-        "publishedAt": null,
-        "viewCount": 31000000,
-        "durationSeconds": null,
-        "thumbnailUrl": null,
-        "channelName": "MrBeast"
-      },
-      {
-        "url": "https://www.youtube.com/shorts/XCGVurja73c",
-        "title": "I Raced The Fastest Man On Earth",
-        "publishedAt": null,
-        "viewCount": 87000000,
         "durationSeconds": null,
         "thumbnailUrl": null,
         "channelName": "MrBeast"
@@ -15048,33 +8401,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 1935,
         "thumbnailUrl": "https://i.ytimg.com/vi/GpQSUjNsNm0/maxresdefault.jpg",
         "channelName": "MrBeast"
-      },
-      {
-        "url": "https://www.youtube.com/watch?v=iYlODtkyw_I",
-        "title": "Survive 30 Days Chained To A Stranger, Win $250,000",
-        "publishedAt": "2026-06-27T16:00:05.000Z",
-        "viewCount": 55908561,
-        "durationSeconds": 2104,
-        "thumbnailUrl": "https://i.ytimg.com/vi/iYlODtkyw_I/maxresdefault.jpg",
-        "channelName": "MrBeast"
-      },
-      {
-        "url": "https://www.youtube.com/watch?v=__fmDj0ZJ1Q",
-        "title": "50 YouTube Legends Fight For $1,000,000",
-        "publishedAt": "2026-06-13T16:00:00.000Z",
-        "viewCount": 69251098,
-        "durationSeconds": 1927,
-        "thumbnailUrl": "https://i.ytimg.com/vi/__fmDj0ZJ1Q/maxresdefault.jpg",
-        "channelName": "MrBeast"
-      },
-      {
-        "url": "https://www.youtube.com/watch?v=6Zy5VLcEbZc",
-        "title": "I Stranded 100 People In The Wilderness For $250,000",
-        "publishedAt": "2026-05-02T16:00:01.000Z",
-        "viewCount": 135166859,
-        "durationSeconds": 2220,
-        "thumbnailUrl": "https://i.ytimg.com/vi/6Zy5VLcEbZc/maxresdefault.jpg",
-        "channelName": "MrBeast"
       }
     ]
   },
@@ -15101,36 +8427,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "thumbnailUrl": "https://i.ytimg.com/vi/iYlODtkyw_I/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBr_mSSbkEXsEQf8rxuahzMDeW9Jg",
         "channelName": "MrBeast",
         "publishedTimeText": "1 month ago"
-      },
-      {
-        "url": "https://www.youtube.com/watch?v=__fmDj0ZJ1Q",
-        "title": "50 YouTube Legends Fight For $1,000,000",
-        "publishedAt": "2026-07-03T19:42:10.000Z",
-        "viewCount": 76000000,
-        "durationSeconds": 1928,
-        "thumbnailUrl": "https://i.ytimg.com/vi/__fmDj0ZJ1Q/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBfvcFZsIc7eS3Y5mxNTWGLYGjlVg",
-        "channelName": "MrBeast",
-        "publishedTimeText": "1 month ago"
-      },
-      {
-        "url": "https://www.youtube.com/watch?v=GpQSUjNsNm0",
-        "title": "7 Days Stranded in The Arctic",
-        "publishedAt": "2026-07-03T19:42:10.000Z",
-        "viewCount": 104000000,
-        "durationSeconds": 1935,
-        "thumbnailUrl": "https://i.ytimg.com/vi/GpQSUjNsNm0/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDou7TMV8d2wG0J5_NdPxT_Z04_Iw",
-        "channelName": "MrBeast",
-        "publishedTimeText": "1 month ago"
-      },
-      {
-        "url": "https://www.youtube.com/watch?v=AaMdXZMvT3w",
-        "title": "Survive 30 Days On An Island With Your Ex, Win $250,000",
-        "publishedAt": "2026-06-03T19:42:10.000Z",
-        "viewCount": 96000000,
-        "durationSeconds": 2349,
-        "thumbnailUrl": "https://i.ytimg.com/vi/AaMdXZMvT3w/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAfwDXsWdeKhhuSk9s8s1TnaZVv0Q",
-        "channelName": "MrBeast",
-        "publishedTimeText": "2 months ago"
       }
     ]
   },
@@ -15165,51 +8461,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "HEY YOUTUBE",
         "likeCount": 3000,
         "replyCount": 2,
-        "hasCreatorHeart": false,
-        "publishedTimeText": "1 year ago",
-        "publishedTime": "2025-08-03T20:35:17.000Z",
-        "replyToId": "Ugzge340dBgB75hWBm54AaABAg"
-      },
-      {
-        "id": "Ugzge340dBgB75hWBm54AaABAg.AHE8_QAWJx9AHEAOCSlaNN",
-        "author": "@NashiraArif",
-        "authorChannelId": "UCWrbmlBO2iW7jwhSuvLsgXQ",
-        "authorAvatarUrl": "https://yt3.ggpht.com/ytc/AIdro_n1guDiz8iQIUgFGnmh5VA5PJlNSiWQwX3Ik0ywlPv8JUDRXZiF6wxDvbC7F3YSi1BdlA=s88-c-k-c0x00ffffff-no-rj",
-        "authorIsVerified": false,
-        "authorIsChannelOwner": false,
-        "text": "new comment alert",
-        "likeCount": 2100,
-        "replyCount": 0,
-        "hasCreatorHeart": false,
-        "publishedTimeText": "1 year ago",
-        "publishedTime": "2025-08-03T20:35:17.000Z",
-        "replyToId": "Ugzge340dBgB75hWBm54AaABAg"
-      },
-      {
-        "id": "Ugzge340dBgB75hWBm54AaABAg.AHE8_QAWJx9AHEAQwtwdoZ",
-        "author": "@jennaortega-m4m",
-        "authorChannelId": "UCbHhpa0tTOY_LO-uMH5ZKig",
-        "authorAvatarUrl": "https://yt3.ggpht.com/ytc/AIdro_lVdgv6VK0IOScTdHt1R4NdIFdRkvG2Y1jsrCR_otHBLogTg1YjnUt3k9YQBrmAT3VFLg=s88-c-k-c0x00ffffff-no-rj",
-        "authorIsVerified": false,
-        "authorIsChannelOwner": false,
-        "text": "oop 3rd didnt realise youtube was here😄",
-        "likeCount": 918,
-        "replyCount": 0,
-        "hasCreatorHeart": false,
-        "publishedTimeText": "1 year ago",
-        "publishedTime": "2025-08-03T20:35:17.000Z",
-        "replyToId": "Ugzge340dBgB75hWBm54AaABAg"
-      },
-      {
-        "id": "Ugzge340dBgB75hWBm54AaABAg.AHE8_QAWJx9AHEB5iPJLDp",
-        "author": "@TheAngelofBattle99",
-        "authorChannelId": "UCCejpvuOWrro8w-YM4SecQQ",
-        "authorAvatarUrl": "https://yt3.ggpht.com/92UP2htp8mRB1oRt7tZ1bmid5hSmtrt-fNUlOH0sgx0zBFEwLSQ7OT0Vo8nuyWC3XSyUxNl3oMQ=s88-c-k-c0x00ffffff-no-rj",
-        "authorIsVerified": false,
-        "authorIsChannelOwner": false,
-        "text": "He's ingrained in our brains at this point. Such a devoted man.",
-        "likeCount": 707,
-        "replyCount": 0,
         "hasCreatorHeart": false,
         "publishedTimeText": "1 year ago",
         "publishedTime": "2025-08-03T20:35:17.000Z",
@@ -15252,48 +8503,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "hasCreatorHeart": false,
         "publishedTimeText": "3 days ago",
         "publishedTime": "2026-07-31T20:35:12.000Z"
-      },
-      {
-        "id": "UgxPYbA7XtJzYXPPPHV4AaABAg",
-        "author": "@encikk444",
-        "authorChannelId": "UCNIQaysmPT6w3TFRiqXJ0nw",
-        "authorAvatarUrl": "https://yt3.ggpht.com/U-R6bbqYCbcKlkAH5Tpn7VHuYaCHW4TPdEmId_pXZvvdLFEmtXt-TAjm_wAKa6i_TO8gJzbhHA=s88-c-k-c0x00ffffff-no-rj",
-        "authorIsVerified": false,
-        "authorIsChannelOwner": false,
-        "text": "I knew it was a trap, but I clicked the link anyway. It's fire tho",
-        "likeCount": 2800,
-        "replyCount": 28,
-        "hasCreatorHeart": false,
-        "publishedTimeText": "3 days ago",
-        "publishedTime": "2026-07-31T20:35:12.000Z"
-      },
-      {
-        "id": "Ugw1tpIYg_PAwdPneep4AaABAg",
-        "author": "@yourlocalragingTVaddict",
-        "authorChannelId": "UCtAP9l1ZFYsRwKTvt-Ip6rA",
-        "authorAvatarUrl": "https://yt3.ggpht.com/rvOHqMNfgroNyVK_V6wJfTBdX8z3oMlP9M9Z4HWccOutbj3mKmzHxzFj4p6JY88sgXwetOqtrA=s88-c-k-c0x00ffffff-no-rj",
-        "authorIsVerified": false,
-        "authorIsChannelOwner": false,
-        "text": "i love how everyone just got summoned here now for the same reason",
-        "likeCount": 1800,
-        "replyCount": 33,
-        "hasCreatorHeart": false,
-        "publishedTimeText": "1 day ago",
-        "publishedTime": "2026-08-02T20:35:12.000Z"
-      },
-      {
-        "id": "UgyfzmVVGOa1-5OAerd4AaABAg",
-        "author": "@bjnewton55",
-        "authorChannelId": "UCzAP_WqmodDqnfhUK1GedkA",
-        "authorAvatarUrl": "https://yt3.ggpht.com/7Uk2UnY5tSqWPR_1VZgRgesIYvs9VFDJ5QJEnEFtTyXKiJUJoG7LQsEzZ9iFgoikLpvIa7oniQ=s88-c-k-c0x00ffffff-no-rj",
-        "authorIsVerified": false,
-        "authorIsChannelOwner": false,
-        "text": "You know the rules, get rick rolled once a year at least.",
-        "likeCount": 226,
-        "replyCount": 4,
-        "hasCreatorHeart": false,
-        "publishedTimeText": "6 hours ago",
-        "publishedTime": "2026-08-03T14:35:12.000Z"
       }
     ]
   },
@@ -15339,8 +8548,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "postType": "image",
         "images": [
           "https://yt3.ggpht.com/bFmb7RbyvsNTUS3otE4oc2tqI5CZyl3apwKmjnqnTjFuv1mwxWG7hWlZCuiWlRYrd3oCd_nAtBWVsw=s2641-c-fcrop64=1,00002578ffffda87-rw-nd-v1",
-          "https://yt3.ggpht.com/1Oxcyk2wshlCOoZYiTWUFoixDaomfdtlcIKiGv_ozoT4Lfs9CZx-3VTxbNeQlJOOV_h7CdWjWF8QIA=s1536-c-fcrop64=1,00002000ffffdfff-rw-nd-v1",
-          "https://yt3.ggpht.com/q_WXrPGUBlang4cdYbyfmOLtBvYUw9SGIHXeDg79S2RbLqVQwM94Yz1cDe3r-xtN7Eh8BO_U66xdpA=s1243-c-fcrop64=1,0000126dffffed92-rw-nd-v1"
+          "https://yt3.ggpht.com/1Oxcyk2wshlCOoZYiTWUFoixDaomfdtlcIKiGv_ozoT4Lfs9CZx-3VTxbNeQlJOOV_h7CdWjWF8QIA=s1536-c-fcrop64=1,00002000ffffdfff-rw-nd-v1"
         ],
         "image": "https://yt3.ggpht.com/bFmb7RbyvsNTUS3otE4oc2tqI5CZyl3apwKmjnqnTjFuv1mwxWG7hWlZCuiWlRYrd3oCd_nAtBWVsw=s2641-c-fcrop64=1,00002578ffffda87-rw-nd-v1",
         "sourceUrl": "https://www.youtube.com/post/UgkxB7POmB4C7U0I3kIEWRZpYfE2t-ieP9CA",
@@ -15367,87 +8575,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "postType": "image",
         "images": [
           "https://yt3.ggpht.com/oiElfzENMAx3umYLMOH0sZOodVZChBV2L0ddB-KbqwR9B0djUx9o-JMD8ehXMt9fmKtAkGeO3ySq=s4000-c-fcrop64=1,00000000ffffc002-rw-nd-v1",
-          "https://yt3.ggpht.com/sL9SyPNxLv5TT8CMSqQFy3o0DhtCcyxQrCt2hfIXYSHNhDZ0_f2ORfAZs8K8aAXoZQ05G7hsnOviCQ=s4000-c-fcrop64=1,00001ffeffffe001-rw-nd-v1",
-          "https://yt3.ggpht.com/0ii-qqCQhUjGtuOBVmwF_lWai5LASCHWt13_EDuLYK_bjnPVNj9jr-lCd4k0IEtAnq-K7dOy-nCoCoM=s4000-c-fcrop64=1,00001ffeffffe001-rw-nd-v1"
+          "https://yt3.ggpht.com/sL9SyPNxLv5TT8CMSqQFy3o0DhtCcyxQrCt2hfIXYSHNhDZ0_f2ORfAZs8K8aAXoZQ05G7hsnOviCQ=s4000-c-fcrop64=1,00001ffeffffe001-rw-nd-v1"
         ],
         "image": "https://yt3.ggpht.com/oiElfzENMAx3umYLMOH0sZOodVZChBV2L0ddB-KbqwR9B0djUx9o-JMD8ehXMt9fmKtAkGeO3ySq=s4000-c-fcrop64=1,00000000ffffc002-rw-nd-v1",
         "sourceUrl": "https://www.youtube.com/post/Ugkxg-YuyvHwnlFZRktAZHHELzGBrskCHChJ",
-        "likeCountApproximate": true
-      },
-      {
-        "id": "Ugkx5QH9-Xr0EWbVJ1riARjVrDcXRN1LfJS7",
-        "url": "https://www.youtube.com/post/Ugkx5QH9-Xr0EWbVJ1riARjVrDcXRN1LfJS7",
-        "author": "MrBeast",
-        "channel": {
-          "id": "UCX6OQ3DkcsbYNE6H8uQQuVA",
-          "title": "MrBeast",
-          "url": "https://www.youtube.com/@MrBeast",
-          "handle": "@MrBeast"
-        },
-        "text": "World Cup was fun",
-        "likeCount": 1900000,
-        "likeCountText": "1.9M",
-        "hashtags": [],
-        "linkedVideos": [],
-        "video": null,
-        "publishedTime": "2026-07-20T19:42:10.000Z",
-        "publishedTimeText": "13 days ago",
-        "postType": "image",
-        "images": [
-          "https://yt3.ggpht.com/wTY3z3Ws2f97goiOPzWqUJMt_LLjENEnpjJoCEefj_yzalyDfkc3N9OKfbtpCqo9KRe927hAX7lJqr0=s4000-c-fcrop64=1,00003852ffffe2fc-rw-nd-v1",
-          "https://yt3.ggpht.com/3UpCr01_PnDBkovY5PCgKqG0221xES8Yb3A9UVTpHVl__YmAB3dT0bsg6Z0eGSRQN64x4i60Xz3n=s4000-c-fcrop64=1,00002aabffffd555-rw-nd-v1",
-          "https://yt3.ggpht.com/1Yfvbg7t0d034W1lsREZ3yWrOEEa7gN_wYUpQCsQsr1qYJ3-8jv0rMhMHSkOvI6R3ysih0PK2ycIKg=s4000-c-fcrop64=1,00002aabffffd555-rw-nd-v1"
-        ],
-        "image": "https://yt3.ggpht.com/wTY3z3Ws2f97goiOPzWqUJMt_LLjENEnpjJoCEefj_yzalyDfkc3N9OKfbtpCqo9KRe927hAX7lJqr0=s4000-c-fcrop64=1,00003852ffffe2fc-rw-nd-v1",
-        "sourceUrl": "https://www.youtube.com/post/Ugkx5QH9-Xr0EWbVJ1riARjVrDcXRN1LfJS7",
-        "likeCountApproximate": true
-      },
-      {
-        "id": "UgkxZusu9I1Z-VuU5PGZNA2gclHi8V9CJVZk",
-        "url": "https://www.youtube.com/post/UgkxZusu9I1Z-VuU5PGZNA2gclHi8V9CJVZk",
-        "author": "MrBeast",
-        "channel": {
-          "id": "UCX6OQ3DkcsbYNE6H8uQQuVA",
-          "title": "MrBeast",
-          "url": "https://www.youtube.com/@MrBeast",
-          "handle": "@MrBeast"
-        },
-        "text": "Would you rather stop aging for 100 years or receive 1 billion dollars right now?",
-        "likeCount": 89000,
-        "likeCountText": "89K",
-        "hashtags": [],
-        "linkedVideos": [],
-        "video": null,
-        "publishedTime": "2026-07-19T19:42:10.000Z",
-        "publishedTimeText": "2 weeks ago",
-        "postType": "poll",
-        "images": [],
-        "image": null,
-        "sourceUrl": "https://www.youtube.com/post/UgkxZusu9I1Z-VuU5PGZNA2gclHi8V9CJVZk",
-        "likeCountApproximate": true
-      },
-      {
-        "id": "Ugkx3w8sfDJf_NDdhUAtu7MTLX3d_Dt1V9UK",
-        "url": "https://www.youtube.com/post/Ugkx3w8sfDJf_NDdhUAtu7MTLX3d_Dt1V9UK",
-        "author": "MrBeast",
-        "channel": {
-          "id": "UCX6OQ3DkcsbYNE6H8uQQuVA",
-          "title": "MrBeast",
-          "url": "https://www.youtube.com/@MrBeast",
-          "handle": "@MrBeast"
-        },
-        "text": "No upload today, may or may not be getting married and a little occupied 🤪",
-        "likeCount": 252000,
-        "likeCountText": "252K",
-        "hashtags": [],
-        "linkedVideos": [],
-        "video": null,
-        "publishedTime": "2026-07-12T19:42:10.000Z",
-        "publishedTimeText": "3 weeks ago",
-        "postType": "text",
-        "images": [],
-        "image": null,
-        "sourceUrl": "https://www.youtube.com/post/Ugkx3w8sfDJf_NDdhUAtu7MTLX3d_Dt1V9UK",
         "likeCountApproximate": true
       }
     ]
@@ -15473,33 +8604,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 194,
         "thumbnailUrl": "https://i.ytimg.com/vi/WpYPeL-gF5U/maxresdefault.jpg",
         "channelName": "The Royalty Family"
-      },
-      {
-        "url": "https://www.youtube.com/shorts/hwf0tDWlP7Q",
-        "title": "Ashnikko - stupid feat ।। Autotune Vs no autotune ।। #battleofsong #shorts #music #song #singer",
-        "publishedAt": "2022-12-14T08:29:38.000Z",
-        "viewCount": 64582461,
-        "durationSeconds": 19,
-        "thumbnailUrl": "https://i.ytimg.com/vi/hwf0tDWlP7Q/maxres2.jpg?sqp=-oaymwEoCIAKENAF8quKqQMcGADwAQH4AbYIgAKAD4oCDAgAEAEYFSBLKH8wDw==&rs=AOn4CLCkDkjFljIdMxNOOmrsKANlEOnqrQ",
-        "channelName": "Battle of song"
-      },
-      {
-        "url": "https://www.youtube.com/shorts/hAQcodpwsIA",
-        "title": "IS THIS THE HOTTEST NEW ROCKSTAR OF 2023?! #music #emo #punkrock #hardrock #rocksong #rock #rockstar",
-        "publishedAt": "2023-05-26T19:12:49.000Z",
-        "viewCount": 12286628,
-        "durationSeconds": 20,
-        "thumbnailUrl": "https://i.ytimg.com/vi/hAQcodpwsIA/maxresdefault.jpg?sqp=-oaymwEoCIAKENAF8quKqQMcGADwAQH4Ac4FgAKACooCDAgAEAEYXSBlKDgwDw==&rs=AOn4CLB1qp8scA6duDC5KhV4UHe1QqDhiw",
-        "channelName": "TX2 OFFICIAL"
-      },
-      {
-        "url": "https://www.youtube.com/watch?v=O40ruQpZogY",
-        "title": "Seriously This is One of The Most Beautiful Songs Ever Made 🥹😭",
-        "publishedAt": "2026-04-28T03:53:48.000Z",
-        "viewCount": 852851,
-        "durationSeconds": 274,
-        "thumbnailUrl": "https://i.ytimg.com/vi/O40ruQpZogY/maxresdefault.jpg",
-        "channelName": "Fearless Soul"
       }
     ]
   },
@@ -15549,54 +8653,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "title": "LadyGagaVEVO",
           "url": "https://www.youtube.com/channel/UC07Kxew-cMIaykMOkzqHtBQ"
         }
-      },
-      {
-        "id": "euCqAq6BRa4",
-        "url": "https://www.youtube.com/watch?v=euCqAq6BRa4",
-        "title": "DJ Snake - Let Me Love You (Official Music Video) ft. Justin Bieber",
-        "publishedAt": "2017-08-05T20:35:07.000Z",
-        "publishedTimeText": "9y ago",
-        "viewCount": 2086513882,
-        "durationSeconds": 205,
-        "thumbnailUrl": "https://i.ytimg.com/vi_webp/euCqAq6BRa4/sddefault.webp",
-        "channelName": "DJSnakeVEVO",
-        "channel": {
-          "id": "UCGkSXL5saM8y3VvJD_PdMFQ",
-          "title": "DJSnakeVEVO",
-          "url": "https://www.youtube.com/channel/UCGkSXL5saM8y3VvJD_PdMFQ"
-        }
-      },
-      {
-        "id": "V9PVRfjEBTI",
-        "url": "https://www.youtube.com/watch?v=V9PVRfjEBTI",
-        "title": "Billie Eilish - BIRDS OF A FEATHER (Official Music Video)",
-        "publishedAt": "2025-08-03T20:35:07.000Z",
-        "publishedTimeText": "1y ago",
-        "viewCount": 902681260,
-        "durationSeconds": 231,
-        "thumbnailUrl": "https://i.ytimg.com/vi/V9PVRfjEBTI/sddefault.jpg",
-        "channelName": "BillieEilishVEVO",
-        "channel": {
-          "id": "UCDGmojLIoWpXok597xYo8cg",
-          "title": "BillieEilishVEVO",
-          "url": "https://www.youtube.com/channel/UCDGmojLIoWpXok597xYo8cg"
-        }
-      },
-      {
-        "id": "omuBaHRavpQ",
-        "url": "https://www.youtube.com/watch?v=omuBaHRavpQ",
-        "title": "Alok & Jennifer Lopez – Everything’s Fine (PM) (Official Lyric Video)",
-        "publishedAt": "2026-07-04T20:37:14.000Z",
-        "publishedTimeText": "1mo ago",
-        "viewCount": 1875446,
-        "durationSeconds": 167,
-        "thumbnailUrl": "https://i.ytimg.com/vi_webp/omuBaHRavpQ/sddefault.webp",
-        "channelName": "Alok",
-        "channel": {
-          "id": "UCQlaArsZfebRbb70iXm6usg",
-          "title": "Alok",
-          "url": "https://www.youtube.com/channel/UCQlaArsZfebRbb70iXm6usg"
-        }
       }
     ]
   },
@@ -15636,54 +8692,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "id": "UC07Kxew-cMIaykMOkzqHtBQ",
           "title": "LadyGagaVEVO",
           "url": "https://www.youtube.com/channel/UC07Kxew-cMIaykMOkzqHtBQ"
-        }
-      },
-      {
-        "id": "euCqAq6BRa4",
-        "url": "https://www.youtube.com/watch?v=euCqAq6BRa4",
-        "title": "DJ Snake - Let Me Love You (Official Music Video) ft. Justin Bieber",
-        "publishedAt": "2017-08-05T20:35:07.000Z",
-        "publishedTimeText": "9y ago",
-        "viewCount": 2086513882,
-        "durationSeconds": 205,
-        "thumbnailUrl": "https://i.ytimg.com/vi_webp/euCqAq6BRa4/sddefault.webp",
-        "channelName": "DJSnakeVEVO",
-        "channel": {
-          "id": "UCGkSXL5saM8y3VvJD_PdMFQ",
-          "title": "DJSnakeVEVO",
-          "url": "https://www.youtube.com/channel/UCGkSXL5saM8y3VvJD_PdMFQ"
-        }
-      },
-      {
-        "id": "V9PVRfjEBTI",
-        "url": "https://www.youtube.com/watch?v=V9PVRfjEBTI",
-        "title": "Billie Eilish - BIRDS OF A FEATHER (Official Music Video)",
-        "publishedAt": "2025-08-03T20:35:07.000Z",
-        "publishedTimeText": "1y ago",
-        "viewCount": 902681260,
-        "durationSeconds": 231,
-        "thumbnailUrl": "https://i.ytimg.com/vi/V9PVRfjEBTI/sddefault.jpg",
-        "channelName": "BillieEilishVEVO",
-        "channel": {
-          "id": "UCDGmojLIoWpXok597xYo8cg",
-          "title": "BillieEilishVEVO",
-          "url": "https://www.youtube.com/channel/UCDGmojLIoWpXok597xYo8cg"
-        }
-      },
-      {
-        "id": "omuBaHRavpQ",
-        "url": "https://www.youtube.com/watch?v=omuBaHRavpQ",
-        "title": "Alok & Jennifer Lopez – Everything’s Fine (PM) (Official Lyric Video)",
-        "publishedAt": "2026-07-04T20:37:14.000Z",
-        "publishedTimeText": "1mo ago",
-        "viewCount": 1875446,
-        "durationSeconds": 167,
-        "thumbnailUrl": "https://i.ytimg.com/vi_webp/omuBaHRavpQ/sddefault.webp",
-        "channelName": "Alok",
-        "channel": {
-          "id": "UCQlaArsZfebRbb70iXm6usg",
-          "title": "Alok",
-          "url": "https://www.youtube.com/channel/UCQlaArsZfebRbb70iXm6usg"
         }
       }
     ]
@@ -15737,71 +8745,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "badges": [],
         "publishedTimeText": "2 months ago"
-      },
-      {
-        "type": "video",
-        "id": "Au2l6Nofx0E",
-        "url": "https://www.youtube.com/watch?v=Au2l6Nofx0E",
-        "title": "Why Space Gets More Terrifying the Further You Travel",
-        "publishedAt": "2026-07-12T19:42:10.000Z",
-        "viewCount": 45420,
-        "durationSeconds": 7439,
-        "thumbnailUrl": "https://i.ytimg.com/vi/Au2l6Nofx0E/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDqNYbuQDzmLSgFoZ9jjTAwu3hDZg",
-        "channelName": "Calm Space",
-        "channelId": "UCXyJmt3PKv0fbsU9DtcreEw",
-        "channel": {
-          "id": "UCXyJmt3PKv0fbsU9DtcreEw",
-          "title": "Calm Space",
-          "handle": "@CalmSpaceToSleep",
-          "url": "https://www.youtube.com/@CalmSpaceToSleep",
-          "thumbnail": null
-        },
-        "badges": [],
-        "publishedTimeText": "3 weeks ago"
-      },
-      {
-        "type": "video",
-        "id": "3Z8n43yp-mg",
-        "url": "https://www.youtube.com/watch?v=3Z8n43yp-mg",
-        "title": "3 Hours Of Facts About Space And Our Solar System",
-        "publishedAt": "2025-08-02T19:42:10.000Z",
-        "viewCount": 506443,
-        "durationSeconds": 10922,
-        "thumbnailUrl": "https://i.ytimg.com/vi/3Z8n43yp-mg/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA5ZCCpBoxl_OMCWz4cWPE8nCa40w",
-        "channelName": "Spark",
-        "channelId": "UCMV3aTOwUtG5vwfH9_rzb2w",
-        "channel": {
-          "id": "UCMV3aTOwUtG5vwfH9_rzb2w",
-          "title": "Spark",
-          "handle": "@SparkDocs",
-          "url": "https://www.youtube.com/@SparkDocs",
-          "thumbnail": null
-        },
-        "badges": [
-          "Verified"
-        ],
-        "publishedTimeText": "1 year ago"
-      },
-      {
-        "type": "video",
-        "id": "ir8jMyLBS6k",
-        "url": "https://www.youtube.com/watch?v=ir8jMyLBS6k",
-        "title": "1 Hour of Mind-Blowing Space Facts Scientists Can’t Ignore",
-        "publishedAt": "2026-07-05T19:42:10.000Z",
-        "viewCount": 72726,
-        "durationSeconds": 3632,
-        "thumbnailUrl": "https://i.ytimg.com/vi/ir8jMyLBS6k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD_eVVLviIcny85Etou6tqf2noKlw",
-        "channelName": "Astral Curiosity",
-        "channelId": "UCd6DpEsZHe5vadiZQ7JssNw",
-        "channel": {
-          "id": "UCd6DpEsZHe5vadiZQ7JssNw",
-          "title": "Astral Curiosity",
-          "handle": "@astralcuriosity",
-          "url": "https://www.youtube.com/@astralcuriosity",
-          "thumbnail": null
-        },
-        "badges": [],
-        "publishedTimeText": "4 weeks ago"
       }
     ],
     "videos": [
@@ -15848,71 +8791,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "badges": [],
         "publishedTimeText": "2 months ago"
-      },
-      {
-        "type": "video",
-        "id": "Au2l6Nofx0E",
-        "url": "https://www.youtube.com/watch?v=Au2l6Nofx0E",
-        "title": "Why Space Gets More Terrifying the Further You Travel",
-        "publishedAt": "2026-07-12T19:42:10.000Z",
-        "viewCount": 45420,
-        "durationSeconds": 7439,
-        "thumbnailUrl": "https://i.ytimg.com/vi/Au2l6Nofx0E/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDqNYbuQDzmLSgFoZ9jjTAwu3hDZg",
-        "channelName": "Calm Space",
-        "channelId": "UCXyJmt3PKv0fbsU9DtcreEw",
-        "channel": {
-          "id": "UCXyJmt3PKv0fbsU9DtcreEw",
-          "title": "Calm Space",
-          "handle": "@CalmSpaceToSleep",
-          "url": "https://www.youtube.com/@CalmSpaceToSleep",
-          "thumbnail": null
-        },
-        "badges": [],
-        "publishedTimeText": "3 weeks ago"
-      },
-      {
-        "type": "video",
-        "id": "3Z8n43yp-mg",
-        "url": "https://www.youtube.com/watch?v=3Z8n43yp-mg",
-        "title": "3 Hours Of Facts About Space And Our Solar System",
-        "publishedAt": "2025-08-02T19:42:10.000Z",
-        "viewCount": 506443,
-        "durationSeconds": 10922,
-        "thumbnailUrl": "https://i.ytimg.com/vi/3Z8n43yp-mg/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA5ZCCpBoxl_OMCWz4cWPE8nCa40w",
-        "channelName": "Spark",
-        "channelId": "UCMV3aTOwUtG5vwfH9_rzb2w",
-        "channel": {
-          "id": "UCMV3aTOwUtG5vwfH9_rzb2w",
-          "title": "Spark",
-          "handle": "@SparkDocs",
-          "url": "https://www.youtube.com/@SparkDocs",
-          "thumbnail": null
-        },
-        "badges": [
-          "Verified"
-        ],
-        "publishedTimeText": "1 year ago"
-      },
-      {
-        "type": "video",
-        "id": "ir8jMyLBS6k",
-        "url": "https://www.youtube.com/watch?v=ir8jMyLBS6k",
-        "title": "1 Hour of Mind-Blowing Space Facts Scientists Can’t Ignore",
-        "publishedAt": "2026-07-05T19:42:10.000Z",
-        "viewCount": 72726,
-        "durationSeconds": 3632,
-        "thumbnailUrl": "https://i.ytimg.com/vi/ir8jMyLBS6k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD_eVVLviIcny85Etou6tqf2noKlw",
-        "channelName": "Astral Curiosity",
-        "channelId": "UCd6DpEsZHe5vadiZQ7JssNw",
-        "channel": {
-          "id": "UCd6DpEsZHe5vadiZQ7JssNw",
-          "title": "Astral Curiosity",
-          "handle": "@astralcuriosity",
-          "url": "https://www.youtube.com/@astralcuriosity",
-          "thumbnail": null
-        },
-        "badges": [],
-        "publishedTimeText": "4 weeks ago"
       }
     ],
     "shorts": [],
@@ -16018,21 +8896,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "summary": "The song 'Never Gonna Give You Up' by Rick Astley is a classic pop anthem that emphasizes unwavering commitment and loyalty in a romantic relationship. The lyrics express a deep emotional connection, highlighting the importance of honesty and trust between partners. Astley reassures his loved one that he will always be there for them, promising never to abandon or hurt them, which resonates with listeners on a personal level.\n\nThis iconic track has gained a cultural significance beyond its initial release, becoming a symbol of internet memes and nostalgia. Its catchy melody and memorable chorus have made it a timeless favorite, often associated with themes of love, dedication, and sincerity. The song's upbeat tempo and heartfelt message continue to engage audiences, making it a staple in pop music history.",
     "keyPoints": [
       "Emphasizes commitment and loyalty in relationships.",
-      "Highlights the importance of honesty and trust.",
-      "Reassures loved ones of unwavering support.",
-      "Cultural icon associated with internet memes.",
-      "Timeless melody and catchy chorus.",
-      "Resonates with themes of love and dedication.",
-      "Continues to engage audiences across generations."
+      "Highlights the importance of honesty and trust."
     ],
     "topics": [
       "Rick Astley",
-      "Never Gonna Give You Up",
-      "Pop Music",
-      "Commitment",
-      "Love",
-      "Nostalgia",
-      "Internet Memes"
+      "Never Gonna Give You Up"
     ],
     "sentiment": "positive"
   },
@@ -16075,21 +8943,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://www.youtube.com/shorts/O07T9_5VIRI",
         "title": "who remembers this trend?😳 #trending #viral #tiktok #funny",
         "viewCount": 23000000
-      },
-      {
-        "url": "https://www.youtube.com/shorts/ERXFiAub3jE",
-        "title": "What's Trending Across America Right Now?",
-        "viewCount": 11
-      },
-      {
-        "url": "https://www.youtube.com/shorts/7c4L1eQeJi4",
-        "title": "TikTok Trends Edits ☘️🔥 #trend #edit #shorts",
-        "viewCount": 14000000
-      },
-      {
-        "url": "https://www.youtube.com/shorts/14pQPufUzj4",
-        "title": "BEN EAGLE - Heartbreaking carelessness #MartialArts #ActionComedy #KungFu #Kindness #Trending #Viral",
-        "viewCount": 7300000
       }
     ]
   },
@@ -16097,7 +8950,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "id": "dQw4w9WgXcQ",
     "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
-    "description": "The official video for “Never Gonna Give You Up” by Rick Astley. \n\nNever: The Autobiography 📚 OUT NOW! \nFollow this link to get your copy and listen to Rick’s ‘Never’ playlist ❤️ #RickAstleyNever\nhttps://linktr.ee/rickastleynever\n\n“Never Gonna Give You Up” was a global smash on its release in July 1987, topping the charts in 25 countries including Rick’s native UK and the US Billboard Hot 100.  It also won the Brit Award for Best single in 1988. Stock Aitken and Waterman wrote and produced the track which was the lead-off single and lead track from Rick’s debut LP “Whenever You Need Somebody”.  The album was itself a UK number one and would go on to sell over 15 million copies worldwide.\n\nThe legendary video was directed by Simon West – who later went on to make Hollywood blockbusters such as Con Air, Lara Croft – Tomb Raider and The Expendables 2.  The video passed the 1bn YouTube views milestone on 28 July 2021.\n\nSubscribe to the official Rick Astley YouTube channel: https://RickAstley.lnk.to/YTSubID\n\nFollow Rick Astley:\nFacebook: https://RickAstley.lnk.to/FBFollowID \nTwitter: https://RickAstley.lnk.to/TwitterID \nInstagram: https://RickAstley.lnk.to/InstagramID \nWebsite: https://RickAstley.lnk.to/storeID \nTikTok: https://RickAstley.lnk.to/TikTokID\n\nListen to Rick Astley:\nSpotify: https://RickAstley.lnk.to/SpotifyID \nApple Music: https://RickAstley.lnk.to/AppleMusicID \nAmazon Music: https://RickAstley.lnk.to/AmazonMusicID \nDeezer: https://RickAstley.lnk.to/DeezerID \n\nLyrics:\nWe’re no strangers to love\nYou know the rules and so do I\nA full commitment’s what I’m thinking of\nYou wouldn’t get this from any other guy\n\nI just wanna tell you how I’m feeling\nGotta make you understand\n\nNever gonna give you up\nNever gonna let you down\nNever gonna run around and desert you\nNever gonna make you cry\nNever gonna say goodbye\nNever gonna tell a lie and hurt you\n\nWe’ve known each other for so long\nYour heart’s been aching but you’re too shy to say it\nInside we both know what’s been going on\nWe know the game and we’re gonna play it\n\nAnd if you ask me how I’m feeling\nDon’t tell me you’re too blind to see\n\nNever gonna give you up\nNever gonna let you down\nNever gonna run around and desert you\nNever gonna make you cry\nNever gonna say goodbye\nNever gonna tell a lie and hurt you\n\n#RickAstley #NeverGonnaGiveYouUp #WheneverYouNeedSomebody #OfficialMusicVideo",
+    "description": "The official video for “Never Gonna Give You Up” by Rick Astley. \n\nNever: The Autobiography 📚 OUT NOW! \nFollow this link to get your copy and listen to Rick’s ‘Never’ playlist ❤️ #RickAstleyNever\nhttps://linktr.ee/rickastleynever\n\n“Never Gonna Give You Up” was a global smash on its release in July 1987, topping the charts in 25 countries including Rick’s native UK and the US Billboard Hot 100.  It also won the Brit Award for Best single in 1988. Stock Aitken and Waterman wrote and produced the track which was the lead-off single and lead track from Rick’s debut LP “Whenever You Need Somebody”.  The album was itself a UK number one and would go on to sell over 15 million copies worldwide.\n\nThe legendary video was directed by Simon West – who later went on to make Hollywood blockbusters such as Con Air, Lara Croft – Tomb Raider and The Expendables 2.  The video passed the 1bn YouTube views milestone on 28 July 2021.\n\nSubscribe to the official Rick Astley YouTube channel: https://RickAstley.lnk.to/YTSubID\n\nFollow Rick Astley:\nFacebook: https://RickAstley.lnk.to/FBFollowID \nTwitter: http …",
     "channelName": "Rick Astley",
     "channelId": "UCuAXFkgsw1L7xaCfnd5JJOw",
     "channelUrl": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
@@ -16110,10 +8963,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "genre": "Music",
     "tags": [
       "rick astley",
-      "Never Gonna Give You Up",
-      "nggyu",
-      "never gonna give you up lyrics",
-      "rick rolled"
+      "Never Gonna Give You Up"
     ],
     "durationFormatted": "00:03:33"
   },
@@ -16143,39 +8993,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 16.475,
         "votes": 0,
         "uuid": "6377104df535c8eb2c2d7d6437320e71660b93a02517da2ba668c3813d7de6ff7"
-      },
-      {
-        "category": "sponsor",
-        "actionType": "skip",
-        "startSeconds": 555.65,
-        "endSeconds": 560.175,
-        "startFormatted": "9:16",
-        "endFormatted": "9:20",
-        "durationSeconds": 4.525,
-        "votes": 0,
-        "uuid": "f75d77a0658f668c014ffa63f26f2ecc439a6d6b18b868d93c0875f55a47ba017"
-      },
-      {
-        "category": "selfpromo",
-        "actionType": "skip",
-        "startSeconds": 567.302,
-        "endSeconds": 573,
-        "startFormatted": "9:27",
-        "endFormatted": "9:33",
-        "durationSeconds": 5.698,
-        "votes": 0,
-        "uuid": "328569d7ae428c1243bc54f010800a5cf6b5449e47abd3ee0f8093531ebeb8137"
-      },
-      {
-        "category": "sponsor",
-        "actionType": "skip",
-        "startSeconds": 621.375,
-        "endSeconds": 627.7,
-        "startFormatted": "10:21",
-        "endFormatted": "10:28",
-        "durationSeconds": 6.325,
-        "votes": -1,
-        "uuid": "ee142c1cb73f13b3eceef18ffdd1eafd763c1adaef8df88f2c2b20f768e40ad27"
       }
     ]
   }
