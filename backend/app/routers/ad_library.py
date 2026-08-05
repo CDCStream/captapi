@@ -49,11 +49,10 @@ CREDIT_AD_LIBRARY_NATIVE = 2
 # Apify fallback is capped — never the old ~70-credit trap.
 CREDIT_TIKTOK_AD_SEARCH = 2
 CREDIT_TIKTOK_AD_SEARCH_APIFY = 5
-# Creative Center Top Ads: Decodo-native is primary (flat 2). Apify fallback
-# keeps ~1 credit/result after markup (~$0.003/ad).
+# Creative Center Top Ads: flat 2 on both Decodo-native and Apify when ads return
+# (empty/timeout free). Never scale with limit/returned ads.
 CREDIT_TIKTOK_TOP_ADS = 2
-RATE_TIKTOK_TOP_ADS = 1.0
-CREDIT_TIKTOK_TOP_ADS_MIN = 2
+CREDIT_TIKTOK_TOP_ADS_MIN = 2  # used by _bill_ads Apify path if ever re-enabled
 # Stay under nginx/ALB 60s defaults (same fast-fail spirit as IG trending-reels).
 _TIKTOK_AD_APIFY_TIMEOUT_SECS = 20.0
 _TIKTOK_AD_RETRY_AFTER_SECS = 30
@@ -2026,7 +2025,7 @@ async def tiktok_search(
         "distinct HD rendition exists; no duplicate media[]). Keyword q uses "
         "match=any|all with matchedFrom/filteredOut/matchBasis. Empty results "
         "are never charged. Upstream capped (~40s Decodo / ~20s Apify). Flat 2 "
-        "credits native when ads are returned; Apify ~1/ad (min 2). For DSA "
+        "credits when ads are returned (native or Apify — not per result). For DSA "
         "firstShown/lastShown use /v1/ad-library/tiktok/search."
     ),
 )
@@ -2197,11 +2196,12 @@ async def tiktok_top_ads(
             ctx,
             use_cache=cache,
         )
+        # Flat 2 whether Decodo or Apify served the page — never ~1/ad.
         _bill_ads(
             ctx,
             data.get("ads") or [],
             flat=CREDIT_TIKTOK_TOP_ADS,
-            apify_rate=RATE_TIKTOK_TOP_ADS if ctx.get("source") != "direct" else None,
+            apify_rate=None,
         )
         return ApiResponse(data=data)
 

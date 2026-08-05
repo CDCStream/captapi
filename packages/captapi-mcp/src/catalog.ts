@@ -644,7 +644,7 @@ const TIKTOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
     name: "TikTok Creative Center Top Ads",
     path: "/v1/ad-library/tiktok/top-ads",
     credits: 2,
-    summary: "Creative Center Top Ads — advertiser{}, firstSeen/lastSeen+datesPresent, no media[] dup, empty free.",
+    summary: "Creative Center Top Ads — flat 2 credits (not per-result), advertiser{}, dates when present, empty free.",
     params: [
       { name: "q", type: "string", required: false, description: "Optional keyword (substring). See match + matchedFrom." },
       { name: "match", type: "string", required: false, description: 'Keyword mode: "any" (default) or "all".' },
@@ -654,7 +654,7 @@ const TIKTOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
       { name: "industry", type: "string", required: false, description: "Optional industry key or label." },
       { name: "objective", type: "string", required: false, description: "Optional campaign objective." },
       { name: "adFormat", type: "string", required: false, description: "spark | non_spark." },
-      limit(20, 100),
+      limitFlat(20, 100, 2),
     ],
   },
   { tool: "tiktok_ad_library_ad_details", name: "TikTok Ad Details", path: "/v1/ad-library/tiktok/ad-details", credits: 2, summary: "TikTok ad details by ad URL or ID.", params: [url("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "ISO country code. Default GB." }] }

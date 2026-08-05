@@ -2815,14 +2815,14 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     path: "/v1/ad-library/tiktok/top-ads",
     credits: 2,
     tagline:
-      "TikTok Creative Center Top Ads — advertiser, dates when present, CTR/likes, video (2 credits native).",
+      "TikTok Creative Center Top Ads — advertiser, dates when present, CTR/likes, video (flat 2 credits).",
     longDescription:
-      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — datesPresent counts filled rows), likes + likesIsApproximate, ctr/ctrTier, costTier, isSparkAd, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Spark/Non-Spark-only adFormat and single-country query echoes are omitted. Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis (soft creative_center fallback when literal matches are empty). Empty results are never charged. Upstream capped (~40s Decodo / ~20s Apify). Flat 2 credits native when ads are returned; Apify ~1/ad (min 2). For DSA firstShown/lastShown use /tiktok/search.",
+      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — datesPresent counts filled rows), likes + likesIsApproximate, ctr/ctrTier, costTier, isSparkAd, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Spark/Non-Spark-only adFormat and single-country query echoes are omitted. Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis (soft creative_center fallback when literal matches are empty). Empty results and upstream timeouts are never charged. Upstream capped (~40s Decodo / ~20s Apify). Flat 2 credits per successful call with ads — native or Apify (not per result). For DSA firstShown/lastShown use /tiktok/search.",
     delivers: [
       "advertiser{id,name} for grouping + Spark author fallback",
       "firstSeen/lastSeen + datesPresent (often null on CC list)",
-      "likesIsApproximate; video without duplicate media[]",
-      "matchBasis transparency; empty results free",
+      "Flat 2 credits when ads return (not per-result)",
+      "matchBasis transparency; empty/timeout free",
     ],
   },
   {
@@ -4982,7 +4982,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       required: false,
       description: "Optional format filter: spark or non_spark.",
     },
-    lp(20, 100),
+    lpFlat(20, 100, 2),
     cacheP(),
   ],
   "tiktok-ad-library-ad-details": [
@@ -6355,7 +6355,7 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     });
     list.push({
       q: `How many credits does Top Ads cost?`,
-      a: `Flat 2 credits on the Decodo-native path when ads are returned. Empty results (and upstream timeouts) are never charged. Apify fallback bills about 1 credit per returned ad (minimum 2).`,
+      a: `Flat 2 credits per successful call when ads are returned — same on Decodo-native and Apify fallback (not per result). Empty results and upstream timeouts are never charged.`,
     });
     list.push({
       q: `Why did my keyword return zero — or soft Creative Center ads?`,
