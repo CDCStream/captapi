@@ -1,7 +1,7 @@
 # @captapi/cli
 
 Official command-line interface for [Captapi](https://captapi.com) — pull
-structured social-media data from 27 platforms (YouTube, TikTok, Instagram,
+structured social-media data from 32 platforms (YouTube, TikTok, Instagram,
 Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth
 Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop) from your terminal, check your credit balance, and
 wire Captapi into AI agents.
@@ -17,7 +17,7 @@ npx @captapi/cli list
 ```bash
 captapi login                 # paste your capt_live_… key (saved to ~/.captapi/config.json)
 captapi balance               # credits + recent requests
-captapi list                  # every endpoint (170 commands)
+captapi list                  # every endpoint (177 commands)
 captapi youtube-transcript --url "https://youtube.com/watch?v=dQw4w9WgXcQ"
 ```
 
@@ -42,7 +42,7 @@ Override the API host with `CAPTAPI_BASE_URL` (default `https://api.captapi.com`
 | `captapi balance [--json]` | Credit balance + recent requests |
 | `captapi list [platform] [--json]` | List endpoints, optionally by platform |
 | `captapi agent add <claude\|cursor>` | Add the Captapi MCP server to an agent |
-| `captapi <endpoint> [flags]` | Call any of the 170 data endpoints |
+| `captapi <endpoint> [flags]` | Call any of the 177 data endpoints |
 
 ### Calling endpoints
 
@@ -70,7 +70,7 @@ captapi agent add cursor --print  # print the snippet instead of writing
 ```
 
 Restart the agent afterwards to load the [`@captapi/mcp`](https://www.npmjs.com/package/@captapi/mcp)
-server (170 tools).
+server (177 tools).
 
 ## License
 

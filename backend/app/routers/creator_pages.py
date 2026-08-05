@@ -11,6 +11,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
+from app.core.cache_params import CACHE_MAX_AGE_DESC, resolve_cache_options
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.browser_fetch import _is_cloudflare_block, fetch_html
@@ -32,6 +33,46 @@ EXAMPLES = {
     "pillar": "https://pillar.io/username",
     "linkbio": "https://lnk.bio/username",
     "linkme": "https://link.me/username",
+}
+
+# Flat credit cost per platform. Komi is a direct JSON API (profile + modules)
+# — same class as Linktree (1). Pillar/Linkbio/Linkme still need HTML fetch.
+CREDIT_PAGE = {
+    "komi": 1,
+    "pillar": 4,
+    "linkbio": 4,
+    "linkme": 4,
+}
+
+_KOMI_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/json",
+    "Origin": "https://komi.io",
+    "Referer": "https://komi.io/",
+}
+
+# Komi socialProfileLinks[].type → socials{} key (incl. website).
+_KOMI_SOCIAL_TYPES: dict[str, str] = {
+    "INSTAGRAM": "instagram",
+    "TIKTOK": "tiktok",
+    "YOUTUBE": "youtube",
+    "TWITTER": "twitter",
+    "FACEBOOK": "facebook",
+    "SNAPCHAT": "snapchat",
+    "SPOTIFY": "spotify",
+    "APPLE_MUSIC": "appleMusic",
+    "SOUNDCLOUD": "soundcloud",
+    "LINKEDIN": "linkedin",
+    "TWITCH": "twitch",
+    "PINTEREST": "pinterest",
+    "THREADS": "threads",
+    "DISCORD": "discord",
+    "TELEGRAM": "telegram",
+    "WHATSAPP": "whatsapp",
+    "WEBSITE": "website",
 }
 
 # lnk.bio (and similar) sprinkle their own nav/share links through the markup;
@@ -285,43 +326,174 @@ def _first_string(data: dict[str, Any], keys: tuple[str, ...]) -> str | None:
     return None
 
 
-async def _fetch_komi(value: str) -> dict[str, Any] | None:
-    """Komi pages are a client-rendered Next.js shell with no hydration data,
-    but the public talent API serves the full profile by username."""
-    username = value.rstrip("/").rsplit("/", 1)[-1].lstrip("@")
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
-    async with httpx.AsyncClient(timeout=30, headers=headers) as client:
-        resp = await client.get(f"https://api.komi.io/api/talent/usernames/{username}")
-    if resp.status_code != 200:
-        return None
-    data = resp.json()
-    profile = data.get("talentProfile") or {}
-    # Komi socialProfileLinks are only {link, type} — no id/thumbnail upstream.
-    links = []
+def _komi_username(value: str) -> str:
+    """Accept komi.io/user, user.komi.io, or bare username."""
+    raw = (value or "").strip().rstrip("/")
+    if "://" in raw:
+        host = raw.split("://", 1)[1].split("/", 1)[0].lower()
+        if host.endswith(".komi.io") and host != "www.komi.io" and host != "api.komi.io":
+            return host[: -len(".komi.io")].split(".")[0]
+        return raw.rsplit("/", 1)[-1].lstrip("@")
+    return raw.lstrip("@")
+
+
+def _komi_socials(profile: dict[str, Any], data: dict[str, Any]) -> dict[str, str]:
+    """Map Komi socialProfileLinks (+ website field) into socials{}."""
+    socials: dict[str, str] = {}
     for link in profile.get("socialProfileLinks") or []:
         if not isinstance(link, dict):
             continue
-        url = safe_str(link.get("link"))
+        url = safe_str(link.get("link") or link.get("url"))
         if not url:
             continue
-        link_type = safe_str(link.get("type"))
-        links.append(_link_item(url, title=link_type, link_type=link_type))
-    return _strip_page(
-        {
-            "platform": "komi",
-            "url": f"https://komi.io/{data.get('username') or username}",
-            "username": safe_str(data.get("username")),
-            "name": safe_str(profile.get("displayName")) or safe_str(data.get("username")),
-            "firstName": safe_str(data.get("firstName") or profile.get("firstName")),
-            "lastName": safe_str(data.get("lastName") or profile.get("lastName")),
-            "description": safe_str(profile.get("bio")),
-            "avatar": safe_str(data.get("avatar") or profile.get("avatar")),
-            "linkCount": len(links),
-            "links": links,
-            "socials": _detect_socials(links),
-            "email": safe_str(data.get("email") or profile.get("email")) or _detect_email("", links),
-        }
+        key = _KOMI_SOCIAL_TYPES.get((safe_str(link.get("type")) or "").upper())
+        if not key:
+            # Unknown type — fall back to host detection (still skip if neither).
+            detected = _detect_socials([{"url": url}])
+            if detected:
+                key = next(iter(detected))
+                url = detected[key]
+            else:
+                continue
+        if key not in socials:
+            socials[key] = url
+    for candidate in (profile.get("website"), data.get("website")):
+        if isinstance(candidate, dict):
+            url = safe_str(candidate.get("url") or candidate.get("link"))
+        else:
+            url = safe_str(candidate)
+        if url and "website" not in socials:
+            socials["website"] = url
+            break
+    return socials
+
+
+def _komi_flatten_module_links(modules: list[Any]) -> list[dict[str, Any]]:
+    """Flatten talent-profiles modules into SC-shaped LINK/PRODUCT rows.
+
+    Komi nests content under GROUP → LINK|PRODUCT modules → items[{url,title,…}].
+    Social icon rows live on socialProfileLinks and are NOT duplicated here.
+    """
+    out: list[dict[str, Any]] = []
+
+    def walk(mod: dict[str, Any]) -> None:
+        items = mod.get("items")
+        if not isinstance(items, list) or not items:
+            return
+        first = items[0]
+        # Leaf rows: items already carry outbound urls (LINK / PRODUCT / …).
+        if isinstance(first, dict) and ("url" in first or "link" in first):
+            mod_type = (safe_str(mod.get("type")) or "LINK").upper()
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                url = safe_str(item.get("url") or item.get("link"))
+                if not url:
+                    continue
+                title = safe_str(item.get("title") or item.get("name") or mod.get("name"))
+                row: dict[str, Any] = {
+                    "id": safe_str(item.get("id")),
+                    "url": url,
+                    "title": title,
+                    "type": mod_type,
+                }
+                if isinstance(item.get("order"), int):
+                    row["order"] = item["order"]
+                if isinstance(item.get("visible"), bool):
+                    row["visible"] = item["visible"]
+                thumb = safe_str(item.get("thumbnail") or item.get("image"))
+                if thumb:
+                    row["thumbnail"] = thumb
+                module_id = safe_str(item.get("moduleId") or mod.get("id"))
+                if module_id:
+                    row["moduleId"] = module_id
+                version_id = safe_str(item.get("versionId"))
+                if version_id:
+                    row["versionId"] = version_id
+                if item.get("price") is not None:
+                    row["price"] = item.get("price")
+                currency = safe_str(item.get("currency"))
+                if currency:
+                    row["currency"] = currency
+                out.append(row)
+            return
+        # Nested modules (GROUP children, etc.).
+        for child in items:
+            if isinstance(child, dict) and (child.get("type") or child.get("items") is not None):
+                walk(child)
+
+    for mod in modules:
+        if isinstance(mod, dict):
+            walk(mod)
+    return out
+
+
+async def _fetch_komi(value: str) -> dict[str, Any] | None:
+    """Komi HTML is a client-rendered shell; public JSON APIs hold the page.
+
+    1) GET /api/talent/usernames/{username} — identity + socialProfileLinks
+    2) GET /api/talent-profiles/{id}/modules — LINK/PRODUCT content (SKIMS, etc.)
+    """
+    username = _komi_username(value)
+    if not username:
+        return None
+    async with httpx.AsyncClient(timeout=30, headers=_KOMI_HEADERS) as client:
+        resp = await client.get(f"https://api.komi.io/api/talent/usernames/{username}")
+        if resp.status_code != 200:
+            return None
+        data = resp.json()
+        if not isinstance(data, dict):
+            return None
+        profile = data.get("talentProfile") if isinstance(data.get("talentProfile"), dict) else {}
+        profile_id = safe_str(profile.get("id"))
+        modules: list[Any] = []
+        if profile_id:
+            mod_resp = await client.get(
+                f"https://api.komi.io/api/talent-profiles/{profile_id}/modules"
+            )
+            if mod_resp.status_code == 200:
+                payload = mod_resp.json()
+                if isinstance(payload, list):
+                    modules = payload
+
+    links = _komi_flatten_module_links(modules)
+    socials = _komi_socials(profile, data)
+    display = (
+        safe_str(profile.get("displayName"))
+        or safe_str(data.get("displayName"))
+        or safe_str(data.get("username") or username)
     )
+    # Keep empty bio as "" (SC always emits the field).
+    bio_raw = profile.get("bio")
+    if bio_raw is None:
+        bio_raw = data.get("bio")
+    bio = "" if bio_raw is None else (safe_str(bio_raw) or "")
+    handle = safe_str(data.get("username") or username)
+    page = {
+        "platform": "komi",
+        "id": profile_id,
+        "url": f"https://komi.io/{handle or username}",
+        "username": handle,
+        "handle": handle,
+        "displayName": display,
+        "name": display,  # deprecated alias of displayName
+        "firstName": safe_str(data.get("firstName") or profile.get("firstName")),
+        "lastName": safe_str(data.get("lastName") or profile.get("lastName")),
+        "bio": bio,
+        "description": bio,  # deprecated alias of bio
+        "avatar": safe_str(data.get("avatar") or profile.get("avatar")),
+        "linkCount": len(links),
+        "links": links,
+        "socials": socials,
+        "email": safe_str(data.get("email") or profile.get("email")),
+    }
+    # strip_empty drops "" — re-attach bio/description for SC-stable empty string.
+    cleaned = strip_empty({k: v for k, v in page.items() if k not in ("bio", "description", "links")})
+    cleaned["bio"] = bio
+    cleaned["description"] = bio
+    cleaned["links"] = links
+    cleaned["linkCount"] = len(links)
+    return cleaned
 
 
 async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
@@ -406,7 +578,15 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
     )
 
 
-async def _page(platform: str, url: str, caller: ApiCaller, use_cache: bool = True):
+async def _page(
+    platform: str,
+    url: str,
+    caller: ApiCaller,
+    *,
+    use_cache: bool = True,
+    ttl: int | None = None,
+    cache_max_age: str | None = None,
+):
     detected = detect_url_platform(url)
     if detected and detected != platform:
         raise HTTPException(
@@ -414,8 +594,22 @@ async def _page(platform: str, url: str, caller: ApiCaller, use_cache: bool = Tr
             detail=platform_mismatch_detail(url, platform, EXAMPLES[platform]),
         )
     profile = _url(platform, url)
-    async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=4) as ctx:
-        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 9}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
+    credits = CREDIT_PAGE.get(platform, 4)
+    async with billed_call(
+        caller=caller,
+        endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}",
+        platform=platform,
+        resource_url=profile,
+        base_credits=credits,
+    ) as ctx:
+        data = await cached_or_run(
+            f"{platform}.page",
+            {"url": profile, "v": 10, "cacheMaxAge": cache_max_age},
+            lambda: _fetch_page(platform, profile),
+            ctx,
+            use_cache=use_cache,
+            ttl=ttl,
+        )
         if data.pop("_marketingShell", None) or not (data.get("username") or data.get("links")):
             raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")
         # Pillar soft-404s to a marketing shell with the path username but no creator links.
@@ -424,12 +618,31 @@ async def _page(platform: str, url: str, caller: ApiCaller, use_cache: bool = Tr
         return ApiResponse(data=data)
 
 
-_CACHE_DESC = "Set true to use the 24h cache. Default false — always fetch fresh data."
+_CACHE_DESC = (
+    "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. "
+    "Prefer cacheMaxAge when you need 1d–30d freshness control."
+)
 
 
-@router.get("/komi/page", summary="Komi page")
-async def komi_page(url: str = Query(..., description="Komi page URL or username"), cache: bool = Query(False, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
-    return await _page("komi", url, caller, use_cache=cache)
+@router.get(
+    "/komi/page",
+    summary="Komi page",
+    description=(
+        "Public Komi page as clean JSON — identity (id, displayName, bio), socials{} "
+        "(incl. website), and content links[] with id/thumbnail/order/visible plus "
+        "price/currency on PRODUCT rows. Flat 1 credit (direct Komi JSON APIs)."
+    ),
+)
+async def komi_page(
+    url: str = Query(..., description="Komi page URL or username (komi.io/user or user.komi.io)"),
+    cache: bool = Query(False, description=_CACHE_DESC),
+    cacheMaxAge: str | None = Query(None, description=CACHE_MAX_AGE_DESC),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    use_cache, ttl = resolve_cache_options(cache, cacheMaxAge)
+    return await _page(
+        "komi", url, caller, use_cache=use_cache, ttl=ttl, cache_max_age=cacheMaxAge
+    )
 
 
 @router.get("/pillar/page", summary="Pillar page")

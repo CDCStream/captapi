@@ -50,6 +50,39 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-05",
+    category: "fix",
+    title: "Komi page: content modules, PRODUCT price, 1 credit",
+    description:
+      "GET /v1/komi/page was only reading socialProfileLinks (icon row) at 4 credits. It now fetches Komi's talent-profiles modules API and flattens LINK/PRODUCT content — Visit SKIMS-style titles, id/thumbnail/order/visible, plus price/currency on products. socials{} includes website. Identity adds string id, displayName, bio. Repriced to flat 1 credit (same class as Linktree; direct JSON, not HTML scrape). Docs no longer promise follower/verified metrics Komi does not expose; cacheMaxAge added.",
+    items: [
+      "Modules flatten + PRODUCT price/currency; socials.website; id/displayName/bio",
+      "1 credit; cacheMaxAge; rewrite docs/use cases (no phantom audience metrics)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "improvement",
+    title: "Linktree page: string ids, PRODUCT urls, YouTube channel resolve",
+    description:
+      "GET /v1/linktree/page now stringifies the top-level account id (catalog convention). PRODUCT / merch links resolve shopUrl when Linktree leaves url empty — url is always present (null only when no destination). socialAccounts stays the HTTP join map (no email; use top-level email) and resolves YouTube watch URLs to the channel via oEmbed so they pipe into youtube/channel-details. Canonical displayName/handle + cacheMaxAge. Docs position socialAccounts as the creator-graph fan-out (TikTok/Instagram/Spotify/SoundCloud — SC lacks the last two).",
+    items: [
+      "id string; PRODUCT url from shopUrl; socialAccounts.youtube → channel",
+      "displayName/handle; cacheMaxAge; Linktree-specific field docs + use cases",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "fix",
+    title: "Docs SSR hardening + Amazon seller vs influencer scope",
+    description:
+      "Amazon /amazon-shop/page is a third-party seller storefront endpoint (/sp?seller= / /s?me=) — not SC's influencer amazon.com/shop/{handle} surface (socials/lists/curations). Docs renamed to Amazon Seller Storefront, call out ASIN + canonical /dp/{ASIN} as the catalog join (vs shop getProductDetails paths), and reject influencer URLs with HTTP 400. Also hardened docs SSR: JSON-LD escapes U+003C, Instagram embed example no longer carries HTML closers that can leave crawlers with head-only pages, gen_examples stubs poison HTML, and lint:docs-examples / audit:docs-ssr cover all /apis pages.",
+    items: [
+      "Amazon: seller-only scope + ASIN/dp advantage explicit (not SC shop equivalent)",
+      "SSR: JSON-LD escape, embed stub, lint:docs-examples + audit:docs-ssr",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
     category: "improvement",
     title: "Kick clip: dual modes documented, HLS typing, VOD deep-links",
     description:

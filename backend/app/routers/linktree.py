@@ -11,11 +11,14 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
+from app.core.cache_params import CACHE_MAX_AGE_DESC, resolve_cache_options
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
+from app.services import decodo_fetch
 from app.services.cached_runner import cached_or_run
 from app.services.http_fetch import DEFAULT_HEADERS
 from app.utils.formatters import safe_str
+from app.utils.profile_core import stamp_profile_core
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
@@ -24,6 +27,10 @@ CREDIT_PAGE = 1
 
 _EMAIL_RE = re.compile(
     r"mailto:([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})",
+    re.IGNORECASE,
+)
+_YT_WATCH_RE = re.compile(
+    r"(?:youtube\.com/watch\?(?:[^#]*&)?v=|youtu\.be/)([\w-]{6,})",
     re.IGNORECASE,
 )
 
@@ -83,9 +90,25 @@ _SOCIAL_HOSTS: tuple[tuple[str, tuple[str, ...]], ...] = (
 )
 
 
+def _youtube_rank(url: str) -> int:
+    """Lower is better — prefer channel/handle URLs over watch links."""
+    low = (url or "").lower()
+    if "/@" in low or "/channel/" in low or "/c/" in low or "/user/" in low:
+        return 0
+    if "watch?" in low or "youtu.be/" in low or "/shorts/" in low:
+        return 2
+    return 1
+
+
 def _social_accounts(social_links: list[Any], links: list[dict[str, Any]]) -> dict[str, str]:
-    """Resolve well-known platforms to URLs (SC-parity: instagram/tiktok/... keys)."""
+    """HTTP social profile URLs for cross-endpoint joins (no email/phone).
+
+    ``socials[]`` keeps the full icon list (including EMAIL_ADDRESS). Email is
+    also exposed as top-level ``email`` — it is intentionally omitted here so
+    clients can pipe values into TikTok/Instagram/Spotify/… endpoints.
+    """
     accounts: dict[str, str] = {}
+    ranks: dict[str, int] = {}
     candidates: list[str] = []
     for item in social_links:
         if not isinstance(item, dict):
@@ -104,9 +127,14 @@ def _social_accounts(social_links: list[Any], links: list[dict[str, Any]]) -> di
             continue
         low = url.lower()
         for key, hosts in _SOCIAL_HOSTS:
-            if key not in accounts and any(h in low for h in hosts):
+            if not any(h in low for h in hosts):
+                continue
+            rank = _youtube_rank(url) if key == "youtube" else 1
+            prev = ranks.get(key)
+            if prev is None or rank < prev:
                 accounts[key] = url
-                break
+                ranks[key] = rank
+            break
     return accounts
 
 
@@ -154,28 +182,70 @@ def _link_thumbnail(item: dict[str, Any]) -> str | None:
     thumb = safe_str(modifiers.get("thumbnailUrl"))
     if thumb:
         return thumb
-    metadata = item.get("metadata") if isinstance(item.get("metadata"), dict) else {}
-    return safe_str(metadata.get("thumbnail") or metadata.get("image"))
+    for bag_name in ("metadata", "metaData", "context"):
+        bag = item.get(bag_name) if isinstance(item.get(bag_name), dict) else {}
+        thumb = safe_str(bag.get("thumbnail") or bag.get("image") or bag.get("imageUrl"))
+        if thumb:
+            return thumb
+    return None
+
+
+def _product_destination(item: dict[str, Any]) -> str | None:
+    """Best outbound URL for a PRODUCT row (Linktree often leaves url=\"\")."""
+    for key in ("url", "link"):
+        u = safe_str(item.get(key))
+        if u:
+            return u
+    for bag_name in ("context", "metaData", "metadata"):
+        bag = item.get(bag_name)
+        if not isinstance(bag, dict):
+            continue
+        products = bag.get("products")
+        if not isinstance(products, list):
+            continue
+        shop_urls: list[str] = []
+        product_urls: list[str] = []
+        for product in products:
+            if not isinstance(product, dict):
+                continue
+            shop = safe_str(product.get("shopUrl"))
+            if shop:
+                shop_urls.append(shop)
+            dest = safe_str(product.get("url") or product.get("cartDeepLinkUrl"))
+            if dest:
+                product_urls.append(dest)
+        if shop_urls:
+            # Prefer the storefront (stable join) over empty per-SKU urls.
+            return shop_urls[0]
+        if product_urls:
+            return product_urls[0]
+    return None
 
 
 def _normalize_link(item: dict[str, Any], *, parent_id: str | None = None) -> dict[str, Any]:
     raw_id = item.get("id")
     link_id = (safe_str(raw_id) or str(raw_id)) if raw_id is not None else None
+    link_type = safe_str(item.get("type") or item.get("linkType"))
     link: dict[str, Any] = {
         "title": safe_str(item.get("title")),
-        "type": safe_str(item.get("type") or item.get("linkType")),
+        "type": link_type,
     }
     if link_id:
         link["id"] = link_id
+
     link_url = safe_str(item.get("url") or item.get("link"))
+    if not link_url and (link_type or "").upper() == "PRODUCT":
+        link_url = _product_destination(item)
+    # Always emit url on links — null when Linktree exposes no destination
+    # (PRODUCT rows often have url:"" but shopUrl on nested products).
+    link["url"] = link_url
+
     thumb = _link_thumbnail(item)
-    if link_url:
-        link["url"] = link_url
     if thumb:
         link["thumbnail"] = thumb
     if parent_id:
         link["parentId"] = parent_id
-    return {k: v for k, v in link.items() if v is not None}
+    return {k: v for k, v in link.items() if v is not None or k == "url"}
 
 
 def _extract_email(social_list: list[Any], page_html: str) -> str | None:
@@ -204,7 +274,6 @@ def _clean_socials(social_list: list[Any]) -> list[dict[str, Any]]:
             for k, v in item.items()
             if not (k == "position" and v in (0, None))
         }
-        # Keep type/url; drop empty noise.
         out: dict[str, Any] = {}
         if row.get("type") is not None:
             out["type"] = safe_str(row.get("type")) or row.get("type")
@@ -222,7 +291,6 @@ def _build_link_tree(raw_links: list[Any]) -> tuple[list[dict[str, Any]], int]:
     by_parent: dict[str | None, list[dict[str, Any]]] = {}
     for item in items:
         pid = _parent_id(item)
-        # Orphans (missing parent row) surface at the root so links aren't dropped.
         if pid is not None and pid not in ids:
             pid = None
         by_parent.setdefault(pid, []).append(item)
@@ -237,6 +305,15 @@ def _build_link_tree(raw_links: list[Any]) -> tuple[list[dict[str, Any]], int]:
 
     roots = [build(item, None) for item in by_parent.get(None, [])]
     return roots, len(items)
+
+
+def _as_string_id(value: Any) -> str | None:
+    if value is None:
+        return None
+    text = safe_str(value)
+    if text:
+        return text
+    return str(value)
 
 
 def _normalize(data: dict[str, Any], url: str, page_html: str = "") -> dict[str, Any]:
@@ -268,13 +345,16 @@ def _normalize(data: dict[str, Any], url: str, page_html: str = "") -> dict[str,
     social_list = socials if isinstance(socials, list) else []
     cleaned_socials = _clean_socials(social_list)
     email = _extract_email(social_list, page_html)
+    display = _display_name(account, username)
 
     out: dict[str, Any] = {
         "platform": "linktree",
         "url": safe_str(url),
-        "id": account.get("id"),
+        "id": _as_string_id(account.get("id")),
         "username": username,
-        "name": _display_name(account, username),
+        "handle": username,
+        "displayName": display,
+        "name": display,  # deprecated alias of displayName
         "description": safe_str(account.get("description") or account.get("bio")),
         "avatar": safe_str(
             account.get("avatarUrl")
@@ -288,24 +368,111 @@ def _normalize(data: dict[str, Any], url: str, page_html: str = "") -> dict[str,
         "email": email,
         "linkCount": total_links,
         "links": normalized_links,
-        # ``socials`` = icon list from Linktree (incl. EMAIL_ADDRESS).
-        # ``socialAccounts`` = camelCase URL map for lookups (instagram/tiktok/…).
+        # socials = Linktree icon list (incl. EMAIL_ADDRESS mailto).
+        # socialAccounts = HTTP profile URLs for catalog joins (no email).
         "socials": cleaned_socials,
         "socialAccounts": _social_accounts(social_list, normalized_links),
     }
-    for key in ("name", "description", "avatar", "timezone", "verticals", "linkPlatforms", "email"):
+    stamp_profile_core(out, platform="linktree")
+    for key in (
+        "displayName",
+        "name",
+        "description",
+        "bio",
+        "avatar",
+        "timezone",
+        "verticals",
+        "linkPlatforms",
+        "email",
+        "handle",
+    ):
         if out.get(key) in (None, "", []):
             out.pop(key, None)
     return out
 
 
-@router.get("/page", summary="Linktree page")
+async def _resolve_youtube_channel(url: str) -> str:
+    """Turn a watch/shorts URL into the creator channel via YouTube oEmbed."""
+    if not url:
+        return url
+    low = url.lower()
+    if "/@" in low or "/channel/" in low or "/c/" in low or "/user/" in low:
+        return url
+    if not _YT_WATCH_RE.search(url) and "youtube.com" not in low and "youtu.be" not in low:
+        return url
+    try:
+        async with httpx.AsyncClient(timeout=12.0, follow_redirects=True, headers=DEFAULT_HEADERS) as client:
+            resp = await client.get(
+                "https://www.youtube.com/oembed",
+                params={"url": url, "format": "json"},
+            )
+        if resp.status_code == 200:
+            author = safe_str((resp.json() or {}).get("author_url"))
+            if author:
+                return author
+    except (httpx.HTTPError, ValueError, TypeError):
+        pass
+    return url
+
+
+async def _enrich_social_accounts(data: dict[str, Any]) -> None:
+    accounts = data.get("socialAccounts")
+    if not isinstance(accounts, dict):
+        return
+    yt = accounts.get("youtube")
+    if isinstance(yt, str) and yt:
+        accounts["youtube"] = await _resolve_youtube_channel(yt)
+
+
+async def _fetch_page_html(profile: str) -> tuple[str, str]:
+    """Return (final_url, html). Prefer direct; Decodo when blocked."""
+    headers = {
+        **DEFAULT_HEADERS,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Referer": "https://linktr.ee/",
+    }
+    async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
+        resp = await client.get(profile)
+    if resp.status_code == 404:
+        raise HTTPException(status_code=404, detail="Linktree profile not found")
+    if resp.status_code < 400 and "__NEXT_DATA__" in (resp.text or ""):
+        return str(resp.url), resp.text
+
+    if decodo_fetch.enabled():
+        got = await decodo_fetch.fetch_url(profile, timeout=60.0)
+        if got and got[0] == 200 and got[1]:
+            body = got[1] if isinstance(got[1], str) else got[1].decode("utf-8", "ignore")
+            if "__NEXT_DATA__" in body:
+                return profile, body
+
+    if resp.status_code >= 400:
+        raise HTTPException(status_code=502, detail="Linktree lookup failed")
+    raise HTTPException(status_code=404, detail="Linktree profile not found")
+
+
+@router.get(
+    "/page",
+    summary="Linktree page",
+    description=(
+        "Public Linktree page as clean JSON — typed links (incl. PRODUCT destinations), "
+        "socials[] + socialAccounts{} for catalog joins, email, verticals. "
+        "YouTube watch URLs in socialAccounts are resolved to the channel via oEmbed."
+    ),
+)
 async def linktree_page(
     url: str = Query(..., description="Linktree profile URL or username"),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    cache: bool = Query(
+        False,
+        description=(
+            "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. "
+            "Prefer cacheMaxAge when you need 1d–30d freshness control."
+        ),
+    ),
+    cacheMaxAge: str | None = Query(None, description=CACHE_MAX_AGE_DESC),
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile = _profile_url(url)
+    use_cache, ttl = resolve_cache_options(cache, cacheMaxAge)
     async with billed_call(
         caller=caller,
         endpoint="/v1/linktree/page",
@@ -315,22 +482,19 @@ async def linktree_page(
     ) as ctx:
 
         async def _run() -> dict[str, Any]:
-            headers = {
-                **DEFAULT_HEADERS,
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "Referer": "https://linktr.ee/",
-            }
-            async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
-                resp = await client.get(profile)
-            if resp.status_code == 404:
-                raise HTTPException(status_code=404, detail="Linktree profile not found")
-            if resp.status_code >= 400:
-                raise HTTPException(status_code=502, detail="Linktree lookup failed")
-            data = _normalize(_find_next_data(resp.text), str(resp.url), resp.text)
+            final_url, page_html = await _fetch_page_html(profile)
+            data = _normalize(_find_next_data(page_html), final_url, page_html)
+            await _enrich_social_accounts(data)
             if not data.get("links") and not data.get("username"):
                 raise HTTPException(status_code=404, detail="Linktree profile not found")
             return data
 
-        # bump cache key: tree links + email/verticals/platforms
-        data = await cached_or_run("linktree.page", {"url": profile, "v": 4}, _run, ctx, use_cache=cache)
+        data = await cached_or_run(
+            "linktree.page",
+            {"url": profile, "v": 5, "cacheMaxAge": cacheMaxAge},
+            _run,
+            ctx,
+            use_cache=use_cache,
+            ttl=ttl,
+        )
         return ApiResponse(data=data)

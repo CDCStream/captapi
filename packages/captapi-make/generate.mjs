@@ -231,7 +231,7 @@ writeText(
   "README.md",
   `# Captapi for Make.com
 
-Structured social media data from 27 platforms — YouTube, TikTok, Instagram,
+Structured social media data from 32 platforms — YouTube, TikTok, Instagram,
 Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble,
 GitHub, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth
 Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop,

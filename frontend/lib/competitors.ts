@@ -82,7 +82,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     focus: "Transcript extractors and comment viewers",
     platforms: "YouTube, TikTok, Instagram",
     intro:
-      "SocialKit offers transcript extractors and comment viewers. Captapi packages the same capabilities into one developer-first REST API across 27 platforms, with summaries, search, profiles, ad intelligence, commerce data, and engagement metrics included.",
+      "SocialKit offers transcript extractors and comment viewers. Captapi packages the same capabilities into one developer-first REST API across 32 platforms, with summaries, search, profiles, ad intelligence, commerce data, and engagement metrics included.",
     transcripts: true,
     summaries: "varies",
     comments: true,
@@ -150,7 +150,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     freeTier: "Varies",
     pricing: "Subscription",
     edge: [
-      "27 platforms in one API — not TikTok only",
+      "32 platforms in one API — not TikTok only",
       "Transcripts, AI summaries, comments and video details from a single key",
       "100 free credits on signup, no credit card",
       "Free public tools you can try instantly",
@@ -159,7 +159,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     faqs: [
       {
         q: "Is Captapi a good TikAPI alternative?",
-        a: "Yes, especially if you need more than TikTok. Captapi covers 27 platforms with transcripts, summaries, comments, details, search, profiles, ad intelligence, and commerce data behind one REST API.",
+        a: "Yes, especially if you need more than TikTok. Captapi covers 32 platforms with transcripts, summaries, comments, details, search, profiles, ad intelligence, and commerce data behind one REST API.",
       },
     ],
   },

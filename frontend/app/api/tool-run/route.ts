@@ -17,7 +17,6 @@ function useCacheByDefault(endpoint: string): boolean {
 }
 
 const ANON_COOKIE = "captapi_tool_free";
-const NO_WELCOME_COOKIE = "captapi_no_welcome";
 const ANON_DAILY_LIMIT = 3;
 const SIGNUP_FROM_TOOLS = "/signup?from=tools";
 
@@ -76,7 +75,6 @@ export async function POST(req: Request) {
       },
       { status: 429 },
     );
-    blocked.cookies.set(NO_WELCOME_COOKIE, "1", cookieOpts());
     return blocked;
   }
 
@@ -139,9 +137,6 @@ export async function POST(req: Request) {
     response.cookies.set(ANON_COOKIE, String(next), cookieOpts());
     // Migrate away from the older TikTok-only cookie name.
     response.cookies.set("captapi_tool_tt", "", { path: "/", maxAge: 0 });
-    // Any free-tool use → no welcome bonus on later signup (farmers
-    // were clearing the limit cookie / skipping ?from=tools).
-    response.cookies.set(NO_WELCOME_COOKIE, "1", cookieOpts());
     response.headers.set("X-Captapi-Free-Tries-Left", String(Math.max(0, ANON_DAILY_LIMIT - next)));
     return response
   } catch {

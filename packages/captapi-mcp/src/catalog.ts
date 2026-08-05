@@ -208,6 +208,15 @@ const TIKTOK: Omit<Endpoint, "platform">[] = [
   { tool: "tiktok_song_details", name: "TikTok Song Details", path: "/v1/tiktok/song-details", credits: 1, summary: "Sound metadata — usageCount, artists[], commerce rights, chorus timing; 1 credit native.", params: [url(TT_MUSIC)] },
   { tool: "tiktok_trending_feed", name: "TikTok Trending Feed", path: "/v1/tiktok/trending-feed", credits: 2, summary: "TikTok trending (For You) videos by region.", params: [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code, e.g. US, GB, TR. Default US." }, limit(20, 200)] },
   { tool: "tiktok_popular_hashtags", name: "TikTok Popular Hashtags", path: "/v1/tiktok/popular-hashtags", credits: 2, summary: "TikTok Creative Center hashtag chart (population videoCount).", params: [{ name: "query", type: "string", required: false, description: "Optional niche seed for related-tag co-occurrence. Omit/trending for Creative Center chart." }, limit(20, 100)] },
+  { tool: "tiktok_popular_songs", name: "TikTok Popular Songs", path: "/v1/tiktok/popular-songs", credits: 2, summary: "Creative Center popular/surging sounds — rankDiff, trend[], commercialMusic. Flat 2 credits.", params: [
+    { name: "country", type: "string", required: false, description: "Two-letter ISO country. Default US." },
+    { name: "period", type: "string", required: false, description: "7, 30, or 120 days. Default 7." },
+    { name: "page", type: "number", required: false, description: "Page number (default 1)." },
+    { name: "rankType", type: "string", required: false, description: "popular | surging. Default popular." },
+    { name: "newOnBoard", type: "boolean", required: false, description: "Only sounds newly on the Top 100." },
+    { name: "commercialMusic", type: "boolean", required: false, description: "Only Commercial Music Library-cleared sounds." },
+    limitFlat(20, 20, 2),
+  ] },
   { tool: "tiktok_live", name: "TikTok Live", path: "/v1/tiktok/live", credits: 1, summary: "isLive/status, creator.id/secUid, streamQualities with flv/hls/cmaf/dash. Flat 1 credit.", params: [url(TT_PROFILE)] },
   { tool: "tiktok_live_info", name: "TikTok Live Info", path: "/v1/tiktok/live-info", credits: 7, summary: "True alias of /live (same payload) at 7 credits for SC path compatibility.", params: [url(TT_PROFILE)] },
   { tool: "tiktok_popular_creators", name: "TikTok Popular Creators", path: "/v1/tiktok/popular-creators", credits: 28, summary: "Popular TikTok creators by country and ranking mode.", params: [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, { name: "sort", type: "string", required: false, description: "follower, engagement, or popularity. Default follower." }, { name: "follower_count", type: "string", required: false, description: "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m." }, limit(20, 100)] },
@@ -233,6 +242,15 @@ const INSTAGRAM: Omit<Endpoint, "platform">[] = [
   { tool: "instagram_hashtag_search", name: "Instagram Hashtag Search", path: "/v1/instagram/hashtag-search", credits: 2, summary: "Search Instagram posts by hashtag (native grid).", params: [q("Hashtag without the # (min 2 chars)."), limit(20, 200), { name: "mediaType", type: "string", required: false, description: "all (default) or reels — return only Reels/clips when set to reels." }] },
   { tool: "instagram_profile_search", name: "Instagram Profile Search", path: "/v1/instagram/profile-search", credits: 1, summary: "Resolve a brand or @handle to one Instagram profile with id, bio, links, and stats (not niche discovery). Flat 1 credit.", params: [q()] },
   { tool: "instagram_embed", name: "Instagram Embed HTML", path: "/v1/instagram/embed", credits: 1, summary: "Embed HTML for an Instagram post, reel, or profile.", params: [url("Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/.")] },
+  { tool: "instagram_highlights", name: "Instagram Highlights", path: "/v1/instagram/highlights", credits: 1, summary: "Persistent Story Highlight albums for a public profile — id, title, cover, owner. Flat 1 credit.", params: [
+    { name: "url", type: "string", required: false, description: "Instagram profile URL, @handle, or username. Omit when userId is set." },
+    { name: "userId", type: "string", required: false, description: "Numeric Instagram user ID. Prefer when known — skips handle→ID resolve." },
+    cacheParam(),
+  ] },
+  { tool: "instagram_highlights_details", name: "Instagram Highlight Details", path: "/v1/instagram/highlights-details", credits: 1, summary: "Items inside one Instagram Story Highlight album — media URLs, type, takenAt. Flat 1 credit.", params: [
+    { name: "id", type: "string", required: true, description: "Highlight id from /v1/instagram/highlights (with or without highlight: prefix)." },
+    cacheParam(),
+  ] },
   { tool: "instagram_basic_profile", name: "Instagram Basic Profile", path: "/v1/instagram/basic-profile", credits: 1, summary: "Instagram profile by user ID/@handle — camelCase (followers, externalUrl, businessAddress).", params: [{ name: "userId", type: "string", required: true, description: "Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically." }] },
 ];
 
@@ -555,7 +573,7 @@ const KWAI: Omit<Endpoint, "platform">[] = [
 ];
 
 const KOMI: Omit<Endpoint, "platform">[] = [
-  { tool: "komi_page", name: "Komi Page", path: "/v1/komi/page", credits: 4, summary: "Public Komi page links and profile metadata.", params: [url(KOMI_PAGE)] },
+  { tool: "komi_page", name: "Komi Page", path: "/v1/komi/page", credits: 1, summary: "Komi page — id/displayName/bio, socials{} (incl. website), content LINK/PRODUCT rows with price/currency. Flat 1 credit.", params: [url(KOMI_PAGE), cacheParam()] },
 ];
 
 const PILLAR: Omit<Endpoint, "platform">[] = [

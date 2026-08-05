@@ -183,7 +183,12 @@ export default async function ApiDetailPage({
         <script
           key={i}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }}
+          // Escape U+003C so a description containing "</script>" cannot
+          // terminate this inline script and leave the page body empty for
+          // crawlers / AI agents that only see the SSR HTML.
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(s).replace(/</g, "\\u003c"),
+          }}
         />
       ))}
 

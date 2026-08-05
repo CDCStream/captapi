@@ -1,8 +1,8 @@
 # @captapi/mcp
 
 Official **Captapi** MCP server. Give Claude, Cursor, VS Code, and any
-MCP-compatible AI agent direct access to **170 social and account endpoints**
-across 27 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads,
+MCP-compatible AI agent direct access to **177 social and account endpoints**
+across 32 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads,
 Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop) —
 transcripts, summaries, comments, channel stats, search, bulk lists, and more.
 

@@ -870,10 +870,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Optional topic seed for the Shorts reel sequence (not a keyword search). Omit for the default trending/recommendation feed — same surface as ScrapeCreators GET /v1/youtube/shorts/trending.",
+              "description": "Optional topic seed for the Shorts recommendation sequence (not a keyword search). Values like trending/shorts are ignored — omit for the default reel feed. Same surface as ScrapeCreators GET /v1/youtube/shorts/trending.",
               "title": "Q"
             },
-            "description": "Optional topic seed for the Shorts reel sequence (not a keyword search). Omit for the default trending/recommendation feed — same surface as ScrapeCreators GET /v1/youtube/shorts/trending."
+            "description": "Optional topic seed for the Shorts recommendation sequence (not a keyword search). Values like trending/shorts are ignored — omit for the default reel feed. Same surface as ScrapeCreators GET /v1/youtube/shorts/trending."
           },
           {
             "name": "limit",
@@ -4258,10 +4258,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug",
+              "description": "TikTok username, @handle, or profile URL, e.g. jeffreestar or https://www.tiktok.com/@jeffreestar",
               "title": "Username"
             },
-            "description": "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug"
+            "description": "TikTok username, @handle, or profile URL, e.g. jeffreestar or https://www.tiktok.com/@jeffreestar"
           },
           {
             "name": "limit",
@@ -4316,7 +4316,7 @@
           "Truth Social"
         ],
         "summary": "Truth Social profile",
-        "description": "Public Truth Social profile (Mastodon-compatible account fields). Important: as of late 2025 Truth Social typically only exposes public profiles/posts for prominent accounts without login — most other accounts require auth and will 404 here. Flat 1 credit.",
+        "description": "Public Truth Social profile (Mastodon-compatible account fields). As of late 2025, Truth Social only lets you view public profiles/posts of prominent users (e.g. Trump, Vance) without authentication; most other accounts require auth and will 404 here. Flat 1 credit.",
         "operationId": "profile_v1_truth_social_profile_get",
         "security": [
           {
@@ -4376,6 +4376,7 @@
           "Truth Social"
         ],
         "summary": "Truth Social user posts (cursor-paginated)",
+        "description": "Recent public Truth Social posts for a profile (cursor via Mastodon max_id). Full author{} once at the top; each post keeps a slim author {id,username,displayName,avatar,verified}. Post text preserves real URLs (span soft-wraps are not turned into spaces) and links[] lists authoritative <a href> targets. As of late 2025, Truth Social only lets you view public profiles/posts of prominent users (e.g. Trump, Vance) without authentication; most other accounts require auth and will 404 here. Native path is flat 2 credits; Apify fallback ~0.85/post (min 2).",
         "operationId": "user_posts_v1_truth_social_user_posts_get",
         "security": [
           {
@@ -4402,9 +4403,11 @@
               "type": "integer",
               "maximum": 80,
               "minimum": 1,
+              "description": "Max posts to return (default 20, max 80). Capped at 80 because Truth Social's statuses page size is ~40 and larger asks still page via cursor.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "Max posts to return (default 20, max 80). Capped at 80 because Truth Social's statuses page size is ~40 and larger asks still page via cursor."
           },
           {
             "name": "cursor",
@@ -4465,6 +4468,7 @@
           "Truth Social"
         ],
         "summary": "Truth Social post",
+        "description": "Public Truth Social post (text, author, engagement, media). As of late 2025, Truth Social only lets you view public profiles/posts of prominent users (e.g. Trump, Vance) without authentication; most other accounts require auth and will 404 here. Flat 1 credit.",
         "operationId": "post_v1_truth_social_post_get",
         "security": [
           {
@@ -5399,7 +5403,7 @@
           "Instagram"
         ],
         "summary": "Instagram trending Reels from /reels",
-        "description": "Public Instagram Reels surface — videos only, flat 1 credit.\n\nInstagram only returns a small overlapping batch per request; call again\nfor more and expect some duplicates (same behaviour as the /reels page).",
+        "description": "Snapshot-backed trending Reels — videos only, flat 1 credit.\n\nPrefer reels-search when you need a live keyword scrape. This endpoint\nserves native /reels when available, otherwise any-age Apify snapshots\n(never Explore photos). Cold countries warm in the background (~10 min).",
         "operationId": "instagram_trending_reels_v1_instagram_trending_reels_get",
         "security": [
           {
@@ -7006,6 +7010,60 @@
               "title": "Q"
             },
             "description": "Topic and/or place, e.g. 'comedy Chicago'"
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional city/place filter tokens required in title/venue (e.g. Chicago).",
+              "title": "Location"
+            },
+            "description": "Optional city/place filter tokens required in title/venue (e.g. Chicago)."
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Inclusive local start date filter YYYY-MM-DD.",
+              "title": "From"
+            },
+            "description": "Inclusive local start date filter YYYY-MM-DD."
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Inclusive local start date filter YYYY-MM-DD.",
+              "title": "To"
+            },
+            "description": "Inclusive local start date filter YYYY-MM-DD."
           },
           {
             "name": "limit",
@@ -10873,7 +10931,7 @@
           "Bluesky"
         ],
         "summary": "Bluesky profile details & stats",
-        "description": "Public Bluesky profile via AT Protocol app.bsky.actor.getProfile — handle, did, display name, bio, follower/following/post counts, avatar, banner, plus verified/verification{}, moderation labels[], and associated{lists, feedgens, starterPacks, labeler}. Flat 1 credit.",
+        "description": "Public Bluesky profile via AT Protocol app.bsky.actor.getProfile. Canonical profile core (displayName, avatar, postCount, …) plus deprecated name/posts aliases for one release; did, verification{} with issuer DIDs resolved to handle/display name, moderation labels[], associated{}, pinnedPost, and joinedViaStarterPack when present. Accepts cache / cacheMaxAge. Flat 1 credit.",
         "operationId": "bluesky_profile_v1_bluesky_profile_get",
         "security": [
           {
@@ -10903,6 +10961,24 @@
               "title": "Cache"
             },
             "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits."
           }
         ],
         "responses": {
@@ -10932,7 +11008,8 @@
         "tags": [
           "Bluesky"
         ],
-        "summary": "List recent posts from a Bluesky profile (cursor-paginated)",
+        "summary": "Author feed from a Bluesky profile (posts + reposts, cursor-paginated)",
+        "description": "Public author feed via app.bsky.feed.getAuthorFeed — the account's posts and reposts. Each row has isRepost / repostedBy / repostedAt when the item is a repost (author is then the original poster). Pass includeReposts=false to drop reposts. filter maps to Bluesky's feed filter (replies/media/threads — does not remove reposts). nextCursor is Bluesky's opaque cursor — pass it through; do not derive from publishedAt. ~0.1 credits per returned row.",
         "operationId": "bluesky_user_posts_v1_bluesky_user_posts_get",
         "security": [
           {
@@ -10976,10 +11053,40 @@
                   "type": "null"
                 }
               ],
-              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "description": "Opaque pagination cursor from the previous response's nextCursor. Leave empty for the first page. Do not invent a cursor from publishedAt — the feed is ordered by feed time (reposts sort by repost time).",
               "title": "Cursor"
             },
-            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+            "description": "Opaque pagination cursor from the previous response's nextCursor. Leave empty for the first page. Do not invent a cursor from publishedAt — the feed is ordered by feed time (reposts sort by repost time)."
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Bluesky getAuthorFeed filter: posts_with_replies (default), posts_no_replies, posts_with_media, posts_and_author_threads, or posts_with_video. Controls replies/media/threads — not reposts. Use includeReposts=false to drop reposts.",
+              "title": "Filter"
+            },
+            "description": "Bluesky getAuthorFeed filter: posts_with_replies (default), posts_no_replies, posts_with_media, posts_and_author_threads, or posts_with_video. Controls replies/media/threads — not reposts. Use includeReposts=false to drop reposts."
+          },
+          {
+            "name": "includeReposts",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "When false, omit feed items that are reposts (reasonRepost). Default true — reposts are included and marked with isRepost / repostedBy / repostedAt.",
+              "default": true,
+              "title": "Includereposts"
+            },
+            "description": "When false, omit feed items that are reposts (reasonRepost). Default true — reposts are included and marked with isRepost / repostedBy / repostedAt."
           },
           {
             "name": "cache",
@@ -11021,7 +11128,8 @@
         "tags": [
           "Bluesky"
         ],
-        "summary": "Bluesky post metadata + engagement",
+        "summary": "Bluesky post + reply thread (getPostThread)",
+        "description": "Public post thread via app.bsky.feed.getPostThread — not a duplicate of a user-posts row. Returns the post with rich author (verification/labels/createdAt), facet-derived links/mentions/hashtags, post labels + langs, parentUri/rootUri, and nested replies[] (depth, default 1). Flat 1 credit.",
         "operationId": "bluesky_post_details_v1_bluesky_post_details_get",
         "security": [
           {
@@ -11035,10 +11143,24 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Bluesky post URL",
+              "description": "Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY",
               "title": "Url"
             },
-            "description": "Bluesky post URL"
+            "description": "Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY"
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 6,
+              "minimum": 0,
+              "description": "How many reply levels to include under the post (0 = post only, no replies[]. Default 1. Max 6 — Bluesky getPostThread depth).",
+              "default": 1,
+              "title": "Depth"
+            },
+            "description": "How many reply levels to include under the post (0 = post only, no replies[]. Default 1. Max 6 — Bluesky getPostThread depth)."
           },
           {
             "name": "cache",
@@ -12110,7 +12232,7 @@
           "Kick"
         ],
         "summary": "Kick clip metadata",
-        "description": "Fetch a Kick clip by URL, or list recent clips for a channel. Clip URLs return a single enriched clip (creator vs channel, maturity, VOD). Channel URLs/usernames return clips[] without duplicating the first item as clip.",
+        "description": "Two modes: Kick clip URL → {channelUrl, clip}; channel URL/@username → {channelUrl, totalReturned, clips[]} (no top-level clip, no cursor). Clip mode includes creator vs channel, maturity, VOD url/urlWithOffset, and HLS playback (videoType=hls).",
         "operationId": "kick_clip_v1_kick_clip_get",
         "security": [
           {
@@ -12124,10 +12246,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Kick clip URL, channel URL, or channel username",
+              "description": "Kick clip URL for one enriched clip, or channel URL/@username for recent clips[]. Clip example: https://kick.com/{channel}/clips/clip_…",
               "title": "Url"
             },
-            "description": "Kick clip URL, channel URL, or channel username"
+            "description": "Kick clip URL for one enriched clip, or channel URL/@username for recent clips[]. Clip example: https://kick.com/{channel}/clips/clip_…"
           },
           {
             "name": "limit",
@@ -12137,11 +12259,11 @@
               "type": "integer",
               "maximum": 100,
               "minimum": 1,
-              "description": "How many recent clips to return when a channel is passed",
+              "description": "Channel mode only — how many recent clips to return (default 30, max 100). Ignored for clip URLs.",
               "default": 30,
               "title": "Limit"
             },
-            "description": "How many recent clips to return when a channel is passed"
+            "description": "Channel mode only — how many recent clips to return (default 30, max 100). Ignored for clip URLs."
           },
           {
             "name": "cache",
@@ -12149,11 +12271,29 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits."
           }
         ],
         "responses": {
@@ -12374,6 +12514,7 @@
           "Creator Pages"
         ],
         "summary": "Komi page",
+        "description": "Public Komi page as clean JSON — identity (id, displayName, bio), socials{} (incl. website), and content links[] with id/thumbnail/order/visible plus price/currency on PRODUCT rows. Flat 1 credit (direct Komi JSON APIs).",
         "operationId": "komi_page_v1_komi_page_get",
         "security": [
           {
@@ -12387,10 +12528,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Komi page URL or username",
+              "description": "Komi page URL or username (komi.io/user or user.komi.io)",
               "title": "Url"
             },
-            "description": "Komi page URL or username"
+            "description": "Komi page URL or username (komi.io/user or user.komi.io)"
           },
           {
             "name": "cache",
@@ -12398,11 +12539,29 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits."
           }
         ],
         "responses": {
@@ -12457,11 +12616,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
           }
         ],
         "responses": {
@@ -12516,11 +12675,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
           }
         ],
         "responses": {
@@ -12575,11 +12734,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
           }
         ],
         "responses": {
@@ -12634,11 +12793,29 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL. Envelope includes cached + cachedAt.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL. Envelope includes cached + cachedAt."
           }
         ],
         "responses": {
@@ -12695,9 +12872,11 @@
               "type": "integer",
               "maximum": 100,
               "minimum": 1,
+              "description": "Max items to return (default 20, max 100). Flat 2 credits per call. Twitch's anonymous surface only exposes the first 100 matching videos — deeper history is not available.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "Max items to return (default 20, max 100). Flat 2 credits per call. Twitch's anonymous surface only exposes the first 100 matching videos — deeper history is not available."
           },
           {
             "name": "filterBy",
@@ -12712,10 +12891,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Video type filter: ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types.",
+              "description": "Video type filter: ARCHIVE | HIGHLIGHT | UPLOAD. Omit (or null) for all types — there is no default filter.",
               "title": "Filterby"
             },
-            "description": "Video type filter: ARCHIVE | HIGHLIGHT | UPLOAD. Omit for all types."
+            "description": "Video type filter: ARCHIVE | HIGHLIGHT | UPLOAD. Omit (or null) for all types — there is no default filter."
           },
           {
             "name": "sortBy",
@@ -12742,10 +12921,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Pagination cursor (offset into the first 100 matching videos). Leave empty for the first page; then pass nextCursor from the previous response.",
+              "description": "Opaque pagination cursor = the last video id from the previous page (nextCursor). Leave empty for the first page. Pages within the first 100 matching videos only — Twitch rejects GQL after-cursors on this surface.",
               "title": "Cursor"
             },
-            "description": "Pagination cursor (offset into the first 100 matching videos). Leave empty for the first page; then pass nextCursor from the previous response."
+            "description": "Opaque pagination cursor = the last video id from the previous page (nextCursor). Leave empty for the first page. Pages within the first 100 matching videos only — Twitch rejects GQL after-cursors on this surface."
           },
           {
             "name": "cache",
@@ -12807,6 +12986,20 @@
             "description": "Twitch channel URL or username"
           },
           {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Max schedule segments to return (default 50, max 100). Flat 1 credit per call.",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Max schedule segments to return (default 50, max 100). Flat 1 credit per call."
+          },
+          {
             "name": "cache",
             "in": "query",
             "required": false,
@@ -12847,7 +13040,7 @@
           "Twitch"
         ],
         "summary": "Twitch clip metadata",
-        "description": "Fetch a Twitch clip as clean JSON — curator vs channel (broadcaster), followers/isPartner, language, multi-quality videoQualities, and playbackAccessToken.expires. Not the raw GraphQL envelope.",
+        "description": "Fetch a Twitch clip as clean JSON — curator vs channel (broadcaster), followers/isPartner, lowercase language, multi-quality videoQualities, signedVideoUrl, and playbackAccessToken.expiresAt. Not the raw GraphQL envelope.",
         "operationId": "clip_v1_twitch_clip_get",
         "security": [
           {
@@ -12872,11 +13065,29 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL. Envelope includes cached + cachedAt.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL. Envelope includes cached + cachedAt."
           }
         ],
         "responses": {
@@ -13517,6 +13728,7 @@
           "Linktree"
         ],
         "summary": "Linktree page",
+        "description": "Public Linktree page as clean JSON — typed links (incl. PRODUCT destinations), socials[] + socialAccounts{} for catalog joins, email, verticals. YouTube watch URLs in socialAccounts are resolved to the channel via oEmbed.",
         "operationId": "linktree_page_v1_linktree_page_get",
         "security": [
           {
@@ -13541,11 +13753,29 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control.",
               "default": false,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control."
+          },
+          {
+            "name": "cacheMaxAge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits.",
+              "title": "Cachemaxage"
+            },
+            "description": "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope includes cached + cachedAt on hits."
           }
         ],
         "responses": {

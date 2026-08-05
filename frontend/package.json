@@ -9,6 +9,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "lint:field-descs": "tsx ../scripts/lint-field-descs.mts",
+    "lint:docs-examples": "tsx ../scripts/lint-docs-examples.mts",
+    "audit:docs-ssr": "tsx ../scripts/audit-docs-ssr.mts",
     "check:parity": "tsx ../scripts/check-catalog-parity.mts",
     "audit:credits": "tsx ../scripts/audit-endpoint-credits.mts",
     "sync:api-surface": "tsx ../scripts/sync-api-surface.mts"

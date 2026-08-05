@@ -23,7 +23,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -51,7 +51,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -73,7 +73,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -107,7 +107,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -117,7 +117,7 @@
     "name": "YouTube Channel Details",
     "path": "/v1/youtube/channel-details",
     "credits": 1,
-    "summary": "Channel info & numeric stats for a YouTube channel — plus handle, verified, links, email, and SEO tags when available.",
+    "summary": "Channel info & numeric stats for a YouTube channel \u2014 plus handle, verified, links, email, and SEO tags when available.",
     "params": [
       {
         "name": "url",
@@ -129,7 +129,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -139,7 +139,7 @@
     "name": "YouTube Search",
     "path": "/v1/youtube/search",
     "credits": 2,
-    "summary": "YouTube search — typed hits, ids, canonical URLs, cursor pagination, filters.",
+    "summary": "YouTube search \u2014 typed hits, ids, canonical URLs, cursor pagination, filters.",
     "params": [
       {
         "name": "q",
@@ -193,7 +193,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -227,7 +227,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -261,7 +261,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -295,7 +295,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -323,7 +323,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -351,7 +351,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -373,7 +373,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -383,7 +383,7 @@
     "name": "YouTube Shorts Comments",
     "path": "/v1/youtube/shorts/comments",
     "credits": 2,
-    "summary": "Comments on a YouTube Short — same engine as /comments (flat 2 credits).",
+    "summary": "Comments on a YouTube Short \u2014 same engine as /comments (flat 2 credits).",
     "params": [
       {
         "name": "url",
@@ -407,7 +407,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -435,7 +435,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -463,7 +463,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -473,7 +473,7 @@
     "name": "YouTube Channel Streams",
     "path": "/v1/youtube/channel-streams",
     "credits": 2,
-    "summary": "Channel Live tab only (empty when hasLiveTab=false) — player-enriched streams.",
+    "summary": "Channel Live tab only (empty when hasLiveTab=false) \u2014 player-enriched streams.",
     "params": [
       {
         "name": "url",
@@ -491,7 +491,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -519,7 +519,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -553,7 +553,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -563,7 +563,7 @@
     "name": "YouTube Channel Playlists",
     "path": "/v1/youtube/channel-playlists",
     "credits": 2,
-    "summary": "List a channel's playlists — id, title, videoCount, thumbnailUrl.",
+    "summary": "List a channel's playlists \u2014 id, title, videoCount, thumbnailUrl.",
     "params": [
       {
         "name": "url",
@@ -581,7 +581,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -591,7 +591,7 @@
     "name": "YouTube Community Posts",
     "path": "/v1/youtube/community-posts",
     "credits": 1,
-    "summary": "Community posts — likeCount+likeCountText, pollOptions, ISO dates, channel{}, cursor.",
+    "summary": "Community posts \u2014 likeCount+likeCountText, pollOptions, ISO dates, channel{}, cursor.",
     "params": [
       {
         "name": "url",
@@ -615,7 +615,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -625,7 +625,7 @@
     "name": "YouTube Community Post Details",
     "path": "/v1/youtube/community-post-details",
     "credits": 1,
-    "summary": "One community post — same schema as list + comments (pollOptions, numeric likeCount).",
+    "summary": "One community post \u2014 same schema as list + comments (pollOptions, numeric likeCount).",
     "params": [
       {
         "name": "url",
@@ -637,7 +637,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -647,7 +647,7 @@
     "name": "YouTube Video Sponsors",
     "path": "/v1/youtube/video-sponsors",
     "credits": 1,
-    "summary": "SponsorBlock segments — sorted, overlapsWith, minVotes, coverageSeconds.",
+    "summary": "SponsorBlock segments \u2014 sorted, overlapsWith, minVotes, coverageSeconds.",
     "params": [
       {
         "name": "url",
@@ -671,7 +671,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -699,7 +699,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Serve from the 24h shared cache when available (0 credits on hit). Default true — set false to always fetch fresh."
+        "description": "Serve from the 24h shared cache when available (0 credits on hit). Default true \u2014 set false to always fetch fresh."
       }
     ]
   },
@@ -727,7 +727,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -749,7 +749,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -759,7 +759,7 @@
     "name": "TikTok Comments",
     "path": "/v1/tiktok/comments",
     "credits": 2,
-    "summary": "Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500).",
+    "summary": "Comments on a TikTok video \u2014 text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500).",
     "params": [
       {
         "name": "url",
@@ -783,7 +783,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -793,7 +793,7 @@
     "name": "TikTok Channel Details",
     "path": "/v1/tiktok/channel-details",
     "credits": 1,
-    "summary": "Resolve @handle → id + secUid; createTime, ttSeller, bioLink.risk, category, commerce flags.",
+    "summary": "Resolve @handle \u2192 id + secUid; createTime, ttSeller, bioLink.risk, category, commerce flags.",
     "params": [
       {
         "name": "url",
@@ -805,7 +805,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -815,7 +815,7 @@
     "name": "TikTok Profile Region",
     "path": "/v1/tiktok/profile-region",
     "credits": 2,
-    "summary": "Where a TikTok creator is likely based and what language they use — country, language, and core profile stats from a profile URL or @handle. When TikTok hides the country, it is estimated from public bio/name/language cues, with a confidence grade.",
+    "summary": "Where a TikTok creator is likely based and what language they use \u2014 country, language, and core profile stats from a profile URL or @handle. When TikTok hides the country, it is estimated from public bio/name/language cues, with a confidence grade.",
     "params": [
       {
         "name": "url",
@@ -827,7 +827,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -849,7 +849,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -859,7 +859,7 @@
     "name": "TikTok Search Suggestions",
     "path": "/v1/tiktok/search-suggestions",
     "credits": 28,
-    "summary": "The autocomplete terms TikTok suggests in its search bar for a seed keyword — the real phrases people search, ranked. Localize by country + language.",
+    "summary": "The autocomplete terms TikTok suggests in its search bar for a seed keyword \u2014 the real phrases people search, ranked. Localize by country + language.",
     "params": [
       {
         "name": "q",
@@ -889,7 +889,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -899,7 +899,7 @@
     "name": "TikTok Channel Posts",
     "path": "/v1/tiktok/channel-posts",
     "credits": 2,
-    "summary": "Latest videos from a TikTok profile — caption, engagement, thumbnail, sound, and hashtags for each post. Cursor pagination via nextCursor.",
+    "summary": "Latest videos from a TikTok profile \u2014 caption, engagement, thumbnail, sound, and hashtags for each post. Cursor pagination via nextCursor.",
     "params": [
       {
         "name": "url",
@@ -923,7 +923,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -933,7 +933,7 @@
     "name": "TikTok Comment Replies",
     "path": "/v1/tiktok/comment-replies",
     "credits": 2,
-    "summary": "Replies under a TikTok comment — text, author, likes, timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits.",
+    "summary": "Replies under a TikTok comment \u2014 text, author, likes, timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits.",
     "params": [
       {
         "name": "url",
@@ -963,7 +963,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -973,7 +973,7 @@
     "name": "TikTok User Followers",
     "path": "/v1/tiktok/user-followers",
     "credits": 1,
-    "summary": "Followers — id, secUid, createTime, region, language; total + nextCursor. Flat 1 credit native.",
+    "summary": "Followers \u2014 id, secUid, createTime, region, language; total + nextCursor. Flat 1 credit native.",
     "params": [
       {
         "name": "url",
@@ -997,7 +997,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1007,7 +1007,7 @@
     "name": "TikTok User Followings",
     "path": "/v1/tiktok/user-followings",
     "credits": 1,
-    "summary": "Followings — id, secUid, createTime, region, language; total + nextCursor. Flat 1 credit native.",
+    "summary": "Followings \u2014 id, secUid, createTime, region, language; total + nextCursor. Flat 1 credit native.",
     "params": [
       {
         "name": "url",
@@ -1031,7 +1031,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1059,7 +1059,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1087,7 +1087,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1097,7 +1097,7 @@
     "name": "TikTok Search by Hashtag",
     "path": "/v1/tiktok/search/hashtag",
     "credits": 14,
-    "summary": "Search TikTok videos by hashtag — video URL, caption, author, and engagement counts per result, with cursor pagination (nextCursor + hasMore).",
+    "summary": "Search TikTok videos by hashtag \u2014 video URL, caption, author, and engagement counts per result, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "q",
@@ -1127,7 +1127,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1137,7 +1137,7 @@
     "name": "TikTok Search Users",
     "path": "/v1/tiktok/search/users",
     "credits": 1,
-    "summary": "Search TikTok users — id, secUid, followers/following, verified, sample videos; cursor pagination.",
+    "summary": "Search TikTok users \u2014 id, secUid, followers/following, verified, sample videos; cursor pagination.",
     "params": [
       {
         "name": "q",
@@ -1161,7 +1161,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1171,7 +1171,7 @@
     "name": "TikTok Song Details",
     "path": "/v1/tiktok/song-details",
     "credits": 1,
-    "summary": "Sound metadata — usageCount, artists[], commerce rights, chorus timing; 1 credit native.",
+    "summary": "Sound metadata \u2014 usageCount, artists[], commerce rights, chorus timing; 1 credit native.",
     "params": [
       {
         "name": "url",
@@ -1183,7 +1183,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1211,7 +1211,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1239,7 +1239,65 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_popular_songs",
+    "platform": "tiktok",
+    "name": "TikTok Popular Songs",
+    "path": "/v1/tiktok/popular-songs",
+    "credits": 2,
+    "summary": "Creative Center popular/surging sounds \u2014 rankDiff, trend[], commercialMusic. Flat 2 credits.",
+    "params": [
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "Two-letter ISO country. Default US."
+      },
+      {
+        "name": "period",
+        "type": "string",
+        "required": false,
+        "description": "7, 30, or 120 days. Default 7."
+      },
+      {
+        "name": "page",
+        "type": "number",
+        "required": false,
+        "description": "Page number (default 1)."
+      },
+      {
+        "name": "rankType",
+        "type": "string",
+        "required": false,
+        "description": "popular | surging. Default popular."
+      },
+      {
+        "name": "newOnBoard",
+        "type": "boolean",
+        "required": false,
+        "description": "Only sounds newly on the Top 100."
+      },
+      {
+        "name": "commercialMusic",
+        "type": "boolean",
+        "required": false,
+        "description": "Only Commercial Music Library-cleared sounds."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 20. Flat 2 credits per call."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1261,7 +1319,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1283,7 +1341,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1323,7 +1381,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1351,7 +1409,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1379,7 +1437,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1401,7 +1459,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1429,7 +1487,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1451,7 +1509,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1485,7 +1543,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1495,7 +1553,7 @@
     "name": "Instagram Channel Reels",
     "path": "/v1/instagram/channel-reels",
     "credits": 6,
-    "summary": "Latest Reels from an Instagram profile — url or userId; nextCursor + hasMore.",
+    "summary": "Latest Reels from an Instagram profile \u2014 url or userId; nextCursor + hasMore.",
     "params": [
       {
         "name": "url",
@@ -1507,7 +1565,7 @@
         "name": "userId",
         "type": "string",
         "required": false,
-        "description": "Instagram numeric user ID (e.g. 173560420). Faster than url — skips handle→ID resolve."
+        "description": "Instagram numeric user ID (e.g. 173560420). Faster than url \u2014 skips handle\u2192ID resolve."
       },
       {
         "name": "limit",
@@ -1525,7 +1583,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1535,7 +1593,7 @@
     "name": "Instagram Reels Search",
     "path": "/v1/instagram/reels-search",
     "credits": 2,
-    "summary": "Native Instagram Reels hashtag search — views/plays, author verified/followers, datePosted. Flat 2 credits.",
+    "summary": "Native Instagram Reels hashtag search \u2014 views/plays, author verified/followers, datePosted. Flat 2 credits.",
     "params": [
       {
         "name": "q",
@@ -1559,7 +1617,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1569,7 +1627,7 @@
     "name": "Instagram Trending Reels",
     "path": "/v1/instagram/trending-reels",
     "credits": 1,
-    "summary": "Trending Reels from instagram.com/reels — videos only, flat 1 credit. Duplicates across calls expected.",
+    "summary": "Trending Reels from instagram.com/reels \u2014 videos only, flat 1 credit. Duplicates across calls expected.",
     "params": [
       {
         "name": "country",
@@ -1587,7 +1645,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1597,7 +1655,7 @@
     "name": "Instagram Tagged Posts",
     "path": "/v1/instagram/tagged-posts",
     "credits": 1,
-    "summary": "Tagged posts — author id, views, hashtags/mentions; cursor pagination.",
+    "summary": "Tagged posts \u2014 author id, views, hashtags/mentions; cursor pagination.",
     "params": [
       {
         "name": "url",
@@ -1621,7 +1679,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1649,7 +1707,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1677,13 +1735,13 @@
         "name": "mediaType",
         "type": "string",
         "required": false,
-        "description": "all (default) or reels — return only Reels/clips when set to reels."
+        "description": "all (default) or reels \u2014 return only Reels/clips when set to reels."
       },
       {
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1705,7 +1763,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1727,7 +1785,57 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_highlights",
+    "platform": "instagram",
+    "name": "Instagram Highlights",
+    "path": "/v1/instagram/highlights",
+    "credits": 1,
+    "summary": "Persistent Story Highlight albums for a public profile \u2014 id, title, cover, owner. Flat 1 credit.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": false,
+        "description": "Instagram profile URL, @handle, or username. Omit when userId is set."
+      },
+      {
+        "name": "userId",
+        "type": "string",
+        "required": false,
+        "description": "Numeric Instagram user ID. Prefer when known \u2014 skips handle\u2192ID resolve."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_highlights_details",
+    "platform": "instagram",
+    "name": "Instagram Highlight Details",
+    "path": "/v1/instagram/highlights-details",
+    "credits": 1,
+    "summary": "Items inside one Instagram Story Highlight album \u2014 media URLs, type, takenAt. Flat 1 credit.",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "description": "Highlight id from /v1/instagram/highlights (with or without highlight: prefix)."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1737,7 +1845,7 @@
     "name": "Instagram Basic Profile",
     "path": "/v1/instagram/basic-profile",
     "credits": 1,
-    "summary": "Instagram profile by user ID/@handle — camelCase (followers, externalUrl, businessAddress).",
+    "summary": "Instagram profile by user ID/@handle \u2014 camelCase (followers, externalUrl, businessAddress).",
     "params": [
       {
         "name": "userId",
@@ -1749,7 +1857,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1759,7 +1867,7 @@
     "name": "Facebook Details",
     "path": "/v1/facebook/details",
     "credits": 2,
-    "summary": "Facebook post or Reel details — engagement, author id, SD/HD video, captions, and music when exposed.",
+    "summary": "Facebook post or Reel details \u2014 engagement, author id, SD/HD video, captions, and music when exposed.",
     "params": [
       {
         "name": "url",
@@ -1771,7 +1879,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1793,7 +1901,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1803,7 +1911,7 @@
     "name": "Facebook Comments",
     "path": "/v1/facebook/comments",
     "credits": 2,
-    "summary": "Facebook comments — 10-type reactions{}, stable author.id, replyCount, hasMore.",
+    "summary": "Facebook comments \u2014 10-type reactions{}, stable author.id, replyCount, hasMore.",
     "params": [
       {
         "name": "url",
@@ -1827,7 +1935,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1837,7 +1945,7 @@
     "name": "Facebook Page Details",
     "path": "/v1/facebook/page-details",
     "credits": 2,
-    "summary": "Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. Flat 2 credits.",
+    "summary": "Facebook page profile \u2014 distinct likes vs followers, talkingAbout, category, website, public email. Flat 2 credits.",
     "params": [
       {
         "name": "url",
@@ -1849,7 +1957,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1877,7 +1985,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1905,7 +2013,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1915,7 +2023,7 @@
     "name": "Facebook Group Posts",
     "path": "/v1/facebook/group-posts",
     "credits": 2,
-    "summary": "Public Facebook group posts — author IDs, permalink, sortBy, engagement (shares null when unknown).",
+    "summary": "Public Facebook group posts \u2014 author IDs, permalink, sortBy, engagement (shares null when unknown).",
     "params": [
       {
         "name": "url",
@@ -1939,7 +2047,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -1949,7 +2057,7 @@
     "name": "Facebook Comment Replies",
     "path": "/v1/facebook/comment-replies",
     "credits": 2,
-    "summary": "Replies to a Facebook comment — same author/reactions shape as comments.",
+    "summary": "Replies to a Facebook comment \u2014 same author/reactions shape as comments.",
     "params": [
       {
         "name": "url",
@@ -1973,7 +2081,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2049,7 +2157,7 @@
         "name": "radiusMiles",
         "type": "number",
         "required": false,
-        "description": "Radius in miles (1–500 discrete values)."
+        "description": "Radius in miles (1\u2013500 discrete values)."
       },
       {
         "name": "category",
@@ -2073,7 +2181,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2107,7 +2215,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2135,7 +2243,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2157,7 +2265,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2185,7 +2293,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2213,7 +2321,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2235,7 +2343,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2257,7 +2365,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2279,7 +2387,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2301,7 +2409,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2329,7 +2437,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2339,7 +2447,7 @@
     "name": "Twitter/X Search",
     "path": "/v1/twitter/search",
     "credits": 2,
-    "summary": "Search public tweets on X by keyword — text, author, engagement, hashtags, and media.",
+    "summary": "Search public tweets on X by keyword \u2014 text, author, engagement, hashtags, and media.",
     "params": [
       {
         "name": "q",
@@ -2357,7 +2465,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2379,7 +2487,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2389,7 +2497,7 @@
     "name": "Twitter/X Community Tweets",
     "path": "/v1/twitter/community-tweets",
     "credits": 2,
-    "summary": "Community posts — flat 2 native; ~0.7/tweet Apify fallback.",
+    "summary": "Community posts \u2014 flat 2 native; ~0.7/tweet Apify fallback.",
     "params": [
       {
         "name": "url",
@@ -2407,7 +2515,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2453,7 +2561,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2475,7 +2583,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2503,7 +2611,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2531,7 +2639,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2577,7 +2685,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2587,7 +2695,7 @@
     "name": "Reddit Subreddit Details",
     "path": "/v1/reddit/subreddit-details",
     "credits": 1,
-    "summary": "Subreddit card — t5_ id, members, activeUsers, rules[], ISO createdAt.",
+    "summary": "Subreddit card \u2014 t5_ id, members, activeUsers, rules[], ISO createdAt.",
     "params": [
       {
         "name": "url",
@@ -2599,7 +2707,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2609,7 +2717,7 @@
     "name": "Reddit Subreddit Search",
     "path": "/v1/reddit/subreddit-search",
     "credits": 2,
-    "summary": "Search inside one subreddit — same sort/timeframe and fields as site-wide Search.",
+    "summary": "Search inside one subreddit \u2014 same sort/timeframe and fields as site-wide Search.",
     "params": [
       {
         "name": "url",
@@ -2651,7 +2759,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2661,7 +2769,7 @@
     "name": "Threads Profile",
     "path": "/v1/threads/profile",
     "credits": 1,
-    "summary": "Threads profile — bio, followers, verified, isPrivate, bioLinks, transparencyLabel, HD avatar versions.",
+    "summary": "Threads profile \u2014 bio, followers, verified, isPrivate, bioLinks, transparencyLabel, HD avatar versions.",
     "params": [
       {
         "name": "url",
@@ -2673,7 +2781,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2683,7 +2791,7 @@
     "name": "Threads User Posts",
     "path": "/v1/threads/user-posts",
     "credits": 2,
-    "summary": "Recent Threads posts — views+engagement, threadId/isReply. Flat 2 native.",
+    "summary": "Recent Threads posts \u2014 views+engagement, threadId/isReply. Flat 2 native.",
     "params": [
       {
         "name": "url",
@@ -2701,7 +2809,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2723,7 +2831,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2733,7 +2841,7 @@
     "name": "Threads Post Search",
     "path": "/v1/threads/search",
     "credits": 2,
-    "summary": "Threads keyword search — flat 2 native (~0.7/post Apify). Meta Top SERP; no sort/date.",
+    "summary": "Threads keyword search \u2014 flat 2 native (~0.7/post Apify). Meta Top SERP; no sort/date.",
     "params": [
       {
         "name": "q",
@@ -2751,7 +2859,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2761,7 +2869,7 @@
     "name": "Threads Search Users",
     "path": "/v1/threads/search-users",
     "credits": 1,
-    "summary": "Distinct authors from keyword search — id, avatar, verified. Flat 1 native.",
+    "summary": "Distinct authors from keyword search \u2014 id, avatar, verified. Flat 1 native.",
     "params": [
       {
         "name": "q",
@@ -2779,7 +2887,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2789,7 +2897,7 @@
     "name": "Bluesky Profile",
     "path": "/v1/bluesky/profile",
     "credits": 1,
-    "summary": "Bluesky profile — counts, banner, verification{}, labels[], associated{}.",
+    "summary": "Bluesky profile \u2014 counts, banner, verification{}, labels[], associated{}.",
     "params": [
       {
         "name": "url",
@@ -2801,7 +2909,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2811,7 +2919,7 @@
     "name": "Bluesky User Posts",
     "path": "/v1/bluesky/user-posts",
     "credits": 3,
-    "summary": "Recent posts from a Bluesky profile — text, author, likes, reposts, embeds; cursor pagination.",
+    "summary": "Recent posts from a Bluesky profile \u2014 text, author, likes, reposts, embeds; cursor pagination.",
     "params": [
       {
         "name": "url",
@@ -2835,7 +2943,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2857,7 +2965,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2879,7 +2987,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2907,7 +3015,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2935,7 +3043,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2945,7 +3053,7 @@
     "name": "Pinterest Board",
     "path": "/v1/pinterest/board",
     "credits": 13,
-    "summary": "Board pins — saves, imageOriginal, destinationUrl, top-level author. Board URL only.",
+    "summary": "Board pins \u2014 saves, imageOriginal, destinationUrl, top-level author. Board URL only.",
     "params": [
       {
         "name": "url",
@@ -2963,7 +3071,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -2991,7 +3099,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3013,7 +3121,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3035,7 +3143,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3057,7 +3165,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3079,7 +3187,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3113,7 +3221,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3147,7 +3255,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3169,7 +3277,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3197,7 +3305,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3225,7 +3333,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3253,7 +3361,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3287,7 +3395,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3315,7 +3423,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3343,7 +3451,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3353,7 +3461,7 @@
     "name": "TikTok Shop Product Reviews",
     "path": "/v1/tiktok-shop/product-reviews",
     "credits": 45,
-    "summary": "Shop product reviews — stars, text, SKU, verified, country, review photos. Not video comments.",
+    "summary": "Shop product reviews \u2014 stars, text, SKU, verified, country, review photos. Not video comments.",
     "params": [
       {
         "name": "url",
@@ -3371,7 +3479,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3381,7 +3489,7 @@
     "name": "TikTok Shop User Showcase",
     "path": "/v1/tiktok-shop/user-showcase",
     "credits": 45,
-    "summary": "Creator affiliate shelf — sold, rating, originalPrice, seller name/url (PDP-hydrated).",
+    "summary": "Creator affiliate shelf \u2014 sold, rating, originalPrice, seller name/url (PDP-hydrated).",
     "params": [
       {
         "name": "username",
@@ -3399,7 +3507,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3409,7 +3517,7 @@
     "name": "GitHub User",
     "path": "/v1/github/user",
     "credits": 1,
-    "summary": "Public GitHub profile (email when public). 1 credit — wraps free GitHub REST API.",
+    "summary": "Public GitHub profile (email when public). 1 credit \u2014 wraps free GitHub REST API.",
     "params": [
       {
         "name": "username",
@@ -3421,7 +3529,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3455,7 +3563,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3477,7 +3585,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3517,7 +3625,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3551,7 +3659,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3585,7 +3693,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3619,7 +3727,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3641,7 +3749,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3669,7 +3777,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3697,7 +3805,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3707,7 +3815,7 @@
     "name": "Twitch Profile",
     "path": "/v1/twitch/profile",
     "credits": 1,
-    "summary": "Twitch channel — live stream, last broadcast, recent videos with embedUrl, game box art, storyboard previews.",
+    "summary": "Twitch channel \u2014 live stream, last broadcast, recent videos with embedUrl, game box art, storyboard previews.",
     "params": [
       {
         "name": "url",
@@ -3719,7 +3827,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3765,7 +3873,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3787,7 +3895,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3797,7 +3905,7 @@
     "name": "Twitch Clip",
     "path": "/v1/twitch/clip",
     "credits": 1,
-    "summary": "Twitch clip — curator vs channel, qualities, token expiry.",
+    "summary": "Twitch clip \u2014 curator vs channel, qualities, token expiry.",
     "params": [
       {
         "name": "url",
@@ -3809,7 +3917,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3819,7 +3927,7 @@
     "name": "Spotify Artist",
     "path": "/v1/spotify/artist",
     "credits": 1,
-    "summary": "Spotify artist — followers, monthlyListeners, worldRank, topCities, topTracks with playCount, concerts, related artists.",
+    "summary": "Spotify artist \u2014 followers, monthlyListeners, worldRank, topCities, topTracks with playCount, concerts, related artists.",
     "params": [
       {
         "name": "url",
@@ -3831,7 +3939,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3841,7 +3949,7 @@
     "name": "Spotify Track",
     "path": "/v1/spotify/track",
     "credits": 1,
-    "summary": "Spotify track — playCount, artist/album IDs, explicit rating.",
+    "summary": "Spotify track \u2014 playCount, artist/album IDs, explicit rating.",
     "params": [
       {
         "name": "url",
@@ -3853,7 +3961,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3875,7 +3983,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3909,7 +4017,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3919,7 +4027,7 @@
     "name": "Spotify Podcast",
     "path": "/v1/spotify/podcast",
     "credits": 1,
-    "summary": "Spotify podcast — publisher, rating, topics, explicit, totalEpisodes.",
+    "summary": "Spotify podcast \u2014 publisher, rating, topics, explicit, totalEpisodes.",
     "params": [
       {
         "name": "url",
@@ -3937,7 +4045,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3965,7 +4073,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -3975,7 +4083,7 @@
     "name": "SoundCloud Artist",
     "path": "/v1/soundcloud/artist",
     "credits": 1,
-    "summary": "SoundCloud artist — bio, counts, badges, creator subscription tier.",
+    "summary": "SoundCloud artist \u2014 bio, counts, badges, creator subscription tier.",
     "params": [
       {
         "name": "url",
@@ -3987,7 +4095,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4021,7 +4129,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4043,7 +4151,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4065,7 +4173,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4075,7 +4183,7 @@
     "name": "Snapchat User Profile",
     "path": "/v1/snapchat/user-profile",
     "credits": 1,
-    "summary": "Public Snapchat profile — highlights with snap lists, Spotlight engagement, related accounts.",
+    "summary": "Public Snapchat profile \u2014 highlights with snap lists, Spotlight engagement, related accounts.",
     "params": [
       {
         "name": "url",
@@ -4087,7 +4195,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4097,7 +4205,7 @@
     "name": "Truth Social Profile",
     "path": "/v1/truth-social/profile",
     "credits": 1,
-    "summary": "Public Truth Social profile (bot/isPrivate/group, static media, emojis). Prominent accounts only — most others require auth.",
+    "summary": "Public Truth Social profile (bot/isPrivate/group, static media, emojis). Prominent accounts only \u2014 most others require auth.",
     "params": [
       {
         "name": "url",
@@ -4109,7 +4217,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4143,7 +4251,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4165,7 +4273,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4175,7 +4283,7 @@
     "name": "Kick Clip",
     "path": "/v1/kick/clip",
     "credits": 1,
-    "summary": "Kick clip — creator vs channel, category, maturity, VOD; or recent channel clips.",
+    "summary": "Kick clip \u2014 creator vs channel, category, maturity, VOD; or recent channel clips.",
     "params": [
       {
         "name": "url",
@@ -4193,7 +4301,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4209,7 +4317,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID. Not influencer /shop/<handle> pages. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+        "description": "Amazon seller storefront URL (/sp?seller=\u2026 or /s?me=\u2026) or raw seller ID. Not influencer /shop/<handle> pages. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "marketplace",
@@ -4233,7 +4341,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4318,7 +4426,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4340,7 +4448,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4382,7 +4490,7 @@
     "name": "Kwai Profile",
     "path": "/v1/kwai/profile",
     "credits": 1,
-    "summary": "Kwai profile — bio, counts, verification, and post privacy flags.",
+    "summary": "Kwai profile \u2014 bio, counts, verification, and post privacy flags.",
     "params": [
       {
         "name": "url",
@@ -4394,7 +4502,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4422,7 +4530,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4444,7 +4552,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4453,8 +4561,8 @@
     "platform": "komi",
     "name": "Komi Page",
     "path": "/v1/komi/page",
-    "credits": 4,
-    "summary": "Public Komi page links and profile metadata.",
+    "credits": 1,
+    "summary": "Komi page \u2014 id/displayName/bio, socials{} (incl. website), content LINK/PRODUCT rows with price/currency. Flat 1 credit.",
     "params": [
       {
         "name": "url",
@@ -4466,7 +4574,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4488,7 +4596,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4510,7 +4618,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4532,7 +4640,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4608,7 +4716,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4642,7 +4750,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4676,7 +4784,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4698,7 +4806,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4720,7 +4828,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4730,7 +4838,7 @@
     "name": "TikTok Ad Library Search",
     "path": "/v1/ad-library/tiktok/search",
     "credits": 2,
-    "summary": "Search TikTok Commercial Content Library (EU DSA) — ISO dates, advertiser, reach bands.",
+    "summary": "Search TikTok Commercial Content Library (EU DSA) \u2014 ISO dates, advertiser, reach bands.",
     "params": [
       {
         "name": "q",
@@ -4754,7 +4862,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4764,7 +4872,7 @@
     "name": "TikTok Creative Center Top Ads",
     "path": "/v1/ad-library/tiktok/top-ads",
     "credits": 2,
-    "summary": "Creative Center Top Ads — CTR, likes, industry/objective, video URLs (2 credits native).",
+    "summary": "Creative Center Top Ads \u2014 CTR, likes, industry/objective, video URLs (2 credits native).",
     "params": [
       {
         "name": "q",
@@ -4818,7 +4926,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4846,7 +4954,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4932,7 +5040,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4966,7 +5074,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -4976,7 +5084,7 @@
     "name": "LinkedIn Ad Library Search",
     "path": "/v1/ad-library/linkedin/search-ads",
     "credits": 2,
-    "summary": "LinkedIn Ad Library — targeting{}, ISO dates, impressions, CTA, cursor pagination.",
+    "summary": "LinkedIn Ad Library \u2014 targeting{}, ISO dates, impressions, CTA, cursor pagination.",
     "params": [
       {
         "name": "q",
@@ -5036,7 +5144,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   },
@@ -5058,7 +5166,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Set true to serve from the 24h response cache. Default false \u2014 always fetch fresh data."
       }
     ]
   }

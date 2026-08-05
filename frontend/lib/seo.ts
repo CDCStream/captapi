@@ -14,7 +14,7 @@ export const DEFAULT_OG_IMAGE = `${SITE_URL}/opengraph-image`;
 
 // Freshness signal: bump when catalog / marketing content meaningfully changes.
 // Used for dateModified JSON-LD + sitemap lastModified on programmatic pages.
-export const CONTENT_UPDATED = "2026-08-04";
+export const CONTENT_UPDATED = "2026-08-05";
 export const CONTENT_UPDATED_DATE = new Date(CONTENT_UPDATED);
 
 export interface PageMetaInput {

@@ -28,22 +28,19 @@ function parseCookie(cookieHeader: string | null, name: string): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
-/** Free-tool converters: used a free tool, or came from /signup?from=tools. */
-function shouldSkipWelcome(
+/** Free-tool converters — analytics / billing landing only (still get welcome credits). */
+function isFromTools(
   request: Request,
   nextPath: string,
   fromParam: string | null,
   userMeta?: Record<string, unknown> | null,
 ): boolean {
   if (fromParam === "tools") return true;
-  // Durable flag set on password signup from free tools (survives lost query params).
   if (userMeta?.from_tools === true || userMeta?.from_tools === "true") return true;
-  // Signup from tools sets next=/dashboard/billing
   if (nextPath.startsWith("/dashboard/billing")) return true;
   const cookieHeader = request.headers.get("cookie");
   if (parseCookie(cookieHeader, NO_WELCOME_COOKIE) === "1") return true;
   const tries = parseInt(parseCookie(cookieHeader, ANON_TOOL_COOKIE) || "0", 10);
-  // Any prior free-tool try marks a converter (cookie may outlive the limit flag).
   if (tries >= 1) return true;
   return false;
 }
@@ -76,44 +73,6 @@ async function grantWelcomeCredits(userId: string, email: string) {
     amount: INITIAL_CREDITS,
     description: "Welcome bonus (email verified)",
   });
-}
-
-/**
- * Zero the trigger's default 100 for free-tool converters (no welcome bonus).
- * Only touches brand-new accounts that still hold the unspent welcome pile —
- * never wipe an existing user's balance if they later hit this callback.
- */
-async function revokeWelcomeCredits(userId: string, createdAt: string | undefined) {
-  const sb = getServiceClient();
-  if (!sb) return;
-
-  if (createdAt) {
-    const ageMs = Date.now() - new Date(createdAt).getTime();
-    if (Number.isFinite(ageMs) && ageMs > 60 * 60 * 1000) return;
-  }
-
-  const { data } = await sb
-    .from("credit_balances")
-    .select("subscription_credits, topup_credits, plan")
-    .eq("user_id", userId)
-    .single();
-
-  if (!data) return;
-  const sub = data.subscription_credits || 0;
-  const top = data.topup_credits || 0;
-  const plan = (data.plan || "free").toLowerCase();
-  if (top > 0 || sub > INITIAL_CREDITS || plan !== "free") return;
-
-  await sb
-    .from("credit_balances")
-    .update({ subscription_credits: 0 })
-    .eq("user_id", userId);
-
-  await sb
-    .from("credit_transactions")
-    .delete()
-    .eq("user_id", userId)
-    .eq("type", "welcome");
 }
 
 function clearToolCookies(response: NextResponse) {
@@ -151,7 +110,7 @@ export async function GET(request: Request) {
         return rejectDisposableSignup(user.id, origin);
       }
 
-      const skipWelcome = shouldSkipWelcome(
+      const fromTools = isFromTools(
         request,
         next,
         fromParam,
@@ -163,17 +122,12 @@ export async function GET(request: Request) {
         await ensureCreditBalance(user.id);
       }
 
+      // Free Tools converters get the same 100 lifetime welcome credits.
       if (user?.email && user?.email_confirmed_at) {
-        if (skipWelcome) {
-          await revokeWelcomeCredits(user.id, user.created_at);
-          // Landing flag opens the buy-credits pricing modal on the dashboard.
-          next = "/dashboard/billing?from=tools";
-        } else {
-          await grantWelcomeCredits(user.id, user.email);
-        }
-      } else if (skipWelcome) {
-        // OAuth may confirm immediately; password signup confirms via this link.
-        // If somehow unconfirmed + skip, still send them to billing after.
+        await grantWelcomeCredits(user.id, user.email);
+      }
+
+      if (fromTools) {
         next = "/dashboard/billing?from=tools";
       }
 
@@ -198,7 +152,7 @@ export async function GET(request: Request) {
       }
 
       const response = NextResponse.redirect(redirectUrl);
-      if (skipWelcome) clearToolCookies(response);
+      if (fromTools) clearToolCookies(response);
       return response;
     }
     return NextResponse.redirect(

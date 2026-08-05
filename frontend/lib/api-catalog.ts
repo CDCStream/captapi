@@ -10,7 +10,8 @@
 // (see api-examples.generated.ts); a generic per-category shape is used as a
 // fallback for any endpoint without a snapshot.
 
-import { API_EXAMPLES, API_EXAMPLE_VARIANTS } from "./api-examples.generated";
+import { API_EXAMPLES } from "./api-examples.generated";
+import { API_EXAMPLE_VARIANTS } from "./api-example-variants";
 
 export type PlatformId =
   | "youtube"
@@ -2074,7 +2075,20 @@ const SOUNDCLOUD: Spec[] = [
 ];
 
 const LINKTREE: Spec[] = [
-  { slug: "linktree-page", name: "Linktree Page API", shortName: "Page", category: "details", method: "GET", path: "/v1/linktree/page", credits: 1, tagline: "Public Linktree page — links (incl. GROUP children), socials, email, verticals. Flat 1 credit.", longDescription: "Paste a Linktree URL or username and get the public page as clean JSON: profile fields, verticals/linkPlatforms, email when the creator publishes a mailto social, typed links (CLASSIC, SPOTIFY_*, GROUP, …), and nested GROUP.links for folder children (parentId on nested rows). socials is the icon list from Linktree; socialAccounts is a camelCase URL map (instagram/tiktok/soundcloud/…). Thumbnails and linkCount included. Flat 1 credit. Ideal for lead enrichment and competitor link-in-bio research." },
+  {
+    slug: "linktree-page",
+    name: "Linktree Page API",
+    shortName: "Page",
+    category: "details",
+    method: "GET",
+    path: "/v1/linktree/page",
+    credits: 1,
+    delivers: [],
+    tagline:
+      "Link-in-bio → creator graph: typed links, socialAccounts{} that feed TikTok/Instagram/Spotify/SoundCloud, email, verticals. Flat 1 credit.",
+    longDescription:
+      "Paste a Linktree URL or username and get the public page as clean JSON. Canonical profile fields: platform, id (string), handle/username, url, displayName (name is a deprecated alias), description, avatar, verified. Also verticals[] (Linktree niche labels, e.g. music_artist), linkPlatforms[] (platforms Linktree detected on the page), timezone, and email when the creator publishes a mailto social. links[] are typed (CLASSIC, PRODUCT, SPOTIFY_*, YOUTUBE_VIDEO, GROUP, …) with id/url/thumbnail; PRODUCT rows resolve shopUrl when Linktree leaves url empty (url is always present — null only when no destination exists); GROUP children nest under links with parentId. socials[] is the icon list (incl. EMAIL_ADDRESS). socialAccounts{} is the camelCase HTTP map for catalog joins (instagram/tiktok/spotify/soundcloud/appleMusic/youtube/…) — email is not duplicated there (use top-level email). YouTube watch URLs in socialAccounts are resolved to the channel via oEmbed so they pipe into youtube/channel-details. Accepts cache / cacheMaxAge. Flat 1 credit. This is the fan-out point for a creator graph: one Linktree call feeds the rest of the catalog.",
+  },
 ];
 
 const SNAPCHAT: Spec[] = [
@@ -2181,15 +2195,20 @@ const KICK: Spec[] = [
 const AMAZON_SHOP: Spec[] = [
   {
     slug: "amazon-shop-page",
-    name: "Amazon Shop Page API",
-    shortName: "Shop Page",
+    name: "Amazon Seller Storefront API",
+    shortName: "Seller Storefront",
     category: "list",
     method: "GET",
     path: "/v1/amazon-shop/page",
     credits: 1,
-    tagline: "Amazon seller storefront products — ASIN, price, badges, canonical /dp URLs. 1 credit/page.",
+    tagline:
+      "Third-party seller storefronts (/sp?seller= / /s?me=) — ASIN + canonical /dp URLs, price, badges. Not influencer /shop/{handle}.",
     longDescription:
-      "Pass an Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID and get that seller's product listings as clean JSON: ASIN, title, canonical /dp URL, image, price/currency/priceFormatted, rating/reviews, and isPrime/isBestSeller/isSponsored flags. Includes seller id/name/profile URL, scrapedAt, and cursor pagination (nextCursor/hasMore). Scope: third-party seller storefronts — not influencer Amazon Shops (/shop/<handle>), which are a different Amazon surface. Billing is 1 credit per ~16-product storefront page.",
+      "Pass an Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID (e.g. A294P4X9EWVXLJ) and get that merchant's product listings as clean JSON. Each product includes an extracted ASIN and a canonical https://www.amazon.com/dp/{ASIN} URL (joinable to Amazon's catalog — not shop/{handle}/getProductDetails/… affiliate paths), plus title, image, price/currency/priceFormatted, rating/reviews, and isPrime/isBestSeller/isSponsored. Also seller{id,name,url}, scrapedAt, and cursor pagination (nextCursor/hasMore). Billing is 1 credit per ~16-product storefront page. This is not the influencer Amazon Shop surface (amazon.com/shop/{handle}) that returns avatar/socials/lists/curations — those creator vitrines are a different product and return HTTP 400 here.",
+    platformLimits: [
+      "Influencer Amazon Shops (amazon.com/shop/{handle}) are out of scope — HTTP 400. That surface has socials[], lists[], curations[], trendingPicks[] and is not a seller storefront.",
+      "Not an SC amazon/shop equivalent: SC targets creator affiliate vitrines; this endpoint targets third-party seller storefronts with ASIN-first product identity.",
+    ],
   },
 ];
 
@@ -2278,7 +2297,25 @@ const KWAI: Spec[] = [
 ];
 
 const KOMI: Spec[] = [
-  { slug: "komi-page", name: "Komi Page API", shortName: "Page", category: "channel", method: "GET", path: "/v1/komi/page", credits: 4 , tagline: "Extract the public links and profile fields from a Komi page.", longDescription: "Paste a Komi page URL and get the creator's public page as structured JSON — profile fields plus the links listed on the page." },
+  {
+    slug: "komi-page",
+    name: "Komi Page API",
+    shortName: "Page",
+    category: "channel",
+    method: "GET",
+    path: "/v1/komi/page",
+    credits: 1,
+    tagline:
+      "Komi link-in-bio → identity, socials{} (incl. website), content LINK/PRODUCT rows with price/currency. Flat 1 credit.",
+    longDescription:
+      "Paste a Komi URL (komi.io/user or user.komi.io) and get the public page as clean JSON. Identity: id (string UUID), handle/username, url, displayName (name is a deprecated alias), firstName/lastName, bio (description is a deprecated alias — may be an empty string), avatar. socials{} maps typed Komi social icons (instagram/tiktok/youtube/twitter/facebook/snapchat/spotify/appleMusic/…) and includes website when the creator publishes a WEBSITE row. links[] are content modules only — flattened LINK/PRODUCT (and similar) rows with id, url, title, type, order, visible, thumbnail, moduleId, versionId, plus price/currency on products. Social icon rows are not duplicated into links[]. Komi does not expose follower counts or a verified badge. Flat 1 credit via Komi's public JSON APIs (not HTML scrape). Pass cache=true or cacheMaxAge (1d/3d/7d/14d/30d) for the shared response cache.",
+    delivers: [
+      "Page id + displayName + bio (empty string when unset)",
+      "socials{} incl. website when published",
+      "Content links[] with id/thumbnail/order/visible",
+      "PRODUCT price + currency for commerce rows",
+    ],
+  },
 ];
 
 const PILLAR: Spec[] = [
@@ -2659,8 +2696,9 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   },
   {
     id: "amazon_shop",
-    name: "Amazon Shop",
-    blurb: "Seller storefront product listings (not influencer /shop/ vitrines) — price, badges, pagination.",
+    name: "Amazon Seller Storefront",
+    blurb:
+      "Third-party seller storefronts (/sp?seller=) with ASIN + canonical /dp URLs — not influencer amazon.com/shop/{handle} vitrines.",
     icon: "amazon",
     color: "text-amber-500",
     exampleUrl: "https://www.amazon.com/s?me=ATVPDKIKX0DER",
@@ -2706,7 +2744,8 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "linktree",
     name: "Linktree",
-    blurb: "Public Linktree links (incl. GROUP children), socials, email, and verticals.",
+    blurb:
+      "Link-in-bio → creator graph: typed links, socialAccounts{} for TikTok/Instagram/Spotify/SoundCloud joins, email, verticals.",
     icon: "link",
     color: "text-lime-500",
     exampleUrl: "https://linktr.ee/tonyhawk",
@@ -2771,10 +2810,10 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "komi",
     name: "Komi",
-    blurb: "Extract public Komi page links and creator profile metadata.",
+    blurb: "Komi link-in-bio pages — identity, socials (incl. website), LINK/PRODUCT commerce rows.",
     icon: "link",
     color: "text-violet-500",
-    exampleUrl: "https://komi.io/example",
+    exampleUrl: "https://komi.io/kimkardashian",
     endpoints: KOMI.map((s) => ({ ...s, platform: "komi" as const })),
   },
   {
@@ -3302,7 +3341,8 @@ const AMAZON_SHOP_URL =
 const KWAI_PROFILE = "Kwai profile URL or @handle, e.g. https://www.kwai.com/@topfilmeseseriesnatv.";
 const KWAI_POST = "Kwai video URL, e.g. https://www.kwai.com/@topfilmeseseriesnatv/video/5240932700689736196.";
 const CURSOR = { name: "cursor", type: "string" as const, required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." };
-const KOMI_PAGE = "Komi page URL or username.";
+const KOMI_PAGE =
+  "Komi page URL or username, e.g. https://komi.io/kimkardashian or https://kimkardashian.komi.io/.";
 const PILLAR_PAGE = "Pillar page URL or username.";
 const LINKBIO_PAGE = "Linkbio (lnk.bio) page URL or username, e.g. https://lnk.bio/charlidamelio.";
 const LINKME_PROFILE = "Linkme profile URL or username.";
@@ -3933,7 +3973,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "soundcloud-artist-tracks": [up(SC_PROFILE), lpFlat(20, 100, 2), CURSOR],
   "soundcloud-track": [up(SC_TRACK)],
   // Linktree / Snapchat
-  "linktree-page": [up(LINKTREE_PROFILE)],
+  "linktree-page": [up(LINKTREE_PROFILE), cachePWithMaxAge(), cacheMaxAgeP()],
   "snapchat-user-profile": [up(SNAPCHAT_PROFILE)],
   // Truth Social / Kick / Amazon / Age-Gender
   "truth-social-profile": [up(TRUTH_PROFILE)],
@@ -4011,7 +4051,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "kwai-profile": [up(KWAI_PROFILE)],
   "kwai-user-posts": [up(KWAI_PROFILE), lp(20, 200)],
   "kwai-post": [up(KWAI_POST)],
-  "komi-page": [up(KOMI_PAGE)],
+  "komi-page": [up(KOMI_PAGE), cachePWithMaxAge(), cacheMaxAgeP()],
   "pillar-page": [up(PILLAR_PAGE)],
   "linkbio-page": [up(LINKBIO_PAGE)],
   "linkme-profile": [up(LINKME_PROFILE)],
@@ -4670,7 +4710,7 @@ const PROFILE_URL: Record<PlatformId, string> = {
   account: "https://captapi.com/dashboard",
   utilities: "https://www.tiktok.com/@tiktok/video/7234567890123456789",
   kwai: "https://www.kwai.com/@topfilmeseseriesnatv",
-  komi: "https://komi.io/example",
+  komi: "https://komi.io/kimkardashian",
   pillar: "https://pillar.io/example",
   linkbio: "https://lnk.bio/charlidamelio",
   linkme: "https://link.me/example",
@@ -5057,6 +5097,16 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `Which AI model powers the summaries?`,
       a: `Summaries are generated with GPT-4o-mini for a strong balance of quality, speed, and cost, built on top of the transcript.`,
+    });
+  }
+  if (ep.slug === "amazon-shop-page") {
+    list.push({
+      q: `Is this the same as influencer amazon.com/shop/{handle} pages?`,
+      a: `No. This endpoint scrapes third-party seller storefronts (/sp?seller= or /s?me=). Influencer Amazon Shops (amazon.com/shop/{handle}) are a different Amazon surface — creator vitrines with socials[], lists[], and curations[] — and return HTTP 400 here. Do not treat seller-storefront and influencer-shop APIs as equivalents in competitive comparisons.`,
+    });
+    list.push({
+      q: `Why do you return ASIN and /dp/{ASIN} instead of shop getProductDetails links?`,
+      a: `ASIN is Amazon's catalog identity. Emitting asin plus a canonical https://www.amazon.com/dp/{ASIN} URL lets you join products across sellers, marketplaces, and your own catalog. Affiliate paths like /shop/{handle}/getProductDetails/{ASIN}?showRelatedPost=true bury the ASIN in the path and are not the product page.`,
     });
   }
   if (ep.slug === "spotify-artist") {
@@ -5484,7 +5534,7 @@ const FIELD_DESCS: Record<string, string> = {
   mediaCount: "Total number of media posts.",
   location: "Location shown on the profile or item.",
   website: "Website listed on the profile.",
-  email: "Public email when the account exposes one (GitHub: only if set public on the profile; YouTube: from About/description). Null when private or CAPTCHA-gated.",
+  email: "Public email when the account exposes one. Null when private, omitted, or CAPTCHA-gated.",
   joinedDate: "When the account was created.",
 
   // Content
@@ -6091,6 +6141,57 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     channelUrl: "Canonical Kick channel URL derived from the request.",
     displayName: "Display name for channel/creator. Canonical; name is a deprecated alias.",
     name: "Deprecated alias of displayName on nested channel/creator objects.",
+  },
+  "amazon-shop-page": {
+    asin: "Amazon Standard Identification Number — catalog identity for joins across sellers and marketplaces.",
+    url: "Canonical product page https://www.amazon.com/dp/{ASIN} (not a shop/{handle}/getProductDetails/… affiliate path).",
+    products:
+      "Seller storefront product rows — asin, title, canonical /dp url, image, price fields, rating/reviews, isPrime/isBestSeller/isSponsored.",
+    seller: "Third-party seller identity {id, name, url} for the /sp?seller= or /s?me= storefront.",
+    marketplace: "Amazon marketplace code echoed from the request (default US).",
+  },
+  "github-user": {
+    email:
+      "Public email only when the user made it public on their GitHub profile. Null when private or unset.",
+  },
+  "facebook-page-details": {
+    email: "Public email when the Facebook Page About section exposes one. Null when omitted.",
+  },
+  "komi-page": {
+    id: "Komi talentProfile id as a string UUID (catalog-wide id convention).",
+    displayName: "Creator display name from Komi. Canonical; name is a deprecated alias.",
+    name: "Deprecated alias of displayName — prefer displayName.",
+    handle: "Komi username. Canonical alongside username.",
+    bio: "Creator bio. Always present — empty string when Komi has none. description is a deprecated alias.",
+    description: "Deprecated alias of bio — prefer bio.",
+    linkCount: "Number of content rows in links[] (hidden PRODUCT rows included when Komi marks visible:false).",
+    links:
+      "Content modules only [{id, url, title, type, order, visible, thumbnail, moduleId, versionId, price?, currency?}]. Social icons live in socials{}, not here. PRODUCT rows include price/currency when Komi exposes them.",
+    type: "On links[]: Komi module type (LINK, PRODUCT, TIKTOK_VIDEO, …).",
+    socials:
+      "CamelCase social URL map from Komi's socialProfileLinks — instagram/tiktok/youtube/twitter/facebook/snapchat/spotify/appleMusic/… plus website when a WEBSITE row (or website field) is published.",
+    url: "On the page: https://komi.io/{username}. On a link row: outbound destination.",
+  },
+  "linktree-page": {
+    id: "Linktree account id as a string (catalog-wide id convention).",
+    displayName: "Creator display name. Canonical; name is a deprecated alias.",
+    name: "Deprecated alias of displayName — prefer displayName.",
+    handle: "Linktree username. Canonical alongside username.",
+    email:
+      "Public email when the creator adds an EMAIL_ADDRESS mailto social on Linktree. Null/omitted when not published.",
+    verticals:
+      "Linktree niche/vertical labels for the page (e.g. music_artist, musician_band). Empty when Linktree exposes none.",
+    linkPlatforms:
+      "Platforms Linktree detected among the page's links/socials (e.g. Spotify, Instagram). Distinct from socialAccounts URLs.",
+    linkCount: "Total link rows including GROUP children.",
+    links:
+      "Typed outbound links [{title, type, id, url, thumbnail?, parentId?, links?}]. url is always present — null only when Linktree exposes no destination (PRODUCT rows usually resolve shopUrl).",
+    type: "On links[]: Linktree link type (CLASSIC, PRODUCT, SPOTIFY_ALBUM, SPOTIFY_SONG, YOUTUBE_VIDEO, SOUNDCLOUD_PLAYLIST, GROUP, …). On socials[]: icon type (INSTAGRAM, TIKTOK, EMAIL_ADDRESS, …).",
+    socials:
+      "Linktree social icon list [{type, url}] including EMAIL_ADDRESS mailto entries. Prefer top-level email for the address string.",
+    socialAccounts:
+      "CamelCase HTTP profile URL map for catalog joins (instagram, tiktok, spotify, soundcloud, appleMusic, youtube, …). Email/phone are intentionally omitted — use top-level email. Watch URLs under youtube are resolved to the channel via oEmbed when possible.",
+    url: "On the page: Linktree profile URL. On a link row: outbound destination (PRODUCT may use shopUrl when Linktree leaves url empty).",
   },
   "twitch-profile": {
     platform: "Platform identifier for this response (matches the endpoint's platform).",
@@ -6877,16 +6978,32 @@ const FIELD_DESC_STICKY_KEYS = new Set([
   "videoUrl",
   "videoType",
   "hlsUrl",
+  "email",
+  "socialAccounts",
+  "socials",
+  "verticals",
+  "linkPlatforms",
+  "type",
 ]);
 
 /**
  * Fail when a sticky field's rendered description names a different platform
  * than the endpoint (shared dictionary bleed).
  */
+/** Pages that intentionally name other platforms (link-in-bio / creator graph). */
+const FIELD_DESC_CROSS_PLATFORM_HOSTS = new Set<PlatformId>([
+  "linktree",
+  "pillar",
+  "linkbio",
+  "linkme",
+  "komi",
+]);
+
 export function lintFieldDescPlatformBleed(): string[] {
   const errors: string[] = [];
   for (const ep of ALL_ENDPOINTS) {
     if (ep.platform === "account" || ep.platform === "utilities") continue;
+    if (FIELD_DESC_CROSS_PLATFORM_HOSTS.has(ep.platform)) continue;
     const groups = responseStructure(ep);
     for (const group of groups) {
       for (const field of group.fields) {
@@ -7193,7 +7310,6 @@ const PROFILE_CHANNEL_SLUGS = new Set([
   "bluesky-profile",
   "twitter-profile",
   "threads-profile",
-  "komi-page",
   "pillar-page",
   "linkbio-page",
   "linkme-profile",
@@ -7231,6 +7347,24 @@ const VIDEO_DETAILS_USE_CASES: UseCase[] = [
 
 /** Slug-specific use cases when category defaults would mislead. */
 const SLUG_USE_CASES: Record<string, UseCase[]> = {
+  "amazon-shop-page": [
+    {
+      title: "Seller catalog ingest",
+      desc: "Pull a merchant's ASIN list with canonical /dp URLs for price monitoring and catalog joins.",
+    },
+    {
+      title: "Badge & Prime signals",
+      desc: "Track isPrime / isBestSeller / isSponsored on storefront rows without HTML scraping.",
+    },
+    {
+      title: "Pagination",
+      desc: "Walk nextCursor/hasMore across ~16-product Amazon storefront pages at 1 credit each.",
+    },
+    {
+      title: "Not influencer shops",
+      desc: "For amazon.com/shop/{handle} creator vitrines (socials/lists/curations), use a different product — this endpoint rejects those URLs.",
+    },
+  ],
   "kick-clip": [
     {
       title: "Clip enrichment",
@@ -7452,9 +7586,41 @@ const SLUG_USE_CASES: Record<string, UseCase[]> = {
     { title: "Contributor Activity", desc: "Summarize a GitHub user's contribution graph." },
     { title: "Developer Vetting", desc: "Check recent activity before hiring or partnering." },
   ],
+  "komi-page": [
+    {
+      title: "Commerce inventory",
+      desc: "Collect PRODUCT rows with price/currency plus LINK CTAs (e.g. Visit SKIMS) for affiliate and merch research.",
+    },
+    {
+      title: "Creator graph fan-out",
+      desc: "Pipe socials.instagram/tiktok/youtube/spotify into matching Captapi profile endpoints.",
+    },
+    {
+      title: "Contact + website",
+      desc: "Read socials.website and outbound link destinations without scraping the Komi SPA.",
+    },
+    {
+      title: "Link change tracking",
+      desc: "Stable link id + visible/order for dedupe and inventory diffs (hidden products included).",
+    },
+  ],
   "linktree-page": [
-    { title: "Link-in-Bio Parsing", desc: "Extract links and socials from a Linktree page." },
-    { title: "Contact Discovery", desc: "Find outbound destinations a creator promotes." },
+    {
+      title: "Creator graph fan-out",
+      desc: "Pipe socialAccounts.instagram/tiktok/spotify/soundcloud into our matching profile endpoints — SC cannot complete Spotify/SoundCloud.",
+    },
+    {
+      title: "Contact discovery",
+      desc: "Collect outbound destinations (incl. PRODUCT merch shopUrl) plus top-level email when published.",
+    },
+    {
+      title: "Niche + platform signals",
+      desc: "Use verticals[] and linkPlatforms[] to classify creators before deeper enrichment.",
+    },
+    {
+      title: "Link-in-bio inventory",
+      desc: "Typed links[] with GROUP nesting, thumbnails, and stable string ids.",
+    },
   ],
   "facebook-marketplace-item": [
     { title: "Listing Enrichment", desc: "Pull Marketplace item title, price, and seller signals." },

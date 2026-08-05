@@ -111,8 +111,8 @@ function SignupForm() {
           <CardDescription>
             We sent a verification link to{" "}
             <span className="font-medium text-foreground">{sentTo}</span>. Click it to
-            activate your account
-            {fromTools ? ", then choose a plan on Billing." : "."}
+            activate your account and claim your 100 free credits
+            {fromTools ? ", then you can pick a plan on Billing." : "."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -143,7 +143,7 @@ function SignupForm() {
         <CardTitle>Create your account</CardTitle>
         <CardDescription>
           {fromTools
-            ? "Create an account to continue — pick a plan on Billing after signup."
+            ? "100 free credits to keep going — pick a plan on Billing anytime."
             : "100 free credits to get you started."}
         </CardDescription>
       </CardHeader>
