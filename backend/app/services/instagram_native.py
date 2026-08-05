@@ -2359,10 +2359,12 @@ def _business_address(user: dict[str, Any]) -> dict[str, Any] | None:
 def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> dict[str, Any]:
     """Map a web_profile_info user node to the channel-details response shape.
 
-    Existing keys (platform…externalUrl) stay stable for customers; newer fields
-    are additive only.
+    Canonical profile core (``displayName``, ``avatar``, ``postCount``, …) plus
+    deprecated aliases (``profileImage``) for one release. Platform extras stay.
     """
+    from app.utils.formatters import strip_empty
     from app.utils.media_urls import utc_now_iso
+    from app.utils.profile_core import stamp_profile_core
 
     username = safe_str(user.get("username")) or (handle or "").lstrip("@")
     pic = safe_str(user.get("profile_pic_url"))
@@ -2389,9 +2391,11 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
         or user.get("category")
         or user.get("category_enum")
     )
-    return {
+    out: dict[str, Any] = {
         "platform": "instagram",
         "url": canonical_instagram_profile_url(username),
+        "id": safe_str(user.get("id") or user.get("pk")),
+        "handle": username,
         "username": username,
         "displayName": safe_str(user.get("full_name")),
         "bio": safe_str(user.get("biography")),
@@ -2399,11 +2403,10 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
         "following": following,
         "postCount": post_count,
         "verified": False if verified is None else bool(verified),
-        "profileImage": profile_image,
+        "avatar": profile_image,
+        "profileImage": profile_image,  # deprecated alias — prefer avatar
         "imageExpiresAt": cdn_image_expires_at(profile_image),
         "externalUrl": external,
-        # --- additive (non-breaking) ---
-        "id": safe_str(user.get("id") or user.get("pk")),
         "fbid": safe_str(user.get("fbid") or user.get("fbid_v2")),
         "isPrivate": False if private is None else bool(private),
         "isBusinessAccount": (
@@ -2427,6 +2430,7 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
         "postCountIsApproximate": False,
         "fetchedAt": utc_now_iso(),
     }
+    return strip_empty(stamp_profile_core(out, platform="instagram"))
 
 
 def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
@@ -2460,10 +2464,13 @@ def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
     if is_business is None:
         is_business = user.get("is_business")
     is_pro = user.get("is_professional_account")
+    from app.utils.profile_core import stamp_profile_core
+
     profile_image = pic_hd or pic
     out: dict[str, Any] = {
         "platform": "instagram",
         "id": uid,
+        "handle": username,
         "username": username,
         "displayName": safe_str(user.get("full_name")),
         "url": canonical_instagram_profile_url(username),
@@ -2483,7 +2490,8 @@ def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
         "categoryName": category,
         "externalUrl": external,
         "bioLinks": bio_links,
-        "profileImage": profile_image,
+        "avatar": profile_image,
+        "profileImage": profile_image,  # deprecated alias — prefer avatar
         "profileImageHd": pic_hd,
         "imageExpiresAt": cdn_image_expires_at(profile_image),
         "fbid": safe_str(user.get("fbid") or user.get("fbid_v2")),
@@ -2491,7 +2499,7 @@ def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
         "relatedProfiles": _related_profiles(user),
         "likeAndViewCountsDisabled": _like_and_view_counts_disabled(user),
     }
-    return strip_empty(out)
+    return strip_empty(stamp_profile_core(out, platform="instagram"))
 
 
 # Logged-out api/v1 tags / clips-music endpoints return login HTML. Decodo

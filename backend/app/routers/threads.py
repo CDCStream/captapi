@@ -383,24 +383,27 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     )
     private = _bool_or_none(is_private)
 
+    from app.utils.profile_core import stamp_profile_core
+
     # Legacy core fields still go through strip_empty; additive keys are always
     # present (null / []) so clients never special-case missing keys.
     out = strip_empty(
         {
             "platform": "threads",
-            "username": safe_str(username),
+            "handle": safe_str(username),
+            "username": safe_str(username),  # deprecated alias — prefer handle
             "url": safe_str(item.get("url"))
             or (f"https://www.threads.net/@{username}" if username else None),
             "id": safe_str(item.get("pk") or item.get("id") or item.get("userId") or item.get("user_id")),
-            # displayName matches TikTok/IG/YouTube; name kept for BC.
             "displayName": display_name,
-            "name": display_name,
+            "name": display_name,  # deprecated alias — prefer displayName
             "bio": safe_str(item.get("biography") or item.get("bio")),
             "verified": bool(verified) if verified is not None else None,
             "followers": safe_int(
                 item.get("follower_count") or item.get("followerCount") or item.get("followers")
             ),
-            "profileImage": profile_image,
+            "avatar": profile_image,
+            "profileImage": profile_image,  # deprecated alias — prefer avatar
         }
     )
     if display_name:
@@ -419,7 +422,7 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
             "hasOnboarded": _bool_or_none(onboarded),
         }
     )
-    return out
+    return stamp_profile_core(out, platform="threads")
 
 
 def _normalize_post_download(item: dict[str, Any]) -> dict[str, Any]:

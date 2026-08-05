@@ -51,6 +51,32 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-05",
     category: "fix",
+    title: "Bluesky user-posts: mark reposts, normalize quotes, opaque cursor",
+    description:
+      "getAuthorFeed includes reposts — we were dropping reason, so other authors' posts looked like the requested handle's and inflated engagement averages. Rows now carry isRepost / repostedBy / repostedAt. Quote embeds are type quote with text/author/url (no raw lexicon NSID). nextCursor is Bluesky's opaque cursor only. Added filter + includeReposts. Docs and use cases no longer talk about videos or mediaUrlsExpireAt.",
+    items: [
+      "isRepost + repostedBy + repostedAt from reasonRepost",
+      "includeReposts=false and Bluesky filter= param",
+      "Quote embeds: type quote with uri/url/text/author",
+      "Pass-through AppView cursor (never publishedAt)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "improvement",
+    title: "Canonical profile core + Bluesky profile polish",
+    description:
+      "Every major profile / channel-details endpoint now emits one shared core — platform, id, handle, url, displayName, bio, avatar, banner, followers, following, postCount, verified, createdAt — so multi-platform dashboards no longer need a rename table. Legacy names (name, posts, profileImage, thumbnailUrl, bannerUrl, videoCount, tweetCount, subscriberCount, description, username, joinedAt) stay as deprecated aliases for one release. Bluesky /profile is the template: clearer indexedAt docs, full labels[] shape, cacheMaxAge in the param table, pinnedPost + joinedViaStarterPack from profileViewDetailed, and issuer DID → issuerHandle/issuerDisplayName resolution.",
+    items: [
+      "Canonical core on Bluesky, YouTube, Instagram, Truth Social, Twitter, Threads, TikTok",
+      "Deprecated aliases kept for one release (documented per endpoint)",
+      "Bluesky: indexedAt / labels docs, cacheMaxAge, pinnedPost, joinedViaStarterPack",
+      "Bluesky: verification issuer DIDs resolved to handle + display name",
+    ],
+  },
+  {
+    publishedAt: "2026-08-05",
+    category: "fix",
     title: "Truth Social posts: reblog/quote/reply chain + mentions/tags/poll",
     description:
       "GET /v1/truth-social/post and /user-posts share one status mapper. Added SC-critical chain fields (reblog{}, quote{}/quoteId, inReplyToId/inReplyToAccountId/inReplyTo{}), platform mentions[]/tags[], poll{}, visibility, spoilerText, sponsored, pinned, and post-level group — so a boost is not mistaken for an original in monitoring. Session-only favourited/reblogged/muted/bookmarked stay omitted. links[]/card/media.meta/externalVideoId were already on the shared mapper for both endpoints.",

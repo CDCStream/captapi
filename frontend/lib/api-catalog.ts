@@ -267,7 +267,7 @@ const YOUTUBE: Spec[] = [
     tagline:
       "YouTube channel stats — ISO country/joinedAt, real banner, quote-aware SEO tags, absolute links. Flat 1 credit.",
     longDescription:
-      "Pass a channel URL, @handle, or UC… id and get clean JSON: platform, id, url + canonicalUrl (@handle when known), name, handle, description, subscriberCount (YouTube's rounded display value, e.g. 292K→292000) with subscriberCountIsApproximate, videoCount, viewCount (exact when About exposes it), thumbnailUrl, bannerUrl (real channel banner or null — never the avatar), country (ISO-3166 alpha-2) + countryName, joinedAt (YYYY-MM-DD) with joinedDate kept as the English About label, verified, links[{text,url}] with absolute https URLs, email when published in About/description (not the CAPTCHA reveal), and tags[] from channel SEO keywords (quote-aware — multi-word tags stay one entry). Flat 1 credit.",
+      "Pass a channel URL, @handle, or UC… id and get clean JSON. Canonical profile core (same keys on every Captapi profile endpoint): platform, id, handle, url, displayName, bio, avatar, banner, followers, following, postCount, verified, createdAt — plus deprecated aliases for one release (name, description, thumbnailUrl, bannerUrl, subscriberCount, videoCount, joinedAt). Also: canonicalUrl (@handle when known), subscriberCountIsApproximate, viewCount (exact when About exposes it), country (ISO-3166 alpha-2) + countryName, joinedDate (English About label), links[{text,url}] with absolute https URLs, email when published in About/description (not the CAPTCHA reveal), and tags[] from channel SEO keywords (quote-aware — multi-word tags stay one entry). banner is null when the channel has no banner — we never substitute the avatar. Flat 1 credit.",
     platformLimits: [
       "subscriberCount is YouTube's rounded shelf value; subscriberCountIsApproximate is true when the source used K/M/B compact form. viewCount is exact when the About panel exposes it.",
       "bannerUrl is null when the channel has no banner — we never substitute the avatar.",
@@ -550,7 +550,7 @@ const TIKTOK: Spec[] = [
     tagline:
       "Resolve a TikTok @handle to id + secUid — createTime, ttSeller, bioLink.risk, category, commerce flags.",
     longDescription:
-      "Pass a profile URL or @handle and get clean JSON for CRM joins and chaining: id + secUid (stable identity — handles change; follower/video lists need secUid), followers/following/likes/postCount, verified, category (commerce niche, when TikTok exposes it), createTime / createTimeUnix (account age), bioLink{link,risk} + bioLinkRisk, ttSeller / isSeller (TikTok Shop bridge), isCommerceUser, isOrganization, friendCount, diggCount, language/region, duet/stitch/download/comment settings, and contact{emails,links} from the bio. Pass cacheMaxAge=1d|3d|7d|14d|30d to reuse a cached copy (envelope cached + cachedAt). Flat 1 credit.",
+      "Pass a profile URL or @handle and get clean JSON for CRM joins and chaining. Canonical profile core: platform, id, handle, url, displayName, bio, avatar, followers, following, postCount, verified, createdAt — plus deprecated username/profileImage aliases for one release. Also: secUid (stable identity — handles change; follower/video lists need secUid), likes, category (commerce niche when exposed), createTime / createTimeUnix, bioLink{link,risk} + bioLinkRisk, ttSeller / isSeller (TikTok Shop bridge), isCommerceUser, isOrganization, friendCount, diggCount, language/region, duet/stitch/download/comment settings, and contact{emails,links} from the bio. Pass cacheMaxAge=1d|3d|7d|14d|30d to reuse a cached copy (envelope cached + cachedAt). Flat 1 credit.",
     delivers: [
       "id + secUid for CRM joins and follower/video chaining",
       "createTime / createTimeUnix (account age)",
@@ -856,7 +856,7 @@ const INSTAGRAM: Spec[] = [
     ],
   },
   { slug: "instagram-comments", name: "Instagram Post Comments API", shortName: "Post Comments", category: "comments", method: "GET", path: "/v1/instagram/comments", credits: 45, creditsPerResult: 0.9, tagline: "Get the comments on any Instagram post or Reel — text, author, avatar, likes, and timestamp for each comment.", longDescription: "Send a post or Reel URL and the Instagram Post Comments API returns its comments as clean, structured JSON. Each comment includes the text, author username and avatar, like count, and when it was posted. Use the limit parameter (up to 500) to control how many you fetch — billing scales with results returned. Ideal for sentiment analysis, social listening, comment moderation, and finding engaged fans or customer feedback. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
-  { slug: "instagram-channel-details", name: "Instagram Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/instagram/channel-details", credits: 1, tagline: "Instagram profile stats plus categoryName, fbid, relatedProfiles, businessAddress, and likeAndViewCountsDisabled.", longDescription: "Send a profile URL or @handle and get clean JSON: displayName, bio, followers/following/postCount, verified, profileImage, externalUrl/bioLinks, plus additive categoryName (Instagram niche label), fbid (cross-platform join to Facebook), relatedProfiles[] (similar accounts from edge_related_profiles), businessAddress{cityName,latitude,longitude,…}, and likeAndViewCountsDisabled. Flat 1 credit. Pass cache=true for the 24h shared cache." },
+  { slug: "instagram-channel-details", name: "Instagram Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/instagram/channel-details", credits: 1, tagline: "Instagram profile stats plus categoryName, fbid, relatedProfiles, businessAddress, and likeAndViewCountsDisabled.", longDescription: "Send a profile URL or @handle and get clean JSON. Canonical profile core: platform, id, handle, url, displayName, bio, avatar, followers, following, postCount, verified — plus deprecated profileImage/username aliases for one release. Also: externalUrl/bioLinks, categoryName (Instagram niche label), fbid (cross-platform join to Facebook), relatedProfiles[] (similar accounts from edge_related_profiles), businessAddress{cityName,latitude,longitude,…}, and likeAndViewCountsDisabled. Flat 1 credit. Pass cache / cacheMaxAge for the profile trust layer." },
   {
     slug: "instagram-channel-posts",
     name: "Instagram Channel Posts API",
@@ -1240,7 +1240,7 @@ const TWITTER: Spec[] = [
     tagline:
       "X profile: verified + blue/legacy/identity, displayName, tipjar→contact{}, expanded website, createdAt.",
     longDescription:
-      "Paste a profile URL or @handle and get clean JSON. Verification is three independent bits — isBlueVerified (paid blue), isLegacyVerified (old celebrity check), isIdentityVerified — plus aggregate verified (always present), verification{reason,verifiedSince,verifiedType}, and affiliate{description,url,badgeUrl}. displayName matches other platforms (name kept for compatibility). Trust signals: ISO createdAt (account age), fastFollowers / normalFollowers (X's own suspicious-follower split), possiblySensitive, withheldInCountries. Outreach: tipjarSettings + contact{emails,paymentHandles,links}, website as expanded URL (not raw t.co), and bioUrls[] with expandedUrl. Also listedCount, mediaCount, likesCount, pinnedTweetIds, bannerImage, highlightedTweets. Flat 1 credit. Pass cacheMaxAge=1d|3d|7d|14d|30d (envelope cached + cachedAt).",
+      "Paste a profile URL or @handle and get clean JSON. Canonical profile core: platform, id, handle, url, displayName, bio, avatar, banner, followers, following, postCount, verified, createdAt — plus deprecated aliases username/name/profileImage/bannerImage/tweetCount for one release. Verification is three independent bits — isBlueVerified (paid blue), isLegacyVerified (old celebrity check), isIdentityVerified — plus aggregate verified (always present), verification{reason,verifiedSince,verifiedType}, and affiliate{description,url,badgeUrl}. Trust signals: fastFollowers / normalFollowers (X's own suspicious-follower split), possiblySensitive, withheldInCountries. Outreach: tipjarSettings + contact{emails,paymentHandles,links}, website as expanded URL (not raw t.co), and bioUrls[] with expandedUrl. Also listedCount, mediaCount, likesCount, pinnedTweetIds, highlightedTweets. Flat 1 credit. Pass cacheMaxAge=1d|3d|7d|14d|30d (envelope cached + cachedAt).",
     delivers: [
       "verified + isBlueVerified ≠ isLegacyVerified ≠ isIdentityVerified",
       "displayName (+ name for compatibility)",
@@ -1422,9 +1422,9 @@ const THREADS: Spec[] = [
     tagline:
       "Threads profile — displayName, private/isPrivate, bioLinks (Meta verified), isThreadsOnlyUser, transparencyLabel, bioFragments, HD avatars (1 credit).",
     longDescription:
-      "Pass a Threads profile URL or @handle and get the public profile as clean JSON: id, username, displayName (+ name for compatibility), bio, followers, verified, profileImage, plus isThreadsOnlyUser (Threads-only vs Instagram-linked — pair with Instagram fbid for an IG↔FB↔Threads identity chain when Meta exposes it), private/isPrivate, bioLinks[] ({url, verified, linkId} — verified means Meta confirmed the bio link), bioFragments[] (parsed plaintext/link/mention/tag pieces from text_app_biography), transparencyLabel (state-affiliated media etc.), profileImageVersions[] ({url,width,height}), and hasOnboarded. Flat 1 credit. following and post counts are not publicly exposed on this surface (same gap as ScrapeCreators).",
+      "Pass a Threads profile URL or @handle and get the public profile as clean JSON. Canonical core: platform, id, handle, url, displayName, bio, avatar, followers, verified — plus deprecated username/name/profileImage aliases for one release. Also: isThreadsOnlyUser (Threads-only vs Instagram-linked — pair with Instagram fbid for an IG↔FB↔Threads identity chain when Meta exposes it), private/isPrivate, bioLinks[] ({url, verified, linkId} — verified means Meta confirmed the bio link), bioFragments[] (parsed plaintext/link/mention/tag pieces from text_app_biography), transparencyLabel (state-affiliated media etc.), profileImageVersions[] ({url,width,height}), and hasOnboarded. Flat 1 credit. following and post counts are not publicly exposed on this surface (same gap as ScrapeCreators).",
     delivers: [
-      "displayName (+ name), bio, followers, verified, profileImage",
+      "Canonical displayName/avatar (+ name/profileImage aliases), bio, followers, verified",
       "private / isPrivate always present when Meta exposes privacy",
       "bioLinks[] with Meta verified + linkId; bioFragments[] when hydrated",
       "isThreadsOnlyUser + transparencyLabel for cross-platform / brand-safety signals",
@@ -1543,15 +1543,40 @@ const BLUESKY: Spec[] = [
     tagline:
       "Bluesky profile — handle, did, bio, counts, banner, verification{}, labels[], and associated{} (1 credit).",
     longDescription:
-      "Give a Bluesky profile URL, @handle, or handle and get the public AT Protocol profile as clean JSON: platform, handle, url, did, name, bio, followers/following/posts, avatar, banner, createdAt/indexedAt, plus verified + verification{verifications[], verifiedStatus, trustedVerifierStatus}, moderation labels[], and associated{lists, feedgens, starterPacks, labeler} so you can tell feed/labeler service accounts from people. Flat 1 credit per call.",
+      "Give a Bluesky profile URL, @handle, or handle and get the public AT Protocol profile as clean JSON. Canonical profile core (same keys on every Captapi profile endpoint): platform, id, handle, url, displayName, bio, avatar, banner, followers, following, postCount, verified, createdAt. Bluesky also returns did (same as id), deprecated aliases name/posts for one release, indexedAt (AppView last indexed the profile record — not last activity), pinnedPost{uri,cid,rkey} when the account featured a post, joinedViaStarterPack when present, verified + verification{verifications[{issuer, issuerHandle, issuerDisplayName, uri, isValid, createdAt}], verifiedStatus, trustedVerifierStatus} (issuer DIDs resolved to handle/display name), moderation labels[{src, uri, cid, val, neg, createdAt, expiresAt}], and associated{lists, feedgens, starterPacks, labeler, chat, activitySubscription} so you can tell feed/labeler service accounts from people. Accepts cache / cacheMaxAge like other profile trust-layer endpoints. Flat 1 credit per call.",
     delivers: [
-      "Handle, DID, display name, bio, avatar, and banner",
-      "Follower, following, and post counts",
-      "verified + verification{} (issuer, validity, trusted verifier status)",
-      "Moderation labels[] and associated{lists, feedgens, starterPacks, labeler}",
+      "Canonical core: displayName, avatar, banner, postCount (+ name/posts aliases)",
+      "DID + verification{} with issuerHandle / issuerDisplayName resolved",
+      "pinnedPost + joinedViaStarterPack when AppView exposes them",
+      "Moderation labels[] (full shape) and associated{lists, feedgens, starterPacks, labeler}",
     ],
   },
-  { slug: "bluesky-user-posts", name: "Bluesky User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/bluesky/user-posts", credits: 3, creditsPerResult: 0.1, tagline: "Get recent posts from any Bluesky profile — text, author, likes, reposts, replies, and embeds, with cursor pagination.", longDescription: "Send a Bluesky profile URL, @handle, or handle and the Bluesky User Posts API returns that account's recent posts as clean JSON. Each post includes the Bluesky URL and AT URI, text, publish time, the author (handle, display name, DID, avatar), engagement (likes, reposts, replies, quotes), and embed details when the post has a link, image, or quote. Need more than the first page? Pass the nextCursor value from the previous response to keep paging, and use hasMore to know when you've reached the end. Ideal for creator monitoring, content calendars, and feeding analytics tools. Billed per result — about 0.1 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Recent public posts from any Bluesky profile", "Post URL, AT URI, text, and publish time", "Author handle, display name, DID, and avatar", "Likes, reposts, replies, quotes, and embeds when present", "Cursor pagination (nextCursor + hasMore) through older posts"] },
+  {
+    slug: "bluesky-user-posts",
+    name: "Bluesky User Posts API",
+    shortName: "User Posts",
+    category: "list",
+    method: "GET",
+    path: "/v1/bluesky/user-posts",
+    credits: 3,
+    creditsPerResult: 0.1,
+    tagline:
+      "Author feed — posts and reposts (isRepost marked), quote/external/images embeds, opaque cursor.",
+    longDescription:
+      "Send a Bluesky profile URL, @handle, or handle and get that account's public author feed (app.bsky.feed.getAuthorFeed) as clean JSON — original posts and reposts. Reposts keep the original author{} and engagement; they are marked isRepost=true with repostedBy{handle,displayName,did,avatar} and repostedAt so analytics do not credit someone else's likes to the profile you queried. Pass includeReposts=false to drop reposts. Optional filter maps to Bluesky's feed filter (posts_with_replies | posts_no_replies | posts_with_media | posts_and_author_threads | posts_with_video) — that controls replies/media/threads, not reposts. Each row: uri/url/cid, text, publishedAt, indexedAt, author{}, engagement{likes,reposts,replies,quotes}, and embed as one of type external | images | video | quote (quotes include uri/url/text/author — never a raw lexicon NSID). nextCursor is Bluesky's opaque cursor (feed order includes repost time — do not derive a cursor from publishedAt). Billed ~0.1 credits per returned row (limit max 100). Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "Author feed: originals + reposts with isRepost / repostedBy / repostedAt",
+      "includeReposts=false and Bluesky filter= for replies/media/threads",
+      "Normalized embeds: external | images | video | quote (with text/author/url)",
+      "Opaque nextCursor from AppView (not publishedAt)",
+      "~0.1 credits/row; limit up to 100",
+    ],
+    platformLimits: [
+      "getAuthorFeed includes reposts by default — check isRepost before averaging engagement on author.handle.",
+      "filter does not exclude reposts; use includeReposts=false for that.",
+      "Feed order is by feed/repost time, not publishedAt — always pass nextCursor through.",
+    ],
+  },
   { slug: "bluesky-post-details", name: "Bluesky Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/bluesky/post-details", credits: 1 , tagline: "Get a Bluesky post — text, author, likes, reposts, and replies as structured JSON." },
 ];
 
@@ -2000,7 +2025,7 @@ const TRUTH_SOCIAL: Spec[] = [
     tagline:
       "Prominent public Truth Social profiles — locked/bot/group flags, fields[], static media. Flat 1 credit.",
     longDescription:
-      `Pass a Truth Social @username or profile URL and get the public account as clean JSON: display name, HTML-stripped bio, avatar/banner plus avatarStatic/headerStatic, verified/bot/locked (+ isPrivate alias)/group, discoverable, followers/following/postCount, location/website, createdAt, ISO lastStatusAt, emojis[], and profile fields[] with verifiedAt for confirmed links. ${TRUTH_AUTH_LIMIT} Flat 1 credit.`,
+      `Pass a Truth Social @username or profile URL and get the public account as clean JSON. Canonical profile core: platform, id, handle, url, displayName, bio, avatar, banner, followers, following, postCount, verified, createdAt — plus deprecated username alias for one release. Also: avatarStatic/headerStatic, bot/locked (+ isPrivate alias)/group, discoverable, location/website, ISO lastStatusAt, emojis[], and profile fields[] with verifiedAt for confirmed links. ${TRUTH_AUTH_LIMIT} Flat 1 credit.`,
     delivers: [
       "locked / bot / group classification flags",
       "fields[] with verifiedAt for confirmed profile links",
@@ -3682,8 +3707,37 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "threads-search": [qp("Keyword or phrase to search public Threads posts (min 2 characters)."), lp(25, 200)],
   "threads-search-users": [qp("Keyword to find Threads users / creators (min 2 characters)."), lp(20, 100)],
   // Bluesky
-  "bluesky-profile": [up("Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle.")],
-  "bluesky-user-posts": [up("Bluesky profile URL, @handle, or handle, e.g. https://bsky.app/profile/handle.bsky.social."), lp(25, 100), CURSOR],
+  "bluesky-profile": [
+    up("Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle."),
+    cachePWithMaxAge(),
+    cacheMaxAgeP(),
+  ],
+  "bluesky-user-posts": [
+    up("Bluesky profile URL, @handle, or handle, e.g. https://bsky.app/profile/handle.bsky.social."),
+    lp(25, 100),
+    {
+      name: "cursor",
+      type: "string",
+      required: false,
+      description:
+        "Opaque pagination cursor from the previous nextCursor. Leave empty for the first page. Do not invent a cursor from publishedAt — the feed is ordered by feed time (reposts sort by repost time).",
+    },
+    {
+      name: "filter",
+      type: "string",
+      required: false,
+      description:
+        "Bluesky getAuthorFeed filter: posts_with_replies (default), posts_no_replies, posts_with_media, posts_and_author_threads, or posts_with_video. Controls replies/media/threads — not reposts. Use includeReposts=false to drop reposts.",
+    },
+    {
+      name: "includeReposts",
+      type: "boolean",
+      required: false,
+      description:
+        "When false, omit repost rows (reasonRepost). Default true — reposts are included and marked with isRepost / repostedBy / repostedAt.",
+    },
+    cacheP(),
+  ],
   "bluesky-post-details": [up("Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY.")],
   // Pinterest
   "pinterest-pin-details": [up("Pinterest pin URL, e.g. https://pinterest.com/pin/ID/.")],
@@ -5177,13 +5231,15 @@ const FIELD_DESCS: Record<string, string> = {
   businessAddress: "Business address ({cityName, streetAddress, zipCode, latitude, longitude}).",
   linkedFbInfo: "Linked Facebook page info when present.",
   latestReelMedia: "Latest reel media timestamp/id when Instagram exposes it.",
-  displayName: "Display name of the account.",
-  name: "Name of the item or account.",
+  displayName:
+    "Display name of the account. Canonical across profile endpoints (prefer over name).",
+  name:
+    "Name of the item or account. On profile endpoints: deprecated alias of displayName (one release).",
   fullName: "Full display name.",
   firstName: "First name.",
   lastName: "Last name.",
   author: "Author name or handle.",
-  bio: "Profile bio or description.",
+  bio: "Profile bio. Canonical across profile endpoints (prefer over description on YouTube).",
   headline: "Profile headline.",
   verified: "Whether the account is verified on this platform.",
   isVerified: "Whether the account is verified.",
@@ -5194,7 +5250,8 @@ const FIELD_DESCS: Record<string, string> = {
   subscriberCount: "Subscriber count (channel, subreddit, or similar).",
   connections: "Number of connections.",
   members: "Member count.",
-  postCount: "Total number of posts.",
+  postCount:
+    "Total posts/statuses/videos for the account. Canonical across profile endpoints (prefer over posts / videoCount / tweetCount).",
   publicPostCount: "Public posts on the Kwai profile.",
   privatePostCount: "Private posts on the Kwai profile.",
   likedCount: "Total likes received across the profile.",
@@ -5379,10 +5436,17 @@ const FIELD_DESCS: Record<string, string> = {
   isRetweet: "Whether the tweet is a retweet.",
   isBlueVerified: "Whether the account has blue-check verification.",
   verification:
-    "Bluesky verification block: verifications[{issuer, uri, isValid, createdAt, …}], verifiedStatus, trustedVerifierStatus.",
-  labels: "Moderation labels on the profile (val, src, uri, createdAt, …).",
+    "Bluesky verification block: verifications[{issuer, issuerHandle, issuerDisplayName, uri, isValid, createdAt}], verifiedStatus, trustedVerifierStatus.",
+  labels:
+    "Moderation labels on the profile: [{src, uri, cid, val, neg, createdAt, expiresAt}]. src is the labeler DID; val is the label value (e.g. !hide).",
   associated:
     "Bluesky association counts: lists, feedgens, starterPacks, labeler (plus chat/activitySubscription when present).",
+  pinnedPost:
+    "Strong ref of the post this account pinned/featured: {uri, cid, rkey}. Omitted when none.",
+  joinedViaStarterPack:
+    "Starter pack the account joined through when AppView exposes it: {uri, cid, name, creator{did, handle, displayName}}.",
+  indexedAt:
+    "When the Bluesky AppView last indexed this profile record (ISO-8601). Not last activity — use createdAt for account age and user-posts for recent activity.",
   verifiedStatus: "Bluesky verification status string (e.g. valid, none).",
   trustedVerifierStatus: "Whether this account is a trusted verifier (e.g. valid, none).",
   feedgens: "Number of custom feeds (feed generators) this account publishes.",
@@ -5407,8 +5471,9 @@ const FIELD_DESCS: Record<string, string> = {
   thumbnailUrl: "Thumbnail image URL.",
   thumbnail: "Thumbnail image URL.",
   image: "Image URL.",
-  avatar: "Avatar image URL.",
-  profileImage: "Profile image URL.",
+  avatar: "Avatar / profile picture URL. Canonical across profile endpoints.",
+  profileImage:
+    "Profile image URL. Deprecated alias of avatar on Instagram/Twitter/Threads/TikTok profile endpoints (one release).",
   isThreadsOnlyUser:
     "Whether the account exists only on Threads (not auto-created from Instagram). Often null on web hydrate when Meta omits the flag.",
   bioFragments:
@@ -5416,9 +5481,9 @@ const FIELD_DESCS: Record<string, string> = {
   profileImageVersions: "Profile image URLs at multiple resolutions ({url, width, height}).",
   hasOnboarded: "Whether the account has onboarded to Threads (text post app).",
   linkId: "Stable id for a bio link when Meta exposes one.",
-  banner: "Banner image URL.",
-  bannerImage: "Banner image URL.",
-  bannerUrl: "Banner image URL.",
+  banner: "Banner / cover image URL. Canonical across profile endpoints.",
+  bannerImage: "Banner image URL. Deprecated alias of banner on Twitter (one release).",
+  bannerUrl: "Banner image URL. Deprecated alias of banner on YouTube (one release).",
   coverImage: "Cover image URL.",
   coverUrl: "Cover image URL.",
   logo: "Logo image URL.",
@@ -5880,17 +5945,28 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
       "ISO-8601 when available; approximate from relative labels on list cards — see publishedTimeText.",
   },
   "youtube-channel-details": {
-    platform: 'Always "youtube".',
-    canonicalUrl: "Preferred public URL — https://www.youtube.com/@handle when known, else /channel/UC….",
+    platform: "Platform identifier for this response (matches the endpoint's platform).",
+    displayName: "Channel title. Canonical; name is a deprecated alias for one release.",
+    name: "Deprecated alias of displayName — prefer displayName.",
+    bio: "Channel description. Canonical; description is a deprecated alias for one release.",
+    description: "Deprecated alias of bio — prefer bio.",
+    avatar: "Channel avatar. Canonical; thumbnailUrl is a deprecated alias for one release.",
+    thumbnailUrl: "Deprecated alias of avatar — prefer avatar.",
+    banner:
+      "Channel banner when YouTube exposes one. null when none — never a downsized avatar. Canonical; bannerUrl is a deprecated alias.",
     bannerUrl:
-      "Channel banner image when YouTube exposes one (c4TabbedHeader / pageHeader banner). null when the channel has no banner — never a downsized avatar.",
-    thumbnailUrl: "Channel avatar / profile image.",
+      "Deprecated alias of banner. null when the channel has no banner — never a downsized avatar.",
+    followers: "Subscriber count. Canonical; subscriberCount is a deprecated alias for one release.",
+    subscriberCount:
+      "Deprecated alias of followers. YouTube's rounded display text (292K → 292000). Not always exact.",
+    postCount: "Public video count. Canonical; videoCount is a deprecated alias for one release.",
+    videoCount: "Deprecated alias of postCount — prefer postCount.",
+    createdAt: "Channel creation date as YYYY-MM-DD. Canonical; joinedAt is a deprecated alias.",
+    joinedAt: "Deprecated alias of createdAt (YYYY-MM-DD from About joinedDateText under en scrape).",
+    canonicalUrl: "Preferred public URL — https://www.youtube.com/@handle when known, else /channel/UC….",
     country: "ISO-3166 alpha-2 channel country (e.g. US, IN). Prefer this over countryName for joins.",
     countryName: "English display name for country (e.g. United States). Locale-stable English from our ISO map.",
-    joinedAt: "Channel creation date as YYYY-MM-DD (parsed from About joinedDateText under en scrape).",
-    joinedDate: "English About label (e.g. Jul 31, 2017). Prefer joinedAt for sorting/filters.",
-    subscriberCount:
-      "Subscriber count from YouTube's rounded display text (292K → 292000). Not always exact.",
+    joinedDate: "English About label (e.g. Jul 31, 2017). Prefer createdAt / joinedAt for sorting/filters.",
     viewCount: "Lifetime channel view count when the About panel exposes it (exact integer).",
     tags: "SEO keywords from channelMetadata. Multi-word tags stay one entry (quote-aware parse).",
     links: "About / primary links as {text, url} with absolute https:// URLs.",
@@ -6174,8 +6250,63 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     authorFullname: "Stable Reddit account fullname (t2_…). Prefer this over author for joins.",
   },
   "bluesky-profile": {
+    platform: "Platform identifier for this response (matches the endpoint's platform).",
+    id: "Stable account id — Bluesky DID (same value as did).",
+    did: "AT Protocol DID. Same as id; kept for Bluesky-native clients.",
+    handle: "Bluesky handle (e.g. bsky.app).",
+    displayName: "Profile display name. Canonical; name is a deprecated alias for one release.",
+    name: "Deprecated alias of displayName — prefer displayName. Removed after one release.",
+    bio: "Profile description / bio text.",
+    avatar: "Avatar image URL.",
+    banner: "Banner image URL.",
+    followers: "Follower count.",
+    following: "Following count.",
+    postCount: "Posts this account has published. Canonical; posts is a deprecated alias for one release.",
+    posts: "Deprecated alias of postCount — prefer postCount. Removed after one release.",
     verified:
       "Prefer verifiedStatus / verification on Bluesky — this boolean is a coarse summary when present.",
+    verification:
+      "verifications[{issuer, issuerHandle, issuerDisplayName, uri, isValid, createdAt}], verifiedStatus, trustedVerifierStatus. Issuer DIDs are resolved so you do not need a second getProfile call.",
+    labels:
+      "Moderation labels: [{src, uri, cid, val, neg, createdAt, expiresAt}]. src = labeler DID; val = label value; neg = negation; expiresAt when the label expires.",
+    associated:
+      "Association counts so you can tell feed/labeler service accounts from people: lists, feedgens, starterPacks, labeler, plus chat{allowIncoming, allowGroupInvites} and activitySubscription{allowSubscriptions} when present.",
+    feedgens: "Number of custom feeds (feed generators) this account publishes.",
+    labeler: "Whether this account is a Bluesky labeler (moderation service).",
+    createdAt: "When the account was created (ISO-8601).",
+    indexedAt:
+      "When the Bluesky AppView last indexed this profile record (ISO-8601). Not last activity — createdAt is account age; use user-posts for recent posts.",
+    pinnedPost:
+      "Post the account chose to feature: {uri, cid, rkey} from profileViewDetailed. Omitted when none.",
+    joinedViaStarterPack:
+      "Starter pack used at join when present: {uri, cid, name, creator{did, handle, displayName}}.",
+  },
+  "bluesky-user-posts": {
+    platform: "Platform identifier for this response (matches the endpoint's platform).",
+    handle: "The actor whose author feed you requested.",
+    uri: "AT URI of the post (at://did…/app.bsky.feed.post/rkey).",
+    url: "bsky.app permalink for the post.",
+    cid: "Content ID (CID) of this post record — stable content-addressed hash.",
+    text: "Post text body.",
+    publishedAt: "When the original post was created (record createdAt). Not repost time.",
+    indexedAt:
+      "When the AppView indexed this post. For reposts, feed order follows repostedAt — not this field.",
+    author:
+      "Author of the underlying post: {handle, displayName, did, avatar}. On reposts this is the original author — not the profile you queried.",
+    isRepost:
+      "true when this feed row is a repost (reasonRepost). Engagement and author belong to the original post — use repostedBy for the account that boosted it.",
+    repostedBy:
+      "Who reposted: {handle, displayName, did, avatar}. Present only when isRepost is true (usually the requested handle).",
+    repostedAt: "When the repost happened (ISO-8601). Present only when isRepost is true.",
+    engagement:
+      "Engagement on the underlying post: {likes, reposts, replies, quotes}. On isRepost rows these counts are the original author's — do not average them onto the requested handle without filtering.",
+    embed:
+      "Normalized embed: type external {url,title,description,thumb} | images {images[{url,alt}]} | video {playlist,thumbnail,alt} | quote {uri,url,text,author,cid,publishedAt}. Never a raw lexicon NSID.",
+    nextCursor:
+      "Opaque AppView cursor for the next page. Pass it through unchanged — do not build a cursor from publishedAt (feed order includes repost time).",
+    hasMore: "true when nextCursor is present.",
+    filter: "Echo of the filter query param when set (Bluesky getAuthorFeed filter).",
+    includeReposts: "Echo of includeReposts (default true).",
   },
   "facebook-ad-library-search": {
     status: "Ad delivery filter/status: ACTIVE, INACTIVE, or ALL.",
@@ -6765,6 +6896,24 @@ const VIDEO_DETAILS_USE_CASES: UseCase[] = [
 
 /** Slug-specific use cases when category defaults would mislead. */
 const SLUG_USE_CASES: Record<string, UseCase[]> = {
+  "bluesky-user-posts": [
+    {
+      title: "Creator monitoring",
+      desc: "Track a handle's author feed — originals and reposts — with isRepost so boosts are not mistaken for new posts.",
+    },
+    {
+      title: "Honest analytics",
+      desc: "Average engagement only on rows where isRepost is false (or includeReposts=false) so you do not credit someone else's likes to the profile.",
+    },
+    {
+      title: "Content calendars",
+      desc: "Pull text, quote embeds, and links for scheduling or research — no video CDN URLs on this surface.",
+    },
+    {
+      title: "Partnership vetting",
+      desc: "Sample recent posts and quote targets before outreach; use filter=posts_no_replies to skip reply noise.",
+    },
+  ],
   "tiktok-shop-search": [
     {
       title: "Product Discovery",
@@ -7051,7 +7200,6 @@ const CHANNEL_CATALOG_LIST_SLUGS = new Set([
   "facebook-group-posts",
   "twitter-user-tweets",
   "threads-user-posts",
-  "bluesky-user-posts",
   "reddit-subreddit-posts",
   "twitch-user-videos",
   "rumble-channel-videos",

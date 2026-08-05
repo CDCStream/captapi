@@ -2080,26 +2080,37 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
         else f"https://www.youtube.com/channel/{channel_id}"
     )
 
-    return {
+    from app.utils.profile_core import stamp_profile_core
+
+    # Canonical profile core + deprecated aliases (name/description/thumbnailUrl/
+    # bannerUrl/videoCount/subscriberCount) for one release.
+    card = {
         "platform": "youtube",
+        "id": channel_id,
+        "handle": handle,
         "url": f"https://www.youtube.com/channel/{channel_id}",
         "canonicalUrl": canonical,
-        "id": channel_id,
+        "displayName": name or "",
         "name": name or "",
-        "handle": handle,
+        "bio": description,
         "description": description,
+        "avatar": avatar,
+        "thumbnailUrl": avatar,
+        "banner": banner,
+        "bannerUrl": banner,
+        "followers": subscriber_count,
         "subscriberCount": subscriber_count,
         "subscriberCountIsApproximate": (
             bool(subscriber_count_is_approximate)
             if subscriber_count is not None
             else None
         ),
+        "postCount": video_count,
         "videoCount": video_count,
         "viewCount": view_count,
-        "thumbnailUrl": avatar,
-        "bannerUrl": banner,
         "country": country_code,
         "countryName": country_display,
+        "createdAt": joined_at,
         "joinedAt": joined_at,
         "joinedDate": joined,
         "verified": verified,
@@ -2107,6 +2118,7 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
         "email": email,
         "tags": tags,
     }
+    return stamp_profile_core(card, platform="youtube")
 
 
 _EMAIL_RE = re.compile(

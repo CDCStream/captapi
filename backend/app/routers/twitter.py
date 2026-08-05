@@ -452,17 +452,24 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
         else None,
     )
 
+    from app.utils.profile_core import stamp_profile_core
+
     display_name = safe_str(item.get("name") or item.get("fullName") or item.get("displayName"))
+    avatar = safe_str(item.get("profilePicture") or item.get("profile_image_url_https"))
+    banner = safe_str(item.get("coverPicture") or item.get("profile_banner_url"))
+    tweet_count = safe_int(
+        first_present(item.get("statusesCount"), item.get("tweetsCount"), item.get("statuses_count"))
+    )
     out = strip_empty(
         {
             "platform": "twitter",
             "url": safe_str(item.get("url"))
             or (f"https://x.com/{username}" if username else None),
             "id": safe_str(item.get("id") or item.get("id_str")),
-            "username": safe_str(username),
-            # displayName matches TikTok/IG/YouTube; name kept for BC.
+            "handle": safe_str(username),
+            "username": safe_str(username),  # deprecated alias — prefer handle
             "displayName": display_name,
-            "name": display_name,
+            "name": display_name,  # deprecated alias — prefer displayName
             "bio": bio_text,
             "location": safe_str(item.get("location")),
             "verified": verified,
@@ -481,9 +488,8 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
             "normalFollowers": safe_int(
                 first_present(item.get("normalFollowers"), item.get("normal_followers_count"))
             ),
-            "tweetCount": safe_int(
-                first_present(item.get("statusesCount"), item.get("tweetsCount"), item.get("statuses_count"))
-            ),
+            "postCount": tweet_count,
+            "tweetCount": tweet_count,  # deprecated alias — prefer postCount
             "likesCount": safe_int(
                 first_present(item.get("favouritesCount"), item.get("favourites_count"), item.get("likesCount"))
             ),
@@ -494,8 +500,10 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
             "bioUrls": bio_urls,
             "contact": contact,
             "tipjarSettings": tipjar,
-            "profileImage": safe_str(item.get("profilePicture") or item.get("profile_image_url_https")),
-            "bannerImage": safe_str(item.get("coverPicture") or item.get("profile_banner_url")),
+            "avatar": avatar,
+            "profileImage": avatar,  # deprecated alias — prefer avatar
+            "banner": banner,
+            "bannerImage": banner,  # deprecated alias — prefer banner
             "profileImageShape": safe_str(item.get("profileImageShape") or item.get("profile_image_shape")),
             "possiblySensitive": (
                 bool(item.get("possiblySensitive"))
@@ -532,7 +540,7 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     if display_name:
         out.setdefault("displayName", display_name)
         out.setdefault("name", display_name)
-    return out
+    return stamp_profile_core(out, platform="twitter")
 
 
 def _merge_tweet_row(base: dict[str, Any], richer: dict[str, Any]) -> dict[str, Any]:

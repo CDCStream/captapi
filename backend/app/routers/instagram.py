@@ -2473,6 +2473,8 @@ def _profile_to_search_user(profile: dict) -> dict:
     """Map sparse Decodo/meta fallback shapes into the enriched search row."""
     from app.utils.formatters import strip_empty
 
+    from app.utils.profile_core import stamp_profile_core
+
     username = safe_str(profile.get("username"))
     private = profile.get("isPrivate")
     if private is None:
@@ -2482,6 +2484,7 @@ def _profile_to_search_user(profile: dict) -> dict:
         "platform": "instagram",
         "id": safe_str(profile.get("id")),
         "username": username,
+        "handle": username,  # canonical — username kept as deprecated alias
         "displayName": safe_str(profile.get("displayName") or profile.get("full_name")),
         "url": instagram_native.canonical_instagram_profile_url(username)
         or safe_str(profile.get("url")),
@@ -2500,11 +2503,12 @@ def _profile_to_search_user(profile: dict) -> dict:
         "categoryName": safe_str(profile.get("categoryName") or profile.get("category_name")),
         "externalUrl": safe_str(profile.get("externalUrl") or profile.get("external_url")),
         "bioLinks": profile.get("bioLinks") or profile.get("bio_links"),
+        "avatar": profile_image,  # canonical — profileImage kept as deprecated alias
         "profileImage": profile_image,
         "profileImageHd": safe_str(profile.get("profileImageHd") or profile.get("profile_pic_url_hd")),
         "imageExpiresAt": instagram_native.cdn_image_expires_at(profile_image),
     }
-    return strip_empty(out)
+    return strip_empty(stamp_profile_core(out, platform="instagram"))
 
 
 @router.get("/profile-search", summary="Find an Instagram profile by name or @handle")

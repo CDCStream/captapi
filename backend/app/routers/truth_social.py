@@ -250,12 +250,15 @@ def _normalize_account(item: dict[str, Any]) -> dict[str, Any]:
             "statusesCount",
         )
     )
+    from app.utils.profile_core import stamp_profile_core
+
     locked = item.get("locked") if "locked" in item else item.get("isPrivate")
     locked_bool = bool(locked) if locked is not None else False
     out: dict[str, Any] = {
         "platform": "truth_social",
         "id": safe_str(item.get("id") or item.get("authorId")),
         "username": safe_str(username),
+        "handle": safe_str(username),  # canonical — username kept as deprecated alias
         "acct": safe_str(item.get("acct") or username),
         "url": safe_str(item.get("url") or item.get("authorUrl"))
         or (f"https://truthsocial.com/@{username}" if username else None),
@@ -306,7 +309,7 @@ def _normalize_account(item: dict[str, Any]) -> dict[str, Any]:
         for key in ("location", "website", "avatarStatic", "headerStatic", "acct"):
             if out.get(key) in (None, ""):
                 out.pop(key, None)
-    return out
+    return stamp_profile_core(out, platform="truth_social")
 
 
 def _author_slim(full: dict[str, Any] | None) -> dict[str, Any] | None:

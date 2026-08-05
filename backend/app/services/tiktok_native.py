@@ -620,12 +620,16 @@ async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None
     bio = safe_str(user.get("signature"))
     create_unix = safe_int(user.get("createTime"))
     tt_seller = user.get("ttSeller")
+    from app.utils.profile_core import stamp_profile_core
+
     contact = build_contact(bio=bio, links=[external_url] if external_url else None)
-    # Additive-only: keep the original 12 keys stable for existing parsers.
-    return {
+    # Canonical profile core + deprecated aliases (username/profileImage) for one release.
+    out: dict[str, Any] = {
         "platform": "tiktok",
         "url": f"https://www.tiktok.com/@{username}",
-        "username": username,
+        "id": safe_str(user.get("id") or user.get("uid") or user.get("user_id")),
+        "handle": username,
+        "username": username,  # deprecated alias — prefer handle
         "displayName": safe_str(user.get("nickname")),
         "bio": bio,
         "followers": _stat(stats_v2, stats, "followerCount"),
@@ -634,15 +638,16 @@ async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None
         "postCount": _stat(stats_v2, stats, "videoCount"),
         "verified": user.get("verified"),
         "private": user.get("privateAccount"),
-        "profileImage": profile_image,
+        "avatar": profile_image,
+        "profileImage": profile_image,  # deprecated alias — prefer avatar
         "externalUrl": external_url,
         "category": safe_str(commerce.get("category")),
         # --- additive identity / vetting / commerce ---
         # id + secUid are the resolve contract (search-users FAQ): handles change.
-        "id": safe_str(user.get("id") or user.get("uid") or user.get("user_id")),
         "secUid": safe_str(user.get("secUid") or user.get("sec_uid")),
         "createTime": _iso(create_unix),
         "createTimeUnix": create_unix,
+        "createdAt": _iso(create_unix),
         "friendCount": _stat(stats_v2, stats, "friendCount"),
         "diggCount": _stat(stats_v2, stats, "diggCount"),
         "profileImageMedium": safe_str(user.get("avatarMedium")),
@@ -678,6 +683,7 @@ async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None
         "contact": contact,
         "fetchedAt": utc_now_iso(),
     }
+    return stamp_profile_core(out, platform="tiktok")
 
 
 # --- Comments (mobile aweme API, cursor-paginated) -------------------------

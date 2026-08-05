@@ -67,6 +67,8 @@ def test_channel_details_and_profile_search_parity() -> None:
     assert ch["relatedProfiles"][0]["username"] == "itsallykrinsky"
     assert ch["likeAndViewCountsDisabled"] is True
     assert ch["url"] == "https://www.instagram.com/austinbbq/"
+    assert ch["handle"] == "austinbbq"
+    assert ch["avatar"] == ch["profileImage"]
     assert "private" not in ch
     assert ch["isPrivate"] is False
     ps = map_profile_search_user(u)
@@ -75,6 +77,8 @@ def test_channel_details_and_profile_search_parity() -> None:
     assert ps["fbid"] == "17841402777077586"
     assert ps["relatedProfiles"][0]["id"] == "9"
     assert ps["url"] == "https://www.instagram.com/austinbbq/"
+    assert ps["handle"] == "austinbbq"
+    assert ps["avatar"] == ps["profileImage"]
     assert "private" not in ps
     assert ps["isPrivate"] is False
     assert ch["url"] == ps["url"]
