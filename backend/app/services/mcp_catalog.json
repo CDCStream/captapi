@@ -1627,7 +1627,7 @@
     "name": "Instagram Trending Reels",
     "path": "/v1/instagram/trending-reels",
     "credits": 1,
-    "summary": "Snapshot-backed trending Reels (typical freshness <24h) — videos only, flat 1 credit. Use reels-search for live scrapes.",
+    "summary": "Cache-first trending Reels (4h TTL; hit 0 credits, miss live 1 credit). Use reels-search for keyword scrapes.",
     "params": [
       {
         "name": "country",
@@ -1639,13 +1639,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200."
       },
       {
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Default true — serve 4h response cache (0 credits). false forces live scrape (1 credit)."
       }
     ]
   },

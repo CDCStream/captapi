@@ -1,12 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
-
 import pytest
 from fastapi import HTTPException
 
 from app.services import instagram_native as native
-from app.services import instagram_trending_snapshot as ig_snap
 from app.routers import instagram as ig_router
 
 
@@ -89,74 +86,39 @@ def test_unsupported_country_is_400_with_list() -> None:
     assert "United States" in detail["error"]["supportedCountries"]
 
 
-def test_warming_error_is_machine_readable() -> None:
-    """Last-resort 503 when live scrape also fails."""
-    exc = ig_router._trending_warming_http("United States")
-    assert exc.status_code == 503
-    assert exc.headers["Retry-After"] == "600"
-    assert exc.detail["error"]["code"] == "warming"
-    assert exc.detail["error"]["retryAfterSeconds"] == 600
+def test_scrape_failed_error_is_machine_readable() -> None:
+    """Live scrape failure → 502; never a warming/snapshot fallback."""
+    exc = ig_router._trending_scrape_failed_http("United States")
+    assert exc.status_code == 502
+    assert exc.detail["error"]["code"] == "scrape_failed"
     assert exc.detail["error"]["country"] == "United States"
 
 
-def test_freshness_marks_stale_after_refresh_window() -> None:
-    fresh = ig_router._trending_freshness(
-        cached_at=datetime.now(timezone.utc) - timedelta(hours=2),
-        from_snapshot=True,
-    )
-    assert fresh["cached"] is True
-    assert fresh["stale"] is False
-    assert fresh["ageHours"] < 6
-    assert "snapshotAt" in fresh
-    assert fresh["cachedAt"] == fresh["snapshotAt"]
-
-    old = ig_router._trending_freshness(
-        cached_at=datetime.now(timezone.utc) - timedelta(hours=8),
-        from_snapshot=True,
-    )
-    assert old["cached"] is True
-    assert old["stale"] is True
-    assert old["ageHours"] >= 6
-
-    native = ig_router._trending_freshness(cached_at=None, from_snapshot=False)
-    assert native["cached"] is False
-    assert "cachedAt" not in native
-    assert "snapshotAt" not in native
-    assert native["ageHours"] == 0
-
-
-def test_hard_cutoff_rejects_snapshots_older_than_12h() -> None:
-    ancient = {
-        "reels": [{"id": "1"}],
-        "snapshotAt": (datetime.now(timezone.utc) - timedelta(hours=22)).strftime(
-            "%Y-%m-%dT%H:%M:%S.000Z"
-        ),
-    }
-    assert ig_snap.is_servable(ancient) is False
-    ok = {
-        "reels": [{"id": "1"}],
-        "snapshotAt": (datetime.now(timezone.utc) - timedelta(hours=3)).strftime(
-            "%Y-%m-%dT%H:%M:%S.000Z"
-        ),
-    }
-    assert ig_snap.is_servable(ok) is True
-    assert ig_snap.MAX_AGE_SECS == 12 * 3600
-
-
 def test_trending_payload_includes_iso_country_code() -> None:
-    payload = ig_router._trending_payload(
-        [],
-        country="United States",
-        freshness={"cached": False, "stale": False, "ageHours": 0},
-    )
+    payload = ig_router._trending_payload([], country="United States", cached=False)
     assert payload["country"] == "United States"
     assert payload["countryCode"] == "US"
-    assert "12 hours" in payload["note"] or "ageHours" in payload["note"]
+    assert payload["cached"] is False
+    assert "4 hours" in payload["note"] or "cache" in payload["note"].lower()
     assert "view count" in payload["note"]
+    assert "snapshot" not in payload["note"].lower()
+    assert "warming" not in payload["note"].lower()
+
+
+def test_slice_trending_payload() -> None:
+    payload = {
+        "reels": [{"id": "1"}, {"id": "2"}, {"id": "3"}],
+        "totalReturned": 3,
+        "cached": False,
+    }
+    sliced = ig_router._slice_trending_payload(payload, 2)
+    assert sliced["totalReturned"] == 2
+    assert [r["id"] for r in sliced["reels"]] == ["1", "2"]
 
 
 def test_live_budget_under_gateway() -> None:
-    assert ig_router._TRENDING_LIVE_BUDGET_SECS <= 40
+    assert ig_router._TRENDING_NATIVE_BUDGET_SECS <= 60
+    assert ig_router._TRENDING_CACHE_TTL_SECS == 4 * 3600
 
 
 def test_wire_trending_reel_drops_plays_keeps_duration() -> None:
@@ -176,6 +138,7 @@ def test_wire_trending_reel_drops_plays_keeps_duration() -> None:
     assert "plays" not in out["engagement"]
     assert out["durationSeconds"] is None
     assert out["engagement"]["views"] == 100
+    assert out["engagement"]["viewsSource"] == "instagram"
 
 
 def test_trending_engagement_acceptance() -> None:
@@ -229,6 +192,9 @@ def test_trending_engagement_acceptance() -> None:
     assert "plays" not in keys
     for k in keys:
         if k in {"views", "viewsSource"}:
+            assert not all(r["engagement"].get(k) is None for r in reels)
+        else:
+            # No engagement field may be null on every row.
             assert not all(r["engagement"].get(k) is None for r in reels)
     assert reels[0]["durationSeconds"] == 12.011
     assert "durationSeconds" in reels[1]

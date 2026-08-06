@@ -5403,7 +5403,7 @@
           "Instagram"
         ],
         "summary": "Instagram trending Reels from /reels",
-        "description": "Snapshot-backed trending Reels — videos only, flat 1 credit.\n\nPrefer reels-search when you need a live keyword scrape. This endpoint\nserves native /reels when available, otherwise any-age Apify snapshots\n(never Explore photos). Cold countries warm in the background (~10 min).",
+        "description": "On-demand trending Reels — videos only.\n\nCache-first (default): hit = 0 credits; miss = live scrape then cache\nfor 4 hours. ``cache=false`` forces live. Concurrent same-country misses\nshare one scrape. Failures return 502 — never an old snapshot.",
         "operationId": "instagram_trending_reels_v1_instagram_trending_reels_get",
         "security": [
           {
@@ -5441,11 +5441,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
-              "default": false,
+              "description": "Default true (cache-first): serve the per-country response cache when present (TTL 4h, 0 credits). Set false to skip the cache read and force a live scrape (~45–120s, 1 credit); the fresh result still refreshes the cache.",
+              "default": true,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Default true (cache-first): serve the per-country response cache when present (TTL 4h, 0 credits). Set false to skip the cache read and force a live scrape (~45–120s, 1 credit); the fresh result still refreshes the cache."
           }
         ],
         "responses": {

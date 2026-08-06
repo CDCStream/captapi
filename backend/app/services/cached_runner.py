@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from typing import Any, Awaitable, Callable
 
 from app.services.cache import (
@@ -30,6 +31,8 @@ async def cached_or_run(
     ttl: int | None = None,
     stale_while_revalidate: bool = False,
     use_cache: bool = True,
+    single_flight: bool = False,
+    flight_wait_secs: int = 180,
 ) -> dict[str, Any]:
     """
     Look up cache; if miss, run `runner()` and store result.
@@ -49,6 +52,10 @@ async def cached_or_run(
     `use_cache=False` (driven by the caller's `cache=false` query param)
     skips the cache lookup so the data is always fetched fresh; the fresh
     result still refreshes the cache for subsequent cached calls.
+
+    `single_flight=True` ensures concurrent misses for the same cache key
+    share one `runner()` call (Redis SET NX lock + poll). Waiters that see
+    the written cache are treated as cache hits (0 credits).
     """
     effective_ttl = ttl if ttl is not None else default_ttl_for(endpoint)
 
@@ -70,25 +77,62 @@ async def cached_or_run(
                 _spawn_refresh(key, stale_key, runner, effective_ttl)
                 return stale
 
-    result = await runner()
-    # Stamp fetchedAt so cache hits can expose cachedAt in the JSON envelope
-    # (BillingHeaderMiddleware reads data.fetchedAt when request_meta lacks it).
-    if isinstance(result, dict) and not result.get("fetchedAt"):
-        from app.utils.media_urls import utc_now_iso
+    async def _execute() -> dict[str, Any]:
+        result = await runner()
+        # Stamp fetchedAt so cache hits can expose cachedAt in the JSON envelope
+        # (BillingHeaderMiddleware reads data.fetchedAt when request_meta lacks it).
+        if isinstance(result, dict) and not result.get("fetchedAt"):
+            from app.utils.media_urls import utc_now_iso
 
-        result["fetchedAt"] = utc_now_iso()
-    ctx["data"] = result
-    if effective_ttl > 0 and not _looks_empty(result):
-        await cache_set(key, result, ttl=effective_ttl)
-        if stale_while_revalidate:
-            await cache_set(stale_key, result, ttl=effective_ttl * _STALE_TTL_FACTOR)
+            result["fetchedAt"] = utc_now_iso()
+        ctx["data"] = result
+        if effective_ttl > 0 and not _looks_empty(result):
+            await cache_set(key, result, ttl=effective_ttl)
+            if stale_while_revalidate:
+                await cache_set(stale_key, result, ttl=effective_ttl * _STALE_TTL_FACTOR)
 
-    # Free by-product: fresh fetches of tracked profile/post endpoints feed
-    # the /v1/history time series (fire-and-forget, never blocks).
-    from app.services.metric_history import maybe_record
+        # Free by-product: fresh fetches of tracked profile/post endpoints feed
+        # the /v1/history time series (fire-and-forget, never blocks).
+        from app.services.metric_history import maybe_record
 
-    maybe_record(endpoint, params, result)
-    return result
+        maybe_record(endpoint, params, result)
+        return result
+
+    if not single_flight:
+        return await _execute()
+
+    lock_ttl = max(int(flight_wait_secs) + 30, 60)
+    lock_key = key + ":flight"
+    if await cache_try_lock(lock_key, lock_ttl):
+        # Re-check — another worker may have filled the cache just as we locked.
+        if effective_ttl > 0:
+            cached = await cache_get(key)
+            if cached is not None:
+                ctx["cache_hit"] = True
+                ctx["data"] = cached
+                return cached
+        return await _execute()
+
+    deadline = time.monotonic() + max(flight_wait_secs, 1)
+    while time.monotonic() < deadline:
+        await asyncio.sleep(0.5)
+        cached = await cache_get(key)
+        if cached is not None:
+            ctx["cache_hit"] = True
+            ctx["data"] = cached
+            return cached
+
+    # Leader failed or timed out without writing — try once as the new leader.
+    if await cache_try_lock(lock_key, lock_ttl):
+        cached = await cache_get(key)
+        if cached is not None:
+            ctx["cache_hit"] = True
+            ctx["data"] = cached
+            return cached
+        return await _execute()
+
+    # Still locked and empty — last resort: run anyway (prefer duplicate over hang).
+    return await _execute()
 
 
 def _spawn_refresh(

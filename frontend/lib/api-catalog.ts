@@ -926,18 +926,18 @@ const INSTAGRAM: Spec[] = [
     path: "/v1/instagram/trending-reels",
     credits: 1,
     tagline:
-      "Warm Redis snapshot (<2s) or live scrape (~40s) — videos only, flat 1 credit.",
+      "Cache-first trending Reels — hit 0 credits / miss live scrape 1 credit (4h TTL).",
     longDescription:
-      "Trending Reels prefers a warm Redis country snapshot written by the cron (~every 6 hours, hard max age 12 hours — see cached / snapshotAt / stale / ageHours). Hot path is a Redis read (typically under 2s). cache=false skips Redis and forces a live scrape (~40s). Cold or stale countries also fall through to live scrape instead of 503. Each reel includes engagement{likes,comments,views,viewsSource} where views is the platform play count when exposed and viewsSource is instagram|facebook whenever views is set. Instagram withholds view counts on roughly a third of reels — those rows keep views/viewsSource null. Constant postType/productType are omitted. durationSeconds is always present (null when unknown), rounded to 3 decimals when set. Photos/carousels are never returned. Content older than ~180 days is dropped as Explore resurfacing. For live keyword search use Instagram Reels Search. Flat 1 credit per successful call.",
+      "On-demand trending Reels for a country. Default cache=true is cache-first: a per-country response cache (TTL 4 hours) returns in typically under 2s at 0 credits. Cache miss (or cache=false) runs a live scrape — native /reels first, then Apify — and waits for real data; concurrent requests for the same country share one scrape (single-flight). Failures return 502 scrape_failed — never an old snapshot and never 503 warming. Each reel includes engagement{likes,comments,views,viewsSource} where views is the platform play count when exposed and viewsSource is instagram|facebook whenever views is set. Instagram withholds view counts on roughly a third of reels — those rows keep views/viewsSource null. Constant postType/productType are omitted. durationSeconds is always present (null when unknown), rounded to 3 decimals when set. Photos/carousels are never returned. Content older than ~180 days is dropped as Explore resurfacing. For live keyword search use Instagram Reels Search. Live success bills flat 1 credit; cache hits bill 0.",
     delivers: [
-      "Hot Redis snapshot (<2s) with hard 12h cutoff",
-      "cache=false / cold / stale → live scrape (~40s), not 503",
-      "engagement.views + viewsSource (plays removed)",
-      "Video Reels only — never Explore photos; flat 1 credit",
+      "Cache-first hot path (<2s, 0 credits) with 4h TTL",
+      "cache=false / miss → live scrape; single-flight per country",
+      "engagement.views + viewsSource (plays removed); 502 on scrape failure",
+      "Video Reels only — never Explore photos",
     ],
     platformLimits: [
-      "Snapshots older than 12 hours are never served — live scrape runs instead.",
-      "cache=false always live-scrapes (slow). Default cache=true serves the warm snapshot when fresh.",
+      "No warm cron / country snapshots — only the on-demand response cache.",
+      "cache=false always live-scrapes (slow). Default cache=true serves the 4h cache when present (0 credits).",
       "Photos / carousels / Explore resurfaces older than ~180 days are filtered out.",
       "Instagram does not expose a view count for every reel; engagement.views stays null when withheld.",
     ],
@@ -7876,15 +7876,11 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
       "Total play count including replays (video_play_count). Often higher than views. Prefer viewsInstagram for Instagram-only reports.",
   },
   "instagram-trending-reels": {
-    cached: "true when served from the warm Redis country snapshot; false on a live scrape.",
-    snapshotAt:
-      "When the country snapshot was built (ISO-8601, ms). Present only when cached=true. Never older than 12h on a 200 response.",
-    cachedAt: "Alias of snapshotAt (one release).",
-    stale: "true when the snapshot is older than the 6h refresh window but still under the 12h hard cutoff.",
-    ageHours: "Age of the snapshot in hours (float). 0 on live scrapes. Responses with ageHours>12 are never returned.",
-    country: "Localized country name used for Apify/native geo (e.g. United States).",
+    cached:
+      "true when served from the per-country response cache (4h TTL, 0 credits); false on a live scrape (1 credit).",
+    country: "Localized country name used for native/Apify geo (e.g. United States).",
     countryCode: "ISO-3166 alpha-2 for the same country (e.g. US). Prefer this for joins.",
-    note: "Honesty copy: warm snapshot vs live scrape, duplicates expected, ~180d content-age filter, points to reels-search for keyword scrapes.",
+    note: "Honesty copy: cache-first vs live scrape, single-flight, duplicates expected, ~180d content-age filter, points to reels-search for keyword scrapes.",
     reels: "Video Reels only. Photos / carousels / multi-year Explore resurfaces are never included.",
     "engagement.views":
       "Platform play count when Instagram exposes it; null when withheld. Read viewsSource.",

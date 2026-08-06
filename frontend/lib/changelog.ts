@@ -50,14 +50,14 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-06",
-    category: "fix",
-    title: "Instagram trending-reels: Redis hot path + 12h hard cutoff",
+    category: "platform",
+    title: "Instagram trending-reels: warm cron removed — cache-first on demand",
     description:
-      "GET /v1/instagram/trending-reels serves a ready-to-serve Redis country snapshot written by the warm cron (typically <2s). Snapshots older than 12 hours are never returned — cold/stale or cache=false falls through to a live scrape (~40s) instead of 503. engagement.plays is removed; durationSeconds stays on every reel (null when unknown).",
+      "GET /v1/instagram/trending-reels no longer uses a warm cron or country snapshots. Default cache=true is cache-first (4h per-country response cache, 0 credits on hit). Miss or cache=false runs a live scrape and waits for real data; same-country concurrency shares one scrape. Failures return 502 scrape_failed — 503 warming is gone. engagement.plays stays removed; durationSeconds remains on every reel.",
     items: [
-      "Warm cron writes enriched Redis payloads (not just Apify kicks)",
-      "Hard 12h serve cutoff; cache=false forces live scrape",
-      "Remove engagement.plays; keep durationSeconds key when null",
+      "Remove warm GitHub Actions cron + snapshot layer",
+      "4h response cache; single-flight; cache hit = 0 credits, live = 1 credit",
+      "502 scrape_failed instead of 503 warming / stale snapshot fallback",
     ],
   },
   {

@@ -43,13 +43,15 @@ from app.utils.url import (
 router = APIRouter()
 log = structlog.get_logger(__name__)
 
-# Live-path budget (Apify wait / native race). Hot path reads Redis only.
-_TRENDING_LIVE_BUDGET_SECS = 38
-# Soft stale flag (docs: ~6h refresh). Hard serve cutoff is snapshot.MAX_AGE_SECS (12h).
-_TRENDING_REFRESH_AFTER_SECS = 6 * 3600
-_TRENDING_WARM_RETRY_SECS = 600
-# Backward-compat alias used by older tests / warm script comments.
-_TRENDING_SYNC_WAIT_SECS = _TRENDING_LIVE_BUDGET_SECS
+# On-demand trending: response cache TTL (3–6h band) + live scrape budgets.
+_TRENDING_CACHE_TTL_SECS = 4 * 3600
+_TRENDING_STORE_LIMIT = 100
+_TRENDING_NATIVE_BUDGET_SECS = 45
+_TRENDING_APIFY_WAIT_SECS = 120
+_TRENDING_FLIGHT_WAIT_SECS = 180
+# Backward-compat alias (older tests).
+_TRENDING_LIVE_BUDGET_SECS = _TRENDING_NATIVE_BUDGET_SECS
+_TRENDING_SYNC_WAIT_SECS = _TRENDING_NATIVE_BUDGET_SECS
 
 CREDIT_TRANSCRIPT = 2
 CREDIT_SUMMARIZE = 4
@@ -1948,26 +1950,6 @@ def _trending_media_split(mapped: list[dict[str, Any]]) -> tuple[int, int]:
     return videos, photos
 
 
-def _iso_ms(dt: datetime) -> str:
-    """UTC ISO-8601 with millisecond precision (Z)."""
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
-
-
-def _trending_freshness(*, cached_at: datetime | None, from_snapshot: bool) -> dict[str, Any]:
-    from app.services import instagram_trending_snapshot as ig_snap
-
-    if from_snapshot and cached_at is not None:
-        return ig_snap.freshness_from_snapshot_at(cached_at)
-    # Fresh live scrape — not a snapshot; don't invent cachedAt.
-    return {
-        "cached": False,
-        "stale": False,
-        "ageHours": 0,
-    }
-
-
 # Reverse map: actor country name → ISO-3166 alpha-2.
 _TRENDING_COUNTRY_TO_ISO: dict[str, str] = {
     "United States": "US",
@@ -2012,17 +1994,19 @@ def _trending_payload(
     reels: list[dict[str, Any]],
     *,
     country: str,
-    freshness: dict[str, Any],
+    cached: bool = False,
 ) -> dict[str, Any]:
     return {
         "platform": "instagram",
         "country": country,
         "countryCode": _TRENDING_COUNTRY_TO_ISO.get(country),
         "totalReturned": len(reels),
+        "cached": cached,
         "note": (
-            "Warm countries are served from a Redis snapshot (refreshed ~every "
-            "6 hours; never older than 12 hours — see ageHours / snapshotAt). "
-            "cache=false forces a live scrape. "
+            "On-demand: cache miss runs a live scrape (native /reels, then Apify), "
+            f"then stores a per-country response cache for {_TRENDING_CACHE_TTL_SECS // 3600} hours. "
+            "cache=false skips the read and forces a fresh scrape (result still refreshes the cache). "
+            "Concurrent requests for the same country share one scrape (single-flight). "
             "Content itself may be older: Explore resurfaces reels, and results "
             "are filtered only to drop posts older than ~180 days. "
             "Instagram returns a small overlapping batch per scrape, so "
@@ -2033,8 +2017,15 @@ def _trending_payload(
             "For live keyword search use /v1/instagram/reels-search."
         ),
         "reels": reels,
-        **freshness,
     }
+
+
+def _slice_trending_payload(payload: dict[str, Any], limit: int) -> dict[str, Any]:
+    out = dict(payload)
+    reels = list(payload.get("reels") or [])[:limit]
+    out["reels"] = reels
+    out["totalReturned"] = len(reels)
+    return out
 
 
 # Countries supported by the trending actor's input enum. Anything else makes
@@ -2088,22 +2079,19 @@ def _normalize_trending_country(raw: str) -> str:
     )
 
 
-def _trending_warming_http(country: str) -> HTTPException:
+def _trending_scrape_failed_http(country: str) -> HTTPException:
     return HTTPException(
-        status_code=503,
+        status_code=502,
         detail={
             "error": {
-                "code": "warming",
-                "retryAfterSeconds": _TRENDING_WARM_RETRY_SECS,
+                "code": "scrape_failed",
                 "country": country,
             },
             "message": (
-                "Trending Reels for this country are being refreshed "
-                f"(~{_TRENDING_WARM_RETRY_SECS // 60} minutes). Retry shortly — "
-                "we never return Explore photos as Reels."
+                f"Could not scrape trending Reels for '{country}'. "
+                "No cached response is served on failure — retry later."
             ),
         },
-        headers={"Retry-After": str(_TRENDING_WARM_RETRY_SECS)},
     )
 
 
@@ -2155,58 +2143,84 @@ def _map_trending_actor_items(items: list[dict[str, Any]]) -> list[dict[str, Any
     ]
 
 
-async def build_trending_snapshot_payload(
+async def _apify_trending_reels(
     country: str,
     *,
-    store_limit: int | None = None,
-    enrich: bool = True,
-    finished_at: datetime | None = None,
-) -> dict[str, Any] | None:
-    """Build a ready-to-serve country payload from the newest usable Apify run.
-
-    Only SUCCEEDED runs younger than the hard 12h cutoff are considered.
-    Used by the warm cron (full enrich) and the request live path.
-    """
-    from app.services import instagram_trending_snapshot as ig_snap
-
+    store_limit: int,
+    max_age_secs: int = _TRENDING_CACHE_TTL_SECS,
+) -> list[dict[str, Any]] | None:
+    """Reuse a recent SUCCEEDED Apify dataset, or start + wait for a new run."""
     settings = get_settings()
     client = ApifyClient(timeout=30, max_attempts=1)
     actor = settings.APIFY_ACTOR_INSTAGRAM_TRENDING
-    fetch_n = store_limit or ig_snap.STORE_LIMIT
     match = {"country": country}
+
     for run in await client.list_succeeded_runs(actor, input_match=match, limit=25):
-        finished = datetime.fromisoformat(run["finishedAt"].replace("Z", "+00:00"))
+        finished_raw = run.get("finishedAt")
+        if not finished_raw:
+            continue
+        finished = datetime.fromisoformat(finished_raw.replace("Z", "+00:00"))
         age = (datetime.now(timezone.utc) - finished).total_seconds()
-        if age > ig_snap.MAX_AGE_SECS:
+        if age > max_age_secs:
             continue
-        items = await client.dataset_items(run["defaultDatasetId"], max_items=fetch_n)
+        items = await client.dataset_items(run["defaultDatasetId"], max_items=store_limit)
         mapped = _map_trending_actor_items(items)
-        reels = _filter_trending_reels_only(mapped)[:fetch_n]
-        if not reels:
-            continue
-        if enrich:
-            reels = await _enrich_trending_reels(reels, max_authors=min(12, len(reels)))
-        else:
-            reels = [_wire_trending_reel(r) for r in reels]
-        stamp = finished_at or finished
-        payload = _trending_payload(
-            reels,
-            country=country,
-            freshness=_trending_freshness(cached_at=stamp, from_snapshot=True),
+        reels = _filter_trending_reels_only(mapped)[:store_limit]
+        if reels:
+            return [_wire_trending_reel(r) for r in reels]
+
+    active = await client.find_active_run(actor, input_match=match)
+    run_id = (active or {}).get("id")
+    if run_id is None:
+        started = await client.start_run(
+            actor, {"max_results": store_limit, "country": country}
         )
-        return payload
-    return None
-
-
-async def store_trending_snapshot(country: str, *, enrich: bool = True) -> dict[str, Any] | None:
-    """Build + write Redis country snapshot. Returns payload or None."""
-    from app.services import instagram_trending_snapshot as ig_snap
-
-    payload = await build_trending_snapshot_payload(country, enrich=enrich)
-    if payload is None:
+        run_id = (started or {}).get("id")
+        log.info(
+            "ig_trending_apify_start",
+            country=country,
+            runId=run_id,
+            status=(started or {}).get("status"),
+        )
+    if not run_id:
         return None
-    await ig_snap.write_snapshot(country, payload)
-    return payload
+    items = await client.wait_for_run_items(
+        run_id, _TRENDING_APIFY_WAIT_SECS, max_items=store_limit
+    )
+    if not items:
+        return None
+    mapped = _map_trending_actor_items(items)
+    reels = _filter_trending_reels_only(mapped)[:store_limit]
+    if not reels:
+        return None
+    return [_wire_trending_reel(r) for r in reels]
+
+
+async def _scrape_trending_country(country: str, *, store_limit: int) -> dict[str, Any]:
+    """Live scrape: prefer cheap native /reels, then Apify. Never serves stale Redis snapshots."""
+    try:
+        native = await asyncio.wait_for(
+            instagram_native.trending_reels_native(
+                country,
+                limit=store_limit,
+                enrich=True,
+                max_authors=min(6, store_limit),
+            ),
+            timeout=_TRENDING_NATIVE_BUDGET_SECS,
+        )
+    except asyncio.TimeoutError:
+        native = None
+        log.warning("ig_trending_native_timeout", country=country)
+
+    if native:
+        wired = [_wire_trending_reel(r) for r in native]
+        return _trending_payload(wired, country=country, cached=False)
+
+    apify_reels = await _apify_trending_reels(country, store_limit=store_limit)
+    if apify_reels:
+        return _trending_payload(apify_reels, country=country, cached=False)
+
+    raise _trending_scrape_failed_http(country)
 
 
 @router.get("/trending-reels", summary="Instagram trending Reels from /reels")
@@ -2219,24 +2233,23 @@ async def instagram_trending_reels(
     cache: bool = Query(
         True,
         description=(
-            "Default true — serve the warm Redis country snapshot when fresher than 12h "
-            "(hot path, typically <2s). Set false to skip Redis/snapshot and force a live "
-            "scrape (~40s)."
+            "Default true (cache-first): serve the per-country response cache when present "
+            f"(TTL {_TRENDING_CACHE_TTL_SECS // 3600}h, 0 credits). "
+            "Set false to skip the cache read and force a live scrape "
+            f"(~{_TRENDING_NATIVE_BUDGET_SECS}–{_TRENDING_APIFY_WAIT_SECS}s, {CREDIT_TRENDING_REELS} credit); "
+            "the fresh result still refreshes the cache."
         ),
     ),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    """Warm-snapshot trending Reels — videos only, flat 1 credit.
+    """On-demand trending Reels — videos only.
 
-    Hot path: Redis payload written by the warm cron (<2s). Cold/stale or
-    ``cache=false``: live scrape (Apify ≤12h run or native /reels) under ~40s.
-    Snapshots older than 12h are never served.
+    Cache-first (default): hit = 0 credits; miss = live scrape then cache
+    for 4 hours. ``cache=false`` forces live. Concurrent same-country misses
+    share one scrape. Failures return 502 — never an old snapshot.
     """
-    from app.services import instagram_trending_snapshot as ig_snap
-
-    settings = get_settings()
     country = _normalize_trending_country(country)
-    force_live = not cache
+    store_limit = min(200, max(_TRENDING_STORE_LIMIT, limit))
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/trending-reels",
@@ -2244,79 +2257,27 @@ async def instagram_trending_reels(
         resource_url=f"country:{country}",
         base_credits=CREDIT_TRENDING_REELS,
     ) as ctx:
-        # Hot path — ready payload in Redis. No Apify list, no enrich.
-        if not force_live:
-            snap = await ig_snap.read_snapshot(country)
-            if snap is not None:
-                ctx["source"] = "cache"
-                data = ig_snap.slice_payload(snap, limit)
-                ctx["credits_override"] = CREDIT_TRENDING_REELS
-                return ApiResponse(data=data)
 
-        async def _live() -> dict[str, Any]:
-            client = ApifyClient(timeout=30, max_attempts=1)
-            actor = settings.APIFY_ACTOR_INSTAGRAM_TRENDING
-            fetch_n = min(200, max(limit * 5, limit + 40))
-            run_input = {"max_results": fetch_n, "country": country}
-            match = {"country": country}
+        async def _run() -> dict[str, Any]:
+            return await _scrape_trending_country(country, store_limit=store_limit)
 
-            # Prefer a fresh Apify dataset (≤12h). Skip author enrich here —
-            # warm cron does the heavy enrich into Redis; request path must stay
-            # near the ~40s live budget.
-            apify_payload = await build_trending_snapshot_payload(
-                country, store_limit=max(fetch_n, ig_snap.STORE_LIMIT), enrich=False
-            )
-            if apify_payload is not None:
-                ctx["source"] = "apify"
-                await ig_snap.write_snapshot(country, apify_payload)
-                return ig_snap.slice_payload(apify_payload, limit)
-
-            # Kick Apify for the next caller / warm cycle, race native scrape.
-            active = await client.find_active_run(actor, input_match=match)
-            if active is None:
-                started = await client.start_run(actor, run_input)
-                log.info(
-                    "ig_trending_apify_start",
-                    country=country,
-                    runId=(started or {}).get("id"),
-                    status=(started or {}).get("status"),
-                )
-
-            async def _native() -> list[dict[str, Any]] | None:
-                # Light enrich so we stay near the 40s live budget.
-                return await instagram_native.trending_reels_native(
-                    country, limit=limit, enrich=True, max_authors=min(6, limit)
-                )
-
-            try:
-                reels = await asyncio.wait_for(_native(), timeout=_TRENDING_LIVE_BUDGET_SECS)
-            except asyncio.TimeoutError:
-                reels = None
-                log.warning("ig_trending_native_timeout", country=country)
-
-            if reels:
-                ctx["source"] = "direct"
-                wired = [_wire_trending_reel(r) for r in reels]
-                payload = _trending_payload(
-                    wired,
-                    country=country,
-                    freshness=_trending_freshness(cached_at=None, from_snapshot=False),
-                )
-                # Persist so the next cache=true hit is hot (snapshotAt = now).
-                store = dict(payload)
-                store["snapshotAt"] = _iso_ms(datetime.now(timezone.utc))
-                store["cachedAt"] = store["snapshotAt"]
-                store["cached"] = True
-                store["stale"] = False
-                store["ageHours"] = 0
-                # Keep full store_limit if we only have `limit` — still useful.
-                await ig_snap.write_snapshot(country, store)
-                return payload
-
-            raise _trending_warming_http(country)
-
-        data = await _live()
-        ctx["credits_override"] = CREDIT_TRENDING_REELS
+        # Cache key is country-only (limit applied after) so one scrape serves all limits.
+        data = await cached_or_run(
+            endpoint="instagram.trending-reels",
+            params={"country": country, "v": 21},
+            runner=_run,
+            ctx=ctx,
+            ttl=_TRENDING_CACHE_TTL_SECS,
+            use_cache=cache,
+            single_flight=True,
+            flight_wait_secs=_TRENDING_FLIGHT_WAIT_SECS,
+        )
+        data = _slice_trending_payload(data, limit)
+        data["cached"] = bool(ctx.get("cache_hit"))
+        if ctx.get("cache_hit"):
+            ctx["source"] = "cache"
+        else:
+            ctx["credits_override"] = CREDIT_TRENDING_REELS
         return ApiResponse(data=data)
 
 
