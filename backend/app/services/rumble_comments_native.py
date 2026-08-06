@@ -33,15 +33,57 @@ _UPVOTES_RE = re.compile(
     r'rumbles-vote-up[\s\S]*?<span class="rumbles-up-votes">(\d+)</span>',
     re.I,
 )
-# Machine-readable attr only — never title= / textContent display strings.
-_TIME_RE = re.compile(
-    r'comments-meta-post-time[^>]*datetime="([^"]+)"',
+# Attribute names that carry a machine-readable timestamp (any order on the tag).
+_TIME_ATTR_KEYS = ("datetime", "data-time", "data-timestamp", "data-unix", "data-ts")
+_ATTR_RE = re.compile(
+    r"""([^\s=/>]+)\s*=\s*(?:"([^"]*)"|'([^']*)')""",
+    re.I,
+)
+_TIME_TAG_RE = re.compile(r"<time\b([^>]*)>", re.I)
+_META_TIME_TAG_RE = re.compile(
+    r"<[^>]*\bcomments-meta-post-time\b[^>]*>",
     re.I,
 )
 
 
 def _strip_tags(raw: str) -> str:
     return unescape(re.sub(r"<[^>]+>", "", raw or "")).strip()
+
+
+def _attrs_map(attr_blob: str) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for m in _ATTR_RE.finditer(attr_blob or ""):
+        key = (m.group(1) or "").lower()
+        val = m.group(2) if m.group(2) is not None else m.group(3)
+        if key and val is not None:
+            out[key] = val
+    return out
+
+
+def _raw_from_attrs(attrs: dict[str, str]) -> str | None:
+    for key in _TIME_ATTR_KEYS:
+        raw = safe_str(attrs.get(key))
+        if raw:
+            return raw
+    return None
+
+
+def comment_published_raw(chunk: str) -> str | None:
+    """Pull a machine-readable timestamp from a comment card HTML slice.
+
+    Attribute order varies (``datetime`` before/after ``class``). Prefer any
+    ``<time>`` tag, then a ``comments-meta-post-time`` wrapper. Never use
+    ``title=`` / textContent display strings.
+    """
+    for m in _TIME_TAG_RE.finditer(chunk or ""):
+        raw = _raw_from_attrs(_attrs_map(m.group(1)))
+        if raw:
+            return raw
+    for m in _META_TIME_TAG_RE.finditer(chunk or ""):
+        raw = _raw_from_attrs(_attrs_map(m.group(0)))
+        if raw:
+            return raw
+    return None
 
 
 def _is_nested(html: str, pos: int) -> bool:
@@ -74,9 +116,7 @@ def parse_comments_html(html: str, limit: int) -> list[dict[str, Any]]:
         if not text:
             continue
         up_m = _UPVOTES_RE.search(chunk)
-        time_m = _TIME_RE.search(chunk)
-        # Raw ISO from datetime= — router normalizer stamps publishedAt.
-        published = to_utc_published_at(time_m.group(1) if time_m else None)
+        published = to_utc_published_at(comment_published_raw(chunk))
         out.append(
             {
                 "platform": "rumble",

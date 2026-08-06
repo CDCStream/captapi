@@ -123,6 +123,8 @@ def test_streams_from_media_uses_height_keeps_bitrate_variants() -> None:
     }
     streams = native._streams_from_media(media)
     assert len(streams) == 6
+    assert all(set(s.keys()) == set(native.STREAM_KEYS) for s in streams)
+    assert all(s["type"] == "video/mp4" for s in streams)
     assert all(native.quality_from_height(s["height"]) == s["quality"] for s in streams)
     assert [s["quality"] for s in streams].count("1080p") == 2
     assert "1081p" not in [s["quality"] for s in streams]
@@ -137,6 +139,8 @@ def test_streams_from_media_uses_height_keeps_bitrate_variants() -> None:
     assert len(audio) == 1
     assert audio[0]["type"] == "audio/aac"
     assert audio[0]["bitrateKbps"] == 192
+    assert audio[0]["width"] is None and audio[0]["height"] is None
+    assert audio[0]["quality"] is None
     track = native._thumbnail_track_from_media(media)
     assert track and track["url"].endswith("timeline.jpg")
     # apply_embedjs must not leak media keyed maps.
@@ -150,6 +154,7 @@ def test_streams_from_media_uses_height_keeps_bitrate_variants() -> None:
     )
     assert "media" not in card
     assert len(card["streams"]) == 6
+    assert all(s["url"] != track["url"] for s in card["streams"])
 
 
 def test_votes_compact_marks_likes_approximate() -> None:
@@ -247,13 +252,22 @@ def test_normalize_comment_iso_published_at() -> None:
     assert raw[0]["publishedAt"] == "2026-07-17T12:33:12+00:00"
     out = rumble._normalize_comment(raw[0])
     assert out["publishedAt"] == "2026-07-17T12:33:12+00:00"
-    assert out["createdAt"] == out["publishedAt"]  # deprecated alias
+    assert "createdAt" not in out  # single field — not a null-padded alias
     # title= display must not win if somehow passed in.
     bad = rumble._normalize_comment(
         {"id": "9", "text": "x", "createdAt": "Friday, July 17, 2026 08:33 AM -04"}
     )
     assert bad["publishedAt"] is None
-    assert bad["createdAt"] is None
+    assert "createdAt" not in bad
+    # datetime before class still resolves (U1).
+    flipped = comments_native.parse_comments_html(
+        '<li class="comment-item" data-comment-id="8" data-num-replies="0" '
+        'data-username="z"><p class="comment-text">Z</p>'
+        '<time datetime="2026-07-17T08:33:12-04:00" class="comments-meta-post-time">'
+        "July 17</time></li>",
+        limit=5,
+    )
+    assert flipped[0]["publishedAt"] == "2026-07-17T12:33:12+00:00"
 
 
 def test_normalize_az_nulls_impossible_zero_views() -> None:

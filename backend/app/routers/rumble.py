@@ -177,39 +177,18 @@ def _finalise_rumble_item(
     return out
 
 
-def _dedupe_streams(streams: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Unique playable URLs; keep same-height bitrate variants."""
-    seen_url: set[str] = set()
-    out: list[dict[str, Any]] = []
-    for s in streams:
-        if not isinstance(s, dict):
-            continue
-        url = safe_str(s.get("url"))
-        if not url or url in seen_url:
-            continue
-        stype = (safe_str(s.get("type")) or "").lower()
-        if stype.startswith("audio") or stype == "image":
-            continue
-        seen_url.add(url)
-        row: dict[str, Any] = {
-            "url": url,
-            "type": safe_str(s.get("type")),
-            "quality": safe_str(s.get("quality")),
-        }
-        for key in ("width", "height", "bitrateKbps", "sizeBytes"):
-            if s.get(key) is not None:
-                row[key] = s.get(key)
-        expires = safe_str(s.get("expiresAt"))
-        if not expires:
-            from app.utils.media_urls import cdn_expires_at
-
-            expires = cdn_expires_at(url)
-        if expires:
-            row["expiresAt"] = expires
-        out.append(row)
-        if len(out) >= 24:
-            break
-    return out
+def _finalise_streams(
+    streams: list[dict[str, Any]] | None,
+    *,
+    thumbnail_url: str | None = None,
+    require_height: bool = True,
+) -> list[dict[str, Any]]:
+    """Shared streams[] shape for video-details + channel-videos."""
+    return rumble_video_native.finalise_streams(
+        streams,
+        thumbnail_url=thumbnail_url,
+        require_height=require_height,
+    )
 
 
 def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
@@ -294,7 +273,7 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
     duration_seconds, duration_text = _coerce_duration_pair(
         item.get("duration") if item.get("duration") is not None else item.get("durationSeconds")
     )
-    streams = [v for v in item.get("videos") or [] if isinstance(v, dict) and v.get("url")]
+    raw_streams = [v for v in item.get("videos") or [] if isinstance(v, dict) and v.get("url")]
     live_raw = first_present(
         item.get("is_live"),
         item.get("livestream_status"),
@@ -318,6 +297,25 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
         comments=comment_count,
         dislikes=dislikes,
     )
+    # Actor rows rarely ship meta.h — keep URLs with null dims/quality rather
+    # than inventing labels from quality_text (same STREAM_KEYS as video-details).
+    mapped_streams: list[dict[str, Any]] = []
+    for v in raw_streams:
+        if (safe_str(v.get("type")) or "").lower() == "audio":
+            continue
+        height = safe_int(v.get("height") or v.get("h"))
+        width = safe_int(v.get("width") or v.get("w"))
+        mapped_streams.append(
+            {
+                "url": safe_str(v.get("url")),
+                "type": safe_str(v.get("type")) or "video/mp4",
+                "width": width,
+                "height": height,
+                "bitrateKbps": safe_int(v.get("bitrate") or v.get("bitrateKbps")),
+                "sizeBytes": safe_int(v.get("size") or v.get("sizeBytes")),
+                "expiresAt": safe_str(v.get("expiresAt")),
+            }
+        )
     partial: dict[str, Any] = {
         "platform": "rumble",
         "id": video_id,
@@ -337,18 +335,7 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
         "thumbnail": safe_str(item.get("thumb")),
         "comments": comment_count,
         "isLive": is_live,
-        "streams": _dedupe_streams(
-            [
-                {
-                    "url": safe_str(v.get("url")),
-                    "type": safe_str(v.get("type")),
-                    "quality": safe_str(v.get("quality_text") or v.get("resolution")),
-                    "expiresAt": safe_str(v.get("expiresAt")),
-                }
-                for v in streams
-                if (safe_str(v.get("type")) or "").lower() != "audio"
-            ]
-        ),
+        "streams": _finalise_streams(mapped_streams, require_height=False),
         "shareUrl": f"https://rumble.com/share/{video_id}" if video_id else None,
     }
     _stamp_duration(partial, duration_seconds if duration_seconds is not None else duration_text)
@@ -414,8 +401,6 @@ def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
         ),
         "replyCount": reply_count,
         "publishedAt": published,
-        # Deprecated alias for one release — same value as publishedAt.
-        "createdAt": published,
     }
 
 
@@ -502,11 +487,31 @@ async def video_details(
             native = await rumble_video_native.video_details_native(_canonical_video_url(url))
             if native and native.get("title"):
                 ctx["source"] = "direct"
-                streams = native.get("streams")
-                if isinstance(streams, list):
-                    native["streams"] = _dedupe_streams(streams)
                 # Never ship raw quality-keyed embed dump.
                 native.pop("media", None)
+                thumb = native.get("thumbnailTrack")
+                thumb_url = (
+                    safe_str(thumb.get("url"))
+                    if isinstance(thumb, dict)
+                    else None
+                )
+                native["streams"] = _finalise_streams(
+                    native.get("streams") if isinstance(native.get("streams"), list) else [],
+                    thumbnail_url=thumb_url,
+                    require_height=True,
+                )
+                if isinstance(native.get("audioStreams"), list):
+                    native["audioStreams"] = rumble_video_native.finalise_audio_streams(
+                        native["audioStreams"]
+                    )
+                if isinstance(native.get("captions"), list):
+                    native["captions"] = rumble_video_native.finalise_captions(
+                        native["captions"]
+                    )
+                if isinstance(thumb, dict):
+                    native["thumbnailTrack"] = rumble_video_native.finalise_thumbnail_track(
+                        thumb
+                    )
                 # Drop null optional flags (likesIsApproximate when likes unknown).
                 for key in list(native.keys()):
                     if native.get(key) is None and key in {
@@ -538,7 +543,7 @@ async def video_details(
 
         data = await cached_or_run(
             endpoint="rumble.video-details",
-            params={"url": url, "v": 11},
+            params={"url": url, "v": 12},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -583,7 +588,7 @@ async def channel_videos(
 
         data = await cached_or_run(
             endpoint="rumble.channel-videos",
-            params={"channel": channel, "limit": limit, "v": 10},
+            params={"channel": channel, "limit": limit, "v": 11},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -661,7 +666,7 @@ async def comments(
 
         data = await cached_or_run(
             endpoint="rumble.comments",
-            params={"url": url, "limit": limit, "v": 5},
+            params={"url": url, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
