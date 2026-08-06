@@ -1003,8 +1003,8 @@ async def instagram_channel_details(
             data = await asyncio.wait_for(
                 cached_or_run(
                     endpoint="instagram.channel-details",
-                    # v10: approx flags from source + drop twin aliases + faster cascade.
-                    params={"url": url, "v": 10, "cacheMaxAge": cacheMaxAge},
+                    # v11: canonical key finaliser (null fillers) + drop profileImageHd twin.
+                    params={"url": url, "v": 11, "cacheMaxAge": cacheMaxAge},
                     runner=_run,
                     ctx=ctx,
                     use_cache=use_cache,

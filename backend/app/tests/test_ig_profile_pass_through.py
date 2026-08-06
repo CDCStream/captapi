@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.services.instagram_native import (
+    IG_CHANNEL_DETAILS_KEYS,
     map_basic_profile,
     map_channel_details,
     map_post_from_media,
@@ -64,18 +65,19 @@ def test_basic_profile_pass_through_fields() -> None:
 def test_channel_details_and_profile_search_parity() -> None:
     u = _user()
     ch = map_channel_details(u)
-    assert ch["categoryName"] == "Entrepreneur"
+    assert list(ch.keys()) == list(IG_CHANNEL_DETAILS_KEYS)
     assert ch["fbid"] == "17841402777077586"
-    assert ch["relatedProfiles"][0]["username"] == "itsallykrinsky"
-    assert ch["likeAndViewCountsDisabled"] is True
+    assert ch["isBusinessAccount"] is True
     assert ch["url"] == "https://www.instagram.com/austinbbq/"
     assert ch["handle"] == "austinbbq"
     assert ch["avatar"]
-    # Twin aliases dropped on channel-details (canonical handle/displayName/avatar).
+    # Twin aliases + duplicate HD key dropped (canonical handle/displayName/avatar).
     assert "profileImage" not in ch
+    assert "profileImageHd" not in ch
     assert "username" not in ch
     assert "name" not in ch
     assert "private" not in ch
+    assert "categoryName" not in ch
     assert ch["isPrivate"] is False
     assert ch["postCountIsApproximate"] is False
     assert ch["followersIsApproximate"] is False
@@ -123,13 +125,17 @@ def test_channel_details_exact_post_count_not_approximate() -> None:
 
 
 def test_channel_details_no_duplicate_non_boolean_values() -> None:
-    out = map_channel_details(_user())
+    u = _user()
+    u["profile_pic_url"] = (
+        "https://scontent.cdninstagram.com/v/t51.xxx/x.jpg?stp=dst-jpg_s150x150_tt6"
+    )
+    u["profile_pic_url_hd"] = u["profile_pic_url"]  # identical twin — must not emit HD key
+    out = map_channel_details(u)
+    assert "profileImageHd" not in out
     bool_keys = {
         "verified",
         "isPrivate",
         "isBusinessAccount",
-        "isProfessionalAccount",
-        "likeAndViewCountsDisabled",
         "followersIsApproximate",
         "followingIsApproximate",
         "postCountIsApproximate",
@@ -139,8 +145,6 @@ def test_channel_details_no_duplicate_non_boolean_values() -> None:
         for k, v in out.items()
         if k not in bool_keys and not isinstance(v, (bool, dict, list))
     }
-    # Values that coincide by chance across different concepts are rare; the
-    # twin-alias pairs are the regression we care about.
     for a, b in (("handle", "username"), ("displayName", "name"), ("avatar", "profileImage")):
         assert not (a in out and b in out and out.get(a) == out.get(b))
     seen: dict[Any, str] = {}
@@ -148,11 +152,32 @@ def test_channel_details_no_duplicate_non_boolean_values() -> None:
         if v in (None, "", 0):
             continue
         if v in seen:
-            # Same URL appearing as url vs something else is fine; only flag
-            # identical string/int pairs that look like alias twins.
-            if {seen[v], k} <= {"handle", "username", "displayName", "name", "avatar", "profileImage"}:
-                raise AssertionError(f"duplicate alias pair {seen[v]!r}/{k!r}={v!r}")
+            raise AssertionError(f"duplicate non-boolean values {seen[v]!r}/{k!r}={v!r}")
         seen[v] = k
+    # Avatar should be upgraded off the s150 thumbnail when HD equals the thumb.
+    assert "s320x320" in (out.get("avatar") or "")
+
+
+def test_channel_details_stable_keys_across_sparse_and_rich() -> None:
+    rich = map_channel_details(_user())
+    sparse_user = {
+        "username": "tinyacct",
+        "full_name": "Tiny",
+        "biography": "",
+        "is_verified": False,
+        "is_private": True,
+        "profile_pic_url": "https://example.com/a.jpg",
+        "edge_followed_by": {"count": 3},
+        "edge_follow": {"count": 1},
+        "edge_owner_to_timeline_media": {"count": 0},
+    }
+    sparse = map_channel_details(sparse_user, handle="tinyacct")
+    assert list(rich.keys()) == list(sparse.keys()) == list(IG_CHANNEL_DETAILS_KEYS)
+    assert sparse["fbid"] is None
+    assert sparse["isBusinessAccount"] is None
+    assert sparse["bioLinks"] is None
+    assert sparse["externalUrl"] is None
+    assert sparse["isPrivate"] is True
 
 
 def test_cdn_image_expires_at_from_oe() -> None:

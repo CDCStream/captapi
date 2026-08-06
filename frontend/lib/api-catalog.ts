@@ -917,9 +917,9 @@ const INSTAGRAM: Spec[] = [
     path: "/v1/instagram/channel-details",
     credits: 1,
     tagline:
-      "Instagram profile stats plus categoryName, fbid, relatedProfiles, businessAddress, and likeAndViewCountsDisabled.",
+      "Instagram profile stats — fixed key set (null fillers), fbid, bioLinks, isBusinessAccount, approx flags.",
     longDescription:
-      "Send a profile URL or @handle and get clean JSON. Canonical profile core only: platform, id, handle, url, displayName, bio, avatar, followers, following, postCount, verified, isPrivate — twin aliases username/name/profileImage are removed (use the canonical keys). postCountIsApproximate / followersIsApproximate / followingIsApproximate are derived from the source (true when the value came from a K/M/B display string such as og:description \"32K\"). Also: externalUrl/bioLinks, categoryName, fbid, relatedProfiles[], businessAddress{}, likeAndViewCountsDisabled, imageExpiresAt. Flat 1 credit. Cold path targets under 5s (WPI → GraphQL → plain HTML → short headless); hard cap 110s → 502, 0 credits. Pass cache / cacheMaxAge for the profile trust layer.",
+      "Send a profile URL or @handle and get clean JSON with a fixed key set on every profile (absent → null, never a missing key): platform, url, id, fbid, handle, displayName, bio, bioLinks, followers, following, postCount, verified, avatar, imageExpiresAt, externalUrl, isPrivate, isBusinessAccount, followersIsApproximate, followingIsApproximate, postCountIsApproximate, fetchedAt. Twin aliases username/name/profileImage and the duplicate profileImageHd key are not emitted — avatar is the single best profile-pic URL (CDN size token upgraded when Instagram only ships s150x150). Approx flags are derived from the source (true when a count came from a K/M/B display string such as og:description \"32K\"). Flat 1 credit. Cold path races WPI/GraphQL/HTML; hard cap 110s → 502, 0 credits. Pass cache / cacheMaxAge for the profile trust layer.",
   },
   {
     slug: "instagram-channel-posts",

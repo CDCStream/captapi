@@ -10,6 +10,10 @@ import json
 from pathlib import Path
 
 from app.services.instagram_decodo import IG_CHANNEL_POST_KEYS
+from app.services.instagram_native import (
+    IG_CHANNEL_DETAILS_KEYS,
+    finalise_channel_details,
+)
 from app.services.rumble_video_details import (
     RUMBLE_VIDEO_DETAILS_KEYS,
     finalise_video_details,
@@ -26,6 +30,33 @@ def test_instagram_channel_post_baseline_in_shelved_suite() -> None:
     baseline = _load_keys("instagram-channel-post.keys.json")
     assert list(IG_CHANNEL_POST_KEYS) == baseline
     assert "mediaId" in baseline and "shortcode" in baseline
+
+
+def test_instagram_channel_details_baseline_in_shelved_suite() -> None:
+    baseline = _load_keys("instagram-channel-details.keys.json")
+    assert list(IG_CHANNEL_DETAILS_KEYS) == baseline
+    assert "fbid" in baseline and "isBusinessAccount" in baseline
+    assert "profileImageHd" not in baseline
+
+
+def test_finalise_channel_details_never_shrinks_baseline() -> None:
+    baseline = _load_keys("instagram-channel-details.keys.json")
+    slim = {
+        "platform": "instagram",
+        "handle": "natgeo",
+        "url": "https://www.instagram.com/natgeo/",
+        "followers": 1,
+        # Simulate the HTML-path subset that used to drop fbid / bioLinks / …
+        "profileImageHd": "https://example.com/dup.jpg",
+        "avatar": "https://example.com/dup.jpg",
+    }
+    out = finalise_channel_details(slim)
+    assert list(out.keys()) == baseline
+    assert out["fbid"] is None
+    assert out["isBusinessAccount"] is None
+    assert out["bioLinks"] is None
+    assert "profileImageHd" not in out
+    assert out["avatar"] == "https://example.com/dup.jpg"
 
 
 def test_rumble_video_details_baseline_has_31_keys() -> None:

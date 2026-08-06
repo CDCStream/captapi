@@ -2535,20 +2535,103 @@ def _count_is_approximate(user: dict[str, Any], *flag_keys: str) -> bool:
     return False
 
 
+# Canonical /channel-details key set. Parse paths (WPI / GraphQL / HTML) used to
+# emit different subsets; finalise_* forces one contract (null fillers). Dropping
+# a baseline key fails CI (shelved_keysets/instagram-channel-details.keys.json).
+IG_CHANNEL_DETAILS_KEYS: tuple[str, ...] = (
+    "platform",
+    "url",
+    "id",
+    "fbid",
+    "handle",
+    "displayName",
+    "bio",
+    "bioLinks",
+    "followers",
+    "following",
+    "postCount",
+    "verified",
+    "avatar",
+    "imageExpiresAt",
+    "externalUrl",
+    "isPrivate",
+    "isBusinessAccount",
+    "followersIsApproximate",
+    "followingIsApproximate",
+    "postCountIsApproximate",
+    "fetchedAt",
+)
+
+# Size tokens Instagram CDN embeds in profile-pic URLs / stp= params.
+_IG_PIC_SIZE_RE = re.compile(r"(?<![A-Za-z0-9])s(\d{2,4})x(\d{2,4})(?![A-Za-z0-9])")
+
+
+def _upgrade_ig_profile_pic_url(url: str | None, *, target: int = 320) -> str | None:
+    """Bump a small Instagram profile-pic size token (e.g. s150x150 → s320x320).
+
+    Returns None when the URL has no size token or is already ≥ target — callers
+    should keep the original in that case.
+    """
+    if not url:
+        return None
+    m = _IG_PIC_SIZE_RE.search(url)
+    if not m:
+        return None
+    try:
+        w, h = int(m.group(1)), int(m.group(2))
+    except ValueError:
+        return None
+    if max(w, h) >= target:
+        return None
+    token = f"s{target}x{target}"
+    return url[: m.start()] + token + url[m.end() :]
+
+
+def _best_profile_avatar(*candidates: str | None) -> str | None:
+    """Pick the best avatar URL (pass HD candidates first).
+
+    When Instagram ships a distinct HD URL, use it. When every candidate is the
+    same small CDN token, bump ``s150x150`` → ``s320x320`` so ``avatar`` is not
+    stuck on the thumbnail size. Never emit a parallel ``profileImageHd`` twin.
+    """
+    urls: list[str] = []
+    for c in candidates:
+        u = safe_str(c)
+        if u and u not in urls:
+            urls.append(u)
+    if not urls:
+        return None
+    if len(urls) > 1:
+        return urls[0]
+    return _upgrade_ig_profile_pic_url(urls[0]) or urls[0]
+
+
+def finalise_channel_details(data: dict[str, Any] | None) -> dict[str, Any]:
+    """Force the shelved channel-details key set — absent ⇒ null, never missing."""
+    src = dict(data) if isinstance(data, dict) else {}
+    # Twin aliases + duplicate HD key must not leak past the finaliser.
+    for alias in ("username", "name", "profileImage", "private", "profileImageHd"):
+        src.pop(alias, None)
+    return {k: src.get(k, None) for k in IG_CHANNEL_DETAILS_KEYS}
+
+
 def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> dict[str, Any]:
     """Map a web_profile_info user node to the channel-details response shape.
 
-    Canonical profile core only (``handle``, ``displayName``, ``avatar``, …).
-    Deprecated twin keys (``username`` / ``name`` / ``profileImage``) are no
-    longer emitted — announced one-release BC window is closed for this endpoint.
+    Canonical key set only (see ``IG_CHANNEL_DETAILS_KEYS``). Deprecated twin
+    keys and the duplicate ``profileImageHd`` alias are never emitted. Missing
+    optional fields are ``null``, not omitted — every profile returns the same
+    keys regardless of parse path.
     """
-    from app.utils.formatters import strip_empty
     from app.utils.media_urls import utc_now_iso
     from app.utils.profile_core import stamp_profile_core
 
     username = safe_str(user.get("username")) or (handle or "").lstrip("@")
     pic = safe_str(user.get("profile_pic_url"))
     pic_hd = safe_str(user.get("profile_pic_url_hd"))
+    hd_info = user.get("hd_profile_pic_url_info")
+    if not pic_hd and isinstance(hd_info, dict):
+        pic_hd = safe_str(hd_info.get("url"))
     verified = user.get("is_verified")
     private = user.get("is_private")
     followers = _edge_count(user.get("edge_followed_by") or user.get("follower_count"))
@@ -2561,23 +2644,18 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
     )
     bio_links = _bio_links(user)
     external = _external_url_from_user(user)
-    # Prefer HD avatar when available; profileImageHd remains the HD-only extra.
-    profile_image = pic_hd or pic
-    category = safe_str(
-        user.get("category_name")
-        or user.get("categoryName")
-        or user.get("business_category_name")
-        or user.get("overall_category_name")
-        or user.get("category")
-        or user.get("category_enum")
-    )
+    # Single avatar field — best available URL (no parallel profileImageHd twin).
+    profile_image = _best_profile_avatar(pic_hd, pic)
+    is_business = user.get("is_business_account")
+    if is_business is None:
+        is_business = user.get("is_business")
     out: dict[str, Any] = {
         "platform": "instagram",
         "url": canonical_instagram_profile_url(username),
-        "id": safe_str(user.get("id") or user.get("pk")),
-        "handle": username,
-        "displayName": safe_str(user.get("full_name")),
-        "bio": safe_str(user.get("biography")),
+        "id": safe_str(user.get("id") or user.get("pk")) or None,
+        "handle": username or None,
+        "displayName": safe_str(user.get("full_name")) or None,
+        "bio": safe_str(user.get("biography")) or None,
         "followers": followers,
         "following": following,
         "postCount": post_count,
@@ -2585,24 +2663,10 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
         "avatar": profile_image,
         "imageExpiresAt": cdn_image_expires_at(profile_image),
         "externalUrl": external,
-        "fbid": safe_str(user.get("fbid") or user.get("fbid_v2")),
+        "fbid": safe_str(user.get("fbid") or user.get("fbid_v2")) or None,
         "isPrivate": False if private is None else bool(private),
-        "isBusinessAccount": (
-            None
-            if user.get("is_business_account") is None
-            else bool(user.get("is_business_account"))
-        ),
-        "isProfessionalAccount": (
-            None
-            if user.get("is_professional_account") is None
-            else bool(user.get("is_professional_account"))
-        ),
-        "categoryName": category,
-        "bioLinks": bio_links,
-        "profileImageHd": pic_hd,
-        "businessAddress": _business_address(user),
-        "relatedProfiles": _related_profiles(user),
-        "likeAndViewCountsDisabled": _like_and_view_counts_disabled(user),
+        "isBusinessAccount": None if is_business is None else bool(is_business),
+        "bioLinks": bio_links if bio_links else None,
         "followersIsApproximate": _count_is_approximate(
             user, "follower_count_is_approximate", "followers_is_approximate"
         ),
@@ -2617,10 +2681,7 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
     stamped = stamp_profile_core(
         out, platform="instagram", emit_deprecated_aliases=False
     )
-    # Belt-and-braces: never reintroduce twin keys on this endpoint.
-    for alias in ("username", "name", "profileImage", "private"):
-        stamped.pop(alias, None)
-    return strip_empty(stamped)
+    return finalise_channel_details(stamped)
 
 
 def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:

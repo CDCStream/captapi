@@ -1,0 +1,23 @@
+[
+    "platform",
+    "url",
+    "id",
+    "fbid",
+    "handle",
+    "displayName",
+    "bio",
+    "bioLinks",
+    "followers",
+    "following",
+    "postCount",
+    "verified",
+    "avatar",
+    "imageExpiresAt",
+    "externalUrl",
+    "isPrivate",
+    "isBusinessAccount",
+    "followersIsApproximate",
+    "followingIsApproximate",
+    "postCountIsApproximate",
+    "fetchedAt"
+]
