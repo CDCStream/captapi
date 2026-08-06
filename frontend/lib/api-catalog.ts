@@ -2831,12 +2831,12 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     tagline:
       "TikTok Creative Center Top Ads — browser-intercepted list XHR, CTR/likes, video (flat 2 / ~1 Apify).",
     longDescription:
-      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — datesPresent counts filled rows), likes + likesIsApproximate, ctr/ctrTier, costTier, isSparkAd, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Spark/Non-Spark-only adFormat and single-country query echoes are omitted. Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis (soft creative_center fallback when literal matches are empty). Empty results and upstream timeouts are never charged. A real browser is required — Creative Center HTML is an empty shell and the list API needs page-signed requests. We intercept the signed top_ads/v2/list XHR and exit when that JSON arrives (typically 30-60 seconds; not networkidle). Flat 2 credits on the browser path; Apify fallback ~1 credit per returned ad (min 2; ~20 at default limit). truncated:true when fewer than limit ads are returned while Creative Center still has pages. Pass cache=true for a 24h hit (0 credits). For DSA firstShown/lastShown use /tiktok/search.",
+      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when the CC list omits run dates — datesPresent counts filled rows; for DSA windows use /tiktok/search), likes + likesIsApproximate, ctr/ctrTier, costTier, isSparkAd, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Spark/Non-Spark-only adFormat and single-country query echoes are omitted. Keyword q is case-insensitive whole-word match=any|all on title/brand/tags/industry (hair ≠ wheelchair) with matchedFrom/filteredOut/literalMatches/matchBasis — zero literal hits return empty ads[], never the unfiltered leaderboard. Empty results and upstream timeouts are never charged. A real browser is required — Creative Center HTML is an empty shell and the list API needs page-signed requests. We intercept the signed top_ads/v2/list XHR and exit when that JSON arrives (typically 30-60 seconds; not networkidle). Flat 2 credits on the browser path; Apify fallback ~1 credit per returned ad (min 2; ~20 at default limit). truncated:true when fewer than limit ads are returned while Creative Center still has pages. Pass cache=true for a 24h hit (0 credits).",
     delivers: [
       "advertiser{id,name} for grouping + Spark author fallback",
+      "Honest keyword filter — empty when no whole-word hit (matchedFrom explains)",
       "firstSeen/lastSeen + datesPresent (often null on CC list)",
       "Signed list XHR early-exit (30–60s typical); empty/timeout free",
-      "Flat 2 browser / ~1 per ad Apify; truncated when short of limit",
     ],
     platformLimits: [
       "This endpoint queries TikTok Creative Center live in a browser and typically takes 30-60 seconds. Set your HTTP client timeout to at least 120 seconds. Note that nginx and AWS ALB default to 60s and Heroku caps at 30s.",
@@ -4956,13 +4956,14 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "string",
       required: false,
       description:
-        "Optional keyword — case-insensitive substring on title/brand/tags/industry. See match and matchedFrom in the response.",
+        "Optional keyword — case-insensitive whole-word match on title/brand/tags/industry (hair ≠ wheelchair). See match and matchedFrom.",
     },
     {
       name: "match",
       type: "string",
       required: false,
-      description: 'Keyword token mode: "any" (default, OR) or "all" (AND). Soft Creative Center fallback when literal matches are empty.',
+      description:
+        'Keyword token mode: "any" (default, OR) or "all" (AND). Zero literal hits → empty ads[] (never an unfiltered soft list).',
     },
     {
       name: "country",
@@ -6386,12 +6387,12 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       a: `Creative Center HTML is an empty shell — ads arrive only via a signed list XHR. We open the page in a browser, intercept that response, and exit when the JSON arrives (typically 30–60 seconds — not networkidle). Set your HTTP client timeout to at least 120 seconds. nginx/ALB default to 60s and Heroku caps at 30s — those cut the connection on your side. On timeout we return 503 upstream_timeout (not billed). If totalReturned < limit and truncated is true, Creative Center still had pages we did not fetch.`,
     });
     list.push({
-      q: `Why did my keyword return zero — or soft Creative Center ads?`,
-      a: `Read matchedFrom, filteredOut, literalMatches, and matchBasis. match=any (default) keeps rows with any token as a substring; match=all requires every token. When literal matches are empty but Creative Center returned a soft-ranked set, matchBasis=creative_center serves that set instead of a silent zero.`,
+      q: `Why did my keyword return zero ads?`,
+      a: `Read matchedFrom, filteredOut, literalMatches, and matchBasis. match=any (default) keeps rows with any whole-word token; match=all requires every token. Creative Center's keyword ranking is soft and often unrelated — we never echo that unfiltered list. If matchedFrom>0 and totalReturned=0, the leaderboard had rows and local filter dropped them (empty is free). Try a brand name or a token that appears in title/industry.`,
     });
     list.push({
       q: `What does ctr mean, and where are ad dates?`,
-      a: `ctr is TikTok's normalized 0–1 Creative Center score (not a raw click-through percent); ctrTier is the bucket TikTok assigns. Each ad has firstSeen/lastSeen (ISO-8601) when Creative Center or the actor ships timestamps; otherwise they stay null — check datesPresent on the response. The period param is only the lookback window for the ranking. For DSA firstShown/lastShown use /tiktok/search.`,
+      a: `ctr is TikTok's normalized 0–1 Creative Center score (not a raw click-through percent); ctrTier is the bucket TikTok assigns. firstSeen/lastSeen are ISO-8601 when Creative Center or the Apify actor ships timestamps (first_shown_date / video create time); the public top_ads/v2/list payload usually omits them — expect datesPresent=0. The period param is only the lookback window for the ranking. For DSA firstShown/lastShown use /tiktok/search.`,
     });
     list.push({
       q: `How do I group ads by advertiser?`,
@@ -8391,18 +8392,19 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     matchBasis: 'How keywords were applied — "any", "all", or "none".',
   },
   "tiktok-ad-library-top-ads": {
-    matchedFrom: "Row count after industry/objective/format filters, before local keyword filtering.",
-    filteredOut: "Rows dropped by the local keyword filter (0 when matchBasis=creative_center).",
-    literalMatches: "Rows that passed local substring matching.",
+    matchedFrom:
+      "Always present (integer). Row count after industry/objective/format filters, before local keyword filtering. With q set and totalReturned=0, matchedFrom>0 means the leaderboard had rows and the whole-word filter dropped them.",
+    filteredOut: "Rows dropped by the local whole-word keyword filter.",
+    literalMatches: "Rows that passed local whole-word matching.",
     match: 'Echo of the match query param ("any" or "all").',
     matchBasis:
-      'any|all when literal filter kept rows; creative_center when Creative Center soft results are served because literal matches were empty; none when q was omitted.',
+      'any|all when q was set (literal filter applied); none when q was omitted. Never creative_center — soft leaderboard echoes were removed.',
     truncated:
       "true when totalReturned < limit while Creative Center pagination still had more pages (early-exit safety net — never a silent short page).",
     datesPresent:
-      "Count of ads where firstSeen or lastSeen is non-null. Creative Center's public list often omits run dates — expect 0 unless upstream ships timestamps.",
+      "Count of ads where firstSeen or lastSeen is non-null. Creative Center's public list almost always omits run dates — expect 0 on the browser path unless Apify/detail ships timestamps.",
     firstSeen:
-      "ISO-8601 UTC when the creative was first observed / created, if Creative Center or the actor provides it; otherwise null.",
+      "ISO-8601 UTC when the creative was first observed / created, if Creative Center or the actor provides it; otherwise null (list XHR usually omits).",
     lastSeen:
       "ISO-8601 UTC when the creative was last shown / ended, if provided; otherwise null. For DSA windows use /tiktok/search.",
     advertiser:

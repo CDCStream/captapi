@@ -332,6 +332,16 @@ def query_tokens(q: str | None) -> list[str]:
     return [t for t in re.split(r"\W+", (q or "").lower()) if len(t) >= 2]
 
 
+def token_in_haystack(token: str, hay: str) -> bool:
+    """Whole-word match — ``hair`` must not hit ``wheelchair``."""
+    if not token or not hay:
+        return False
+    return (
+        re.search(rf"(?<![a-z0-9]){re.escape(token)}(?![a-z0-9])", hay, re.I)
+        is not None
+    )
+
+
 def normalize_match_mode(match: str | None) -> MatchMode:
     raw = (match or "any").strip().lower()
     if raw in {"any", "or"}:
@@ -347,11 +357,12 @@ def top_ad_matches_query(
     *,
     match: MatchMode = "any",
 ) -> bool:
-    """True when query tokens appear as case-insensitive substrings.
+    """True when query tokens appear as whole words in title/brand/tags/industry.
 
-    ``match=any`` (default): at least one token in title/brand/tags/industry.
-    ``match=all``: every token must appear. Creative Center's keyword param is
-    soft — local filtering is a second pass, not an exact AND dictionary match.
+    ``match=any`` (default): at least one token. ``match=all``: every token.
+    Creative Center's ``keyword`` param is soft-ranked — local filtering is the
+    only honest relevance gate. Empty local matches → empty response (never
+    echo the unfiltered leaderboard as a keyword hit).
     """
     tokens = query_tokens(q)
     if not tokens:
@@ -384,8 +395,8 @@ def top_ad_matches_query(
     if not hay.strip():
         return False
     if match == "all":
-        return all(t in hay for t in tokens)
-    return any(t in hay for t in tokens)
+        return all(token_in_haystack(t, hay) for t in tokens)
+    return any(token_in_haystack(t, hay) for t in tokens)
 
 
 def filter_top_ads_by_query(
@@ -570,27 +581,41 @@ def _extract_brand(row: dict[str, Any]) -> tuple[str | None, str | None]:
 def _extract_dates(row: dict[str, Any]) -> tuple[str | None, str | None]:
     """Best-effort firstSeen / lastSeen from Creative Center / actor payloads.
 
-    The public Top Ads list usually omits run dates — keys stay present as null
-    so clients have a stable schema. When upstream (or a detail hydrate) ships
-    timestamps, map them here.
+    The public ``top_ads/v2/list`` materials almost never include run dates —
+    keys stay present as null for a stable schema. Apify / detail hydrates
+    sometimes ship ``first_shown_date`` / ``last_shown_date`` (YYYYMMDD) or
+    unix create times on ``video_info`` — map every known alias here.
     """
     detail = _nested_dict(row, "detail", "ad_detail", "adDetail")
     info = _nested_dict(row, "video_info", "videoInfo")
+    metrics = _nested_dict(row, "metrics", "metric", "analytics")
     first = _iso_from_unknown(
         row.get("first_shown")
         or row.get("firstShown")
         or row.get("first_shown_date")
         or row.get("firstShownDate")
         or row.get("first_shown_at")
+        or row.get("first_show_time")
+        or row.get("firstShowTime")
+        or row.get("show_start_time")
+        or row.get("showStartTime")
+        or row.get("start_time")
+        or row.get("startTime")
         or row.get("create_time")
         or row.get("createTime")
         or row.get("create_timestamp")
         or row.get("created_at")
         or row.get("createdAt")
         or detail.get("first_shown")
+        or detail.get("first_shown_date")
+        or detail.get("firstShownDate")
         or detail.get("create_time")
+        or detail.get("createTime")
         or info.get("create_time")
         or info.get("createTime")
+        or info.get("create_timestamp")
+        or metrics.get("first_shown")
+        or metrics.get("first_shown_date")
     )
     last = _iso_from_unknown(
         row.get("last_shown")
@@ -598,10 +623,18 @@ def _extract_dates(row: dict[str, Any]) -> tuple[str | None, str | None]:
         or row.get("last_shown_date")
         or row.get("lastShownDate")
         or row.get("last_shown_at")
+        or row.get("last_show_time")
+        or row.get("lastShowTime")
+        or row.get("show_end_time")
+        or row.get("showEndTime")
         or row.get("end_time")
         or row.get("endTime")
         or detail.get("last_shown")
         or detail.get("last_shown_date")
+        or detail.get("lastShownDate")
+        or detail.get("end_time")
+        or metrics.get("last_shown")
+        or metrics.get("last_shown_date")
     )
     return first, last
 
@@ -930,15 +963,13 @@ def filter_top_ads(
     industry: str | None = None,
     objective: str | None = None,
     ad_format: str | None = None,
-    soft_fallback: bool = True,
 ) -> dict[str, Any]:
     """Apply dimension + keyword filters.
 
     Returns ``{rows, matchedFrom, filteredOut, match, matchBasis, literalMatches}``.
     ``matchedFrom`` is the count after industry/objective/format and before ``q``.
-    When local literal matching would wipe a non-empty Creative Center set and
-    ``soft_fallback`` is true, return the pre-q rows with ``matchBasis=creative_center``
-    so soft-ranked ads are not silently discarded.
+    When ``q`` is set and no row passes whole-word matching, ``rows`` is empty —
+    Creative Center's soft keyword ranking is never sold as a literal hit.
     """
     out = materials
     ind = (industry or "").strip().lower()
@@ -983,30 +1014,11 @@ def filter_top_ads(
         }
 
     literal = filter_top_ads_by_query(out, q, match=match)
-    if literal:
-        return {
-            "rows": literal,
-            "matchedFrom": matched_from,
-            "filteredOut": matched_from - len(literal),
-            "literalMatches": len(literal),
-            "match": match,
-            "matchBasis": match,
-        }
-    if soft_fallback and matched_from > 0:
-        # Creative Center already soft-matched via keyword on the page URL.
-        return {
-            "rows": out,
-            "matchedFrom": matched_from,
-            "filteredOut": 0,
-            "literalMatches": 0,
-            "match": match,
-            "matchBasis": "creative_center",
-        }
     return {
-        "rows": [],
+        "rows": literal,
         "matchedFrom": matched_from,
-        "filteredOut": matched_from,
-        "literalMatches": 0,
+        "filteredOut": matched_from - len(literal),
+        "literalMatches": len(literal),
         "match": match,
         "matchBasis": match,
     }
@@ -1056,7 +1068,6 @@ def _filter_and_truncate(
         industry=industry,
         objective=objective,
         ad_format=ad_format,
-        soft_fallback=True,
     )
     kept = list(filtered["rows"])[:want]
     # Exit with collected < limit while upstream still has pages → truncated.

@@ -7816,7 +7816,7 @@
           "Ad Library"
         ],
         "summary": "TikTok Creative Center Top Ads",
-        "description": "High-performing TikTok ads from Creative Center Top Ads (ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — check datesPresent), likes (+likesIsApproximate), ctr/ctrTier, costTier, resolved industry/objective, isSparkAd, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Keyword q uses match=any|all with matchedFrom/filteredOut/matchBasis. Empty results are never charged. This endpoint opens TikTok Creative Center in a browser and intercepts the signed list XHR (HTML has no ad data). Typically 30–60 seconds — set your HTTP client timeout to at least 120s (nginx/ALB default 60s and Heroku 30s will cut the connection). Flat 2 credits on the browser path; Apify fallback ~1 credit per returned ad (min 2). For DSA firstShown/lastShown use /v1/ad-library/tiktok/search.",
+        "description": "High-performing TikTok ads from Creative Center Top Ads (ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when CC list omits run dates — check datesPresent; DSA windows: /tiktok/search), likes (+likesIsApproximate), ctr/ctrTier, costTier, resolved industry/objective, isSparkAd, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Keyword q is whole-word match=any|all on title/brand/tags/industry — matchedFrom/filteredOut/literalMatches/matchBasis explain the filter. No soft Creative Center fallback: zero literal hits → empty ads (free). This endpoint opens TikTok Creative Center in a browser and intercepts the signed list XHR (HTML has no ad data). Typically 30–60 seconds — set your HTTP client timeout to at least 120s (nginx/ALB default 60s and Heroku 30s will cut the connection). Flat 2 credits on the browser path; Apify fallback ~1 credit per returned ad (min 2).",
         "operationId": "tiktok_top_ads_v1_ad_library_tiktok_top_ads_get",
         "security": [
           {
@@ -7837,10 +7837,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Optional keyword. Case-insensitive substring match on title, brand, tags, industry, objective. See match=any|all. When literal matches are empty, Creative Center soft results may still be returned (matchBasis=creative_center) with matchedFrom populated.",
+              "description": "Optional keyword. Case-insensitive whole-word match on title, brand, tags, industry, objective (hair ≠ wheelchair). See match=any|all. When no row matches, ads[] is empty and matchedFrom shows how many leaderboard rows were considered — never the unfiltered list.",
               "title": "Q"
             },
-            "description": "Optional keyword. Case-insensitive substring match on title, brand, tags, industry, objective. See match=any|all. When literal matches are empty, Creative Center soft results may still be returned (matchBasis=creative_center) with matchedFrom populated."
+            "description": "Optional keyword. Case-insensitive whole-word match on title, brand, tags, industry, objective (hair ≠ wheelchair). See match=any|all. When no row matches, ads[] is empty and matchedFrom shows how many leaderboard rows were considered — never the unfiltered list."
           },
           {
             "name": "match",

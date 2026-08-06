@@ -2027,27 +2027,28 @@ async def tiktok_search(
     description=(
         "High-performing TikTok ads from Creative Center Top Ads "
         "(ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, "
-        "advertiser{id,name}, firstSeen/lastSeen (null when CC omits run dates — "
-        "check datesPresent), likes (+likesIsApproximate), ctr/ctrTier, costTier, "
-        "resolved industry/objective, isSparkAd, and video{} (urlHd only when a "
-        "distinct HD rendition exists; no duplicate media[]). Keyword q uses "
-        "match=any|all with matchedFrom/filteredOut/matchBasis. Empty results "
-        "are never charged. This endpoint opens TikTok Creative Center in a "
-        "browser and intercepts the signed list XHR (HTML has no ad data). "
-        "Typically 30–60 seconds — set your HTTP client timeout to at least 120s "
-        "(nginx/ALB default 60s and Heroku 30s will cut the connection). Flat 2 "
-        "credits on the browser path; Apify fallback ~1 credit per returned ad "
-        "(min 2). For DSA firstShown/lastShown use /v1/ad-library/tiktok/search."
+        "advertiser{id,name}, firstSeen/lastSeen (null when CC list omits run dates — "
+        "check datesPresent; DSA windows: /tiktok/search), likes (+likesIsApproximate), "
+        "ctr/ctrTier, costTier, resolved industry/objective, isSparkAd, and video{} "
+        "(urlHd only when a distinct HD rendition exists; no duplicate media[]). "
+        "Keyword q is whole-word match=any|all on title/brand/tags/industry — "
+        "matchedFrom/filteredOut/literalMatches/matchBasis explain the filter. "
+        "No soft Creative Center fallback: zero literal hits → empty ads (free). "
+        "This endpoint opens TikTok Creative Center in a browser and intercepts "
+        "the signed list XHR (HTML has no ad data). Typically 30–60 seconds — set "
+        "your HTTP client timeout to at least 120s (nginx/ALB default 60s and "
+        "Heroku 30s will cut the connection). Flat 2 credits on the browser path; "
+        "Apify fallback ~1 credit per returned ad (min 2)."
     ),
 )
 async def tiktok_top_ads(
     q: str | None = Query(
         None,
         description=(
-            "Optional keyword. Case-insensitive substring match on title, brand, "
-            "tags, industry, objective. See match=any|all. When literal matches "
-            "are empty, Creative Center soft results may still be returned "
-            "(matchBasis=creative_center) with matchedFrom populated."
+            "Optional keyword. Case-insensitive whole-word match on title, brand, "
+            "tags, industry, objective (hair ≠ wheelchair). See match=any|all. "
+            "When no row matches, ads[] is empty and matchedFrom shows how many "
+            "leaderboard rows were considered — never the unfiltered list."
         ),
     ),
     match: str = Query(
@@ -2157,11 +2158,9 @@ async def tiktok_top_ads(
                 objective=objective,
                 ad_format=ad_format,
             )
-            # Empty browser result with active filters → try Apify.
-            has_filters = bool(
-                (q or "").strip() or industry or objective or ad_format
-            )
-            if native is not None and (native.get("rows") or not has_filters):
+            # Browser capture succeeded — trust it even when keyword filter
+            # returns zero rows (honest empty). Apify only when capture failed.
+            if native is not None:
                 ctx["source"] = "direct"
                 return await _payload(native, want=want)
 
@@ -2189,7 +2188,6 @@ async def tiktok_top_ads(
                 industry=industry,
                 objective=objective,
                 ad_format=ad_format,
-                soft_fallback=True,
             )
             return await _payload(filt, want=want)
 
@@ -2205,7 +2203,7 @@ async def tiktok_top_ads(
                 "objective": objective or "",
                 "adFormat": ad_format or "",
                 "limit": limit,
-                "v": 6,
+                "v": 7,
             },
             _run,
             ctx,

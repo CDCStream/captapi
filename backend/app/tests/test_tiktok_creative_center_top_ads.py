@@ -30,23 +30,33 @@ def test_top_ad_keyword_any_vs_all() -> None:
     )
 
 
-def test_filter_soft_fallback_when_literal_empty() -> None:
+def test_keyword_requires_word_boundary() -> None:
+    wheelchair = {
+        "ad_title": "Best wheelchair accessories",
+        "brand_name": "Mobility Co",
+    }
+    assert not cc.top_ad_matches_query(wheelchair, "hair", match="any")
+    assert cc.top_ad_matches_query(
+        {"ad_title": "Hair growth serum", "brand_name": "Glow"},
+        "hair",
+        match="any",
+    )
+    assert cc.token_in_haystack("casino", "online casino bonuses")
+    assert not cc.token_in_haystack("hair", "wheelchair")
+
+
+def test_filter_empty_when_no_literal_matches() -> None:
+    """Never echo the unfiltered leaderboard as a keyword hit."""
     rows = [
         {"ad_id": "1", "ad_title": "Being a landlord", "brand_name": "Rent"},
         {"ad_id": "2", "ad_title": "Apartment tips", "brand_name": "Home"},
     ]
-    filt = cc.filter_top_ads(rows, q="casino", match="any", soft_fallback=True)
+    filt = cc.filter_top_ads(rows, q="casino", match="any")
     assert filt["matchedFrom"] == 2
     assert filt["literalMatches"] == 0
-    assert filt["filteredOut"] == 0
-    assert filt["matchBasis"] == "creative_center"
-    assert len(filt["rows"]) == 2
-
-    strict = cc.filter_top_ads(rows, q="casino", match="any", soft_fallback=False)
-    assert strict["matchedFrom"] == 2
-    assert strict["filteredOut"] == 2
-    assert strict["rows"] == []
-    assert strict["matchBasis"] == "any"
+    assert filt["filteredOut"] == 2
+    assert filt["rows"] == []
+    assert filt["matchBasis"] == "any"
 
 
 def test_filter_reports_matched_from() -> None:
@@ -54,7 +64,7 @@ def test_filter_reports_matched_from() -> None:
         {"ad_id": "1", "ad_title": "Casino night", "brand_name": "Lucky"},
         {"ad_id": "2", "ad_title": "Landlord tips", "brand_name": "Rent"},
     ]
-    filt = cc.filter_top_ads(rows, q="casino", match="any", soft_fallback=True)
+    filt = cc.filter_top_ads(rows, q="casino", match="any")
     assert filt["matchedFrom"] == 2
     assert filt["literalMatches"] == 1
     assert filt["filteredOut"] == 1
@@ -111,6 +121,18 @@ def test_normalize_top_ad_shape() -> None:
     assert out["advertiser"] == {"id": "brand_123", "name": "Rent Please!"}
     assert out["firstSeen"] == "2026-01-15T00:00:00.000Z"
     assert out["lastSeen"] == "2026-02-01T00:00:00.000Z"
+
+
+def test_extract_dates_from_video_create_time() -> None:
+    out = cc.normalize_top_ad(
+        {
+            "ad_id": "9",
+            "ad_title": "Clip",
+            "video_info": {"create_time": 1735689600, "vid": "v1"},
+        }
+    )
+    assert out["firstSeen"] == "2025-01-01T00:00:00.000Z"
+    assert out["lastSeen"] is None
 
 
 def test_normalize_spark_falls_back_to_author() -> None:
