@@ -240,8 +240,32 @@ const PLATFORM_LABEL: Record<PlatformId, string> = {
 type Spec = Omit<ApiEndpoint, "platform">;
 
 const YOUTUBE: Spec[] = [
-  { slug: "youtube-transcript", name: "YouTube Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/youtube/transcript", credits: 1 },
-  { slug: "youtube-summarizer", name: "YouTube Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/youtube/summarize", credits: 3 },
+  {
+    slug: "youtube-transcript",
+    name: "YouTube Transcript API",
+    shortName: "Transcript",
+    category: "transcript",
+    method: "GET",
+    path: "/v1/youtube/transcript",
+    credits: 1,
+    tagline:
+      "YouTube's published captions with timestamps — not speech-to-text. Flat 1 credit; 404 is free.",
+    longDescription:
+      "Returns the captions YouTube published for a video (manual or auto-generated tracks) as clean JSON with timestamps. It does not generate text from speech — long live streams often have no auto-captions. When captions are missing, the 404 body includes code (no_captions / language_not_available), reason, availableLanguages[], and hasAutoCaptions. Pass language to require that track (or a YouTube translation into it); there is no silent fallback to another language — success responses expose requestedLanguage and returnedLanguage. Flat 1 credit on success; 404 never charges.",
+  },
+  {
+    slug: "youtube-summarizer",
+    name: "YouTube Summarizer API",
+    shortName: "Summarizer",
+    category: "summarize",
+    method: "GET",
+    path: "/v1/youtube/summarize",
+    credits: 3,
+    tagline:
+      "GPT summary from YouTube's published captions — same source as /transcript. Flat 3 credits; caption-miss 404 is free.",
+    longDescription:
+      "Fetches YouTube's published captions (same engine as /transcript — not speech-to-text) and returns a GPT summary, key points, topics, and sentiment. When the video has no caption tracks, you get the same diagnostic 404 as /transcript (code, reason, availableLanguages, hasAutoCaptions) and are charged 0 credits — never 3. Long live streams often lack auto-captions. Flat 3 credits only when a summary is returned.",
+  },
   { slug: "youtube-video-details", name: "YouTube Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/youtube/video-details", credits: 1 },
   {
     slug: "youtube-comments",
@@ -325,7 +349,8 @@ const YOUTUBE: Spec[] = [
     path: "/v1/youtube/shorts/transcript",
     credits: 1,
     tagline: "Transcript for a YouTube Short — rejects long-form videos (≤3 min only).",
-    longDescription: "Same transcript engine as YouTube Transcript, but scoped to Shorts. Pass a youtube.com/shorts/… URL (or a watch URL that is actually a Short). Videos longer than 3 minutes return HTTP 422 — use /v1/youtube/transcript for those. Flat 1 credit.",
+    longDescription:
+      "Same caption engine as YouTube Transcript (published captions only — not speech-to-text), scoped to Shorts. Pass a youtube.com/shorts/… URL (or a watch URL that is actually a Short). Videos longer than 3 minutes return HTTP 422 — use /v1/youtube/transcript for those. Caption-miss 404 uses the same diagnostic body and charges 0. Flat 1 credit on success.",
   },
   {
     slug: "youtube-shorts-summarizer",
@@ -336,7 +361,8 @@ const YOUTUBE: Spec[] = [
     path: "/v1/youtube/shorts/summarize",
     credits: 3,
     tagline: "AI summary of a YouTube Short — rejects long-form videos (≤3 min only).",
-    longDescription: "Same summarizer as YouTube Summarizer, scoped to Shorts (≤3 minutes). Longer videos return HTTP 422. Flat 3 credits.",
+    longDescription:
+      "Same summarizer as YouTube Summarizer (captions → GPT), scoped to Shorts (≤3 minutes). Longer videos return HTTP 422. Caption-miss 404 matches /transcript diagnostics and charges 0 — never 3. Flat 3 credits only when a summary is returned.",
   },
   {
     slug: "youtube-shorts-stats",
@@ -5242,11 +5268,29 @@ function article(label: string): string {
  * from the router sources. Returns null when the endpoint doesn't 404 in
  * practice (most searches return 200 with an empty list instead).
  */
-function notFoundDetail(ep: ApiEndpoint): string | null {
+function notFoundDetail(
+  ep: ApiEndpoint,
+): string | Record<string, unknown> | null {
   const p = ep.platform;
 
   if (ep.category === "search") {
     return null;
+  }
+  if (
+    ep.slug === "youtube-transcript" ||
+    ep.slug === "youtube-summarizer" ||
+    ep.slug === "youtube-shorts-transcript" ||
+    ep.slug === "youtube-shorts-summarizer"
+  ) {
+    return {
+      code: "no_captions",
+      reason:
+        "YouTube published no caption tracks for this video. This endpoint returns YouTube's published captions only — it does not generate text from speech. Long live streams often have no auto-captions.",
+      message: "Transcript not available for this video",
+      availableLanguages: [],
+      hasAutoCaptions: false,
+      requestedLanguage: null,
+    };
   }
   if (ep.category === "transcript" || ep.category === "summarize") {
     return p === "rumble"
@@ -6241,6 +6285,21 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `Why is isLive false when room has stream URLs?`,
       a: `isLive is true only when status === 2. Ended rooms often keep title, totalEnterCount, and pull URLs — that is last-broadcast history, not a live session. viewerCount is omitted when offline so a stale concurrent count is not mistaken for live viewers.`,
+    });
+  }
+  if (
+    ep.slug === "youtube-transcript" ||
+    ep.slug === "youtube-summarizer" ||
+    ep.slug === "youtube-shorts-transcript" ||
+    ep.slug === "youtube-shorts-summarizer"
+  ) {
+    list.push({
+      q: `Why did I get 404 on a video with clear speech?`,
+      a: `This endpoint returns captions YouTube published — it does not run speech-to-text. Read detail.code: no_captions means tracks=0 (common on long live streams); language_not_available means tracks exist but not in your language (see availableLanguages). 404 never charges credits. Summarizer uses the same caption path and the same free 404.`,
+    });
+    list.push({
+      q: `If I pass language=en and only Turkish captions exist, what happens?`,
+      a: `We try YouTube's timedtext translation into en. If that fails → 404 language_not_available with availableLanguages (not a silent Turkish transcript). On success, requestedLanguage and returnedLanguage are both set; isTranslated is true when YouTube translated.`,
     });
   }
   if (ep.slug === "tiktok-user-followers" || ep.slug === "tiktok-user-followings") {

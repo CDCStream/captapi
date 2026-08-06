@@ -7,7 +7,7 @@ import json
 import math
 import re
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, NoReturn
 from urllib.parse import parse_qs, urlparse
 import xml.etree.ElementTree as ET
 
@@ -759,11 +759,17 @@ async def _fetch_transcript_item(norm_url: str, language: str | None) -> dict[st
     A single third-party actor can silently start returning empty results
     (as pintostudio did), so we try a primary actor and a fallback. When a
     specific non-English language is requested we lead with the language-aware
-    actor. Returns a normalized item ``{segments, title, language}``.
+    actor. Returns a normalized item ``{segments, title, language}`` or a
+    diagnostic empty payload (``error`` + ``availableLanguages``) when YouTube
+    has no usable captions.
     """
     native = await transcript_native(norm_url, language)
     if native and native.get("segments"):
         return {**native, "source": "direct"}
+
+    # Keep native diagnostic (tracks=0 / language_not_available) for the final
+    # 404 if Apify also finds nothing — no extra upstream call required.
+    native_diag = native if isinstance(native, dict) else None
 
     apify = get_apify()
     settings = get_settings()
@@ -778,7 +784,14 @@ async def _fetch_transcript_item(norm_url: str, language: str | None) -> dict[st
     # never succeeds on an immediate retry, and each retry risked another full
     # actor run (~2 min worst case). Two independent actors are redundancy
     # enough; worst case is now 2 runs instead of 4.
-    last: dict[str, Any] = {"segments": [], "title": None, "language": language}
+    last: dict[str, Any] = {
+        "segments": [],
+        "title": None,
+        "language": language,
+        "requestedLanguage": safe_str(language),
+        "availableLanguages": [],
+        "hasAutoCaptions": False,
+    }
     for actor in chain:
         try:
             items = await apify.run_actor_sync(
@@ -791,25 +804,123 @@ async def _fetch_transcript_item(norm_url: str, language: str | None) -> dict[st
             segs = _normalize_segments(rec)
             title = safe_str(rec.get("videoTitle") or rec.get("video_title") or rec.get("title"))
             if segs:
+                returned = safe_str(
+                    rec.get("language") or rec.get("selectedLanguage") or language
+                )
                 return {
                     "segments": segs,
                     "title": title,
-                    "language": safe_str(rec.get("language") or rec.get("selectedLanguage") or language),
+                    "language": returned,
+                    "requestedLanguage": safe_str(language),
+                    "returnedLanguage": returned,
                     "source": "apify",
                 }
-            last = {"segments": [], "title": title, "language": language}
+            last = {
+                "segments": [],
+                "title": title,
+                "language": language,
+                "requestedLanguage": safe_str(language),
+                "availableLanguages": [],
+                "hasAutoCaptions": False,
+            }
+    if native_diag:
+        return {**native_diag, "source": native_diag.get("source") or "direct"}
+    # No native player + empty Apify — treat as no published captions.
+    if not last.get("error"):
+        last["error"] = {
+            "code": "no_captions",
+            "reason": (
+                "YouTube published no caption tracks for this video. "
+                "This endpoint returns YouTube's published captions only — "
+                "it does not generate text from speech. Long live streams "
+                "often have no auto-captions."
+            ),
+        }
+        last["hasAutoCaptions"] = False
+        last["availableLanguages"] = []
     return last
+
+
+def _fix_available_languages(available: Any) -> list[dict[str, Any]]:
+    from app.utils.formatters import language_name_from_code
+
+    if not isinstance(available, list):
+        return []
+    fixed: list[dict[str, Any]] = []
+    for row in available:
+        if not isinstance(row, dict):
+            continue
+        row = dict(row)
+        if not row.get("languageName"):
+            row["languageName"] = language_name_from_code(
+                safe_str(row.get("languageCode"))
+            )
+        fixed.append(row)
+    return fixed
+
+
+def _raise_transcript_unavailable(
+    item: dict[str, Any], *, language: str | None
+) -> NoReturn:
+    """404 with diagnostic body. billed_call never charges status >= 400."""
+    err = item.get("error") if isinstance(item.get("error"), dict) else {}
+    available = _fix_available_languages(item.get("availableLanguages"))
+    has_auto = bool(item.get("hasAutoCaptions"))
+    requested = normalize_language_code(
+        safe_str(item.get("requestedLanguage") or language)
+    )
+    code = safe_str(err.get("code")) or (
+        "language_not_available"
+        if requested and available
+        else "no_captions"
+    )
+    if code == "language_not_available":
+        reason = safe_str(err.get("reason")) or (
+            f"No caption track matches language '{requested}'."
+        )
+    else:
+        code = "no_captions"
+        reason = safe_str(err.get("reason")) or (
+            "YouTube published no caption tracks for this video. "
+            "This endpoint returns YouTube's published captions only — "
+            "it does not generate text from speech. Long live streams "
+            "often have no auto-captions."
+        )
+    raise HTTPException(
+        status_code=404,
+        detail={
+            "code": code,
+            "reason": reason,
+            "message": "Transcript not available for this video",
+            "availableLanguages": available,
+            "hasAutoCaptions": has_auto,
+            "requestedLanguage": requested,
+        },
+    )
 
 
 # ---------- TRANSCRIPT ----------------------------------------------------
 @router.get(
     "/transcript",
     summary="Get YouTube video transcript",
-    description=f"Returns the full transcript with timestamps. Costs {CREDIT_TRANSCRIPT} credit.",
+    description=(
+        "Returns YouTube's published captions with timestamps — it does not "
+        "generate text from speech. Long live streams often have no "
+        f"auto-captions. Costs {CREDIT_TRANSCRIPT} credit on success; 404 "
+        "(no_captions / language_not_available) is never charged."
+    ),
 )
 async def youtube_transcript(
     url: str = Query(..., description="YouTube video URL"),
-    language: str | None = Query(None, description="ISO language code (en, tr, es...)"),
+    language: str | None = Query(
+        None,
+        description=(
+            "ISO language code (en, tr, es…). When set, only that language "
+            "(or a YouTube translation into it) is returned — never a silent "
+            "fallback to another track. Missing language → 404 "
+            "language_not_available with availableLanguages."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -846,10 +957,10 @@ async def youtube_transcript(
                     )
                     text_parts.append(text)
             if not segments:
-                raise HTTPException(
-                    status_code=404,
-                    detail="Transcript not available for this video",
-                )
+                # Explicit 0 — billed_call already skips status>=400, but keep
+                # the override so logs never show a positive credit on miss.
+                ctx["credits_override"] = 0
+                _raise_transcript_unavailable(item, language=language)
             full = " ".join(text_parts)
             title = safe_str(item.get("title")) or await _oembed_title(norm_url)
             # Public source labels (additive). Internal "direct"/"apify" stay on ctx.
@@ -860,23 +971,19 @@ async def youtube_transcript(
                 public_source = "fallback"
             else:
                 public_source = None
-            from app.utils.formatters import language_name_from_code
-
-            available = item.get("availableLanguages")
-            if not isinstance(available, list):
-                available = []
-            # Backfill languageName when YouTube omitted the track label
-            # (ANDROID player often sends languageCode without name.simpleText).
-            fixed_available: list[dict[str, Any]] = []
-            for row in available:
-                if not isinstance(row, dict):
-                    continue
-                row = dict(row)
-                if not row.get("languageName"):
-                    row["languageName"] = language_name_from_code(
-                        safe_str(row.get("languageCode"))
-                    )
-                fixed_available.append(row)
+            fixed_available = _fix_available_languages(
+                item.get("availableLanguages")
+            )
+            returned = normalize_language_code(
+                safe_str(
+                    item.get("returnedLanguage")
+                    or item.get("language")
+                    or language
+                )
+            )
+            requested = normalize_language_code(
+                safe_str(item.get("requestedLanguage") or language)
+            )
             return {
                 "url": norm_url,
                 "videoId": vid,
@@ -885,16 +992,19 @@ async def youtube_transcript(
                 "transcriptSegments": segments,
                 "wordCount": len(full.split()),
                 "segments": len(segments),
-                "language": normalize_language_code(safe_str(item.get("language") or language)),
+                "language": returned,
+                "requestedLanguage": requested,
+                "returnedLanguage": returned,
                 "source": public_source,
                 "isAutoGenerated": item.get("isAutoGenerated"),
                 "isTranslated": item.get("isTranslated"),
                 "availableLanguages": fixed_available,
+                "hasAutoCaptions": bool(item.get("hasAutoCaptions")),
             }
 
         data = await cached_or_run(
             endpoint="youtube.transcript",
-            params={"url": norm_url, "language": language or "", "v": 7},
+            params={"url": norm_url, "language": language or "", "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -906,11 +1016,23 @@ async def youtube_transcript(
 @router.get(
     "/summarize",
     summary="AI summary of a YouTube video",
-    description=f"Transcript + GPT summary. Costs {CREDIT_SUMMARIZE} credits.",
+    description=(
+        "Summarizes YouTube's published captions via GPT — same caption "
+        "source as /transcript (not speech-to-text). "
+        f"Costs {CREDIT_SUMMARIZE} credits on success; when captions are "
+        "missing, returns the same diagnostic 404 as /transcript and "
+        "charges 0 credits."
+    ),
 )
 async def youtube_summarize(
     url: str = Query(...),
-    language: str | None = Query(None),
+    language: str | None = Query(
+        None,
+        description=(
+            "ISO language code for captions + summary. Missing caption "
+            "language → 404 language_not_available (0 credits)."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -932,13 +1054,21 @@ async def youtube_summarize(
                 (s.get("text") or "").strip() for s in seg_raw
             ).strip()
             if not transcript_text:
-                raise HTTPException(
-                    status_code=404,
-                    detail="Transcript not available for this video",
-                )
+                ctx["credits_override"] = 0
+                _raise_transcript_unavailable(item, language=language)
 
             ai = await summarize_transcript(
                 transcript_text, title=title, language=language or "en"
+            )
+            returned = normalize_language_code(
+                safe_str(
+                    item.get("returnedLanguage")
+                    or item.get("language")
+                    or language
+                )
+            )
+            requested = normalize_language_code(
+                safe_str(item.get("requestedLanguage") or language)
             )
             return {
                 "url": norm_url,
@@ -948,11 +1078,17 @@ async def youtube_summarize(
                 "keyPoints": ai["keyPoints"],
                 "topics": ai["topics"],
                 "sentiment": ai["sentiment"],
+                "requestedLanguage": requested,
+                "returnedLanguage": returned,
+                "availableLanguages": _fix_available_languages(
+                    item.get("availableLanguages")
+                ),
+                "hasAutoCaptions": bool(item.get("hasAutoCaptions")),
             }
 
         data = await cached_or_run(
             endpoint="youtube.summarize",
-            params={"url": norm_url, "language": language or "", "v": 3},
+            params={"url": norm_url, "language": language or "", "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
