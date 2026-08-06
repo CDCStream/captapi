@@ -265,17 +265,17 @@ const YOUTUBE: Spec[] = [
     tagline:
       "Whisper-class speech-to-text for YouTube audio — 2 credits per started minute; maxCredits safety valve.",
     longDescription:
-      "Transcribes YouTube audio with Whisper-class ASR when the video has no published captions (or when you want speech-to-text regardless). Separate from /transcript — that endpoint only returns YouTube's caption tracks. Pricing is duration-based and honest: creditsUsed = ceil(durationSeconds / 60) × 2 (badge: 2 credits/min of audio). Pass maxCredits to refuse expensive jobs before any STT runs (400 cost_exceeds_max, 0 credits). Prefers Groq whisper-large-v3-turbo when GROQ_API_KEY is set; otherwise OpenAI whisper-1 with response_format=verbose_json + timestamp_granularities=['segment'] so segments[] is never emptied by a text-only fallback. Sync path is capped at 20 minutes under Cloudflare's 110s hard deadline (measured OpenAI e2e: ~3.5 min ≈ 12s, ~20 min TED ≈ 72s); longer videos return 400 duration_too_long with estimatedCredits before any STT spend. Response always includes source: \"asr\", asrProvider, languageIsDetected, numeric segments[{text,startMs,endMs}], text, durationSeconds, creditsUsed. Cache hits still bill — the cache is our margin.",
+      "Transcribes YouTube audio with Whisper-class ASR when the video has no published captions (or when you want speech-to-text regardless). Separate from /transcript — that endpoint only returns YouTube's caption tracks. Pricing is duration-based and honest: creditsUsed = ceil(durationSeconds / 60) × 2 (badge: 2 credits/min of audio). Pass maxCredits to refuse expensive jobs before any STT runs (400 cost_exceeds_max, 0 credits). Prefers Groq whisper-large-v3-turbo when GROQ_API_KEY is set (measured: ~20 min ≈ 12s e2e, ~82 min ≈ 49s); otherwise OpenAI whisper-1. Audio is re-encoded to 16 kHz mono 32 kbps before upload so podcast-length jobs stay under the ~25 MB ceiling. Sync path is capped at 90 minutes under Cloudflare's 110s hard deadline; longer videos return 400 duration_too_long with estimatedCredits before any STT spend. Response always includes source: \"asr\", asrProvider, languageIsDetected, numeric segments[{text,startMs,endMs}], text, durationSeconds, creditsUsed. Cache hits still bill — the cache is our margin.",
     delivers: [
       "source:asr discriminator (pair with /transcript source:captions)",
       "Per-minute pricing + maxCredits preflight",
       "Uniform segments[] with numeric startMs/endMs (verbose_json)",
-      "110s hard deadline; 20-minute sync cap from measured e2e",
+      "Groq-first path; 90-minute sync cap from measured e2e",
     ],
     platformLimits: [
-      "Sync transcription is capped at 20 minutes (Cloudflare ~110s hard deadline). Longer videos return 400 duration_too_long with estimatedCredits so you can budget — 0 credits, no STT.",
-      "ASR upload is limited to 25MB after audio extract — very long or high-bitrate sources may hit audio_too_large.",
-      "Set GROQ_API_KEY to switch the preferred provider to Groq whisper-large-v3-turbo (needed to clear ~60 min inside the sync deadline).",
+      "Sync transcription is capped at 90 minutes (Cloudflare ~110s hard deadline + ~25 MB upload). Longer videos — including multi-hour livestreams — return 400 duration_too_long with estimatedCredits (0 credits, no STT).",
+      "Audio is speech-reencoded (16 kHz mono 32 kbps) before ASR; rare extract failures may still hit audio_too_large.",
+      "Requires GROQ_API_KEY in production for the 90-minute band; without it the OpenAI fallback is far slower and should stay on a tighter operational cap.",
     ],
   },
   {
@@ -6371,6 +6371,10 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `How is this different from /youtube/transcript?`,
       a: `/transcript returns YouTube's published captions (source:captions, flat 1 credit). /audio-transcript runs speech-to-text on the audio (source:asr, per-minute). Fall back from one to the other using the source discriminator — segment parsers should accept both shapes.`,
+    });
+    list.push({
+      q: `What is the sync length limit?`,
+      a: `90 minutes when Groq is configured (measured: ~82 min Huberman ≈ 49s e2e under Cloudflare's ~110s deadline). Longer videos return 400 duration_too_long with estimatedCredits and cost 0 — multi-hour livestreams need a future chunked path.`,
     });
   }
   if (ep.slug === "tiktok-user-followers" || ep.slug === "tiktok-user-followings") {

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import math
+import subprocess
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -21,7 +22,10 @@ from app.services.transcript_segments import segments_from_seconds as segments_t
 log = structlog.get_logger(__name__)
 
 _YT_AUDIO_FORMAT = "bestaudio[ext=m4a]/bestaudio/best"
-_YT_AUDIO_BITRATE = "48"
+# yt-dlp preferredquality is unreliable for already-m4a sources; we re-encode
+# after download to 16 kHz mono 32 kbps so ~60–75 min fits under 25 MB.
+_YT_SPEECH_BITRATE = "32k"
+_YT_SPEECH_RATE = "16000"
 
 
 def credits_for_duration(duration_seconds: float | int) -> int:
@@ -99,7 +103,7 @@ async def extract_audio_bytes(video_id: str) -> tuple[bytes, float, str]:
                     {
                         "key": "FFmpegExtractAudio",
                         "preferredcodec": "m4a",
-                        "preferredquality": _YT_AUDIO_BITRATE,
+                        "preferredquality": "32",
                     }
                 ],
             }
@@ -117,6 +121,35 @@ async def extract_audio_bytes(video_id: str) -> tuple[bytes, float, str]:
                 path = files[0] if files else None
             if path is None or not path.exists():
                 raise RuntimeError("audio_extract_empty")
+
+            # Re-encode for ASR upload budget (Groq/OpenAI ~25 MB free tier).
+            speech = Path(tmp) / f"{vid}.speech.m4a"
+            try:
+                subprocess.run(
+                    [
+                        "ffmpeg",
+                        "-y",
+                        "-i",
+                        str(path),
+                        "-vn",
+                        "-ac",
+                        "1",
+                        "-ar",
+                        _YT_SPEECH_RATE,
+                        "-b:a",
+                        _YT_SPEECH_BITRATE,
+                        "-c:a",
+                        "aac",
+                        str(speech),
+                    ],
+                    check=True,
+                    capture_output=True,
+                )
+                if speech.exists() and speech.stat().st_size > 0:
+                    path = speech
+            except (OSError, subprocess.CalledProcessError) as exc:
+                log.warning("yt_asr_speech_reencode_failed", error=str(exc)[:160])
+
             raw = path.read_bytes()
             if not raw:
                 raise RuntimeError("audio_extract_empty")

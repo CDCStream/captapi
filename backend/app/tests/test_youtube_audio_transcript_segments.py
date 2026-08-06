@@ -55,5 +55,5 @@ def test_exact_segment_loop_still_rejected() -> None:
 
 
 def test_sync_cap_constants() -> None:
-    assert yt._YT_ASR_SYNC_MAX_SECONDS == 20 * 60
+    assert yt._YT_ASR_SYNC_MAX_SECONDS == 90 * 60
     assert yt._YT_ASR_HARD_DEADLINE_SECS == 110

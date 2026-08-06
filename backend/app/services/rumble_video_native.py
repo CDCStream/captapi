@@ -1049,7 +1049,7 @@ def parse_video_html(html: str, url: str | None = None) -> dict[str, Any] | None
         "thumbnail": thumbnail,
         "width": None,
         "height": None,
-        "captions": captions or None,
+        "captions": captions or [],
         "isLive": is_live,
         "streams": streams,
     }

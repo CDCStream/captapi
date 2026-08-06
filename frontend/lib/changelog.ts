@@ -51,6 +51,30 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-06",
     category: "fix",
+    title: "Rumble video-details: restore shelved fields + transcript path",
+    description:
+      "GET /v1/rumble/video-details had silently dropped captions, embedUrl/embedId, audioStreams, thumbnailTrack, description, width/height and likesIsApproximate when the Apify fallback ran or null optional keys were stripped — breaking GET /v1/rumble/video/transcript (50s \"Video not found\" on a live fixture). Both endpoints now share resolve_video_details with a 31-key finaliser, embedJS enrichment on slim fallbacks, and a CI key-set snapshot that fails if the shelved shape shrinks. Transcript 404s use no_captions / language_not_available / video_not_found instead of a bare Video not found string.",
+    items: [
+      "Restore 31-key video-details shape (captions, embed*, media tracks)",
+      "Shared resolver + embedJS enrich for Apify/slim paths",
+      "Shelved key-set snapshot CI guard + transcript diagnostic 404s",
+    ],
+  },
+  {
+    publishedAt: "2026-08-06",
+    category: "improvement",
+    title: "YouTube audio-transcript: Groq turbo + 90-minute sync cap",
+    description:
+      "GET /v1/youtube/audio-transcript now prefers Groq whisper-large-v3-turbo when GROQ_API_KEY is set, parses Groq's dict-shaped verbose_json segments, and speech-reencodes audio to 16 kHz mono 32 kbps so podcast-length jobs fit the ~25 MB upload ceiling. Sync cap raised from 20 → 90 minutes from measured e2e (TED ~20 min ≈ 12s, Huberman ~82 min ≈ 49s under the 110s Cloudflare deadline). Multi-hour livestreams still return duration_too_long with estimatedCredits until a chunked path exists.",
+    items: [
+      "Groq whisper-large-v3-turbo preferred provider",
+      "Sync cap 90 minutes (measured e2e)",
+      "16 kHz/32 kbps speech re-encode for upload budget",
+    ],
+  },
+  {
+    publishedAt: "2026-08-06",
+    category: "fix",
     title: "YouTube audio-transcript: keep timed segments[] (no text-only fallback)",
     description:
       "GET /v1/youtube/audio-transcript was returning a full text blob with segments:[]. Root cause: the shared Whisper helper rejected song/chorus word reuse as a hallucination loop and fell back to gpt-4o-mini-transcribe (text only). verbose_json segment timings are now kept; ASR callers set require_timed_segments so that fallback never runs. Playground badge fixed to \"2 credits/min of audio\" (was wrongly \"~2 (2/result)\").",

@@ -22,6 +22,10 @@ from app.services.apify_client import get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
 from app.services import rumble_comments_native, rumble_transcript, rumble_video_native
+from app.services.rumble_video_details import (
+    RUMBLE_VIDEO_DETAILS_KEYS,
+    finalise_video_details,
+)
 from app.utils.formatters import first_present, parse_compact_count, safe_int, safe_str
 from app.utils.url import (
     extract_rumble_channel,
@@ -476,6 +480,100 @@ async def _fetch_video_page(url: str) -> dict[str, Any]:
     )
 
 
+
+async def _enrich_with_embedjs(card: dict[str, Any]) -> dict[str, Any]:
+    """Fill captions/streams/audio/thumbnailTrack from embedJS when missing."""
+    embed_id = safe_str(card.get("embedId"))
+    if not embed_id:
+        return card
+    needs = (
+        not (isinstance(card.get("captions"), list) and card.get("captions"))
+        or not (isinstance(card.get("streams"), list) and card.get("streams"))
+        or not (isinstance(card.get("audioStreams"), list) and card.get("audioStreams"))
+        or not isinstance(card.get("thumbnailTrack"), dict)
+        or card.get("width") is None
+        or card.get("height") is None
+    )
+    if not needs:
+        return card
+    payload = await rumble_video_native.fetch_embedjs(embed_id)
+    if not payload:
+        return card
+    payload.setdefault("video", embed_id)
+    return rumble_video_native.apply_embedjs(card, payload)
+
+
+async def resolve_video_details(url: str) -> tuple[dict[str, Any] | None, str]:
+    """Shared card loader for video-details + video/transcript.
+
+    Returns (card, source) where source is direct|apify. Card is always passed
+    through ``finalise_video_details`` so the shelved key set cannot shrink.
+    """
+    canon = _canonical_video_url(url)
+    native = await rumble_video_native.video_details_native(canon)
+    if native and native.get("title"):
+        card = dict(native)
+        card.pop("media", None)
+        thumb = card.get("thumbnailTrack")
+        thumb_url = (
+            safe_str(thumb.get("url")) if isinstance(thumb, dict) else None
+        )
+        card["streams"] = _finalise_streams(
+            card.get("streams") if isinstance(card.get("streams"), list) else [],
+            thumbnail_url=thumb_url,
+            require_height=True,
+        )
+        if isinstance(card.get("audioStreams"), list):
+            card["audioStreams"] = rumble_video_native.finalise_audio_streams(
+                card["audioStreams"]
+            )
+        if isinstance(card.get("captions"), list):
+            card["captions"] = rumble_video_native.finalise_captions(card["captions"])
+        if isinstance(thumb, dict):
+            card["thumbnailTrack"] = rumble_video_native.finalise_thumbnail_track(thumb)
+        # Only drop likesIsApproximate when unknown — never drop captions /
+        # width / height / media tracks (that regressed the shelved shape).
+        if card.get("likesIsApproximate") is None:
+            card.pop("likesIsApproximate", None)
+        card = await _enrich_with_embedjs(card)
+        return finalise_video_details(_stamp_duration(card)), "direct"
+
+    settings = get_settings()
+    apify = get_apify()
+    try:
+        items = await apify.run_actor_sync(
+            settings.APIFY_ACTOR_RUMBLE_DETAILS,
+            {"startUrls": [canon]},
+            max_items=1,
+        )
+    except Exception:
+        items = []
+    rows = [i for i in items if isinstance(i, dict) and i.get("object_type") == "video"]
+    if rows:
+        card = _normalize_az_video(rows[0])
+        card = await _enrich_with_embedjs(card)
+        if isinstance(card.get("captions"), list):
+            card["captions"] = rumble_video_native.finalise_captions(card["captions"])
+        if isinstance(card.get("audioStreams"), list):
+            card["audioStreams"] = rumble_video_native.finalise_audio_streams(
+                card["audioStreams"]
+            )
+        if isinstance(card.get("thumbnailTrack"), dict):
+            card["thumbnailTrack"] = rumble_video_native.finalise_thumbnail_track(
+                card["thumbnailTrack"]
+            )
+        return finalise_video_details(_stamp_duration(card)), "apify"
+
+    try:
+        page_card = await _fetch_video_page(url)
+    except HTTPException:
+        return None, "direct"
+    if page_card and page_card.get("title"):
+        page_card = await _enrich_with_embedjs(page_card)
+        return finalise_video_details(_stamp_duration(page_card)), "direct"
+    return None, "direct"
+
+
 @router.get(
     "/video-details",
     summary="Rumble video metadata + stats (null engagement when unknown; streams + captions[])",
@@ -486,7 +584,6 @@ async def video_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_rumble_video_url(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/rumble/video-details",
@@ -495,67 +592,15 @@ async def video_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Decodo JSON-LD first (CF blocks datacenter/residential).
-            native = await rumble_video_native.video_details_native(_canonical_video_url(url))
-            if native and native.get("title"):
-                ctx["source"] = "direct"
-                # Never ship raw quality-keyed embed dump.
-                native.pop("media", None)
-                thumb = native.get("thumbnailTrack")
-                thumb_url = (
-                    safe_str(thumb.get("url"))
-                    if isinstance(thumb, dict)
-                    else None
-                )
-                native["streams"] = _finalise_streams(
-                    native.get("streams") if isinstance(native.get("streams"), list) else [],
-                    thumbnail_url=thumb_url,
-                    require_height=True,
-                )
-                if isinstance(native.get("audioStreams"), list):
-                    native["audioStreams"] = rumble_video_native.finalise_audio_streams(
-                        native["audioStreams"]
-                    )
-                if isinstance(native.get("captions"), list):
-                    native["captions"] = rumble_video_native.finalise_captions(
-                        native["captions"]
-                    )
-                if isinstance(thumb, dict):
-                    native["thumbnailTrack"] = rumble_video_native.finalise_thumbnail_track(
-                        thumb
-                    )
-                # Drop null optional flags (likesIsApproximate when likes unknown).
-                for key in list(native.keys()):
-                    if native.get(key) is None and key in {
-                        "likesIsApproximate",
-                        "width",
-                        "height",
-                        "captions",
-                        "audioStreams",
-                        "thumbnailTrack",
-                    }:
-                        native.pop(key, None)
-                return _stamp_duration(native)
-
-            apify = get_apify()
-            try:
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_RUMBLE_DETAILS,
-                    {"startUrls": [_canonical_video_url(url)]},
-                    max_items=1,
-                )
-            except Exception:
-                items = []
-            rows = [i for i in items if isinstance(i, dict) and i.get("object_type") == "video"]
-            if rows:
-                ctx["source"] = "apify"
-                return _normalize_az_video(rows[0])
-            ctx["source"] = "direct"
-            return await _fetch_video_page(url)
+            card, source = await resolve_video_details(url)
+            if not card or not card.get("title"):
+                raise HTTPException(status_code=404, detail="Video not found")
+            ctx["source"] = source
+            return card
 
         data = await cached_or_run(
             endpoint="rumble.video-details",
-            params={"url": url, "v": 12},
+            params={"url": url, "v": 13},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -626,15 +671,20 @@ async def video_transcript(
         base_credits=CREDIT_TRANSCRIPT,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await rumble_video_native.video_details_native(canon)
-            if not native or not native.get("title"):
+            card, source = await resolve_video_details(canon)
+            if not card or not card.get("title"):
                 ctx["credits_override"] = 0
-                raise HTTPException(status_code=404, detail="Video not found")
+                raise HTTPException(
+                    status_code=404,
+                    detail={
+                        "code": "video_not_found",
+                        "reason": "Could not resolve this Rumble video",
+                        "availableLanguages": [],
+                    },
+                )
 
             captions = (
-                native.get("captions")
-                if isinstance(native.get("captions"), list)
-                else []
+                card.get("captions") if isinstance(card.get("captions"), list) else []
             )
             track, err, available = rumble_transcript.pick_caption_track(
                 captions, language
@@ -660,15 +710,15 @@ async def video_transcript(
                     },
                 ) from exc
 
-            duration = native.get("durationSeconds")
+            duration = card.get("durationSeconds")
             try:
                 duration_i = int(duration) if duration is not None else None
             except (TypeError, ValueError):
                 duration_i = None
 
             payload = rumble_transcript.build_transcript_payload(
-                video_id=safe_str(native.get("id")) or video_id,
-                url=safe_str(native.get("url")) or canon,
+                video_id=safe_str(card.get("id")) or video_id,
+                url=safe_str(card.get("url")) or canon,
                 track=track,
                 vtt_body=vtt,
                 duration_seconds=duration_i,
@@ -681,11 +731,15 @@ async def video_transcript(
                     language=language,
                 )
             ctx["source"] = "captions"
+            # Preserve scrape source on the envelope meta via credits ctx only;
+            # response discriminator stays source=captions.
+            if source:
+                ctx["fetchPath"] = source
             return payload
 
         data = await cached_or_run(
             endpoint="rumble.video-transcript",
-            params={"url": canon, "language": language or "", "v": 1},
+            params={"url": canon, "language": language or "", "v": 2},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -161,7 +161,7 @@ const YOUTUBE: Omit<Endpoint, "platform">[] = [
     name: "YouTube Audio Transcript",
     path: "/v1/youtube/audio-transcript",
     credits: 2,
-    summary: "Whisper-class speech-to-text for YouTube audio. 2 credits per started minute; maxCredits safety valve.",
+    summary: "Whisper-class speech-to-text for YouTube audio (Groq turbo when configured). 2 credits/min; sync cap 90 min; maxCredits safety valve.",
     params: [
       url(YT_VIDEO),
       language(),

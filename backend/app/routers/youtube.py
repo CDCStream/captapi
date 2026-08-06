@@ -79,8 +79,11 @@ CREDIT_CHANNEL_DETAILS = 1
 # 2 credits ≈ $0.009 → ~50% markup). Verified against live e2e timings.
 CREDIT_YT_ASR_PER_MINUTE = 2
 # Measured 2026-08-06: 19s→6s, ~3.5min→35s, 20min TED→52.5s e2e. Cap sync at
-# 20 minutes under Cloudflare's 125s proxy read (110s hard deadline).
-_YT_ASR_SYNC_MAX_SECONDS = 20 * 60
+# Groq whisper-large-v3-turbo measured e2e (speech-reencoded 16 kHz/32 kbps):
+# ~20 min TED ≈ 12s, ~82 min Huberman ≈ 49s — both under Cloudflare's ~110s
+# hard deadline and the ~25 MB upload ceiling. 90 min is the sync product cap;
+# longer (e.g. 3.5 h livestreams) still need chunked/async.
+_YT_ASR_SYNC_MAX_SECONDS = 90 * 60
 _YT_ASR_HARD_MAX_SECONDS = 4 * 60 * 60
 _YT_ASR_HARD_DEADLINE_SECS = 110
 # Native InnerTube / RSS list endpoints (comments, search, channel-videos,
@@ -1062,18 +1065,27 @@ async def _asr_transcribe(
                 "file": (filename, raw),
                 "model": settings.GROQ_MODEL_TRANSCRIPTION or "whisper-large-v3-turbo",
                 "response_format": "verbose_json",
+                # Same as OpenAI — without this some clients omit timings.
+                "timestamp_granularities": ["segment"],
             }
             if language:
                 kwargs["language"] = language
             resp = await client.audio.transcriptions.create(**kwargs)
+
+            def _g(seg: Any, key: str, default: Any = None) -> Any:
+                # Groq SDK returns segment rows as dicts; OpenAI uses objects.
+                if isinstance(seg, dict):
+                    return seg.get(key, default)
+                return getattr(seg, key, default)
+
             # Normalize Groq verbose_json → openai_client-like segments.
             segments: list[dict[str, Any]] = []
-            for seg in getattr(resp, "segments", None) or []:
-                text = (getattr(seg, "text", None) or "").strip()
+            for seg in _g(resp, "segments", None) or getattr(resp, "segments", None) or []:
+                text = (safe_str(_g(seg, "text")) or "").strip()
                 if not text:
                     continue
-                start = float(getattr(seg, "start", 0.0) or 0.0)
-                end = float(getattr(seg, "end", start) or start)
+                start = float(_g(seg, "start", 0.0) or 0.0)
+                end = float(_g(seg, "end", start) or start)
                 segments.append(
                     {
                         "text": text,
@@ -1082,7 +1094,7 @@ async def _asr_transcribe(
                         "duration": max(end - start, 0.0),
                     }
                 )
-            text = (getattr(resp, "text", None) or "").strip()
+            text = (safe_str(_g(resp, "text") or getattr(resp, "text", None)) or "").strip()
             if not text and segments:
                 text = " ".join(s["text"] for s in segments)
             result = {
@@ -1090,8 +1102,12 @@ async def _asr_transcribe(
                 "transcriptSegments": segments,
                 "wordCount": len(text.split()),
                 "segments": len(segments),
-                "language": getattr(resp, "language", None),
-                "duration": float(getattr(resp, "duration", 0.0) or 0.0),
+                "language": _g(resp, "language") or getattr(resp, "language", None),
+                "duration": float(
+                    _g(resp, "duration")
+                    or getattr(resp, "duration", None)
+                    or 0.0
+                ),
             }
             provider = f"groq-{settings.GROQ_MODEL_TRANSCRIPTION or 'whisper-large-v3-turbo'}"
             return result, provider
