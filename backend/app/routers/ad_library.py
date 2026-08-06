@@ -1442,6 +1442,7 @@ def _tiktok_ad_timeout_http(wait_secs: float) -> HTTPException:
 
 
 def _match_meta(filt: dict[str, Any]) -> dict[str, Any]:
+    """DSA / library search envelope — ``matchedFrom`` is a pre-filter count."""
     return {
         "matchedFrom": int(filt.get("matchedFrom") or 0),
         "filteredOut": int(filt.get("filteredOut") or 0),
@@ -1449,6 +1450,29 @@ def _match_meta(filt: dict[str, Any]) -> dict[str, Any]:
         "match": filt.get("match") or "any",
         "matchBasis": filt.get("matchBasis") or "any",
     }
+
+
+def _top_ads_match_meta(filt: dict[str, Any], *, q: str | None) -> dict[str, Any]:
+    """Top Ads envelope — scan count is ``candidatesScanned``, never ``matchedFrom``.
+
+    Per-ad ``matchedFrom`` (field provenance array) is stamped on each ad when
+    ``q`` is set. ``literalMatches`` is omitted when there is no keyword.
+    """
+    scanned = int(
+        filt.get("candidatesScanned")
+        if filt.get("candidatesScanned") is not None
+        else filt.get("matchedFrom")
+        or 0
+    )
+    out: dict[str, Any] = {
+        "candidatesScanned": scanned,
+        "filteredOut": int(filt.get("filteredOut") or 0),
+        "match": filt.get("match") or "any",
+        "matchBasis": filt.get("matchBasis") or "any",
+    }
+    if (q or "").strip():
+        out["literalMatches"] = int(filt.get("literalMatches") or 0)
+    return out
 
 
 def _bill_ads(ctx: dict[str, Any], ads: list[Any], *, flat: int, apify_rate: float | None = None) -> None:
@@ -2027,18 +2051,16 @@ async def tiktok_search(
     description=(
         "High-performing TikTok ads from Creative Center Top Ads "
         "(ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, "
-        "advertiser{id,name}, firstSeen/lastSeen (null when CC list omits run dates — "
-        "check datesPresent; DSA windows: /tiktok/search), likes (+likesIsApproximate), "
-        "ctr/ctrTier, costTier, resolved industry/objective, isSparkAd, and video{} "
-        "(urlHd only when a distinct HD rendition exists; no duplicate media[]). "
-        "Keyword q is whole-word match=any|all on title/brand/tags/industry — "
-        "matchedFrom/filteredOut/literalMatches/matchBasis explain the filter. "
-        "No soft Creative Center fallback: zero literal hits → empty ads (free). "
-        "This endpoint opens TikTok Creative Center in a browser and intercepts "
-        "the signed list XHR (HTML has no ad data). Typically 30–60 seconds — set "
-        "your HTTP client timeout to at least 120s (nginx/ALB default 60s and "
-        "Heroku 30s will cut the connection). Flat 2 credits on the browser path; "
-        "Apify fallback ~1 credit per returned ad (min 2)."
+        "advertiser{id,name}, likes (+likesIsApproximate), ctr, costTier, "
+        "resolved industry/objective, and video{} (urlHd only when a distinct HD "
+        "rendition exists). Creative Center does not expose ad run dates on the "
+        "list surface — use /tiktok/search or /tiktok/ad-details (DSA) for "
+        "firstShown/lastShown. Keyword q is whole-word match=any|all; each hit "
+        "includes matchedFrom (field names that matched) and the envelope reports "
+        "candidatesScanned/filteredOut/literalMatches/matchBasis. Zero literal "
+        "hits → empty ads (free). Typically 30–60 seconds — set HTTP client "
+        "timeout ≥120s. Flat 2 credits on the browser path; Apify ~1/returned ad "
+        "(min 2)."
     ),
 )
 async def tiktok_top_ads(
@@ -2046,9 +2068,9 @@ async def tiktok_top_ads(
         None,
         description=(
             "Optional keyword. Case-insensitive whole-word match on title, brand, "
-            "tags, industry, objective (hair ≠ wheelchair). See match=any|all. "
-            "When no row matches, ads[] is empty and matchedFrom shows how many "
-            "leaderboard rows were considered — never the unfiltered list."
+            "tags, industry, objective (hair ≠ wheelchair). Each returned ad includes "
+            "matchedFrom: which of those fields matched. Envelope candidatesScanned "
+            "is the pre-filter pool size. Empty ads[] when nothing matches (free)."
         ),
     ),
     match: str = Query(
@@ -2117,29 +2139,28 @@ async def tiktok_top_ads(
         order_key = order_by.strip().lower().replace(" ", "_").replace("-", "_")
 
         async def _payload(filt: dict[str, Any], *, want: int) -> dict[str, Any]:
+            q_clean = (q or "").strip() or None
             ads = [
                 tiktok_creative_center.normalize_top_ad(i, query_country=region)
                 for i in filt.get("rows") or []
                 if isinstance(i, dict) and (i.get("ad_id") or i.get("id"))
             ][:want]
-            dates_present = sum(
-                1 for a in ads if a.get("firstSeen") or a.get("lastSeen")
-            )
+            if q_clean:
+                for ad in ads:
+                    fields = tiktok_creative_center.matched_from_fields(ad, q_clean)
+                    if fields:
+                        ad["matchedFrom"] = fields
             out: dict[str, Any] = {
-                "query": (q or "").strip() or None,
+                "query": q_clean,
                 "country": region,
                 "period": period_days,
                 "orderBy": order_key,
                 "totalReturned": len(ads),
-                # Creative Center Top Ads rarely publishes run dates — clients
-                # can see how often firstSeen/lastSeen are filled vs null.
-                "datesPresent": dates_present,
-                **_match_meta(filt),
+                **_top_ads_match_meta(filt, q=q_clean),
+                # Always present — false when filter emptied the page or fetch completed.
+                "truncated": bool(filt.get("truncated")) if ads else False,
                 "ads": ads,
             }
-            # Early-exit collected < limit while Creative Center still has pages.
-            if filt.get("truncated"):
-                out["truncated"] = True
             return out
 
         async def _run() -> dict[str, Any]:
@@ -2203,7 +2224,7 @@ async def tiktok_top_ads(
                 "objective": objective or "",
                 "adFormat": ad_format or "",
                 "limit": limit,
-                "v": 7,
+                "v": 8,
             },
             _run,
             ctx,

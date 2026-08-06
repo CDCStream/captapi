@@ -1798,7 +1798,7 @@ export class TiktokAdLibraryApi {
   search(params: TiktokAdLibrarySearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/tiktok/search", params);
   }
-  /** TikTok Creative Center Top Ads — Creative Center Top Ads — advertiser{}, firstSeen/lastSeen+datesPresent, no media[] dup, empty free. (2 credits) */
+  /** TikTok Creative Center Top Ads — Creative Center Top Ads — advertiser{}, per-ad matchedFrom, candidatesScanned, empty free. (2 credits) */
   topAds(params: TiktokAdLibraryTopAdsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/tiktok/top-ads", params);
   }

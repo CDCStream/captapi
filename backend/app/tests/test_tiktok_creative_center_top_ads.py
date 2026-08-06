@@ -52,24 +52,48 @@ def test_filter_empty_when_no_literal_matches() -> None:
         {"ad_id": "2", "ad_title": "Apartment tips", "brand_name": "Home"},
     ]
     filt = cc.filter_top_ads(rows, q="casino", match="any")
-    assert filt["matchedFrom"] == 2
+    assert filt["candidatesScanned"] == 2
+    assert "matchedFrom" not in filt
     assert filt["literalMatches"] == 0
     assert filt["filteredOut"] == 2
     assert filt["rows"] == []
     assert filt["matchBasis"] == "any"
 
 
-def test_filter_reports_matched_from() -> None:
+def test_filter_reports_candidates_scanned() -> None:
     rows = [
         {"ad_id": "1", "ad_title": "Casino night", "brand_name": "Lucky"},
         {"ad_id": "2", "ad_title": "Landlord tips", "brand_name": "Rent"},
     ]
     filt = cc.filter_top_ads(rows, q="casino", match="any")
-    assert filt["matchedFrom"] == 2
+    assert filt["candidatesScanned"] == 2
     assert filt["literalMatches"] == 1
     assert filt["filteredOut"] == 1
     assert filt["matchBasis"] == "any"
     assert len(filt["rows"]) == 1
+
+
+def test_filter_omits_literal_matches_without_q() -> None:
+    rows = [{"ad_id": "1", "ad_title": "Casino night", "brand_name": "Lucky"}]
+    filt = cc.filter_top_ads(rows, q=None)
+    assert filt["candidatesScanned"] == 1
+    assert "literalMatches" not in filt
+    assert filt["matchBasis"] == "none"
+
+
+def test_matched_from_fields_provenance() -> None:
+    ad = {
+        "title": "Promote your brand today",
+        "brandName": "Acme",
+        "industry": "E-commerce",
+        "tags": ["growth"],
+        "objective": "Traffic",
+    }
+    assert cc.matched_from_fields(ad, "promote") == ["title"]
+    assert "brandName" in cc.matched_from_fields(
+        {**ad, "brandName": "Promote Co"}, "promote"
+    )
+    assert cc.matched_from_fields(ad, None) == []
 
 
 def test_normalize_top_ad_shape() -> None:
@@ -113,26 +137,34 @@ def test_normalize_top_ad_shape() -> None:
     assert out["industry"] == "Games"
     assert "adFormat" not in out  # Spark/Non-Spark echo dropped; isSparkAd kept
     assert out["isSparkAd"] is False
+    assert out["ctrTier"] == "below_50%"
     assert "favorite" not in out
     assert "media" not in out
     assert "countries" not in out  # query-country echo dropped
     assert "urlHd" not in out["video"]
     assert out["likesIsApproximate"] is True
     assert out["advertiser"] == {"id": "brand_123", "name": "Rent Please!"}
-    assert out["firstSeen"] == "2026-01-15T00:00:00.000Z"
-    assert out["lastSeen"] == "2026-02-01T00:00:00.000Z"
+    assert out["brandName"] == "Rent Please!"
+    # Creative Center list does not expose run dates — omit, do not null-pad.
+    assert "firstSeen" not in out
+    assert "lastSeen" not in out
 
 
-def test_extract_dates_from_video_create_time() -> None:
+def test_normalize_omits_null_optional_flags() -> None:
     out = cc.normalize_top_ad(
         {
             "ad_id": "9",
             "ad_title": "Clip",
-            "video_info": {"create_time": 1735689600, "vid": "v1"},
+            "ctr": 0.11,
+            "cost_tier": 2,
+            "advertiser": {"id": "a1", "name": "Brand From Nested"},
         }
     )
-    assert out["firstSeen"] == "2025-01-01T00:00:00.000Z"
-    assert out["lastSeen"] is None
+    assert "ctrTier" not in out
+    assert "isSparkAd" not in out
+    assert out["brandName"] == "Brand From Nested"
+    assert out["advertiser"]["name"] == "Brand From Nested"
+    assert "firstSeen" not in out
 
 
 def test_normalize_spark_falls_back_to_author() -> None:
@@ -159,8 +191,44 @@ def test_normalize_spark_falls_back_to_author() -> None:
     assert "adFormat" not in out
     assert out["countries"] == ["US", "CA"]  # multi-country kept
     assert out["video"]["urlHd"] == "https://v.example/hd.mp4"
-    assert out["firstSeen"] is None
-    assert out["lastSeen"] is None
+    assert "firstSeen" not in out
+    assert "lastSeen" not in out
+
+
+def test_list_shape_no_always_null_keys() -> None:
+    """Acceptance: no key may be null on 100% of rows (T2/T4 hygiene)."""
+    rows = [
+        {
+            "ad_id": "1",
+            "ad_title": "Promote growth",
+            "brand_name": "Acme",
+            "brand_id": "b1",
+            "ctr": 0.1,
+            "cost_tier": 2,
+            "likes": 1000,
+            "industry_key": "label_25100000000",
+            "objective": "Conversion",
+        },
+        {
+            "ad_id": "2",
+            "ad_title": "Other clip",
+            "advertiser": {"id": "b2", "name": "Beta"},
+            "ctr": 0.2,
+            "cost_tier": 1,
+            "likes": 2000,
+            "industry_key": "label_14104000000",
+            "objective": "Traffic",
+        },
+    ]
+    ads = [cc.normalize_top_ad(r, query_country="NL") for r in rows]
+    ads[0]["matchedFrom"] = cc.matched_from_fields(ads[0], "promote")
+    assert ads[0]["matchedFrom"] == ["title"]
+    assert "matchedFrom" not in ads[1]
+    assert "firstSeen" not in ads[0]
+    assert "ctrTier" not in ads[0]  # omitted when upstream withholds
+    # Same form as the live acceptance check: no key null on every row.
+    for k in ads[0]:
+        assert not all(a.get(k) is None for a in ads)
 
 
 def test_apify_industry_maps_keys_and_rejects_unknown() -> None:

@@ -51,5 +51,24 @@ def test_filter_and_truncate_full_page_not_truncated() -> None:
     assert len(out["rows"]) == 3
 
 
+def test_filter_and_truncate_empty_after_keyword_not_truncated() -> None:
+    """totalReturned=0 after filter must never report truncated=true (T3)."""
+    rows = [{"id": "1", "ad_title": "Landlord tips", "brand_name": "Rent"}]
+    out = cc._filter_and_truncate(
+        rows,
+        want=20,
+        has_more=True,
+        q="casino",
+        match="any",
+        industry=None,
+        objective=None,
+        ad_format=None,
+    )
+    assert out["rows"] == []
+    assert out["truncated"] is False
+    assert out["candidatesScanned"] == 1
+    assert out["filteredOut"] == 1
+
+
 def test_decodo_timeout_is_hard_safety_net() -> None:
     assert 60.0 <= cc.DECODO_TIMEOUT_SECONDS <= 75.0

@@ -2842,11 +2842,11 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     tagline:
       "TikTok Creative Center Top Ads — browser-intercepted list XHR, CTR/likes, video (flat 2 / ~1 Apify).",
     longDescription:
-      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName, advertiser{id,name}, firstSeen/lastSeen (null when the CC list omits run dates — datesPresent counts filled rows; for DSA windows use /tiktok/search), likes + likesIsApproximate, ctr/ctrTier, costTier, isSparkAd, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists; no duplicate media[]). Spark/Non-Spark-only adFormat and single-country query echoes are omitted. Keyword q is case-insensitive whole-word match=any|all on title/brand/tags/industry (hair ≠ wheelchair) with matchedFrom/filteredOut/literalMatches/matchBasis — zero literal hits return empty ads[], never the unfiltered leaderboard. Empty results and upstream timeouts are never charged. A real browser is required — Creative Center HTML is an empty shell and the list API needs page-signed requests. We intercept the signed top_ads/v2/list XHR and exit when that JSON arrives (typically 30-60 seconds; not networkidle). Flat 2 credits on the browser path; Apify fallback ~1 credit per returned ad (min 2; ~20 at default limit). truncated:true when fewer than limit ads are returned while Creative Center still has pages. Pass cache=true for a 24h hit (0 credits).",
+      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName (= advertiser.name), advertiser{id,name}, likes + likesIsApproximate, ctr, costTier when present, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists). Creative Center does not expose ad run dates on the list surface — use /tiktok/search or /tiktok/ad-details (DSA) for firstShown/lastShown. Optional ctrTier/isSparkAd appear only when upstream ships them (never null-padded). Keyword q is case-insensitive whole-word match=any|all on title/brand/tags/industry (hair ≠ wheelchair); each hit includes matchedFrom (field names that matched) and the envelope reports candidatesScanned/filteredOut/literalMatches/matchBasis — zero literal hits return empty ads[], never the unfiltered leaderboard. Empty results and upstream timeouts are never charged. A real browser is required — Creative Center HTML is an empty shell and the list API needs page-signed requests. We intercept the signed top_ads/v2/list XHR and exit when that JSON arrives (typically 30-60 seconds; not networkidle). Flat 2 credits on the browser path; Apify fallback ~1 credit per returned ad (min 2; ~20 at default limit). truncated:true only when a non-empty page is shorter than limit while Creative Center still has pages (empty after filter → truncated:false). Pass cache=true for a 24h hit (0 credits).",
     delivers: [
       "advertiser{id,name} for grouping + Spark author fallback",
-      "Honest keyword filter — empty when no whole-word hit (matchedFrom explains)",
-      "firstSeen/lastSeen + datesPresent (often null on CC list)",
+      "Honest keyword filter — per-ad matchedFrom + candidatesScanned envelope",
+      "No always-null date/flag fields (CC list has no run dates)",
       "Signed list XHR early-exit (30–60s typical); empty/timeout free",
     ],
     platformLimits: [
@@ -4967,7 +4967,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "string",
       required: false,
       description:
-        "Optional keyword — case-insensitive whole-word match on title/brand/tags/industry (hair ≠ wheelchair). See match and matchedFrom.",
+        "Optional keyword — case-insensitive whole-word match on title/brand/tags/industry (hair ≠ wheelchair). Each returned ad includes matchedFrom (which fields matched). Envelope candidatesScanned is the pre-filter pool size.",
     },
     {
       name: "match",
@@ -6399,15 +6399,15 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     });
     list.push({
       q: `Why did my keyword return zero ads?`,
-      a: `Read matchedFrom, filteredOut, literalMatches, and matchBasis. match=any (default) keeps rows with any whole-word token; match=all requires every token. Creative Center's keyword ranking is soft and often unrelated — we never echo that unfiltered list. If matchedFrom>0 and totalReturned=0, the leaderboard had rows and local filter dropped them (empty is free). Try a brand name or a token that appears in title/industry.`,
+      a: `Read candidatesScanned, filteredOut, literalMatches, and matchBasis. match=any (default) keeps rows with any whole-word token; match=all requires every token. Creative Center's keyword ranking is soft and often unrelated — we never echo that unfiltered list. If candidatesScanned>0 and totalReturned=0, the leaderboard had rows and local filter dropped them (empty is free; truncated is false). Try a brand name or a token that appears in title/industry.`,
     });
     list.push({
       q: `What does ctr mean, and where are ad dates?`,
-      a: `ctr is TikTok's normalized 0–1 Creative Center score (not a raw click-through percent); ctrTier is the bucket TikTok assigns. firstSeen/lastSeen are ISO-8601 when Creative Center or the Apify actor ships timestamps (first_shown_date / video create time); the public top_ads/v2/list payload usually omits them — expect datesPresent=0. The period param is only the lookback window for the ranking. For DSA firstShown/lastShown use /tiktok/search.`,
+      a: `ctr is TikTok's normalized 0–1 Creative Center score (not a raw click-through percent). ctrTier/isSparkAd appear only when Creative Center ships them. The list surface does not expose ad run dates — firstSeen/lastSeen are not returned. The period param is only the lookback window for the ranking. For DSA firstShown/lastShown use /tiktok/search or /tiktok/ad-details.`,
     });
     list.push({
       q: `How do I group ads by advertiser?`,
-      a: `Use advertiser.id when present, else advertiser.name / brandName. Spark Ads that ship brandName "Not Mention" fall back to the organic creator nickname and author id. Creative Center often omits a stable business id — null advertiser.id is expected on some rows.`,
+      a: `Use advertiser.id when present, else advertiser.name (same value as brandName). Spark Ads that ship "Not Mention" fall back to the organic creator nickname and author id. Creative Center often omits a stable business id — null advertiser.id is expected on some rows.`,
     });
     list.push({
       q: `Why did Top Ads return 502 with industry set?`,
@@ -8413,31 +8413,30 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     matchBasis: 'How keywords were applied — "any", "all", or "none".',
   },
   "tiktok-ad-library-top-ads": {
-    matchedFrom:
-      "Always present (integer). Row count after industry/objective/format filters, before local keyword filtering. With q set and totalReturned=0, matchedFrom>0 means the leaderboard had rows and the whole-word filter dropped them.",
+    candidatesScanned:
+      "Always present (integer). Row count after industry/objective/format filters, before local keyword filtering. With q set and totalReturned=0, candidatesScanned>0 means the leaderboard had rows and the whole-word filter dropped them.",
     filteredOut: "Rows dropped by the local whole-word keyword filter.",
-    literalMatches: "Rows that passed local whole-word matching.",
+    literalMatches:
+      "Present only when q is set. Count of rows that passed local whole-word matching.",
     match: 'Echo of the match query param ("any" or "all").',
     matchBasis:
       'any|all when q was set (literal filter applied); none when q was omitted. Never creative_center — soft leaderboard echoes were removed.',
     truncated:
-      "true when totalReturned < limit while Creative Center pagination still had more pages (early-exit safety net — never a silent short page).",
-    datesPresent:
-      "Count of ads where firstSeen or lastSeen is non-null. Creative Center's public list almost always omits run dates — expect 0 on the browser path unless Apify/detail ships timestamps.",
-    firstSeen:
-      "ISO-8601 UTC when the creative was first observed / created, if Creative Center or the actor provides it; otherwise null (list XHR usually omits).",
-    lastSeen:
-      "ISO-8601 UTC when the creative was last shown / ended, if provided; otherwise null. For DSA windows use /tiktok/search.",
+      "true only when a non-empty page has totalReturned < limit while Creative Center pagination still had more pages. Empty after filter → false.",
+    matchedFrom:
+      "Per-ad only, and only when q is set: string[] of fields that matched (title, brandName, industry, tags, objective). Never the envelope scan count.",
     advertiser:
       "Grouping axis {id,name}. id may be brand_id or Spark author uid; null when Creative Center withholds it. name mirrors brandName (Spark falls back to creator nickname).",
     brandName:
-      'Advertiser / brand display name. Spark Ads with "Not Mention" fall back to the organic creator.',
+      'Same as advertiser.name when present. Spark Ads with "Not Mention" fall back to the organic creator. Omitted only when no name exists.',
     likesIsApproximate:
       "true when likes looks like a rounded Creative Center bucket (e.g. multiples of 1k/100k); false when the integer looks exact.",
     "video.urlHd":
       "Present only when a distinct HD rendition exists (different URL from video.url). Omitted when null — not a dead always-null field.",
+    ctrTier:
+      "Present only when Creative Center ships a CTR bucket. Omitted (not null) when withheld.",
     isSparkAd:
-      "true for Spark Ads. adFormat is omitted when it would only repeat Spark/Non-Spark.",
+      "Present only when upstream sets Spark/non-Spark. Omitted when withheld. adFormat is omitted when it would only repeat Spark/Non-Spark.",
     countries:
       "Omitted when it only echoes the request country filter (already at response root). Kept for multi-country targeting.",
   },

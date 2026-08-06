@@ -5131,12 +5131,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "period": 30,
     "orderBy": "ctr",
     "totalReturned": 2,
-    "datesPresent": 1,
-    "match": "any",
-    "matchedFrom": 2,
+    "candidatesScanned": 2,
     "filteredOut": 0,
-    "literalMatches": 2,
+    "match": "any",
     "matchBasis": "none",
+    "truncated": false,
     "ads": [
       {
         "platform": "tiktok_creative_center",
@@ -5148,8 +5147,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "id": "brand_nuuly",
           "name": "nuuly"
         },
-        "firstSeen": "2026-01-10T00:00:00.000Z",
-        "lastSeen": null,
         "likes": 620,
         "likesIsApproximate": false,
         "ctr": 0.17,
@@ -5179,8 +5176,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "id": "uid42",
           "name": "Creator X"
         },
-        "firstSeen": null,
-        "lastSeen": null,
         "likes": 5,
         "likesIsApproximate": false,
         "ctr": 0.62,

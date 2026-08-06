@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
@@ -412,6 +411,34 @@ def filter_top_ads_by_query(
     ]
 
 
+def matched_from_fields(ad: dict[str, Any], q: str | None) -> list[str]:
+    """Public field names where ``q`` tokens hit (per-ad provenance).
+
+    Only runs when ``q`` is set. Field names match the normalized Top Ads card
+    (title / brandName / industry / tags / objective) — not the envelope scan count.
+    """
+    tokens = query_tokens(q)
+    if not tokens or not isinstance(ad, dict):
+        return []
+    brand = safe_str(ad.get("brandName"))
+    if not brand:
+        adv = ad.get("advertiser") if isinstance(ad.get("advertiser"), dict) else {}
+        brand = safe_str(adv.get("name"))
+    tags = ad.get("tags") if isinstance(ad.get("tags"), list) else []
+    fields: list[tuple[str, str]] = [
+        ("title", (safe_str(ad.get("title")) or "").lower()),
+        ("brandName", (brand or "").lower()),
+        ("industry", (safe_str(ad.get("industry")) or "").lower()),
+        ("tags", " ".join(str(t) for t in tags if t).lower()),
+        ("objective", (safe_str(ad.get("objective")) or "").lower()),
+    ]
+    hits: list[str] = []
+    for name, hay in fields:
+        if hay and any(token_in_haystack(t, hay) for t in tokens):
+            hits.append(name)
+    return hits
+
+
 def fetch_limit_for_query(limit: int, q: str | None) -> int:
     """Over-fetch when keyword filtering will drop soft-matched noise."""
     base = max(1, min(int(limit), 100))
@@ -427,45 +454,6 @@ def likes_is_approximate(likes: int | None) -> bool:
     if likes < 1_000_000:
         return likes % 1000 == 0
     return likes % 100_000 == 0
-
-
-def _iso_from_unknown(value: Any) -> str | None:
-    """Normalize unix seconds/ms, YYYYMMDD, or ISO strings to UTC ISO-8601."""
-    if value is None or value == "":
-        return None
-    if isinstance(value, (int, float)):
-        ts = float(value)
-        if ts > 1e12:  # milliseconds
-            ts /= 1000.0
-        if ts < 1e9:  # too small to be a unix timestamp
-            return None
-        try:
-            return datetime.fromtimestamp(ts, tz=timezone.utc).strftime(
-                "%Y-%m-%dT%H:%M:%S.000Z"
-            )
-        except (OverflowError, OSError, ValueError):
-            return None
-    text = str(value).strip()
-    if not text:
-        return None
-    if re.fullmatch(r"\d{8}", text):
-        try:
-            return datetime.strptime(text, "%Y%m%d").replace(tzinfo=timezone.utc).strftime(
-                "%Y-%m-%dT%H:%M:%S.000Z"
-            )
-        except ValueError:
-            return None
-    if re.fullmatch(r"\d{10,13}", text):
-        return _iso_from_unknown(int(text))
-    # Already ISO-ish
-    try:
-        cleaned = text.replace("Z", "+00:00")
-        dt = datetime.fromisoformat(cleaned)
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-    except ValueError:
-        return None
 
 
 def _nested_dict(row: dict[str, Any], *keys: str) -> dict[str, Any]:
@@ -537,6 +525,7 @@ def _extract_brand(row: dict[str, Any]) -> tuple[str | None, str | None]:
     """Return (brandName, advertiserId) from list/detail/author shapes."""
     detail = _nested_dict(row, "detail", "ad_detail", "adDetail")
     author = _nested_dict(row, "author", "creator", "tiktok_author")
+    advertiser = _nested_dict(row, "advertiser", "advertiser_info", "advertiserInfo")
     item = _nested_dict(row, "tiktok_item", "item_info", "itemInfo", "aweme")
     if not author and item:
         author = _nested_dict(item, "author", "authorInfo")
@@ -546,6 +535,9 @@ def _extract_brand(row: dict[str, Any]) -> tuple[str | None, str | None]:
         or row.get("brandName")
         or row.get("advertiser_name")
         or row.get("advertiserName")
+        or advertiser.get("name")
+        or advertiser.get("brand_name")
+        or advertiser.get("brandName")
         or detail.get("brand_name")
         or detail.get("brandName")
         or detail.get("advertiser_name")
@@ -568,6 +560,9 @@ def _extract_brand(row: dict[str, Any]) -> tuple[str | None, str | None]:
         or row.get("advertiser_id")
         or row.get("advertiserId")
         or row.get("advertiser_business_id")
+        or advertiser.get("id")
+        or advertiser.get("brand_id")
+        or advertiser.get("brandId")
         or detail.get("brand_id")
         or detail.get("advertiser_id")
         or author.get("id")
@@ -578,76 +573,20 @@ def _extract_brand(row: dict[str, Any]) -> tuple[str | None, str | None]:
     return brand, advertiser_id
 
 
-def _extract_dates(row: dict[str, Any]) -> tuple[str | None, str | None]:
-    """Best-effort firstSeen / lastSeen from Creative Center / actor payloads.
-
-    The public ``top_ads/v2/list`` materials almost never include run dates —
-    keys stay present as null for a stable schema. Apify / detail hydrates
-    sometimes ship ``first_shown_date`` / ``last_shown_date`` (YYYYMMDD) or
-    unix create times on ``video_info`` — map every known alias here.
-    """
-    detail = _nested_dict(row, "detail", "ad_detail", "adDetail")
-    info = _nested_dict(row, "video_info", "videoInfo")
-    metrics = _nested_dict(row, "metrics", "metric", "analytics")
-    first = _iso_from_unknown(
-        row.get("first_shown")
-        or row.get("firstShown")
-        or row.get("first_shown_date")
-        or row.get("firstShownDate")
-        or row.get("first_shown_at")
-        or row.get("first_show_time")
-        or row.get("firstShowTime")
-        or row.get("show_start_time")
-        or row.get("showStartTime")
-        or row.get("start_time")
-        or row.get("startTime")
-        or row.get("create_time")
-        or row.get("createTime")
-        or row.get("create_timestamp")
-        or row.get("created_at")
-        or row.get("createdAt")
-        or detail.get("first_shown")
-        or detail.get("first_shown_date")
-        or detail.get("firstShownDate")
-        or detail.get("create_time")
-        or detail.get("createTime")
-        or info.get("create_time")
-        or info.get("createTime")
-        or info.get("create_timestamp")
-        or metrics.get("first_shown")
-        or metrics.get("first_shown_date")
-    )
-    last = _iso_from_unknown(
-        row.get("last_shown")
-        or row.get("lastShown")
-        or row.get("last_shown_date")
-        or row.get("lastShownDate")
-        or row.get("last_shown_at")
-        or row.get("last_show_time")
-        or row.get("lastShowTime")
-        or row.get("show_end_time")
-        or row.get("showEndTime")
-        or row.get("end_time")
-        or row.get("endTime")
-        or detail.get("last_shown")
-        or detail.get("last_shown_date")
-        or detail.get("lastShownDate")
-        or detail.get("end_time")
-        or metrics.get("last_shown")
-        or metrics.get("last_shown_date")
-    )
-    return first, last
-
-
 def normalize_top_ad(
     row: dict[str, Any],
     *,
     query_country: str | None = None,
 ) -> dict[str, Any]:
-    """Map an upstream Top Ads row to the public Captapi shape."""
+    """Map an upstream Top Ads row to the public Captapi shape.
+
+    Creative Center's list XHR does not expose run dates — ``firstSeen`` /
+    ``lastSeen`` are omitted (use DSA ``/tiktok/search`` or ``/tiktok/ad-details``
+    for firstShown/lastShown). Always-null optional flags (ctrTier / isSparkAd
+    when CC withholds them) are omitted rather than shipped as null.
+    """
     ad_id = safe_str(row.get("ad_id") or row.get("id") or row.get("material_id"))
     brand, advertiser_id = _extract_brand(row)
-    first_seen, last_seen = _extract_dates(row)
 
     countries_raw = row.get("countries") or row.get("country") or row.get("countryCode") or []
     if isinstance(countries_raw, str):
@@ -694,6 +633,8 @@ def normalize_top_ad(
     if upstream_detail and "/topads/" in upstream_detail and "keyword=" not in upstream_detail:
         per_ad = upstream_detail or per_ad
 
+    # One brand concept — never leave brandName empty when advertiser.name is set.
+    adv_name = brand
     out: dict[str, Any] = {
         "platform": "tiktok_creative_center",
         "id": ad_id,
@@ -701,24 +642,25 @@ def normalize_top_ad(
         "title": safe_str(
             row.get("ad_title") or row.get("title") or row.get("adTitle")
         ),
-        "brandName": brand,
-        # Grouping axis for competitive research (id may be null when CC omits it).
-        "advertiser": {"id": advertiser_id, "name": brand},
-        "firstSeen": first_seen,
-        "lastSeen": last_seen,
+        "advertiser": {"id": advertiser_id, "name": adv_name},
         "likes": likes,
         "likesIsApproximate": likes_is_approximate(likes),
         "ctr": ctr_num,
-        "ctrTier": safe_str(row.get("ctr_tier") or row.get("ctrTier")),
         "costTier": safe_int(
             row.get("cost_tier") if row.get("cost_tier") is not None else row.get("cost")
         ),
-        "isSparkAd": is_spark,
         "industry": industry,
         "industryKey": industry_key,
         "objective": objective,
         "video": video,
     }
+    if adv_name:
+        out["brandName"] = adv_name
+    ctr_tier = safe_str(row.get("ctr_tier") or row.get("ctrTier"))
+    if ctr_tier:
+        out["ctrTier"] = ctr_tier
+    if is_spark is not None:
+        out["isSparkAd"] = is_spark
     # adFormat duplicates isSparkAd when it's only Spark / Non-Spark — keep it
     # only for richer labels (e.g. Collection Ads).
     if ad_format and ad_format not in {"Spark Ads", "Non-Spark Ads"}:
@@ -966,10 +908,11 @@ def filter_top_ads(
 ) -> dict[str, Any]:
     """Apply dimension + keyword filters.
 
-    Returns ``{rows, matchedFrom, filteredOut, match, matchBasis, literalMatches}``.
-    ``matchedFrom`` is the count after industry/objective/format and before ``q``.
-    When ``q`` is set and no row passes whole-word matching, ``rows`` is empty —
-    Creative Center's soft keyword ranking is never sold as a literal hit.
+    Returns ``{rows, candidatesScanned, filteredOut, match, matchBasis[, literalMatches]}``.
+    ``candidatesScanned`` is the count after industry/objective/format and before ``q``.
+    Per-ad field provenance lives on each ad as ``matchedFrom`` (array) — never
+    reuse that name for the envelope count. When ``q`` is set and no row passes
+    whole-word matching, ``rows`` is empty.
     """
     out = materials
     ind = (industry or "").strip().lower()
@@ -1002,13 +945,12 @@ def filter_top_ads(
     elif fmt in {"non_spark", "nonspark", "non_spark_ads"}:
         out = [m for m in out if m.get("is_spark_ad") is False or m.get("isSparkAd") is False]
 
-    matched_from = len(out)
+    scanned = len(out)
     if not (q or "").strip():
         return {
             "rows": out,
-            "matchedFrom": matched_from,
+            "candidatesScanned": scanned,
             "filteredOut": 0,
-            "literalMatches": matched_from,
             "match": match,
             "matchBasis": "none",
         }
@@ -1016,8 +958,8 @@ def filter_top_ads(
     literal = filter_top_ads_by_query(out, q, match=match)
     return {
         "rows": literal,
-        "matchedFrom": matched_from,
-        "filteredOut": matched_from - len(literal),
+        "candidatesScanned": scanned,
+        "filteredOut": scanned - len(literal),
         "literalMatches": len(literal),
         "match": match,
         "matchBasis": match,
@@ -1070,8 +1012,10 @@ def _filter_and_truncate(
         ad_format=ad_format,
     )
     kept = list(filtered["rows"])[:want]
-    # Exit with collected < limit while upstream still has pages → truncated.
-    truncated = len(kept) < want and has_more
+    # Truncation is about the fetch, not the keyword filter: empty after filter
+    # is a complete response (truncated=false). Short non-empty page while
+    # upstream still has pages → truncated=true.
+    truncated = bool(kept) and len(kept) < want and has_more
     if truncated:
         log.warning(
             "tiktok_cc_truncated_early_exit",

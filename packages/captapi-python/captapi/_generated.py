@@ -2477,7 +2477,7 @@ class TiktokAdLibraryApi:
         return self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "match": match, "limit": limit, "cache": cache})
 
     def top_ads(self, *, q: str | None = None, match: str | None = None, country: str | None = None, period: float | None = None, orderBy: str | None = None, industry: str | None = None, objective: str | None = None, adFormat: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Creative Center Top Ads — Creative Center Top Ads — advertiser{}, firstSeen/lastSeen+datesPresent, no media[] dup, empty free. (2 credits)
+        """TikTok Creative Center Top Ads — Creative Center Top Ads — advertiser{}, per-ad matchedFrom, candidatesScanned, empty free. (2 credits)
 
         :param q: Optional keyword (substring). See match + matchedFrom.
         :param match: Keyword mode: "any" (default) or "all".
@@ -2518,7 +2518,7 @@ class AsyncTiktokAdLibraryApi:
         return await self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "match": match, "limit": limit, "cache": cache})
 
     async def top_ads(self, *, q: str | None = None, match: str | None = None, country: str | None = None, period: float | None = None, orderBy: str | None = None, industry: str | None = None, objective: str | None = None, adFormat: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Creative Center Top Ads — Creative Center Top Ads — advertiser{}, firstSeen/lastSeen+datesPresent, no media[] dup, empty free. (2 credits)
+        """TikTok Creative Center Top Ads — Creative Center Top Ads — advertiser{}, per-ad matchedFrom, candidatesScanned, empty free. (2 credits)
 
         :param q: Optional keyword (substring). See match + matchedFrom.
         :param match: Keyword mode: "any" (default) or "all".
