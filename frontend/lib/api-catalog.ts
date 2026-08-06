@@ -848,10 +848,10 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Get an Instagram post or Reel — caption, likes, comments, media URLs, author, and split view counts on Reels.",
     longDescription:
-      "Paste an Instagram post or Reel URL and get the item as clean JSON: caption, like and comment counts, media URLs, author profile, duration when it is a Reel, and publish date. On Reels, engagement.views is video_view_count when Instagram exposes it (reach-style); engagement.plays is the total play count including replays (often ~2× views). viewsInstagram is Instagram-only plays (excludes Facebook cross-post); viewsFacebook is the FB share — total plays can be ~20% higher from Facebook. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+      "Paste an Instagram post or Reel URL and get the item as clean JSON: caption, like and comment counts, media URLs, author profile, duration when it is a Reel, and publish date. On Reels, engagement.views is the canonical play count when Instagram exposes one; viewsSource is instagram|facebook whenever views is set; plays is a deprecated one-release alias of views. Flat 1 credit. Pass cache=true for the 24h shared cache.",
     delivers: [
       "Caption, media URLs, and publish date",
-      "views + plays + viewsInstagram + viewsFacebook on Reels when available",
+      "engagement.views + viewsSource on Reels when available",
       "Like and comment counts",
       "Author profile fields",
     ],
@@ -868,12 +868,12 @@ const INSTAGRAM: Spec[] = [
     credits: 6,
     creditsPerResult: 0.3,
     tagline:
-      "Latest posts from a public Instagram profile — viewsInstagram vs Facebook, profile user{} in one call.",
+      "Latest posts from a public Instagram profile — engagement.views + viewsSource, profile user{} in one call.",
     longDescription:
-      "Send a profile URL or @handle and get recent posts as JSON plus a top-level user{} profile block (id, username, displayName, verified, followers, profileImage) so you do not need a second channel-details call. Each item includes postType, productType (clips/feed — never an empty string), caption, media, likes, comments, and on videos: durationSeconds, hasAudio, music{}, location{}, isAd / isAffiliate / isPaidPartnership when Instagram exposes them. Metrics: views (video_view_count when present), plays (total play count), viewsInstagram (IG-only plays — excludes Facebook cross-post), viewsFacebook. Image/Sidecar keep engagement.views as null. Cursor pagination via nextCursor + hasMore. Pass cache=true for the 24h shared cache.",
+      "Send a profile URL or @handle and get recent posts as JSON plus a top-level user{} profile block (id, username, displayName, verified, followers, profileImage) so you do not need a second channel-details call. Each item includes postType, productType (clips/feed — never an empty string), caption, media, likes, comments, and on videos: durationSeconds, hasAudio, music{}, location{}, isAd / isAffiliate / isPaidPartnership when Instagram exposes them. Metrics: engagement.views (canonical play count) + viewsSource (instagram|facebook|null) + deprecated plays alias. Image/Sidecar keep engagement.views as null. Cursor pagination via nextCursor + hasMore. Pass cache=true for the 24h shared cache.",
     delivers: [
       "Top-level user{} profile (no second call)",
-      "views + plays + viewsInstagram + viewsFacebook on videos",
+      "engagement.views + viewsSource on videos",
       "productType, durationSeconds, hasAudio, music{}, location{}, commercial flags",
       "nextCursor + hasMore pagination",
     ],
@@ -6853,10 +6853,14 @@ const FIELD_DESCS: Record<string, string> = {
   engagement: "Engagement metrics for the item.",
   views: "View count when the platform exposes one.",
   viewCount: "View count.",
-  plays: "Play count when the platform exposes one (may include replays).",
+  plays:
+    "Deprecated one-release alias of engagement.views on Instagram video endpoints — same value; prefer views.",
+  viewsSource:
+    'On Instagram videos: "instagram" | "facebook" when engagement.views is set; null when views is null. Never a 100%-null discriminator.',
   viewsInstagram:
-    "Instagram-only play count (excludes Facebook cross-post plays). Prefer this for Instagram performance reports.",
-  viewsFacebook: "Facebook cross-post play count when Instagram exposes the split.",
+    "Removed — use engagement.views + viewsSource. (Previously Instagram-only plays.)",
+  viewsFacebook:
+    "Removed — use engagement.views + viewsSource. (Previously Facebook cross-post plays.)",
   likes: "Like count (number).",
   likeCount:
     "Like count as an integer. Compact UI labels (\"727K\") are expanded here; see likeCountText for the original string.",
