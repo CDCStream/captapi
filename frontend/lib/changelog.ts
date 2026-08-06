@@ -50,14 +50,14 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-06",
-    category: "platform",
-    title: "Instagram trending-reels: flat 2 credits; Apify fallback removed",
+    category: "fix",
+    title: "Instagram trending-reels: fix live scrape timeout + 110s hard deadline",
     description:
-      "GET /v1/instagram/trending-reels bills a flat 2 credits on every successful call — including cache hits (the 4h response cache is our margin). Warm cron / snapshots stay gone. Live path is native /reels only; the ~$0.40 Apify fallback is removed and native misses are logged as ig_trending_native_miss for measurement. Failures return 502 scrape_failed.",
+      "Live US scrapes were timing out because the router asked native for 100+ hydrates under a 45s budget while also rendering a second Decodo page. The path now scrapes a modest store (≤24), skips the second headless page when /reels already has enough shortcodes, hydrates residential-first without author-feed enrich, logs stage counts/timings, and hard-caps the whole request at 110s (under Cloudflare). Flat 2 credits and 4h cache-first unchanged. Failures return staged 502 codes (fetch_empty / hydrate_empty / filtered_empty / timeout).",
     items: [
-      "Flat 2 credits always (bill_on_cache_hit); cache amortizes our cost",
-      "Remove silent Apify fallback; log native miss rate by country",
-      "cache-first latency; single-flight; 502 on scrape failure",
+      "Fix over-fetch timeout; residential-first hydrate; no enrich by default",
+      "110s hard deadline + single-flight wait under Cloudflare 125s",
+      "Stage counts in logs/errors; default limit 10; docs match 4h / 2 credits",
     ],
   },
   {

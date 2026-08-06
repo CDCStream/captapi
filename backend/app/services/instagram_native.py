@@ -17,6 +17,7 @@ import base64
 import itertools
 import json
 import re
+import time
 import urllib.parse
 from datetime import datetime, timezone
 from typing import Any
@@ -2592,15 +2593,24 @@ def shortcodes_from_html(html: str, *, limit: int = 50) -> list[str]:
 
 
 async def fetch_shortcodes_via_decodo(
-    url: str, *, limit: int = 50, geo: str | None = None
+    url: str,
+    *,
+    limit: int = 50,
+    geo: str | None = None,
+    timeout: float = 35.0,
 ) -> list[str] | None:
-    """JS-render ``url`` via Decodo and return Instagram shortcodes, or None."""
+    """JS-render ``url`` via Decodo and return Instagram shortcodes, or None.
+
+    Plain HTTP (no headless) returns Instagram's JS shell with zero shortcodes —
+    headless is required. Keep ``timeout`` modest so trending stays under
+    Cloudflare's proxy read limit.
+    """
     from app.services import decodo_fetch
 
     if not decodo_fetch.enabled() or limit <= 0:
         return None
     got = await decodo_fetch.fetch_url(
-        url, timeout=90.0, headless="html", geo=geo
+        url, timeout=timeout, headless="html", geo=geo
     )
     if not got:
         return None
@@ -2615,15 +2625,37 @@ async def fetch_shortcodes_via_decodo(
     return codes
 
 
-async def hydrate_shortcodes(codes: list[str], *, limit: int) -> list[dict[str, Any]]:
+async def _fetch_item_residential_first(shortcode: str) -> dict[str, Any] | None:
+    """Polaris hydrate skipping datacenter — logged-out GraphQL 401s there."""
+    try:
+        media = await _fetch_via("residential", shortcode)
+    except (httpx.HTTPError, ValueError, KeyError) as exc:
+        log.info("ig_native_tier_failed", tier="residential", error=str(exc)[:120])
+        media = None
+    if media is not None:
+        return media
+    # One session attempt only — keep trending under the Cloudflare budget.
+    return await _fetch_item_with_session(shortcode, max_sessions=1)
+
+
+async def hydrate_shortcodes(
+    codes: list[str],
+    *,
+    limit: int,
+    concurrency: int = 4,
+    residential_first: bool = False,
+) -> list[dict[str, Any]]:
     """Resolve shortcodes through Polaris (bounded concurrency)."""
     if not codes or limit <= 0:
         return []
-    sem = asyncio.Semaphore(4)
+    sem = asyncio.Semaphore(max(1, concurrency))
     selected = codes[:limit]
 
     async def _one(code: str) -> dict[str, Any] | None:
         async with sem:
+            if residential_first:
+                media = await _fetch_item_residential_first(code)
+                return map_post_from_media(media, shortcode=code) if media else None
             return await fetch_post_details(code)
 
     rows = await asyncio.gather(*[_one(c) for c in selected])
@@ -2770,17 +2802,13 @@ def _as_trending_reel(post: dict[str, Any]) -> dict[str, Any]:
     engagement = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
     author = post.get("author") if isinstance(post.get("author"), dict) else {}
     views = engagement.get("views")
-    views_source = engagement.get("viewsSource")
-    if views is not None and not views_source:
-        views_source = "instagram"
-    if views is None:
-        views_source = None
-    eng_out = {
+    eng_out: dict[str, Any] = {
         "likes": engagement.get("likes"),
         "comments": engagement.get("comments"),
         "views": views,
-        "viewsSource": views_source,
     }
+    if views is not None:
+        eng_out["viewsSource"] = engagement.get("viewsSource") or "instagram"
     video_url = safe_str(post.get("videoUrl"))
     thumb = safe_str(post.get("thumbnailUrl"))
     dur = post.get("durationSeconds")
@@ -2824,35 +2852,51 @@ async def trending_reels_native(
     country: str = "United States",
     *,
     limit: int = 20,
-    enrich: bool = True,
+    enrich: bool = False,
     max_authors: int | None = None,
-) -> list[dict[str, Any]] | None:
+) -> dict[str, Any]:
     """Trending Reels from Instagram's public ``/reels`` surface.
 
-    Scrapes ``instagram.com/reels`` (then ``/explore/reels``) — **never** the
-    general Explore photo grid. Hydrates shortcodes and keeps only videos
-    (``product_type=clips`` / Video). Photos/carousels and multi-year stale
-    resurfaces are dropped. Instagram's own page returns small overlapping
-    batches; callers should expect duplicates across requests.
-
-    ``enrich=False`` skips author-feed backfill (faster live path; views may
-    stay null more often).
+    Returns ``{"reels": list|None, "error": str|None, "stages": {...}}``.
+    ``error`` is one of ``None``, ``fetch_empty``, ``hydrate_empty``,
+    ``filtered_empty``. Headless Decodo is required for shortcodes (plain
+    HTTP returns the JS shell with zero codes). ``enrich`` defaults False —
+    Polaris already carries likes/comments/caption/media; author-feed
+    backfill is optional and expensive.
     """
+    t0 = time.perf_counter()
+    stages: dict[str, Any] = {
+        "fetched": 0,
+        "hydrated": 0,
+        "afterReelFilter": 0,
+        "afterAgeFilter": 0,
+        "ms": {},
+    }
     if limit <= 0:
-        return []
+        return {"reels": [], "error": None, "stages": stages}
+
     geo = _TRENDING_GEO.get((country or "").strip()) or None
-    # Over-fetch: hydrate 401s some codes; keep only videos after.
-    fetch_n = min(200, max(limit * 5, limit + 40))
-    # SC scrapes /reels — keep that first. Never /explore/ (photos).
-    urls = (
-        "https://www.instagram.com/reels/",
-        "https://www.instagram.com/explore/reels/",
-    )
+    # Modest over-fetch: hydrate drops some 401s; keep under Cloudflare budget.
+    fetch_n = min(36, max(limit * 2, limit + 6))
     codes: list[str] = []
     seen: set[str] = set()
-    for page_url in urls:
-        got = await fetch_shortcodes_via_decodo(page_url, limit=fetch_n, geo=geo)
+
+    async def _page(url: str) -> list[str] | None:
+        return await fetch_shortcodes_via_decodo(
+            url, limit=fetch_n, geo=geo, timeout=30.0
+        )
+
+    # Primary: /reels. Only fall through to /explore/reels when primary is empty.
+    t_fetch = time.perf_counter()
+    for page_url in (
+        "https://www.instagram.com/reels/",
+        "https://www.instagram.com/explore/reels/",
+    ):
+        got = await _page(page_url)
         if not got:
+            log.info("ig_trending_page_empty", url=page_url, geo=geo)
+            if codes:
+                break
             continue
         for code in got:
             if code in seen:
@@ -2861,22 +2905,48 @@ async def trending_reels_native(
             codes.append(code)
             if len(codes) >= fetch_n:
                 break
-        if len(codes) >= fetch_n:
+        # Enough for the request — do not burn another headless render.
+        if len(codes) >= max(limit, 8):
             break
+        if page_url.endswith("/reels/") and codes:
+            break
+    stages["ms"]["fetch"] = int((time.perf_counter() - t_fetch) * 1000)
+    stages["fetched"] = len(codes)
+
     if not codes:
-        return None
-    posts = await hydrate_shortcodes(codes, limit=fetch_n)
+        stages["ms"]["total"] = int((time.perf_counter() - t0) * 1000)
+        log.error("ig_trending_stages", country=country, error="fetch_empty", **stages)
+        return {"reels": None, "error": "fetch_empty", "stages": stages}
+
+    t_hyd = time.perf_counter()
+    posts = await hydrate_shortcodes(
+        codes,
+        limit=fetch_n,
+        concurrency=8,
+        residential_first=True,
+    )
+    stages["ms"]["hydrate"] = int((time.perf_counter() - t_hyd) * 1000)
+    stages["hydrated"] = len(posts)
+
     if not posts:
-        return None
+        stages["ms"]["total"] = int((time.perf_counter() - t0) * 1000)
+        log.error("ig_trending_stages", country=country, error="hydrate_empty", **stages)
+        return {"reels": None, "error": "hydrate_empty", "stages": stages}
+
     if enrich:
-        # Polaris hydrate often omits play_count logged-out — author feeds fill.
-        authors = max_authors if max_authors is not None else min(16, max(len(posts), 8))
+        t_en = time.perf_counter()
+        authors = max_authors if max_authors is not None else min(6, len(posts))
         posts = await enrich_posts_from_author_feeds(posts, max_authors=authors)
+        stages["ms"]["enrich"] = int((time.perf_counter() - t_en) * 1000)
+
+    t_filt = time.perf_counter()
     reels: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
+    after_reel = 0
     for post in posts:
         if not is_reel_post(post):
             continue
+        after_reel += 1
         if _is_stale_explore_post(post):
             continue
         row = _as_trending_reel(post)
@@ -2886,6 +2956,9 @@ async def trending_reels_native(
         if rid:
             seen_ids.add(rid)
         reels.append(row)
+    stages["afterReelFilter"] = after_reel
+    stages["afterAgeFilter"] = len(reels)
+    stages["ms"]["filter"] = int((time.perf_counter() - t_filt) * 1000)
 
     def _rank(row: dict[str, Any]) -> tuple[int, int, float]:
         eng = row.get("engagement") if isinstance(row.get("engagement"), dict) else {}
@@ -2897,18 +2970,28 @@ async def trending_reels_native(
 
     reels.sort(key=_rank, reverse=True)
     out = reels[:limit]
+    stages["ms"]["total"] = int((time.perf_counter() - t0) * 1000)
+
     if not out:
-        return None
+        log.error(
+            "ig_trending_stages",
+            country=country,
+            error="filtered_empty",
+            enrich=enrich,
+            **stages,
+        )
+        return {"reels": None, "error": "filtered_empty", "stages": stages}
+
     log.info(
-        "ig_trending_native_ok",
+        "ig_trending_stages",
         country=country,
         geo=geo,
+        error=None,
         n=len(out),
-        hydrated=len(posts),
-        reels=len(reels),
         enrich=enrich,
+        **stages,
     )
-    return out
+    return {"reels": out, "error": None, "stages": stages}
 
 
 async def enrich_posts_from_author_feeds(

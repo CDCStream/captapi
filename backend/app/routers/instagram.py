@@ -45,13 +45,15 @@ log = structlog.get_logger(__name__)
 
 # On-demand trending: response cache TTL (3–6h band) + live scrape budgets.
 # Cache is our margin — every successful call bills CREDIT_TRENDING_REELS.
+# Hard deadline stays under Cloudflare's 125s proxy read timeout.
 _TRENDING_CACHE_TTL_SECS = 4 * 3600
-_TRENDING_STORE_LIMIT = 100
-_TRENDING_NATIVE_BUDGET_SECS = 45
-_TRENDING_FLIGHT_WAIT_SECS = 180
-# Backward-compat alias (older tests).
-_TRENDING_LIVE_BUDGET_SECS = _TRENDING_NATIVE_BUDGET_SECS
-_TRENDING_SYNC_WAIT_SECS = _TRENDING_NATIVE_BUDGET_SECS
+_TRENDING_STORE_LIMIT = 24
+_TRENDING_HARD_DEADLINE_SECS = 110
+_TRENDING_FLIGHT_WAIT_SECS = 95
+# Backward-compat alias (older tests / docs).
+_TRENDING_NATIVE_BUDGET_SECS = _TRENDING_HARD_DEADLINE_SECS
+_TRENDING_LIVE_BUDGET_SECS = _TRENDING_HARD_DEADLINE_SECS
+_TRENDING_SYNC_WAIT_SECS = _TRENDING_HARD_DEADLINE_SECS
 
 CREDIT_TRANSCRIPT = 2
 CREDIT_SUMMARIZE = 4
@@ -2082,17 +2084,44 @@ def _normalize_trending_country(raw: str) -> str:
     )
 
 
-def _trending_scrape_failed_http(country: str) -> HTTPException:
+def _trending_scrape_failed_http(
+    country: str,
+    *,
+    code: str = "scrape_failed",
+    stages: dict[str, Any] | None = None,
+) -> HTTPException:
+    err: dict[str, Any] = {"code": code, "country": country}
+    if stages:
+        err["stages"] = stages
+    messages = {
+        "filtered_empty": (
+            f"Fetched posts for '{country}' but none survived the Reels/age filters. "
+            "No cached response is served on failure — retry later."
+        ),
+        "hydrate_empty": (
+            f"Found shortcodes for '{country}' but could not hydrate any posts. "
+            "No cached response is served on failure — retry later."
+        ),
+        "fetch_empty": (
+            f"Could not fetch trending shortcodes for '{country}'. "
+            "No cached response is served on failure — retry later."
+        ),
+        "timeout": (
+            f"Trending scrape for '{country}' exceeded the "
+            f"{_TRENDING_HARD_DEADLINE_SECS}s deadline. "
+            "No cached response is served on failure — retry later."
+        ),
+    }
     return HTTPException(
         status_code=502,
         detail={
-            "error": {
-                "code": "scrape_failed",
-                "country": country,
-            },
-            "message": (
-                f"Could not scrape trending Reels for '{country}'. "
-                "No cached response is served on failure — retry later."
+            "error": err,
+            "message": messages.get(
+                code,
+                (
+                    f"Could not scrape trending Reels for '{country}'. "
+                    "No cached response is served on failure — retry later."
+                ),
             ),
         },
     )
@@ -2105,13 +2134,16 @@ def _wire_trending_reel(r: dict[str, Any]) -> dict[str, Any]:
     eng = cleaned.get("engagement")
     if isinstance(eng, dict):
         views = eng.get("views")
-        if views is not None and not eng.get("viewsSource"):
-            eng["viewsSource"] = "instagram"
-        if views is None:
-            eng["viewsSource"] = None
         eng.pop("plays", None)
         eng.pop("viewsInstagram", None)
         eng.pop("viewsFacebook", None)
+        # Keep views key (null when withheld). Only emit viewsSource when views
+        # is set — otherwise the key is 100% null on every row and fails honesty.
+        if views is not None:
+            eng["viewsSource"] = eng.get("viewsSource") or "instagram"
+        else:
+            eng["views"] = None
+            eng.pop("viewsSource", None)
         cleaned["engagement"] = eng
     # Uniform key — null when actor omitted duration.
     if "durationSeconds" not in cleaned:
@@ -2139,40 +2171,34 @@ async def _enrich_trending_reels(
 
 
 async def _scrape_trending_country(country: str, *, store_limit: int) -> dict[str, Any]:
-    """Live native /reels scrape. No Apify fallback — that path is ~$0.40/run.
+    """Live native /reels scrape. No Apify fallback — that path is ~$0.40/run."""
+    # enrich=False: author-feed backfill is 200s+ (redirect loops) and blows
+    # the Cloudflare budget. Polaris already returns likes/comments/media;
+    # views stay null when Instagram withholds play_count logged-out.
+    result = await instagram_native.trending_reels_native(
+        country,
+        limit=store_limit,
+        enrich=False,
+    )
+    stages = result.get("stages") if isinstance(result, dict) else None
+    error = result.get("error") if isinstance(result, dict) else "scrape_failed"
+    reels = result.get("reels") if isinstance(result, dict) else None
 
-    Native misses are logged as ``ig_trending_native_miss`` so we can measure
-    failure rate by country before considering a separately priced Apify tier.
-    """
-    reason = "empty"
-    try:
-        native = await asyncio.wait_for(
-            instagram_native.trending_reels_native(
-                country,
-                limit=store_limit,
-                enrich=True,
-                max_authors=min(6, store_limit),
-            ),
-            timeout=_TRENDING_NATIVE_BUDGET_SECS,
-        )
-    except asyncio.TimeoutError:
-        native = None
-        reason = "timeout"
-        log.warning("ig_trending_native_timeout", country=country)
-
-    if native:
-        wired = [_wire_trending_reel(r) for r in native]
+    if reels:
+        wired = [_wire_trending_reel(r) for r in reels]
         return _trending_payload(wired, country=country, cached=False)
 
-    # Measurable miss — do not silently fall through to a ~$0.40 Apify run.
     log.error(
         "ig_trending_native_miss",
         country=country,
-        reason=reason,
+        reason=error or "empty",
         store_limit=store_limit,
+        stages=stages,
         apify_fallback=False,
     )
-    raise _trending_scrape_failed_http(country)
+    raise _trending_scrape_failed_http(
+        country, code=str(error or "scrape_failed"), stages=stages
+    )
 
 
 @router.get("/trending-reels", summary="Instagram trending Reels from /reels")
@@ -2181,16 +2207,17 @@ async def instagram_trending_reels(
         "United States",
         description="Country name or ISO code (e.g. 'United States' or 'US') for Reels localization",
     ),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(10, ge=1, le=200),
     cache: bool = Query(
         True,
         description=(
             "Default true (cache-first): serve the per-country response cache when present "
-            f"(TTL {_TRENDING_CACHE_TTL_SECS // 3600}h). "
+            f"(TTL {_TRENDING_CACHE_TTL_SECS // 3600} hours). "
             f"Every successful call costs {CREDIT_TRENDING_REELS} credits — including cache hits "
             "(cache is our margin, not a free tier). "
             "Set false to skip the cache read and force a live scrape "
-            f"(~{_TRENDING_NATIVE_BUDGET_SECS}s); the fresh result still refreshes the cache."
+            f"(typically under 20s, hard cap {_TRENDING_HARD_DEADLINE_SECS}s); "
+            "the fresh result still refreshes the cache."
         ),
     ),
     caller: ApiCaller = Depends(require_api_key),
@@ -2199,11 +2226,12 @@ async def instagram_trending_reels(
 
     Cache-first (default) amortizes native scrape cost for us; the customer
     always pays the same flat fee. ``cache=false`` forces live. Concurrent
-    same-country misses share one scrape. Failures return 502 — never an
-    old snapshot and never a silent Apify fallback.
+    same-country misses share one scrape. Hard deadline 110s (under
+    Cloudflare). Failures return 502 — never an old snapshot.
     """
     country = _normalize_trending_country(country)
-    store_limit = min(200, max(_TRENDING_STORE_LIMIT, limit))
+    # Cap store size — previously max(100, limit) forced 100+ hydrates and timed out.
+    store_limit = min(_TRENDING_STORE_LIMIT, max(limit, 12))
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/trending-reels",
@@ -2219,17 +2247,30 @@ async def instagram_trending_reels(
             ctx["source"] = "direct"
             return payload
 
-        # Cache key is country-only (limit applied after) so one scrape serves all limits.
-        data = await cached_or_run(
-            endpoint="instagram.trending-reels",
-            params={"country": country, "v": 22},
-            runner=_run,
-            ctx=ctx,
-            ttl=_TRENDING_CACHE_TTL_SECS,
-            use_cache=cache,
-            single_flight=True,
-            flight_wait_secs=_TRENDING_FLIGHT_WAIT_SECS,
-        )
+        async def _bounded() -> dict[str, Any]:
+            try:
+                return await asyncio.wait_for(
+                    cached_or_run(
+                        endpoint="instagram.trending-reels",
+                        params={"country": country, "v": 23},
+                        runner=_run,
+                        ctx=ctx,
+                        ttl=_TRENDING_CACHE_TTL_SECS,
+                        use_cache=cache,
+                        single_flight=True,
+                        flight_wait_secs=_TRENDING_FLIGHT_WAIT_SECS,
+                    ),
+                    timeout=_TRENDING_HARD_DEADLINE_SECS,
+                )
+            except asyncio.TimeoutError:
+                log.error(
+                    "ig_trending_hard_deadline",
+                    country=country,
+                    secs=_TRENDING_HARD_DEADLINE_SECS,
+                )
+                raise _trending_scrape_failed_http(country, code="timeout") from None
+
+        data = await _bounded()
         data = _slice_trending_payload(data, limit)
         data["cached"] = bool(ctx.get("cache_hit"))
         if ctx.get("cache_hit"):

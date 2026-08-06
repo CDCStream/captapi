@@ -94,6 +94,18 @@ def test_scrape_failed_error_is_machine_readable() -> None:
     assert exc.detail["error"]["country"] == "United States"
 
 
+def test_filtered_empty_error_is_distinct() -> None:
+    exc = ig_router._trending_scrape_failed_http(
+        "United States",
+        code="filtered_empty",
+        stages={"fetched": 12, "hydrated": 10, "afterReelFilter": 0},
+    )
+    assert exc.status_code == 502
+    assert exc.detail["error"]["code"] == "filtered_empty"
+    assert exc.detail["error"]["stages"]["fetched"] == 12
+    assert "filters" in exc.detail["message"].lower()
+
+
 def test_trending_payload_includes_iso_country_code() -> None:
     payload = ig_router._trending_payload([], country="United States", cached=False)
     assert payload["country"] == "United States"
@@ -121,9 +133,11 @@ def test_slice_trending_payload() -> None:
     assert [r["id"] for r in sliced["reels"]] == ["1", "2"]
 
 
-def test_live_budget_under_gateway() -> None:
-    assert ig_router._TRENDING_NATIVE_BUDGET_SECS <= 60
+def test_live_budget_under_cloudflare() -> None:
+    assert ig_router._TRENDING_HARD_DEADLINE_SECS <= 110
+    assert ig_router._TRENDING_FLIGHT_WAIT_SECS < ig_router._TRENDING_HARD_DEADLINE_SECS
     assert ig_router._TRENDING_CACHE_TTL_SECS == 4 * 3600
+    assert ig_router._TRENDING_STORE_LIMIT <= 40
 
 
 def test_wire_trending_reel_drops_plays_keeps_duration() -> None:
@@ -144,6 +158,12 @@ def test_wire_trending_reel_drops_plays_keeps_duration() -> None:
     assert out["durationSeconds"] is None
     assert out["engagement"]["views"] == 100
     assert out["engagement"]["viewsSource"] == "instagram"
+    # Null views → no viewsSource key.
+    bare = ig_router._wire_trending_reel(
+        {"id": "2", "durationSeconds": None, "engagement": {"likes": 1, "comments": 0, "views": None}}
+    )
+    assert bare["engagement"]["views"] is None
+    assert "viewsSource" not in bare["engagement"]
 
 
 def test_trending_engagement_acceptance() -> None:
@@ -190,17 +210,17 @@ def test_trending_engagement_acceptance() -> None:
         for r in rows
     ]
     assert all(
-        r["engagement"]["views"] is None or r["engagement"]["viewsSource"] is not None
+        r["engagement"].get("views") is None or r["engagement"].get("viewsSource") is not None
         for r in reels
     )
-    keys = set(reels[0]["engagement"])
+    # viewsSource is omitted when views is null (not a 100%-null key).
+    assert reels[0]["engagement"].get("viewsSource") == "instagram"
+    assert "viewsSource" not in reels[1]["engagement"]
+    keys = set(reels[0]["engagement"]) | set(reels[1]["engagement"])
     assert "plays" not in keys
-    for k in keys:
-        if k in {"views", "viewsSource"}:
-            assert not all(r["engagement"].get(k) is None for r in reels)
-        else:
-            # No engagement field may be null on every row.
-            assert not all(r["engagement"].get(k) is None for r in reels)
+    for k in keys - {"views", "viewsSource"}:
+        # Required engagement metrics must not be null on every row.
+        assert not all(r["engagement"].get(k) is None for r in reels)
     assert reels[0]["durationSeconds"] == 12.011
     assert "durationSeconds" in reels[1]
     assert reels[1]["durationSeconds"] is None
