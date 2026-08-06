@@ -15522,9 +15522,9 @@
       "likes": 15500,
       "dislikes": 194,
       "comments": 1050,
-          "durationSeconds": 5185,
-          "durationText": "1:26:25",
-          "publishedAt": "2026-07-17T12:18:39+00:00",
+      "durationSeconds": 5185,
+      "durationText": "1:26:25",
+      "publishedAt": "2026-07-17T12:18:39+00:00",
       "thumbnail": "https://1a-1791.com/video/fwe2/7c/s8/1/C/w/c/H/CwcHA.qR4e-small-Now-I-Can-Finally-Talk-Abou..jpg",
       "width": 1920,
       "height": 1080,
@@ -16345,5 +16345,45 @@
       "creditsCharged": 2,
       "noSpeech": false
     }
+  },
+  "youtube-audio-transcript": {
+    "ok": true,
+    "status": 200,
+    "credits": 2,
+    "data": {
+      "platform": "youtube",
+      "videoId": "jNQXAC9IVRw",
+      "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+      "source": "asr",
+      "asrProvider": "groq-whisper-large-v3-turbo",
+      "language": "en",
+      "languageIsDetected": true,
+      "durationSeconds": 19,
+      "segments": [
+        {
+          "text": "Alright, so here we are in front of the elephants.",
+          "startMs": 0,
+          "endMs": 4000
+        },
+        {
+          "text": "The cool thing about these guys is that they have really, really, really long fronts.",
+          "startMs": 4000,
+          "endMs": 12000
+        },
+        {
+          "text": "And that's cool.",
+          "startMs": 12000,
+          "endMs": 14000
+        },
+        {
+          "text": "And that's pretty much all there is to say.",
+          "startMs": 16000,
+          "endMs": 19000
+        }
+      ],
+      "text": "Alright, so here we are in front of the elephants. The cool thing about these guys is that they have really, really, really long fronts. And that's cool. And that's pretty much all there is to say.",
+      "creditsUsed": 2
+    },
+    "error": null
   }
 }

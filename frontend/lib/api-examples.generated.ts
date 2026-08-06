@@ -5131,11 +5131,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "period": 30,
     "orderBy": "ctr",
     "totalReturned": 2,
-    "candidatesScanned": 2,
-    "filteredOut": 0,
+    "datesPresent": 1,
     "match": "any",
+    "matchedFrom": 2,
+    "filteredOut": 0,
+    "literalMatches": 2,
     "matchBasis": "none",
-    "truncated": false,
     "ads": [
       {
         "platform": "tiktok_creative_center",
@@ -5147,6 +5148,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "id": "brand_nuuly",
           "name": "nuuly"
         },
+        "firstSeen": "2026-01-10T00:00:00.000Z",
+        "lastSeen": null,
         "likes": 620,
         "likesIsApproximate": false,
         "ctr": 0.17,
@@ -5176,6 +5179,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "id": "uid42",
           "name": "Creator X"
         },
+        "firstSeen": null,
+        "lastSeen": null,
         "likes": 5,
         "likesIsApproximate": false,
         "ctr": 0.62,
@@ -7648,6 +7653,30 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "duration": 8.4,
     "creditsCharged": 1,
     "noSpeech": false
+  },
+  "youtube-audio-transcript": {
+    "platform": "youtube",
+    "videoId": "jNQXAC9IVRw",
+    "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+    "source": "asr",
+    "asrProvider": "groq-whisper-large-v3-turbo",
+    "language": "en",
+    "languageIsDetected": true,
+    "durationSeconds": 19,
+    "segments": [
+      {
+        "text": "Alright, so here we are in front of the elephants.",
+        "startMs": 0,
+        "endMs": 4000
+      },
+      {
+        "text": "The cool thing about these guys is that they have really, really, really long fronts.",
+        "startMs": 4000,
+        "endMs": 12000
+      }
+    ],
+    "text": "Alright, so here we are in front of the elephants. The cool thing about these guys is that they have really, really, really long fronts. And that's cool. And that's pretty much all there is to say.",
+    "creditsUsed": 2
   },
   "youtube-channel-details": {
     "url": "https://www.youtube.com/channel/UCX6OQ3DkcsbYNE6H8uQQuVA",
