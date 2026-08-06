@@ -21,7 +21,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
-from app.services import rumble_comments_native, rumble_video_native
+from app.services import rumble_comments_native, rumble_transcript, rumble_video_native
 from app.utils.formatters import first_present, parse_compact_count, safe_int, safe_str
 from app.utils.url import (
     extract_rumble_channel,
@@ -32,6 +32,7 @@ from app.utils.url import (
 router = APIRouter()
 
 CREDIT_DETAILS = 1
+CREDIT_TRANSCRIPT = rumble_transcript.CREDIT_TRANSCRIPT
 CREDIT_COMMENTS_NATIVE = rumble_comments_native.CREDIT_RUMBLE_COMMENTS_NATIVE
 RATE = 0.6
 
@@ -555,6 +556,136 @@ async def video_details(
         data = await cached_or_run(
             endpoint="rumble.video-details",
             params={"url": url, "v": 12},
+            runner=_run,
+            ctx=ctx,
+            use_cache=cache,
+        )
+        return ApiResponse(data=data)
+
+
+def _raise_rumble_transcript_unavailable(
+    *,
+    code: str,
+    available: list[dict[str, str]],
+    language: str | None,
+) -> None:
+    """404 with diagnostic body. billed_call never charges status >= 400."""
+    if code == "language_not_available":
+        reason = (
+            f"No caption track matches language '{(language or '').strip()}'."
+        )
+    else:
+        code = "no_captions"
+        reason = "Rumble publishes no caption track for this video"
+    raise HTTPException(
+        status_code=404,
+        detail={
+            "code": code,
+            "reason": reason,
+            "availableLanguages": available,
+        },
+    )
+
+
+@router.get(
+    "/video/transcript",
+    summary="Rumble video caption transcript (published .vtt, not STT)",
+    description=(
+        "Fetches the caption track Rumble already exposes on video-details, "
+        "parses the .vtt, and returns timed segments. Does not run "
+        "speech-to-text. Missing captions or a language mismatch return 404 "
+        f"and cost 0 credits. Flat {CREDIT_TRANSCRIPT} credit on success."
+    ),
+)
+async def video_transcript(
+    url: str = Query(..., description="Rumble video URL"),
+    language: str | None = Query(
+        None,
+        description=(
+            "Caption language code (e.g. en or en-auto). When set, that track "
+            "(or a matching base language like en → en-auto) is required — "
+            "never a silent fallback. Missing language → 404 "
+            "language_not_available with availableLanguages. Omit to use the "
+            "first track and report which one was used."
+        ),
+    ),
+    cache: bool = Query(
+        False,
+        description="Set true to use the 24h cache. Default false — always fetch fresh data.",
+    ),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    video_id = _require_rumble_video_url(url)
+    canon = _canonical_video_url(url)
+
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/rumble/video/transcript",
+        platform="rumble",
+        resource_url=canon,
+        base_credits=CREDIT_TRANSCRIPT,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            native = await rumble_video_native.video_details_native(canon)
+            if not native or not native.get("title"):
+                ctx["credits_override"] = 0
+                raise HTTPException(status_code=404, detail="Video not found")
+
+            captions = (
+                native.get("captions")
+                if isinstance(native.get("captions"), list)
+                else []
+            )
+            track, err, available = rumble_transcript.pick_caption_track(
+                captions, language
+            )
+            if err or not track:
+                ctx["credits_override"] = 0
+                _raise_rumble_transcript_unavailable(
+                    code=err or "no_captions",
+                    available=available,
+                    language=language,
+                )
+
+            try:
+                vtt = await rumble_transcript.fetch_vtt(track["url"])
+            except Exception as exc:
+                ctx["credits_override"] = 0
+                raise HTTPException(
+                    status_code=502,
+                    detail={
+                        "code": "caption_fetch_failed",
+                        "message": "Failed to download the caption track",
+                        "reason": str(exc),
+                    },
+                ) from exc
+
+            duration = native.get("durationSeconds")
+            try:
+                duration_i = int(duration) if duration is not None else None
+            except (TypeError, ValueError):
+                duration_i = None
+
+            payload = rumble_transcript.build_transcript_payload(
+                video_id=safe_str(native.get("id")) or video_id,
+                url=safe_str(native.get("url")) or canon,
+                track=track,
+                vtt_body=vtt,
+                duration_seconds=duration_i,
+            )
+            if not payload.get("segments"):
+                ctx["credits_override"] = 0
+                _raise_rumble_transcript_unavailable(
+                    code="no_captions",
+                    available=available,
+                    language=language,
+                )
+            ctx["source"] = "captions"
+            return payload
+
+        data = await cached_or_run(
+            endpoint="rumble.video-transcript",
+            params={"url": canon, "language": language or "", "v": 1},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

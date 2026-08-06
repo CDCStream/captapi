@@ -407,6 +407,7 @@ const LINKEDIN: Omit<Endpoint, "platform">[] = [
 
 const RUMBLE: Omit<Endpoint, "platform">[] = [
   { tool: "rumble_video_details", name: "Rumble Video Details", path: "/v1/rumble/video-details", credits: 1, summary: "Rumble video metadata + stats: real likes/comments (null when unknown), durationSeconds, captions, media qualities, channelFollowers/verified.", params: [url(RB_VIDEO)] },
+  { tool: "rumble_video_transcript", name: "Rumble Video Transcript", path: "/v1/rumble/video/transcript", credits: 1, summary: "Published Rumble captions as timed segments (parses .vtt; not STT). 404 is free.", params: [url(RB_VIDEO), language(), cacheParam()] },
   { tool: "rumble_channel_videos", name: "Rumble Channel Videos", path: "/v1/rumble/channel-videos", credits: 12, summary: "List videos from a Rumble channel.", params: [url(RB_CHANNEL), limit(20, 200)] },
   { tool: "rumble_search", name: "Rumble Search", path: "/v1/rumble/search", credits: 12, summary: "Search Rumble videos by keyword.", params: [q(), limit(20, 200)] },
   { tool: "rumble_comments", name: "Rumble Comments", path: "/v1/rumble/comments", credits: 30, summary: "Comments on a Rumble video.", params: [url(RB_VIDEO), limit(50, 500)] },

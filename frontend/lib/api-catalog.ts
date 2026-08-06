@@ -1882,6 +1882,25 @@ const RUMBLE: Spec[] = [
     ],
   },
   {
+    slug: "rumble-video-transcript",
+    name: "Rumble Video Transcript API",
+    shortName: "Video Transcript",
+    category: "transcript",
+    method: "GET",
+    path: "/v1/rumble/video/transcript",
+    credits: 1,
+    tagline:
+      "Rumble published captions as timed segments — parses the .vtt from video-details (not speech-to-text).",
+    longDescription:
+      "Fetches the caption track Rumble already exposes on /video-details (unsigned .vtt URLs), parses cues into segments[{text,startMs,endMs}], and returns the full text. source is always \"captions\". Pass language to require that track (en matches en-auto); mismatch → 404 language_not_available with availableLanguages (never a silent fallback). No tracks → 404 no_captions. 404 costs 0 credits. No STT fallback on this endpoint. Flat 1 credit on success. Segment shape is shared with /v1/youtube/audio-transcript.",
+    delivers: [
+      "source always \"captions\" on success",
+      "Uniform segments[{text,startMs,endMs}] (shared shape)",
+      "Rolling auto-caption duplicates collapsed",
+      "404 language_not_available / no_captions cost 0",
+    ],
+  },
+  {
     slug: "rumble-channel-videos",
     name: "Rumble Channel Videos API",
     shortName: "Channel Videos",
@@ -4465,6 +4484,11 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "linkedin-search-posts": [qp(), { name: "sort", type: "string", required: false, description: "relevance or date. Default relevance." }, lp(20, 50)],
   // Rumble
   "rumble-video-details": [up("Rumble video URL, e.g. https://rumble.com/vXXXX-title.html.")],
+  "rumble-video-transcript": [
+    up("Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."),
+    lang(),
+    cacheP(),
+  ],
   "rumble-channel-videos": [up("Rumble channel URL, e.g. https://rumble.com/c/name."), lp(20, 200)],
   "rumble-search": [qp("Keywords or search query (min 2 characters)."), lp(20, 200)],
   "rumble-comments": [up("Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."), lpFlat(50, 500, 2)],
@@ -8067,6 +8091,17 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     thumbnailTrack: "Timeline sprite strip when present — not a playable video.",
     captions: "Array of {code, language, url} caption tracks (.vtt).",
     isLive: "true while the upload is a livestream; false for VODs.",
+  },
+  "rumble-video-transcript": {
+    source: 'Always "captions" — this endpoint parses Rumble\'s published .vtt only (no STT).',
+    language: "Caption track code actually returned (e.g. en-auto).",
+    languageName: "Human label from the track (e.g. English (auto)).",
+    durationSeconds: "Video length in seconds when known (from video-details).",
+    segments:
+      "Timed cues [{text, startMs, endMs}]. Same shape as /v1/youtube/audio-transcript. Consecutive identical rolling auto-captions are collapsed.",
+    "segments[].startMs": "Cue start in integer milliseconds.",
+    "segments[].endMs": "Cue end in integer milliseconds (always > startMs).",
+    text: "Full transcript — segment texts joined with a single space.",
   },
   "rumble-comments": {
     publishedAt:

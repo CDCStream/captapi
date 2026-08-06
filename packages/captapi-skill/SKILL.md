@@ -246,6 +246,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `rumble_video_details` | `/v1/rumble/video-details` | `url` (string), `cache`? (boolean) | 1 |
+| `rumble_video_transcript` | `/v1/rumble/video/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 1 |
 | `rumble_channel_videos` | `/v1/rumble/channel-videos` | `url` (string), `limit`? (number), `cache`? (boolean) | 12 |
 | `rumble_search` | `/v1/rumble/search` | `q` (string), `limit`? (number), `cache`? (boolean) | 12 |
 | `rumble_comments` | `/v1/rumble/comments` | `url` (string), `limit`? (number), `cache`? (boolean) | 30 |

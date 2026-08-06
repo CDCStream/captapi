@@ -3276,6 +3276,34 @@
     ]
   },
   {
+    "tool": "rumble_video_transcript",
+    "platform": "rumble",
+    "name": "Rumble Video Transcript",
+    "path": "/v1/rumble/video/transcript",
+    "credits": 1,
+    "summary": "Published Rumble captions as timed segments (parses .vtt; not STT). 404 is free.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Caption language code (e.g. en or en-auto). Omit to use the first track."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
     "tool": "rumble_channel_videos",
     "platform": "rumble",
     "name": "Rumble Channel Videos",

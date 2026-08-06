@@ -16,6 +16,7 @@ from typing import Any
 import structlog
 
 from app.services.youtube_native import _player_android
+from app.services.transcript_segments import segments_from_seconds as segments_to_ms
 
 log = structlog.get_logger(__name__)
 
@@ -122,20 +123,3 @@ async def extract_audio_bytes(video_id: str) -> tuple[bytes, float, str]:
             return raw, duration, path.name
 
     return await asyncio.to_thread(_run)
-
-
-def segments_to_ms(whisper_segments: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Map Whisper start/end seconds -> uniform {text,startMs,endMs}."""
-    out: list[dict[str, Any]] = []
-    for seg in whisper_segments:
-        if not isinstance(seg, dict):
-            continue
-        text = (seg.get("text") or "").strip()
-        if not text:
-            continue
-        start = float(seg.get("start") or 0.0)
-        end = float(seg.get("end") if seg.get("end") is not None else start)
-        start_ms = int(round(max(start, 0.0) * 1000))
-        end_ms = int(round(max(end, start) * 1000))
-        out.append({"text": text, "startMs": start_ms, "endMs": end_ms})
-    return out

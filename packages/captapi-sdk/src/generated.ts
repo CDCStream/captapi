@@ -1438,6 +1438,15 @@ export interface RumbleVideoDetailsParams {
   cache?: boolean;
 }
 
+export interface RumbleVideoTranscriptParams {
+  /** Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  url: string;
+  /** Caption language code (e.g. en or en-auto). Omit to use the first track. */
+  language?: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
 export interface RumbleChannelVideosParams {
   /** Rumble channel URL, e.g. https://rumble.com/c/name. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
@@ -1470,6 +1479,10 @@ export class RumbleApi {
   /** Rumble Video Details — Rumble video metadata + stats: real likes/comments (null when unknown), durationSeconds, captions, media qualities, channelFollowers/verified. (1 credit) */
   videoDetails(params: RumbleVideoDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/rumble/video-details", params);
+  }
+  /** Rumble Video Transcript — Published captions as timed segments (parses .vtt; not STT). (1 credit) */
+  videoTranscript(params: RumbleVideoTranscriptParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/rumble/video/transcript", params);
   }
   /** Rumble Channel Videos — List videos from a Rumble channel. (12 credits) */
   channelVideos(params: RumbleChannelVideosParams): Promise<ApiEnvelope> {

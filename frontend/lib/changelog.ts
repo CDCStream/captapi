@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-06",
     category: "feature",
+    title: "Rumble video transcript: parse published .vtt captions",
+    description:
+      "New GET /v1/rumble/video/transcript fetches the caption track already exposed on video-details, parses the unsigned .vtt, and returns timed segments[{text,startMs,endMs}] with source:\"captions\". Flat 1 credit on success; no_captions / language_not_available 404s cost 0. No STT fallback. Segment shape is shared with YouTube audio-transcript so clients do not grow a fourth mapper.",
+    items: [
+      "New /v1/rumble/video/transcript (1 credit)",
+      "Shared segments[{text,startMs,endMs}] module",
+      "Rolling auto-caption dedupe + language_not_available 404",
+    ],
+  },
+  {
+    publishedAt: "2026-08-06",
+    category: "feature",
     title: "YouTube audio-transcript: per-minute Whisper ASR + maxCredits",
     description:
       "New GET /v1/youtube/audio-transcript runs Whisper-class speech-to-text on YouTube audio (separate from /transcript captions). Pricing is ceil(durationSeconds/60)×2 with a maxCredits preflight (400 cost_exceeds_max, 0 credits). Sync cap is 20 minutes from measured e2e under Cloudflare; longer videos return duration_too_long with estimatedCredits. /transcript 404 no_captions now includes a suggestion block pointing at audio-transcript, and success responses always set source:\"captions\" (audio-transcript uses source:\"asr\").",
