@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import json
 import math
@@ -59,6 +60,8 @@ CREDIT_TIKTOK_TOP_ADS_MIN = 2
 # Exceeding 125s needs Cloudflare Enterprise (up to 6000s via Cache Rule / API).
 _TIKTOK_AD_APIFY_TIMEOUT_SECS = 90.0
 _TIKTOK_AD_RETRY_AFTER_SECS = 30
+# Hard deadline under Cloudflare's 125s proxy read timeout (same as trending-reels).
+_TIKTOK_SEARCH_HARD_DEADLINE_SECS = 110
 
 _DKI_RE = re.compile(
     r"\{(?:KeyWord|KEYWORD|Keyword|param\d*|CUSTOMIZER\.[^}:]+)(?::[^}]*)?\}",
@@ -510,10 +513,25 @@ def _tiktok_region(value: str) -> str:
 
 
 def _tiktok_library_date_iso(value: Any) -> str | None:
-    """Normalize TikTok library dates (often ``MM/DD/YYYY``) to ISO-8601 UTC."""
+    """Normalize TikTok library dates (ms epoch, ``MM/DD/YYYY``, ISO) to UTC."""
+    if isinstance(value, (int, float)):
+        n = float(value)
+        if n > 1e12:
+            n /= 1000.0
+        if n >= 1_000_000_000:
+            from datetime import datetime, timezone
+
+            return (
+                datetime.fromtimestamp(n, tz=timezone.utc)
+                .strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+                + "Z"
+            )
+        return None
     raw = safe_str(value)
     if not raw:
         return None
+    if raw.isdigit():
+        return _tiktok_library_date_iso(int(raw))
     if re.match(r"^\d{4}-\d{2}-\d{2}T", raw):
         return raw
     if re.match(r"^\d{4}-\d{2}-\d{2}$", raw):
@@ -717,58 +735,66 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
     )
     if not isinstance(advertiser, dict):
         advertiser = {"name": advertiser} if advertiser else {}
-    media: list[Any] = []
-
-    media.extend(_listify(item.get("media")))
-    media.extend(_listify(item.get("mediaUrls")))
-    media.extend(_listify(item.get("images")))
-    media.extend(_listify(item.get("imageUrls")))
-    media.extend(_listify(item.get("videos")))
-    media.extend(_listify(item.get("videoUrls")))
-    media.extend(
-        m
-        for m in [
-            item.get("imageUrl"),
-            item.get("creativeImageUrl"),
-            item.get("primaryImageUrl"),
-            item.get("thumbnailUrl"),
-            item.get("coverImageUrl"),
-            item.get("adVideoCover"),
-            item.get("videoUrl"),
-            item.get("adVideoUrl"),
-            item.get("previewUrl"),
-            item.get("creativeAssetUrl"),
-        ]
-        if m
-    )
-    media.extend(_listify(snapshot.get("images")))
-    for video in _listify(snapshot.get("videos")):
-        if isinstance(video, dict):
-            media.extend(
-                m
-                for m in [
-                    video.get("videoHdUrl"),
-                    video.get("videoSdUrl"),
-                    video.get("videoPreviewImageUrl"),
-                ]
-                if m
-            )
-        else:
-            media.append(video)
-    for card in _listify(snapshot.get("cards")):
-        if isinstance(card, dict):
-            media.extend(
-                m
-                for m in [
-                    card.get("originalImageUrl"),
-                    card.get("videoHdUrl"),
-                    card.get("videoSdUrl"),
-                    card.get("videoPreviewImageUrl"),
-                ]
-                if m
-            )
-
-    media = _flatten_media(media)
+    structured_media = item.get("media")
+    if (
+        isinstance(structured_media, list)
+        and structured_media
+        and all(isinstance(m, dict) and safe_str(m.get("url")) for m in structured_media)
+    ):
+        media: list[Any] = structured_media
+    else:
+        media = []
+        media.extend(_listify(item.get("media")))
+        media.extend(_listify(item.get("mediaUrls")))
+        media.extend(_listify(item.get("images")))
+        media.extend(_listify(item.get("imageUrls")))
+        media.extend(_listify(item.get("videos")))
+        media.extend(_listify(item.get("videoUrls")))
+        media.extend(
+            m
+            for m in [
+                item.get("imageUrl"),
+                item.get("creativeImageUrl"),
+                item.get("primaryImageUrl"),
+                item.get("thumbnailUrl"),
+                item.get("coverImageUrl"),
+                item.get("adVideoCover"),
+                item.get("videoUrl"),
+                item.get("adVideoUrl"),
+                item.get("previewUrl"),
+                item.get("creativeAssetUrl"),
+            ]
+            if m
+        )
+        media.extend(_listify(snapshot.get("images")))
+        for video in _listify(snapshot.get("videos")):
+            if isinstance(video, dict):
+                media.extend(
+                    m
+                    for m in [
+                        video.get("videoHdUrl"),
+                        video.get("videoSdUrl"),
+                        video.get("videoPreviewImageUrl"),
+                    ]
+                    if m
+                )
+            else:
+                media.append(video)
+        for card in _listify(snapshot.get("cards")):
+            if isinstance(card, dict):
+                media.extend(
+                    m
+                    for m in [
+                        card.get("originalImageUrl"),
+                        card.get("videoHdUrl"),
+                        card.get("videoSdUrl"),
+                        card.get("videoPreviewImageUrl"),
+                    ]
+                    if m
+                )
+        media = _flatten_media(media)
+        if platform in {"tiktok", "tiktok_ad_library"}:
+            media = tiktok_ads_native._media_objects(media)
 
     ad_id = safe_str(
         _first(
@@ -802,7 +828,7 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
     )
     if platform == "facebook_ad_library" and not url and ad_id:
         url = _facebook_ad_url(ad_id)
-    if platform == "tiktok_ad_library" and not url and ad_id:
+    if platform in {"tiktok", "tiktok_ad_library"} and not url and ad_id:
         url = f"https://library.tiktok.com/ads/detail/?ad_id={ad_id}"
     if platform == "linkedin_ad_library" and not url and ad_id:
         url = f"https://www.linkedin.com/ad-library/detail/{ad_id}"
@@ -1041,13 +1067,20 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         },
         "media": media,
     }
-    if platform == "tiktok_ad_library":
+    if platform in {"tiktok", "tiktok_ad_library"}:
         # Align date shape with Facebook/Google Ad Library (ISO-8601).
         normalized["firstShown"] = _tiktok_library_date_iso(normalized.get("firstShown"))
         normalized["lastShown"] = _tiktok_library_date_iso(normalized.get("lastShown"))
         reach_range = _tiktok_reach_range(normalized.get("impressions"))
         if reach_range:
             normalized["impressionsRange"] = reach_range
+        # One platform value across the TikTok Ad Library block; surface is separate.
+        normalized["platform"] = "tiktok"
+        if item.get("library") or platform == "tiktok_ad_library":
+            normalized["library"] = safe_str(item.get("library")) or "dsa"
+        # Echo request country when upstream omits a single ISO.
+        if not normalized.get("country") and item.get("country"):
+            normalized["country"] = safe_str(item.get("country"))
     if platform == "linkedin_ad_library":
         # LinkedIn Ad Library transparency extras (additive; SC-parity).
         description = safe_str(
@@ -1153,18 +1186,16 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             adv["name"] = None
         if not normalized.get("advertiserLinkedinPage") and adv.get("url"):
             normalized["advertiserLinkedinPage"] = adv.get("url")
-    if platform == "tiktok_ad_library":
-        # Stable schema (FB parity): keep null keys — never omit text/cta/….
-        for key in ("headline", "cta", "landingUrl", "spend", "text"):
-            if normalized.get(key) in ("", [], {}):
-                normalized[key] = None
-            elif key not in normalized:
-                normalized[key] = None
-        for key in ("id", "url", "logo"):
-            if adv.get(key) in ("", []):
-                adv[key] = None
-            elif key not in adv:
-                adv[key] = None
+    if platform in {"tiktok", "tiktok_ad_library"}:
+        # Omit keys TikTok withholds (no 100%-null padding).
+        for key in ("headline", "cta", "landingUrl", "text", "spend", "impressions"):
+            if normalized.get(key) in (None, "", [], {}):
+                normalized.pop(key, None)
+        for key in ("id", "url", "logo", "location"):
+            if adv.get(key) in (None, "", []):
+                adv.pop(key, None)
+        if not adv.get("name"):
+            adv.pop("name", None)
     if platform == "facebook_ad_library":
         # Additive fields for competitor intel — existing keys above stay stable.
         spend_raw = normalized.get("spend")
@@ -1441,22 +1472,11 @@ def _tiktok_ad_timeout_http(wait_secs: float) -> HTTPException:
     )
 
 
-def _match_meta(filt: dict[str, Any]) -> dict[str, Any]:
-    """DSA / library search envelope — ``matchedFrom`` is a pre-filter count."""
-    return {
-        "matchedFrom": int(filt.get("matchedFrom") or 0),
-        "filteredOut": int(filt.get("filteredOut") or 0),
-        "literalMatches": int(filt.get("literalMatches") or 0),
-        "match": filt.get("match") or "any",
-        "matchBasis": filt.get("matchBasis") or "any",
-    }
+def _tiktok_block_match_meta(filt: dict[str, Any], *, q: str | None = None) -> dict[str, Any]:
+    """TikTok Ad Library block envelope — ``candidatesScanned``, never numeric ``matchedFrom``.
 
-
-def _top_ads_match_meta(filt: dict[str, Any], *, q: str | None) -> dict[str, Any]:
-    """Top Ads envelope — scan count is ``candidatesScanned``, never ``matchedFrom``.
-
-    Per-ad ``matchedFrom`` (field provenance array) is stamped on each ad when
-    ``q`` is set. ``literalMatches`` is omitted when there is no keyword.
+    Per-ad ``matchedFrom`` (field provenance string array) is stamped on each ad
+    when ``q`` is set. ``literalMatches`` is omitted when there is no keyword.
     """
     scanned = int(
         filt.get("candidatesScanned")
@@ -1473,6 +1493,11 @@ def _top_ads_match_meta(filt: dict[str, Any], *, q: str | None) -> dict[str, Any
     if (q or "").strip():
         out["literalMatches"] = int(filt.get("literalMatches") or 0)
     return out
+
+
+# Back-compat aliases (tests / older call sites).
+_match_meta = _tiktok_block_match_meta
+_top_ads_match_meta = _tiktok_block_match_meta
 
 
 def _bill_ads(ctx: dict[str, Any], ads: list[Any], *, flat: int, apify_rate: float | None = None) -> None:
@@ -1943,12 +1968,12 @@ async def facebook_ad_transcript(
         "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) "
         "as clean JSON. Flat 2 credits on the native path when results are returned "
         f"(Apify fallback capped at {CREDIT_TIKTOK_AD_SEARCH_APIFY}); empty results "
-        "are never charged. Local keyword matching is case-insensitive substring "
-        "with match=any|all (default any). When the filter reduces the set, "
-        "matchedFrom / filteredOut explain how many SERP rows existed before "
-        "filtering. Upstream work is capped (~40s Decodo / ~20s Apify) so clients "
-        "are not billed after ALB disconnect. Default country GB. For Creative "
-        "Center Top Ads use /v1/ad-library/tiktok/top-ads."
+        "are never charged. Keyword q is case-insensitive whole-word match=any|all "
+        "on advertiser/title/copy (hair ≠ wheelchair); each hit includes matchedFrom "
+        "(field names) and the envelope reports candidatesScanned / filteredOut / "
+        "literalMatches / truncated. Hard-capped at 110s → 502 scrape_failed "
+        "(0 credits). Default country GB. For Creative Center Top Ads use "
+        "/v1/ad-library/tiktok/top-ads."
     ),
 )
 async def tiktok_search(
@@ -1961,7 +1986,10 @@ async def tiktok_search(
     ),
     match: str = Query(
         "any",
-        description='Keyword token mode: "any" (default, OR) or "all" (AND). Substring, case-insensitive.',
+        description=(
+            'Keyword token mode: "any" (default, OR whole-word) or "all" (AND). '
+            "Case-insensitive; hair ≠ wheelchair."
+        ),
     ),
     limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -1974,7 +2002,7 @@ async def tiktok_search(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     # Over-fetch then relevance-filter so limit is filled with on-topic ads.
-    fetch_limit = min(200, max(limit * 3, limit))
+    fetch_limit = min(200, max(limit * 2, limit))
     async with billed_call(
         caller=caller,
         endpoint="/v1/ad-library/tiktok/search",
@@ -1982,27 +2010,51 @@ async def tiktok_search(
         resource_url=None,
         base_credits=CREDIT_TIKTOK_AD_SEARCH,
     ) as ctx:
+        async def _payload_from_rows(
+            rows: list[dict[str, Any]],
+            *,
+            has_more: bool = False,
+            upstream_truncated: bool = False,
+        ) -> dict[str, Any]:
+            filt = tiktok_ads_native.filter_ads_by_query(rows, q, match=match_mode)
+            ads = []
+            for i in filt["rows"][:limit]:
+                row = dict(i) if isinstance(i, dict) else {}
+                row["country"] = region
+                row["library"] = row.get("library") or "dsa"
+                ads.append(_normalize_ad(row, "tiktok"))
+            for ad in ads:
+                fields = tiktok_ads_native.matched_from_fields(ad, q)
+                if fields:
+                    ad["matchedFrom"] = fields
+            # Spec: truncated = collected < limit && hasMore; always false when empty.
+            truncated = bool(ads) and len(ads) < limit and bool(
+                has_more or upstream_truncated
+            )
+            return {
+                "query": q,
+                "country": region,
+                "totalReturned": len(ads),
+                **_tiktok_block_match_meta(filt, q=q),
+                "truncated": truncated,
+                "ads": ads,
+            }
+
         async def _run() -> dict[str, Any]:
-            # Decodo-native Commercial Content Library first (flat 2 credits).
             native = await tiktok_ads_native.search_ads(
                 q, country=region, limit=fetch_limit
             )
             if native is not None:
                 ctx["source"] = "direct"
-                filt = tiktok_ads_native.filter_ads_by_query(
-                    native, q, match=match_mode
-                )
-                ads = [
-                    _normalize_ad(i, "tiktok_ad_library")
-                    for i in filt["rows"][:limit]
-                ]
-                return {
-                    "query": q,
-                    "country": region,
-                    "totalReturned": len(ads),
-                    **_match_meta(filt),
-                    "ads": ads,
-                }
+                if isinstance(native, dict):
+                    rows = list(native.get("rows") or [])
+                    return await _payload_from_rows(
+                        rows,
+                        has_more=bool(native.get("has_more")),
+                        upstream_truncated=bool(native.get("truncated")),
+                    )
+                # Legacy list return
+                return await _payload_from_rows(list(native))
 
             items = await _run_actor_fast(
                 settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY,
@@ -2016,25 +2068,40 @@ async def tiktok_search(
                 timeout=_TIKTOK_AD_APIFY_TIMEOUT_SECS,
             )
             ctx["source"] = "apify"
-            filt = tiktok_ads_native.filter_ads_by_query(items, q, match=match_mode)
-            ads = [
-                _normalize_ad(i, "tiktok_ad_library") for i in filt["rows"][:limit]
-            ]
-            return {
-                "query": q,
-                "country": region,
-                "totalReturned": len(ads),
-                **_match_meta(filt),
-                "ads": ads,
-            }
+            return await _payload_from_rows(items)
 
-        data = await cached_or_run(
-            "ad-library.tiktok.search",
-            {"q": q, "country": region, "limit": limit, "match": match_mode, "v": 8},
-            _run,
-            ctx,
-            use_cache=cache,
-        )
+        async def _run_deadline() -> dict[str, Any]:
+            try:
+                return await asyncio.wait_for(
+                    cached_or_run(
+                        "ad-library.tiktok.search",
+                        {
+                            "q": q,
+                            "country": region,
+                            "limit": limit,
+                            "match": match_mode,
+                            "v": 9,
+                        },
+                        _run,
+                        ctx,
+                        use_cache=cache,
+                    ),
+                    timeout=_TIKTOK_SEARCH_HARD_DEADLINE_SECS,
+                )
+            except asyncio.TimeoutError as exc:
+                ctx["credits_override"] = 0
+                raise HTTPException(
+                    status_code=502,
+                    detail={
+                        "code": "scrape_failed",
+                        "message": (
+                            f"TikTok Ad Library search exceeded the "
+                            f"{_TIKTOK_SEARCH_HARD_DEADLINE_SECS}s hard deadline."
+                        ),
+                    },
+                ) from exc
+
+        data = await _run_deadline()
         ads = data.get("ads") or []
         if not ads:
             ctx["credits_override"] = 0
@@ -2246,8 +2313,10 @@ async def tiktok_top_ads(
     summary="TikTok ad details",
     description=(
         "Fetch one TikTok Commercial Content Library ad by URL or ad ID. Same "
-        "schema as search hits (text/cta/landingUrl/impressions/advertiser.* with "
-        "nulls when DSA withholds). Useful for ID lookup without a search page. "
+        "schema as /tiktok/search hits: platform=tiktok, library=dsa, media[] "
+        "objects (url/type/expiresAt when signed), impressions from Unique users "
+        "seen when disclosed, spend only when TikTok ships it. Keys withheld by "
+        "DSA are omitted rather than null-padded. "
         f"Flat {CREDIT_AD_LIBRARY_NATIVE} credits on the native path; Apify fallback "
         f"capped at {CREDIT_TIKTOK_AD_SEARCH_APIFY} (not 17). Default country GB."
     ),
@@ -2277,7 +2346,10 @@ async def tiktok_ad_details(
             native = await tiktok_ads_native.ad_details(ad_id, country=region)
             if native:
                 ctx["source"] = "direct"
-                return _normalize_ad(native, "tiktok_ad_library")
+                native = dict(native)
+                native["country"] = region
+                native["library"] = "dsa"
+                return _normalize_ad(native, "tiktok")
 
             candidates: list[tuple[str, dict[str, Any]]] = [
                 (
@@ -2322,12 +2394,15 @@ async def tiktok_ad_details(
                 raise HTTPException(status_code=404, detail="Ad not found")
             ctx["source"] = "apify"
             ctx["credits_override"] = CREDIT_TIKTOK_AD_SEARCH_APIFY
-            return _normalize_ad(best, "tiktok_ad_library")
+            best = dict(best)
+            best["country"] = region
+            best["library"] = "dsa"
+            return _normalize_ad(best, "tiktok")
 
         return ApiResponse(
             data=await cached_or_run(
                 "ad-library.tiktok.ad-details",
-                {"ad_id": ad_id, "country": region, "v": 6},
+                {"ad_id": ad_id, "country": region, "v": 7},
                 _run,
                 ctx,
                 use_cache=cache,

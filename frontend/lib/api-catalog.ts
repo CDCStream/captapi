@@ -2828,7 +2828,7 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     tagline:
       "Search TikTok Commercial Content Library — relevance-filtered, ISO dates, stable null schema (2 credits native).",
     longDescription:
-      "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) by keyword. Local keyword matching is case-insensitive substring with match=any|all (default any). When the filter reduces the SERP, matchedFrom / filteredOut explain how many rows existed before filtering. Schema keeps nulls for headline/cta/landingUrl/spend/advertiser.id when TikTok withholds them. firstShown/lastShown are ISO-8601. Flat 2 credits when results are returned (empty is free); Apify fallback capped at 5. Upstream capped (~40s) under ALB/nginx defaults. country default GB (US often empty). For brand performance use /v1/ad-library/tiktok/top-ads.",
+      "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) by keyword. Local keyword matching is case-insensitive whole-word match=any|all (hair ≠ wheelchair). Envelope uses candidatesScanned / truncated; each hit has matchedFrom as a string array of matched fields. platform is tiktok (library=dsa). media[] are objects with url/type/expiresAt when signed. Keys TikTok withholds are omitted. Flat 2 credits when results are returned (empty is free); Apify fallback capped at 5. Hard-capped at 110s. country default GB (US often empty). For brand performance use /v1/ad-library/tiktok/top-ads.",
   },
   {
     slug: "tiktok-ad-library-top-ads",
@@ -2865,7 +2865,7 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     tagline:
       "One TikTok Commercial Content Library ad by ID — search-parity schema, 2 credits native.",
     longDescription:
-      "Paste a TikTok Ad Library URL or ad ID and get that creative as clean JSON with the same schema as /tiktok/search hits: text, cta, landingUrl, impressions (Unique users seen), firstShown/lastShown (ISO), advertiser{id,name,url,logo,location} with nulls when DSA withholds them. Useful for ID lookup without a search page — not a richer Graph than search. Flat 2 credits on the native path; Apify fallback capped at 5 (never 17). Default country GB (EU-led library).",
+      "Paste a TikTok Ad Library URL or ad ID and get that creative as clean JSON with the same schema as /tiktok/search hits: platform=tiktok, library=dsa, media[] objects, impressions from Unique users seen when disclosed, spend only when shipped, firstShown/lastShown (ISO). Keys DSA withholds are omitted. Flat 2 credits on the native path; Apify fallback capped at 5 (never 17). Default country GB (EU-led library).",
     delivers: [
       "ID lookup with search-parity fields (including impressions)",
       "Stable null keys for headline/cta/landingUrl/spend/advertiser.id",
@@ -4963,7 +4963,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       name: "match",
       type: "string",
       required: false,
-      description: 'Keyword token mode: "any" (default, OR substring) or "all" (AND). Empty results are free.',
+      description: 'Keyword token mode: "any" (default, OR whole-word) or "all" (AND). hair ≠ wheelchair. Empty results are free.',
     },
     lpFlat(20, 200, 2),
     cacheP(),
@@ -5433,8 +5433,20 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       return ep.platform === "youtube" ? "structured data api" : "skincare";
     }
     case "country":
+      if (
+        ep.slug === "tiktok-ad-library-search" ||
+        ep.slug === "tiktok-ad-library-ad-details"
+      ) {
+        return "GB";
+      }
       return "US";
     case "region":
+      if (
+        ep.slug === "tiktok-ad-library-search" ||
+        ep.slug === "tiktok-ad-library-ad-details"
+      ) {
+        return "GB";
+      }
       return "US";
     case "username": {
       if (ep.platform === "github") {
@@ -6370,7 +6382,7 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     });
     list.push({
       q: `Why did my keyword return zero ads?`,
-      a: `Check matchedFrom vs totalReturned. If matchedFrom>0 and totalReturned=0, the library had rows and local filter (match=any|all, substring) dropped them — try match=any or a brand name. If matchedFrom=0, the DSA library truly had nothing for that country/query (US is often empty; default GB).`,
+      a: `Read candidatesScanned, filteredOut, literalMatches. match=any (default) keeps rows with any whole-word token in advertiser/title/copy; match=all requires every token. TikTok's keyword ranking is soft — we never echo that unfiltered list. If candidatesScanned>0 and totalReturned=0, the library had rows and local filter dropped them (try an advertiser name token). US is often empty; default GB.`,
     });
   }
   if (ep.slug === "facebook-ad-library-search") {
@@ -8410,11 +8422,17 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     destinationUrl: "Click-through / landing URL from the ad creative.",
   },
   "tiktok-ad-library-search": {
-    videos: "Typed video assets for the ad creative when present.",
-    status: "Ad delivery status when the library exposes it.",
-    matchedFrom: "SERP row count before local keyword filtering.",
-    filteredOut: "How many of those rows the local keyword filter dropped.",
-    literalMatches: "Rows that passed the local substring filter (match=any|all).",
+    candidatesScanned:
+      "Always present (integer). SERP pool size before local whole-word filtering.",
+    filteredOut: "Rows dropped by the local whole-word keyword filter.",
+    literalMatches:
+      "Present when q is set. Count of rows that passed local whole-word matching.",
+    truncated:
+      "true when totalReturned < limit and upstream still had more pages. Always false when empty.",
+    matchedFrom:
+      "Per-ad only: string[] of fields that matched (text, headline, cta, landingUrl, advertiser.name). Never the envelope scan count.",
+    library: 'Surface discriminator — "dsa" for Commercial Content Library (platform stays tiktok).',
+    media: "Array of {url,type,width,height,durationSeconds,expiresAt?} — expiresAt only when the signed CDN URL encodes one.",
     match: 'Echo of the match query param ("any" or "all").',
     matchBasis: 'How keywords were applied — "any", "all", or "none".',
   },

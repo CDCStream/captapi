@@ -40,6 +40,7 @@ def test_paginate_ads_cursor() -> None:
 
 
 def test_tiktok_relevance_rejects_off_topic() -> None:
+    # Whole-word: fashion must not match via substring inside unrelated copy.
     assert not tt.ad_matches_query(
         {"advertiserName": "alyalina535", "text": "Buna dimineata tuturor!"},
         "fashion",
@@ -47,6 +48,11 @@ def test_tiktok_relevance_rejects_off_topic() -> None:
     assert tt.ad_matches_query(
         {"advertiserName": "Nike Europe", "text": "New fashion drop"},
         "fashion",
+    )
+    # hair ≠ wheelchair
+    assert not tt.ad_matches_query(
+        {"advertiserName": "Shop", "text": "best wheelchair deals"},
+        "hair",
     )
 
 
@@ -56,9 +62,10 @@ def test_tiktok_date_iso() -> None:
         al._tiktok_library_date_iso("2026-07-29T00:00:00.000Z")
         == "2026-07-29T00:00:00.000Z"
     )
+    assert al._tiktok_library_date_iso(1786033151000) == "2026-08-06T16:19:11.000Z"
 
 
-def test_tiktok_normalize_keeps_null_keys() -> None:
+def test_tiktok_normalize_omits_withheld_keys() -> None:
     out = al._normalize_ad(
         {
             "adId": "1",
@@ -66,17 +73,34 @@ def test_tiktok_normalize_keeps_null_keys() -> None:
             "text": "hello",
             "first_shown_date": "07/29/2026",
             "estimatedAudience": "0-1K",
+            "library": "dsa",
+            "country": "GB",
+            "media": [
+                {
+                    "url": "https://cdn.example/v.mp4?x-expires=1893456000",
+                    "type": "video/mp4",
+                    "width": None,
+                    "height": None,
+                    "durationSeconds": None,
+                    "expiresAt": "2030-01-01T00:00:00.000Z",
+                }
+            ],
         },
-        "tiktok_ad_library",
+        "tiktok",
     )
+    assert out["platform"] == "tiktok"
+    assert out["library"] == "dsa"
+    assert out["country"] == "GB"
     assert out["text"] == "hello"
-    assert out["cta"] is None
-    assert out["landingUrl"] is None
-    assert out["headline"] is None
-    assert out["spend"] is None
+    assert "cta" not in out
+    assert "landingUrl" not in out
+    assert "spend" not in out
     assert out["impressions"] == "0-1K"
-    assert "id" in out["advertiser"]
+    assert "id" not in out["advertiser"]
+    assert out["advertiser"]["name"] == "Brand"
     assert out["firstShown"] == "2026-07-29T00:00:00.000Z"
+    assert isinstance(out["media"], list) and out["media"][0]["url"].startswith("http")
+    assert out["media"][0].get("expiresAt")
 
 
 def test_facebook_detail_delivery_schema() -> None:

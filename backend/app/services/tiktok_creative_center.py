@@ -636,7 +636,9 @@ def normalize_top_ad(
     # One brand concept — never leave brandName empty when advertiser.name is set.
     adv_name = brand
     out: dict[str, Any] = {
-        "platform": "tiktok_creative_center",
+        # One platform value across the TikTok Ad Library block; surface is separate.
+        "platform": "tiktok",
+        "library": "creative_center",
         "id": ad_id,
         "url": per_ad,
         "title": safe_str(
