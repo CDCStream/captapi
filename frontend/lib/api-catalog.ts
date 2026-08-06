@@ -908,7 +908,19 @@ const INSTAGRAM: Spec[] = [
     ],
   },
   { slug: "instagram-comments", name: "Instagram Post Comments API", shortName: "Post Comments", category: "comments", method: "GET", path: "/v1/instagram/comments", credits: 45, creditsPerResult: 0.9, tagline: "Get the comments on any Instagram post or Reel — text, author, avatar, likes, and timestamp for each comment.", longDescription: "Send a post or Reel URL and the Instagram Post Comments API returns its comments as clean, structured JSON. Each comment includes the text, author username and avatar, like count, and when it was posted. Use the limit parameter (up to 500) to control how many you fetch — billing scales with results returned. Ideal for sentiment analysis, social listening, comment moderation, and finding engaged fans or customer feedback. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
-  { slug: "instagram-channel-details", name: "Instagram Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/instagram/channel-details", credits: 1, tagline: "Instagram profile stats plus categoryName, fbid, relatedProfiles, businessAddress, and likeAndViewCountsDisabled.", longDescription: "Send a profile URL or @handle and get clean JSON. Canonical profile core: platform, id, handle, url, displayName, bio, avatar, followers, following, postCount, verified — plus deprecated profileImage/username aliases for one release. Also: externalUrl/bioLinks, categoryName (Instagram niche label), fbid (cross-platform join to Facebook), relatedProfiles[] (similar accounts from edge_related_profiles), businessAddress{cityName,latitude,longitude,…}, and likeAndViewCountsDisabled. Flat 1 credit. Pass cache / cacheMaxAge for the profile trust layer." },
+  {
+    slug: "instagram-channel-details",
+    name: "Instagram Channel Details API",
+    shortName: "Channel Details",
+    category: "channel",
+    method: "GET",
+    path: "/v1/instagram/channel-details",
+    credits: 1,
+    tagline:
+      "Instagram profile stats plus categoryName, fbid, relatedProfiles, businessAddress, and likeAndViewCountsDisabled.",
+    longDescription:
+      "Send a profile URL or @handle and get clean JSON. Canonical profile core only: platform, id, handle, url, displayName, bio, avatar, followers, following, postCount, verified, isPrivate — twin aliases username/name/profileImage are removed (use the canonical keys). postCountIsApproximate / followersIsApproximate / followingIsApproximate are derived from the source (true when the value came from a K/M/B display string such as og:description \"32K\"). Also: externalUrl/bioLinks, categoryName, fbid, relatedProfiles[], businessAddress{}, likeAndViewCountsDisabled, imageExpiresAt. Flat 1 credit. Cold path targets under 5s (WPI → GraphQL → plain HTML → short headless); hard cap 110s → 502, 0 credits. Pass cache / cacheMaxAge for the profile trust layer.",
+  },
   {
     slug: "instagram-channel-posts",
     name: "Instagram Channel Posts API",

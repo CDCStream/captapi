@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-06",
     category: "fix",
+    title: "Instagram channel-details: approx flags, drop twin aliases, faster cold path",
+    description:
+      "GET /v1/instagram/channel-details was returning postCount:32000 with postCountIsApproximate:false when the value came from og:description \"32K\", shipping username/name/profileImage twins of handle/displayName/avatar, and spending ~37s (often 60–100s with session redirect loops) on sequential WPI→headless before GraphQL. Approximate flags are now derived from the count source; twin aliases are removed on this endpoint; WPI + GraphQL + short headless race from t=0 (no session pool) with stage logs and a 110s hard deadline (502, 0 credits).",
+    items: [
+      "postCountIsApproximate true for K/M/B display-sourced counts",
+      "Drop username/name/profileImage twins (canonical handle/displayName/avatar)",
+      "Parallel race + stage timings + 110s hard cap",
+    ],
+  },
+  {
+    publishedAt: "2026-08-06",
+    category: "fix",
     title: "Instagram channel-posts: one shape for GraphQL + feed rows",
     description:
       "GET /v1/instagram/channel-posts mixed two upstream mappers in one posts[] when limit filled past the ~12-item GraphQL page: shortcode ids + mediaId on early rows, numeric media ids and missing mediaId/commentsDisabled on feed extras — plus uneven author/music/location key sets. Both sources now pass finalise_channel_post (id always shortcode, mediaId always numeric, null-filled author/music/location). Top-level user.private renamed to isPrivate (A21). Same finaliser on channel-reels. Not a same-day regression — dual path dates to 2026-07-13 cursor pagination.",

@@ -54,6 +54,8 @@ _TRENDING_FLIGHT_WAIT_SECS = 95
 _TRENDING_NATIVE_BUDGET_SECS = _TRENDING_HARD_DEADLINE_SECS
 _TRENDING_LIVE_BUDGET_SECS = _TRENDING_HARD_DEADLINE_SECS
 _TRENDING_SYNC_WAIT_SECS = _TRENDING_HARD_DEADLINE_SECS
+# channel-details: same Cloudflare-safe hard cap as trending-reels.
+_CHANNEL_DETAILS_HARD_DEADLINE_SECS = 110
 
 CREDIT_TRANSCRIPT = 2
 CREDIT_SUMMARIZE = 4
@@ -914,29 +916,119 @@ async def instagram_channel_details(
         base_credits=CREDIT_CHANNEL,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Native first (same web_profile_info as basic-profile), then Decodo.
-            user, missing = await instagram_native.lookup_web_profile_info(handle)
-            if user is not None:
-                ctx["source"] = "direct"
-                return instagram_native.map_channel_details(user, handle=handle)
-            # Dead / renamed handles: Instagram already said "Profile isn't available".
-            if missing:
-                raise HTTPException(status_code=404, detail="Profile not found")
+            stages: dict[str, Any] = {"handle": handle}
+            t_all = time.perf_counter()
+
+            # Race every useful source from t=0. When WPI is 429'd (~3–6s),
+            # GraphQL or short headless can still finish the cold path without
+            # waiting for WPI to fully fail first (was 36–100s sequential).
+            t_race = time.perf_counter()
+            tasks: dict[str, asyncio.Task] = {
+                "wpi": asyncio.create_task(
+                    instagram_native.lookup_web_profile_info(
+                        handle,
+                        fallback_html=False,
+                        fallback_decodo_html=False,
+                        use_sessions=False,
+                    )
+                ),
+            }
             if decodo.enabled():
-                result = await decodo.channel_details(handle)
-                if result is not None:
-                    ctx["source"] = "direct"
-                    return result
+                tasks["graphql"] = asyncio.create_task(decodo.channel_details(handle))
+                tasks["html_headless"] = asyncio.create_task(
+                    instagram_native.fetch_web_profile_info_via_decodo(
+                        handle, timeout=20.0
+                    )
+                )
+            else:
+                tasks["html_http"] = asyncio.create_task(
+                    instagram_native.fetch_web_profile_info_via_html_http(handle)
+                )
+            pending = set(tasks.values())
+            winner: str | None = None
+            data: dict[str, Any] | None = None
+            saw_missing = False
+            while pending and data is None:
+                done, pending = await asyncio.wait(
+                    pending, return_when=asyncio.FIRST_COMPLETED
+                )
+                for task in done:
+                    name = next(n for n, t in tasks.items() if t is task)
+                    try:
+                        result = task.result()
+                    except Exception as exc:  # noqa: BLE001
+                        log.info(
+                            "ig_channel_details_race_error",
+                            handle=handle,
+                            stage=name,
+                            error=str(exc)[:120],
+                        )
+                        continue
+                    if name == "wpi":
+                        user, miss = result
+                        if user is not None:
+                            winner = name
+                            data = instagram_native.map_channel_details(
+                                user, handle=handle
+                            )
+                        elif miss:
+                            saw_missing = True
+                    elif name == "graphql" and isinstance(result, dict):
+                        winner, data = name, result
+                    elif name in {"html_headless", "html_http"}:
+                        user, miss = result
+                        if user is not None:
+                            winner = name
+                            data = instagram_native.map_channel_details(
+                                user, handle=handle
+                            )
+                        elif miss:
+                            saw_missing = True
+            for task in pending:
+                task.cancel()
+            stages["race_ms"] = int((time.perf_counter() - t_race) * 1000)
+            if data is not None and winner:
+                stages["source"] = winner
+                stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+                log.info("ig_channel_details_stages", **stages)
+                ctx["source"] = "direct"
+                return data
+
+            stages["source"] = "missing" if saw_missing else "miss"
+            stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+            log.info("ig_channel_details_stages", **stages)
             raise HTTPException(status_code=404, detail="Profile not found")
 
-        data = await cached_or_run(
-            endpoint="instagram.channel-details",
-            params={"url": url, "v": 9, "cacheMaxAge": cacheMaxAge},
-            runner=_run,
-            ctx=ctx,
-            use_cache=use_cache,
-            ttl=ttl,
-        )
+        try:
+            data = await asyncio.wait_for(
+                cached_or_run(
+                    endpoint="instagram.channel-details",
+                    # v10: approx flags from source + drop twin aliases + faster cascade.
+                    params={"url": url, "v": 10, "cacheMaxAge": cacheMaxAge},
+                    runner=_run,
+                    ctx=ctx,
+                    use_cache=use_cache,
+                    ttl=ttl,
+                ),
+                timeout=_CHANNEL_DETAILS_HARD_DEADLINE_SECS,
+            )
+        except asyncio.TimeoutError as exc:
+            ctx["credits_override"] = 0
+            log.error(
+                "ig_channel_details_timeout",
+                handle=handle,
+                secs=_CHANNEL_DETAILS_HARD_DEADLINE_SECS,
+            )
+            raise HTTPException(
+                status_code=502,
+                detail={
+                    "code": "timeout",
+                    "message": (
+                        f"Instagram channel-details exceeded the "
+                        f"{_CHANNEL_DETAILS_HARD_DEADLINE_SECS}s hard deadline."
+                    ),
+                },
+            ) from exc
         return ApiResponse(data=data)
 
 

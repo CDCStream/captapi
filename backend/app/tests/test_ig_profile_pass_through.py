@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from app.services.instagram_native import (
     map_basic_profile,
     map_channel_details,
@@ -68,9 +70,15 @@ def test_channel_details_and_profile_search_parity() -> None:
     assert ch["likeAndViewCountsDisabled"] is True
     assert ch["url"] == "https://www.instagram.com/austinbbq/"
     assert ch["handle"] == "austinbbq"
-    assert ch["avatar"] == ch["profileImage"]
+    assert ch["avatar"]
+    # Twin aliases dropped on channel-details (canonical handle/displayName/avatar).
+    assert "profileImage" not in ch
+    assert "username" not in ch
+    assert "name" not in ch
     assert "private" not in ch
     assert ch["isPrivate"] is False
+    assert ch["postCountIsApproximate"] is False
+    assert ch["followersIsApproximate"] is False
     ps = map_profile_search_user(u)
     assert ps["platform"] == "instagram"
     assert ps["categoryName"] == "Entrepreneur"
@@ -82,6 +90,69 @@ def test_channel_details_and_profile_search_parity() -> None:
     assert "private" not in ps
     assert ps["isPrivate"] is False
     assert ch["url"] == ps["url"]
+
+
+def test_channel_details_post_count_approx_from_og_compact() -> None:
+    """og ``32K`` → postCount 32000 with postCountIsApproximate true."""
+    from app.services.instagram_native import parse_profile_from_html
+
+    # No media_count in JSON → fall back to og "32K". Exact follower_count stays.
+    html = (
+        '<meta property="og:description" content="1,234 Followers, 56 Following, 32K Posts" />'
+        '{"username":"natgeo","full_name":"National Geographic","biography":"bio",'
+        '"follower_count":1234,"following_count":56,"pk":"787132","id":"787132"}'
+    )
+    user = parse_profile_from_html(html, "natgeo")
+    assert user is not None
+    assert user.get("media_count") == 32000
+    assert user.get("media_count_is_approximate") is True
+    assert user.get("follower_count") == 1234
+    assert not user.get("follower_count_is_approximate")
+    out = map_channel_details(user, handle="natgeo")
+    assert out["postCount"] == 32000
+    assert out["postCountIsApproximate"] is True
+    assert out["followersIsApproximate"] is False
+
+
+def test_channel_details_exact_post_count_not_approximate() -> None:
+    u = _user()
+    u["edge_owner_to_timeline_media"] = {"count": 32847}
+    out = map_channel_details(u)
+    assert out["postCount"] == 32847
+    assert out["postCountIsApproximate"] is False
+
+
+def test_channel_details_no_duplicate_non_boolean_values() -> None:
+    out = map_channel_details(_user())
+    bool_keys = {
+        "verified",
+        "isPrivate",
+        "isBusinessAccount",
+        "isProfessionalAccount",
+        "likeAndViewCountsDisabled",
+        "followersIsApproximate",
+        "followingIsApproximate",
+        "postCountIsApproximate",
+    }
+    non_bool = {
+        k: v
+        for k, v in out.items()
+        if k not in bool_keys and not isinstance(v, (bool, dict, list))
+    }
+    # Values that coincide by chance across different concepts are rare; the
+    # twin-alias pairs are the regression we care about.
+    for a, b in (("handle", "username"), ("displayName", "name"), ("avatar", "profileImage")):
+        assert not (a in out and b in out and out.get(a) == out.get(b))
+    seen: dict[Any, str] = {}
+    for k, v in non_bool.items():
+        if v in (None, "", 0):
+            continue
+        if v in seen:
+            # Same URL appearing as url vs something else is fine; only flag
+            # identical string/int pairs that look like alias twins.
+            if {seen[v], k} <= {"handle", "username", "displayName", "name", "avatar", "profileImage"}:
+                raise AssertionError(f"duplicate alias pair {seen[v]!r}/{k!r}={v!r}")
+        seen[v] = k
 
 
 def test_cdn_image_expires_at_from_oe() -> None:

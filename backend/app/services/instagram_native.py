@@ -1632,10 +1632,12 @@ async def _fetch_embed_once(tier: str, embed_url: str) -> str | None:
 _IG_APP_ID = "936619743392459"
 
 
-async def _ig_web_get(tier: str, url: str, referer: str) -> dict[str, Any] | None:
+async def _ig_web_get(
+    tier: str, url: str, referer: str, *, timeout: float = 8.0
+) -> dict[str, Any] | None:
     """GET an Instagram web api/v1 JSON endpoint logged-out (csrf + app id)."""
     async with httpx.AsyncClient(
-        timeout=12, proxy=proxy_for(tier), follow_redirects=True
+        timeout=timeout, proxy=proxy_for(tier), follow_redirects=True
     ) as client:
         await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
         csrf = client.cookies.get("csrftoken")
@@ -1777,17 +1779,23 @@ _OG_PROFILE_COUNTS_RE = re.compile(
 
 def _parse_compact_count(value: str | None) -> int | None:
     """Parse ``32K`` / ``1,667`` / ``269M`` style counts from og:description."""
+    count, _approx = _parse_compact_count_ex(value)
+    return count
+
+
+def _parse_compact_count_ex(value: str | None) -> tuple[int | None, bool]:
+    """Parse compact counts; second value is True when a K/M/B suffix was used."""
     if not value:
-        return None
+        return None, False
     m = _COMPACT_COUNT_RE.match(value.replace("\u00a0", " "))
     if not m:
-        return None
+        return None, False
     try:
         base = float(m.group(1).replace(",", ""))
     except ValueError:
-        return None
+        return None, False
     suffix = (m.group(2) or "").upper()
-    return int(base * _COMPACT_MULT.get(suffix, 1))
+    return int(base * _COMPACT_MULT.get(suffix, 1)), bool(suffix)
 
 
 def _external_url_from_bio_links(html: str) -> str | None:
@@ -1824,8 +1832,14 @@ def _external_url_from_bio_links(html: str) -> str | None:
     return None
 
 
-def _counts_from_og_description(html: str) -> tuple[int | None, int | None, int | None]:
-    """``og:description`` → (followers, following, posts)."""
+def _counts_from_og_description(
+    html: str,
+) -> tuple[
+    tuple[int | None, bool],
+    tuple[int | None, bool],
+    tuple[int | None, bool],
+]:
+    """``og:description`` → ((followers, approx), (following, approx), (posts, approx))."""
     m = re.search(
         r'<meta[^>]+property=["\']og:description["\'][^>]+content=["\']([^"\']+)["\']',
         html,
@@ -1836,14 +1850,14 @@ def _counts_from_og_description(html: str) -> tuple[int | None, int | None, int 
         re.I,
     )
     if not m:
-        return None, None, None
+        return (None, False), (None, False), (None, False)
     cm = _OG_PROFILE_COUNTS_RE.search(m.group(1))
     if not cm:
-        return None, None, None
+        return (None, False), (None, False), (None, False)
     return (
-        _parse_compact_count(cm.group(1)),
-        _parse_compact_count(cm.group(2)),
-        _parse_compact_count(cm.group(3)),
+        _parse_compact_count_ex(cm.group(1)),
+        _parse_compact_count_ex(cm.group(2)),
+        _parse_compact_count_ex(cm.group(3)),
     )
 
 
@@ -1863,7 +1877,10 @@ def parse_profile_from_html(html: str, handle: str) -> dict[str, Any] | None:
     if not anchors:
         return None
 
-    og_followers, og_following, og_posts = _counts_from_og_description(html)
+    (og_followers, og_followers_approx), (og_following, og_following_approx), (
+        og_posts,
+        og_posts_approx,
+    ) = _counts_from_og_description(html)
     external_from_links = _external_url_from_bio_links(html)
 
     def _from_window(window: str) -> dict[str, Any] | None:
@@ -1947,13 +1964,17 @@ def parse_profile_from_html(html: str, handle: str) -> dict[str, Any] | None:
         return None
 
     # Logged-out HTML often omits media_count / external_url; og:description and
-    # bio_links still expose them.
+    # bio_links still expose them. Prefer numeric JSON fields (exact); only fall
+    # back to og compact strings, and mark those with *_is_approximate.
     if parsed.get("media_count") is None and og_posts is not None:
         parsed["media_count"] = og_posts
+        parsed["media_count_is_approximate"] = og_posts_approx
     if parsed.get("follower_count") is None and og_followers is not None:
         parsed["follower_count"] = og_followers
+        parsed["follower_count_is_approximate"] = og_followers_approx
     if parsed.get("following_count") is None and og_following is not None:
         parsed["following_count"] = og_following
+        parsed["following_count_is_approximate"] = og_following_approx
     if not parsed.get("external_url") and external_from_links:
         parsed["external_url"] = external_from_links
     return parsed
@@ -1974,12 +1995,62 @@ def profile_unavailable_html(html: str) -> bool:
     return False
 
 
+async def fetch_web_profile_info_via_html_http(
+    username: str,
+) -> tuple[dict[str, Any] | None, bool]:
+    """Fetch the public profile HTML over HTTP (no JS render) and parse it.
+
+    og:description + embedded JSON usually carry follower/post counts without a
+    30–90s Decodo headless session.
+    """
+    handle = username.lstrip("@")
+    if not handle:
+        return None, False
+    url = f"https://www.instagram.com/{handle}/"
+    for tier in ("residential", "datacenter"):
+        try:
+            async with httpx.AsyncClient(
+                timeout=15, proxy=proxy_for(tier), follow_redirects=True
+            ) as client:
+                resp = await client.get(url, headers={"User-Agent": _UA})
+        except httpx.HTTPError as exc:
+            log.info(
+                "ig_wpi_html_http_error",
+                tier=tier,
+                handle=handle,
+                error=str(exc)[:120],
+            )
+            continue
+        if resp.status_code == 404:
+            return None, True
+        if resp.status_code != 200 or not resp.text:
+            continue
+        if profile_unavailable_html(resp.text):
+            log.info("ig_wpi_html_http_unavailable", handle=handle, tier=tier)
+            return None, True
+        user = parse_profile_from_html(resp.text, handle)
+        if user:
+            log.info(
+                "ig_wpi_html_http_ok",
+                handle=handle,
+                tier=tier,
+                followers=user.get("follower_count"),
+                posts=user.get("media_count"),
+                posts_approx=user.get("media_count_is_approximate"),
+            )
+            return user, False
+    return None, False
+
+
 async def fetch_web_profile_info_via_decodo(
     username: str,
+    *,
+    timeout: float = 25.0,
 ) -> tuple[dict[str, Any] | None, bool]:
     """Render the profile page via Decodo and parse counts / bio from HTML.
 
-    Returns ``(user, confirmed_missing)``.
+    Returns ``(user, confirmed_missing)``. Prefer
+    :func:`fetch_web_profile_info_via_html_http` first — headless is the slow path.
     """
     from app.services import decodo_fetch
 
@@ -1988,7 +2059,7 @@ async def fetch_web_profile_info_via_decodo(
         return None, False
     got = await decodo_fetch.fetch_url(
         f"https://www.instagram.com/{handle}/",
-        timeout=90.0,
+        timeout=timeout,
         headless="html",
     )
     if not got:
@@ -2007,6 +2078,8 @@ async def fetch_web_profile_info_via_decodo(
             "ig_wpi_decodo_html_ok",
             handle=handle,
             followers=user.get("follower_count"),
+            posts=user.get("media_count"),
+            posts_approx=user.get("media_count_is_approximate"),
         )
         return user, False
     log.info("ig_wpi_decodo_html_miss", handle=handle, length=len(body))
@@ -2015,17 +2088,30 @@ async def fetch_web_profile_info_via_decodo(
 
 async def lookup_web_profile_info(
     username: str,
+    *,
+    fallback_html: bool = True,
+    fallback_decodo_html: bool = True,
+    use_sessions: bool = True,
 ) -> tuple[dict[str, Any] | None, bool]:
     """Rich profile lookup.
 
     Returns ``(user, confirmed_missing)``. When ``confirmed_missing`` is True,
     callers should 404 instead of spending Apify credits on a dead handle.
+
+    ``fallback_html`` / ``fallback_decodo_html`` let channel-details run GraphQL
+    before the slow headless path (see router stage cascade).
+    ``use_sessions=False`` skips the session pool — redirect loops there commonly
+    burn 60s+ and dominate channel-details cold latency.
     """
-    from app.core.config import get_settings
+    import time
 
     handle = username.lstrip("@")
     url = f"https://www.instagram.com/api/v1/users/web_profile_info/?username={urllib.parse.quote(handle)}"
     referer = f"https://www.instagram.com/{handle}/"
+    stages: dict[str, int] = {}
+    t_all = time.perf_counter()
+
+    t0 = time.perf_counter()
     for tier in _TIERS:
         try:
             payload = await _ig_web_get(tier, url, referer)
@@ -2036,21 +2122,92 @@ async def lookup_web_profile_info(
             continue
         user = (payload.get("data") or {}).get("user") or payload.get("user")
         if isinstance(user, dict) and (user.get("username") or user.get("id")):
+            stages["wpi_ms"] = int((time.perf_counter() - t0) * 1000)
+            log.info(
+                "ig_profile_lookup_stages",
+                handle=handle,
+                source="wpi",
+                **stages,
+                total_ms=int((time.perf_counter() - t_all) * 1000),
+            )
             return user, False
+    stages["wpi_ms"] = int((time.perf_counter() - t0) * 1000)
 
     session_404 = False
-    for sid in _sessions_rotated():
-        user, session_404 = await _fetch_web_profile_info_session(handle, sid)
-        if user is not None:
-            return user, False
-        if session_404:
-            # Confirmed missing handle — no point burning the rest of the pool.
-            break
+    if use_sessions:
+        t0 = time.perf_counter()
+        for sid in _sessions_rotated():
+            user, session_404 = await _fetch_web_profile_info_session(handle, sid)
+            if user is not None:
+                stages["session_ms"] = int((time.perf_counter() - t0) * 1000)
+                log.info(
+                    "ig_profile_lookup_stages",
+                    handle=handle,
+                    source="session",
+                    **stages,
+                    total_ms=int((time.perf_counter() - t_all) * 1000),
+                )
+                return user, False
+            if session_404:
+                # Confirmed missing handle — no point burning the rest of the pool.
+                break
+        stages["session_ms"] = int((time.perf_counter() - t0) * 1000)
+    else:
+        stages["session_ms"] = 0
 
-    user, missing = await fetch_web_profile_info_via_decodo(handle)
-    if user is not None:
-        return user, False
-    return None, bool(missing or session_404)
+    if fallback_html:
+        t0 = time.perf_counter()
+        user, missing = await fetch_web_profile_info_via_html_http(handle)
+        stages["html_http_ms"] = int((time.perf_counter() - t0) * 1000)
+        if user is not None:
+            log.info(
+                "ig_profile_lookup_stages",
+                handle=handle,
+                source="html_http",
+                **stages,
+                total_ms=int((time.perf_counter() - t_all) * 1000),
+            )
+            return user, False
+        if missing:
+            log.info(
+                "ig_profile_lookup_stages",
+                handle=handle,
+                source="html_http_missing",
+                **stages,
+                total_ms=int((time.perf_counter() - t_all) * 1000),
+            )
+            return None, True
+
+    if fallback_decodo_html:
+        t0 = time.perf_counter()
+        user, missing = await fetch_web_profile_info_via_decodo(handle)
+        stages["html_headless_ms"] = int((time.perf_counter() - t0) * 1000)
+        if user is not None:
+            log.info(
+                "ig_profile_lookup_stages",
+                handle=handle,
+                source="html_headless",
+                **stages,
+                total_ms=int((time.perf_counter() - t_all) * 1000),
+            )
+            return user, False
+        log.info(
+            "ig_profile_lookup_stages",
+            handle=handle,
+            source="miss",
+            **stages,
+            total_ms=int((time.perf_counter() - t_all) * 1000),
+        )
+        return None, bool(missing or session_404)
+
+    log.info(
+        "ig_profile_lookup_stages",
+        handle=handle,
+        source="miss_no_html",
+        **stages,
+        total_ms=int((time.perf_counter() - t_all) * 1000),
+    )
+    return None, bool(session_404)
 
 
 async def fetch_web_profile_info(username: str) -> dict[str, Any] | None:
@@ -2370,11 +2527,20 @@ def _business_address(user: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+def _count_is_approximate(user: dict[str, Any], *flag_keys: str) -> bool:
+    """True when a count was filled from a K/M/B display string (og:description)."""
+    for key in flag_keys:
+        if user.get(key) is True:
+            return True
+    return False
+
+
 def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> dict[str, Any]:
     """Map a web_profile_info user node to the channel-details response shape.
 
-    Canonical profile core (``displayName``, ``avatar``, ``postCount``, …) plus
-    deprecated aliases (``profileImage``) for one release. Platform extras stay.
+    Canonical profile core only (``handle``, ``displayName``, ``avatar``, …).
+    Deprecated twin keys (``username`` / ``name`` / ``profileImage``) are no
+    longer emitted — announced one-release BC window is closed for this endpoint.
     """
     from app.utils.formatters import strip_empty
     from app.utils.media_urls import utc_now_iso
@@ -2395,7 +2561,7 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
     )
     bio_links = _bio_links(user)
     external = _external_url_from_user(user)
-    # Prefer HD for profileImage when available (previous behavior); expose both.
+    # Prefer HD avatar when available; profileImageHd remains the HD-only extra.
     profile_image = pic_hd or pic
     category = safe_str(
         user.get("category_name")
@@ -2410,7 +2576,6 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
         "url": canonical_instagram_profile_url(username),
         "id": safe_str(user.get("id") or user.get("pk")),
         "handle": username,
-        "username": username,
         "displayName": safe_str(user.get("full_name")),
         "bio": safe_str(user.get("biography")),
         "followers": followers,
@@ -2418,7 +2583,6 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
         "postCount": post_count,
         "verified": False if verified is None else bool(verified),
         "avatar": profile_image,
-        "profileImage": profile_image,  # deprecated alias — prefer avatar
         "imageExpiresAt": cdn_image_expires_at(profile_image),
         "externalUrl": external,
         "fbid": safe_str(user.get("fbid") or user.get("fbid_v2")),
@@ -2439,12 +2603,24 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
         "businessAddress": _business_address(user),
         "relatedProfiles": _related_profiles(user),
         "likeAndViewCountsDisabled": _like_and_view_counts_disabled(user),
-        "followersIsApproximate": False,
-        "followingIsApproximate": False,
-        "postCountIsApproximate": False,
+        "followersIsApproximate": _count_is_approximate(
+            user, "follower_count_is_approximate", "followers_is_approximate"
+        ),
+        "followingIsApproximate": _count_is_approximate(
+            user, "following_count_is_approximate", "following_is_approximate"
+        ),
+        "postCountIsApproximate": _count_is_approximate(
+            user, "media_count_is_approximate", "post_count_is_approximate"
+        ),
         "fetchedAt": utc_now_iso(),
     }
-    return strip_empty(stamp_profile_core(out, platform="instagram"))
+    stamped = stamp_profile_core(
+        out, platform="instagram", emit_deprecated_aliases=False
+    )
+    # Belt-and-braces: never reintroduce twin keys on this endpoint.
+    for alias in ("username", "name", "profileImage", "private"):
+        stamped.pop(alias, None)
+    return strip_empty(stamped)
 
 
 def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
