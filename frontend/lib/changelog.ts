@@ -51,6 +51,17 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-06",
     category: "fix",
+    title: "TikTok ad-details: always 2 credits (no silent Apify surcharge)",
+    description:
+      "GET /v1/ad-library/tiktok/ad-details used to bill 2 credits on the native path and 5 when Apify fallback ran — same ad id, same endpoint, unpredictable cost with no explanation in the body. Success is now always 2 credits; the rare Apify path is absorbed. Response includes fetchPath: \"native\" | \"fallback\" so clients can see which path ran.",
+    items: [
+      "Always 2 credits on success (native and Apify)",
+      "fetchPath native|fallback in the response body",
+    ],
+  },
+  {
+    publishedAt: "2026-08-06",
+    category: "fix",
     title: "Instagram trending-reels: fix live scrape timeout + 110s hard deadline",
     description:
       "Live US scrapes were timing out because the router asked native for 100+ hydrates under a 45s budget while also rendering a second Decodo page. The path now scrapes a modest store (≤24), skips the second headless page when /reels already has enough shortcodes, hydrates residential-first without author-feed enrich, logs stage counts/timings, and hard-caps the whole request at 110s (under Cloudflare). Flat 2 credits and 4h cache-first unchanged. Failures return staged 502 codes (fetch_empty / hydrate_empty / filtered_empty / timeout).",

@@ -47,9 +47,12 @@ CREDIT_AD_DETAILS_APIFY = 5
 # the legacy per-result RATE_AD_LIST scale.
 CREDIT_AD_LIBRARY_NATIVE = 2
 # TikTok Commercial Content Library: Decodo-native is the primary path (flat 2).
-# Apify fallback is capped — never the old ~70-credit trap.
+# Search Apify fallback is capped — never the old ~70-credit trap.
 CREDIT_TIKTOK_AD_SEARCH = 2
 CREDIT_TIKTOK_AD_SEARCH_APIFY = 5
+# ad-details: always flat 2 (native + Apify). Unpredictable 2-vs-5 was worse
+# than absorbing rare fallback; response exposes fetchPath native|fallback.
+CREDIT_TIKTOK_AD_DETAILS = 2
 # Creative Center Top Ads: flat 2 on Decodo-native; Apify ~1 credit/result (min 2).
 # Empty/timeout free. Sync wait for the real upstream JSON (no background warm).
 CREDIT_TIKTOK_TOP_ADS = 2
@@ -2317,8 +2320,10 @@ async def tiktok_top_ads(
         "objects (url/type/expiresAt when signed), impressions from Unique users "
         "seen when disclosed, spend only when TikTok ships it. Keys withheld by "
         "DSA are omitted rather than null-padded. "
-        f"Flat {CREDIT_AD_LIBRARY_NATIVE} credits on the native path; Apify fallback "
-        f"capped at {CREDIT_TIKTOK_AD_SEARCH_APIFY} (not 17). Default country GB."
+        f"Always {CREDIT_TIKTOK_AD_DETAILS} credits (success) — native and Apify "
+        "fallback share one price so billing is budgetable. Response includes "
+        'fetchPath: "native" | "fallback" so clients can see which path ran. '
+        "Default country GB."
     ),
 )
 async def tiktok_ad_details(
@@ -2340,16 +2345,19 @@ async def tiktok_ad_details(
         endpoint="/v1/ad-library/tiktok/ad-details",
         platform="tiktok_ad_library",
         resource_url=ad_id,
-        base_credits=CREDIT_AD_LIBRARY_NATIVE,
+        base_credits=CREDIT_TIKTOK_AD_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             native = await tiktok_ads_native.ad_details(ad_id, country=region)
             if native:
                 ctx["source"] = "direct"
+                ctx["credits_override"] = CREDIT_TIKTOK_AD_DETAILS
                 native = dict(native)
                 native["country"] = region
                 native["library"] = "dsa"
-                return _normalize_ad(native, "tiktok")
+                out = _normalize_ad(native, "tiktok")
+                out["fetchPath"] = "native"
+                return out
 
             candidates: list[tuple[str, dict[str, Any]]] = [
                 (
@@ -2392,17 +2400,21 @@ async def tiktok_ad_details(
                     break
             if best is None:
                 raise HTTPException(status_code=404, detail="Ad not found")
+            # Flat 2 on fallback too — never silent 2→5 surcharge. Cost of the
+            # rare Apify path is absorbed; clients see fetchPath=fallback.
             ctx["source"] = "apify"
-            ctx["credits_override"] = CREDIT_TIKTOK_AD_SEARCH_APIFY
+            ctx["credits_override"] = CREDIT_TIKTOK_AD_DETAILS
             best = dict(best)
             best["country"] = region
             best["library"] = "dsa"
-            return _normalize_ad(best, "tiktok")
+            out = _normalize_ad(best, "tiktok")
+            out["fetchPath"] = "fallback"
+            return out
 
         return ApiResponse(
             data=await cached_or_run(
                 "ad-library.tiktok.ad-details",
-                {"ad_id": ad_id, "country": region, "v": 7},
+                {"ad_id": ad_id, "country": region, "v": 8},
                 _run,
                 ctx,
                 use_cache=cache,

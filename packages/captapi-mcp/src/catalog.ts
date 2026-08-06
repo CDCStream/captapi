@@ -658,7 +658,7 @@ const TIKTOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
       { name: "cache", type: "boolean", required: false, description: "Serve from 24h cache when available (0 credits on hit)." },
     ],
   },
-  { tool: "tiktok_ad_library_ad_details", name: "TikTok Ad Details", path: "/v1/ad-library/tiktok/ad-details", credits: 2, summary: "TikTok ad details by ad URL or ID.", params: [url("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "ISO country code. Default GB." }] }
+  { tool: "tiktok_ad_library_ad_details", name: "TikTok Ad Details", path: "/v1/ad-library/tiktok/ad-details", credits: 2, summary: "TikTok ad details by ad URL or ID. Always 2 credits; fetchPath native|fallback.", params: [url("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "ISO country code. Default GB." }] }
 ];
 
 const GOOGLE_AD_LIBRARY: Omit<Endpoint, "platform">[] = [

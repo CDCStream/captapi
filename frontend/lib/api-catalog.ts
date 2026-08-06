@@ -2889,14 +2889,14 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     path: "/v1/ad-library/tiktok/ad-details",
     credits: 2,
     tagline:
-      "One TikTok Commercial Content Library ad by ID — search-parity schema, 2 credits native.",
+      "One TikTok Commercial Content Library ad by ID — search-parity schema, always 2 credits.",
     longDescription:
-      "Paste a TikTok Ad Library URL or ad ID and get that creative as clean JSON with the same schema as /tiktok/search hits: platform=tiktok, library=dsa, media[] objects, impressions from Unique users seen when disclosed, spend only when shipped, firstShown/lastShown (ISO). Keys DSA withholds are omitted. Flat 2 credits on the native path; Apify fallback capped at 5 (never 17). Default country GB (EU-led library).",
+      "Paste a TikTok Ad Library URL or ad ID and get that creative as clean JSON with the same schema as /tiktok/search hits: platform=tiktok, library=dsa, media[] objects, impressions from Unique users seen when disclosed, spend only when shipped, firstShown/lastShown (ISO). Keys DSA withholds are omitted. Always 2 credits on success — native and Apify fallback share one price (no 2-vs-5 surprise). Response includes fetchPath: \"native\" | \"fallback\" so you can see which path ran. Default country GB (EU-led library).",
     delivers: [
       "ID lookup with search-parity fields (including impressions)",
       "Stable null keys for headline/cta/landingUrl/spend/advertiser.id",
       "ISO firstShown / lastShown",
-      "Flat 2 credits native; Apify cap 5",
+      "Always 2 credits; fetchPath native|fallback",
     ],
   },
 ];
