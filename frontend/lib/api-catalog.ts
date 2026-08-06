@@ -890,11 +890,11 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Latest Reels from a public Instagram profile — pass userId for a faster lookup, paginate with nextCursor + hasMore.",
     longDescription:
-      "Send a profile URL/@handle or a numeric userId and get that account's recent Reels (videos only). Prefer userId when you already have it (from basic-profile or another call) — it skips handle→ID resolve and responds faster. Each Reel includes video URL, caption, likes, comments, duration, and publish date. Metrics when Instagram exposes them: views (video_view_count), plays (total plays incl. replays), viewsInstagram (Instagram-only plays — excludes Facebook cross-post), viewsFacebook. Cursor pagination via nextCursor; hasMore is true until the end of the list. Pass cache=true for the 24h shared cache.",
+      "Send a profile URL/@handle or a numeric userId and get that account's recent Reels (videos only). Prefer userId when you already have it (from basic-profile or another call) — it skips handle→ID resolve and responds faster. Each Reel includes video URL, caption, likes, comments, duration, and publish date. Metrics when Instagram exposes them: engagement.views (canonical play count), viewsSource (instagram|facebook|null whenever views is set), and plays as a deprecated alias of views. Cursor pagination via nextCursor; hasMore is true until the end of the list. Pass cache=true for the 24h shared cache.",
     delivers: [
       "Reels only (photos/carousels filtered out)",
       "url or userId input (userId skips handle resolve)",
-      "views + plays + viewsInstagram + viewsFacebook when available",
+      "engagement.views + viewsSource when available",
       "nextCursor + hasMore pagination",
     ],
   },
