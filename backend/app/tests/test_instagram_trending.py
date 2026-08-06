@@ -99,10 +99,15 @@ def test_trending_payload_includes_iso_country_code() -> None:
     assert payload["country"] == "United States"
     assert payload["countryCode"] == "US"
     assert payload["cached"] is False
-    assert "4 hours" in payload["note"] or "cache" in payload["note"].lower()
+    assert "2 credits" in payload["note"]
     assert "view count" in payload["note"]
     assert "snapshot" not in payload["note"].lower()
     assert "warming" not in payload["note"].lower()
+    assert "apify" not in payload["note"].lower()
+
+
+def test_trending_flat_credits() -> None:
+    assert ig_router.CREDIT_TRENDING_REELS == 2
 
 
 def test_slice_trending_payload() -> None:

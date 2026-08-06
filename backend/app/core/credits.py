@@ -147,10 +147,14 @@ async def billed_call(
     finally:
         elapsed_ms = int((time.perf_counter() - started) * 1000)
         cache_hit = bool(ctx.get("cache_hit"))
+        # When True, cache hits still bill (cache is our margin, not a free tier).
+        bill_on_cache_hit = bool(ctx.get("bill_on_cache_hit"))
         # Respect explicit 0 overrides (empty result sets); `or` would ignore them.
         # Failed responses must never bill or log a positive credits_used.
         override = ctx.get("credits_override")
-        if status_code >= 400 or cache_hit:
+        if status_code >= 400:
+            credits_used = 0
+        elif cache_hit and not bill_on_cache_hit:
             credits_used = 0
         elif override is not None:
             credits_used = int(override)
@@ -167,7 +171,11 @@ async def billed_call(
                 deduct_failed = True
                 error = "insufficient_credits"
 
-        source = None if cache_hit else ctx.get("source")
+        # Keep source on billed cache hits so dashboards can still see "cache".
+        if cache_hit:
+            source = ctx.get("source") or "cache"
+        else:
+            source = ctx.get("source")
         request_id = str(uuid.uuid4())
         fetched_at = None
         data_obj = ctx.get("data")

@@ -1626,8 +1626,8 @@
     "platform": "instagram",
     "name": "Instagram Trending Reels",
     "path": "/v1/instagram/trending-reels",
-    "credits": 1,
-    "summary": "Cache-first trending Reels (4h TTL; hit 0 credits, miss live 1 credit). Use reels-search for keyword scrapes.",
+    "credits": 2,
+    "summary": "Cache-first trending Reels — flat 2 credits every call (4h TTL). Use reels-search for keyword scrapes.",
     "params": [
       {
         "name": "country",
@@ -1645,7 +1645,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Default true — serve 4h response cache (0 credits). false forces live scrape (1 credit)."
+        "description": "Default true — serve 4h response cache. Flat 2 credits either way; false forces live scrape."
       }
     ]
   },

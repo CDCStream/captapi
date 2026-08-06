@@ -44,10 +44,10 @@ router = APIRouter()
 log = structlog.get_logger(__name__)
 
 # On-demand trending: response cache TTL (3–6h band) + live scrape budgets.
+# Cache is our margin — every successful call bills CREDIT_TRENDING_REELS.
 _TRENDING_CACHE_TTL_SECS = 4 * 3600
 _TRENDING_STORE_LIMIT = 100
 _TRENDING_NATIVE_BUDGET_SECS = 45
-_TRENDING_APIFY_WAIT_SECS = 120
 _TRENDING_FLIGHT_WAIT_SECS = 180
 # Backward-compat alias (older tests).
 _TRENDING_LIVE_BUDGET_SECS = _TRENDING_NATIVE_BUDGET_SECS
@@ -74,8 +74,9 @@ RATE_IG_MARGIN = 1.4
 RATE_IG_CHANNEL = 0.3
 # Native usertags feed (session cookies) — flat fee; Apify tagged scraper stays RATE_IG_RICH.
 CREDIT_TAGGED_NATIVE = 1
-# Match SC: flat fee for Instagram's public /reels surface (not Explore photos).
-CREDIT_TRENDING_REELS = 1
+# Flat fee always (including cache hits). Cache amortizes native Decodo cost;
+# Apify (~$0.40/run) is not used as a silent fallback — see _scrape_trending_country.
+CREDIT_TRENDING_REELS = 2
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -2003,8 +2004,10 @@ def _trending_payload(
         "totalReturned": len(reels),
         "cached": cached,
         "note": (
-            "On-demand: cache miss runs a live scrape (native /reels, then Apify), "
-            f"then stores a per-country response cache for {_TRENDING_CACHE_TTL_SECS // 3600} hours. "
+            "On-demand native /reels scrape with a per-country response cache "
+            f"({_TRENDING_CACHE_TTL_SECS // 3600}h TTL). "
+            f"Every successful call costs {CREDIT_TRENDING_REELS} credits — cache hits are not free; "
+            "the cache is our margin. "
             "cache=false skips the read and forces a fresh scrape (result still refreshes the cache). "
             "Concurrent requests for the same country share one scrape (single-flight). "
             "Content itself may be older: Explore resurfaces reels, and results "
@@ -2135,69 +2138,13 @@ async def _enrich_trending_reels(
     return [_wire_trending_reel(r) for r in filled]
 
 
-def _map_trending_actor_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [
-        decodo.strip_null_post_fields(_normalize_trending_item(i))
-        for i in items
-        if not i.get("error")
-    ]
-
-
-async def _apify_trending_reels(
-    country: str,
-    *,
-    store_limit: int,
-    max_age_secs: int = _TRENDING_CACHE_TTL_SECS,
-) -> list[dict[str, Any]] | None:
-    """Reuse a recent SUCCEEDED Apify dataset, or start + wait for a new run."""
-    settings = get_settings()
-    client = ApifyClient(timeout=30, max_attempts=1)
-    actor = settings.APIFY_ACTOR_INSTAGRAM_TRENDING
-    match = {"country": country}
-
-    for run in await client.list_succeeded_runs(actor, input_match=match, limit=25):
-        finished_raw = run.get("finishedAt")
-        if not finished_raw:
-            continue
-        finished = datetime.fromisoformat(finished_raw.replace("Z", "+00:00"))
-        age = (datetime.now(timezone.utc) - finished).total_seconds()
-        if age > max_age_secs:
-            continue
-        items = await client.dataset_items(run["defaultDatasetId"], max_items=store_limit)
-        mapped = _map_trending_actor_items(items)
-        reels = _filter_trending_reels_only(mapped)[:store_limit]
-        if reels:
-            return [_wire_trending_reel(r) for r in reels]
-
-    active = await client.find_active_run(actor, input_match=match)
-    run_id = (active or {}).get("id")
-    if run_id is None:
-        started = await client.start_run(
-            actor, {"max_results": store_limit, "country": country}
-        )
-        run_id = (started or {}).get("id")
-        log.info(
-            "ig_trending_apify_start",
-            country=country,
-            runId=run_id,
-            status=(started or {}).get("status"),
-        )
-    if not run_id:
-        return None
-    items = await client.wait_for_run_items(
-        run_id, _TRENDING_APIFY_WAIT_SECS, max_items=store_limit
-    )
-    if not items:
-        return None
-    mapped = _map_trending_actor_items(items)
-    reels = _filter_trending_reels_only(mapped)[:store_limit]
-    if not reels:
-        return None
-    return [_wire_trending_reel(r) for r in reels]
-
-
 async def _scrape_trending_country(country: str, *, store_limit: int) -> dict[str, Any]:
-    """Live scrape: prefer cheap native /reels, then Apify. Never serves stale Redis snapshots."""
+    """Live native /reels scrape. No Apify fallback — that path is ~$0.40/run.
+
+    Native misses are logged as ``ig_trending_native_miss`` so we can measure
+    failure rate by country before considering a separately priced Apify tier.
+    """
+    reason = "empty"
     try:
         native = await asyncio.wait_for(
             instagram_native.trending_reels_native(
@@ -2210,16 +2157,21 @@ async def _scrape_trending_country(country: str, *, store_limit: int) -> dict[st
         )
     except asyncio.TimeoutError:
         native = None
+        reason = "timeout"
         log.warning("ig_trending_native_timeout", country=country)
 
     if native:
         wired = [_wire_trending_reel(r) for r in native]
         return _trending_payload(wired, country=country, cached=False)
 
-    apify_reels = await _apify_trending_reels(country, store_limit=store_limit)
-    if apify_reels:
-        return _trending_payload(apify_reels, country=country, cached=False)
-
+    # Measurable miss — do not silently fall through to a ~$0.40 Apify run.
+    log.error(
+        "ig_trending_native_miss",
+        country=country,
+        reason=reason,
+        store_limit=store_limit,
+        apify_fallback=False,
+    )
     raise _trending_scrape_failed_http(country)
 
 
@@ -2234,19 +2186,21 @@ async def instagram_trending_reels(
         True,
         description=(
             "Default true (cache-first): serve the per-country response cache when present "
-            f"(TTL {_TRENDING_CACHE_TTL_SECS // 3600}h, 0 credits). "
+            f"(TTL {_TRENDING_CACHE_TTL_SECS // 3600}h). "
+            f"Every successful call costs {CREDIT_TRENDING_REELS} credits — including cache hits "
+            "(cache is our margin, not a free tier). "
             "Set false to skip the cache read and force a live scrape "
-            f"(~{_TRENDING_NATIVE_BUDGET_SECS}–{_TRENDING_APIFY_WAIT_SECS}s, {CREDIT_TRENDING_REELS} credit); "
-            "the fresh result still refreshes the cache."
+            f"(~{_TRENDING_NATIVE_BUDGET_SECS}s); the fresh result still refreshes the cache."
         ),
     ),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    """On-demand trending Reels — videos only.
+    """On-demand trending Reels — videos only, flat 2 credits always.
 
-    Cache-first (default): hit = 0 credits; miss = live scrape then cache
-    for 4 hours. ``cache=false`` forces live. Concurrent same-country misses
-    share one scrape. Failures return 502 — never an old snapshot.
+    Cache-first (default) amortizes native scrape cost for us; the customer
+    always pays the same flat fee. ``cache=false`` forces live. Concurrent
+    same-country misses share one scrape. Failures return 502 — never an
+    old snapshot and never a silent Apify fallback.
     """
     country = _normalize_trending_country(country)
     store_limit = min(200, max(_TRENDING_STORE_LIMIT, limit))
@@ -2257,14 +2211,18 @@ async def instagram_trending_reels(
         resource_url=f"country:{country}",
         base_credits=CREDIT_TRENDING_REELS,
     ) as ctx:
+        # Flat price always — cache hits still bill (margin, not free tier).
+        ctx["bill_on_cache_hit"] = True
 
         async def _run() -> dict[str, Any]:
-            return await _scrape_trending_country(country, store_limit=store_limit)
+            payload = await _scrape_trending_country(country, store_limit=store_limit)
+            ctx["source"] = "direct"
+            return payload
 
         # Cache key is country-only (limit applied after) so one scrape serves all limits.
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "v": 21},
+            params={"country": country, "v": 22},
             runner=_run,
             ctx=ctx,
             ttl=_TRENDING_CACHE_TTL_SECS,
@@ -2276,8 +2234,7 @@ async def instagram_trending_reels(
         data["cached"] = bool(ctx.get("cache_hit"))
         if ctx.get("cache_hit"):
             ctx["source"] = "cache"
-        else:
-            ctx["credits_override"] = CREDIT_TRENDING_REELS
+        ctx["credits_override"] = CREDIT_TRENDING_REELS
         return ApiResponse(data=data)
 
 

@@ -5403,7 +5403,7 @@
           "Instagram"
         ],
         "summary": "Instagram trending Reels from /reels",
-        "description": "On-demand trending Reels — videos only.\n\nCache-first (default): hit = 0 credits; miss = live scrape then cache\nfor 4 hours. ``cache=false`` forces live. Concurrent same-country misses\nshare one scrape. Failures return 502 — never an old snapshot.",
+        "description": "On-demand trending Reels — videos only, flat 2 credits always.\n\nCache-first (default) amortizes native scrape cost for us; the customer\nalways pays the same flat fee. ``cache=false`` forces live. Concurrent\nsame-country misses share one scrape. Failures return 502 — never an\nold snapshot and never a silent Apify fallback.",
         "operationId": "instagram_trending_reels_v1_instagram_trending_reels_get",
         "security": [
           {
@@ -5441,11 +5441,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Default true (cache-first): serve the per-country response cache when present (TTL 4h, 0 credits). Set false to skip the cache read and force a live scrape (~45–120s, 1 credit); the fresh result still refreshes the cache.",
+              "description": "Default true (cache-first): serve the per-country response cache when present (TTL 4h). Every successful call costs 2 credits — including cache hits. Set false to skip the cache read and force a live scrape (~45s); the fresh result still refreshes the cache.",
               "default": true,
               "title": "Cache"
             },
-            "description": "Default true (cache-first): serve the per-country response cache when present (TTL 4h, 0 credits). Set false to skip the cache read and force a live scrape (~45–120s, 1 credit); the fresh result still refreshes the cache."
+            "description": "Default true (cache-first): serve the per-country response cache when present (TTL 4h). Every successful call costs 2 credits — including cache hits. Set false to skip the cache read and force a live scrape (~45s); the fresh result still refreshes the cache."
           }
         ],
         "responses": {

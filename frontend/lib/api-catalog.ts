@@ -924,20 +924,20 @@ const INSTAGRAM: Spec[] = [
     category: "list",
     method: "GET",
     path: "/v1/instagram/trending-reels",
-    credits: 1,
+    credits: 2,
     tagline:
-      "Cache-first trending Reels — hit 0 credits / miss live scrape 1 credit (4h TTL).",
+      "Cache-first trending Reels — flat 2 credits every call (4h TTL).",
     longDescription:
-      "On-demand trending Reels for a country. Default cache=true is cache-first: a per-country response cache (TTL 4 hours) returns in typically under 2s at 0 credits. Cache miss (or cache=false) runs a live scrape — native /reels first, then Apify — and waits for real data; concurrent requests for the same country share one scrape (single-flight). Failures return 502 scrape_failed — never an old snapshot and never 503 warming. Each reel includes engagement{likes,comments,views,viewsSource} where views is the platform play count when exposed and viewsSource is instagram|facebook whenever views is set. Instagram withholds view counts on roughly a third of reels — those rows keep views/viewsSource null. Constant postType/productType are omitted. durationSeconds is always present (null when unknown), rounded to 3 decimals when set. Photos/carousels are never returned. Content older than ~180 days is dropped as Explore resurfacing. For live keyword search use Instagram Reels Search. Live success bills flat 1 credit; cache hits bill 0.",
+      "On-demand trending Reels for a country. Flat 2 credits on every successful call — including cache hits (the 4h per-country response cache is our margin, not a free tier). Default cache=true is cache-first for latency; cache=false forces a live native /reels scrape. Concurrent requests for the same country share one scrape (single-flight). Failures return 502 scrape_failed — never an old snapshot, never 503 warming, and no silent Apify fallback. Each reel includes engagement{likes,comments,views,viewsSource} where views is the platform play count when exposed and viewsSource is instagram|facebook whenever views is set. Instagram withholds view counts on roughly a third of reels — those rows keep views/viewsSource null. Constant postType/productType are omitted. durationSeconds is always present (null when unknown), rounded to 3 decimals when set. Photos/carousels are never returned. Content older than ~180 days is dropped as Explore resurfacing. For live keyword search use Instagram Reels Search.",
     delivers: [
-      "Cache-first hot path (<2s, 0 credits) with 4h TTL",
-      "cache=false / miss → live scrape; single-flight per country",
+      "Flat 2 credits always (cache hit or live)",
+      "Cache-first hot path (<2s) with 4h TTL; single-flight per country",
       "engagement.views + viewsSource (plays removed); 502 on scrape failure",
-      "Video Reels only — never Explore photos",
+      "Video Reels only — never Explore photos; native path only",
     ],
     platformLimits: [
       "No warm cron / country snapshots — only the on-demand response cache.",
-      "cache=false always live-scrapes (slow). Default cache=true serves the 4h cache when present (0 credits).",
+      "cache=false always live-scrapes (slow). Billing stays flat 2 credits either way.",
       "Photos / carousels / Explore resurfaces older than ~180 days are filtered out.",
       "Instagram does not expose a view count for every reel; engagement.views stays null when withheld.",
     ],
@@ -7877,7 +7877,7 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "instagram-trending-reels": {
     cached:
-      "true when served from the per-country response cache (4h TTL, 0 credits); false on a live scrape (1 credit).",
+      "true when served from the per-country response cache (4h TTL); false on a live scrape. Billing is flat 2 credits either way.",
     country: "Localized country name used for native/Apify geo (e.g. United States).",
     countryCode: "ISO-3166 alpha-2 for the same country (e.g. US). Prefer this for joins.",
     note: "Honesty copy: cache-first vs live scrape, single-flight, duplicates expected, ~180d content-age filter, points to reels-search for keyword scrapes.",

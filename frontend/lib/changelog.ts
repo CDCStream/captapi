@@ -51,13 +51,13 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-06",
     category: "platform",
-    title: "Instagram trending-reels: warm cron removed — cache-first on demand",
+    title: "Instagram trending-reels: flat 2 credits; Apify fallback removed",
     description:
-      "GET /v1/instagram/trending-reels no longer uses a warm cron or country snapshots. Default cache=true is cache-first (4h per-country response cache, 0 credits on hit). Miss or cache=false runs a live scrape and waits for real data; same-country concurrency shares one scrape. Failures return 502 scrape_failed — 503 warming is gone. engagement.plays stays removed; durationSeconds remains on every reel.",
+      "GET /v1/instagram/trending-reels bills a flat 2 credits on every successful call — including cache hits (the 4h response cache is our margin). Warm cron / snapshots stay gone. Live path is native /reels only; the ~$0.40 Apify fallback is removed and native misses are logged as ig_trending_native_miss for measurement. Failures return 502 scrape_failed.",
     items: [
-      "Remove warm GitHub Actions cron + snapshot layer",
-      "4h response cache; single-flight; cache hit = 0 credits, live = 1 credit",
-      "502 scrape_failed instead of 503 warming / stale snapshot fallback",
+      "Flat 2 credits always (bill_on_cache_hit); cache amortizes our cost",
+      "Remove silent Apify fallback; log native miss rate by country",
+      "cache-first latency; single-flight; 502 on scrape failure",
     ],
   },
   {
