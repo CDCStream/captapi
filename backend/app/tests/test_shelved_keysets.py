@@ -1,10 +1,15 @@
-"""Shelved-endpoint key-set guard — silently dropping fields fails CI."""
+"""Shelved-endpoint key-set guard — silently dropping fields fails CI.
+
+Also covers Instagram channel-posts (live traffic; never formally shelved)
+via ``test_instagram_channel_posts_shape.py`` + fixtures in this folder.
+"""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
+from app.services.instagram_decodo import IG_CHANNEL_POST_KEYS
 from app.services.rumble_video_details import (
     RUMBLE_VIDEO_DETAILS_KEYS,
     finalise_video_details,
@@ -15,6 +20,12 @@ FIXTURES = Path(__file__).resolve().parent / "fixtures" / "shelved_keysets"
 
 def _load_keys(name: str) -> list[str]:
     return json.loads((FIXTURES / name).read_text(encoding="utf-8"))
+
+
+def test_instagram_channel_post_baseline_in_shelved_suite() -> None:
+    baseline = _load_keys("instagram-channel-post.keys.json")
+    assert list(IG_CHANNEL_POST_KEYS) == baseline
+    assert "mediaId" in baseline and "shortcode" in baseline
 
 
 def test_rumble_video_details_baseline_has_31_keys() -> None:

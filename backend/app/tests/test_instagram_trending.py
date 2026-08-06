@@ -158,11 +158,11 @@ def test_wire_trending_reel_drops_plays_keeps_duration() -> None:
     assert out["durationSeconds"] is None
     assert out["engagement"]["views"] == 100
     assert out["engagement"]["viewsSource"] == "instagram"
-    # Null views → no viewsSource key.
+    # Null/missing views → omit both views and viewsSource keys.
     bare = ig_router._wire_trending_reel(
         {"id": "2", "durationSeconds": None, "engagement": {"likes": 1, "comments": 0, "views": None}}
     )
-    assert bare["engagement"]["views"] is None
+    assert "views" not in bare["engagement"]
     assert "viewsSource" not in bare["engagement"]
 
 

@@ -1238,13 +1238,24 @@ def map_feed_post(
     is_affiliate = bool(affiliate) if affiliate not in (None, [], {}, False) else bool(
         media.get("is_affiliate")
     )
+    media_pk = safe_str(media.get("pk") or media.get("pk_id") or media.get("id"))
+    if media_pk and "_" in media_pk:
+        media_pk = media_pk.split("_", 1)[0]
+    if media_pk and not media_pk.isdigit():
+        media_pk = None
+    likes_disabled = _like_and_view_counts_disabled(media)
+    comments_disabled = media.get("comments_disabled")
+    if comments_disabled is not None:
+        comments_disabled = bool(comments_disabled)
 
+    # id = shortcode (same contract as GraphQL ``_post``); mediaId = numeric pk.
     return strip_null_post_fields(
         {
             "platform": "instagram",
             "url": f"https://www.instagram.com/{'reel' if is_video else 'p'}/{shortcode}/" if shortcode else None,
-            "id": safe_str(media.get("pk") or media.get("id")),
+            "id": shortcode or media_pk,
             "shortcode": shortcode,
+            "mediaId": media_pk,
             "postType": _MEDIA_TYPE_NAMES.get(media_type or 0),
             "productType": product,
             "caption": caption,
@@ -1273,6 +1284,8 @@ def map_feed_post(
             "isAd": bool(media.get("is_ad") or media.get("ad_id") or media.get("injected")),
             "isAffiliate": is_affiliate,
             "accessibilityCaption": safe_str(media.get("accessibility_caption")),
+            "likeAndViewCountsDisabled": likes_disabled,
+            "commentsDisabled": comments_disabled,
             "music": music,
             "musicId": (music or {}).get("id") if music else None,
             "location": _location_from_media(media),
@@ -2805,9 +2818,10 @@ def _as_trending_reel(post: dict[str, Any]) -> dict[str, Any]:
     eng_out: dict[str, Any] = {
         "likes": engagement.get("likes"),
         "comments": engagement.get("comments"),
-        "views": views,
     }
+    # Omit when unknown — logged-out /reels almost never exposes play_count.
     if views is not None:
+        eng_out["views"] = views
         eng_out["viewsSource"] = engagement.get("viewsSource") or "instagram"
     video_url = safe_str(post.get("videoUrl"))
     thumb = safe_str(post.get("thumbnailUrl"))

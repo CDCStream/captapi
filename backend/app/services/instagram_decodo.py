@@ -488,6 +488,193 @@ def map_ig_location(loc: dict[str, Any] | None) -> dict[str, Any] | None:
     return {k: v for k, v in out.items() if v is not None}
 
 
+# Canonical channel-posts / channel-reels list-item shape. GraphQL timeline
+# rows and api/v1 feed rows used to emit different key sets in one array —
+# finalise_* forces one contract (null fillers). Adding keys is fine; dropping
+# any baseline key fails CI (see shelved_keysets/instagram-channel-post.keys.json).
+IG_CHANNEL_POST_KEYS: tuple[str, ...] = (
+    "platform",
+    "url",
+    "id",
+    "shortcode",
+    "mediaId",
+    "postType",
+    "productType",
+    "caption",
+    "description",
+    "publishedAt",
+    "durationSeconds",
+    "thumbnailUrl",
+    "videoUrl",
+    "hasAudio",
+    "author",
+    "engagement",
+    "hashtags",
+    "mentions",
+    "isPaidPartnership",
+    "isAd",
+    "isAffiliate",
+    "accessibilityCaption",
+    "likeAndViewCountsDisabled",
+    "commentsDisabled",
+    "music",
+    "musicId",
+    "location",
+)
+IG_AUTHOR_KEYS: tuple[str, ...] = (
+    "id",
+    "username",
+    "displayName",
+    "url",
+    "verified",
+    "profileImage",
+    "followers",
+    "postCount",
+    "isPrivate",
+)
+IG_MUSIC_KEYS: tuple[str, ...] = (
+    "id",
+    "title",
+    "artist",
+    "clusterId",
+    "assetId",
+    "canonicalId",
+    "artistId",
+    "durationMs",
+    "audioType",
+    "coverUrl",
+    "isTrendingInClips",
+    "trendRank",
+    "previousTrendRank",
+    "isExplicit",
+    "hasLyrics",
+)
+IG_LOCATION_KEYS: tuple[str, ...] = (
+    "id",
+    "name",
+    "slug",
+    "hasPublicPage",
+    "latitude",
+    "longitude",
+)
+IG_CHANNEL_USER_KEYS: tuple[str, ...] = (
+    "id",
+    "username",
+    "displayName",
+    "url",
+    "verified",
+    "isPrivate",
+    "profileImage",
+    "followers",
+    "postCount",
+)
+
+_SHORTCODE_IN_URL_RE = re.compile(r"/(?:p|reel|tv)/([^/?#]+)", re.I)
+
+
+def _finalise_keys(keys: tuple[str, ...], obj: dict[str, Any] | None) -> dict[str, Any]:
+    src = obj if isinstance(obj, dict) else {}
+    return {k: src.get(k, None) for k in keys}
+
+
+def shortcode_from_url(url: str | None) -> str | None:
+    m = _SHORTCODE_IN_URL_RE.search(url or "")
+    return safe_str(m.group(1)) if m else None
+
+
+def canonical_post_ids(post: dict[str, Any]) -> dict[str, Any]:
+    """Force ``id``/``shortcode`` = shortcode and ``mediaId`` = numeric pk."""
+    shortcode = safe_str(post.get("shortcode")) or shortcode_from_url(safe_str(post.get("url")))
+    media_id = safe_str(post.get("mediaId"))
+    raw_id = safe_str(post.get("id"))
+    if raw_id and raw_id.isdigit():
+        media_id = media_id or raw_id
+    elif raw_id and not shortcode:
+        shortcode = raw_id
+    if shortcode and shortcode.isdigit() and not media_id:
+        # Numeric-only id with no shortcode yet — keep as mediaId, try URL.
+        media_id = shortcode
+        shortcode = shortcode_from_url(safe_str(post.get("url")))
+    post["shortcode"] = shortcode
+    post["id"] = shortcode or media_id
+    post["mediaId"] = media_id if media_id and media_id.isdigit() else None
+    return post
+
+
+def finalise_channel_post(post: dict[str, Any] | None) -> dict[str, Any]:
+    """One key set for every channel-posts / channel-reels list item."""
+    src = dict(post or {})
+    # Legacy author.private → isPrivate (A21 / profile-search parity).
+    author = src.get("author") if isinstance(src.get("author"), dict) else {}
+    if author.get("isPrivate") is None and author.get("private") is not None:
+        author = {**author, "isPrivate": author.get("private")}
+    author = {k: v for k, v in author.items() if k != "private"}
+    src["author"] = _finalise_keys(IG_AUTHOR_KEYS, author)
+
+    music = src.get("music")
+    if isinstance(music, dict) and music:
+        src["music"] = _finalise_keys(IG_MUSIC_KEYS, music)
+        if src.get("musicId") is None:
+            src["musicId"] = src["music"].get("id")
+    else:
+        src["music"] = None
+
+    location = src.get("location")
+    if isinstance(location, dict) and location:
+        src["location"] = _finalise_keys(IG_LOCATION_KEYS, location)
+    else:
+        src["location"] = None
+
+    canonical_post_ids(src)
+
+    is_video = (
+        src.get("postType") == "Video"
+        or safe_str(src.get("productType")) in {"clips", "reel", "reels"}
+        or bool(src.get("videoUrl"))
+    )
+    eng_src = src.get("engagement") if isinstance(src.get("engagement"), dict) else {}
+    eng: dict[str, Any] = {
+        "likes": eng_src.get("likes"),
+        "comments": eng_src.get("comments"),
+        "views": eng_src.get("views"),
+    }
+    if is_video:
+        views_source = eng_src.get("viewsSource")
+        if eng["views"] is not None and not views_source:
+            views_source = "instagram"
+        eng["viewsSource"] = views_source
+    src["engagement"] = eng
+
+    if not isinstance(src.get("hashtags"), list):
+        src["hashtags"] = []
+    if not isinstance(src.get("mentions"), list):
+        src["mentions"] = []
+
+    out = _finalise_keys(IG_CHANNEL_POST_KEYS, src)
+    out["platform"] = out.get("platform") or "instagram"
+    out["author"] = src["author"]
+    out["engagement"] = src["engagement"]
+    out["music"] = src["music"]
+    out["location"] = src["location"]
+    out["hashtags"] = src["hashtags"]
+    out["mentions"] = src["mentions"]
+    return out
+
+
+def finalise_channel_posts(posts: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+    return [finalise_channel_post(p) for p in (posts or []) if isinstance(p, dict)]
+
+
+def finalise_channel_user(user: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(user, dict):
+        return None
+    src = dict(user)
+    if src.get("isPrivate") is None and src.get("private") is not None:
+        src["isPrivate"] = src.get("private")
+    src.pop("private", None)
+    return _finalise_keys(IG_CHANNEL_USER_KEYS, src)
+
+
 def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
     """Drop fields we can't fill instead of returning nulls: video-only
     fields (videoUrl) on images/carousels, hidden engagement counts (None)
@@ -496,6 +683,9 @@ def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
 
     ``durationSeconds`` stays on the object when present (null allowed) so
     array rows keep a uniform key set — never silently drop the key.
+
+    Prefer ``finalise_channel_post`` on channel-posts / channel-reels responses
+    so GraphQL + feed rows share one key set (null fillers, not drops).
     """
     if not post.get("videoUrl"):
         post.pop("videoUrl", None)
@@ -678,14 +868,14 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         else safe_int(node.get("fb_play_count") or node.get("fbPlayCount"))
     )
     product = safe_str(node.get("product_type")) or ("clips" if is_video else None)
-    # Prefer shortcode as id (matches Polaris hydrate + enrich_posts_from_author_feeds).
+    # Prefer shortcode as id; mediaId is always the numeric pk when known.
     result = {
         "platform": "instagram",
         "url": safe_str(node.get("url"))
         or (f"https://www.instagram.com/{'reel' if is_video else 'p'}/{shortcode}/" if shortcode else None),
         "id": shortcode or media_id,
         "shortcode": shortcode,
-        "mediaId": media_id if media_id and media_id != shortcode else None,
+        "mediaId": media_id if media_id and str(media_id).isdigit() else None,
         "postType": "Sidecar" if is_sidecar else ("Video" if is_video else "Image"),
         "productType": product,
         "caption": caption,
@@ -801,13 +991,14 @@ def _channel_user_summary(user: dict[str, Any]) -> dict[str, Any]:
         "displayName": safe_str(user.get("full_name")),
         "url": f"https://instagram.com/{username}" if username else None,
         "verified": user.get("is_verified"),
-        "private": user.get("is_private"),
+        # Same key as nested author{} / channel-details (A21) — never ``private``.
+        "isPrivate": user.get("is_private"),
         "profileImage": _image_url(user),
         "followers": _count(user.get("edge_followed_by")) or safe_int(user.get("follower_count")),
         "postCount": _count(user.get("edge_owner_to_timeline_media"))
         or safe_int(user.get("media_count")),
     }
-    return {k: v for k, v in out.items() if v is not None}
+    return finalise_channel_user(out) or out
 
 
 async def channel_posts(handle: str, limit: int) -> dict[str, Any] | None:

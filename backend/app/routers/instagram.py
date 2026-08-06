@@ -228,7 +228,9 @@ def _normalize_post(item: dict) -> dict:
             ),
             "postCount": safe_int(owner.get("mediaCount") or owner.get("postsCount") or item.get("ownerPostsCount")),
             "verified": verified,
-            "private": owner.get("isPrivate") if owner.get("isPrivate") is not None else owner.get("is_private"),
+            "isPrivate": owner.get("isPrivate")
+            if owner.get("isPrivate") is not None
+            else owner.get("is_private"),
             "profileImage": safe_str(
                 owner.get("profilePicUrl") or owner.get("profile_pic_url") or item.get("ownerProfilePicUrl")
             ),
@@ -1293,6 +1295,19 @@ def _ig_channel_page(
     return posts, next_cursor, user_id, followers, user
 
 
+def _finalise_channel_list_payload(
+    data: dict[str, Any], *, items_key: str = "posts"
+) -> dict[str, Any]:
+    """Unify GraphQL + feed (+ Apify) list rows before they leave the API."""
+    items = data.get(items_key)
+    if isinstance(items, list):
+        data[items_key] = decodo.finalise_channel_posts(items)
+        data["totalReturned"] = len(data[items_key])
+    if isinstance(data.get("user"), dict):
+        data["user"] = decodo.finalise_channel_user(data["user"])
+    return data
+
+
 @router.get("/channel-posts", summary="Latest posts from an Instagram profile")
 async def instagram_channel_posts(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
@@ -1325,13 +1340,15 @@ async def instagram_channel_posts(
                     raise HTTPException(status_code=502, detail="Failed to fetch the next page. Retry shortly.")
                 posts, next_cursor = result
                 ctx["source"] = "direct"
-                return {
-                    "url": url,
-                    "totalReturned": len(posts),
-                    "posts": posts,
-                    "nextCursor": next_cursor,
-                    "hasMore": next_cursor is not None,
-                }
+                return _finalise_channel_list_payload(
+                    {
+                        "url": url,
+                        "totalReturned": len(posts),
+                        "posts": posts,
+                        "nextCursor": next_cursor,
+                        "hasMore": next_cursor is not None,
+                    }
+                )
 
             async def _apify() -> dict[str, Any]:
                 apify = get_apify()
@@ -1365,14 +1382,16 @@ async def instagram_channel_posts(
                     if author_extra:
                         post["author"] = {**author_extra, **(post.get("author") or {})}
                     posts.append(decodo.strip_null_post_fields(post))
-                return {
-                    "url": url,
-                    "totalReturned": len(posts),
-                    "posts": posts,
-                    "nextCursor": None,
-                    "hasMore": None,
-                    "degraded": True,
-                }
+                return _finalise_channel_list_payload(
+                    {
+                        "url": url,
+                        "totalReturned": len(posts),
+                        "posts": posts,
+                        "nextCursor": None,
+                        "hasMore": None,
+                        "degraded": True,
+                    }
+                )
 
             async def _decodo_run() -> dict[str, Any] | None:
                 page = _ig_channel_page(await decodo.channel_posts(handle, limit), limit)
@@ -1396,13 +1415,14 @@ async def instagram_channel_posts(
                     out["user"] = channel_user
                 if user_id:
                     out["userId"] = user_id
-                return out
+                return _finalise_channel_list_payload(out)
 
             return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 18},
+            # v19: finalise_channel_post — uniform keys + shortcode id across GraphQL/feed.
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 19},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1491,7 +1511,7 @@ async def instagram_channel_reels(
                 out["degraded"] = True
             if partial:
                 out["partial"] = True
-            return out
+            return _finalise_channel_list_payload(out, items_key="reels")
 
         async def _ensure_handle() -> str:
             nonlocal handle
@@ -1615,7 +1635,8 @@ async def instagram_channel_reels(
                 "userId": known_user_id or "",
                 "limit": limit,
                 "cursor": cursor or "",
-                "v": 20,
+                # v21: same finalise_channel_post contract as channel-posts.
+                "v": 21,
             },
             runner=_run,
             ctx=ctx,
@@ -2016,9 +2037,9 @@ def _trending_payload(
             "are filtered only to drop posts older than ~180 days. "
             "Instagram returns a small overlapping batch per scrape, so "
             "duplicates across requests are expected. "
-            "Instagram does not expose a view count for every reel; "
-            "engagement.views is null when the platform withholds it "
-            "(roughly a third of results). "
+            "Logged-out /reels hydrate does not expose play counts, so "
+            "engagement.views / viewsSource are omitted (not null) on this "
+            "endpoint unless a future source fills them. "
             "For live keyword search use /v1/instagram/reels-search."
         ),
         "reels": reels,

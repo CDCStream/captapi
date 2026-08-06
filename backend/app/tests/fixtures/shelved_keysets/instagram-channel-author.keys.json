@@ -1,0 +1,11 @@
+[
+  "id",
+  "username",
+  "displayName",
+  "url",
+  "verified",
+  "profileImage",
+  "followers",
+  "postCount",
+  "isPrivate"
+]

@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-06",
     category: "fix",
+    title: "Instagram channel-posts: one shape for GraphQL + feed rows",
+    description:
+      "GET /v1/instagram/channel-posts mixed two upstream mappers in one posts[] when limit filled past the ~12-item GraphQL page: shortcode ids + mediaId on early rows, numeric media ids and missing mediaId/commentsDisabled on feed extras — plus uneven author/music/location key sets. Both sources now pass finalise_channel_post (id always shortcode, mediaId always numeric, null-filled author/music/location). Top-level user.private renamed to isPrivate (A21). Same finaliser on channel-reels. Not a same-day regression — dual path dates to 2026-07-13 cursor pagination.",
+    items: [
+      "Uniform posts[] / author / music / location key sets",
+      "id=shortcode + mediaId on every row (URL parse when needed)",
+      "user.isPrivate (drop private alias on channel list payloads)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-06",
+    category: "fix",
     title: "Rumble video-details: restore shelved fields + transcript path",
     description:
       "GET /v1/rumble/video-details had silently dropped captions, embedUrl/embedId, audioStreams, thumbnailTrack, description, width/height and likesIsApproximate when the Apify fallback ran or null optional keys were stripped — breaking GET /v1/rumble/video/transcript (50s \"Video not found\" on a live fixture). Both endpoints now share resolve_video_details with a 31-key finaliser, embedJS enrichment on slim fallbacks, and a CI key-set snapshot that fails if the shelved shape shrinks. Transcript 404s use no_captions / language_not_available / video_not_found instead of a bare Video not found string.",
