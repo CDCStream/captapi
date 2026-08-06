@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-06",
     category: "fix",
+    title: "TikTok Ad Library search: drop scrape-time dates, uniform keys",
+    description:
+      "GET /v1/ad-library/tiktok/search was writing DSA list scrape/serve timestamps into firstShown/lastShown (page-bucketed near fetchedAt). Those fields are now omitted from search — use /tiktok/ad-details for calendar-day ISO dates. Search ads share a uniform key set (null when withheld); advertiser is always {id,name,url,logo,location} with human names (never bare numeric sponsor ids); truncated is true when literalMatches > totalReturned.",
+    items: [
+      "Search omits firstShown/lastShown (dates on ad-details only)",
+      "Uniform ad keys + advertiser shape; reject numeric advertiser.name",
+      "truncated when literalMatches exceeds totalReturned",
+    ],
+  },
+  {
+    publishedAt: "2026-08-06",
+    category: "fix",
     title: "TikTok ad-details: always 2 credits (no silent Apify surcharge)",
     description:
       "GET /v1/ad-library/tiktok/ad-details used to bill 2 credits on the native path and 5 when Apify fallback ran — same ad id, same endpoint, unpredictable cost with no explanation in the body. Success is now always 2 credits; the rare Apify path is absorbed. Response includes fetchPath: \"native\" | \"fallback\" so clients can see which path ran.",

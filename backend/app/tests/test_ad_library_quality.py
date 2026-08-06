@@ -62,42 +62,48 @@ def test_tiktok_date_iso() -> None:
         al._tiktok_library_date_iso("2026-07-29T00:00:00.000Z")
         == "2026-07-29T00:00:00.000Z"
     )
-    assert al._tiktok_library_date_iso(1786033151000) == "2026-08-06T16:19:11.000Z"
+    # Wall-clock epochs → calendar day (never scrape time-of-day).
+    assert al._tiktok_library_date_iso(1786033151000) == "2026-08-06T00:00:00.000Z"
 
 
 def test_tiktok_normalize_omits_withheld_keys() -> None:
-    out = al._normalize_ad(
-        {
-            "adId": "1",
-            "advertiserName": "Brand",
-            "text": "hello",
-            "first_shown_date": "07/29/2026",
-            "estimatedAudience": "0-1K",
-            "library": "dsa",
-            "country": "GB",
-            "media": [
-                {
-                    "url": "https://cdn.example/v.mp4?x-expires=1893456000",
-                    "type": "video/mp4",
-                    "width": None,
-                    "height": None,
-                    "durationSeconds": None,
-                    "expiresAt": "2030-01-01T00:00:00.000Z",
-                }
-            ],
-        },
-        "tiktok",
+    # Legacy name kept — now null-pads via finaliser (rumble-style uniform keys).
+    out = al._finalise_tiktok_ad(
+        al._normalize_ad(
+            {
+                "adId": "1",
+                "advertiserName": "Brand",
+                "text": "hello",
+                "first_shown_date": "07/29/2026",
+                "estimatedAudience": "0-1K",
+                "library": "dsa",
+                "country": "GB",
+                "media": [
+                    {
+                        "url": "https://cdn.example/v.mp4?x-expires=1893456000",
+                        "type": "video/mp4",
+                        "width": None,
+                        "height": None,
+                        "durationSeconds": None,
+                        "expiresAt": "2030-01-01T00:00:00.000Z",
+                    }
+                ],
+            },
+            "tiktok",
+        ),
+        surface="details",
     )
     assert out["platform"] == "tiktok"
     assert out["library"] == "dsa"
     assert out["country"] == "GB"
     assert out["text"] == "hello"
-    assert "cta" not in out
-    assert "landingUrl" not in out
-    assert "spend" not in out
+    assert out["cta"] is None
+    assert out["landingUrl"] is None
+    assert out["spend"] is None
     assert out["impressions"] == "0-1K"
-    assert "id" not in out["advertiser"]
+    assert out["advertiser"]["id"] is None
     assert out["advertiser"]["name"] == "Brand"
+    assert set(out["advertiser"]) == set(al.TIKTOK_ADVERTISER_KEYS)
     assert out["firstShown"] == "2026-07-29T00:00:00.000Z"
     assert isinstance(out["media"], list) and out["media"][0]["url"].startswith("http")
     assert out["media"][0].get("expiresAt")

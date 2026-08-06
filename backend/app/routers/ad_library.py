@@ -516,7 +516,11 @@ def _tiktok_region(value: str) -> str:
 
 
 def _tiktok_library_date_iso(value: Any) -> str | None:
-    """Normalize TikTok library dates (ms epoch, ``MM/DD/YYYY``, ISO) to UTC."""
+    """Normalize TikTok DSA dates to calendar-day midnight UTC.
+
+    DSA publishes day granularity (HTML ``MM/DD/YYYY``). List XHR epochs often
+    carry scrape/serve wall-clock times — never emit those as content dates.
+    """
     if isinstance(value, (int, float)):
         n = float(value)
         if n > 1e12:
@@ -524,10 +528,8 @@ def _tiktok_library_date_iso(value: Any) -> str | None:
         if n >= 1_000_000_000:
             from datetime import datetime, timezone
 
-            return (
-                datetime.fromtimestamp(n, tz=timezone.utc)
-                .strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
-                + "Z"
+            return datetime.fromtimestamp(n, tz=timezone.utc).strftime(
+                "%Y-%m-%dT00:00:00.000Z"
             )
         return None
     raw = safe_str(value)
@@ -536,7 +538,7 @@ def _tiktok_library_date_iso(value: Any) -> str | None:
     if raw.isdigit():
         return _tiktok_library_date_iso(int(raw))
     if re.match(r"^\d{4}-\d{2}-\d{2}T", raw):
-        return raw
+        return f"{raw[:10]}T00:00:00.000Z"
     if re.match(r"^\d{4}-\d{2}-\d{2}$", raw):
         return f"{raw}T00:00:00.000Z"
     m = re.search(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", raw)
@@ -546,6 +548,75 @@ def _tiktok_library_date_iso(value: Any) -> str | None:
     if not (1 <= month <= 12 and 1 <= day <= 31):
         return raw
     return f"{year:04d}-{month:02d}-{day:02d}T00:00:00.000Z"
+
+
+# Uniform DSA ad schema (rumble-style). Search omits run dates — list XHR stamps
+# are scrape/serve times, not first/last shown. Dates live on ad-details only.
+TIKTOK_ADVERTISER_KEYS: tuple[str, ...] = ("id", "name", "url", "logo", "location")
+TIKTOK_AD_SEARCH_KEYS: tuple[str, ...] = (
+    "platform",
+    "id",
+    "url",
+    "text",
+    "headline",
+    "cta",
+    "landingUrl",
+    "adFormat",
+    "impressions",
+    "impressionsRange",
+    "spend",
+    "country",
+    "advertiser",
+    "media",
+    "library",
+)
+TIKTOK_AD_DETAIL_KEYS: tuple[str, ...] = TIKTOK_AD_SEARCH_KEYS + (
+    "firstShown",
+    "lastShown",
+)
+
+
+def _finalise_tiktok_ad(
+    partial: dict[str, Any],
+    *,
+    surface: Literal["search", "details"] = "search",
+) -> dict[str, Any]:
+    """Force a uniform key set — missing scrape → null, never a missing key.
+
+    Search omits ``firstShown`` / ``lastShown`` entirely (list XHR dates are
+    scrape/serve times). Details keep calendar-day ISO dates.
+    """
+    keys = TIKTOK_AD_DETAIL_KEYS if surface == "details" else TIKTOK_AD_SEARCH_KEYS
+    adv_in = partial.get("advertiser") if isinstance(partial.get("advertiser"), dict) else {}
+    adv: dict[str, Any] = {}
+    for key in TIKTOK_ADVERTISER_KEYS:
+        val = adv_in.get(key)
+        adv[key] = None if val in (None, "", [], {}) else val
+    name = safe_str(adv.get("name"))
+    if name and tiktok_ads_native._looks_like_id(name):
+        adv["name"] = None
+
+    out: dict[str, Any] = {}
+    for key in keys:
+        if key == "advertiser":
+            out[key] = adv
+            continue
+        val = partial.get(key, None)
+        if key == "media" and val is None:
+            out[key] = []
+        elif val in ("", [], {}):
+            out[key] = None
+        else:
+            out[key] = val
+
+    if surface == "search":
+        if "matchedFrom" in partial and isinstance(partial.get("matchedFrom"), list):
+            out["matchedFrom"] = partial["matchedFrom"]
+    else:
+        fetch_path = safe_str(partial.get("fetchPath"))
+        if fetch_path in {"native", "fallback"}:
+            out["fetchPath"] = fetch_path
+    return out
 
 
 def _tiktok_reach_range(value: Any) -> dict[str, Any] | None:
@@ -730,14 +801,18 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         or item.get("page")
         or item.get("company")
         or item.get("organization")
-        or item.get("payingEntity")
-        or item.get("payer")
-        or item.get("adPayer")
         or item.get("posterInfo")
         or {}
     )
+    # Never coerce payer/payingEntity strings into advertiser{} — on TikTok DSA
+    # ``payer`` is often a second numeric sponsor id, which then wins over the
+    # real advertiserName (Z3 regression: name became 7510870833…).
     if not isinstance(advertiser, dict):
-        advertiser = {"name": advertiser} if advertiser else {}
+        raw_adv = safe_str(advertiser)
+        if raw_adv and not re.fullmatch(r"\d{10,}", raw_adv):
+            advertiser = {"name": raw_adv}
+        else:
+            advertiser = {}
     structured_media = item.get("media")
     if (
         isinstance(structured_media, list)
@@ -925,7 +1000,6 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             item.get("adPaidForBy"),
             item.get("paidForBy"),
             item.get("payerName"),
-            item.get("payingEntity"),
             item.get("pageName"),
             item.get("brandName"),
             item.get("companyName"),
@@ -937,6 +1011,9 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         )
     )
     if advertiser_name and advertiser_name.strip().lower() in {"not mention", "n/a", "unknown"}:
+        advertiser_name = None
+    # Bare numeric strings are ids, not display names (TikTok sponsor / biz id).
+    if advertiser_name and re.fullmatch(r"\d{10,}", advertiser_name.strip()):
         advertiser_name = None
 
     normalized = {
@@ -1071,12 +1148,10 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         "media": media,
     }
     if platform in {"tiktok", "tiktok_ad_library"}:
-        # Align date shape with Facebook/Google Ad Library (ISO-8601).
+        # Align date shape with Facebook/Google Ad Library (ISO-8601 day).
         normalized["firstShown"] = _tiktok_library_date_iso(normalized.get("firstShown"))
         normalized["lastShown"] = _tiktok_library_date_iso(normalized.get("lastShown"))
-        reach_range = _tiktok_reach_range(normalized.get("impressions"))
-        if reach_range:
-            normalized["impressionsRange"] = reach_range
+        normalized["impressionsRange"] = _tiktok_reach_range(normalized.get("impressions"))
         # One platform value across the TikTok Ad Library block; surface is separate.
         normalized["platform"] = "tiktok"
         if item.get("library") or platform == "tiktok_ad_library":
@@ -1084,6 +1159,19 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         # Echo request country when upstream omits a single ISO.
         if not normalized.get("country") and item.get("country"):
             normalized["country"] = safe_str(item.get("country"))
+        # Prefer human advertiser labels; never leave a bare numeric id in name.
+        adv_name = safe_str(normalized["advertiser"].get("name"))
+        if adv_name and tiktok_ads_native._looks_like_id(adv_name):
+            normalized["advertiser"]["name"] = None
+        elif not adv_name:
+            rescued = tiktok_ads_native._human_advertiser_name(
+                item.get("advertiserName"),
+                item.get("name"),
+                item.get("brandName"),
+                _dig(item, "advertiser", "tt_user", "unique_id"),
+            )
+            if rescued:
+                normalized["advertiser"]["name"] = rescued
     if platform == "linkedin_ad_library":
         # LinkedIn Ad Library transparency extras (additive; SC-parity).
         description = safe_str(
@@ -1190,15 +1278,13 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         if not normalized.get("advertiserLinkedinPage") and adv.get("url"):
             normalized["advertiserLinkedinPage"] = adv.get("url")
     if platform in {"tiktok", "tiktok_ad_library"}:
-        # Omit keys TikTok withholds (no 100%-null padding).
-        for key in ("headline", "cta", "landingUrl", "text", "spend", "impressions"):
-            if normalized.get(key) in (None, "", [], {}):
-                normalized.pop(key, None)
-        for key in ("id", "url", "logo", "location"):
-            if adv.get(key) in (None, "", []):
-                adv.pop(key, None)
-        if not adv.get("name"):
-            adv.pop("name", None)
+        # Stable advertiser key set — null what the surface withholds (Z2/Z3).
+        # Search/details callers run ``_finalise_tiktok_ad`` for full-row keys.
+        for key in TIKTOK_ADVERTISER_KEYS:
+            if key not in adv or adv.get(key) in ("", [], {}):
+                adv[key] = adv.get(key) if adv.get(key) not in ("", [], {}) else None
+        if adv.get("name") and tiktok_ads_native._looks_like_id(adv.get("name")):
+            adv["name"] = None
     if platform == "facebook_ad_library":
         # Additive fields for competitor intel — existing keys above stay stable.
         spend_raw = normalized.get("spend")
@@ -1974,9 +2060,12 @@ async def facebook_ad_transcript(
         "are never charged. Keyword q is case-insensitive whole-word match=any|all "
         "on advertiser/title/copy (hair ≠ wheelchair); each hit includes matchedFrom "
         "(field names) and the envelope reports candidatesScanned / filteredOut / "
-        "literalMatches / truncated. Hard-capped at 110s → 502 scrape_failed "
-        "(0 credits). Default country GB. For Creative Center Top Ads use "
-        "/v1/ad-library/tiktok/top-ads."
+        "literalMatches / truncated (true when literalMatches > totalReturned). "
+        "Ads share a uniform key set (null when withheld). firstShown/lastShown are "
+        "omitted — DSA list XHR stamps scrape/serve times, not run dates; use "
+        "/tiktok/ad-details for calendar-day ISO dates. Hard-capped at 110s → 502 "
+        "scrape_failed (0 credits). Default country GB. For Creative Center Top Ads "
+        "use /v1/ad-library/tiktok/top-ads."
     ),
 )
 async def tiktok_search(
@@ -2025,20 +2114,30 @@ async def tiktok_search(
                 row = dict(i) if isinstance(i, dict) else {}
                 row["country"] = region
                 row["library"] = row.get("library") or "dsa"
-                ads.append(_normalize_ad(row, "tiktok"))
-            for ad in ads:
-                fields = tiktok_ads_native.matched_from_fields(ad, q)
-                if fields:
-                    ad["matchedFrom"] = fields
-            # Spec: truncated = collected < limit && hasMore; always false when empty.
-            truncated = bool(ads) and len(ads) < limit and bool(
-                has_more or upstream_truncated
+                # Z1: never expose list firstShown/lastShown — DSA search XHR
+                # stamps scrape/serve times (page-bucketed near fetchedAt).
+                row.pop("first_shown_date", None)
+                row.pop("last_shown_date", None)
+                row.pop("firstShown", None)
+                row.pop("lastShown", None)
+                ad = _finalise_tiktok_ad(_normalize_ad(row, "tiktok"), surface="search")
+                # Always stamp matchedFrom when q is set so key sets stay uniform.
+                if (q or "").strip():
+                    ad["matchedFrom"] = tiktok_ads_native.matched_from_fields(ad, q) or []
+                ads.append(ad)
+            meta = _tiktok_block_match_meta(filt, q=q)
+            literal = int(meta.get("literalMatches") or 0) if (q or "").strip() else 0
+            # Honest truncation: limit sliced matching rows, or upstream has more.
+            truncated = literal > len(ads) or (
+                bool(ads)
+                and len(ads) < limit
+                and bool(has_more or upstream_truncated)
             )
             return {
                 "query": q,
                 "country": region,
                 "totalReturned": len(ads),
-                **_tiktok_block_match_meta(filt, q=q),
+                **meta,
                 "truncated": truncated,
                 "ads": ads,
             }
@@ -2083,7 +2182,7 @@ async def tiktok_search(
                             "country": region,
                             "limit": limit,
                             "match": match_mode,
-                            "v": 9,
+                            "v": 10,
                         },
                         _run,
                         ctx,
@@ -2316,10 +2415,11 @@ async def tiktok_top_ads(
     summary="TikTok ad details",
     description=(
         "Fetch one TikTok Commercial Content Library ad by URL or ad ID. Same "
-        "schema as /tiktok/search hits: platform=tiktok, library=dsa, media[] "
-        "objects (url/type/expiresAt when signed), impressions from Unique users "
-        "seen when disclosed, spend only when TikTok ships it. Keys withheld by "
-        "DSA are omitted rather than null-padded. "
+        "uniform key set as /tiktok/search (null when withheld) plus calendar-day "
+        "ISO firstShown/lastShown (search omits those — list XHR dates are not "
+        "run dates). platform=tiktok, library=dsa, media[] objects (url/type/"
+        "expiresAt when signed), impressions from Unique users seen when "
+        "disclosed. advertiser is always {id,name,url,logo,location}. "
         f"Always {CREDIT_TIKTOK_AD_DETAILS} credits (success) — native and Apify "
         "fallback share one price so billing is budgetable. Response includes "
         'fetchPath: "native" | "fallback" so clients can see which path ran. '
@@ -2357,7 +2457,7 @@ async def tiktok_ad_details(
                 native["library"] = "dsa"
                 out = _normalize_ad(native, "tiktok")
                 out["fetchPath"] = "native"
-                return out
+                return _finalise_tiktok_ad(out, surface="details")
 
             candidates: list[tuple[str, dict[str, Any]]] = [
                 (
@@ -2409,12 +2509,12 @@ async def tiktok_ad_details(
             best["library"] = "dsa"
             out = _normalize_ad(best, "tiktok")
             out["fetchPath"] = "fallback"
-            return out
+            return _finalise_tiktok_ad(out, surface="details")
 
         return ApiResponse(
             data=await cached_or_run(
                 "ad-library.tiktok.ad-details",
-                {"ad_id": ad_id, "country": region, "v": 8},
+                {"ad_id": ad_id, "country": region, "v": 9},
                 _run,
                 ctx,
                 use_cache=cache,

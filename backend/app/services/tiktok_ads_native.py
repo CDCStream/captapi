@@ -51,8 +51,32 @@ def normalize_match_mode(match: str | None) -> MatchMode:
     return _cc_normalize_match_mode(match)
 
 
+def _looks_like_id(value: Any) -> bool:
+    """True for long digit strings (biz ids / sponsor ids — never display names)."""
+    s = str(value or "").strip()
+    return bool(re.fullmatch(r"\d{10,}", s))
+
+
+def _human_advertiser_name(*candidates: Any) -> str | None:
+    """First human-readable advertiser label; reject bare numeric ids."""
+    for cand in candidates:
+        if cand is None:
+            continue
+        s = str(cand).strip()
+        if not s or _looks_like_id(s):
+            continue
+        if s.lower() in {"not mention", "n/a", "unknown", "advertiser", "ad paid for by"}:
+            continue
+        return s
+    return None
+
+
 def _ms_to_iso(value: Any) -> str | None:
-    """Unix ms / sec → ISO-8601 UTC, or pass through date strings."""
+    """Unix ms / sec → calendar-day ISO-8601 UTC, or pass through date strings.
+
+    DSA content dates are day-granularity. Emitting wall-clock scrape/serve times
+    into firstShown/lastShown fabricates run dates — always midnight UTC.
+    """
     if value is None or value == "":
         return None
     if isinstance(value, (int, float)):
@@ -63,11 +87,7 @@ def _ms_to_iso(value: Any) -> str | None:
             return None
         from datetime import datetime, timezone
 
-        return (
-            datetime.fromtimestamp(n, tz=timezone.utc)
-            .strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
-            + "Z"
-        )
+        return datetime.fromtimestamp(n, tz=timezone.utc).strftime("%Y-%m-%dT00:00:00.000Z")
     raw = str(value).strip()
     if not raw:
         return None
@@ -159,26 +179,37 @@ def _to_normalize_shape(row: dict[str, Any]) -> dict[str, Any]:
     ad_id = str(row.get("ad_id") or row.get("id") or "").strip()
     advertiser = row.get("advertiser") if isinstance(row.get("advertiser"), dict) else {}
     sponsor = advertiser.get("sponsor") or row.get("sponsor")
-    name = (
-        row.get("advertiser_name")
-        or advertiser.get("name")
-        or row.get("name")
-        or row.get("brand_name")
-        or sponsor
-    )
     biz_ids = advertiser.get("adv_biz_ids") or row.get("advertiser_id")
     if isinstance(biz_ids, str) and biz_ids.strip() in {"", "0"}:
         biz_ids = None
+    if _looks_like_id(biz_ids):
+        biz_ids = str(biz_ids).strip()
+    elif biz_ids is not None:
+        # Non-digit biz ids are not usable as advertiser.id.
+        biz_ids = str(biz_ids).strip() or None
     tt_user = advertiser.get("tt_user")
     adv_url = None
+    handle = None
     if isinstance(tt_user, dict):
-        uname = tt_user.get("unique_id") or tt_user.get("username")
-        if uname:
-            adv_url = f"https://www.tiktok.com/@{uname}"
+        handle = tt_user.get("unique_id") or tt_user.get("username") or tt_user.get("nickname")
+        if handle and not _looks_like_id(handle):
+            adv_url = f"https://www.tiktok.com/@{handle}"
         if not biz_ids:
-            biz_ids = tt_user.get("id") or tt_user.get("uid")
+            uid = tt_user.get("id") or tt_user.get("uid")
+            if _looks_like_id(uid):
+                biz_ids = str(uid).strip()
     elif isinstance(tt_user, str) and tt_user.startswith("http"):
         adv_url = tt_user
+    # Never fall through to numeric sponsor ids — that regressed advertiser.name
+    # to a second biz id (e.g. sponsor 7510870833… while adv_biz_ids is different).
+    name = _human_advertiser_name(
+        handle,
+        row.get("advertiser_name"),
+        advertiser.get("name"),
+        row.get("name"),
+        row.get("brand_name"),
+        sponsor,
+    )
 
     videos = row.get("videos") if isinstance(row.get("videos"), list) else []
     image_urls = row.get("image_urls") if isinstance(row.get("image_urls"), list) else []
@@ -211,7 +242,9 @@ def _to_normalize_shape(row: dict[str, Any]) -> dict[str, Any]:
         "advertiserUrl": adv_url or row.get("advertiser_url") or advertiser.get("url"),
         "advertiserLocation": advertiser.get("registry_location")
         or row.get("advertiserLocation"),
-        "payer": sponsor,
+        # Only keep human payer labels — numeric sponsor ids must not reach
+        # ``_normalize_ad``'s advertiser coercion path.
+        "payer": sponsor if not _looks_like_id(sponsor) else None,
         "cta": row.get("call_to_action")
         or row.get("cta")
         or row.get("cta_text")

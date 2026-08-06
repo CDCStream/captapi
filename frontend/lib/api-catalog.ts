@@ -2852,9 +2852,9 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     path: "/v1/ad-library/tiktok/search",
     credits: 2,
     tagline:
-      "Search TikTok Commercial Content Library — relevance-filtered, ISO dates, stable null schema (2 credits native).",
+      "Search TikTok Commercial Content Library — relevance-filtered, uniform null schema (2 credits native).",
     longDescription:
-      "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) by keyword. Local keyword matching is case-insensitive whole-word match=any|all (hair ≠ wheelchair). Envelope uses candidatesScanned / truncated; each hit has matchedFrom as a string array of matched fields. platform is tiktok (library=dsa). media[] are objects with url/type/expiresAt when signed. Keys TikTok withholds are omitted. Flat 2 credits when results are returned (empty is free); Apify fallback capped at 5. Hard-capped at 110s. country default GB (US often empty). For brand performance use /v1/ad-library/tiktok/top-ads.",
+      "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) by keyword. Local keyword matching is case-insensitive whole-word match=any|all (hair ≠ wheelchair). Envelope uses candidatesScanned / truncated (true when literalMatches > totalReturned); each hit has matchedFrom as a string array of matched fields. platform is tiktok (library=dsa). media[] are objects with url/type/expiresAt when signed. Ads share a uniform key set — withheld fields are null, not missing. firstShown/lastShown are omitted (DSA list XHR stamps scrape/serve times, not run dates) — use /tiktok/ad-details for calendar-day ISO dates. advertiser is always {id,name,url,logo,location}. Flat 2 credits when results are returned (empty is free); Apify fallback capped at 5. Hard-capped at 110s. country default GB (US often empty). For brand performance use /v1/ad-library/tiktok/top-ads.",
   },
   {
     slug: "tiktok-ad-library-top-ads",
@@ -2868,7 +2868,7 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     tagline:
       "TikTok Creative Center Top Ads — browser-intercepted list XHR, CTR/likes, video (flat 2 / ~1 Apify).",
     longDescription:
-      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName (= advertiser.name), advertiser{id,name}, likes + likesIsApproximate, ctr, costTier when present, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists). Creative Center does not expose ad run dates on the list surface — use /tiktok/search or /tiktok/ad-details (DSA) for firstShown/lastShown. Optional ctrTier/isSparkAd appear only when upstream ships them (never null-padded). Keyword q is case-insensitive whole-word match=any|all on title/brand/tags/industry (hair ≠ wheelchair); each hit includes matchedFrom (field names that matched) and the envelope reports candidatesScanned/filteredOut/literalMatches/matchBasis — zero literal hits return empty ads[], never the unfiltered leaderboard. Empty results and upstream timeouts are never charged. A real browser is required — Creative Center HTML is an empty shell and the list API needs page-signed requests. We intercept the signed top_ads/v2/list XHR and exit when that JSON arrives (typically 30-60 seconds; not networkidle). Flat 2 credits on the browser path; Apify fallback ~1 credit per returned ad (min 2; ~20 at default limit). truncated:true only when a non-empty page is shorter than limit while Creative Center still has pages (empty after filter → truncated:false). Pass cache=true for a 24h hit (0 credits).",
+      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, url (per-ad detail page), title, brandName (= advertiser.name), advertiser{id,name}, likes + likesIsApproximate, ctr, costTier when present, resolved industry/industryKey, objective, and video{} (urlHd only when a distinct HD rendition exists). Creative Center does not expose ad run dates on the list surface — use /tiktok/ad-details (DSA) for firstShown/lastShown (search omits them). Optional ctrTier/isSparkAd appear only when upstream ships them (never null-padded). Keyword q is case-insensitive whole-word match=any|all on title/brand/tags/industry (hair ≠ wheelchair); each hit includes matchedFrom (field names that matched) and the envelope reports candidatesScanned/filteredOut/literalMatches/matchBasis — zero literal hits return empty ads[], never the unfiltered leaderboard. Empty results and upstream timeouts are never charged. A real browser is required — Creative Center HTML is an empty shell and the list API needs page-signed requests. We intercept the signed top_ads/v2/list XHR and exit when that JSON arrives (typically 30-60 seconds; not networkidle). Flat 2 credits on the browser path; Apify fallback ~1 credit per returned ad (min 2; ~20 at default limit). truncated:true only when a non-empty page is shorter than limit while Creative Center still has pages (empty after filter → truncated:false). Pass cache=true for a 24h hit (0 credits).",
     delivers: [
       "advertiser{id,name} for grouping + Spark author fallback",
       "Honest keyword filter — per-ad matchedFrom + candidatesScanned envelope",
@@ -2889,13 +2889,13 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     path: "/v1/ad-library/tiktok/ad-details",
     credits: 2,
     tagline:
-      "One TikTok Commercial Content Library ad by ID — search-parity schema, always 2 credits.",
+      "One TikTok Commercial Content Library ad by ID — calendar-day dates, always 2 credits.",
     longDescription:
-      "Paste a TikTok Ad Library URL or ad ID and get that creative as clean JSON with the same schema as /tiktok/search hits: platform=tiktok, library=dsa, media[] objects, impressions from Unique users seen when disclosed, spend only when shipped, firstShown/lastShown (ISO). Keys DSA withholds are omitted. Always 2 credits on success — native and Apify fallback share one price (no 2-vs-5 surprise). Response includes fetchPath: \"native\" | \"fallback\" so you can see which path ran. Default country GB (EU-led library).",
+      "Paste a TikTok Ad Library URL or ad ID and get that creative as clean JSON with the same uniform key set as /tiktok/search (null when withheld) plus calendar-day ISO firstShown/lastShown (search omits those). platform=tiktok, library=dsa, media[] objects, impressions from Unique users seen when disclosed, spend only when shipped. advertiser is always {id,name,url,logo,location} — name is a human label, never a bare numeric id. Always 2 credits on success — native and Apify fallback share one price (no 2-vs-5 surprise). Response includes fetchPath: \"native\" | \"fallback\" so you can see which path ran. Default country GB (EU-led library).",
     delivers: [
       "ID lookup with search-parity fields (including impressions)",
-      "Stable null keys for headline/cta/landingUrl/spend/advertiser.id",
-      "ISO firstShown / lastShown",
+      "Uniform null keys + advertiser{id,name,url,logo,location}",
+      "Calendar-day ISO firstShown / lastShown",
       "Always 2 credits; fetchPath native|fallback",
     ],
   },
@@ -6481,7 +6481,7 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     });
     list.push({
       q: `What does ctr mean, and where are ad dates?`,
-      a: `ctr is TikTok's normalized 0–1 Creative Center score (not a raw click-through percent). ctrTier/isSparkAd appear only when Creative Center ships them. The list surface does not expose ad run dates — firstSeen/lastSeen are not returned. The period param is only the lookback window for the ranking. For DSA firstShown/lastShown use /tiktok/search or /tiktok/ad-details.`,
+      a: `ctr is TikTok's normalized 0–1 Creative Center score (not a raw click-through percent). ctrTier/isSparkAd appear only when Creative Center ships them. The list surface does not expose ad run dates — firstSeen/lastSeen are not returned. The period param is only the lookback window for the ranking. For DSA firstShown/lastShown use /tiktok/ad-details (search omits them).`,
     });
     list.push({
       q: `How do I group ads by advertiser?`,
