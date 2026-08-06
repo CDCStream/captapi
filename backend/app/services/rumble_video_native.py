@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import datetime, timezone
 from html import unescape
 from typing import Any
 
@@ -22,6 +23,41 @@ from app.utils.formatters import safe_int, safe_str
 from app.utils.url import extract_rumble_video_id
 
 log = structlog.get_logger(__name__)
+
+
+def to_utc_published_at(value: Any) -> str | None:
+    """Normalize timestamps to UTC ``+00:00`` (search HTML often uses -04:00)."""
+    text = safe_str(value)
+    if not text:
+        return None
+    try:
+        dt = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return text
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc).isoformat()
+
+
+def honest_views(
+    views: Any,
+    *,
+    likes: Any = None,
+    comments: Any = None,
+    dislikes: Any = None,
+) -> int | None:
+    """Drop impossible ``views: 0`` when other engagement is present.
+
+    Fresh Rumble pages/JSON-LD often ship ``userInteractionCount: 0`` while
+    the vote UI already shows likes/comments — treat that as unknown.
+    """
+    v = safe_int(views)
+    if v is None:
+        return None
+    if v == 0 and any((safe_int(x) or 0) > 0 for x in (likes, comments, dislikes)):
+        return None
+    return v
+
 
 _LD_RE = re.compile(
     r'<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
@@ -672,6 +708,8 @@ def parse_video_html(html: str, url: str | None = None) -> dict[str, Any] | None
     channel_url = f"https://rumble.com/c/{channel_slug}" if channel_slug else None
     streams = _streams_from_html(html)
     likes, dislikes, likes_approx = _votes_from_html(html)
+    comments = _comments_from_html(html)
+    views = honest_views(views, likes=likes, comments=comments, dislikes=dislikes)
     iso_dur = safe_str((video or {}).get("duration"))
     duration_seconds = _iso_duration_seconds(iso_dur)
     duration_text = _seconds_to_clock(duration_seconds) if duration_seconds is not None else _parse_iso_duration(iso_dur)
@@ -708,10 +746,10 @@ def parse_video_html(html: str, url: str | None = None) -> dict[str, Any] | None
         "likes": likes,
         "likesIsApproximate": bool(likes_approx) if likes is not None else None,
         "dislikes": dislikes,
-        "comments": _comments_from_html(html),
+        "comments": comments,
         "durationSeconds": duration_seconds,
         "durationText": duration_text,
-        "publishedAt": safe_str((video or {}).get("uploadDate")),
+        "publishedAt": to_utc_published_at((video or {}).get("uploadDate")),
         "thumbnail": thumbnail,
         "width": None,
         "height": None,
@@ -824,26 +862,51 @@ def parse_search_html(html: str, limit: int = 20) -> list[dict[str, Any]]:
         votes_m = _LIKES_DISLIKES_RE.search(chunk)
         likes = _parse_count(votes_m.group(1)) if votes_m else None
         dislikes = _parse_count(votes_m.group(2)) if votes_m else None
+        comments = _counter_from_match(_COMMENTS_RE.search(chunk))
+        views = honest_views(
+            _counter_from_match(_VIEWS_RE.search(chunk)),
+            likes=likes,
+            comments=comments,
+            dislikes=dislikes,
+        )
         channel = safe_str(unescape(by_m.group(2))) if by_m else None
-        channel_url = f"https://rumble.com{by_m.group(1)}" if by_m else None
+        channel_path = safe_str(by_m.group(1)) if by_m else None
+        channel_url = f"https://rumble.com{channel_path}" if channel_path else None
+        channel_handle = (
+            channel_path.rstrip("/").split("/")[-1] if channel_path else None
+        )
+        video_id = path.split("/")[-1].split("-")[0]
+        clock = safe_str(dur_m.group(1)) if dur_m else None
+        is_live = bool(re.search(r"video-item--live|livestream", chunk, re.I))
+        content_type = (
+            "live"
+            if is_live
+            else ("short" if "/shorts/" in path.lower() else "video")
+        )
         out.append(
             {
                 "platform": "rumble",
-                "id": path.split("/")[-1].split("-")[0],
+                "id": video_id,
                 "url": f"https://rumble.com{path}",
+                "type": content_type,
                 "title": safe_str(unescape(title_m.group(1))) if title_m else None,
                 "channel": channel,
                 "channelUrl": channel_url,
-                "views": _counter_from_match(_VIEWS_RE.search(chunk)),
+                "channelHandle": channel_handle,
+                "channelVerified": bool(_VERIFIED_RE.search(chunk)) or None,
+                "views": views,
                 "likes": likes,
                 "dislikes": dislikes,
-                "duration": safe_str(dur_m.group(1)) if dur_m else None,
-                "durationSeconds": _clock_to_seconds(
-                    safe_str(dur_m.group(1)) if dur_m else None
+                "comments": comments,
+                "durationSeconds": _clock_to_seconds(clock),
+                "durationText": clock,
+                "publishedAt": to_utc_published_at(
+                    time_m.group(1) if time_m else None
                 ),
-                "publishedAt": safe_str(time_m.group(1)) if time_m else None,
                 "thumbnail": safe_str(unescape(thumb_m.group(1))) if thumb_m else None,
-                "comments": _counter_from_match(_COMMENTS_RE.search(chunk)),
+                "isLive": is_live,
+                "streams": [],
+                "shareUrl": f"https://rumble.com/share/{video_id}" if video_id else None,
             }
         )
         if len(out) >= capped:

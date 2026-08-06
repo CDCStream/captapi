@@ -138,3 +138,69 @@ def test_normalize_az_always_emits_is_live() -> None:
     )
     assert out["isLive"] is False
     assert out["type"] == "video"
+    # Zero views with no engagement can stay 0 (truly unwatched).
+    assert out["views"] == 0
+
+
+def test_honest_views_zero_with_engagement_is_null() -> None:
+    assert native.honest_views(0, likes=26, comments=3) is None
+    assert native.honest_views(0, likes=0, comments=0) == 0
+    assert native.honest_views(12, likes=26, comments=3) == 12
+    assert native.honest_views(None, likes=1) is None
+
+
+def test_to_utc_published_at_normalizes_offset() -> None:
+    assert (
+        native.to_utc_published_at("2026-07-17T08:18:39-04:00")
+        == "2026-07-17T12:18:39+00:00"
+    )
+    assert (
+        native.to_utc_published_at("2026-07-17T12:18:39+00:00")
+        == "2026-07-17T12:18:39+00:00"
+    )
+
+
+def test_normalize_video_search_shape_and_utc() -> None:
+    out = rumble._normalize_video(
+        {
+            "id": "vsearch1",
+            "url": "https://rumble.com/vsearch1-clip.html",
+            "title": "Clip",
+            "channel": "Show",
+            "channelUrl": "https://rumble.com/c/bongino",
+            "views": 0,
+            "likes": 26,
+            "comments": 3,
+            "duration": "1:26:25",
+            "publishedAt": "2026-07-17T08:18:39-04:00",
+            "thumbnail": "https://cdn.example/t.jpg",
+        }
+    )
+    assert out["channelHandle"] == "bongino"
+    assert out["isLive"] is False
+    assert out["type"] == "video"
+    assert out["shareUrl"] == "https://rumble.com/share/vsearch1"
+    assert out["durationSeconds"] == 5185
+    assert out["durationText"] == "1:26:25"
+    assert out["publishedAt"] == "2026-07-17T12:18:39+00:00"
+    assert out["views"] is None
+    assert "duration" not in out
+
+
+def test_normalize_az_nulls_impossible_zero_views() -> None:
+    out = rumble._normalize_az_video(
+        {
+            "permalink_id": "vfresh",
+            "title": "Just posted",
+            "duration": 72,
+            "views": 0,
+            "url": "https://rumble.com/vfresh-just-posted.html",
+            "by": {"name": "Show", "url": "https://rumble.com/c/bongino"},
+            "rumble_votes": {"num_votes_up": 26, "num_votes_down": 0},
+            "comments": {"count": 3},
+        },
+        include_description=False,
+    )
+    assert out["views"] is None
+    assert out["likes"] == 26
+    assert out["comments"] == 3

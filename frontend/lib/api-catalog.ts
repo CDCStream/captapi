@@ -1845,7 +1845,20 @@ const RUMBLE: Spec[] = [
     longDescription:
       "List a channel's uploads as clean JSON. Each row: id, url, type (video|short|live), title, channel/channelUrl/channelHandle, views/likes/dislikes/comments, durationSeconds + durationText (same pair as video-details), publishedAt, thumbnail, streams[], shareUrl. embedUrl/embedId are present only when Rumble exposes a distinct embed id — page permalink ids are never used to invent /embed/{id}/ URLs (those 404). Flat ~0.6 credits per returned video (min 2).",
   },
-  { slug: "rumble-search", name: "Rumble Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/rumble/search", credits: 12, creditsPerResult: 0.6 },
+  {
+    slug: "rumble-search",
+    name: "Rumble Search API",
+    shortName: "Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/rumble/search",
+    credits: 12,
+    creditsPerResult: 0.6,
+    tagline:
+      "Rumble keyword search — same video card shape as channel-videos (type, durationSeconds + durationText, UTC publishedAt).",
+    longDescription:
+      "Search Rumble videos by keyword. Each result matches the channel-videos card: id, url, type (video|short|live), title, channel/channelUrl/channelHandle, views/likes/dislikes/comments, durationSeconds + durationText, publishedAt in UTC (+00:00), thumbnail, isLive, shareUrl. views is null when unknown or impossible (e.g. 0 with likes/comments). Flat ~0.6 credits per returned video (min 2).",
+  },
   { slug: "rumble-comments", name: "Rumble Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/rumble/comments", credits: 2 },
 ];
 
@@ -7932,9 +7945,15 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "rumble-search": {
     channel: "Channel display name string when present.",
-    durationSeconds: "Length in seconds when known.",
+    channelHandle: "Channel slug from /c/{handle} when present.",
+    durationSeconds: "Length in seconds when known. Same pair as video-details / channel-videos.",
     durationText: "Human clock duration when known.",
     type: 'Content kind: "video" | "short" | "live".',
+    isLive: "Always present. true only when the search card is marked live; false otherwise.",
+    publishedAt: "ISO-8601 UTC (+00:00). Search HTML offsets (e.g. -04:00) are normalized.",
+    views:
+      "View count when known; null when unknown or impossible (0 with non-zero likes/comments/dislikes).",
+    shareUrl: "https://rumble.com/share/{id} when id is known.",
   },
   "linkedin-post-transcript": {
     transcript: "Full LinkedIn post body text (not speech-to-text from a video).",
