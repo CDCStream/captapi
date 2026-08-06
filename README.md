@@ -1,5 +1,7 @@
 # Captapi
 
+[![MCP Queen operational grade](https://mcpqueen.com/badge/io.github.CDCStream/captapi.svg)](https://mcpqueen.com/s/io.github.CDCStream/captapi)
+
 One REST API for structured public data across **32 platforms** and **177 endpoints** — transcripts, AI summaries, comments, profiles, search, commerce data, ad libraries, analytics helpers, and engagement metrics. Clean JSON, no OAuth, one Bearer key.
 
 **Product:** [captapi.com](https://captapi.com) · **API docs:** [captapi.com/docs](https://captapi.com/docs) · **Catalog:** [captapi.com/apis](https://captapi.com/apis)
