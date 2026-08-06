@@ -26,14 +26,19 @@ log = structlog.get_logger(__name__)
 
 
 def to_utc_published_at(value: Any) -> str | None:
-    """Normalize timestamps to UTC ``+00:00`` (search HTML often uses -04:00)."""
+    """Normalize timestamps to UTC ``+00:00``.
+
+    Accepts ISO-8601 / ``Z`` only. Display strings like
+    ``Friday, July 17, 2026 08:33 AM -04`` are rejected → ``null`` (never
+    echoed into the public response).
+    """
     text = safe_str(value)
     if not text:
         return None
     try:
         dt = datetime.fromisoformat(text.replace("Z", "+00:00"))
     except ValueError:
-        return text
+        return None
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     return dt.astimezone(timezone.utc).isoformat()
@@ -344,19 +349,24 @@ def _numeric_id_from_html(html: str) -> int | None:
     return safe_int(m.group(1)) if m else None
 
 
-def _captions_from_html(html: str) -> dict[str, dict[str, str]] | None:
-    out: dict[str, dict[str, str]] = {}
+def _captions_from_html(html: str) -> list[dict[str, str]]:
+    out: list[dict[str, str]] = []
     for tag_m in _TRACK_CAPTION_RE.finditer(html or ""):
         attrs = {a.group(1).lower(): unescape(a.group(2)) for a in _ATTR_RE.finditer(tag_m.group(0))}
         src = safe_str(attrs.get("src"))
         if not src:
             continue
+        if src.startswith("//"):
+            src = f"https:{src}"
         lang = safe_str(attrs.get("srclang")) or "und"
-        out[lang] = {
-            "language": safe_str(attrs.get("label")) or lang,
-            "path": src,
-        }
-    return out or None
+        out.append(
+            {
+                "code": lang,
+                "language": safe_str(attrs.get("label")) or lang,
+                "url": src,
+            }
+        )
+    return out
 
 
 def _is_live_from_html(html: str) -> bool | None:
@@ -422,93 +432,180 @@ def _media_from_embed(payload: dict[str, Any]) -> dict[str, Any] | None:
     return out or None
 
 
-def _video_quality_label(key: Any, node: dict[str, Any] | None = None) -> str | None:
-    """Prefer ``meta.h`` so Rumble's ``1081`` high-bitrate key becomes ``1080p``."""
-    meta = node.get("meta") if isinstance(node, dict) and isinstance(node.get("meta"), dict) else {}
-    h = safe_int(meta.get("h")) if meta else None
-    if h and h > 0:
-        return f"{h}p"
-    key_s = str(key)
-    if key_s.isdigit():
-        n = int(key_s)
-        # Known embedJS bitrate-variant keys that are still 1080p frames.
-        if n in {1081, 1082}:
-            return "1080p"
-        return f"{n}p"
-    return safe_str(key)
+def quality_from_height(h: Any) -> str | None:
+    """Map pixel height → quality label. Never use upstream slot keys (``1081``)."""
+    height = safe_int(h)
+    if height is None or height <= 0:
+        return None
+    if height >= 2160:
+        return "2160p"
+    if height >= 1440:
+        return "1440p"
+    if height >= 1080:
+        return "1080p"
+    if height >= 720:
+        return "720p"
+    if height >= 480:
+        return "480p"
+    if height >= 360:
+        return "360p"
+    if height >= 240:
+        return "240p"
+    return f"{height}p"
 
 
 def _media_node_sort_key(kv: tuple[Any, Any]) -> tuple[int, int]:
-    key, node = kv
+    _key, node = kv
     meta = node.get("meta") if isinstance(node, dict) and isinstance(node.get("meta"), dict) else {}
     h = safe_int(meta.get("h")) if meta else None
-    if not h or h <= 0:
-        h = int(key) if str(key).isdigit() else 0
     br = safe_int(meta.get("bitrate")) if meta else None
     return (h or 0, br or 0)
 
 
-def _streams_from_media(media: dict[str, Any] | None) -> list[dict[str, Any]]:
-    """Build a flat playable video ``streams`` list from ``media`` (mp4/hls first).
+def _stream_row_from_node(
+    node: dict[str, Any],
+    *,
+    typ: str,
+) -> dict[str, Any] | None:
+    """One playable stream from embedJS node metadata (not the upstream key)."""
+    from app.utils.media_urls import cdn_expires_at
 
-    Audio stays under ``media.audio`` only — never mixed into ``streams[].quality``.
+    url = safe_str(node.get("url"))
+    if not url:
+        return None
+    meta = node.get("meta") if isinstance(node.get("meta"), dict) else {}
+    width = safe_int(meta.get("w"))
+    height = safe_int(meta.get("h"))
+    bitrate = safe_int(meta.get("bitrate"))
+    size = safe_int(meta.get("size"))
+    quality = quality_from_height(height)
+    if not quality and typ.startswith("audio"):
+        quality = f"{bitrate}k" if bitrate else None
+    row: dict[str, Any] = {
+        "url": url,
+        "type": typ,
+        "quality": quality,
+    }
+    if width is not None:
+        row["width"] = width
+    if height is not None:
+        row["height"] = height
+    if bitrate is not None:
+        row["bitrateKbps"] = bitrate
+    if size is not None:
+        row["sizeBytes"] = size
+    expires = cdn_expires_at(url)
+    if expires:
+        row["expiresAt"] = expires
+    return row
+
+
+def _streams_from_media(media: dict[str, Any] | None) -> list[dict[str, Any]]:
+    """Flat playable video streams from embed ``mp4`` / ``tar`` / ``hls``.
+
+    Quality comes from ``meta.h``, never the upstream key (``240`` with h=360
+    → ``360p``; two 1080p bitrates stay two array entries). Timeline strips and
+    audio stay out of this list.
     """
     if not media:
         return []
-    from app.utils.media_urls import cdn_expires_at
-
     out: list[dict[str, Any]] = []
     seen_url: set[str] = set()
-    seen_quality: set[str] = set()
 
-    def _add(url: str | None, typ: str, quality: str | None) -> None:
-        clean = safe_str(url)
-        if not clean or clean in seen_url:
-            return
-        q = (quality or "").lower()
-        qkey = f"{typ}:{q}" if q and q != "auto" else ""
-        if qkey and qkey in seen_quality:
-            return
-        seen_url.add(clean)
-        if qkey:
-            seen_quality.add(qkey)
-        row: dict[str, Any] = {"url": clean, "type": typ, "quality": quality}
-        expires = cdn_expires_at(clean)
-        if expires:
-            row["expiresAt"] = expires
+    mp4 = media.get("mp4") if isinstance(media.get("mp4"), dict) else {}
+    for _q, node in sorted(mp4.items(), key=_media_node_sort_key, reverse=True):
+        if not isinstance(node, dict):
+            continue
+        row = _stream_row_from_node(node, typ="mp4")
+        if not row or row["url"] in seen_url:
+            continue
+        seen_url.add(row["url"])
         out.append(row)
 
-    # Progressive MP4: highest height, then bitrate (keeps 8051kbps before 3985kbps).
-    mp4 = media.get("mp4") if isinstance(media.get("mp4"), dict) else {}
-    for q, node in sorted(mp4.items(), key=_media_node_sort_key, reverse=True):
-        if isinstance(node, dict):
-            _add(node.get("url"), "mp4", _video_quality_label(q, node))
-
-    timeline = media.get("timeline") if isinstance(media.get("timeline"), dict) else {}
-    for q, node in sorted(timeline.items(), key=_media_node_sort_key, reverse=True):
-        if isinstance(node, dict):
-            _add(node.get("url"), "mp4", _video_quality_label(q, node))
-
     tar = media.get("tar") if isinstance(media.get("tar"), dict) else {}
-    for q, node in sorted(tar.items(), key=_media_node_sort_key, reverse=True):
-        if isinstance(node, dict):
-            _add(node.get("url"), "hls", _video_quality_label(q, node))
+    for _q, node in sorted(tar.items(), key=_media_node_sort_key, reverse=True):
+        if not isinstance(node, dict):
+            continue
+        row = _stream_row_from_node(node, typ="hls")
+        if not row or row["url"] in seen_url:
+            continue
+        seen_url.add(row["url"])
+        out.append(row)
 
     hls = media.get("hls") if isinstance(media.get("hls"), dict) else {}
     for q, node in hls.items():
-        if isinstance(node, dict):
-            _add(node.get("url"), "hls", safe_str(q) or "auto")
+        if not isinstance(node, dict):
+            continue
+        row = _stream_row_from_node(node, typ="hls")
+        if not row or row["url"] in seen_url:
+            continue
+        if not row.get("quality"):
+            row["quality"] = safe_str(q) or "auto"
+        seen_url.add(row["url"])
+        out.append(row)
 
-    # Intentionally omit media.audio — clients use media.audio[{bitrate}k].
+    return out[:24]
 
-    return out[:12]
+
+def _audio_streams_from_media(media: dict[str, Any] | None) -> list[dict[str, Any]]:
+    if not media:
+        return []
+    audio = media.get("audio") if isinstance(media.get("audio"), dict) else {}
+    out: list[dict[str, Any]] = []
+    for _q, node in sorted(audio.items(), key=_media_node_sort_key, reverse=True):
+        if not isinstance(node, dict):
+            continue
+        row = _stream_row_from_node(node, typ="audio/aac")
+        if row:
+            out.append(row)
+    return out
+
+
+def _thumbnail_track_from_media(media: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Sprite / timeline strip — not a playable video stream."""
+    if not media:
+        return None
+    timeline = media.get("timeline") if isinstance(media.get("timeline"), dict) else {}
+    for _q, node in sorted(timeline.items(), key=_media_node_sort_key, reverse=True):
+        if not isinstance(node, dict):
+            continue
+        row = _stream_row_from_node(node, typ="image")
+        if row:
+            row.pop("quality", None)
+            return row
+    return None
+
+
+def _captions_array(payload: dict[str, Any]) -> list[dict[str, str]]:
+    captions = payload.get("cc") if isinstance(payload.get("cc"), dict) else None
+    if not captions:
+        return []
+    out: list[dict[str, str]] = []
+    for key, node in captions.items():
+        if not isinstance(node, dict):
+            continue
+        path = safe_str(node.get("path") or node.get("url"))
+        if not path:
+            continue
+        if path.startswith("//"):
+            path = f"https:{path}"
+        elif path.startswith("/"):
+            path = f"https://rumble.com{path}"
+        out.append(
+            {
+                "code": str(key),
+                "language": safe_str(node.get("language")) or str(key),
+                "url": path,
+            }
+        )
+    return out
 
 
 def _width_height_from_embed(payload: dict[str, Any], media: dict[str, Any] | None) -> tuple[int | None, int | None]:
     best_w: int | None = None
     best_h: int | None = None
     if media:
-        for bucket in ("tar", "mp4", "timeline"):
+        for bucket in ("mp4", "tar"):
             nodes = media.get(bucket)
             if not isinstance(nodes, dict):
                 continue
@@ -535,35 +632,28 @@ def _width_height_from_embed(payload: dict[str, Any], media: dict[str, Any] | No
 
 
 def _merge_streams(*groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Merge stream groups; drop audio rows and duplicate type:quality labels."""
+    """Merge stream groups by URL; keep same-height bitrate variants."""
     seen_url: set[str] = set()
-    seen_quality: set[str] = set()
     out: list[dict[str, Any]] = []
     for group in groups:
         for item in group:
             if not isinstance(item, dict):
                 continue
             stype = (safe_str(item.get("type")) or "").lower()
-            if stype == "audio":
+            if stype.startswith("audio") or stype == "image":
                 continue
             url = safe_str(item.get("url"))
             if not url or url in seen_url:
                 continue
-            quality = (safe_str(item.get("quality")) or "").lower()
-            qkey = f"{stype}:{quality}" if quality and quality != "auto" else ""
-            if qkey and qkey in seen_quality:
-                continue
             seen_url.add(url)
-            if qkey:
-                seen_quality.add(qkey)
             out.append(item)
-            if len(out) >= 12:
+            if len(out) >= 24:
                 return out
     return out
 
 
 def apply_embedjs(card: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
-    """Merge embedJS media/captions/ids into an existing video-details card."""
+    """Merge embedJS streams/captions/ids into an existing video-details card."""
     if not payload:
         return card
     embed_id = safe_str(payload.get("video") or card.get("embedId"))
@@ -592,30 +682,24 @@ def apply_embedjs(card: dict[str, Any], payload: dict[str, Any]) -> dict[str, An
     if live_raw is not None:
         card["isLive"] = bool(safe_int(live_raw) or 0) if not isinstance(live_raw, bool) else live_raw
 
-    captions = payload.get("cc") if isinstance(payload.get("cc"), dict) else None
-    if captions:
-        cleaned: dict[str, dict[str, str]] = {}
-        for key, node in captions.items():
-            if not isinstance(node, dict):
-                continue
-            path = safe_str(node.get("path") or node.get("url"))
-            if not path:
-                continue
-            cleaned[str(key)] = {
-                "language": safe_str(node.get("language")) or str(key),
-                "path": path,
-            }
-        if cleaned:
-            card["captions"] = cleaned
+    caps = _captions_array(payload)
+    if caps:
+        card["captions"] = caps
 
     media = _media_from_embed(payload)
+    # Never expose raw quality-keyed ``media`` — streams[] is authoritative.
+    card.pop("media", None)
     if media:
-        card["media"] = media
-        # Prefer embedJS qualities (full ladder); keep page mp4s as extras.
         card["streams"] = _merge_streams(
             _streams_from_media(media),
             [s for s in (card.get("streams") or []) if isinstance(s, dict)],
         )
+        audio = _audio_streams_from_media(media)
+        if audio:
+            card["audioStreams"] = audio
+        track = _thumbnail_track_from_media(media)
+        if track:
+            card["thumbnailTrack"] = track
 
     width, height = _width_height_from_embed(payload, media)
     if width:
@@ -753,8 +837,7 @@ def parse_video_html(html: str, url: str | None = None) -> dict[str, Any] | None
         "thumbnail": thumbnail,
         "width": None,
         "height": None,
-        "captions": captions,
-        "media": None,
+        "captions": captions or None,
         "isLive": is_live,
         "streams": streams,
     }
@@ -791,7 +874,7 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
         likes=parsed.get("likes"),
         comments=parsed.get("comments"),
         duration_seconds=parsed.get("durationSeconds"),
-        has_media=bool(parsed.get("media")),
+        streams=len(parsed.get("streams") or []),
         title=(parsed.get("title") or "")[:80],
     )
     return parsed

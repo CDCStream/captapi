@@ -14,7 +14,8 @@ from typing import Any
 import structlog
 
 from app.services import decodo_fetch
-from app.utils.formatters import safe_int, safe_str, strip_empty
+from app.services.rumble_video_native import to_utc_published_at
+from app.utils.formatters import safe_int, safe_str
 
 log = structlog.get_logger(__name__)
 
@@ -32,8 +33,9 @@ _UPVOTES_RE = re.compile(
     r'rumbles-vote-up[\s\S]*?<span class="rumbles-up-votes">(\d+)</span>',
     re.I,
 )
+# Machine-readable attr only — never title= / textContent display strings.
 _TIME_RE = re.compile(
-    r'comments-meta-post-time[^>]*title="([^"]+)"',
+    r'comments-meta-post-time[^>]*datetime="([^"]+)"',
     re.I,
 )
 
@@ -73,22 +75,22 @@ def parse_comments_html(html: str, limit: int) -> list[dict[str, Any]]:
             continue
         up_m = _UPVOTES_RE.search(chunk)
         time_m = _TIME_RE.search(chunk)
+        # Raw ISO from datetime= — router normalizer stamps publishedAt.
+        published = to_utc_published_at(time_m.group(1) if time_m else None)
         out.append(
-            strip_empty(
-                {
-                    "platform": "rumble",
-                    "id": cid,
-                    "text": text,
-                    "author": {
-                        "name": unescape(username),
-                        "url": f"https://rumble.com/user/{unescape(username)}",
-                        "verified": False,
-                    },
-                    "likes": safe_int(up_m.group(1)) if up_m else 0,
-                    "replyCount": safe_int(num_replies) or 0,
-                    "createdAt": safe_str(time_m.group(1) if time_m else None),
-                }
-            )
+            {
+                "platform": "rumble",
+                "id": cid,
+                "text": text,
+                "author": {
+                    "name": unescape(username),
+                    "url": f"https://rumble.com/user/{unescape(username)}",
+                    "verified": False,
+                },
+                "likes": safe_int(up_m.group(1)) if up_m else 0,
+                "replyCount": safe_int(num_replies) or 0,
+                "publishedAt": published,
+            }
         )
         if len(out) >= limit:
             break

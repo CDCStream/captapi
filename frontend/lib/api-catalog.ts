@@ -1821,14 +1821,14 @@ const RUMBLE: Spec[] = [
     path: "/v1/rumble/video-details",
     credits: 1,
     tagline:
-      "Rumble video metadata — real likes/comments (null when unknown), durationSeconds + durationText, captions, media.",
+      "Rumble video metadata — streams from height (not slot keys), captions[], audioStreams.",
     longDescription:
-      "Paste a Rumble video URL and get clean JSON: title, description, views, likes/dislikes/comments (null when Rumble does not expose them — never fake zeros), durationSeconds + durationText (same pair as channel-videos — no legacy duration string), publishedAt, thumbnail, width/height, channel name/url/handle plus channelFollowers and channelVerified, numericId/embedId/shareUrl/embedUrl (real embed id, not the page permalink), captions (language → .vtt path), media (mp4 and/or tar qualities, timeline, audio, hls), and streams[]. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+      "Paste a Rumble video URL and get clean JSON: title, description, views, likes/dislikes/comments (null when Rumble does not expose them — never fake zeros), durationSeconds + durationText, publishedAt, thumbnail, width/height, channel name/url/handle plus channelFollowers and channelVerified, numericId/embedId/shareUrl/embedUrl (real embed id, not the page permalink), captions[{code,language,url}], streams[] built from embed metadata height/bitrate (two 1080p bitrates stay two rows — no fabricated 1081 keys), audioStreams[], and thumbnailTrack when Rumble ships a timeline sprite. The raw quality-keyed media dump is not returned. Flat 1 credit. Pass cache=true for the 24h shared cache.",
     delivers: [
       "Engagement counts stay null when unknown (no fake zeros)",
-      "durationSeconds + durationText (aligned with channel-videos)",
+      "streams[] quality from height + bitrateKbps (no media map)",
       "Real embedId/embedUrl (page id ≠ embed id on Rumble)",
-      "captions{} + media{mp4|tar,timeline,audio,hls}",
+      "captions[{code,language,url}] + audioStreams[]",
     ],
   },
   {
@@ -1857,9 +1857,20 @@ const RUMBLE: Spec[] = [
     tagline:
       "Rumble keyword search — same video card shape as channel-videos (type, durationSeconds + durationText, UTC publishedAt).",
     longDescription:
-      "Search Rumble videos by keyword. Each result matches the channel-videos card: id, url, type (video|short|live), title, channel/channelUrl/channelHandle, views/likes/dislikes/comments, durationSeconds + durationText, publishedAt in UTC (+00:00), thumbnail, isLive, shareUrl. views is null when unknown or impossible (e.g. 0 with likes/comments). Flat ~0.6 credits per returned video (min 2).",
+      "Search Rumble videos by keyword. Every result has the same key set (null when scrape miss): id, url, type, title, channel/channelUrl/channelHandle/channelVerified, views/likes/dislikes/comments, durationSeconds + durationText, publishedAt UTC (+00:00), thumbnail, isLive, shareUrl. views is null when unknown or impossible (e.g. 0 with likes/comments). Flat ~0.6 credits per returned video (min 2).",
   },
-  { slug: "rumble-comments", name: "Rumble Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/rumble/comments", credits: 2 },
+  {
+    slug: "rumble-comments",
+    name: "Rumble Comments API",
+    shortName: "Comments",
+    category: "comments",
+    method: "GET",
+    path: "/v1/rumble/comments",
+    credits: 2,
+    tagline: "Rumble top-level comments — publishedAt ISO-8601 UTC (createdAt deprecated alias).",
+    longDescription:
+      "Paste a Rumble video URL and get top-level comments as clean JSON: id, text, author{name,url,verified}, likes, replyCount, publishedAt (ISO-8601 UTC from the <time datetime> attribute — never the display title string). createdAt is a deprecated one-release alias of publishedAt. Flat 2 credits.",
+  },
 ];
 
 const TIKTOK_SHOP: Spec[] = [
@@ -7917,19 +7928,29 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     durationSeconds: "Length in seconds (integer). Canonical with durationText — same pair as channel-videos.",
     durationText: "Human clock duration (e.g. 1:26:25). Not zero-padded HH:MM:SS.",
     "streams[].expiresAt":
-      "ISO expiry from signed CDN query params (expire / Expires / e / x-expires) when present. Omitted on unsigned progressive URLs (common for 1a-1791.com mp4).",
+      "ISO expiry from signed CDN query params (expire / Expires / e / x-expires) when present.",
     "streams[].quality":
-      "Video height label (e.g. 1080p). Deduped per type; Rumble's 1081 bitrate key maps to 1080p via meta.h. Audio is under media.audio, not streams.",
+      "From meta.height (e.g. 1080p). Upstream slot keys like 240/1081 are never used — two 1080p bitrates are two rows.",
+    "streams[].bitrateKbps": "Progressive bitrate from embedJS meta when present.",
     type: 'Content kind: "video" | "short" | "live".',
     likes: "Rumble upvotes when the vote UI is present; null when unknown (never invent 0).",
     likesIsApproximate:
       "true when likes came from a compact K/M/B display (e.g. 15.5K → 15500); false/omitted when the integer is exact.",
     dislikes: "Rumble downvotes when present; null when unknown.",
     comments: "Public comment count when Rumble exposes it; null when unknown.",
-    views: "View count from JSON-LD / page chrome.",
-    streams: "Playable mp4/hls rows ({url, type, quality[, expiresAt]}) — video only; audio is media.audio.",
-    media: "Raw embedJS buckets {mp4, timeline, audio, …} when available — use media.audio for AAC bitrates.",
+    views: "View count from JSON-LD / page chrome; null when impossible (0 with engagement).",
+    streams:
+      "Playable mp4/hls rows ({url, type, quality, width, height, bitrateKbps, sizeBytes, expiresAt}). Authoritative — no raw media map.",
+    audioStreams: "AAC rows ({url, type: audio/aac, bitrateKbps, …}) — never mixed into streams[].",
+    thumbnailTrack: "Timeline sprite strip when present — not a playable video.",
+    captions: "Array of {code, language, url} caption tracks (.vtt).",
     isLive: "true while the upload is a livestream; false for VODs.",
+  },
+  "rumble-comments": {
+    publishedAt:
+      "ISO-8601 UTC from the comment <time datetime> attribute. Display title= strings are never returned.",
+    createdAt:
+      "Deprecated one-release alias of publishedAt — same value. Prefer publishedAt.",
   },
   "rumble-channel-videos": {
     channel: "Top-level: channel slug you queried. Per-video channel is the display name string.",
