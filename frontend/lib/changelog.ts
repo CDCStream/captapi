@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-06",
+    category: "feature",
+    title: "YouTube audio-transcript: per-minute Whisper ASR + maxCredits",
+    description:
+      "New GET /v1/youtube/audio-transcript runs Whisper-class speech-to-text on YouTube audio (separate from /transcript captions). Pricing is ceil(durationSeconds/60)×2 with a maxCredits preflight (400 cost_exceeds_max, 0 credits). Sync cap is 20 minutes from measured e2e under Cloudflare; longer videos return duration_too_long with estimatedCredits. /transcript 404 no_captions now includes a suggestion block pointing at audio-transcript, and success responses always set source:\"captions\" (audio-transcript uses source:\"asr\").",
+    items: [
+      "New /v1/youtube/audio-transcript (2 credits/started minute)",
+      "maxCredits safety valve + 20-minute sync cap",
+      "/transcript: source=captions + ASR suggestion on no_captions 404",
+    ],
+  },
+  {
+    publishedAt: "2026-08-06",
     category: "fix",
     title: "TikTok Ad Library search: drop scrape-time dates, uniform keys",
     description:

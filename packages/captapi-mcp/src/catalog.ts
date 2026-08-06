@@ -155,7 +155,20 @@ const LINKBIO_PAGE = "Linkbio page URL or username.";
 const LINKME_PROFILE = "Linkme profile URL or username.";
 
 const YOUTUBE: Omit<Endpoint, "platform">[] = [
-  { tool: "youtube_transcript", name: "YouTube Transcript", path: "/v1/youtube/transcript", credits: 1, summary: "Extract the full timestamped transcript of a YouTube video.", params: [url(YT_VIDEO), language(), cacheParam()] },
+  { tool: "youtube_transcript", name: "YouTube Transcript", path: "/v1/youtube/transcript", credits: 1, summary: "YouTube published captions (not STT). 404 is free; see audio-transcript for ASR.", params: [url(YT_VIDEO), language(), cacheParam()] },
+  {
+    tool: "youtube_audio_transcript",
+    name: "YouTube Audio Transcript",
+    path: "/v1/youtube/audio-transcript",
+    credits: 2,
+    summary: "Whisper-class speech-to-text for YouTube audio. 2 credits per started minute; maxCredits safety valve.",
+    params: [
+      url(YT_VIDEO),
+      language(),
+      { name: "maxCredits", type: "number", required: false, description: "Refuse before STT when estimated credits would exceed this." },
+      cacheParam(),
+    ],
+  },
   { tool: "youtube_summarize", name: "YouTube Summarizer", path: "/v1/youtube/summarize", credits: 3, summary: "AI summary (key points, topics, sentiment) of a YouTube video.", params: [url(YT_VIDEO), language(), cacheParam()] },
   { tool: "youtube_video_details", name: "YouTube Video Details", path: "/v1/youtube/video-details", credits: 1, summary: "Metadata + engagement stats for a YouTube video.", params: [url(YT_VIDEO)] },
   { tool: "youtube_comments", name: "YouTube Comments", path: "/v1/youtube/comments", credits: 2, summary: "Comments on a YouTube video, with cursor pagination (nextCursor + hasMore).", params: [url(YT_VIDEO), limit(50, 500), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }, cacheParam()] },

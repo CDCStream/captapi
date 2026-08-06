@@ -285,6 +285,10 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     OPENAI_MODEL_SUMMARY: str = "gpt-4o-mini"
     OPENAI_MODEL_TRANSCRIPTION: str = "whisper-1"
+    # Optional Groq Whisper (whisper-large-v3-turbo). When set, YouTube
+    # /audio-transcript prefers Groq for lower latency; else OpenAI whisper-1.
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL_TRANSCRIPTION: str = "whisper-large-v3-turbo"
 
     # Active Merchant-of-Record provider. "paddle" is live; "dodo" is kept as a
     # dormant fallback (its code path still works if switched back).

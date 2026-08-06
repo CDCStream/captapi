@@ -91,6 +91,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `youtube_transcript` | `/v1/youtube/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 1 |
+| `youtube_audio_transcript` | `/v1/youtube/audio-transcript` | `url` (string), `language`? (string), `maxCredits`? (number), `cache`? (boolean) | 2/min |
 | `youtube_summarize` | `/v1/youtube/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 3 |
 | `youtube_video_details` | `/v1/youtube/video-details` | `url` (string), `cache`? (boolean) | 1 |
 | `youtube_comments` | `/v1/youtube/comments` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |

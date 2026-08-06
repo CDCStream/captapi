@@ -251,7 +251,31 @@ const YOUTUBE: Spec[] = [
     tagline:
       "YouTube's published captions with timestamps — not speech-to-text. Flat 1 credit; 404 is free.",
     longDescription:
-      "Returns the captions YouTube published for a video (manual or auto-generated tracks) as clean JSON with timestamps. It does not generate text from speech — long live streams often have no auto-captions. When captions are missing, the 404 body includes code (no_captions / language_not_available), reason, availableLanguages[], and hasAutoCaptions. Pass language to require that track (or a YouTube translation into it); there is no silent fallback to another language — success responses expose requestedLanguage and returnedLanguage. Flat 1 credit on success; 404 never charges.",
+      "Returns the captions YouTube publishes for a video — manual or auto-generated. It does not perform speech-to-text. Long live streams and VODs frequently have no auto-captions at all. When there is no caption track this endpoint returns 404 and costs 0 credits (strictly better than charging for a null body); use /v1/youtube/audio-transcript to transcribe the audio directly (priced per minute). The 404 body includes code (no_captions / language_not_available), reason, availableLanguages[], hasAutoCaptions, and — when the video is reachable with audio — a suggestion block with estimatedCredits for audio-transcript. Success responses always set source: \"captions\" (contrast audio-transcript source: \"asr\"). Pass language to require that track; there is no silent fallback. Flat 1 credit on success.",
+  },
+  {
+    slug: "youtube-audio-transcript",
+    name: "YouTube Audio Transcript API",
+    shortName: "Audio Transcript",
+    category: "transcript",
+    method: "GET",
+    path: "/v1/youtube/audio-transcript",
+    credits: 2,
+    creditsPerResult: 2,
+    tagline:
+      "Whisper-class speech-to-text for YouTube audio — 2 credits per started minute; maxCredits safety valve.",
+    longDescription:
+      "Transcribes YouTube audio with Whisper-class ASR when the video has no published captions (or when you want speech-to-text regardless). Separate from /transcript — that endpoint only returns YouTube's caption tracks. Pricing is duration-based and honest: creditsUsed = ceil(durationSeconds / 60) × 2 (OpenAI whisper-1 is about $0.006/min; 2 credits ≈ $0.009 covers cost plus margin). Pass maxCredits to refuse expensive jobs before any STT runs (400 cost_exceeds_max, 0 credits). Sync path is capped at 20 minutes under Cloudflare's 110s hard deadline (measured: 20 min TED ≈ 52s e2e); longer videos return 400 duration_too_long with estimatedCredits. Response always includes source: \"asr\", asrProvider, languageIsDetected, numeric segments[{text,startMs,endMs}], text, durationSeconds, creditsUsed. Cache hits still bill — the cache is our margin.",
+    delivers: [
+      "source:asr discriminator (pair with /transcript source:captions)",
+      "Per-minute pricing + maxCredits preflight",
+      "Uniform segments[] with numeric startMs/endMs",
+      "110s hard deadline; 20-minute sync cap from measured e2e",
+    ],
+    platformLimits: [
+      "Sync transcription is capped at 20 minutes (Cloudflare 125s proxy read). Longer videos return 400 duration_too_long with estimatedCredits so you can budget.",
+      "ASR upload is limited to 25MB after audio extract — very long or high-bitrate sources may hit audio_too_large.",
+    ],
   },
   {
     slug: "youtube-summarizer",
@@ -3828,6 +3852,18 @@ const LINKME_PROFILE =
 const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   // YouTube
   "youtube-transcript": [up(YT_VIDEO), lang(), cacheP()],
+  "youtube-audio-transcript": [
+    up(YT_VIDEO),
+    lang(),
+    {
+      name: "maxCredits",
+      type: "number",
+      required: false,
+      description:
+        "Refuse before STT when estimatedCredits would exceed this (400 cost_exceeds_max, 0 credits).",
+    },
+    cacheP(),
+  ],
   "youtube-summarizer": [up(YT_VIDEO), lang(), cacheP()],
   "youtube-video-details": [up(YT_VIDEO)],
   "youtube-comments": [up(YT_VIDEO), lpFlat(50, 500, 2), CURSOR],
@@ -6295,11 +6331,21 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
   ) {
     list.push({
       q: `Why did I get 404 on a video with clear speech?`,
-      a: `This endpoint returns captions YouTube published — it does not run speech-to-text. Read detail.code: no_captions means tracks=0 (common on long live streams); language_not_available means tracks exist but not in your language (see availableLanguages). 404 never charges credits. Summarizer uses the same caption path and the same free 404.`,
+      a: `This endpoint returns captions YouTube published — it does not run speech-to-text. Read detail.code: no_captions means tracks=0 (common on long live streams); language_not_available means tracks exist but not in your language (see availableLanguages). On no_captions, detail.suggestion points at /v1/youtube/audio-transcript with estimatedCredits. 404 never charges credits.`,
     });
     list.push({
       q: `If I pass language=en and only Turkish captions exist, what happens?`,
       a: `We try YouTube's timedtext translation into en. If that fails → 404 language_not_available with availableLanguages (not a silent Turkish transcript). On success, requestedLanguage and returnedLanguage are both set; isTranslated is true when YouTube translated.`,
+    });
+  }
+  if (ep.slug === "youtube-audio-transcript") {
+    list.push({
+      q: `How are credits calculated?`,
+      a: `creditsUsed = ceil(durationSeconds / 60) × 2. Pass maxCredits to refuse before STT when the estimate would exceed your budget (400 cost_exceeds_max, 0 credits). Cache hits still bill — the cache is our margin.`,
+    });
+    list.push({
+      q: `How is this different from /youtube/transcript?`,
+      a: `/transcript returns YouTube's published captions (source:captions, flat 1 credit). /audio-transcript runs speech-to-text on the audio (source:asr, per-minute). Fall back from one to the other using the source discriminator — segment parsers should accept both shapes.`,
     });
   }
   if (ep.slug === "tiktok-user-followers" || ep.slug === "tiktok-user-followings") {

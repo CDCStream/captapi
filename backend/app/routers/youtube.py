@@ -21,7 +21,8 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.services.http_fetch import fetch as proxy_fetch
-from app.services.openai_client import summarize_transcript
+from app.services.openai_client import summarize_transcript, transcribe_audio, WHISPER_MAX_BYTES
+from app.services import youtube_audio
 from app.services.youtube_native import (
     YT_COOKIES,
     YT_HEADERS,
@@ -74,6 +75,14 @@ CREDIT_TRANSCRIPT = 1
 CREDIT_SUMMARIZE = 3
 CREDIT_VIDEO_DETAILS = 1
 CREDIT_CHANNEL_DETAILS = 1
+# YouTube /audio-transcript: ceil(minutes) × 2 (OpenAI whisper-1 ≈ $0.006/min;
+# 2 credits ≈ $0.009 → ~50% markup). Verified against live e2e timings.
+CREDIT_YT_ASR_PER_MINUTE = 2
+# Measured 2026-08-06: 19s→6s, ~3.5min→35s, 20min TED→52.5s e2e. Cap sync at
+# 20 minutes under Cloudflare's 125s proxy read (110s hard deadline).
+_YT_ASR_SYNC_MAX_SECONDS = 20 * 60
+_YT_ASR_HARD_MAX_SECONDS = 4 * 60 * 60
+_YT_ASR_HARD_DEADLINE_SECS = 110
 # Native InnerTube / RSS list endpoints (comments, search, channel-videos,
 # channel-playlists): ~$0–0.001 proxy cost → flat 2 keeps ~80%+ markup.
 CREDIT_YT_NATIVE_LIST = 2
@@ -860,7 +869,10 @@ def _fix_available_languages(available: Any) -> list[dict[str, Any]]:
 
 
 def _raise_transcript_unavailable(
-    item: dict[str, Any], *, language: str | None
+    item: dict[str, Any],
+    *,
+    language: str | None,
+    suggestion: dict[str, Any] | None = None,
 ) -> NoReturn:
     """404 with diagnostic body. billed_call never charges status >= 400."""
     err = item.get("error") if isinstance(item.get("error"), dict) else {}
@@ -881,22 +893,23 @@ def _raise_transcript_unavailable(
     else:
         code = "no_captions"
         reason = safe_str(err.get("reason")) or (
-            "YouTube published no caption tracks for this video. "
+            "YouTube publishes no caption track for this video. "
             "This endpoint returns YouTube's published captions only — "
             "it does not generate text from speech. Long live streams "
             "often have no auto-captions."
         )
-    raise HTTPException(
-        status_code=404,
-        detail={
-            "code": code,
-            "reason": reason,
-            "message": "Transcript not available for this video",
-            "availableLanguages": available,
-            "hasAutoCaptions": has_auto,
-            "requestedLanguage": requested,
-        },
-    )
+    detail: dict[str, Any] = {
+        "code": code,
+        "reason": reason,
+        "message": "Transcript not available for this video",
+        "availableLanguages": available,
+        "hasAutoCaptions": has_auto,
+        "requestedLanguage": requested,
+    }
+    # Point callers at /audio-transcript only for reachable audio with no tracks.
+    if code == "no_captions" and isinstance(suggestion, dict):
+        detail["suggestion"] = suggestion
+    raise HTTPException(status_code=404, detail=detail)
 
 
 # ---------- TRANSCRIPT ----------------------------------------------------
@@ -904,10 +917,12 @@ def _raise_transcript_unavailable(
     "/transcript",
     summary="Get YouTube video transcript",
     description=(
-        "Returns YouTube's published captions with timestamps — it does not "
-        "generate text from speech. Long live streams often have no "
-        f"auto-captions. Costs {CREDIT_TRANSCRIPT} credit on success; 404 "
-        "(no_captions / language_not_available) is never charged."
+        "Returns the captions YouTube publishes for a video — manual or "
+        "auto-generated. It does not perform speech-to-text. Long live streams "
+        "and VODs frequently have no auto-captions at all. When there is no "
+        f"caption track this endpoint returns 404 and costs 0 credits; use "
+        "/v1/youtube/audio-transcript to transcribe the audio directly "
+        f"(priced per minute). Costs {CREDIT_TRANSCRIPT} credit on success."
     ),
 )
 async def youtube_transcript(
@@ -957,20 +972,36 @@ async def youtube_transcript(
                     )
                     text_parts.append(text)
             if not segments:
-                # Explicit 0 — billed_call already skips status>=400, but keep
-                # the override so logs never show a positive credit on miss.
                 ctx["credits_override"] = 0
-                _raise_transcript_unavailable(item, language=language)
+                suggestion: dict[str, Any] | None = None
+                err = item.get("error") if isinstance(item.get("error"), dict) else {}
+                code = safe_str(err.get("code")) or "no_captions"
+                # Suggest ASR only when there are simply no tracks (not a
+                # language mismatch / private / deleted).
+                if code == "no_captions" or (
+                    not code and not item.get("availableLanguages")
+                ):
+                    duration = await youtube_audio.video_duration_seconds(vid)
+                    if duration and duration > 0:
+                        suggestion = {
+                            "endpoint": "/v1/youtube/audio-transcript",
+                            "message": (
+                                "This video has audio but no captions. Use "
+                                "audio-transcript for speech-to-text "
+                                "(priced per minute)."
+                            ),
+                            "estimatedCredits": youtube_audio.credits_for_duration(
+                                duration
+                            ),
+                            "durationSeconds": duration,
+                        }
+                _raise_transcript_unavailable(
+                    item, language=language, suggestion=suggestion
+                )
             full = " ".join(text_parts)
             title = safe_str(item.get("title")) or await _oembed_title(norm_url)
-            # Public source labels (additive). Internal "direct"/"apify" stay on ctx.
-            raw_source = item.get("source")
-            if raw_source == "direct":
-                public_source = "captions"
-            elif raw_source == "apify":
-                public_source = "fallback"
-            else:
-                public_source = None
+            # Union discriminator with /audio-transcript (source=asr). Always
+            # populated — never null on success (captions path includes Apify).
             fixed_available = _fix_available_languages(
                 item.get("availableLanguages")
             )
@@ -985,6 +1016,7 @@ async def youtube_transcript(
                 safe_str(item.get("requestedLanguage") or language)
             )
             return {
+                "platform": "youtube",
                 "url": norm_url,
                 "videoId": vid,
                 "title": title,
@@ -995,7 +1027,7 @@ async def youtube_transcript(
                 "language": returned,
                 "requestedLanguage": requested,
                 "returnedLanguage": returned,
-                "source": public_source,
+                "source": "captions",
                 "isAutoGenerated": item.get("isAutoGenerated"),
                 "isTranslated": item.get("isTranslated"),
                 "availableLanguages": fixed_available,
@@ -1004,11 +1036,267 @@ async def youtube_transcript(
 
         data = await cached_or_run(
             endpoint="youtube.transcript",
-            params={"url": norm_url, "language": language or "", "v": 8},
+            params={"url": norm_url, "language": language or "", "v": 9},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
+        return ApiResponse(data=data)
+
+
+async def _asr_transcribe(
+    raw: bytes,
+    *,
+    filename: str,
+    language: str | None,
+) -> tuple[dict[str, Any], str]:
+    """Run Whisper-class ASR. Prefer Groq when ``GROQ_API_KEY`` is set."""
+    settings = get_settings()
+    groq_key = (settings.GROQ_API_KEY or "").strip()
+    if groq_key:
+        try:
+            from groq import AsyncGroq
+
+            client = AsyncGroq(api_key=groq_key)
+            kwargs: dict[str, Any] = {
+                "file": (filename, raw),
+                "model": settings.GROQ_MODEL_TRANSCRIPTION or "whisper-large-v3-turbo",
+                "response_format": "verbose_json",
+            }
+            if language:
+                kwargs["language"] = language
+            resp = await client.audio.transcriptions.create(**kwargs)
+            # Normalize Groq verbose_json → openai_client-like segments.
+            segments: list[dict[str, Any]] = []
+            for seg in getattr(resp, "segments", None) or []:
+                text = (getattr(seg, "text", None) or "").strip()
+                if not text:
+                    continue
+                start = float(getattr(seg, "start", 0.0) or 0.0)
+                end = float(getattr(seg, "end", start) or start)
+                segments.append(
+                    {
+                        "text": text,
+                        "start": start,
+                        "end": end,
+                        "duration": max(end - start, 0.0),
+                    }
+                )
+            text = (getattr(resp, "text", None) or "").strip()
+            if not text and segments:
+                text = " ".join(s["text"] for s in segments)
+            result = {
+                "transcript": text,
+                "transcriptSegments": segments,
+                "wordCount": len(text.split()),
+                "segments": len(segments),
+                "language": getattr(resp, "language", None),
+                "duration": float(getattr(resp, "duration", 0.0) or 0.0),
+            }
+            provider = f"groq-{settings.GROQ_MODEL_TRANSCRIPTION or 'whisper-large-v3-turbo'}"
+            return result, provider
+        except Exception as exc:  # noqa: BLE001
+            # Fall through to OpenAI — do not fail the request on Groq hiccups.
+            import structlog
+
+            structlog.get_logger(__name__).warning(
+                "yt_asr_groq_failed", error=str(exc)[:200]
+            )
+
+    result = await transcribe_audio(raw, filename=filename, language=language)
+    provider = f"openai-{settings.OPENAI_MODEL_TRANSCRIPTION or 'whisper-1'}"
+    return result, provider
+
+
+# ---------- AUDIO TRANSCRIPT (ASR) ----------------------------------------
+@router.get(
+    "/audio-transcript",
+    summary="Speech-to-text a YouTube video (Whisper-class ASR)",
+    description=(
+        "Transcribes YouTube audio with Whisper-class speech-to-text — separate "
+        "from /transcript (published captions). Priced per started minute: "
+        f"credits = ceil(durationSeconds / 60) × {CREDIT_YT_ASR_PER_MINUTE}. "
+        "Pass maxCredits to refuse expensive jobs before any STT runs "
+        "(400 cost_exceeds_max, 0 credits). Sync path is capped at "
+        f"{_YT_ASR_SYNC_MAX_SECONDS // 60} minutes (measured e2e under Cloudflare); "
+        "longer videos return 400 duration_too_long with estimatedCredits. "
+        "Hard deadline 110s → 502, 0 credits. Response source is always \"asr\" "
+        "(contrast /transcript source=\"captions\")."
+    ),
+)
+async def youtube_audio_transcript(
+    url: str = Query(..., description="YouTube video URL"),
+    language: str | None = Query(
+        None,
+        description=(
+            "Optional ISO-639-1 hint for ASR (e.g. tr, en). Omit to auto-detect "
+            "(languageIsDetected=true)."
+        ),
+    ),
+    maxCredits: int | None = Query(
+        None,
+        ge=1,
+        le=50_000,
+        description=(
+            "Refuse the job before transcription when estimatedCredits would "
+            "exceed this. Returns 400 cost_exceeds_max (0 credits)."
+        ),
+    ),
+    cache: bool = Query(
+        False,
+        description="Set true to use the 24h cache. Default false — always fetch fresh.",
+    ),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    vid, norm_url = _require_youtube_url(url)
+    lang = (language or "").strip().lower() or None
+
+    # 1) Cheap duration — before any STT or credit hold beyond the estimate.
+    duration = await youtube_audio.video_duration_seconds(vid)
+    if not duration or duration <= 0:
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "code": "video_unavailable",
+                "message": "Could not resolve this YouTube video or its duration.",
+            },
+        )
+    estimated = youtube_audio.credits_for_duration(duration)
+
+    if duration > _YT_ASR_HARD_MAX_SECONDS:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "duration_too_long",
+                "message": (
+                    f"Videos longer than {_YT_ASR_HARD_MAX_SECONDS // 3600} hours "
+                    "are not supported yet."
+                ),
+                "durationSeconds": duration,
+                "estimatedCredits": estimated,
+                "hardMaxSeconds": _YT_ASR_HARD_MAX_SECONDS,
+            },
+        )
+    if duration > _YT_ASR_SYNC_MAX_SECONDS:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "duration_too_long",
+                "message": (
+                    f"Sync audio-transcript supports up to "
+                    f"{_YT_ASR_SYNC_MAX_SECONDS // 60} minutes "
+                    f"(measured under a 110s Cloudflare deadline). "
+                    f"This video is {duration}s."
+                ),
+                "durationSeconds": duration,
+                "estimatedCredits": estimated,
+                "syncMaxSeconds": _YT_ASR_SYNC_MAX_SECONDS,
+            },
+        )
+    if maxCredits is not None and estimated > maxCredits:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "cost_exceeds_max",
+                "durationSeconds": duration,
+                "estimatedCredits": estimated,
+                "maxCredits": maxCredits,
+            },
+        )
+
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/youtube/audio-transcript",
+        platform="youtube",
+        resource_url=norm_url,
+        base_credits=estimated,
+    ) as ctx:
+        # Cache is our margin (same framing as trending-reels) — hits still bill.
+        ctx["bill_on_cache_hit"] = True
+
+        async def _run() -> dict[str, Any]:
+            try:
+                raw, _extracted_dur, filename = await youtube_audio.extract_audio_bytes(vid)
+            except Exception as exc:  # noqa: BLE001
+                ctx["credits_override"] = 0
+                raise HTTPException(
+                    status_code=502,
+                    detail={
+                        "code": "audio_extract_failed",
+                        "message": "Failed to download audio from YouTube.",
+                        "error": str(exc)[:200],
+                    },
+                ) from exc
+            if len(raw) > WHISPER_MAX_BYTES:
+                ctx["credits_override"] = 0
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "code": "audio_too_large",
+                        "message": (
+                            f"Extracted audio exceeds the {WHISPER_MAX_BYTES // (1024 * 1024)}MB "
+                            "ASR upload limit. Try a shorter video."
+                        ),
+                        "durationSeconds": duration,
+                        "estimatedCredits": estimated,
+                    },
+                )
+
+            result, provider = await _asr_transcribe(
+                raw, filename=filename or "audio.m4a", language=lang
+            )
+            segs = youtube_audio.segments_to_ms(result.get("transcriptSegments") or [])
+            text = (result.get("transcript") or "").strip()
+            if not text and segs:
+                text = " ".join(s["text"] for s in segs)
+            # Bill on the metadata duration the caller saw in the estimate —
+            # predictable, matches maxCredits math.
+            credits_used = youtube_audio.credits_for_duration(duration)
+            ctx["credits_override"] = credits_used
+            ctx["source"] = "asr"
+            detected = normalize_language_code(safe_str(result.get("language")))
+            return {
+                "platform": "youtube",
+                "videoId": vid,
+                "url": norm_url,
+                "source": "asr",
+                "asrProvider": provider,
+                "language": detected or lang,
+                "languageIsDetected": lang is None,
+                "durationSeconds": duration,
+                "segments": segs,
+                "text": text,
+                "creditsUsed": credits_used,
+            }
+
+        try:
+            data = await asyncio.wait_for(
+                cached_or_run(
+                    endpoint="youtube.audio-transcript",
+                    params={
+                        "url": norm_url,
+                        "language": lang or "",
+                        "v": 1,
+                    },
+                    runner=_run,
+                    ctx=ctx,
+                    use_cache=cache,
+                ),
+                timeout=_YT_ASR_HARD_DEADLINE_SECS,
+            )
+        except asyncio.TimeoutError as exc:
+            ctx["credits_override"] = 0
+            raise HTTPException(
+                status_code=502,
+                detail={
+                    "code": "timeout",
+                    "message": (
+                        f"Audio transcription exceeded the "
+                        f"{_YT_ASR_HARD_DEADLINE_SECS}s hard deadline."
+                    ),
+                    "durationSeconds": duration,
+                },
+            ) from exc
         return ApiResponse(data=data)
 
 
