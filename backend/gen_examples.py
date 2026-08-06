@@ -25,6 +25,8 @@ _ARRAY_CAPS: dict[str, int] = {
     "keyPoints": 8,
     "topics": 8,
     "transcriptSegments": 8,
+    # ms-cue family (youtube-audio-transcript, rumble-video-transcript)
+    "segments": 8,
     "requests": 5,
 }
 

@@ -4028,6 +4028,58 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
+  "rumble-video-transcript": {
+    "platform": "rumble",
+    "id": "v7cv2cc",
+    "url": "https://rumble.com/v7cv2cc-now-i-can-finally-talk-about-it-ep.-2555-07172026.html",
+    "source": "captions",
+    "language": "en-auto",
+    "languageName": "English (auto)",
+    "durationSeconds": 5185,
+    "segments": [
+      {
+        "text": "All America all the time sit down buckle up and get ready for the Dan Bongino show",
+        "startMs": 52240,
+        "endMs": 59760
+      },
+      {
+        "text": "team is like",
+        "startMs": 65750,
+        "endMs": 71960
+      },
+      {
+        "text": "Thank you. Mr. President for",
+        "startMs": 71960,
+        "endMs": 74280
+      },
+      {
+        "text": "Declassifying a lot of this folks",
+        "startMs": 75080,
+        "endMs": 77080
+      },
+      {
+        "text": "Obviously",
+        "startMs": 79390,
+        "endMs": 81720
+      },
+      {
+        "text": "Was like itching to get on the air today",
+        "startMs": 81720,
+        "endMs": 85240
+      },
+      {
+        "text": "When you go and take a job in the government, especially in the executive branch",
+        "startMs": 85880,
+        "endMs": 92530
+      },
+      {
+        "text": "The president is the ultimate declassifier the job is not about you",
+        "startMs": 93420,
+        "endMs": 98140
+      }
+    ],
+    "text": "All America all the time sit down buckle up and get ready for the Dan Bongino show team is like Thank you. Mr. President for Declassifying a lot of this folks Obviously Was like itching to get on the air today When you go and take a job in the government, especially in the executive branch The president is the ultimate declassifier the job is not about you"
+  },
   "snapchat-user-profile": {
     "platform": "snapchat",
     "username": "nba",
@@ -7673,6 +7725,16 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "The cool thing about these guys is that they have really, really, really long fronts.",
         "startMs": 4000,
         "endMs": 12000
+      },
+      {
+        "text": "And that's cool.",
+        "startMs": 12000,
+        "endMs": 14000
+      },
+      {
+        "text": "And that's pretty much all there is to say.",
+        "startMs": 16000,
+        "endMs": 19000
       }
     ],
     "text": "Alright, so here we are in front of the elephants. The cool thing about these guys is that they have really, really, really long fronts. And that's cool. And that's pretty much all there is to say.",
@@ -8376,6 +8438,39 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 16.475,
         "votes": 0,
         "uuid": "6377104df535c8eb2c2d7d6437320e71660b93a02517da2ba668c3813d7de6ff7"
+      },
+      {
+        "category": "sponsor",
+        "actionType": "skip",
+        "startSeconds": 555.65,
+        "endSeconds": 560.175,
+        "startFormatted": "9:16",
+        "endFormatted": "9:20",
+        "durationSeconds": 4.525,
+        "votes": 0,
+        "uuid": "f75d77a0658f668c014ffa63f26f2ecc439a6d6b18b868d93c0875f55a47ba017"
+      },
+      {
+        "category": "selfpromo",
+        "actionType": "skip",
+        "startSeconds": 567.302,
+        "endSeconds": 573,
+        "startFormatted": "9:27",
+        "endFormatted": "9:33",
+        "durationSeconds": 5.698,
+        "votes": 0,
+        "uuid": "328569d7ae428c1243bc54f010800a5cf6b5449e47abd3ee0f8093531ebeb8137"
+      },
+      {
+        "category": "sponsor",
+        "actionType": "skip",
+        "startSeconds": 621.375,
+        "endSeconds": 627.7,
+        "startFormatted": "10:21",
+        "endFormatted": "10:28",
+        "durationSeconds": 6.325,
+        "votes": -1,
+        "uuid": "ee142c1cb73f13b3eceef18ffdd1eafd763c1adaef8df88f2c2b20f768e40ad27"
       }
     ]
   }

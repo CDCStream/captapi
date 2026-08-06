@@ -263,7 +263,7 @@ const YOUTUBE: Spec[] = [
     path: "/v1/youtube/audio-transcript",
     credits: 2,
     tagline:
-      "Whisper-class speech-to-text for YouTube audio — 2 credits per started minute; maxCredits safety valve.",
+      "Speech-to-text for YouTube audio. Use it when a video has no captions — or when you want a transcript of what was actually spoken rather than YouTube's published captions. Priced per started minute of audio.",
     longDescription:
       "Transcribes YouTube audio with Whisper-class ASR when the video has no published captions (or when you want speech-to-text regardless). Separate from /transcript — that endpoint only returns YouTube's caption tracks. Pricing is duration-based and honest: creditsUsed = ceil(durationSeconds / 60) × 2 (badge: 2 credits/min of audio). Pass maxCredits to refuse expensive jobs before any STT runs (400 cost_exceeds_max, 0 credits). Prefers Groq whisper-large-v3-turbo when GROQ_API_KEY is set (measured: ~20 min ≈ 12s e2e, ~82 min ≈ 49s); otherwise OpenAI whisper-1. Audio is re-encoded to 16 kHz mono 32 kbps before upload so podcast-length jobs stay under the ~25 MB ceiling. Sync path is capped at 90 minutes under Cloudflare's 110s hard deadline; longer videos return 400 duration_too_long with estimatedCredits before any STT spend. Response always includes source: \"asr\", asrProvider, languageIsDetected, numeric segments[{text,startMs,endMs}], text, durationSeconds, creditsUsed. Cache hits still bill — the cache is our margin.",
     delivers: [
@@ -5224,20 +5224,97 @@ function exampleData(ep: ApiEndpoint): Record<string, unknown> {
 
   switch (ep.category) {
     case "transcript":
+      // Two families — never cross-contaminate:
+      //   • file upload (video-transcript): transcript + transcriptSegments + segments:number
+      //   • ms-cue captions/ASR (youtube-audio, rumble): text + segments[{text,startMs,endMs}]
+      //   • platform caption tracks (youtube/tiktok/…): transcript + transcriptSegments
+      if (ep.slug === "video-transcript") {
+        return {
+          filename: "sample.mp4",
+          transcript:
+            "Hey everyone, welcome back to the channel. Today we're breaking down structured data APIs.",
+          wordCount: 14,
+          segments: 2,
+          language: "english",
+          durationSeconds: 8.4,
+          duration: 8.4,
+          creditsCharged: 1,
+          noSpeech: false,
+          transcriptSegments: [
+            {
+              text: "Hey everyone, welcome back to the channel.",
+              start: 0.0,
+              duration: 4.12,
+              end: 4.12,
+              timestamp: "00:00",
+            },
+            {
+              text: "Today we're breaking down structured data APIs.",
+              start: 4.12,
+              duration: 4.28,
+              end: 8.4,
+              timestamp: "00:04",
+            },
+          ],
+        };
+      }
+      if (
+        ep.slug === "youtube-audio-transcript" ||
+        ep.slug === "rumble-video-transcript"
+      ) {
+        return {
+          platform: ep.platform,
+          ...(ep.slug === "youtube-audio-transcript"
+            ? {
+                videoId: "jNQXAC9IVRw",
+                url: "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+                source: "asr",
+                asrProvider: "groq-whisper-large-v3-turbo",
+                languageIsDetected: true,
+                creditsUsed: 2,
+              }
+            : {
+                id: "v7cv2cc",
+                url: "https://rumble.com/v7cv2cc-now-i-can-finally-talk-about-it-ep.-2555-07172026.html",
+                source: "captions",
+                languageName: "English (auto)",
+              }),
+          language: ep.slug === "rumble-video-transcript" ? "en-auto" : "en",
+          durationSeconds: ep.slug === "rumble-video-transcript" ? 5185 : 19,
+          segments: [
+            { text: "Alright, so here we are in front of the elephants.", startMs: 0, endMs: 4000 },
+            {
+              text: "The cool thing about these guys is that they have really, really, really long fronts.",
+              startMs: 4000,
+              endMs: 12000,
+            },
+          ],
+          text: "Alright, so here we are in front of the elephants. The cool thing about these guys is that they have really, really, really long fronts.",
+        };
+      }
       return {
-        filename: "sample.mp4",
+        platform: ep.platform,
+        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
         transcript:
           "Hey everyone, welcome back to the channel. Today we're breaking down structured data APIs.",
         wordCount: 14,
         segments: 2,
-        language: "english",
-        durationSeconds: 8.4,
-        duration: 8.4,
-        creditsCharged: 1,
-        noSpeech: false,
+        language: "en",
         transcriptSegments: [
-          { text: "Hey everyone, welcome back to the channel.", start: 0.0, duration: 4.12, end: 4.12, timestamp: "00:00" },
-          { text: "Today we're breaking down structured data APIs.", start: 4.12, duration: 4.28, end: 8.4, timestamp: "00:04" },
+          {
+            text: "Hey everyone, welcome back to the channel.",
+            start: 0.0,
+            duration: 4.12,
+            end: 4.12,
+            timestamp: "00:00",
+          },
+          {
+            text: "Today we're breaking down structured data APIs.",
+            start: 4.12,
+            duration: 4.28,
+            end: 8.4,
+            timestamp: "00:04",
+          },
         ],
       };
     case "summarize":
@@ -6102,11 +6179,26 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
   if (
     ep.category === "transcript" &&
     ep.platform !== "account" &&
-    ep.platform !== "utilities"
+    ep.platform !== "utilities" &&
+    // Captions-only / ASR / text-as-transcript surfaces must not claim a Whisper fallback.
+    ep.slug !== "youtube-transcript" &&
+    ep.slug !== "youtube-shorts-transcript" &&
+    ep.slug !== "youtube-audio-transcript" &&
+    ep.slug !== "rumble-video-transcript" &&
+    ep.slug !== "twitter-transcript" &&
+    ep.slug !== "linkedin-post-transcript" &&
+    ep.slug !== "reddit-post-transcript" &&
+    ep.slug !== "facebook-ad-library-ad-transcript"
   ) {
     list.push({
       q: `What if the ${platform} ${inputKind(ep)} has no captions?`,
       a: `When no captions are available, Captapi transcribes the audio with AI (Whisper) automatically, so you still get a usable transcript.`,
+    });
+  }
+  if (ep.slug === "rumble-video-transcript") {
+    list.push({
+      q: `What if the Rumble video has no captions?`,
+      a: `This endpoint only parses Rumble's published .vtt tracks — it does not run speech-to-text. No tracks → 404 no_captions (0 credits). Language mismatch → 404 language_not_available with availableLanguages.`,
     });
   }
   if (ep.category === "summarize") {
@@ -8109,6 +8201,24 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     captions: "Array of {code, language, url} caption tracks (.vtt).",
     isLive: "true while the upload is a livestream; false for VODs.",
   },
+  "youtube-audio-transcript": {
+    source: 'Always "asr" — Whisper-class speech-to-text on the audio (not YouTube\'s published captions). Pair with /youtube/transcript source:"captions".',
+    asrProvider:
+      'ASR backend that produced this transcript (e.g. "groq-whisper-large-v3-turbo" or "openai-whisper-1").',
+    languageIsDetected:
+      "true when language was auto-detected from the audio; false when the language query param was honored.",
+    language: 'BCP-47 / ISO speech language code from ASR (e.g. "en"), not a full name like "english".',
+    durationSeconds: "Audio length in whole seconds — basis for per-minute billing.",
+    segments:
+      "Timed speech cues as an array of {text, startMs, endMs}. Not a count — contrast file-transcript family where segments is a number.",
+    startMs: "Cue start in integer milliseconds.",
+    endMs: "Cue end in integer milliseconds (always > startMs).",
+    text: "Full transcript — segment texts joined with a single space. Prefer this over any legacy transcript alias.",
+    creditsUsed:
+      "Credits billed for this call: ceil(durationSeconds / 60) × 2. Present in data (and echoed on the envelope).",
+    videoId: "YouTube video id parsed from the url.",
+    platform: 'Always "youtube" on this endpoint.',
+  },
   "rumble-video-transcript": {
     source: 'Always "captions" — this endpoint parses Rumble\'s published .vtt only (no STT).',
     language: "Caption track code actually returned (e.g. en-auto).",
@@ -8116,9 +8226,11 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     durationSeconds: "Video length in seconds when known (from video-details).",
     segments:
       "Timed cues [{text, startMs, endMs}]. Same shape as /v1/youtube/audio-transcript. Consecutive identical rolling auto-captions are collapsed.",
-    "segments[].startMs": "Cue start in integer milliseconds.",
-    "segments[].endMs": "Cue end in integer milliseconds (always > startMs).",
+    startMs: "Cue start in integer milliseconds.",
+    endMs: "Cue end in integer milliseconds (always > startMs).",
     text: "Full transcript — segment texts joined with a single space.",
+    platform: 'Always "rumble" on this endpoint.',
+    id: "Rumble video id (e.g. v7cv2cc).",
   },
   "rumble-comments": {
     publishedAt:
@@ -8955,6 +9067,70 @@ export function responseStructure(ep: ApiEndpoint): ResponseGroup[] {
   }
   switch (ep.category) {
     case "transcript":
+      if (
+        ep.slug === "youtube-audio-transcript" ||
+        ep.slug === "rumble-video-transcript"
+      ) {
+        return [
+          {
+            title: "Top-level fields",
+            fields: [
+              { name: "platform", desc: `Always "${ep.platform}" on this endpoint.` },
+              ...(ep.slug === "youtube-audio-transcript"
+                ? [
+                    { name: "videoId", desc: "YouTube video id parsed from the url." },
+                    {
+                      name: "source",
+                      desc: 'Always "asr" — speech-to-text on the audio (not published captions).',
+                    },
+                    {
+                      name: "asrProvider",
+                      desc: "ASR backend that produced this transcript.",
+                    },
+                    {
+                      name: "languageIsDetected",
+                      desc: "true when language was auto-detected from the audio.",
+                    },
+                    {
+                      name: "creditsUsed",
+                      desc: "Credits billed: ceil(durationSeconds / 60) × 2.",
+                    },
+                  ]
+                : [
+                    { name: "id", desc: "Rumble video id." },
+                    {
+                      name: "source",
+                      desc: 'Always "captions" — published .vtt only (no STT).',
+                    },
+                    {
+                      name: "languageName",
+                      desc: "Human label from the caption track.",
+                    },
+                  ]),
+              { name: "url", desc: "Canonical URL of the video." },
+              { name: "language", desc: "Language code actually returned." },
+              { name: "durationSeconds", desc: "Length in seconds when known." },
+              {
+                name: "text",
+                desc: "Full transcript — segment texts joined with a single space.",
+              },
+              {
+                name: "segments",
+                desc: "Timed cues as an array of {text, startMs, endMs} — not a count.",
+              },
+            ],
+          },
+          {
+            title: "Segments",
+            note: "Each item in segments contains:",
+            fields: [
+              { name: "text", desc: "Spoken text for this cue." },
+              { name: "startMs", desc: "Cue start in integer milliseconds." },
+              { name: "endMs", desc: "Cue end in integer milliseconds." },
+            ],
+          },
+        ];
+      }
       return [
         {
           title: "Full transcript",

@@ -16385,5 +16385,63 @@
       "creditsUsed": 2
     },
     "error": null
+  },
+  "rumble-video-transcript": {
+    "ok": true,
+    "status": 200,
+    "credits": 1,
+    "data": {
+      "platform": "rumble",
+      "id": "v7cv2cc",
+      "url": "https://rumble.com/v7cv2cc-now-i-can-finally-talk-about-it-ep.-2555-07172026.html",
+      "source": "captions",
+      "language": "en-auto",
+      "languageName": "English (auto)",
+      "durationSeconds": 5185,
+      "segments": [
+        {
+          "text": "All America all the time sit down buckle up and get ready for the Dan Bongino show",
+          "startMs": 52240,
+          "endMs": 59760
+        },
+        {
+          "text": "team is like",
+          "startMs": 65750,
+          "endMs": 71960
+        },
+        {
+          "text": "Thank you. Mr. President for",
+          "startMs": 71960,
+          "endMs": 74280
+        },
+        {
+          "text": "Declassifying a lot of this folks",
+          "startMs": 75080,
+          "endMs": 77080
+        },
+        {
+          "text": "Obviously",
+          "startMs": 79390,
+          "endMs": 81720
+        },
+        {
+          "text": "Was like itching to get on the air today",
+          "startMs": 81720,
+          "endMs": 85240
+        },
+        {
+          "text": "When you go and take a job in the government, especially in the executive branch",
+          "startMs": 85880,
+          "endMs": 92530
+        },
+        {
+          "text": "The president is the ultimate declassifier the job is not about you",
+          "startMs": 93420,
+          "endMs": 98140
+        }
+      ],
+      "text": "All America all the time sit down buckle up and get ready for the Dan Bongino show team is like Thank you. Mr. President for Declassifying a lot of this folks Obviously Was like itching to get on the air today When you go and take a job in the government, especially in the executive branch The president is the ultimate declassifier the job is not about you"
+    },
+    "error": null
   }
 }
