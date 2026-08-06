@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-06",
+    category: "fix",
+    title: "YouTube audio-transcript: keep timed segments[] (no text-only fallback)",
+    description:
+      "GET /v1/youtube/audio-transcript was returning a full text blob with segments:[]. Root cause: the shared Whisper helper rejected song/chorus word reuse as a hallucination loop and fell back to gpt-4o-mini-transcribe (text only). verbose_json segment timings are now kept; ASR callers set require_timed_segments so that fallback never runs. Playground badge fixed to \"2 credits/min of audio\" (was wrongly \"~2 (2/result)\").",
+    items: [
+      "segments[] populated from whisper-1 verbose_json",
+      "No gpt-4o-mini text-only fallback on audio-transcript",
+      "Catalogue badge: 2 credits/min of audio",
+    ],
+  },
+  {
+    publishedAt: "2026-08-06",
     category: "feature",
     title: "Rumble video transcript: parse published .vtt captions",
     description:

@@ -172,6 +172,7 @@ export function creditLabel(
   if (e.slug === "analytics-compare") return "1 credit/url";
   if (e.slug === "video-transcript") return "1 credit/min";
   if (e.slug === "video-summarize") return "1 credit/min +1";
+  if (e.slug === "youtube-audio-transcript") return "2 credits/min of audio";
   // Native flat + Apify per-result dual pricing (document both, not "~2 (0.7/result)").
   if (e.slug === "tiktok-shop-product-details") {
     return "2 credits native (14 Apify)";
@@ -261,20 +262,20 @@ const YOUTUBE: Spec[] = [
     method: "GET",
     path: "/v1/youtube/audio-transcript",
     credits: 2,
-    creditsPerResult: 2,
     tagline:
       "Whisper-class speech-to-text for YouTube audio — 2 credits per started minute; maxCredits safety valve.",
     longDescription:
-      "Transcribes YouTube audio with Whisper-class ASR when the video has no published captions (or when you want speech-to-text regardless). Separate from /transcript — that endpoint only returns YouTube's caption tracks. Pricing is duration-based and honest: creditsUsed = ceil(durationSeconds / 60) × 2 (OpenAI whisper-1 is about $0.006/min; 2 credits ≈ $0.009 covers cost plus margin). Pass maxCredits to refuse expensive jobs before any STT runs (400 cost_exceeds_max, 0 credits). Sync path is capped at 20 minutes under Cloudflare's 110s hard deadline (measured: 20 min TED ≈ 52s e2e); longer videos return 400 duration_too_long with estimatedCredits. Response always includes source: \"asr\", asrProvider, languageIsDetected, numeric segments[{text,startMs,endMs}], text, durationSeconds, creditsUsed. Cache hits still bill — the cache is our margin.",
+      "Transcribes YouTube audio with Whisper-class ASR when the video has no published captions (or when you want speech-to-text regardless). Separate from /transcript — that endpoint only returns YouTube's caption tracks. Pricing is duration-based and honest: creditsUsed = ceil(durationSeconds / 60) × 2 (badge: 2 credits/min of audio). Pass maxCredits to refuse expensive jobs before any STT runs (400 cost_exceeds_max, 0 credits). Prefers Groq whisper-large-v3-turbo when GROQ_API_KEY is set; otherwise OpenAI whisper-1 with response_format=verbose_json + timestamp_granularities=['segment'] so segments[] is never emptied by a text-only fallback. Sync path is capped at 20 minutes under Cloudflare's 110s hard deadline (measured OpenAI e2e: ~3.5 min ≈ 12s, ~20 min TED ≈ 72s); longer videos return 400 duration_too_long with estimatedCredits before any STT spend. Response always includes source: \"asr\", asrProvider, languageIsDetected, numeric segments[{text,startMs,endMs}], text, durationSeconds, creditsUsed. Cache hits still bill — the cache is our margin.",
     delivers: [
       "source:asr discriminator (pair with /transcript source:captions)",
       "Per-minute pricing + maxCredits preflight",
-      "Uniform segments[] with numeric startMs/endMs",
+      "Uniform segments[] with numeric startMs/endMs (verbose_json)",
       "110s hard deadline; 20-minute sync cap from measured e2e",
     ],
     platformLimits: [
-      "Sync transcription is capped at 20 minutes (Cloudflare 125s proxy read). Longer videos return 400 duration_too_long with estimatedCredits so you can budget.",
+      "Sync transcription is capped at 20 minutes (Cloudflare ~110s hard deadline). Longer videos return 400 duration_too_long with estimatedCredits so you can budget — 0 credits, no STT.",
       "ASR upload is limited to 25MB after audio extract — very long or high-bitrate sources may hit audio_too_large.",
+      "Set GROQ_API_KEY to switch the preferred provider to Groq whisper-large-v3-turbo (needed to clear ~60 min inside the sync deadline).",
     ],
   },
   {

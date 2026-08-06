@@ -255,6 +255,7 @@ async def transcribe_audio(
     *,
     translate: bool = False,
     timestamp_granularity: str = "segment",
+    require_timed_segments: bool = False,
 ) -> dict[str, Any]:
     """Whisper-transcribe (or translate-to-English) audio/video bytes.
 
@@ -263,6 +264,8 @@ async def transcribe_audio(
     (a toddler shouting "Baba!" is phonetically Spanish "Papa!").
     `translate=True` uses the translations endpoint (always English output).
     `timestamp_granularity` is ``segment`` (default) or ``word``.
+    `require_timed_segments=True` keeps verbose_json timings and never falls
+    back to text-only models (required by /youtube/audio-transcript).
     """
     settings = get_settings()
     client = get_openai()
@@ -298,6 +301,10 @@ async def transcribe_audio(
     result = _parse_verbose(resp, include_words=(gran == "word"))
     if _is_valid_transcript(result):
         return result
+    # Songs / catchphrases fail uniqueness checks but still have a healthy
+    # timed timeline — keep them when the caller needs segments[].
+    if require_timed_segments and result.get("transcriptSegments"):
+        return result
 
     # Whisper sometimes bails out after hallucinating on a music/silence
     # intro and misses speech that starts later; retries with the detected
@@ -325,10 +332,13 @@ async def transcribe_audio(
                     temperature=temperature,
                 )
                 return retry
+            if require_timed_segments and retry.get("transcriptSegments") and substantial:
+                return retry
 
     # Last resort: gpt-4o-mini-transcribe is far more robust on clips whose
-    # speech starts after a music intro. No segment timestamps, text only.
-    if not translate:
+    # speech starts after a music intro. No segment timestamps, text only —
+    # never used when the caller requires timed segments[] (ASR endpoints).
+    if not translate and not require_timed_segments:
         try:
             alt_kwargs: dict[str, Any] = {}
             if iso:
@@ -367,8 +377,12 @@ def _is_valid_transcript(result: dict[str, Any]) -> bool:
     if len(segments) >= 5:
         texts = [s["text"].lower() for s in segments]
         if len(set(texts)) / len(texts) < 0.34:
-            return False  # repetition loop, not real speech
-    # Word-level loop within a single segment ("???? 2. ???? 2. ...").
+            return False  # exact segment-text loop, not real speech
+    # Word-level loop only when we lack a multi-cue timeline. Songs and
+    # speeches with catchphrases reuse words across many timed segments —
+    # rejecting those emptied segments[] on /youtube/audio-transcript.
+    if len(segments) >= 3:
+        return True
     words = result["transcript"].lower().split()
     if len(words) >= 10 and len(set(words)) / len(words) < 0.3:
         return False

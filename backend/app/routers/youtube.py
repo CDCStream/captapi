@@ -1103,7 +1103,7 @@ async def _asr_transcribe(
                 "yt_asr_groq_failed", error=str(exc)[:200]
             )
 
-    result = await transcribe_audio(raw, filename=filename, language=language)
+    result = await transcribe_audio(raw, filename=filename, language=language, require_timed_segments=True)
     provider = f"openai-{settings.OPENAI_MODEL_TRANSCRIPTION or 'whisper-1'}"
     return result, provider
 
