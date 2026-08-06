@@ -30,6 +30,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install httpx structlog pydantic pydantic-settings python-dotenv tenacity redis
 
+      # Fail fast with a readable message (empty secrets look like silent exit 1).
+      - name: Check required secrets
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+        run: |
+          missing=0
+          if [ -z "$APIFY_TOKEN" ]; then
+            echo "::error::GitHub secret APIFY_TOKEN is missing or empty. Add it under Settings → Secrets and variables → Actions."
+            missing=1
+          else
+            echo "APIFY_TOKEN: set (${#APIFY_TOKEN} chars)"
+          fi
+          if [ -z "$REDIS_URL" ]; then
+            echo "::error::GitHub secret REDIS_URL is missing or empty. Use the same Upstash rediss:// URL as production (backend/.env)."
+            missing=1
+          else
+            echo "REDIS_URL: set (${#REDIS_URL} chars)"
+          fi
+          exit $missing
+
       - name: Kick Apify + write Redis snapshots
         working-directory: backend
         env:
