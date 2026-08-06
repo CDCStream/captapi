@@ -25,12 +25,29 @@ from app.utils.url import extract_rumble_video_id
 log = structlog.get_logger(__name__)
 
 
+# Absolute title= stamps on Rumble comment links (minute precision, not relative).
+_RUMBLE_COMMENT_TITLE_RE = re.compile(
+    r"^[A-Za-z]+,\s+[A-Za-z]+\s+\d{1,2},\s+\d{4}\s+\d{1,2}:\d{2}\s+(?:AM|PM)\s+[+-]\d{2}(?:\d{2})?$",
+    re.I,
+)
+
+
+def _parse_rumble_comment_title(text: str) -> str | None:
+    """Parse ``Friday, July 17, 2026 08:33 AM -04`` → UTC ISO (seconds = :00)."""
+    normalized = re.sub(r"([+-]\d{2})$", r"\g<1>00", (text or "").strip())
+    try:
+        dt = datetime.strptime(normalized, "%A, %B %d, %Y %I:%M %p %z")
+    except ValueError:
+        return None
+    return dt.astimezone(timezone.utc).isoformat()
+
+
 def to_utc_published_at(value: Any) -> str | None:
     """Normalize timestamps to UTC ``+00:00``.
 
-    Accepts ISO-8601 / ``Z`` and unix epoch seconds (int or digit string).
-    Display strings like ``Friday, July 17, 2026 08:33 AM -04`` are rejected
-    → ``null`` (never echoed into the public response).
+    Accepts ISO-8601 / ``Z``, unix epoch seconds, and Rumble comment ``title=``
+    absolutes (``Friday, July 17, 2026 08:33 AM -04``). Relative strings like
+    ``2 weeks ago`` are rejected → ``null``.
     """
     if isinstance(value, (int, float)) and not isinstance(value, bool):
         ts = float(value)
@@ -47,6 +64,8 @@ def to_utc_published_at(value: Any) -> str | None:
         return None
     if re.fullmatch(r"\d{10,13}", text):
         return to_utc_published_at(int(text))
+    if _RUMBLE_COMMENT_TITLE_RE.match(text):
+        return _parse_rumble_comment_title(text)
     try:
         dt = datetime.fromisoformat(text.replace("Z", "+00:00"))
     except ValueError:
@@ -472,6 +491,8 @@ STREAM_KEYS: tuple[str, ...] = (
     "sizeBytes",
     "expiresAt",
 )
+# Channel listing signed URLs have no rendition meta — honest lean shape only.
+CHANNEL_STREAM_KEYS: tuple[str, ...] = ("url", "type", "expiresAt")
 CAPTION_KEYS: tuple[str, ...] = ("code", "language", "url", "expiresAt")
 
 
@@ -581,6 +602,42 @@ def finalise_streams(
         key=lambda r: (safe_int(r.get("height")) or 0, safe_int(r.get("bitrateKbps")) or 0),
         reverse=True,
     )
+    return out
+
+
+def finalise_channel_streams(
+    streams: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    """Lean channel-videos streams — signed URLs, no per-rendition meta.
+
+    Channel scrapes return JWT playback URLs without height/bitrate. Shipping
+    the full ``STREAM_KEYS`` shape filled with nulls is a schema-without-data
+    trap; clients that need dims/bitrate should call ``/video-details``.
+    """
+    from app.utils.media_urls import cdn_expires_at
+
+    seen_url: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for s in streams or []:
+        if not isinstance(s, dict):
+            continue
+        url = safe_str(s.get("url"))
+        if not url or url in seen_url:
+            continue
+        stype = (safe_str(s.get("type")) or "").lower()
+        if stype.startswith("audio") or stype == "image":
+            continue
+        seen_url.add(url)
+        out.append(
+            {
+                "url": url,
+                "type": _normalize_stream_type(safe_str(s.get("type")), audio=False)
+                or "video/mp4",
+                "expiresAt": safe_str(s.get("expiresAt")) or cdn_expires_at(url),
+            }
+        )
+        if len(out) >= 24:
+            break
     return out
 
 

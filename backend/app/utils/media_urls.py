@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import base64
+import json
 import re
 from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 _URL_RE = re.compile(r"https?://[^\s<>\"']+", re.IGNORECASE)
+_JWT_RE = re.compile(r"eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+")
 
 
 def utc_now_iso() -> str:
@@ -17,12 +20,76 @@ def utc_now_iso() -> str:
 _KWAI_TAG_TS_RE = re.compile(r"^\d+-(\d{10,})(?:-|$)")
 
 
+def _iso_from_unix(ts: int | float) -> str | None:
+    try:
+        n = float(ts)
+    except (TypeError, ValueError):
+        return None
+    if n < 1_000_000_000:
+        return None
+    if n > 1e12:  # ms
+        n /= 1000.0
+    try:
+        return datetime.fromtimestamp(n, tz=timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%S.000Z"
+        )
+    except (OverflowError, OSError, ValueError):
+        return None
+
+
+def jwt_exp_iso(token: str | None) -> str | None:
+    """Decode a JWT payload ``exp`` claim → ISO-8601 UTC (no verify)."""
+    raw = (token or "").strip()
+    if not raw or raw.count(".") < 2:
+        return None
+    seg = raw.split(".")[1]
+    pad = "=" * (-len(seg) % 4)
+    try:
+        data = json.loads(base64.urlsafe_b64decode(seg + pad))
+    except Exception:
+        return None
+    if not isinstance(data, dict):
+        return None
+    exp = data.get("exp")
+    if isinstance(exp, (int, float)) and not isinstance(exp, bool):
+        return _iso_from_unix(exp)
+    return None
+
+
+def _jwt_exp_from_url(url: str) -> str | None:
+    """Find a JWT in query values or path segments and read ``exp``."""
+    try:
+        parsed = urlparse(url)
+    except Exception:
+        return None
+    qs = parse_qs(parsed.query)
+    for values in qs.values():
+        for v in values:
+            text = str(v)
+            if "eyJ" not in text:
+                continue
+            m = _JWT_RE.search(text)
+            got = jwt_exp_iso(m.group(0) if m else text)
+            if got:
+                return got
+    for seg in (parsed.path or "").split("/"):
+        if "eyJ" not in seg:
+            continue
+        m = _JWT_RE.search(seg)
+        got = jwt_exp_iso(m.group(0) if m else seg)
+        if got:
+            return got
+    m = _JWT_RE.search(url)
+    return jwt_exp_iso(m.group(0)) if m else None
+
+
 def cdn_expires_at(url: str | None) -> str | None:
-    """Parse signed CDN expiry (``x-expires`` / ``expire`` / Kwai ``tag=``)."""
+    """Parse signed CDN expiry (query params, Kwai ``tag=``, or JWT ``exp``)."""
     if not url:
         return None
     try:
-        qs = parse_qs(urlparse(url).query)
+        parsed = urlparse(url)
+        qs = parse_qs(parsed.query)
     except Exception:
         return None
     # Case-insensitive: Google CDN uses ``Expires``, others ``expire`` / ``e``.
@@ -35,12 +102,9 @@ def cdn_expires_at(url: str | None) -> str | None:
             ts = int(raw)
         except (TypeError, ValueError):
             continue
-        # Prefer unix seconds; ignore tiny / non-epoch values.
-        if ts < 1_000_000_000:
-            continue
-        return datetime.fromtimestamp(ts, tz=timezone.utc).strftime(
-            "%Y-%m-%dT%H:%M:%S.000Z"
-        )
+        got = _iso_from_unix(ts)
+        if got:
+            return got
     # Kwai / Kuaishou: tag=1-{unix}-s-0-{nonce}-{sig}
     tag = (qs.get("tag") or [None])[0]
     if tag:
@@ -50,11 +114,11 @@ def cdn_expires_at(url: str | None) -> str | None:
                 ts = int(m.group(1))
             except (TypeError, ValueError):
                 ts = 0
-            if ts >= 1_000_000_000:
-                return datetime.fromtimestamp(ts, tz=timezone.utc).strftime(
-                    "%Y-%m-%dT%H:%M:%S.000Z"
-                )
-    return None
+            got = _iso_from_unix(ts)
+            if got:
+                return got
+    # Rumble channel-videos: signed playback URLs carry expiry in JWT ``exp``.
+    return _jwt_exp_from_url(url)
 
 
 def earliest_cdn_expires_at(*urls: str | None) -> str | None:

@@ -33,13 +33,12 @@ _UPVOTES_RE = re.compile(
     r'rumbles-vote-up[\s\S]*?<span class="rumbles-up-votes">(\d+)</span>',
     re.I,
 )
-# Attribute names that carry a machine-readable timestamp (any order on the tag).
+# Prefer machine attrs if present; live Rumble uses title= on the anchor.
 _TIME_ATTR_KEYS = ("datetime", "data-time", "data-timestamp", "data-unix", "data-ts")
 _ATTR_RE = re.compile(
     r"""([^\s=/>]+)\s*=\s*(?:"([^"]*)"|'([^']*)')""",
     re.I,
 )
-_TIME_TAG_RE = re.compile(r"<time\b([^>]*)>", re.I)
 _META_TIME_TAG_RE = re.compile(
     r"<[^>]*\bcomments-meta-post-time\b[^>]*>",
     re.I,
@@ -56,33 +55,27 @@ def _attrs_map(attr_blob: str) -> dict[str, str]:
         key = (m.group(1) or "").lower()
         val = m.group(2) if m.group(2) is not None else m.group(3)
         if key and val is not None:
-            out[key] = val
+            out[key] = unescape(val)
     return out
 
 
-def _raw_from_attrs(attrs: dict[str, str]) -> str | None:
-    for key in _TIME_ATTR_KEYS:
-        raw = safe_str(attrs.get(key))
-        if raw:
-            return raw
-    return None
-
-
 def comment_published_raw(chunk: str) -> str | None:
-    """Pull a machine-readable timestamp from a comment card HTML slice.
+    """Timestamp from the comment card.
 
-    Attribute order varies (``datetime`` before/after ``class``). Prefer any
-    ``<time>`` tag, then a ``comments-meta-post-time`` wrapper. Never use
-    ``title=`` / textContent display strings.
+    Live Rumble ships no ``<time datetime>`` on comments — only
+    ``<a class="comments-meta-post-time" title="Friday, July 17, 2026 08:33 AM -04">``.
+    Prefer datetime/data-* if upstream ever adds them; else ``title``.
+    Never use relative textContent (``2 weeks ago``).
     """
-    for m in _TIME_TAG_RE.finditer(chunk or ""):
-        raw = _raw_from_attrs(_attrs_map(m.group(1)))
-        if raw:
-            return raw
     for m in _META_TIME_TAG_RE.finditer(chunk or ""):
-        raw = _raw_from_attrs(_attrs_map(m.group(0)))
-        if raw:
-            return raw
+        attrs = _attrs_map(m.group(0))
+        for key in _TIME_ATTR_KEYS:
+            raw = safe_str(attrs.get(key))
+            if raw:
+                return raw
+        title = safe_str(attrs.get("title"))
+        if title and not re.search(r"\bago\b", title, re.I):
+            return title
     return None
 
 

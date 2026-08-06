@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import base64
+import json
 import re
 from typing import Any
 
 from app.routers import rumble
 from app.services import rumble_comments_native as comments_native
 from app.services import rumble_video_native as native
+from app.utils.media_urls import cdn_expires_at
 
 ISO = re.compile(
     r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?(Z|[+-]\d{2}:\d{2})$"
@@ -17,11 +20,57 @@ ISO = re.compile(
 def _walk(obj: Any, path: str = "$"):
     if isinstance(obj, dict):
         yield path, obj
-        for k, v in obj.items():
-            yield from _walk(v, f"{path}.{k}")
     elif isinstance(obj, list):
         for i, v in enumerate(obj):
             yield from _walk(v, f"{path}[{i}]")
+        return
+    else:
+        return
+    for k, v in obj.items():
+        yield from _walk(v, f"{path}.{k}")
+
+
+def _assert_no_all_null_fields(body: Any) -> None:
+    """No media/comment array field may be null on 100% of rows.
+
+    Top-level video cards intentionally sparse-null optional engagement fields.
+    ``expiresAt`` on unsigned video-details streams is documented as null.
+    """
+
+    def _check(obj: Any, path: str = "$") -> None:
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                _check(v, f"{path}.{k}")
+        elif isinstance(obj, list) and obj and all(isinstance(x, dict) for x in obj):
+            mediaish = path.endswith(
+                (".streams", ".audioStreams", ".captions", ".comments")
+            )
+            if mediaish:
+                keys = set().union(*(x.keys() for x in obj))
+                for key in keys:
+                    if (
+                        key == "expiresAt"
+                        and path.endswith((".streams", ".audioStreams", ".captions"))
+                        and ".videos[" not in path
+                    ):
+                        # Unsigned video-details CDN — null is correct.
+                        continue
+                    # Audio rows keep width/height/quality null by design.
+                    if path.endswith(".audioStreams") and key in {
+                        "width",
+                        "height",
+                        "quality",
+                    }:
+                        continue
+                    vals = [x.get(key) for x in obj]
+                    if vals and all(v is None for v in vals):
+                        raise AssertionError(
+                            f"field {key!r} is null on 100% of rows at {path}"
+                        )
+            for i, v in enumerate(obj):
+                _check(v, f"{path}[{i}]")
+
+    _check(body)
 
 
 def _assert_rumble_guards(body: Any) -> None:
@@ -57,8 +106,14 @@ def _assert_rumble_guards(body: Any) -> None:
                         "replyCount",
                         "publishedAt",
                     }
-                elif path.endswith(".streams") or path.endswith(".audioStreams"):
+                elif path.endswith(".audioStreams"):
                     required = set(native.STREAM_KEYS)
+                elif path.endswith(".streams"):
+                    # Channel listing: lean signed-URL shape. Details: full meta.
+                    if ".videos[" in path:
+                        required = set(native.CHANNEL_STREAM_KEYS)
+                    else:
+                        required = set(native.STREAM_KEYS)
                 elif path.endswith(".captions"):
                     required = set(native.CAPTION_KEYS)
                 else:
@@ -68,10 +123,12 @@ def _assert_rumble_guards(body: Any) -> None:
                         if isinstance(o, dict):
                             missing = required - set(o.keys())
                             assert not missing, f"missing keys at {path}: {missing}"
-                            # Nested stream rows must be exactly STREAM_KEYS (uniform).
-                            if path.endswith((".streams", ".audioStreams", ".captions")):
+                            if path.endswith(
+                                (".streams", ".audioStreams", ".captions")
+                            ):
                                 assert set(o.keys()) == required, (
-                                    f"extra/missing keys at {path}: {set(o.keys()) ^ required}"
+                                    f"extra/missing keys at {path}: "
+                                    f"{set(o.keys()) ^ required}"
                                 )
                 else:
                     sigs = {tuple(sorted(o.keys())) for o in obj if isinstance(o, dict)}
@@ -80,6 +137,22 @@ def _assert_rumble_guards(body: Any) -> None:
                 _check_arrays(v, f"{path}[{i}]")
 
     _check_arrays(body)
+    _assert_no_all_null_fields(body)
+
+
+def _jwt_url(exp: int = 2_000_000_000) -> str:
+    header = (
+        base64.urlsafe_b64encode(json.dumps({"alg": "none"}).encode())
+        .decode()
+        .rstrip("=")
+    )
+    payload = (
+        base64.urlsafe_b64encode(json.dumps({"exp": exp}).encode())
+        .decode()
+        .rstrip("=")
+    )
+    tok = f"{header}.{payload}.sig"
+    return f"https://cdn.example/play/{tok}"
 
 
 def test_guard_search_rows_uniform() -> None:
@@ -115,7 +188,9 @@ def test_guard_search_rows_uniform() -> None:
     assert len({frozenset(r.keys()) for r in rows}) == 1
 
 
-def test_guard_channel_videos_uniform() -> None:
+def test_guard_channel_videos_lean_streams() -> None:
+    jwt_a = _jwt_url(2_000_000_000)
+    jwt_b = _jwt_url(2_100_000_000)
     rows = [
         rumble._normalize_az_video(
             {
@@ -126,14 +201,8 @@ def test_guard_channel_videos_uniform() -> None:
                 "by": {"name": "Show", "url": "https://rumble.com/c/bongino"},
                 "views": 10,
                 "videos": [
-                    {"url": "https://cdn.example/a.mp4?e=2000000000", "type": "mp4"},
-                    {
-                        "url": "https://cdn.example/b.mp4?e=2000000000",
-                        "type": "mp4",
-                        "height": 720,
-                        "width": 1280,
-                        "bitrate": 2000,
-                    },
+                    {"url": jwt_a, "type": "mp4"},
+                    {"url": jwt_b, "type": "mp4"},
                 ],
             },
             include_description=False,
@@ -153,38 +222,50 @@ def test_guard_channel_videos_uniform() -> None:
     ]
     _assert_rumble_guards({"videos": rows})
     assert len({frozenset(r.keys()) for r in rows}) == 1
-    # Same STREAM_KEYS as video-details (U3).
     streams = rows[0]["streams"]
     assert streams
-    assert all(set(s.keys()) == set(native.STREAM_KEYS) for s in streams)
-    assert streams[0]["type"] == "video/mp4"
+    assert all(set(s.keys()) == set(native.CHANNEL_STREAM_KEYS) for s in streams)
+    assert all(s["type"] == "video/mp4" for s in streams)
+    assert all(ISO.match(s["expiresAt"] or "") for s in streams)
+    assert streams[0]["expiresAt"] == "2033-05-18T03:33:20.000Z"
 
 
-def test_comment_datetime_any_attr_order() -> None:
-    """U1 — datetime before/after class, data-time epoch, wrapper <time>."""
+def test_cdn_expires_at_jwt_payload() -> None:
+    url = _jwt_url(1_784_753_172)
+    assert cdn_expires_at(url) == "2026-07-22T20:46:12.000Z"
+    q = f"https://cdn.example/x.mp4?token={url.rsplit('/', 1)[-1]}"
+    assert cdn_expires_at(q) == "2026-07-22T20:46:12.000Z"
+
+
+def test_comment_title_published_at() -> None:
+    """U1 — live DOM uses title= on a.comments-meta-post-time (no datetime)."""
     cases = [
         (
             '<li class="comment-item" data-comment-id="1" data-num-replies="0" '
             'data-username="a"><p class="comment-text">Hi</p>'
-            '<time class="comments-meta-post-time" datetime="2026-07-17T08:33:12-04:00" '
-            'title="Friday, July 17, 2026 08:33 AM -04">July 17</time></li>'
+            '<a class="comments-meta-post-time whitespace-nowrap" '
+            'href="#comment-1" title="Friday, July 17, 2026 08:33 AM -04">'
+            "2 weeks ago</a></li>"
         ),
         (
             '<li class="comment-item" data-comment-id="2" data-num-replies="0" '
             'data-username="b"><p class="comment-text">Yo</p>'
-            '<time datetime="2026-07-18T10:00:00+00:00" class="comments-meta-post-time" '
-            'title="Saturday">July 18</time></li>'
+            '<a class="comments-meta-post-time" href="#comment-2" '
+            'title="Friday, July 17, 2026 04:42 PM -04">2 weeks ago</a></li>'
         ),
         (
             '<li class="comment-item" data-comment-id="3" data-num-replies="0" '
             'data-username="c"><p class="comment-text">Ep</p>'
-            '<span class="comments-meta-post-time" data-time="1721214792">July 17</span></li>'
+            '<a class="comments-meta-post-time" data-time="1721214792">'
+            "July 17</a></li>"
         ),
         (
+            # Prefer datetime when present (future-proof); title is fallback.
             '<li class="comment-item" data-comment-id="4" data-num-replies="0" '
             'data-username="d"><p class="comment-text">Wrap</p>'
-            '<div class="comments-meta"><time datetime="2026-07-19T12:00:00Z">'
-            "July 19</time></div></li>"
+            '<a class="comments-meta-post-time" '
+            'datetime="2026-07-19T12:00:00Z" '
+            'title="Saturday, July 19, 2026 08:00 AM -04">July 19</a></li>'
         ),
     ]
     comments = []
@@ -195,6 +276,8 @@ def test_comment_datetime_any_attr_order() -> None:
         )
     assert len(comments) == 4
     assert all(ISO.match(c["publishedAt"] or "") for c in comments)
+    assert comments[0]["publishedAt"] == "2026-07-17T12:33:00+00:00"
+    assert comments[1]["publishedAt"] == "2026-07-17T20:42:00+00:00"
     assert all("createdAt" not in c for c in comments)
     _assert_rumble_guards({"comments": comments})
 
@@ -203,12 +286,12 @@ def test_guard_comments_iso_dates() -> None:
     html = (
         '<li class="comment-item" data-comment-id="1" data-num-replies="0" '
         'data-username="a"><p class="comment-text">Hi</p>'
-        '<time class="comments-meta-post-time" datetime="2026-07-17T08:33:12-04:00" '
-        'title="Friday, July 17, 2026 08:33 AM -04">July 17</time></li>'
+        '<a class="comments-meta-post-time" href="#comment-1" '
+        'title="Friday, July 17, 2026 08:33 AM -04">2 weeks ago</a></li>'
         '<li class="comment-item" data-comment-id="2" data-num-replies="0" '
         'data-username="b"><p class="comment-text">Yo</p>'
-        '<time class="comments-meta-post-time" datetime="2026-07-18T10:00:00+00:00" '
-        'title="Saturday">July 18</time></li>'
+        '<a class="comments-meta-post-time" href="#comment-2" '
+        'title="Monday, July 20, 2026 07:48 PM -04">2 weeks ago</a></li>'
     )
     comments = [
         rumble._normalize_comment(c)
@@ -216,6 +299,7 @@ def test_guard_comments_iso_dates() -> None:
     ]
     _assert_rumble_guards({"comments": comments})
     assert all(ISO.match(c["publishedAt"]) for c in comments)
+    assert comments[1]["publishedAt"] == "2026-07-20T23:48:00+00:00"
     assert all("createdAt" not in c for c in comments)
 
 
@@ -251,7 +335,7 @@ def test_guard_video_details_streams_uniform() -> None:
                 "audio": {
                     "192": {
                         "url": "https://cdn.example/c.aac?e=2000000000",
-                        "meta": {"bitrate": 192, "w": 0, "h": 0},
+                        "meta": {"bitrate": 192, "w": 0, "h": 0, "size": 9000},
                     }
                 },
                 "timeline": {

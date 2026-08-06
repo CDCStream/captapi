@@ -183,12 +183,19 @@ def _finalise_streams(
     thumbnail_url: str | None = None,
     require_height: bool = True,
 ) -> list[dict[str, Any]]:
-    """Shared streams[] shape for video-details + channel-videos."""
+    """video-details streams[] — full 8-key shape with rendition meta."""
     return rumble_video_native.finalise_streams(
         streams,
         thumbnail_url=thumbnail_url,
         require_height=require_height,
     )
+
+
+def _finalise_channel_streams(
+    streams: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    """channel-videos streams[] — lean {url, type, expiresAt} only."""
+    return rumble_video_native.finalise_channel_streams(streams)
 
 
 def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
@@ -297,8 +304,8 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
         comments=comment_count,
         dislikes=dislikes,
     )
-    # Actor rows rarely ship meta.h — keep URLs with null dims/quality rather
-    # than inventing labels from quality_text (same STREAM_KEYS as video-details).
+    # Channel rows use signed JWT playback URLs with no rendition meta — lean
+    # {url,type,expiresAt}. Detail Apify fallback may still ship height bits.
     mapped_streams: list[dict[str, Any]] = []
     for v in raw_streams:
         if (safe_str(v.get("type")) or "").lower() == "audio":
@@ -316,6 +323,10 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
                 "expiresAt": safe_str(v.get("expiresAt")),
             }
         )
+    if include_description:
+        final_streams = _finalise_streams(mapped_streams, require_height=False)
+    else:
+        final_streams = _finalise_channel_streams(mapped_streams)
     partial: dict[str, Any] = {
         "platform": "rumble",
         "id": video_id,
@@ -335,7 +346,7 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
         "thumbnail": safe_str(item.get("thumb")),
         "comments": comment_count,
         "isLive": is_live,
-        "streams": _finalise_streams(mapped_streams, require_height=False),
+        "streams": final_streams,
         "shareUrl": f"https://rumble.com/share/{video_id}" if video_id else None,
     }
     _stamp_duration(partial, duration_seconds if duration_seconds is not None else duration_text)
@@ -368,7 +379,7 @@ def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
         # Upstream uses null (not []) when there are no replies — treat as 0.
         reply_count = safe_int(item.get("replyCount")) or 0
     votes = item.get("rumble_votes") if isinstance(item.get("rumble_votes"), dict) else {}
-    # ISO only — display title= strings become null via to_utc_published_at.
+    # ISO / epoch / Rumble comment title= absolutes — relative text → null.
     published = rumble_video_native.to_utc_published_at(
         item.get("publishedAt")
         or item.get("createdAt")
@@ -588,7 +599,7 @@ async def channel_videos(
 
         data = await cached_or_run(
             endpoint="rumble.channel-videos",
-            params={"channel": channel, "limit": limit, "v": 11},
+            params={"channel": channel, "limit": limit, "v": 12},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -666,7 +677,7 @@ async def comments(
 
         data = await cached_or_run(
             endpoint="rumble.comments",
-            params={"url": url, "limit": limit, "v": 6},
+            params={"url": url, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -1821,14 +1821,14 @@ const RUMBLE: Spec[] = [
     path: "/v1/rumble/video-details",
     credits: 1,
     tagline:
-      "Rumble video metadata — uniform streams[] (video/mp4 + expiresAt), captions[], audioStreams.",
+      "Rumble video metadata — uniform streams[] with rendition meta, captions[], audioStreams.",
     longDescription:
-      "Paste a Rumble video URL and get clean JSON: title, description, views, likes/dislikes/comments (null when Rumble does not expose them — never fake zeros), durationSeconds + durationText, publishedAt, thumbnail, width/height, channel name/url/handle plus channelFollowers and channelVerified, numericId/embedId/shareUrl/embedUrl (real embed id, not the page permalink), captions[{code,language,url,expiresAt}], streams[{url,type,quality,width,height,bitrateKbps,sizeBytes,expiresAt}] built from embed metadata height/bitrate (two 1080p bitrates stay two rows — no fabricated 1081 keys; metadata-less and timeline strips are dropped), audioStreams[] (width/height/quality null — bitrateKbps carries the rate), and thumbnailTrack when Rumble ships a timeline sprite. type is video/mp4 (MIME-style). expiresAt is parsed from the signed CDN query when present, else null. The raw quality-keyed media dump is not returned. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+      "Paste a Rumble video URL and get clean JSON: title, description, views, likes/dislikes/comments (null when Rumble does not expose them — never fake zeros), durationSeconds + durationText, publishedAt, thumbnail, width/height, channel name/url/handle plus channelFollowers and channelVerified, numericId/embedId/shareUrl/embedUrl (real embed id, not the page permalink), captions[{code,language,url,expiresAt}], streams[{url,type,quality,width,height,bitrateKbps,sizeBytes,expiresAt}] built from embed metadata height/bitrate (two 1080p bitrates stay two rows — no fabricated 1081 keys; metadata-less and timeline strips are dropped), audioStreams[] (width/height/quality null — bitrateKbps carries the rate), and thumbnailTrack when Rumble ships a timeline sprite. type is video/mp4 (MIME-style). expiresAt is null when the URL is unsigned and does not expire (typical for video-details progressive files); when a signed CDN query is present it is parsed. The raw quality-keyed media dump is not returned. Flat 1 credit. Pass cache=true for the 24h shared cache.",
     delivers: [
       "Engagement counts stay null when unknown (no fake zeros)",
-      "Uniform streams[] keys + expiresAt (no media map / no junk rows)",
+      "Uniform streams[] keys with real height/bitrate (no junk rows)",
       "Real embedId/embedUrl (page id ≠ embed id on Rumble)",
-      "captions[] + audioStreams[] with the same CDN expiry field",
+      "expiresAt null on unsigned progressive URLs (documented)",
     ],
   },
   {
@@ -1841,9 +1841,9 @@ const RUMBLE: Spec[] = [
     credits: 12,
     creditsPerResult: 0.6,
     tagline:
-      "Rumble channel uploads — same streams[] key set as video-details; embedUrl only when a real embed id is known.",
+      "Rumble channel uploads — lean streams[{url,type,expiresAt}]; call video-details for rendition meta.",
     longDescription:
-      "List a channel's uploads as clean JSON. Each row: id, url, type (video|short|live), title, channel/channelUrl/channelHandle, views/likes/dislikes/comments, durationSeconds + durationText (same pair as video-details), publishedAt, thumbnail, streams[] (same 8 keys as video-details — dims/quality null when the actor omits meta), shareUrl. embedUrl/embedId are present only when Rumble exposes a distinct embed id — page permalink ids are never used to invent /embed/{id}/ URLs (those 404). Flat ~0.6 credits per returned video (min 2).",
+      "List a channel's uploads as clean JSON. Each row: id, url, type (video|short|live), title, channel/channelUrl/channelHandle, views/likes/dislikes/comments, durationSeconds + durationText (same pair as video-details), publishedAt, thumbnail, streams[{url,type,expiresAt}] from signed playback URLs (expiresAt from the JWT exp claim). Per-rendition quality/height/bitrate/sizeBytes require /v1/rumble/video-details — the channel scrape does not ship that metadata. shareUrl. embedUrl/embedId are present only when Rumble exposes a distinct embed id — page permalink ids are never used to invent /embed/{id}/ URLs (those 404). Flat ~0.6 credits per returned video (min 2).",
   },
   {
     slug: "rumble-search",
@@ -1867,9 +1867,9 @@ const RUMBLE: Spec[] = [
     method: "GET",
     path: "/v1/rumble/comments",
     credits: 2,
-    tagline: "Rumble top-level comments — publishedAt ISO-8601 UTC from <time datetime>.",
+    tagline: "Rumble top-level comments — publishedAt ISO-8601 UTC from title= on the comment time link.",
     longDescription:
-      "Paste a Rumble video URL and get top-level comments as clean JSON: id, text, author{name,url,verified}, likes, replyCount, publishedAt (ISO-8601 UTC from the machine-readable datetime / data-time attribute on the comment card — attribute order independent; never the display title string). Flat 2 credits.",
+      "Paste a Rumble video URL and get top-level comments as clean JSON: id, text, author{name,url,verified}, likes, replyCount, publishedAt (ISO-8601 UTC parsed from a.comments-meta-post-time title=, e.g. Friday, July 17, 2026 08:33 AM -04 — minute precision; relative textContent like 2 weeks ago is never returned). createdAt is not emitted. Flat 2 credits.",
   },
 ];
 
@@ -7932,7 +7932,7 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     durationSeconds: "Length in seconds (integer). Canonical with durationText — same pair as channel-videos.",
     durationText: "Human clock duration (e.g. 1:26:25). Not zero-padded HH:MM:SS.",
     "streams[].expiresAt":
-      "ISO expiry from signed CDN query params (expire / Expires / e / x-expires) when present.",
+      "Null when the progressive URL is unsigned and does not expire (typical here). ISO when a signed CDN query (expire / Expires / e / x-expires) is present.",
     "streams[].quality":
       "From meta.height (e.g. 1080p). Upstream slot keys like 240/1081 are never used — two 1080p bitrates are two rows.",
     "streams[].bitrateKbps": "Progressive bitrate from embedJS meta when present.",
@@ -7952,9 +7952,7 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "rumble-comments": {
     publishedAt:
-      "ISO-8601 UTC from the comment <time datetime> attribute. Display title= strings are never returned.",
-    createdAt:
-      "Deprecated one-release alias of publishedAt — same value. Prefer publishedAt.",
+      "ISO-8601 UTC from a.comments-meta-post-time title= (e.g. Friday, July 17, 2026 08:33 AM -04 → minute precision). Relative textContent is never returned. createdAt is not emitted.",
   },
   "rumble-channel-videos": {
     channel: "Top-level: channel slug you queried. Per-video channel is the display name string.",
@@ -7967,7 +7965,10 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
       "Always present. true only when upstream marks the row live; false otherwise (including fresh VODs with 0 views — not omitted).",
     likes: "Upvotes when the channel scrape exposes rumbleVotes; null when unknown.",
     views: "View count for the upload.",
-    streams: "Playable stream rows when the channel scrape includes media URLs.",
+    streams:
+      "Lean signed playback rows ({url, type, expiresAt}). expiresAt comes from the JWT exp claim. For quality/height/bitrate/sizeBytes call /v1/rumble/video-details.",
+    "streams[].expiresAt":
+      "ISO-8601 from the signed playback JWT exp claim (no extra network call).",
   },
   "rumble-search": {
     channel: "Channel display name string when present.",

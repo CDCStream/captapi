@@ -199,8 +199,13 @@ def test_to_utc_published_at_normalizes_offset() -> None:
         native.to_utc_published_at("2026-07-17T12:18:39+00:00")
         == "2026-07-17T12:18:39+00:00"
     )
-    # Display title= strings must never leak.
-    assert native.to_utc_published_at("Friday, July 17, 2026 08:33 AM -04") is None
+    # Rumble comment title= absolute (minute precision) → UTC ISO.
+    assert (
+        native.to_utc_published_at("Friday, July 17, 2026 08:33 AM -04")
+        == "2026-07-17T12:33:00+00:00"
+    )
+    # Relative text stays null.
+    assert native.to_utc_published_at("2 weeks ago") is None
 
 
 def test_normalize_video_search_shape_and_utc() -> None:
@@ -244,30 +249,30 @@ def test_normalize_comment_iso_published_at() -> None:
     <li class="comment-item" data-comment-id="1" data-num-replies="0" data-username="alice">
       <p class="comment-text">Hello</p>
       <span class="rumbles-vote-up"><span class="rumbles-up-votes">2</span></span>
-      <time class="comments-meta-post-time" datetime="2026-07-17T08:33:12-04:00"
-        title="Friday, July 17, 2026 08:33 AM -04">July 17, 2026</time>
+      <a class="comments-meta-post-time" href="#comment-1"
+        title="Friday, July 17, 2026 08:33 AM -04">2 weeks ago</a>
     </li>
     """
     raw = comments_native.parse_comments_html(html, limit=5)
-    assert raw[0]["publishedAt"] == "2026-07-17T12:33:12+00:00"
+    assert raw[0]["publishedAt"] == "2026-07-17T12:33:00+00:00"
     out = rumble._normalize_comment(raw[0])
-    assert out["publishedAt"] == "2026-07-17T12:33:12+00:00"
+    assert out["publishedAt"] == "2026-07-17T12:33:00+00:00"
     assert "createdAt" not in out  # single field — not a null-padded alias
-    # title= display must not win if somehow passed in.
+    # Relative createdAt must not leak; absolute title= via publishedAt is fine.
     bad = rumble._normalize_comment(
-        {"id": "9", "text": "x", "createdAt": "Friday, July 17, 2026 08:33 AM -04"}
+        {"id": "9", "text": "x", "createdAt": "2 weeks ago"}
     )
     assert bad["publishedAt"] is None
     assert "createdAt" not in bad
-    # datetime before class still resolves (U1).
-    flipped = comments_native.parse_comments_html(
-        '<li class="comment-item" data-comment-id="8" data-num-replies="0" '
-        'data-username="z"><p class="comment-text">Z</p>'
-        '<time datetime="2026-07-17T08:33:12-04:00" class="comments-meta-post-time">'
-        "July 17</time></li>",
-        limit=5,
+    # Absolute title= also accepted when passed through the normalizer.
+    titled = rumble._normalize_comment(
+        {
+            "id": "8",
+            "text": "Z",
+            "publishedAt": "Friday, July 17, 2026 08:33 AM -04",
+        }
     )
-    assert flipped[0]["publishedAt"] == "2026-07-17T12:33:12+00:00"
+    assert titled["publishedAt"] == "2026-07-17T12:33:00+00:00"
 
 
 def test_normalize_az_nulls_impossible_zero_views() -> None:
