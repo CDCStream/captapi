@@ -81,7 +81,9 @@ def test_overlay_matches_by_pk_and_skips_image_views(monkeypatch) -> None:
 
     out = asyncio.run(ig._overlay_feed_engagement(posts, "99"))
     assert out[0]["engagement"]["views"] == 51_078
-    assert out[0]["engagement"]["viewsInstagram"] == 40_862
+    assert out[0]["engagement"]["viewsSource"] == "instagram"
+    assert out[0]["engagement"]["plays"] == 51_078
+    assert "viewsInstagram" not in out[0]["engagement"]
     assert out[0]["productType"] == "clips"
     assert out[0]["durationSeconds"] == 72.1
     assert out[0]["hasAudio"] is True

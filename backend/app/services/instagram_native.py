@@ -2764,32 +2764,42 @@ def _trending_ids(post: dict[str, Any]) -> tuple[str | None, str | None]:
 def _as_trending_reel(post: dict[str, Any]) -> dict[str, Any]:
     """Align Polaris post details with the trending-reels response shape."""
     media_id, shortcode = _trending_ids(post)
-    product = safe_str(post.get("productType")) or "clips"
     url = safe_str(post.get("url"))
     if shortcode:
         url = f"https://www.instagram.com/reel/{shortcode}/"
     engagement = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
     author = post.get("author") if isinstance(post.get("author"), dict) else {}
-    # Keep the full play-count split (views / viewsInstagram / viewsFacebook /
-    # plays) — dropping to likes+comments only made every reel look viewless.
+    views = engagement.get("views")
+    views_source = engagement.get("viewsSource")
+    if views is not None and not views_source:
+        views_source = "instagram"
+    if views is None:
+        views_source = None
     eng_out = {
-        k: engagement.get(k)
-        for k in ("views", "likes", "comments", "viewsInstagram", "viewsFacebook", "plays")
-        if k in engagement or k in {"views", "likes", "comments"}
+        "likes": engagement.get("likes"),
+        "comments": engagement.get("comments"),
+        "views": views,
+        "viewsSource": views_source,
+        # Deprecated alias — same value as views for one release.
+        "plays": views,
     }
     video_url = safe_str(post.get("videoUrl"))
     thumb = safe_str(post.get("thumbnailUrl"))
+    dur = post.get("durationSeconds")
+    try:
+        dur = round(float(dur), 3) if dur is not None else None
+    except (TypeError, ValueError):
+        dur = None
     out: dict[str, Any] = {
         "platform": "instagram",
         "url": url,
         # Prefer numeric media id (matches channel-reels); shortcode for URLs.
         "id": media_id or shortcode,
         "shortcode": shortcode,
-        "postType": "Video",
-        "productType": product if product else "clips",
+        # Endpoint only returns reels — omit constant postType/productType.
         "caption": post.get("caption") or post.get("description"),
         "publishedAt": post.get("publishedAt"),
-        "durationSeconds": post.get("durationSeconds"),
+        "durationSeconds": dur,
         "thumbnailUrl": thumb,
         "videoUrl": video_url,
         "author": build_ig_author(author, username=safe_str(author.get("username"))),

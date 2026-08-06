@@ -346,35 +346,28 @@ def split_play_counts(
     likes: int | None = None,
     is_video: bool = True,
 ) -> dict[str, Any]:
-    """Split Instagram view/play metrics into public engagement fields.
+    """Collapse Instagram play/view signals into one canonical ``views``.
 
-    Upstream signals (often all present on the same Reel):
-      - ``video_view_count`` — reach-style view metric (unique / ~3s views)
-      - ``play_count`` / ``video_play_count`` — total plays incl. replays
-        (typically Instagram + Facebook cross-post when IG exposes the split)
-      - ``ig_play_count`` — Instagram-only plays (excludes Facebook cross-post)
+    Upstream may ship several aliases for the same reel:
+      - ``play_count`` / ``video_play_count`` — total plays (preferred)
+      - ``ig_play_count`` — Instagram-side plays
       - ``fb_play_count`` — Facebook cross-post plays
+      - ``video_view_count`` — reach-style / GraphQL view (often undercounts)
 
-    Public shape:
-      - ``views`` — reach-style only when Instagram exposes a **distinct**
-        ``video_view_count``. Never copied from ``plays`` (that lie used to
-        make views==plays==viewsInstagram and look like "people watched").
-      - ``viewsSource`` — ``"video_view_count"`` when ``views`` is that metric;
-        ``null`` when ``views`` is null. ``"plays_fallback"`` is reserved if a
-        caller path intentionally mirrors plays into views (not used here).
-      - ``plays`` — total play count when exposed (may be ~2× ``views``)
-      - ``viewsInstagram`` / ``viewsFacebook`` — IG-only / FB cross-post plays
+    Public shape (reels block):
+      - ``views`` — the platform count we expose; never null when any of the
+        above was read (except GraphQL undercount rejects).
+      - ``viewsSource`` — ``"instagram"`` | ``"facebook"`` | ``null``.
+        Non-null whenever ``views`` is non-null.
+      - ``plays`` — deprecated one-release alias of ``views`` (same value).
 
-    GraphQL ``video_view_count`` undercounts many Reels (e.g. 112k vs 485k
-    likes) — reject when ``likes > video_view_count``. Prefer null over a lie
-    when that is the only signal. Image/Sidecar omit play keys via strip.
+    ``viewsInstagram`` / ``viewsFacebook`` are not returned — they were null on
+    most rows and duplicated ``views`` when filled.
     """
     if not is_video:
         return {
             "views": None,
             "viewsSource": None,
-            "viewsInstagram": None,
-            "viewsFacebook": None,
             "plays": None,
         }
 
@@ -383,32 +376,28 @@ def split_play_counts(
     fb = safe_int(fb_play_count)
     gql = safe_int(video_view_count)
 
-    if fb is None and total is not None and ig is not None and total >= ig:
-        derived = total - ig
-        if derived > 0:
-            fb = derived
-
-    # Total plays: prefer play_count, else IG-only.
-    plays = total if total is not None else ig
-
-    # Distinct reach-style metric only — never echo plays into views.
     views: int | None = None
     views_source: str | None = None
-    if gql is not None and (likes is None or likes <= gql):
-        if plays is None or gql != plays:
-            views = gql
-            views_source = "video_view_count"
-        # Identical gql==plays → one undifferentiated signal; keep plays only.
-    if likes is not None and views is not None and likes > views:
-        views = None
-        views_source = None
+
+    if total is not None:
+        views, views_source = total, "instagram"
+    elif ig is not None:
+        views, views_source = ig, "instagram"
+    elif fb is not None:
+        views, views_source = fb, "facebook"
+    elif gql is not None:
+        # GraphQL alone undercounts many Reels vs likes — reject that lie.
+        if likes is None or likes <= gql:
+            views, views_source = gql, "instagram"
+
+    if views is not None and views_source is None:
+        views_source = "instagram"
 
     return {
         "views": views,
-        "viewsSource": views_source,
-        "viewsInstagram": ig,
-        "viewsFacebook": fb,
-        "plays": plays,
+        "viewsSource": views_source if views is not None else None,
+        # Deprecated alias — same value as views for one release.
+        "plays": views,
     }
 
 
@@ -443,8 +432,11 @@ def engagement_with_play_split(
     likes: int | None = None,
     is_video: bool = True,
 ) -> dict[str, Any]:
-    """Merge play-count split into an engagement dict."""
+    """Merge canonical views (+ deprecated plays alias) into engagement."""
     out = dict(engagement or {})
+    # Drop retired split keys if a caller still passed them through.
+    out.pop("viewsInstagram", None)
+    out.pop("viewsFacebook", None)
     split = split_play_counts(
         play_count=play_count,
         ig_play_count=ig_play_count,
@@ -455,16 +447,10 @@ def engagement_with_play_split(
     )
     out["views"] = split["views"]
     if is_video:
-        # Always emit play/view keys on videos — null means "tried, unknown"
-        # (never omit plays while leaving views:null).
         out["viewsSource"] = split["viewsSource"]
-        out["viewsInstagram"] = split["viewsInstagram"]
-        out["viewsFacebook"] = split["viewsFacebook"]
-        out["plays"] = split["plays"]
+        out["plays"] = split["plays"]  # deprecated alias of views
     else:
         out.pop("viewsSource", None)
-        out.pop("viewsInstagram", None)
-        out.pop("viewsFacebook", None)
         out.pop("plays", None)
     return out
 
@@ -511,56 +497,64 @@ def map_ig_location(loc: dict[str, Any] | None) -> dict[str, Any] | None:
 def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
     """Drop fields we can't fill instead of returning nulls: video-only
     fields (videoUrl, durationSeconds) on images/carousels, hidden engagement
-    counts (None) except ``engagement.views`` (always present — null on
-    Image/Sidecar) and ``viewsInstagram`` / ``viewsFacebook`` on videos, and
-    author fields the source doesn't provide.
+    counts (None) except ``engagement.views`` / ``viewsSource`` / deprecated
+    ``plays`` on videos, and author fields the source doesn't provide.
     """
     if not post.get("videoUrl"):
         post.pop("videoUrl", None)
     if post.get("durationSeconds") is None:
         post.pop("durationSeconds", None)
+    else:
+        # One precision rule — three decimal places everywhere.
+        try:
+            post["durationSeconds"] = round(float(post["durationSeconds"]), 3)
+        except (TypeError, ValueError):
+            post.pop("durationSeconds", None)
     if not safe_str(post.get("productType")):
         post.pop("productType", None)
     engagement = post.get("engagement")
+    eng_dict = engagement if isinstance(engagement, dict) else {}
     is_video = (
         post.get("postType") == "Video"
         or safe_str(post.get("productType")) in {"clips", "reel", "reels"}
         or bool(post.get("videoUrl"))
+        # Trending strips constant postType — still a video when view keys exist.
+        or "viewsSource" in eng_dict
+        or "plays" in eng_dict
     )
     if isinstance(engagement, dict):
+        # Retired split keys — never ship them again.
+        engagement.pop("viewsInstagram", None)
+        engagement.pop("viewsFacebook", None)
         likes = engagement.get("likes")
         views = engagement.get("views")
-        if likes is not None and views is not None and likes > views:
-            engagement["views"] = None
-            views = None
+        views_source = engagement.get("viewsSource")
+        # Discriminator must track views (never null while views is set).
+        if views is not None and not views_source:
+            views_source = "instagram"
+        if views is None:
+            views_source = None
         keep_null = {"views"}
         if is_video:
-            # Video: null = unknown after attempt. Omit these keys only on images.
-            keep_null |= {
-                "viewsInstagram",
-                "viewsFacebook",
-                "plays",
-                "viewsSource",
-            }
+            keep_null |= {"viewsSource", "plays"}
         # Hidden counts: keep likes:null so clients can pair with
         # likeAndViewCountsDisabled (0 ≠ omitted ≠ hidden).
         if post.get("likeAndViewCountsDisabled"):
-            keep_null |= {"likes", "plays", "viewsInstagram", "viewsFacebook", "viewsSource"}
+            keep_null |= {"likes", "plays", "viewsSource"}
             engagement.setdefault("likes", None)
         cleaned = {
-            k: v for k, v in engagement.items() if v is not None or k in keep_null
+            k: v
+            for k, v in engagement.items()
+            if (v is not None or k in keep_null)
+            and k not in {"viewsInstagram", "viewsFacebook"}
         }
-        # Typed clients always read engagement.views (null when unknown / N/A).
         cleaned["views"] = views
         if is_video:
-            cleaned.setdefault("viewsSource", engagement.get("viewsSource"))
-            cleaned.setdefault("viewsInstagram", engagement.get("viewsInstagram"))
-            cleaned.setdefault("viewsFacebook", engagement.get("viewsFacebook"))
-            cleaned.setdefault("plays", engagement.get("plays"))
+            cleaned["viewsSource"] = views_source
+            # Deprecated alias — same value as views for one release.
+            cleaned["plays"] = views
         else:
             cleaned.pop("viewsSource", None)
-            cleaned.pop("viewsInstagram", None)
-            cleaned.pop("viewsFacebook", None)
             cleaned.pop("plays", None)
         post["engagement"] = cleaned
     author = post.get("author")

@@ -592,6 +592,9 @@ def _normalize_audio_reel(item: dict) -> dict:
     author = item.get("author") or {}
     username = author.get("username")
     caption = safe_str(item.get("caption")) or ""
+    likes = decodo.hidden_count(item.get("likeCount"))
+    play_count = safe_int(item.get("playCount") or item.get("play_count"))
+    duration = safe_float(item.get("videoDuration"))
     return {
         "platform": "instagram",
         "url": safe_str(item.get("URL") or item.get("url")),
@@ -599,7 +602,7 @@ def _normalize_audio_reel(item: dict) -> dict:
         "caption": caption,
         "description": caption,
         "publishedAt": safe_str(item.get("postedAt")),
-        "durationSeconds": safe_float(item.get("videoDuration")),
+        "durationSeconds": round(duration, 3) if duration is not None else None,
         "videoUrl": safe_str(item.get("videoTemporaryUrl") or item.get("storedVideoUrl")),
         "author": {
             "username": safe_str(username),
@@ -608,11 +611,15 @@ def _normalize_audio_reel(item: dict) -> dict:
             "verified": author.get("isVerified"),
             "profileImage": safe_str(author.get("temporaryProfilePictureUrl")),
         },
-        "engagement": {
-            "views": safe_int(item.get("playCount")),
-            "likes": decodo.hidden_count(item.get("likeCount")),
-            "comments": decodo.hidden_count(item.get("commentCount")),
-        },
+        "engagement": decodo.engagement_with_play_split(
+            {
+                "likes": likes,
+                "comments": decodo.hidden_count(item.get("commentCount")),
+            },
+            play_count=play_count,
+            likes=likes,
+            is_video=True,
+        ),
         "musicId": safe_str(item.get("musicId")),
         "musicUrl": safe_str(item.get("musicUrl")),
     }
@@ -1859,6 +1866,7 @@ def _normalize_trending_item(item: dict) -> dict:
         "url": url,
         "id": media_id or shortcode or raw_id,
         "shortcode": shortcode,
+        # Kept for is_reel_post filtering; stripped before the public payload.
         "postType": post_type,
         "productType": product or ("clips" if is_video else None),
         "caption": caption,
@@ -1917,7 +1925,11 @@ def _filter_trending_reels_only(items: list[dict[str, Any]]) -> list[dict[str, A
             continue
         if instagram_native._is_stale_explore_post(item):
             continue
-        out.append(item)
+        # Endpoint only returns reels — constant postType/productType add nothing.
+        cleaned = dict(item)
+        cleaned.pop("postType", None)
+        cleaned.pop("productType", None)
+        out.append(cleaned)
     return out
 
 
@@ -2016,11 +2028,14 @@ def _trending_payload(
         "countryCode": _TRENDING_COUNTRY_TO_ISO.get(country),
         "totalReturned": len(reels),
         "note": (
-            "Snapshot-backed trending list (typical freshness under 24h). "
-            "Instagram returns a small overlapping batch per scrape; "
+            "Snapshot refreshed roughly every 6 hours — see ageHours. "
+            "Content itself may be older: Explore resurfaces reels, and results "
+            "are filtered only to drop posts older than ~180 days. "
+            "Instagram returns a small overlapping batch per scrape, so "
             "duplicates across requests are expected. "
-            "Content age filter drops Explore resurfaces older than ~180 days — "
-            "not a strict 24h content window. "
+            "Instagram does not expose a view count for every reel; "
+            "engagement.views is null when the platform withholds it "
+            "(roughly a third of results). "
             "For live keyword search use /v1/instagram/reels-search."
         ),
         "reels": reels,
@@ -2111,8 +2126,9 @@ async def instagram_trending_reels(
     """Snapshot-backed trending Reels — videos only, flat 1 credit.
 
     Prefer reels-search when you need a live keyword scrape. This endpoint
-    serves native /reels when available, otherwise any-age Apify snapshots
-    (never Explore photos). Cold countries warm in the background (~10 min).
+    serves Apify country snapshots first (sub-second dataset read; warm cron
+    every ~6h). Never runs the ~120s Decodo /reels scrape on the request path.
+    Cold countries warm in the background (~10 min).
     """
     settings = get_settings()
     country = _normalize_trending_country(country)
@@ -2125,20 +2141,8 @@ async def instagram_trending_reels(
         base_credits=CREDIT_TRENDING_REELS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # 1) Native /reels (+ /explore/reels) — never /explore/ photo grid.
-            native = await instagram_native.trending_reels_native(country, limit=limit)
-            if native:
-                reels = [decodo.strip_null_post_fields(r) for r in native[:limit]]
-                ctx["source"] = "direct"
-                return _trending_payload(
-                    reels,
-                    country=country,
-                    freshness=_trending_freshness(cached_at=None, from_snapshot=False),
-                )
-
-            # 2) Apify fallthrough — never hold the HTTP request for a 10-minute
-            # actor. Serve any-age video snapshot; kick refresh in background;
-            # wait at most 15s only when this country has never had a usable run.
+            # Snapshot-first — never block the HTTP request on a live Decodo
+            # scrape (~120s). Warm cron + background refresh keep datasets hot.
             client = ApifyClient(timeout=30, max_attempts=1)
             actor = settings.APIFY_ACTOR_INSTAGRAM_TRENDING
             fetch_n = min(200, max(limit * 5, limit + 40))
@@ -2152,25 +2156,39 @@ async def instagram_trending_reels(
                     if not i.get("error")
                 ]
 
+            def _wire_trending_reel(r: dict[str, Any]) -> dict[str, Any]:
+                cleaned = decodo.strip_null_post_fields(dict(r))
+                cleaned.pop("postType", None)
+                cleaned.pop("productType", None)
+                eng = cleaned.get("engagement")
+                if isinstance(eng, dict):
+                    views = eng.get("views")
+                    if views is not None and not eng.get("viewsSource"):
+                        eng["viewsSource"] = "instagram"
+                    if views is None:
+                        eng["viewsSource"] = None
+                    eng["plays"] = views  # deprecated alias
+                    eng.pop("viewsInstagram", None)
+                    eng.pop("viewsFacebook", None)
+                    cleaned["engagement"] = eng
+                return cleaned
+
             async def _enrich_trending(reels: list[dict[str, Any]]) -> list[dict[str, Any]]:
-                """Author-feed backfill — Apify/Polaris often omit play_count."""
+                """Author-feed backfill — Apify often omits play_count."""
                 if not reels:
                     return reels
                 need = [
                     r
                     for r in reels
                     if isinstance(r.get("engagement"), dict)
-                    and (
-                        r["engagement"].get("plays") is None
-                        and r["engagement"].get("viewsInstagram") is None
-                    )
+                    and r["engagement"].get("views") is None
                 ]
                 if not need:
-                    return [decodo.strip_null_post_fields(r) for r in reels]
+                    return [_wire_trending_reel(r) for r in reels]
                 filled = await instagram_native.enrich_posts_from_author_feeds(
                     reels, max_authors=min(12, len(reels))
                 )
-                return [decodo.strip_null_post_fields(r) for r in filled]
+                return [_wire_trending_reel(r) for r in filled]
 
             async def _ensure_refresh(*, force: bool = False) -> dict[str, Any] | None:
                 active = await client.find_active_run(actor, input_match=match)
@@ -2262,7 +2280,7 @@ async def instagram_trending_reels(
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 17},
+            params={"country": country, "limit": limit, "v": 18},
             runner=_run,
             ctx=ctx,
             stale_while_revalidate=True,

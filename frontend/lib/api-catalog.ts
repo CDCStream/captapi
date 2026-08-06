@@ -907,14 +907,14 @@ const INSTAGRAM: Spec[] = [
     path: "/v1/instagram/reels-search",
     credits: 2,
     tagline:
-      "Native Instagram Reels hashtag search — views vs plays, IG/FB split, location, commercial flags. Flat 2 credits.",
+      "Native Instagram Reels hashtag search — engagement.views + viewsSource, location, commercial flags. Flat 2 credits.",
     longDescription:
-      "Send a hashtag (without the #) or keyword and get matching Reels from Instagram's native hashtag grid as clean JSON — videos only. Engagement is explicit: views = video_view_count (reach-style), plays = video_play_count (replays included; often ~2× views when both exist), viewsInstagram = Instagram-only plays (excludes Facebook cross-post), viewsFacebook = FB plays. Author includes id / verified / profileImage / followers / postCount when available. Also music{}, location{id,name,slug,address}, isAd / isAffiliate / isPaidPartnership, previewComments with authorId, hasAudio, accessibilityCaption, duration, and publish date. Optional datePosted=last_24_hours|last_week|last_month|last_year. Flat 2 credits. Pass cache=true for the 24h shared cache.",
+      "Send a hashtag (without the #) or keyword and get matching Reels from Instagram's native hashtag grid as clean JSON — videos only. Engagement: likes, comments, views (canonical play count when Instagram exposes one), viewsSource (instagram|facebook|null — non-null whenever views is), and plays as a deprecated one-release alias of views. Author includes id / verified / profileImage / followers / postCount when available. Also music{}, location{id,name,slug,address}, isAd / isAffiliate / isPaidPartnership, previewComments with authorId, hasAudio, accessibilityCaption, durationSeconds (3 d.p.), and publish date. Optional datePosted=last_24_hours|last_week|last_month|last_year. Flat 2 credits. Pass cache=true for the 24h shared cache.",
     delivers: [
-      "views ≠ plays when Instagram exposes both (up to ~2× gap)",
-      "viewsInstagram / viewsFacebook for cross-post split",
+      "engagement.views + viewsSource (discriminator tracks views)",
       "location{} with address when tagged",
       "isAd / isAffiliate / isPaidPartnership",
+      "durationSeconds rounded to 3 decimals",
     ],
   },
   {
@@ -926,20 +926,20 @@ const INSTAGRAM: Spec[] = [
     path: "/v1/instagram/trending-reels",
     credits: 1,
     tagline:
-      "Snapshot-backed trending Reels (typical freshness <24h) — videos only, flat 1 credit. Use reels-search for live results.",
+      "Snapshot-backed trending Reels (~6h refresh) — videos only, flat 1 credit. Use reels-search for live results.",
     longDescription:
-      "Trending Reels is served from a periodic snapshot (native /reels when available, otherwise any-age Apify country snapshot). Typical snapshot freshness is under 24 hours — check cached / snapshotAt / stale / ageHours. Each reel includes engagement.views with viewsSource (video_view_count when reach-style is distinct; null when unknown — never a silent copy of plays), plays / viewsInstagram / viewsFacebook as null keys when unknown on videos, caption (not a duplicated description), author.url as https://www.instagram.com/{user}/, and countryCode (ISO). Photos/carousels are never returned. Instagram only yields a small overlapping batch per scrape, so duplicates across calls are expected. Content older than ~180 days is dropped as Explore resurfacing. For live keyword search use Instagram Reels Search. Cold countries return 503 warming + Retry-After: 600. Flat 1 credit per successful call.",
+      "Trending Reels is served from a periodic Apify country snapshot (warm cron ~every 6 hours) — sub-second dataset read; check cached / snapshotAt / stale / ageHours. Each reel includes engagement{likes,comments,views,viewsSource,plays?} where views is the platform play count when exposed and viewsSource is instagram|facebook whenever views is set (plays is a deprecated alias of views). Instagram withholds view counts on roughly a third of reels — those rows keep views/viewsSource null. Constant postType/productType are omitted (endpoint only returns reels). durationSeconds is rounded to 3 decimals. Photos/carousels are never returned. Content older than ~180 days is dropped as Explore resurfacing; content itself may be days old within that window. For live keyword search use Instagram Reels Search. Cold countries return 503 warming + Retry-After: 600. Flat 1 credit per successful call.",
     delivers: [
-      "Snapshot freshness: cached / snapshotAt / stale / ageHours",
-      "viewsSource honesty (never silent plays→views)",
-      "plays/views null keys kept on videos after enrich",
+      "Snapshot-first: cached / snapshotAt / stale / ageHours (~6h refresh)",
+      "engagement.views + viewsSource (no always-null split keys)",
+      "Views withheld honesty (~1/3 of rows) in note",
       "Video Reels only — never Explore photos; flat 1 credit",
     ],
     platformLimits: [
-      "Not a live feed — typical snapshot freshness under 24h; use /v1/instagram/reels-search for immediate keyword scrapes.",
+      "Not a live feed — snapshot refreshed roughly every 6 hours; use /v1/instagram/reels-search for immediate keyword scrapes.",
       "Cold country (never snapshotted) returns 503 warming with Retry-After: 600 while Apify refreshes in the background.",
       "Photos / carousels / Explore resurfaces older than ~180 days are filtered out.",
-      "Logged-out Polaris/Apify often omit play counts — we backfill from author feeds when the reel is still on their recent timeline; plays/views may stay null.",
+      "Instagram does not expose a view count for every reel; engagement.views stays null when withheld (author-feed backfill helps when the reel is still on their recent timeline).",
     ],
   },
   {

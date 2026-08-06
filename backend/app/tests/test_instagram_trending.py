@@ -40,18 +40,22 @@ def test_normalize_trending_item_splits_composite_id() -> None:
     )
     assert row["id"] == "3948507321457537241"
     assert row["shortcode"] == "DbL6n0ggXDZ"
-    assert row["postType"] == "Video"
+    assert row["postType"] == "Video"  # present pre-filter for is_reel_post
     assert row["mentions"] == ["NASAHubble"]
-    # plays alone — views stays null (not a silent plays copy); viewsSource null.
-    assert row["engagement"]["views"] is None
-    assert row["engagement"]["viewsSource"] is None
-    assert row["engagement"]["plays"] == 13_000_000
+    # Canonical views = play count; viewsSource non-null whenever views is.
+    assert row["engagement"]["views"] == 13_000_000
+    assert row["engagement"]["viewsSource"] == "instagram"
+    assert row["engagement"]["plays"] == 13_000_000  # deprecated alias
+    assert "viewsInstagram" not in row["engagement"]
     assert row["engagement"]["likes"] == 485_567
     assert "description" not in row
     assert "topic" not in row
     assert "section" not in row
     assert row["author"]["url"] == "https://www.instagram.com/nasa/"
-    assert ig_router._filter_trending_reels_only([row]) == [row]
+    filtered = ig_router._filter_trending_reels_only([row])
+    assert len(filtered) == 1
+    assert "postType" not in filtered[0]
+    assert "productType" not in filtered[0]
 
 
 def test_filter_drops_photo_junk_from_docs_example() -> None:
@@ -125,7 +129,64 @@ def test_trending_payload_includes_iso_country_code() -> None:
     )
     assert payload["country"] == "United States"
     assert payload["countryCode"] == "US"
+    assert "ageHours" in payload["note"] or "6 hours" in payload["note"]
+    assert "view count" in payload["note"]
 
 
 def test_sync_wait_budget_is_gateway_safe() -> None:
     assert ig_router._TRENDING_SYNC_WAIT_SECS <= 15
+
+
+def test_trending_engagement_acceptance() -> None:
+    """No 100%-null engagement key; viewsSource tracks views."""
+    rows = [
+        ig_router._normalize_trending_item(
+            {
+                "id": "1_1",
+                "code": "Aaa",
+                "username": "a",
+                "is_video": True,
+                "type": "clips",
+                "plays": 100,
+                "likes": 10,
+                "comments": 1,
+                "date": "2026-07-24T18:46:42+00:00",
+                "url": "https://www.instagram.com/reel/Aaa/",
+                "video_url": "https://cdn.example/a.mp4",
+                "duration": 12.011,
+            }
+        ),
+        ig_router._normalize_trending_item(
+            {
+                "id": "2_1",
+                "code": "Bbb",
+                "username": "b",
+                "is_video": True,
+                "type": "clips",
+                "likes": 20,
+                "comments": 2,
+                "date": "2026-07-24T18:46:42+00:00",
+                "url": "https://www.instagram.com/reel/Bbb/",
+                "video_url": "https://cdn.example/b.mp4",
+                "duration": 8.8,
+            }
+        ),
+    ]
+    from app.services import instagram_decodo as decodo
+
+    reels = [
+        decodo.strip_null_post_fields(ig_router._filter_trending_reels_only([r])[0])
+        for r in rows
+    ]
+    assert all(
+        r["engagement"]["views"] is None or r["engagement"]["viewsSource"] is not None
+        for r in reels
+    )
+    keys = set(reels[0]["engagement"])
+    for k in keys:
+        # likes/comments always filled; views may be null on some rows but not all
+        if k in {"views", "viewsSource", "plays"}:
+            assert not all(r["engagement"].get(k) is None for r in reels)
+    assert reels[0]["durationSeconds"] == 12.011
+    assert reels[1]["durationSeconds"] == 8.8
+    assert "postType" not in reels[0]
