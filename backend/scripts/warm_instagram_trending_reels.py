@@ -207,4 +207,10 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except SystemExit:
+        raise
+    except Exception as exc:  # noqa: BLE001 — surface ImportError etc. in Actions logs
+        print(f"warm-fatal: {type(exc).__name__}: {exc}", file=sys.stderr)
+        raise SystemExit(1) from exc

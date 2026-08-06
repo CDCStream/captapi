@@ -28,7 +28,8 @@ jobs:
         working-directory: backend
         run: |
           python -m pip install --upgrade pip
-          pip install httpx structlog pydantic pydantic-settings python-dotenv tenacity redis
+          # Full pyproject deps — warm script imports app.routers.instagram (needs fastapi, etc.).
+          pip install .
 
       # Fail fast with a readable message (empty secrets look like silent exit 1).
       - name: Check required secrets
