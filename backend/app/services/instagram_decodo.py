@@ -359,16 +359,13 @@ def split_play_counts(
         above was read (except GraphQL undercount rejects).
       - ``viewsSource`` — ``"instagram"`` | ``"facebook"`` | ``null``.
         Non-null whenever ``views`` is non-null.
-      - ``plays`` — deprecated one-release alias of ``views`` (same value).
 
-    ``viewsInstagram`` / ``viewsFacebook`` are not returned — they were null on
-    most rows and duplicated ``views`` when filled.
+    ``plays`` / ``viewsInstagram`` / ``viewsFacebook`` are not returned.
     """
     if not is_video:
         return {
             "views": None,
             "viewsSource": None,
-            "plays": None,
         }
 
     total = safe_int(play_count)
@@ -396,8 +393,6 @@ def split_play_counts(
     return {
         "views": views,
         "viewsSource": views_source if views is not None else None,
-        # Deprecated alias — same value as views for one release.
-        "plays": views,
     }
 
 
@@ -419,7 +414,7 @@ def pick_video_views(
         likes=likes,
         is_video=is_video,
     )
-    return split["views"], split["plays"]
+    return split["views"], split.get("plays", split["views"])
 
 
 def engagement_with_play_split(
@@ -432,11 +427,12 @@ def engagement_with_play_split(
     likes: int | None = None,
     is_video: bool = True,
 ) -> dict[str, Any]:
-    """Merge canonical views (+ deprecated plays alias) into engagement."""
+    """Merge canonical views (+ viewsSource) into engagement."""
     out = dict(engagement or {})
-    # Drop retired split keys if a caller still passed them through.
+    # Drop retired keys if a caller still passed them through.
     out.pop("viewsInstagram", None)
     out.pop("viewsFacebook", None)
+    out.pop("plays", None)
     split = split_play_counts(
         play_count=play_count,
         ig_play_count=ig_play_count,
@@ -448,10 +444,8 @@ def engagement_with_play_split(
     out["views"] = split["views"]
     if is_video:
         out["viewsSource"] = split["viewsSource"]
-        out["plays"] = split["plays"]  # deprecated alias of views
     else:
         out.pop("viewsSource", None)
-        out.pop("plays", None)
     return out
 
 
@@ -496,22 +490,15 @@ def map_ig_location(loc: dict[str, Any] | None) -> dict[str, Any] | None:
 
 def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
     """Drop fields we can't fill instead of returning nulls: video-only
-    fields (videoUrl, durationSeconds) on images/carousels, hidden engagement
-    counts (None) except ``engagement.views`` / ``viewsSource`` / deprecated
-    ``plays`` on videos, and author fields the source doesn't provide.
+    fields (videoUrl) on images/carousels, hidden engagement counts (None)
+    except ``engagement.views`` / ``viewsSource`` on videos, and author
+    fields the source doesn't provide.
+
+    ``durationSeconds`` stays on the object when present (null allowed) so
+    array rows keep a uniform key set — never silently drop the key.
     """
     if not post.get("videoUrl"):
         post.pop("videoUrl", None)
-    if post.get("durationSeconds") is None:
-        post.pop("durationSeconds", None)
-    else:
-        # One precision rule — three decimal places everywhere.
-        try:
-            post["durationSeconds"] = round(float(post["durationSeconds"]), 3)
-        except (TypeError, ValueError):
-            post.pop("durationSeconds", None)
-    if not safe_str(post.get("productType")):
-        post.pop("productType", None)
     engagement = post.get("engagement")
     eng_dict = engagement if isinstance(engagement, dict) else {}
     is_video = (
@@ -520,12 +507,24 @@ def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
         or bool(post.get("videoUrl"))
         # Trending strips constant postType — still a video when view keys exist.
         or "viewsSource" in eng_dict
-        or "plays" in eng_dict
     )
+    # Keep durationSeconds key on videos (null ok); drop only on non-videos
+    # that never had a meaningful duration.
+    if "durationSeconds" in post or is_video:
+        if post.get("durationSeconds") is None:
+            post["durationSeconds"] = None
+        else:
+            try:
+                post["durationSeconds"] = round(float(post["durationSeconds"]), 3)
+            except (TypeError, ValueError):
+                post["durationSeconds"] = None
+    if not safe_str(post.get("productType")):
+        post.pop("productType", None)
     if isinstance(engagement, dict):
-        # Retired split keys — never ship them again.
+        # Retired keys — never ship them again.
         engagement.pop("viewsInstagram", None)
         engagement.pop("viewsFacebook", None)
+        engagement.pop("plays", None)
         likes = engagement.get("likes")
         views = engagement.get("views")
         views_source = engagement.get("viewsSource")
@@ -536,26 +535,23 @@ def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
             views_source = None
         keep_null = {"views"}
         if is_video:
-            keep_null |= {"viewsSource", "plays"}
+            keep_null |= {"viewsSource"}
         # Hidden counts: keep likes:null so clients can pair with
         # likeAndViewCountsDisabled (0 ≠ omitted ≠ hidden).
         if post.get("likeAndViewCountsDisabled"):
-            keep_null |= {"likes", "plays", "viewsSource"}
+            keep_null |= {"likes", "viewsSource"}
             engagement.setdefault("likes", None)
         cleaned = {
             k: v
             for k, v in engagement.items()
             if (v is not None or k in keep_null)
-            and k not in {"viewsInstagram", "viewsFacebook"}
+            and k not in {"viewsInstagram", "viewsFacebook", "plays"}
         }
         cleaned["views"] = views
         if is_video:
             cleaned["viewsSource"] = views_source
-            # Deprecated alias — same value as views for one release.
-            cleaned["plays"] = views
         else:
             cleaned.pop("viewsSource", None)
-            cleaned.pop("plays", None)
         post["engagement"] = cleaned
     author = post.get("author")
     if isinstance(author, dict):

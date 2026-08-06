@@ -926,20 +926,20 @@ const INSTAGRAM: Spec[] = [
     path: "/v1/instagram/trending-reels",
     credits: 1,
     tagline:
-      "Snapshot-backed trending Reels (~6h refresh) — videos only, flat 1 credit. Use reels-search for live results.",
+      "Warm Redis snapshot (<2s) or live scrape (~40s) — videos only, flat 1 credit.",
     longDescription:
-      "Trending Reels is served from a periodic Apify country snapshot (warm cron ~every 6 hours) — sub-second dataset read; check cached / snapshotAt / stale / ageHours. Each reel includes engagement{likes,comments,views,viewsSource,plays?} where views is the platform play count when exposed and viewsSource is instagram|facebook whenever views is set (plays is a deprecated alias of views). Instagram withholds view counts on roughly a third of reels — those rows keep views/viewsSource null. Constant postType/productType are omitted (endpoint only returns reels). durationSeconds is rounded to 3 decimals. Photos/carousels are never returned. Content older than ~180 days is dropped as Explore resurfacing; content itself may be days old within that window. For live keyword search use Instagram Reels Search. Cold countries return 503 warming + Retry-After: 600. Flat 1 credit per successful call.",
+      "Trending Reels prefers a warm Redis country snapshot written by the cron (~every 6 hours, hard max age 12 hours — see cached / snapshotAt / stale / ageHours). Hot path is a Redis read (typically under 2s). cache=false skips Redis and forces a live scrape (~40s). Cold or stale countries also fall through to live scrape instead of 503. Each reel includes engagement{likes,comments,views,viewsSource} where views is the platform play count when exposed and viewsSource is instagram|facebook whenever views is set. Instagram withholds view counts on roughly a third of reels — those rows keep views/viewsSource null. Constant postType/productType are omitted. durationSeconds is always present (null when unknown), rounded to 3 decimals when set. Photos/carousels are never returned. Content older than ~180 days is dropped as Explore resurfacing. For live keyword search use Instagram Reels Search. Flat 1 credit per successful call.",
     delivers: [
-      "Snapshot-first: cached / snapshotAt / stale / ageHours (~6h refresh)",
-      "engagement.views + viewsSource (no always-null split keys)",
-      "Views withheld honesty (~1/3 of rows) in note",
+      "Hot Redis snapshot (<2s) with hard 12h cutoff",
+      "cache=false / cold / stale → live scrape (~40s), not 503",
+      "engagement.views + viewsSource (plays removed)",
       "Video Reels only — never Explore photos; flat 1 credit",
     ],
     platformLimits: [
-      "Not a live feed — snapshot refreshed roughly every 6 hours; use /v1/instagram/reels-search for immediate keyword scrapes.",
-      "Cold country (never snapshotted) returns 503 warming with Retry-After: 600 while Apify refreshes in the background.",
+      "Snapshots older than 12 hours are never served — live scrape runs instead.",
+      "cache=false always live-scrapes (slow). Default cache=true serves the warm snapshot when fresh.",
       "Photos / carousels / Explore resurfaces older than ~180 days are filtered out.",
-      "Instagram does not expose a view count for every reel; engagement.views stays null when withheld (author-feed backfill helps when the reel is still on their recent timeline).",
+      "Instagram does not expose a view count for every reel; engagement.views stays null when withheld.",
     ],
   },
   {
@@ -4082,6 +4082,13 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
         "Country for Reels localization — full name or ISO code (e.g. 'United States', 'US', 'Turkey', 'TR'). Default United States. Unsupported values return 400 with supportedCountries[].",
     },
     lpFlat(20, 200, 1),
+    {
+      name: "cache",
+      type: "boolean",
+      required: false,
+      description:
+        "Default true — serve the warm Redis country snapshot when fresher than 12h (hot path, typically <2s). Set false to skip Redis/snapshot and force a live scrape (~40s).",
+    },
   ],
   "instagram-tagged-posts": [
     up(IG_PROFILE),
@@ -7869,24 +7876,22 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
       "Total play count including replays (video_play_count). Often higher than views. Prefer viewsInstagram for Instagram-only reports.",
   },
   "instagram-trending-reels": {
-    cached: "true when the list came from a stored country snapshot (Apify fallthrough), false on a fresh native /reels hit.",
+    cached: "true when served from the warm Redis country snapshot; false on a live scrape.",
     snapshotAt:
-      "When the underlying country snapshot finished (ISO-8601, ms precision). Present only when cached=true.",
-    cachedAt: "Alias of snapshotAt (one release). Omitted on fresh native hits — do not treat as Redis cache time.",
-    stale: "true when the snapshot is older than the 6h refresh window — still usable; a background refresh was kicked.",
-    ageHours: "Age of the snapshot in hours (float). 0 on fresh native hits.",
+      "When the country snapshot was built (ISO-8601, ms). Present only when cached=true. Never older than 12h on a 200 response.",
+    cachedAt: "Alias of snapshotAt (one release).",
+    stale: "true when the snapshot is older than the 6h refresh window but still under the 12h hard cutoff.",
+    ageHours: "Age of the snapshot in hours (float). 0 on live scrapes. Responses with ageHours>12 are never returned.",
     country: "Localized country name used for Apify/native geo (e.g. United States).",
     countryCode: "ISO-3166 alpha-2 for the same country (e.g. US). Prefer this for joins.",
-    note: "Honesty copy: snapshot-backed, duplicates expected, ~180d content-age filter, points to reels-search for live scrapes.",
-    reels: "Video Reels only (productType clips). Photos / carousels / multi-year Explore resurfaces are never included.",
+    note: "Honesty copy: warm snapshot vs live scrape, duplicates expected, ~180d content-age filter, points to reels-search for keyword scrapes.",
+    reels: "Video Reels only. Photos / carousels / multi-year Explore resurfaces are never included.",
     "engagement.views":
-      "Reach-style video_view_count only when Instagram exposes a value distinct from plays. Null when unknown — never a silent copy of plays. Read viewsSource.",
+      "Platform play count when Instagram exposes it; null when withheld. Read viewsSource.",
     "engagement.viewsSource":
-      '"video_view_count" when views is that metric; null when views is null. Same honesty pattern as engagementRateBasis. Do not report views as "people watched" unless viewsSource is video_view_count.',
-    "engagement.plays":
-      "Total play count including replays when known; null (key present) when Instagram withheld it after enrich. Never omitted on video reels while views is null.",
-    "engagement.viewsInstagram": "Instagram-only plays when the split is available; null when unknown.",
-    "engagement.viewsFacebook": "Facebook cross-post plays when available (or total−IG); null when unknown.",
+      '"instagram" | "facebook" whenever views is set; null when views is null.',
+    durationSeconds:
+      "Always present on each reel. Float seconds (3dp) when known; null when the source omitted it.",
     caption: "Reel caption. description is not duplicated on this endpoint.",
     "author.url": "Canonical https://www.instagram.com/{username}/ (www + trailing slash).",
     "author.isPrivate": "Whether the account is private. Canonical privacy flag (not private).",

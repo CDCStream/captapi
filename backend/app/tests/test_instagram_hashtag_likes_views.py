@@ -129,5 +129,5 @@ def test_enrich_overlays_feed_like_count(monkeypatch) -> None:
     assert eng["likes"] == 18_420
     assert eng["views"] == 2_199_099
     assert eng["viewsSource"] == "instagram"
-    assert eng["plays"] == 2_199_099
+    assert "plays" not in eng
     assert "viewsInstagram" not in eng

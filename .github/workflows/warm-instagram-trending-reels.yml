@@ -2,7 +2,7 @@ name: Warm Instagram trending-reels
 
 on:
   schedule:
-    # Every 6 hours - keep common countries off the cold path.
+    # Every 6 hours — keep common countries off the cold path.
     - cron: "17 */6 * * *"
   workflow_dispatch:
 
@@ -13,7 +13,8 @@ concurrency:
 jobs:
   warm:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Apify Explore runs are slow; wait for SUCCEEDED then write Redis.
+    timeout-minutes: 90
     permissions:
       contents: read
     steps:
@@ -27,14 +28,19 @@ jobs:
         working-directory: backend
         run: |
           python -m pip install --upgrade pip
-          pip install httpx structlog pydantic pydantic-settings python-dotenv tenacity
+          pip install httpx structlog pydantic pydantic-settings python-dotenv tenacity redis
 
-      - name: Kick Apify refreshes
+      - name: Kick Apify + write Redis snapshots
         working-directory: backend
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
           APIFY_ACTOR_INSTAGRAM_TRENDING: ${{ vars.APIFY_ACTOR_INSTAGRAM_TRENDING }}
           TRENDING_WARM_COUNTRIES: ${{ vars.TRENDING_WARM_COUNTRIES }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Optional — author-feed enrich during warm (views backfill).
+          DECODO_API_KEY: ${{ secrets.DECODO_API_KEY }}
+          DECODO_USERNAME: ${{ secrets.DECODO_USERNAME }}
+          DECODO_PASSWORD: ${{ secrets.DECODO_PASSWORD }}
         run: python scripts/warm_instagram_trending_reels.py

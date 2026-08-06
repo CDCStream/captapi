@@ -14,7 +14,7 @@ def test_split_play_counts_canonical_views() -> None:
     # Prefer total play_count as engagement.views.
     assert split["views"] == 293_700
     assert split["viewsSource"] == "instagram"
-    assert split["plays"] == 293_700  # deprecated alias
+    assert "plays" not in split
     assert "viewsInstagram" not in split
     assert "viewsFacebook" not in split
 
@@ -27,7 +27,6 @@ def test_split_play_counts_ig_only() -> None:
     )
     assert split["views"] == 235_383
     assert split["viewsSource"] == "instagram"
-    assert split["plays"] == 235_383
 
 
 def test_split_play_counts_facebook_only() -> None:
@@ -49,7 +48,6 @@ def test_split_play_counts_rejects_gql_undercount() -> None:
     )
     assert split["views"] is None
     assert split["viewsSource"] is None
-    assert split["plays"] is None
 
 
 def test_split_play_counts_gql_when_only_signal() -> None:
@@ -72,7 +70,6 @@ def test_split_play_counts_identical_signals() -> None:
     )
     assert split["views"] == 1_157_752
     assert split["viewsSource"] == "instagram"
-    assert split["plays"] == 1_157_752
 
 
 def test_engagement_with_play_split_on_video() -> None:
@@ -86,7 +83,7 @@ def test_engagement_with_play_split_on_video() -> None:
     )
     assert eng["views"] == 293_700
     assert eng["viewsSource"] == "instagram"
-    assert eng["plays"] == 293_700
+    assert "plays" not in eng
     assert "viewsInstagram" not in eng
     assert "viewsFacebook" not in eng
 
@@ -100,7 +97,7 @@ def test_engagement_keeps_null_views_on_video() -> None:
     )
     assert eng["views"] is None
     assert eng["viewsSource"] is None
-    assert eng["plays"] is None
+    assert "plays" not in eng
     assert "viewsSource" in eng
 
 
@@ -123,10 +120,23 @@ def test_strip_keeps_null_view_keys_on_video() -> None:
     out = decodo.strip_null_post_fields(post)
     assert out["engagement"]["views"] is None
     assert out["engagement"]["viewsSource"] is None
-    assert out["engagement"]["plays"] is None
+    assert "plays" not in out["engagement"]
     assert "viewsInstagram" not in out["engagement"]
     assert "viewsFacebook" not in out["engagement"]
     assert out["durationSeconds"] == 12.011
+
+
+def test_strip_keeps_null_duration_on_video() -> None:
+    post = {
+        "postType": "Video",
+        "productType": "clips",
+        "videoUrl": "https://cdn.example/r.mp4",
+        "durationSeconds": None,
+        "engagement": {"views": 10, "viewsSource": "instagram", "likes": 1, "comments": 0},
+    }
+    out = decodo.strip_null_post_fields(post)
+    assert "durationSeconds" in out
+    assert out["durationSeconds"] is None
 
 
 def test_strip_wires_discriminator_with_views() -> None:
@@ -147,7 +157,7 @@ def test_strip_wires_discriminator_with_views() -> None:
     out = decodo.strip_null_post_fields(post)
     assert out["engagement"]["views"] == 46_018
     assert out["engagement"]["viewsSource"] == "instagram"
-    assert out["engagement"]["plays"] == 46_018
+    assert "plays" not in out["engagement"]
     assert "viewsInstagram" not in out["engagement"]
 
 
@@ -160,13 +170,10 @@ def test_acceptance_no_100pct_null_engagement_key() -> None:
             {"likes": 20, "comments": 2}, play_count=None, likes=20, is_video=True
         ),
     ]
-    # views/viewsSource/plays may be null on some rows, never on all if any row has data…
-    # stricter: no key that is null on EVERY row that has the key.
     keys = set().union(*(r.keys() for r in rows))
     for k in keys:
-        assert not all(r.get(k) is None for r in rows if k in r) or k in {
-            # comments/likes always filled here; views may be null on row 2 only
-        }
+        if k in {"views", "viewsSource"}:
+            assert not all(r.get(k) is None for r in rows)
     assert rows[0]["views"] is not None and rows[0]["viewsSource"] is not None
     assert all(r["views"] is None or r["viewsSource"] is not None for r in rows)
 

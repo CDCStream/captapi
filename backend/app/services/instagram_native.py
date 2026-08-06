@@ -2780,8 +2780,6 @@ def _as_trending_reel(post: dict[str, Any]) -> dict[str, Any]:
         "comments": engagement.get("comments"),
         "views": views,
         "viewsSource": views_source,
-        # Deprecated alias — same value as views for one release.
-        "plays": views,
     }
     video_url = safe_str(post.get("videoUrl"))
     thumb = safe_str(post.get("thumbnailUrl"))
@@ -2823,7 +2821,11 @@ def _as_trending_reel(post: dict[str, Any]) -> dict[str, Any]:
 
 
 async def trending_reels_native(
-    country: str = "United States", *, limit: int = 20
+    country: str = "United States",
+    *,
+    limit: int = 20,
+    enrich: bool = True,
+    max_authors: int | None = None,
 ) -> list[dict[str, Any]] | None:
     """Trending Reels from Instagram's public ``/reels`` surface.
 
@@ -2832,6 +2834,9 @@ async def trending_reels_native(
     (``product_type=clips`` / Video). Photos/carousels and multi-year stale
     resurfaces are dropped. Instagram's own page returns small overlapping
     batches; callers should expect duplicates across requests.
+
+    ``enrich=False`` skips author-feed backfill (faster live path; views may
+    stay null more often).
     """
     if limit <= 0:
         return []
@@ -2863,11 +2868,10 @@ async def trending_reels_native(
     posts = await hydrate_shortcodes(codes, limit=fetch_n)
     if not posts:
         return None
-    # Polaris hydrate often omits play_count logged-out — author feeds fill
-    # plays / viewsInstagram (and distinct views when GraphQL had them).
-    posts = await enrich_posts_from_author_feeds(
-        posts, max_authors=min(16, max(len(posts), 8))
-    )
+    if enrich:
+        # Polaris hydrate often omits play_count logged-out — author feeds fill.
+        authors = max_authors if max_authors is not None else min(16, max(len(posts), 8))
+        posts = await enrich_posts_from_author_feeds(posts, max_authors=authors)
     reels: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
     for post in posts:
@@ -2885,7 +2889,7 @@ async def trending_reels_native(
 
     def _rank(row: dict[str, Any]) -> tuple[int, int, float]:
         eng = row.get("engagement") if isinstance(row.get("engagement"), dict) else {}
-        views = safe_int(eng.get("views") or eng.get("viewsInstagram") or eng.get("plays")) or 0
+        views = safe_int(eng.get("views")) or 0
         likes = safe_int(eng.get("likes")) or 0
         published = _parse_published_at(row.get("publishedAt"))
         ts = published.timestamp() if published else 0.0
@@ -2902,6 +2906,7 @@ async def trending_reels_native(
         n=len(out),
         hydrated=len(posts),
         reels=len(reels),
+        enrich=enrich,
     )
     return out
 

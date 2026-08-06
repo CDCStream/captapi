@@ -49,6 +49,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 /** Static mirror of the migration seed — used only when the table is unavailable. */
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
+    publishedAt: "2026-08-06",
+    category: "fix",
+    title: "Instagram trending-reels: Redis hot path + 12h hard cutoff",
+    description:
+      "GET /v1/instagram/trending-reels serves a ready-to-serve Redis country snapshot written by the warm cron (typically <2s). Snapshots older than 12 hours are never returned — cold/stale or cache=false falls through to a live scrape (~40s) instead of 503. engagement.plays is removed; durationSeconds stays on every reel (null when unknown).",
+    items: [
+      "Warm cron writes enriched Redis payloads (not just Apify kicks)",
+      "Hard 12h serve cutoff; cache=false forces live scrape",
+      "Remove engagement.plays; keep durationSeconds key when null",
+    ],
+  },
+  {
     publishedAt: "2026-08-05",
     category: "improvement",
     title: "SoundCloud track streamUrl + nested artist{}",

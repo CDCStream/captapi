@@ -6,6 +6,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.services import instagram_native as native
+from app.services import instagram_trending_snapshot as ig_snap
 from app.routers import instagram as ig_router
 
 
@@ -36,6 +37,7 @@ def test_normalize_trending_item_splits_composite_id() -> None:
             "date": "2026-07-24T18:46:42+00:00",
             "video_url": "https://cdn.example/reel.mp4",
             "url": "https://www.instagram.com/reel/DbL6n0ggXDZ/",
+            "duration": 12.011,
         }
     )
     assert row["id"] == "3948507321457537241"
@@ -45,9 +47,10 @@ def test_normalize_trending_item_splits_composite_id() -> None:
     # Canonical views = play count; viewsSource non-null whenever views is.
     assert row["engagement"]["views"] == 13_000_000
     assert row["engagement"]["viewsSource"] == "instagram"
-    assert row["engagement"]["plays"] == 13_000_000  # deprecated alias
+    assert "plays" not in row["engagement"]
     assert "viewsInstagram" not in row["engagement"]
     assert row["engagement"]["likes"] == 485_567
+    assert row["durationSeconds"] == 12.011
     assert "description" not in row
     assert "topic" not in row
     assert "section" not in row
@@ -87,6 +90,7 @@ def test_unsupported_country_is_400_with_list() -> None:
 
 
 def test_warming_error_is_machine_readable() -> None:
+    """Last-resort 503 when live scrape also fails."""
     exc = ig_router._trending_warming_http("United States")
     assert exc.status_code == 503
     assert exc.headers["Retry-After"] == "600"
@@ -107,18 +111,36 @@ def test_freshness_marks_stale_after_refresh_window() -> None:
     assert fresh["cachedAt"] == fresh["snapshotAt"]
 
     old = ig_router._trending_freshness(
-        cached_at=datetime.now(timezone.utc) - timedelta(hours=32),
+        cached_at=datetime.now(timezone.utc) - timedelta(hours=8),
         from_snapshot=True,
     )
     assert old["cached"] is True
     assert old["stale"] is True
-    assert old["ageHours"] >= 30
+    assert old["ageHours"] >= 6
 
     native = ig_router._trending_freshness(cached_at=None, from_snapshot=False)
     assert native["cached"] is False
     assert "cachedAt" not in native
     assert "snapshotAt" not in native
     assert native["ageHours"] == 0
+
+
+def test_hard_cutoff_rejects_snapshots_older_than_12h() -> None:
+    ancient = {
+        "reels": [{"id": "1"}],
+        "snapshotAt": (datetime.now(timezone.utc) - timedelta(hours=22)).strftime(
+            "%Y-%m-%dT%H:%M:%S.000Z"
+        ),
+    }
+    assert ig_snap.is_servable(ancient) is False
+    ok = {
+        "reels": [{"id": "1"}],
+        "snapshotAt": (datetime.now(timezone.utc) - timedelta(hours=3)).strftime(
+            "%Y-%m-%dT%H:%M:%S.000Z"
+        ),
+    }
+    assert ig_snap.is_servable(ok) is True
+    assert ig_snap.MAX_AGE_SECS == 12 * 3600
 
 
 def test_trending_payload_includes_iso_country_code() -> None:
@@ -129,16 +151,35 @@ def test_trending_payload_includes_iso_country_code() -> None:
     )
     assert payload["country"] == "United States"
     assert payload["countryCode"] == "US"
-    assert "ageHours" in payload["note"] or "6 hours" in payload["note"]
+    assert "12 hours" in payload["note"] or "ageHours" in payload["note"]
     assert "view count" in payload["note"]
 
 
-def test_sync_wait_budget_is_gateway_safe() -> None:
-    assert ig_router._TRENDING_SYNC_WAIT_SECS <= 15
+def test_live_budget_under_gateway() -> None:
+    assert ig_router._TRENDING_LIVE_BUDGET_SECS <= 40
+
+
+def test_wire_trending_reel_drops_plays_keeps_duration() -> None:
+    row = {
+        "id": "1",
+        "videoUrl": "https://cdn.example/a.mp4",
+        "durationSeconds": None,
+        "engagement": {
+            "likes": 1,
+            "comments": 0,
+            "views": 100,
+            "viewsSource": "instagram",
+            "plays": 100,
+        },
+    }
+    out = ig_router._wire_trending_reel(row)
+    assert "plays" not in out["engagement"]
+    assert out["durationSeconds"] is None
+    assert out["engagement"]["views"] == 100
 
 
 def test_trending_engagement_acceptance() -> None:
-    """No 100%-null engagement key; viewsSource tracks views."""
+    """No 100%-null engagement key; viewsSource tracks views; no plays."""
     rows = [
         ig_router._normalize_trending_item(
             {
@@ -168,14 +209,16 @@ def test_trending_engagement_acceptance() -> None:
                 "date": "2026-07-24T18:46:42+00:00",
                 "url": "https://www.instagram.com/reel/Bbb/",
                 "video_url": "https://cdn.example/b.mp4",
-                "duration": 8.8,
+                # duration omitted — key must still exist as null after wire
             }
         ),
     ]
     from app.services import instagram_decodo as decodo
 
     reels = [
-        decodo.strip_null_post_fields(ig_router._filter_trending_reels_only([r])[0])
+        ig_router._wire_trending_reel(
+            decodo.strip_null_post_fields(ig_router._filter_trending_reels_only([r])[0])
+        )
         for r in rows
     ]
     assert all(
@@ -183,10 +226,11 @@ def test_trending_engagement_acceptance() -> None:
         for r in reels
     )
     keys = set(reels[0]["engagement"])
+    assert "plays" not in keys
     for k in keys:
-        # likes/comments always filled; views may be null on some rows but not all
-        if k in {"views", "viewsSource", "plays"}:
+        if k in {"views", "viewsSource"}:
             assert not all(r["engagement"].get(k) is None for r in reels)
     assert reels[0]["durationSeconds"] == 12.011
-    assert reels[1]["durationSeconds"] == 8.8
+    assert "durationSeconds" in reels[1]
+    assert reels[1]["durationSeconds"] is None
     assert "postType" not in reels[0]
