@@ -1177,6 +1177,8 @@ async def instagram_basic_profile(
 
 
 _IG_CURSOR_RE = re.compile(r"^\d+_(\d+)$")
+# Opaque clips/user max_id (base64) scoped to a user id.
+_IG_CLIPS_CURSOR_RE = re.compile(r"^clips:(\d+):(.+)$")
 _IG_FEED_MAX_PAGES = 8
 
 
@@ -1284,6 +1286,85 @@ async def _ig_usertags_collect(
     return posts, next_cursor
 
 
+async def _ig_clips_collect(
+    user_id: str,
+    cursor: str | None,
+    limit: int,
+    *,
+    followers: int | None = None,
+) -> tuple[list[dict[str, Any]], str | None] | None:
+    """Collect Reels via ``clips/user`` (reels-dense pages).
+
+    ``cursor`` is either None or ``clips:{userId}:{opaque_max_id}``.
+    """
+    max_id: str | None = None
+    if cursor:
+        m = _IG_CLIPS_CURSOR_RE.match(cursor)
+        if not m or m.group(1) != user_id:
+            return None
+        max_id = m.group(2)
+    collected: list[dict[str, Any]] = []
+    t_all = time.perf_counter()
+    page_timings: list[dict[str, Any]] = []
+    for page_idx in range(_IG_FEED_MAX_PAGES):
+        t_page = time.perf_counter()
+        page = await instagram_native.fetch_user_clips_page(user_id, max_id, count=12)
+        if page is None and not collected:
+            await asyncio.sleep(0.4)
+            page = await instagram_native.fetch_user_clips_page(user_id, max_id, count=12)
+        page_ms = int((time.perf_counter() - t_page) * 1000)
+        if page is None:
+            page_timings.append({"page": page_idx, "ms": page_ms, "ok": False})
+            log.info(
+                "ig_clips_collect_stages",
+                user_id=user_id,
+                limit=limit,
+                collected=len(collected),
+                pages=page_timings,
+                total_ms=int((time.perf_counter() - t_all) * 1000),
+            )
+            return None if not collected else (
+                collected[:limit],
+                f"clips:{user_id}:{max_id}" if max_id else None,
+            )
+        items, next_max_id, more = page
+        kept_before = len(collected)
+        for raw in items:
+            collected.append(
+                instagram_native.map_feed_post(raw, followers=followers, profile_user_id=user_id)
+            )
+        page_timings.append(
+            {
+                "page": page_idx,
+                "ms": page_ms,
+                "ok": True,
+                "raw": len(items),
+                "kept": len(collected) - kept_before,
+            }
+        )
+        max_id = next_max_id if more and next_max_id else None
+        next_cursor = f"clips:{user_id}:{max_id}" if max_id else None
+        if len(collected) >= limit or not max_id:
+            log.info(
+                "ig_clips_collect_stages",
+                user_id=user_id,
+                limit=limit,
+                collected=min(len(collected), limit),
+                pages=page_timings,
+                total_ms=int((time.perf_counter() - t_all) * 1000),
+            )
+            return collected[:limit], next_cursor
+    log.info(
+        "ig_clips_collect_stages",
+        user_id=user_id,
+        limit=limit,
+        collected=min(len(collected), limit),
+        pages=page_timings,
+        total_ms=int((time.perf_counter() - t_all) * 1000),
+    )
+    return collected[:limit], (f"clips:{user_id}:{max_id}" if max_id else None)
+
+
 async def _ig_feed_collect(
     user_id: str,
     cursor: str | None,
@@ -1294,25 +1375,61 @@ async def _ig_feed_collect(
 ) -> tuple[list[dict[str, Any]], str | None] | None:
     """Collect up to ``limit`` posts from the native api/v1 feed starting at
     ``cursor``. Returns (posts, next_cursor) or None if the feed is
-    unreachable."""
+    unreachable.
+
+    When ``reels_only``, prefer ``clips/user`` (dense Reels pages). Falls back
+    to the mixed timeline feed + in-memory media_type filter.
+    """
+    if reels_only and (cursor is None or _IG_CLIPS_CURSOR_RE.match(cursor or "")):
+        clips = await _ig_clips_collect(user_id, cursor, limit, followers=followers)
+        if clips is not None and clips[0]:
+            return clips
+        if cursor and _IG_CLIPS_CURSOR_RE.match(cursor):
+            # Opaque clips cursor is not valid on the timeline feed.
+            return clips
+
     collected: list[dict[str, Any]] = []
     next_cursor = cursor
-    for _ in range(_IG_FEED_MAX_PAGES):
+    t_all = time.perf_counter()
+    page_timings: list[dict[str, Any]] = []
+    for page_idx in range(_IG_FEED_MAX_PAGES):
+        t_page = time.perf_counter()
         page = await instagram_native.fetch_user_feed_page(user_id, next_cursor, count=33)
         if page is None and not collected:
             # Soft-block / empty residential exits are common on page 2+;
             # one short retry before declaring the feed unreachable.
             await asyncio.sleep(0.4)
             page = await instagram_native.fetch_user_feed_page(user_id, next_cursor, count=33)
+        page_ms = int((time.perf_counter() - t_page) * 1000)
         if page is None:
+            page_timings.append({"page": page_idx, "ms": page_ms, "ok": False})
+            log.info(
+                "ig_feed_collect_stages",
+                user_id=user_id,
+                reels_only=reels_only,
+                limit=limit,
+                collected=len(collected),
+                pages=page_timings,
+                total_ms=int((time.perf_counter() - t_all) * 1000),
+            )
             return None if not collected else (collected[:limit], next_cursor)
         items, next_max_id, more = page
+        kept_before = len(collected)
         for raw in items:
             if reels_only and safe_int(raw.get("media_type")) != 2:
                 continue
             collected.append(
                 instagram_native.map_feed_post(raw, followers=followers, profile_user_id=user_id)
             )
+        page_timings.append(
+            {
+                "page": page_idx,
+                "ms": page_ms,
+                "ok": True,
+                "raw": len(items),
+                "kept": len(collected) - kept_before,
+            }
+        )
         next_cursor = next_max_id if more and next_max_id else None
         # Instagram suffixes next_max_id with the last item's owner id, which
         # differs from the profile on collab posts. Our public cursor embeds
@@ -1322,6 +1439,15 @@ async def _ig_feed_collect(
             next_cursor = f"{next_cursor.split('_')[0]}_{user_id}"
         if len(collected) >= limit or next_cursor is None:
             break
+    log.info(
+        "ig_feed_collect_stages",
+        user_id=user_id,
+        reels_only=reels_only,
+        limit=limit,
+        collected=min(len(collected), limit),
+        pages=page_timings,
+        total_ms=int((time.perf_counter() - t_all) * 1000),
+    )
     return collected[:limit], next_cursor
 
 
@@ -1466,12 +1592,19 @@ def _ig_channel_page(
 
 
 def _finalise_channel_list_payload(
-    data: dict[str, Any], *, items_key: str = "posts"
+    data: dict[str, Any],
+    *,
+    items_key: str = "posts",
+    reels: bool = False,
 ) -> dict[str, Any]:
     """Unify GraphQL + feed (+ Apify) list rows before they leave the API."""
     items = data.get(items_key)
     if isinstance(items, list):
-        data[items_key] = decodo.finalise_channel_posts(items)
+        data[items_key] = (
+            decodo.finalise_channel_reels(items)
+            if reels
+            else decodo.finalise_channel_posts(items)
+        )
         data["totalReturned"] = len(data[items_key])
     if isinstance(data.get("user"), dict):
         data["user"] = decodo.finalise_channel_user(data["user"])
@@ -1610,9 +1743,9 @@ async def instagram_channel_reels(
     userId: str | None = Query(
         None,
         description=(
-            "Instagram numeric user ID (e.g. 173560420). Faster than url — skips "
-            "handle→ID resolve. Prefer when you already have the ID from basic-profile "
-            "or another call."
+            "Instagram numeric user ID (e.g. 173560420). Skips handle→ID resolve "
+            "(historically ~80s on the sequential WPI path; prefer this when you "
+            "already have the ID from basic-profile or profile-search)."
         ),
     ),
     limit: int = Query(20, ge=1, le=200),
@@ -1645,15 +1778,24 @@ async def instagram_channel_reels(
         )
 
     settings = get_settings()
-    if cursor and not _IG_CURSOR_RE.match(cursor):
+    if cursor and not (_IG_CURSOR_RE.match(cursor) or _IG_CLIPS_CURSOR_RE.match(cursor)):
         raise HTTPException(status_code=400, detail="Invalid cursor. Pass the nextCursor value from a previous response.")
-    resource_url = (url.strip() if url and str(url).strip() else None) or f"instagram_user:{known_user_id}"
+    # Billing / cache key — not the public envelope url (that must be a real
+    # profile URL or null; never instagram_user:{id}).
+    billing_resource = (
+        (url.strip() if url and str(url).strip() else None)
+        or (f"https://www.instagram.com/{handle}/" if handle else None)
+        or f"instagram_user:{known_user_id}"
+    )
+    profile_url: str | None = (
+        instagram_native.canonical_instagram_profile_url(handle) if handle else None
+    )
     cost = _scaled_credits(limit, RATE_IG_CHANNEL, 1)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/channel-reels",
         platform="instagram",
-        resource_url=resource_url,
+        resource_url=billing_resource,
         base_credits=cost,
     ) as ctx:
         def _payload(
@@ -1664,10 +1806,11 @@ async def instagram_channel_reels(
             user: dict[str, Any] | None = None,
             degraded: bool = False,
             partial: bool = False,
+            envelope_url: str | None = None,
         ) -> dict[str, Any]:
             uid = user_id or known_user_id
             out: dict[str, Any] = {
-                "url": resource_url,
+                "url": envelope_url if envelope_url is not None else profile_url,
                 "totalReturned": len(reels),
                 "reels": reels,
                 "nextCursor": next_cursor,
@@ -1681,10 +1824,10 @@ async def instagram_channel_reels(
                 out["degraded"] = True
             if partial:
                 out["partial"] = True
-            return _finalise_channel_list_payload(out, items_key="reels")
+            return _finalise_channel_list_payload(out, items_key="reels", reels=True)
 
         async def _ensure_handle() -> str:
-            nonlocal handle
+            nonlocal handle, profile_url
             if handle:
                 return handle
             assert known_user_id
@@ -1695,11 +1838,29 @@ async def instagram_channel_reels(
                     detail="Profile not found for that user ID.",
                 )
             handle = resolved
+            profile_url = instagram_native.canonical_instagram_profile_url(handle)
             return handle
 
         async def _run() -> dict[str, Any]:
+            nonlocal profile_url
+            stages: dict[str, Any] = {
+                "limit": limit,
+                "had_user_id": bool(known_user_id),
+                "had_url": bool(handle),
+            }
+            t_all = time.perf_counter()
+
             if cursor:
-                user_id = _IG_CURSOR_RE.match(cursor).group(1)
+                feed_m = _IG_CURSOR_RE.match(cursor)
+                clips_m = _IG_CLIPS_CURSOR_RE.match(cursor)
+                user_id = (feed_m.group(1) if feed_m else None) or (
+                    clips_m.group(1) if clips_m else None
+                )
+                if not user_id:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Invalid cursor. Pass the nextCursor value from a previous response.",
+                    )
                 if known_user_id and known_user_id != user_id:
                     raise HTTPException(
                         status_code=400,
@@ -1714,6 +1875,9 @@ async def instagram_channel_reels(
                     raise HTTPException(status_code=502, detail="Failed to fetch the next page. Retry shortly.")
                 reels, next_cursor = result
                 ctx["source"] = "direct"
+                stages["path"] = "cursor"
+                stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+                log.info("ig_channel_reels_stages", **stages)
                 return _payload(reels, next_cursor, user_id=user_id)
 
             async def _apify() -> dict[str, Any]:
@@ -1730,12 +1894,14 @@ async def instagram_channel_reels(
                     for i in items[:limit]
                     if not i.get("error")
                 ]
+                stages["path"] = "apify"
+                stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+                log.info("ig_channel_reels_stages", **stages)
                 return _payload(reels, None, degraded=True, partial=True)
 
-            # Native-first. When userId is provided, skip handle→ID resolve and
-            # hit the feed API directly (faster; matches SC's user_id DX).
-            # Otherwise: web_profile_info → api/v1 feed → Decodo GraphQL.
-            # Hard wall-clock budget: return what we have rather than sit to 180s.
+            # Native-first. userId → feed directly. url/@handle → same raced
+            # resolve as profile-search / basic-profile (not sequential session
+            # WPI — that alone was ~80s). Soft budget before Decodo/Apify.
             t0 = time.monotonic()
             budget_s = 45.0
 
@@ -1743,24 +1909,43 @@ async def instagram_channel_reels(
             followers = None
             if not user_id:
                 assert handle
-                user = await instagram_native.fetch_web_profile_info(handle)
-                user_id = safe_str((user or {}).get("pk") or (user or {}).get("id"))
+                t_resolve = time.perf_counter()
+                user, winner, resolve_stages, _missing = await _race_resolve_ig_user(handle)
+                stages["resolve_ms"] = int((time.perf_counter() - t_resolve) * 1000)
+                stages["resolve_winner"] = winner
+                stages["resolve"] = resolve_stages
+                user_id = safe_str(
+                    (user or {}).get("pk")
+                    or (user or {}).get("id")
+                    or (user or {}).get("userId")
+                )
                 if user:
+                    uname = safe_str(user.get("username")) or handle
+                    profile_url = instagram_native.canonical_instagram_profile_url(uname)
                     followers = safe_int(
                         (user.get("edge_followed_by") or {}).get("count")
                         if isinstance(user.get("edge_followed_by"), dict)
-                        else user.get("follower_count")
+                        else user.get("follower_count") or user.get("followers")
                     )
             if user_id:
+                t_feed = time.perf_counter()
                 native = await _ig_feed_collect(
                     user_id, None, limit, reels_only=True, followers=followers
                 )
+                stages["feed_ms"] = int((time.perf_counter() - t_feed) * 1000)
                 if native is not None and native[0]:
                     reels, next_cursor = native
                     ctx["source"] = "direct"
+                    stages["path"] = "native_feed"
+                    stages["reels"] = len(reels)
+                    stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+                    log.info("ig_channel_reels_stages", **stages)
                     return _payload(reels, next_cursor, user_id=user_id)
 
             if time.monotonic() - t0 >= budget_s:
+                stages["path"] = "budget_exhausted"
+                stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+                log.info("ig_channel_reels_stages", **stages)
                 raise HTTPException(
                     status_code=502,
                     detail="Instagram reels temporarily unavailable. Retry shortly.",
@@ -1794,6 +1979,10 @@ async def instagram_channel_reels(
                 )
                 if time.monotonic() - t0 >= budget_s:
                     out["partial"] = True
+                stages["path"] = "decodo"
+                stages["reels"] = len(reels)
+                stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+                log.info("ig_channel_reels_stages", **stages)
                 return out
 
             return await _try_decodo(ctx, _decodo_run, _apify)
@@ -1805,8 +1994,8 @@ async def instagram_channel_reels(
                 "userId": known_user_id or "",
                 "limit": limit,
                 "cursor": cursor or "",
-                # v21: same finalise_channel_post contract as channel-posts.
-                "v": 21,
+                # v22: lean reel keys + raced resolve + raced feed sessions.
+                "v": 22,
             },
             runner=_run,
             ctx=ctx,

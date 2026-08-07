@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Instagram channel-reels: race feed sessions + IPS1 resolve; lean reel shape",
+    description:
+      "channel-reels was burning minutes paging the mixed photo timeline (not a per-reel hydrate) and still used sequential WPI for handle→ID while profile-search raced. Reels now prefer POST /api/v1/clips/user/ (dense pages); feed/session candidates race in a bounded pool; url/@handle reuses _race_resolve_ig_user. Envelope url is a real profile URL or null (never instagram_user:{id}). reels[] drop description/postType/productType and always-null dead fields. Docs state ceil(n×0.3) credits.",
+    items: [
+      "clips/user primary path + raced session pool",
+      "Handle resolve via profile-search race path",
+      "Lean reel keys; ceil billing documented",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Spotify search docs: regenerate example; drop playable promise; field-coverage lint",
     description:
       "The /apis/spotify-search page still showed scrapedAt in the field table and code examples after the per-row stamp was removed from the API. Snapshot regenerated from a live Pathfinder call (no scrapedAt). Prose no longer promises playable — decorateContextTracks omits playability (use /spotify/track). npm run gen:examples + lint:docs-fields fail the build when platformLimits say a field is absent but the generated example still contains it.",

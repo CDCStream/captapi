@@ -562,6 +562,38 @@ IG_MUSIC_KEYS: tuple[str, ...] = (
     "isExplicit",
     "hasLyrics",
 )
+# channel-reels only: drop tautologies (postType/productType), caption twin
+# (description), and fields that are null on every measured row.
+IG_CHANNEL_REEL_KEYS: tuple[str, ...] = (
+    "platform",
+    "url",
+    "id",
+    "shortcode",
+    "mediaId",
+    "caption",
+    "publishedAt",
+    "durationSeconds",
+    "thumbnailUrl",
+    "videoUrl",
+    "hasAudio",
+    "author",
+    "engagement",
+    "hashtags",
+    "mentions",
+    "isPaidPartnership",
+    "isAd",
+    "isAffiliate",
+    "likeAndViewCountsDisabled",
+    "music",
+    "musicId",
+    "location",
+)
+IG_REEL_AUTHOR_KEYS: tuple[str, ...] = tuple(
+    k for k in IG_AUTHOR_KEYS if k != "postCount"
+)
+IG_REEL_MUSIC_KEYS: tuple[str, ...] = tuple(
+    k for k in IG_MUSIC_KEYS if k not in {"trendRank", "previousTrendRank"}
+)
 IG_LOCATION_KEYS: tuple[str, ...] = (
     "id",
     "name",
@@ -678,6 +710,29 @@ def finalise_channel_post(post: dict[str, Any] | None) -> dict[str, Any]:
 
 def finalise_channel_posts(posts: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
     return [finalise_channel_post(p) for p in (posts or []) if isinstance(p, dict)]
+
+
+def finalise_channel_reel(post: dict[str, Any] | None) -> dict[str, Any]:
+    """Lean reels list row — no caption twin, no constant Video/clips enums."""
+    base = finalise_channel_post(post)
+    author = base.get("author") if isinstance(base.get("author"), dict) else {}
+    music = base.get("music")
+    out = {k: base.get(k) for k in IG_CHANNEL_REEL_KEYS}
+    out["author"] = _finalise_keys(IG_REEL_AUTHOR_KEYS, author)
+    if isinstance(music, dict) and music:
+        out["music"] = _finalise_keys(IG_REEL_MUSIC_KEYS, music)
+        if out.get("musicId") is None:
+            out["musicId"] = out["music"].get("id")
+    else:
+        out["music"] = None
+    # location stays null when untagged (do not ship empty objects).
+    if not (isinstance(out.get("location"), dict) and out["location"]):
+        out["location"] = None
+    return out
+
+
+def finalise_channel_reels(posts: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+    return [finalise_channel_reel(p) for p in (posts or []) if isinstance(p, dict)]
 
 
 def finalise_channel_user(user: dict[str, Any] | None) -> dict[str, Any] | None:

@@ -1293,6 +1293,163 @@ def map_feed_post(
     )
 
 
+# Serial session walks were burning ~minutes on channel-reels (each tier does
+# a 15s httpx timeout). Race a bounded pool; first JSON feed page wins.
+_FEED_RACE_CONCURRENCY = 5
+_FEED_SESSION_CAP = 8
+_FEED_ATTEMPT_TIMEOUT = 12.0
+
+
+_CLIPS_MOBILE_UA = (
+    "Instagram 192.0.0.37.107 Android (28/9; 420dpi; 1080x1920; samsung; "
+    "SM-G973F; beyond1; exynos9820; en_US; 301484483)"
+)
+
+
+async def fetch_user_clips_page(
+    user_id: str, max_id: str | None = None, count: int = 12
+) -> tuple[list[dict[str, Any]], str | None, bool] | None:
+    """One page of a profile's Reels via ``POST /api/v1/clips/user/``.
+
+    Unlike the mixed timeline feed, every item is a clip — channel-reels no
+    longer has to burn 8 photo-heavy feed pages to gather 17 reels.
+    Returns (raw media dicts, next_max_id, more_available) or None.
+    """
+    form: dict[str, str] = {
+        "target_user_id": str(user_id),
+        "page_size": str(max(1, min(count, 33))),
+        "include_feed_video": "true",
+    }
+    if max_id:
+        form["max_id"] = max_id
+    for attempt in range(3):
+        result = await _fetch_clips_once(user_id, form, attempt)
+        if result is not None:
+            return result
+    return None
+
+
+async def _try_clips_candidate(
+    form: dict[str, str],
+    tier: str | None,
+    cks: dict[str, str],
+    *,
+    attempt: int,
+) -> tuple[list[dict[str, Any]], str | None, bool] | None:
+    try:
+        async with httpx.AsyncClient(
+            timeout=_FEED_ATTEMPT_TIMEOUT,
+            proxy=proxy_for(tier) if tier else None,
+            follow_redirects=True,
+            cookies=cks,
+        ) as client:
+            resp = await client.post(
+                "https://i.instagram.com/api/v1/clips/user/",
+                data=form,
+                headers={
+                    "User-Agent": _CLIPS_MOBILE_UA,
+                    "X-IG-App-ID": _IG_APP_ID,
+                    "X-CSRFToken": client.cookies.get("csrftoken") or cks.get("csrftoken") or "",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "*/*",
+                },
+            )
+    except httpx.HTTPError as exc:
+        log.info(
+            "ig_clips_transport_error",
+            attempt=attempt,
+            tier=tier or "direct",
+            error=str(exc)[:120],
+        )
+        return None
+    if resp.status_code != 200:
+        log.info(
+            "ig_clips_http_status",
+            attempt=attempt,
+            tier=tier or "direct",
+            status=resp.status_code,
+        )
+        return None
+    body = (resp.text or "").lstrip()
+    if not body.startswith("{"):
+        return None
+    try:
+        payload = resp.json()
+    except ValueError:
+        return None
+    raw_items = payload.get("items")
+    if not isinstance(raw_items, list):
+        return None
+    media_items: list[dict[str, Any]] = []
+    for entry in raw_items:
+        if not isinstance(entry, dict):
+            continue
+        media = entry.get("media") if isinstance(entry.get("media"), dict) else entry
+        if isinstance(media, dict):
+            media_items.append(media)
+    paging = payload.get("paging_info") if isinstance(payload.get("paging_info"), dict) else {}
+    next_id = safe_str(paging.get("max_id"))
+    more = bool(paging.get("more_available")) if paging else bool(next_id)
+    return media_items, next_id, more
+
+
+async def _fetch_clips_once(
+    user_id: str, form: dict[str, str], attempt: int
+) -> tuple[list[dict[str, Any]], str | None, bool] | None:
+    candidates: list[tuple[str | None, dict[str, str]]] = []
+    for sid in _sessions_rotated()[:_FEED_SESSION_CAP]:
+        cks = _cookies_for_session(sid)
+        candidates.append((None, cks))
+        candidates.append(("residential", cks))
+    candidates.append(("residential", {}))
+    t0 = time.perf_counter()
+    for batch_start in range(0, len(candidates), _FEED_RACE_CONCURRENCY):
+        batch = candidates[batch_start : batch_start + _FEED_RACE_CONCURRENCY]
+        tasks = [
+            asyncio.create_task(
+                _try_clips_candidate(form, tier, cks, attempt=attempt)
+            )
+            for tier, cks in batch
+        ]
+        pending: set[asyncio.Task] = set(tasks)
+        winner: tuple[list[dict[str, Any]], str | None, bool] | None = None
+        while pending and winner is None:
+            done, pending = await asyncio.wait(
+                pending, return_when=asyncio.FIRST_COMPLETED
+            )
+            for task in done:
+                try:
+                    result = task.result()
+                except Exception as exc:  # noqa: BLE001
+                    log.info("ig_clips_race_error", attempt=attempt, error=str(exc)[:120])
+                    continue
+                if result is not None:
+                    winner = result
+                    break
+        for task in pending:
+            task.cancel()
+        if pending:
+            await asyncio.gather(*pending, return_exceptions=True)
+        if winner is not None:
+            log.info(
+                "ig_clips_race_win",
+                attempt=attempt,
+                user_id=user_id,
+                batch=batch_start // _FEED_RACE_CONCURRENCY,
+                items=len(winner[0]),
+                ms=int((time.perf_counter() - t0) * 1000),
+            )
+            return winner
+    log.info(
+        "ig_clips_http_error",
+        attempt=attempt,
+        user_id=user_id,
+        candidates=len(candidates),
+        ms=int((time.perf_counter() - t0) * 1000),
+    )
+    return None
+
+
 async def fetch_user_feed_page(
     user_id: str, max_id: str | None = None, count: int = 12
 ) -> tuple[list[dict[str, Any]], str | None, bool] | None:
@@ -1336,61 +1493,123 @@ def _ig_session_cookies() -> dict[str, str]:
     return _cookies_for_session(session) if session else {}
 
 
+async def _try_feed_candidate(
+    user_id: str,
+    params: dict[str, Any],
+    tier: str | None,
+    cks: dict[str, str],
+    *,
+    attempt: int,
+) -> tuple[list[dict[str, Any]], str | None, bool] | None:
+    """Single feed GET (no homepage warm-up — that doubled serial latency)."""
+    try:
+        async with httpx.AsyncClient(
+            timeout=_FEED_ATTEMPT_TIMEOUT,
+            proxy=proxy_for(tier) if tier else None,
+            follow_redirects=True,
+            cookies=cks,
+        ) as client:
+            resp = await client.get(
+                f"https://www.instagram.com/api/v1/feed/user/{user_id}/",
+                params=params,
+                headers={
+                    "User-Agent": _UA,
+                    "X-IG-App-ID": _IG_APP_ID,
+                    "X-CSRFToken": client.cookies.get("csrftoken") or cks.get("csrftoken") or "",
+                    "Accept": "application/json",
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Referer": "https://www.instagram.com/",
+                },
+            )
+    except httpx.HTTPError as exc:
+        log.info(
+            "ig_feed_transport_error",
+            attempt=attempt,
+            tier=tier or "direct",
+            error=str(exc)[:120],
+        )
+        return None
+    if resp.status_code != 200:
+        log.info(
+            "ig_feed_http_status",
+            attempt=attempt,
+            tier=tier or "direct",
+            status=resp.status_code,
+        )
+        return None
+    body = (resp.text or "").lstrip()
+    if not body.startswith("{"):
+        return None
+    try:
+        payload = resp.json()
+    except ValueError:
+        return None
+    items = payload.get("items")
+    if not isinstance(items, list):
+        return None
+    return items, safe_str(payload.get("next_max_id")) or None, bool(payload.get("more_available"))
+
+
 async def _fetch_feed_once(
     user_id: str, params: dict[str, Any], attempt: int
 ) -> tuple[list[dict[str, Any]], str | None, bool] | None:
-    # Prefer session+direct when available; rotate through the pool on auth fails.
-    tiers: list[tuple[str | None, dict[str, str]]] = []
-    for sid in _sessions_rotated():
+    """Race session/proxy candidates; cancel losers when the first page lands."""
+    candidates: list[tuple[str | None, dict[str, str]]] = []
+    for sid in _sessions_rotated()[:_FEED_SESSION_CAP]:
         cks = _cookies_for_session(sid)
-        tiers.append((None, cks))
-        tiers.append(("residential", cks))
-    tiers.append(("residential", {}))
-    last_status: int | None = None
-    for tier, cks in tiers:
-        try:
-            async with httpx.AsyncClient(
-                timeout=15,
-                proxy=proxy_for(tier) if tier else None,
-                follow_redirects=True,
-                cookies=cks,
-            ) as client:
-                await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
-                resp = await client.get(
-                    f"https://www.instagram.com/api/v1/feed/user/{user_id}/",
-                    params=params,
-                    headers={
-                        "User-Agent": _UA,
-                        "X-IG-App-ID": _IG_APP_ID,
-                        "X-CSRFToken": client.cookies.get("csrftoken") or "",
-                        "Accept": "application/json",
-                        "X-Requested-With": "XMLHttpRequest",
-                        "Referer": "https://www.instagram.com/",
-                    },
-                )
-        except httpx.HTTPError as exc:
-            log.info(
-                "ig_feed_transport_error",
-                attempt=attempt,
-                tier=tier or "direct",
-                error=str(exc)[:120],
+        candidates.append((None, cks))
+        candidates.append(("residential", cks))
+    candidates.append(("residential", {}))
+
+    t0 = time.perf_counter()
+    # Batch so we do not open 2×pool connections at once.
+    for batch_start in range(0, len(candidates), _FEED_RACE_CONCURRENCY):
+        batch = candidates[batch_start : batch_start + _FEED_RACE_CONCURRENCY]
+        tasks = [
+            asyncio.create_task(
+                _try_feed_candidate(user_id, params, tier, cks, attempt=attempt)
             )
-            continue
-        last_status = resp.status_code
-        if resp.status_code != 200:
-            continue
-        body = (resp.text or "").lstrip()
-        if not body.startswith("{"):
-            continue
-        try:
-            payload = resp.json()
-        except ValueError:
-            continue
-        items = payload.get("items")
-        if not isinstance(items, list):
-            continue
-        return items, safe_str(payload.get("next_max_id")) or None, bool(payload.get("more_available"))
-    log.info("ig_feed_http_error", attempt=attempt, status=last_status)
+            for tier, cks in batch
+        ]
+        pending: set[asyncio.Task] = set(tasks)
+        winner: tuple[list[dict[str, Any]], str | None, bool] | None = None
+        while pending and winner is None:
+            done, pending = await asyncio.wait(
+                pending, return_when=asyncio.FIRST_COMPLETED
+            )
+            for task in done:
+                try:
+                    result = task.result()
+                except Exception as exc:  # noqa: BLE001
+                    log.info(
+                        "ig_feed_race_error",
+                        attempt=attempt,
+                        error=str(exc)[:120],
+                    )
+                    continue
+                if result is not None:
+                    winner = result
+                    break
+        for task in pending:
+            task.cancel()
+        if pending:
+            await asyncio.gather(*pending, return_exceptions=True)
+        if winner is not None:
+            log.info(
+                "ig_feed_race_win",
+                attempt=attempt,
+                batch=batch_start // _FEED_RACE_CONCURRENCY,
+                candidates=len(batch),
+                items=len(winner[0]),
+                ms=int((time.perf_counter() - t0) * 1000),
+            )
+            return winner
+    log.info(
+        "ig_feed_http_error",
+        attempt=attempt,
+        candidates=len(candidates),
+        ms=int((time.perf_counter() - t0) * 1000),
+    )
     return None
 
 

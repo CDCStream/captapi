@@ -216,3 +216,45 @@ def test_image_omits_views_source() -> None:
     )
     assert "viewsSource" not in out["engagement"]
     assert out["engagement"]["views"] is None
+
+
+def test_finalise_channel_reel_drops_tautologies_and_dead_fields() -> None:
+    out = decodo.finalise_channel_reel(
+        {
+            "id": "DbW4UlRF4mc",
+            "shortcode": "DbW4UlRF4mc",
+            "mediaId": "3951593428073548188",
+            "postType": "Video",
+            "productType": "clips",
+            "caption": "hello",
+            "description": "hello",
+            "videoUrl": "https://cdn.example/a.mp4",
+            "thumbnailUrl": "https://cdn.example/a.jpg",
+            "author": {
+                "id": "173560420",
+                "username": "cristiano",
+                "postCount": None,
+            },
+            "engagement": {"likes": 1, "comments": 0, "views": 10, "viewsSource": "instagram"},
+            "accessibilityCaption": None,
+            "commentsDisabled": None,
+            "location": None,
+            "music": {
+                "id": "m1",
+                "title": "x",
+                "trendRank": None,
+                "previousTrendRank": None,
+            },
+        }
+    )
+    assert set(out.keys()) == set(decodo.IG_CHANNEL_REEL_KEYS)
+    assert "description" not in out
+    assert "postType" not in out
+    assert "productType" not in out
+    assert "accessibilityCaption" not in out
+    assert "commentsDisabled" not in out
+    assert out["caption"] == "hello"
+    assert "postCount" not in out["author"]
+    assert "trendRank" not in out["music"]
+    assert "previousTrendRank" not in out["music"]
+    assert out["location"] is None

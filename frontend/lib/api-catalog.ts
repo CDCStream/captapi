@@ -951,14 +951,19 @@ const INSTAGRAM: Spec[] = [
     credits: 6,
     creditsPerResult: 0.3,
     tagline:
-      "Latest Reels from a public Instagram profile — pass userId for a faster lookup, paginate with nextCursor + hasMore.",
+      "Latest Reels from a public Instagram profile — pass userId to skip resolve; ceil(n×0.3) credits; nextCursor + hasMore.",
     longDescription:
-      "Send a profile URL/@handle or a numeric userId and get that account's recent Reels (videos only). Prefer userId when you already have it (from basic-profile or another call) — it skips handle→ID resolve and responds faster. Each Reel includes video URL, caption, likes, comments, duration, and publish date. Metrics when Instagram exposes them: engagement.views (canonical play count), viewsSource (instagram|facebook|null whenever views is set), and plays as a deprecated alias of views. Cursor pagination via nextCursor; hasMore is true until the end of the list. Pass cache=true for the 24h shared cache.",
+      "Send a profile URL/@handle or a numeric userId and get that account's recent Reels (videos only). Prefer userId when you already have it (from basic-profile or profile-search) — it skips handle→ID resolve (the old sequential path alone could cost ~80s; url/@handle now uses the same raced resolver as profile-search). Each Reel includes videoUrl, thumbnailUrl, caption (not a duplicated description), likes, comments, duration, and publish date. Billing is ceil(n × 0.3) credits on the returned reel count (17 → 6, 5 → 2). Metrics when Instagram exposes them: engagement.views + viewsSource. Cursor pagination via nextCursor; hasMore is true until the end of the list. Pass cache=true for the 24h shared cache.",
     delivers: [
       "Reels only (photos/carousels filtered out)",
-      "url or userId input (userId skips handle resolve)",
+      "userId skips resolve (~80s saved vs legacy sequential WPI)",
       "engagement.views + viewsSource when available",
       "nextCursor + hasMore pagination",
+      "Credits: ceil(returned × 0.3), minimum 1",
+    ],
+    platformLimits: [
+      "Envelope url is a real profile URL when known; with userId-only input it is null (identity is userId) — never instagram_user:{id}.",
+      "postType/productType/description are not on reels[] (reels-only endpoint; caption is the text field).",
     ],
   },
   {
@@ -4158,7 +4163,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "string",
       required: false,
       description:
-        "Instagram numeric user ID (e.g. 173560420). Faster than url — skips handle→ID resolve. Prefer when you already have the ID from basic-profile or another call.",
+        "Instagram numeric user ID (e.g. 173560420). Skips handle→ID resolve (legacy sequential WPI alone could cost ~80s). Prefer when you already have the ID from basic-profile or profile-search.",
     },
     lp(20, 200),
     {
@@ -4166,7 +4171,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "string",
       required: false,
       description:
-        "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (e.g. 3937158245004702478_12281817). Stop when hasMore is false.",
+        "Pagination cursor. Leave empty for the first page; then pass nextCursor from the previous response (clips:{userId}:{opaque} on the native Reels path, or legacy {mediaId}_{userId}). Stop when hasMore is false.",
     },
   ],
   "instagram-reels-search": [
