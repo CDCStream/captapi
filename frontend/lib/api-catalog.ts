@@ -173,25 +173,20 @@ export function creditLabel(
   if (e.slug === "video-transcript") return "1 credit/min";
   if (e.slug === "video-summarize") return "1 credit/min +1";
   if (e.slug === "youtube-audio-transcript") return "2 credits/min of audio";
-  // Native flat + Apify per-result dual pricing (document both, not "~2 (0.7/result)").
-  if (e.slug === "tiktok-shop-product-details") {
-    return "2 credits native (14 Apify)";
-  }
-  if (e.slug === "tiktok-shop-search") {
-    return "2 credits native (~2.8/result Apify)";
-  }
+  // Published-flat endpoints (measurement window): one number, always.
+  // Dual native/extended labels are retired — meter matches the badge.
   if (
-    (e.slug === "twitter-community-tweets" ||
-      e.slug === "threads-user-posts" ||
-      e.slug === "threads-search" ||
-      e.slug === "threads-search-users" ||
-      e.slug === "truth-social-user-posts" ||
-      e.slug === "facebook-event-search" ||
-      e.slug === "facebook-profile-events") &&
-    e.creditsPerResult
+    e.slug === "tiktok-shop-product-details" ||
+    e.slug === "tiktok-shop-search" ||
+    e.slug === "twitter-community-tweets" ||
+    e.slug === "threads-user-posts" ||
+    e.slug === "threads-search" ||
+    e.slug === "threads-search-users" ||
+    e.slug === "truth-social-user-posts" ||
+    e.slug === "facebook-event-search" ||
+    e.slug === "facebook-profile-events"
   ) {
-    const unit = e.credits === 1 ? "credit" : "credits";
-    return `${e.credits} ${unit} native (~${e.creditsPerResult}/result Apify)`;
+    return `${e.credits} credit${e.credits === 1 ? "" : "s"}`;
   }
   if (e.creditsPerResult) {
     return `~${e.credits} credits (${e.creditsPerResult}/result)`;
@@ -646,7 +641,7 @@ const TIKTOK: Spec[] = [
     credits: 1,
     creditsPerResult: 0.4,
     tagline:
-      "List a TikTok user's followers — id, secUid, createTime, region, language, cursor pagination. Flat 1 credit native.",
+      "List a TikTok user's followers — id, secUid, createTime, region, language, cursor pagination. Flat 1 credit.",
     longDescription:
       "Pass a TikTok profile URL or @handle and get followers as clean JSON: id + secUid (stable identity — same fields search-users documents), username, displayName, bio, url, followers, following, verified, profileImage, plus createTime/createTimeUnix, region, and language when TikTok exposes them (audience quality / bot signals). total is the profile's followerCount (universe size); totalReturned is this page. Cursor pagination via nextCursor + hasMore (TikTok minCursor). Flat 1 credit on the native path; Apify fallback bills about 0.4 credits per returned user (min 5).",
     delivers: [
@@ -666,7 +661,7 @@ const TIKTOK: Spec[] = [
     credits: 1,
     creditsPerResult: 0.4,
     tagline:
-      "List who a TikTok user follows — id, secUid, createTime, region, language, cursor pagination. Flat 1 credit native.",
+      "List who a TikTok user follows — id, secUid, createTime, region, language, cursor pagination. Flat 1 credit.",
     longDescription:
       "Pass a TikTok profile URL or @handle and get followings as clean JSON: id + secUid, username, displayName, bio, url, followers, following, verified, profileImage, plus createTime/createTimeUnix, region, and language when TikTok exposes them. total is the profile's followingCount; cursor pagination via nextCursor + hasMore. Flat 1 credit on the native path; Apify fallback bills about 0.4 credits per returned user (min 5).",
     delivers: [
@@ -939,13 +934,13 @@ const INSTAGRAM: Spec[] = [
     delivers: [
       "Top-level user{} profile (null on degraded path)",
       "Sidecar children[] + honest mediaCount (null if unexpanded)",
-      "Stale-serve on Apify timeout (cachedAt labelled)",
+      "Stale-serve on extended-timeout (cachedAt labelled)",
       "Uniform envelope: degraded / degradedReason / user / userId",
     ],
     platformLimits: [
       "location is not returned — logged-out feed/GraphQL samples never carry a tagged place (0/72 across nasa/natgeo/instagram); not a silent cover-only gap.",
       "description is not returned — caption is the text field (same as channel-reels).",
-      "degraded: true (apify-fallback | apify-timeout | apify-timeout-served-stale) — Apify budget ~105s; on timeout prefer a labelled day-old cache over empty. Set client timeouts ≥130s.",
+      "degraded: true (extended | extended-timeout | extended-timeout-served-stale) — extended-path budget ~105s; on timeout prefer a labelled day-old cache over empty. Set client timeouts ≥130s.",
       "accessibilityCaption is sparse Instagram alt-text — null on many profiles; when present it is backfilled from the feed overlay (e.g. @instagram/DbbY9pdm6Q2).",
     ],
   },
@@ -1317,11 +1312,10 @@ const FACEBOOK_EVENTS: Spec[] = [
     method: "GET",
     path: "/v1/facebook/event-search",
     credits: 2,
-    creditsPerResult: 2,
     tagline:
-      "Search Facebook events by topic and city — local startDate/timezone, venue. 2 credits native (~2/result Apify).",
+      "Search Facebook events by topic and city — local startDate/timezone, venue. 2 credits.",
     longDescription:
-      "Search public Facebook events with a topic query (e.g. comedy) and optional location / from / to / upcoming filters. Each result uses the same Event shape as Event Details and Profile Events — every field present, null when Facebook omits it: startDate/endDate as ISO with the host timezone offset (calendar day matches startTime — evening CDT events do not roll to the next UTC day), IANA timezone (from venue lat/lng when present — never Etc/*), startTime (always includes the year), isPast, eventType (discovery category, e.g. Comedy), visibility (public|private|friends|… from Facebook's *_TYPE), location{name,city,latitude,longitude,countryCode} (all five keys always — null when unknown), description, image, organizers, ticketsUrl, categories, and usersGoing/usersInterested when exposed. Relative labels like \"Happening now\" are never returned as startTime. Billing: flat 2 credits on the native path; Apify fallthrough bills ~2 credits per returned event (min 4) — check source / x-captapi-source. A 19-result Apify call is 38 credits, not 2. Envelope timings{serpMs,hydrateMs,hydrateAttempts,discoveryMs,totalMs,path} exposes per-stage latency. Set client timeouts ≥130s until typical searches stay under 60s.",
+      "Search public Facebook events with a topic query (e.g. comedy) and optional location / from / to / upcoming filters. Each result uses the same Event shape as Event Details and Profile Events — every field present, null when Facebook omits it: startDate/endDate as ISO with the host timezone offset (calendar day matches startTime — evening CDT events do not roll to the next UTC day), IANA timezone (from venue lat/lng when present — never Etc/*), startTime (always includes the year), isPast, eventType (discovery category, e.g. Comedy), visibility (public|private|friends|… from Facebook's *_TYPE), location{name,city,latitude,longitude,countryCode} (all five keys always — null when unknown), description, image, organizers, ticketsUrl, categories, and usersGoing/usersInterested when exposed. Relative labels like \"Happening now\" are never returned as startTime. Billing: flat 2 credits on every successful call — check source / x-captapi-source (native|extended). Envelope timings{serpMs,hydrateMs,hydrateAttempts,discoveryMs,totalMs,path} exposes per-stage latency. Set client timeouts ≥130s until typical searches stay under 60s.",
     platformLimits: [
       "Facebook/SERP discovery can return past events. Use upcoming=true (sets from=today UTC) or from=YYYY-MM-DD for a forward window, or filter client-side on isPast — same pattern as playCount absence on Spotify search.",
       "timezone is a real IANA zone or null — never Etc/GMT. Prefer location.latitude/longitude → IANA when coords exist.",
@@ -1354,11 +1348,10 @@ const FACEBOOK_EVENTS: Spec[] = [
     method: "GET",
     path: "/v1/facebook/profile-events",
     credits: 2,
-    creditsPerResult: 2,
     tagline:
-      "List a Facebook Page's events — local startDate, timezone, venue. 2 credits native (~2/result Apify).",
+      "List a Facebook Page's events — local startDate, timezone, venue. 2 credits.",
     longDescription:
-      "Pass a Facebook Page URL and get that page's /events list as clean JSON using the same Event shape as Event Search / Event Details — every field present, null when the profile card omits it (description, endDate, duration, image, organizers, ticketsUrl, categories, …). startDate is ISO with host offset (year resolved from yearless cards like \"Tue, Aug 4 at 8:00 PM EDT\"); startTime always includes the year; eventType is the discovery category when known; visibility is public|private|… (not PUBLIC_TYPE). Envelope includes source (direct|apify) so dual billing is observable — same as Event Search. Billing: flat 2 credits on the native path; Apify fallthrough is ~2 credits per returned event (min 4).",
+      "Pass a Facebook Page URL and get that page's /events list as clean JSON using the same Event shape as Event Search / Event Details — every field present, null when the profile card omits it (description, endDate, duration, image, organizers, ticketsUrl, categories, …). startDate is ISO with host offset (year resolved from yearless cards like \"Tue, Aug 4 at 8:00 PM EDT\"); startTime always includes the year; eventType is the discovery category when known; visibility is public|private|… (not PUBLIC_TYPE). Envelope includes source (native|extended) for the fetch path. Billing: flat 2 credits on every successful call.",
   },
 ];
 
@@ -1484,15 +1477,14 @@ const TWITTER: Spec[] = [
     method: "GET",
     path: "/v1/twitter/community-tweets",
     credits: 2,
-    creditsPerResult: 0.7,
     tagline:
-      "Posts in an X Community — same 6-metric tweet shape as search. Flat 2 native; ~0.7/tweet on Apify fallback.",
+      "Posts in an X Community — same 6-metric tweet shape as search. Flat 2 credits.",
     longDescription:
-      "Pass an X community URL (x.com/i/communities/ID) or community ID — not a tweet/status URL — and get recent posts as clean JSON. Response includes url + communityId + communityName + memberCount (so you often skip a second Community call) plus tweets[] using the shared contract: ISO-8601 publishedAt, engagement{views,likes,replies,retweets,quotes,bookmarks}, hashtags[], media[]. Flat 2 credits on the native GraphQL path (same guest surface as Search); Apify fallback bills about 0.7 credits per returned tweet (min 2). Pass cache=true for the 24h shared cache.",
+      "Pass an X community URL (x.com/i/communities/ID) or community ID — not a tweet/status URL — and get recent posts as clean JSON. Response includes url + communityId + communityName + memberCount (so you often skip a second Community call) plus tweets[] using the shared contract: ISO-8601 publishedAt, engagement{views,likes,replies,retweets,quotes,bookmarks}, hashtags[], media[]. Flat 2 credits (same guest surface as Search). Pass cache=true for the 24h shared cache.",
     delivers: [
       "communityName + memberCount + community url/id",
       "Same engagement 6-key shape + ISO publishedAt as search",
-      "Flat 2 credits native; ~0.7/tweet Apify fallback (min 2)",
+      "Flat 2 credits",
       "hashtags[] + media[] always present on each tweet",
     ],
   },
@@ -1608,16 +1600,15 @@ const THREADS: Spec[] = [
     method: "GET",
     path: "/v1/threads/user-posts",
     credits: 2,
-    creditsPerResult: 0.7,
     tagline:
-      "Recent Threads posts — engagement{views,likes,replies,reposts,quotes}, threadId/isReply. Flat 2 native; ~0.7/post Apify.",
+      "Recent Threads posts — engagement{views,likes,replies,reposts,quotes}, threadId/isReply. Flat 2 credits.",
     longDescription:
-      "Pass a Threads profile URL or @handle and get recent public posts as clean JSON: id, code, url, text, ISO publishedAt, threadId / replyToId / isReply / isQuote (rebuild multi-part Threads), top-level author{} (full card once — per-post rows keep slim author without repeating profileImage), engagement{views,likes,replies,reposts,quotes} (views null when Meta omits them on hydrate), and media[] (carousel-aware). Flat 2 credits on the native profile-hydrate path (same soft-cap surface ScrapeCreators uses); Apify fallback bills about 0.7 credits per returned post (min 2). Pass cache=true for the 24h shared cache.",
+      "Pass a Threads profile URL or @handle and get recent public posts as clean JSON: id, code, url, text, ISO publishedAt, threadId / replyToId / isReply / isQuote (rebuild multi-part Threads), top-level author{} (full card once — per-post rows keep slim author without repeating profileImage), engagement{views,likes,replies,reposts,quotes} (views null when Meta omits them on hydrate), and media[] (carousel-aware). Flat 2 credits (same soft-cap surface ScrapeCreators uses). Pass cache=true for the 24h shared cache.",
     delivers: [
       "engagement with views + likes/replies/reposts/quotes",
       "threadId / replyToId / isReply / isQuote for multi-part Threads",
       "Top-level author{} once (no repeated CDN avatar on every row)",
-      "Flat 2 credits native; ~0.7/post Apify fallback (min 2)",
+      "Flat 2 credits",
     ],
     platformLimits: [
       "Only the last ~20–30 posts are publicly visible on this surface (Meta soft-cap on profile hydrate / logged-out feeds). limit=100 will not return 100 — asking above ~30 just returns what Meta exposes.",
@@ -1654,21 +1645,20 @@ const THREADS: Spec[] = [
     method: "GET",
     path: "/v1/threads/search",
     credits: 2,
-    creditsPerResult: 0.7,
     tagline:
-      "Threads keyword search — posts with engagement + media. Flat 2 credits native (~0.7/post Apify).",
+      "Threads keyword search — posts with engagement + media. Flat 2 credits.",
     longDescription:
-      "Pass a keyword and get public Threads posts from Meta's Top SERP hydrate as clean JSON: id, code, url, text, ISO publishedAt, author{username,displayName,verified}, engagement{views,likes,replies,reposts,quotes}, threadId/isReply/isQuote, and media[]. Flat 2 credits on the native path (parity with twitter/search); Apify fallback is about 0.7 credits per returned post (min 2). There is no sort or date filter — Meta ranks the page, and older or engagement-farm posts can appear near the top. Pass cache=true for the 24h shared cache (0 credits on hit).",
+      "Pass a keyword and get public Threads posts from Meta's Top SERP hydrate as clean JSON: id, code, url, text, ISO publishedAt, author{username,displayName,verified}, engagement{views,likes,replies,reposts,quotes}, threadId/isReply/isQuote, and media[]. Flat 2 credits (parity with twitter/search). There is no sort or date filter — Meta ranks the page, and older or engagement-farm posts can appear near the top. Pass cache=true for the 24h shared cache (0 credits on hit).",
     delivers: [
       "Posts from Meta Top SERP for your keyword",
       "id/code/url, text, ISO publishedAt",
       "engagement{views,likes,replies,reposts,quotes} + media[]",
-      "Flat 2 native; ~0.7/post Apify fallback",
+      "Flat 2 credits",
     ],
     platformLimits: [
       "No sort or since/until — Meta's default Top ranking only. Results often mix recent and months-old posts.",
       "Engagement-farm / giveaway spam can rank first (high replies vs likes). Captapi does not filter spam.",
-      "Native hydrate soft-caps around ~20–25 posts per page; limit above that only helps on Apify fallback.",
+      "Native hydrate soft-caps around ~20–25 posts per page.",
     ],
   },
   {
@@ -1679,16 +1669,15 @@ const THREADS: Spec[] = [
     method: "GET",
     path: "/v1/threads/search-users",
     credits: 1,
-    creditsPerResult: 0.7,
     tagline:
-      "Threads user discovery from keyword search — id, handle, avatar, verified. Flat 1 credit native.",
+      "Threads user discovery from keyword search — id, handle, avatar, verified. Flat 1 credit.",
     longDescription:
-      "Pass a keyword and get distinct Threads authors who appear in Meta's keyword post search as clean JSON: id (pk when embedded), username, displayName, url, verified, profileImage, and followers (usually null on this surface — call Threads Profile for counts). Flat 1 credit on the native path (parity with TikTok search-users and ScrapeCreators); Apify fallback is about 0.7 credits per returned user (min 2). This is not a semantic people-search: users are unique authors of posts that matched the keyword on Top SERP, so handles may not contain the query. Pass cache=true for the 24h shared cache (0 credits on hit).",
+      "Pass a keyword and get distinct Threads authors who appear in Meta's keyword post search as clean JSON: id (pk when embedded), username, displayName, url, verified, profileImage, and followers (usually null on this surface — call Threads Profile for counts). Flat 1 credit (parity with TikTok search-users and ScrapeCreators). This is not a semantic people-search: users are unique authors of posts that matched the keyword on Top SERP, so handles may not contain the query. Pass cache=true for the 24h shared cache (0 credits on hit).",
     delivers: [
       "Distinct authors from keyword post search",
       "id + username + displayName + url + verified",
       "profileImage when Meta embeds it; followers keyed (often null)",
-      "Flat 1 native; ~0.7/user Apify fallback",
+      "Flat 1 credit",
     ],
     platformLimits: [
       "Not a Users-tab GraphQL people search — authors are derived from post SERP hits. Handle/bio may not mention your query.",
@@ -2004,18 +1993,17 @@ const TIKTOK_SHOP: Spec[] = [
     category: "search",
     method: "GET",
     path: "/v1/tiktok-shop/shop-search",
-    credits: 56,
-    creditsPerResult: 2.8,
+    credits: 2,
     tagline:
       "TikTok Shop keyword search — priced products with sold, rating/reviews, originalPrice/discount, seller id.",
     longDescription:
-      "Search TikTok Shop by keyword and get products as clean JSON: id, url, title, price + originalPrice/discount/savings, currency, sold, rating + reviews (always keyed; null when the PDP has no score yet), image, and seller{id,name,url}. top-level region is an echo of the region query param you sent (default US) — market selection, not a creator country and not AI-inferred. price uses the same canonical rule as Product Details: TikTok's promotion minimum sale price across SKUs at fetch time (promos can move between calls). Native SERP→PDP path bills flat 2 credits; Apify fallback is billed per result (~2.8 each, e.g. ~56 for limit=20). Pass cache=true for the 24h shared cache.",
+      "Search TikTok Shop by keyword and get products as clean JSON: id, url, title, price + originalPrice/discount/savings, currency, sold, rating + reviews (always keyed; null when the PDP has no score yet), image, and seller{id,name,url}. top-level region is an echo of the region query param you sent (default US) — market selection, not a creator country and not AI-inferred. price uses the same canonical rule as Product Details: TikTok's promotion minimum sale price across SKUs at fetch time (promos can move between calls). Flat 2 credits per call. Pass cache=true for the 24h shared cache.",
     delivers: [
       "rating + reviews always keyed on every hit",
       "originalPrice + discount + savings (same price rule as Product Details)",
       "seller{id,name,url}",
       "region = request param echo (not AI / no regionSource)",
-      "Flat 2 credits native; ~2.8/result Apify",
+      "Flat 2 credits",
     ],
     platformLimits: [
       "Native path hydrates each hit via PDP SSR (Shop search HTML is WAF-gated). rating/reviews come from the PDP review_model — new products often have null until TikTok publishes a score.",
@@ -2057,11 +2045,11 @@ const TIKTOK_SHOP: Spec[] = [
     path: "/v1/tiktok-shop/product-details",
     credits: 2,
     tagline:
-      "PDP — price/originalPrice/discount, images[], skus[] with per-variant stock + saleProps, seller id/url, categories (2 credits native).",
+      "PDP — price/originalPrice/discount, images[], skus[] with per-variant stock + saleProps, seller id/url, categories (2 credits).",
     longDescription:
-      "Pass a TikTok Shop product URL and get the PDP as clean JSON from the same SSR product_info blob TikTok ships: title, rich description, numeric price + originalPrice + discount + savings (when a seller deduction exists), currency, sold, stock (sum of SKUs), rating/reviews, images[] gallery, categories[{id,name}], saleProperties[] (Color/Size axes), and skus[{id,stock,price,warehouseId,saleProps[]}]. seller includes id, name, url, rating, productCount, and logo when present. Native SSR bills flat 2 credits — same as Shop Products — so this is no longer a 14-credit tax for a thinner payload. Apify fallback (rare) bills 14. region (default US) selects the Apify market when native misses. relatedVideos[] (affiliate creator bridge) and seller.tiktokUrl are not in US PDP SSR today — returned when an upstream path provides them; use Product Reviews for sample review text.",
+      "Pass a TikTok Shop product URL and get the PDP as clean JSON from the same SSR product_info blob TikTok ships: title, rich description, numeric price + originalPrice + discount + savings (when a seller deduction exists), currency, sold, stock (sum of SKUs), rating/reviews, images[] gallery, categories[{id,name}], saleProperties[] (Color/Size axes), and skus[{id,stock,price,warehouseId,saleProps[]}]. seller includes id, name, url, rating, productCount, and logo when present. Flat 2 credits — same as Shop Products. region (default US) selects the market when the primary path misses. relatedVideos[] (affiliate creator bridge) and seller.tiktokUrl are not in US PDP SSR today — returned when an upstream path provides them; use Product Reviews for sample review text.",
     delivers: [
-      "Flat 2 credits on native SSR (14 only on Apify fallback)",
+      "Flat 2 credits",
       "originalPrice / discount / savings always keyed (null when no promo)",
       "skus[] with per-variant stock + saleProps (e.g. Phone Models)",
       "images[] gallery + categories[{id,name}]",
@@ -2568,11 +2556,10 @@ const TRUTH_SOCIAL: Spec[] = [
     method: "GET",
     path: "/v1/truth-social/user-posts",
     credits: 2,
-    creditsPerResult: 0.85,
     tagline:
-      "Recent Truths — same post mapper as /post (links, card, reblog/quote, mentions). 2 credits native.",
+      "Recent Truths — same post mapper as /post (links, card, reblog/quote, mentions). 2 credits.",
     longDescription:
-      `Pass a Truth Social @username or profile URL and get recent public posts as clean JSON — same status mapper as /post (not a slim sibling). Full author{} once at the top (same shape as /profile); each post keeps a slim author {id,username,displayName,avatar,verified}. text + links[] (unbroken URLs), card, media.meta, externalVideoId→Rumble, engagement {replies,reblogs,likes,downvotes} (likes is favourites/upvotes — identical upstream; downvotes keeps real zeros). Chain fields when present: reblog{}, quote{}/quoteId, inReplyToId/inReplyToAccountId/inReplyTo{} — so a boost is not mistaken for an original. Also mentions[]/tags[] (platform lists), poll{}, visibility, spoilerText, sponsored, pinned, group. Session-only flags (favourited/reblogged/muted/bookmarked) are omitted. Native timeline excludes replies (Truth Social exclude_replies); reblogs and quotes still appear. nextCursor/hasMore; max limit 80. ${TRUTH_AUTH_LIMIT} Native path flat 2 credits; Apify fallback ~0.85/post (min 2).`,
+      `Pass a Truth Social @username or profile URL and get recent public posts as clean JSON — same status mapper as /post (not a slim sibling). Full author{} once at the top (same shape as /profile); each post keeps a slim author {id,username,displayName,avatar,verified}. text + links[] (unbroken URLs), card, media.meta, externalVideoId→Rumble, engagement {replies,reblogs,likes,downvotes} (likes is favourites/upvotes — identical upstream; downvotes keeps real zeros). Chain fields when present: reblog{}, quote{}/quoteId, inReplyToId/inReplyToAccountId/inReplyTo{} — so a boost is not mistaken for an original. Also mentions[]/tags[] (platform lists), poll{}, visibility, spoilerText, sponsored, pinned, group. Session-only flags (favourited/reblogged/muted/bookmarked) are omitted. Native timeline excludes replies (Truth Social exclude_replies); reblogs and quotes still appear. nextCursor/hasMore; max limit 80. ${TRUTH_AUTH_LIMIT} Flat 2 credits.`,
     delivers: [
       "Same _normalize_post mapper as /post (links/card/media.meta/externalVideoId)",
       "reblog / quote / inReplyTo chain fields for monitoring accuracy",
@@ -2976,7 +2963,7 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     path: "/v1/ad-library/tiktok/search",
     credits: 2,
     tagline:
-      "Search TikTok Commercial Content Library — relevance-filtered, uniform null schema (2 credits native).",
+      "Search TikTok Commercial Content Library — relevance-filtered, uniform null schema (2 credits).",
     longDescription:
       "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) by keyword. Local keyword matching is case-insensitive whole-word match=any|all (hair ≠ wheelchair). Envelope uses candidatesScanned / truncated (true when literalMatches > totalReturned); each hit has matchedFrom as a string array of matched fields. platform is tiktok (library=dsa). media[] are objects with url/type/expiresAt when signed. Ads share a uniform key set — withheld fields are null, not missing. firstShown/lastShown are omitted (DSA list XHR stamps scrape/serve times, not run dates) — use /tiktok/ad-details for calendar-day ISO dates. advertiser is always {id,name,url,logo,location}. Flat 2 credits when results are returned (empty is free); Apify fallback capped at 5. Hard-capped at 110s. country default GB (US often empty). For brand performance use /v1/ad-library/tiktok/top-ads.",
   },
@@ -3862,12 +3849,12 @@ const lpFlat = (def: number, max: number, credits: number): ApiParam => ({
   required: false,
   description: `Max items to return (default ${def}, max ${max}). Flat ${credits} credit${credits === 1 ? "" : "s"} per call.`,
 });
-/** Limit helper for native-flat + Apify-per-result dual pricing (check `source`). */
-const lpDual = (def: number, max: number, flat: number, perResult: number): ApiParam => ({
+/** Limit helper for published-flat list endpoints (path in \`source\`: native|extended). */
+const lpDual = (def: number, max: number, flat: number, _perResult?: number): ApiParam => ({
   name: "limit",
   type: "integer",
   required: false,
-  description: `Max items to return (default ${def}, max ${max}). Billed ${flat} credit${flat === 1 ? "" : "s"} flat on the native path; ~${perResult} credit${perResult === 1 ? "" : "s"} per returned event on the Apify fallback — check \`source\` in the response.`,
+  description: `Max items to return (default ${def}, max ${max}). Flat ${flat} credit${flat === 1 ? "" : "s"} per call. Response \`source\` is native or extended (fetch path — not a price change).`,
 });
 /** Limit helper for free account endpoints (never bills). */
 const lpFree = (def: number, max: number): ApiParam => ({
@@ -4732,7 +4719,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "integer",
       required: false,
       description:
-        "Max posts to return (default 20, max 80). Capped at 80 because Truth Social's statuses page is ~40 items — use nextCursor for more pages. Billed 2 credits flat on the native path; ~0.7/post on Apify — check `source` in the response.",
+        "Max posts to return (default 20, max 80). Capped at 80 because Truth Social's statuses page is ~40 items — use nextCursor for more pages. Flat 2 credits per call. Response `source` is native or extended.",
     },
     CURSOR,
   ],
@@ -5034,7 +5021,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "string",
       required: false,
       description:
-        "Two-letter market region for the Apify fallback path (default US). Native SSR uses the product URL's market; empty/partial non-US results are often a TikTok exposure limit.",
+        "Two-letter market region for the secondary fetch path (default US). Primary SSR uses the product URL's market; empty/partial non-US results are often a TikTok exposure limit.",
     },
   ],
   "tiktok-shop-product-reviews": [
@@ -6649,7 +6636,7 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
   if (ep.slug === "threads-search") {
     list.push({
       q: `Why is this 2 credits when older docs said ~18?`,
-      a: `Native Top SERP hydrate is flat 2 credits — same soft-cap surface as twitter/search and threads/user-posts. The old ~18 figure was Apify billed at ~0.7 credits per returned post (default limit 25). Apify fallback still uses that per-result rate when the native path is unavailable.`,
+      a: `Flat 2 credits — same soft-cap surface as twitter/search and threads/user-posts. The old ~18 figure was a per-result extended-path rate at default limit 25; success is always billed at the published flat price now.`,
     });
     list.push({
       q: `Can I sort by newest or filter by date?`,
@@ -6663,7 +6650,7 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
   if (ep.slug === "threads-search-users") {
     list.push({
       q: `Why is this 1 credit when older docs said ~14?`,
-      a: `Native path is flat 1 credit — parity with TikTok search-users and ScrapeCreators Threads search/users. The old ~14 figure was Apify at ~0.7 per returned user (default limit 20). Apify fallback still uses that rate (min 2).`,
+      a: `Flat 1 credit — parity with TikTok search-users and ScrapeCreators Threads search/users. The old ~14 figure was a per-result extended-path rate at default limit 20; success is always billed at the published flat price now.`,
     });
     list.push({
       q: `Why don't the usernames match my query?`,
@@ -8734,7 +8721,7 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     usersGoing: "Public going count when Facebook exposes it.",
     usersInterested: "Public interested count when Facebook exposes it.",
     location: "Venue block {name, city, latitude, longitude, countryCode} — all five keys always.",
-    source: "direct (native) or apify — drives dual billing. Also mirrored in X-Captapi-Source.",
+    source: "native or extended (fetch path). Also mirrored in X-Captapi-Source. Not a price change — success is always flat 2 credits.",
   },
   "facebook-profile-events": {
     startDate:
@@ -8747,7 +8734,7 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     visibility: "Lowercase audience enum (public|private|friends|…) from Facebook's *_TYPE.",
     isPast: "Whether the event start is in the past (derived from startDate).",
     address: "Street when distinct from location.name; null when it would only duplicate the venue.",
-    source: "direct (native) or apify — drives dual billing. Also mirrored in X-Captapi-Source.",
+    source: "native or extended (fetch path). Also mirrored in X-Captapi-Source. Not a price change — success is always flat 2 credits.",
   },
   "pinterest-board": {
     destinationUrl: "Outbound link on the pin (product/article URL). Not an ad creative field.",

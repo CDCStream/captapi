@@ -191,7 +191,7 @@ def test_channel_user_uses_is_private_not_private() -> None:
 
 
 def test_timeout_serves_stale_cache_when_present() -> None:
-    """apify-timeout with a prior cache hit → labelled stale posts, not []."""
+    """extended-timeout with a prior cache hit → labelled stale posts, not []."""
     import asyncio
     from unittest.mock import AsyncMock, patch
 
@@ -234,10 +234,10 @@ def test_timeout_serves_stale_cache_when_present() -> None:
         out = ig._finalise_channel_list_payload(
             {**hit, "cachedAt": hit["fetchedAt"]},
             degraded=True,
-            degraded_reason="apify-timeout-served-stale",
+            degraded_reason="extended-timeout-served-stale",
         )
         assert out["degraded"] is True
-        assert out["degradedReason"] == "apify-timeout-served-stale"
+        assert out["degradedReason"] == "extended-timeout-served-stale"
         assert out["cachedAt"] == "2026-08-06T14:22:10.118Z"
         assert len(out["posts"]) == 1
 
@@ -259,19 +259,27 @@ def test_finalise_payload_emits_uniform_envelope() -> None:
     degraded = ig._finalise_channel_list_payload(
         {"url": "https://www.instagram.com/nasa/", "posts": [], "totalReturned": 0},
         degraded=True,
-        degraded_reason="apify-fallback",
+        degraded_reason="extended",
     )
     assert degraded["degraded"] is True
-    assert degraded["degradedReason"] == "apify-fallback"
+    assert degraded["degradedReason"] == "extended"
     assert degraded["user"] is None
     assert degraded["userId"] is None
 
     timed_out = ig._finalise_channel_list_payload(
         {"url": "https://www.instagram.com/nasa/", "posts": [], "totalReturned": 0},
         degraded=True,
-        degraded_reason="apify-timeout",
+        degraded_reason="extended-timeout",
     )
-    assert timed_out["degradedReason"] == "apify-timeout"
+    assert timed_out["degradedReason"] == "extended-timeout"
+
+    # Legacy supplier-named reasons still rewrite to public vocabulary.
+    legacy = ig._finalise_channel_list_payload(
+        {"url": "https://www.instagram.com/nasa/", "posts": [], "totalReturned": 0},
+        degraded=True,
+        degraded_reason="apify-fallback",
+    )
+    assert legacy["degradedReason"] == "extended"
 
 
 def test_overlay_copies_accessibility_caption_from_feed() -> None:

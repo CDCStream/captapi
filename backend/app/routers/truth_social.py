@@ -895,14 +895,12 @@ async def user_posts(
             status_code=400,
             detail="Invalid cursor. Pass the nextCursor value from a previous response.",
         )
-    # Reserve Apify worst-case; native path overrides to flat CREDIT_USER_POSTS.
-    cost = _scaled_posts(limit)
     async with billed_call(
         caller=caller,
         endpoint="/v1/truth-social/user-posts",
         platform="truth_social",
         resource_url=f"{BASE}/@{username}",
-        base_credits=cost,
+        base_credits=CREDIT_USER_POSTS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             next_cursor: str | None = None
@@ -970,10 +968,12 @@ async def user_posts(
             ctx,
             use_cache=cache,
         )
-        if ctx.get("source") == "direct":
-            ctx["credits_override"] = CREDIT_USER_POSTS
+        n = len(data.get("posts") or [])
+        ctx["result_count"] = n
+        if ctx.get("source") in ("direct", "native"):
+            ctx["credits_computed"] = CREDIT_USER_POSTS
         else:
-            ctx["credits_override"] = _scaled_posts(len(data.get("posts") or []))
+            ctx["credits_computed"] = _scaled_posts(n)
         return ApiResponse(data=data)
 
 

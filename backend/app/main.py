@@ -138,8 +138,11 @@ class BillingHeaderMiddleware:
                         # before clients see the body. Safe default — only adds nulls.
                         if data is not None:
                             from app.utils.array_normalise import normalise_object_arrays
+                            from app.core.credits import rewrite_public_path_fields
 
                             data = normalise_object_arrays(data)
+                            if isinstance(data, dict):
+                                rewrite_public_path_fields(data)
                             payload["data"] = data
                         if fetched_at is None and isinstance(data, dict):
                             fetched_at = data.get("fetchedAt")

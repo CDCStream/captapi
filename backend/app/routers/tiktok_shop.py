@@ -489,7 +489,13 @@ async def shop_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/shop-search", platform="tiktok_shop", resource_url=None, base_credits=_scaled(limit, RATE_SHOP)) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok-shop/shop-search",
+        platform="tiktok_shop",
+        resource_url=None,
+        base_credits=CREDIT_SHOP_NATIVE,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
             # 1) SERP → PDP hydrate (Shop search HTML is WAF/captcha gated).
             native = await tiktok_shop_native.search_products_native(
@@ -527,10 +533,12 @@ async def shop_search(
             ctx,
             use_cache=cache,
         )
-        if ctx.get("source") == "direct":
-            ctx["credits_override"] = CREDIT_SHOP_NATIVE
+        n = len(data.get("products") or [])
+        ctx["result_count"] = n
+        if ctx.get("source") in ("direct", "native"):
+            ctx["credits_computed"] = CREDIT_SHOP_NATIVE
         else:
-            ctx["credits_override"] = _scaled(len(data["products"]), RATE_SHOP)
+            ctx["credits_computed"] = _scaled(n, RATE_SHOP)
         return ApiResponse(data=data)
 
 
@@ -656,7 +664,8 @@ async def product_details(
             native = await tiktok_shop_native.fetch_product_details(url)
             if native and native.get("title"):
                 ctx["source"] = "direct"
-                ctx["credits_override"] = CREDIT_SHOP_NATIVE
+                ctx["credits_computed"] = CREDIT_SHOP_NATIVE
+                ctx["result_count"] = 1
                 normalized = _normalize_product(native, details_mode=True)
                 normalized["url"] = normalized["url"] or url
                 normalized.setdefault("region", region_code)
@@ -687,13 +696,16 @@ async def product_details(
                 # Keep the endpoint useful with canonical basics for valid PDP URLs.
                 product_id = url.rstrip("/").split("/")[-1]
                 ctx["source"] = "direct" if native else "apify"
-                ctx["credits_override"] = CREDIT_SHOP_NATIVE if native else 14
+                # Extended path would have been 14; published flat caps at 2.
+                ctx["credits_computed"] = CREDIT_SHOP_NATIVE if native else 14
+                ctx["result_count"] = 1
                 base = native or {"productUrl": url, "productId": product_id}
                 normalized = _normalize_product(base, details_mode=True)
                 normalized.setdefault("region", region_code)
                 return normalized
             ctx["source"] = "apify"
-            ctx["credits_override"] = 14
+            ctx["credits_computed"] = 14
+            ctx["result_count"] = 1
             normalized = _normalize_product(items[0], details_mode=True)
             normalized["url"] = normalized["url"] or url
             normalized.setdefault("region", region_code)

@@ -1704,9 +1704,12 @@ def _finalise_channel_list_payload(
     else:
         data["degraded"] = bool(data.get("degraded"))
     if data["degraded"]:
-        data["degradedReason"] = (
-            degraded_reason or safe_str(data.get("degradedReason")) or "apify-fallback"
+        from app.core.credits import public_degraded_reason
+
+        raw_reason = (
+            degraded_reason or safe_str(data.get("degradedReason")) or "extended"
         )
+        data["degradedReason"] = public_degraded_reason(raw_reason) or "extended"
     else:
         data["degradedReason"] = None
     return data
@@ -1783,7 +1786,7 @@ async def instagram_channel_posts(
                 )
 
             async def _timeout_result() -> dict[str, Any]:
-                """Prefer labelled stale cache over an empty apify-timeout page."""
+                """Prefer labelled stale cache over an empty extended-timeout page."""
                 key = make_cache_key("instagram.channel-posts", cache_params)
                 stale = None
                 for peek in (key, key + ":stale"):
@@ -1801,7 +1804,7 @@ async def instagram_channel_posts(
                     stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
                     log.info("ig_channel_posts_stages", **stages)
                     ctx["source"] = "apify"
-                    return _empty_degraded("apify-timeout")
+                    return _empty_degraded("extended-timeout")
                 out = dict(stale)
                 cached_at = safe_str(out.get("fetchedAt") or out.get("cachedAt"))
                 out["cachedAt"] = cached_at
@@ -1816,10 +1819,10 @@ async def instagram_channel_posts(
                 return _finalise_channel_list_payload(
                     out,
                     degraded=True,
-                    degraded_reason="apify-timeout-served-stale",
+                    degraded_reason="extended-timeout-served-stale",
                 )
 
-            async def _apify(reason: str = "apify-fallback") -> dict[str, Any]:
+            async def _apify(reason: str = "extended") -> dict[str, Any]:
                 # No second Decodo _profile here — native already failed/timed
                 # out; another 75s scrape was compounding the edge-timeout risk.
                 apify_budget = min(_CHANNEL_POSTS_APIFY_TIMEOUT_SECS, _remaining())
@@ -1951,7 +1954,7 @@ async def instagram_channel_posts(
             else:
                 stages["native"] = "decodo_disabled"
 
-            return await _apify("apify-fallback")
+            return await _apify("extended")
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",

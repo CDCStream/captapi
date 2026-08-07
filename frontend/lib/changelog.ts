@@ -49,6 +49,19 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 /** Static mirror of the migration seed — used only when the table is unavailable. */
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
+    publishedAt: "2026-08-08",
+    category: "improvement",
+    title: "One published price + fetch-path telemetry",
+    description:
+      "Dual native/extended price badges are gone — measurement-window endpoints publish and charge one flat price on both paths (facebook event-search/profile-events, truth-social user-posts, twitter community-tweets, tiktok-shop search/product-details, threads search/search-users/user-posts). Response source is native|extended (supplier names removed). requests logs credits_computed vs credits_used + result_count for the weekly subsidy report.",
+    items: [
+      "Single creditLabel on 9 dual-price endpoints",
+      "PUBLISHED_FLAT cap: charge ≤ published (e.g. 38→2)",
+      "source native|extended; degradedReason extended*",
+      "requests.credits_computed + scrape_path_weekly view",
+    ],
+  },
+  {
     publishedAt: "2026-08-07",
     category: "fix",
     title: "Truth Social: drop author twins; fix downvotes 0→null",

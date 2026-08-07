@@ -529,14 +529,12 @@ async def threads_user_posts(
 ):
     handle = _require_threads_handle(url)
     settings = get_settings()
-    # Reserve Apify worst-case; native path overrides to flat CREDIT_POST_LIST.
-    cost = _scaled(limit, RATE, CREDIT_POST_LIST)
     async with billed_call(
         caller=caller,
         endpoint="/v1/threads/user-posts",
         platform="threads",
         resource_url=f"https://www.threads.net/@{handle}",
-        base_credits=cost,
+        base_credits=CREDIT_POST_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Hydrated profile HTML embeds recent thread_items (soft-capped).
@@ -589,12 +587,12 @@ async def threads_user_posts(
             ctx=ctx,
             use_cache=cache,
         )
-        if ctx.get("source") == "direct":
-            ctx["credits_override"] = CREDIT_POST_LIST
+        n = len(data.get("posts") or [])
+        ctx["result_count"] = n
+        if ctx.get("source") in ("direct", "native"):
+            ctx["credits_computed"] = CREDIT_POST_LIST
         else:
-            ctx["credits_override"] = _scaled(
-                len(data.get("posts") or []), RATE, CREDIT_POST_LIST
-            )
+            ctx["credits_computed"] = _scaled(n, RATE, CREDIT_POST_LIST)
         return ApiResponse(data=data)
 
 
@@ -603,8 +601,7 @@ async def threads_user_posts(
     summary="Search public Threads posts by keyword",
     description=(
         f"Public Threads post search via Meta Top SERP hydrate. Flat "
-        f"{CREDIT_SEARCH} credits on the native path; Apify fallback ~{RATE}/post "
-        f"(min {CREDIT_SEARCH}). No sort or date filter — Meta ranks the page."
+        f"{CREDIT_SEARCH} credits. No sort or date filter — Meta ranks the page."
     ),
 )
 async def threads_search(
@@ -614,14 +611,12 @@ async def threads_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    # Reserve Apify worst-case; native path overrides to flat CREDIT_SEARCH.
-    cost = _scaled(limit, RATE, CREDIT_SEARCH)
     async with billed_call(
         caller=caller,
         endpoint="/v1/threads/search",
         platform="threads",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_SEARCH,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Hydrated /search HTML embeds matching thread_items (soft-capped).
@@ -650,12 +645,12 @@ async def threads_search(
             ctx=ctx,
             use_cache=cache,
         )
-        if ctx.get("source") == "direct":
-            ctx["credits_override"] = CREDIT_SEARCH
+        n = len(data.get("results") or [])
+        ctx["result_count"] = n
+        if ctx.get("source") in ("direct", "native"):
+            ctx["credits_computed"] = CREDIT_SEARCH
         else:
-            ctx["credits_override"] = _scaled(
-                len(data.get("results") or []), RATE, CREDIT_SEARCH
-            )
+            ctx["credits_computed"] = _scaled(n, RATE, CREDIT_SEARCH)
         return ApiResponse(data=data)
 
 
@@ -664,9 +659,9 @@ async def threads_search(
     summary="Find Threads users / creators by keyword",
     description=(
         f"Distinct authors from Threads keyword search hydrate. Flat "
-        f"{CREDIT_SEARCH_USERS} credit on the native path (TikTok/SC parity); "
-        f"Apify fallback ~{RATE}/user (min 2). Returns id + profileImage when "
-        f"Meta embeds them; followers is usually null on this surface."
+        f"{CREDIT_SEARCH_USERS} credit (TikTok/SC parity). Returns id + "
+        f"profileImage when Meta embeds them; followers is usually null on "
+        f"this surface."
     ),
 )
 async def threads_search_users(
@@ -676,13 +671,12 @@ async def threads_search_users(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled(limit, RATE, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/threads/search-users",
         platform="threads",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_SEARCH_USERS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Native: distinct authors from hydrated search HTML (soft-capped).
@@ -731,10 +725,12 @@ async def threads_search_users(
             ctx=ctx,
             use_cache=cache,
         )
-        if ctx.get("source") == "direct":
-            ctx["credits_override"] = CREDIT_SEARCH_USERS
+        n = len(data.get("users") or [])
+        ctx["result_count"] = n
+        if ctx.get("source") in ("direct", "native"):
+            ctx["credits_computed"] = CREDIT_SEARCH_USERS
         else:
-            ctx["credits_override"] = _scaled(len(data.get("users") or []), RATE, 2)
+            ctx["credits_computed"] = _scaled(n, RATE, 2)
         return ApiResponse(data=data)
 
 

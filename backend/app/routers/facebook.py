@@ -1967,10 +1967,13 @@ async def facebook_profile_events(
             stale_while_revalidate=True,
             use_cache=cache,
         )
-        if ctx.get("source") == "direct":
-            ctx["credits_override"] = CREDIT_FB_EVENTS_NATIVE
+        n = len(data.get("events") or [])
+        ctx["result_count"] = n
+        if ctx.get("source") in ("direct", "native"):
+            ctx["credits_computed"] = CREDIT_FB_EVENTS_NATIVE
         else:
-            ctx["credits_override"] = _scaled_credits(len(data["events"]), RATE_FB_EVENTS, 4)
+            # Uncapped path cost for subsidy telemetry; billed_call caps at published 2.
+            ctx["credits_computed"] = _scaled_credits(n, RATE_FB_EVENTS, 4)
         return ApiResponse(data=data)
 
 
@@ -2479,11 +2482,13 @@ async def facebook_event_search(
             stale_while_revalidate=True,
             use_cache=cache,
         )
-        if ctx.get("source") == "direct":
-            ctx["credits_override"] = CREDIT_FB_EVENTS_NATIVE
+        n = len(data.get("events") or [])
+        ctx["result_count"] = n
+        if ctx.get("source") in ("direct", "native"):
+            ctx["credits_computed"] = CREDIT_FB_EVENTS_NATIVE
         else:
-            # Apify path — 2 credits/result (RATE_FB_EVENTS), min 4. Documented dual price.
-            ctx["credits_override"] = _scaled_credits(len(data["events"]), RATE_FB_EVENTS, 4)
+            # Uncapped path cost for subsidy telemetry; billed_call caps at published 2.
+            ctx["credits_computed"] = _scaled_credits(n, RATE_FB_EVENTS, 4)
         return ApiResponse(data=data)
 
 

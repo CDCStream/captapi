@@ -1003,14 +1003,12 @@ async def twitter_community_tweets(
         )
     settings = get_settings()
     community_url = f"https://x.com/i/communities/{community_id}"
-    # Reserve Apify worst-case; native path overrides to flat CREDIT_TWEET_LIST.
-    cost = _scaled_credits(limit, RATE_TWEET, CREDIT_TWEET_LIST)
     async with billed_call(
         caller=caller,
         endpoint="/v1/twitter/community-tweets",
         platform="twitter",
         resource_url=community_url,
-        base_credits=cost,
+        base_credits=CREDIT_TWEET_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             meta_task = asyncio.create_task(native.community(community_id))
@@ -1063,10 +1061,10 @@ async def twitter_community_tweets(
             ctx=ctx,
             use_cache=cache,
         )
-        if ctx.get("source") == "direct":
-            ctx["credits_override"] = CREDIT_TWEET_LIST
+        n = len(data.get("tweets") or [])
+        ctx["result_count"] = n
+        if ctx.get("source") in ("direct", "native"):
+            ctx["credits_computed"] = CREDIT_TWEET_LIST
         else:
-            ctx["credits_override"] = _scaled_credits(
-                len(data.get("tweets") or []), RATE_TWEET, CREDIT_TWEET_LIST
-            )
+            ctx["credits_computed"] = _scaled_credits(n, RATE_TWEET, CREDIT_TWEET_LIST)
         return ApiResponse(data=data)
