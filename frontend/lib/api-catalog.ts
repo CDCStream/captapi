@@ -185,7 +185,9 @@ export function creditLabel(
       e.slug === "threads-user-posts" ||
       e.slug === "threads-search" ||
       e.slug === "threads-search-users" ||
-      e.slug === "truth-social-user-posts") &&
+      e.slug === "truth-social-user-posts" ||
+      e.slug === "facebook-event-search" ||
+      e.slug === "facebook-profile-events") &&
     e.creditsPerResult
   ) {
     const unit = e.credits === 1 ? "credit" : "credits";
@@ -1313,13 +1315,15 @@ const FACEBOOK_EVENTS: Spec[] = [
     method: "GET",
     path: "/v1/facebook/event-search",
     credits: 2,
+    creditsPerResult: 2,
     tagline:
-      "Search Facebook events by topic and city — local startDate/timezone, venue, and attendance when exposed. Flat 2 credits.",
+      "Search Facebook events by topic and city — local startDate/timezone, venue. 2 credits native (~2/result Apify).",
     longDescription:
-      "Search public Facebook events with a topic query (e.g. comedy) and optional location / from / to / upcoming filters. Each result uses the same Event shape as Event Details and Profile Events: startDate/endDate as ISO with the host timezone offset (calendar day matches startTime — evening CDT events do not roll to the next UTC day), IANA timezone (from venue lat/lng when present — never Etc/*), isPast, eventType, location{}, image, and usersGoing/usersInterested when Facebook exposes them. Relative labels like \"Happening now\" are never returned as startTime. Flat 2 credits on the native path.",
+      "Search public Facebook events with a topic query (e.g. comedy) and optional location / from / to / upcoming filters. Each result uses the same Event shape as Event Details and Profile Events: startDate/endDate as ISO with the host timezone offset (calendar day matches startTime — evening CDT events do not roll to the next UTC day), IANA timezone (from venue lat/lng when present — never Etc/*), isPast, eventType, location{}, image, and usersGoing/usersInterested when Facebook exposes them. Relative labels like \"Happening now\" are never returned as startTime. Billing: flat 2 credits on the native path; Apify fallthrough bills ~2 credits per returned event (min 4) — check x-captapi-source. A 19-result Apify call is 38 credits, not 2.",
     platformLimits: [
       "Facebook/SERP discovery can return past events. Use upcoming=true (sets from=today UTC) or from=YYYY-MM-DD for a forward window, or filter client-side on isPast — same pattern as playCount absence on Spotify search.",
       "timezone is a real IANA zone or null — never Etc/GMT. Prefer location.latitude/longitude → IANA when coords exist.",
+      "location is a geo filter (timezone / city / coords near the place) — not a required substring of the event title. Most London venues do not contain \"London\" in their name.",
     ],
   },
   {
@@ -1346,10 +1350,11 @@ const FACEBOOK_EVENTS: Spec[] = [
     method: "GET",
     path: "/v1/facebook/profile-events",
     credits: 2,
+    creditsPerResult: 2,
     tagline:
-      "List a Facebook Page's events — local startDate (year included), timezone, venue. Flat 2 credits.",
+      "List a Facebook Page's events — local startDate, timezone, venue. 2 credits native (~2/result Apify).",
     longDescription:
-      "Pass a Facebook Page URL and get that page's /events list as clean JSON using the same Event shape as Event Search / Event Details: id, url, name, startDate (ISO with host offset — year resolved from yearless cards like \"Tue, Aug 4 at 8:00 PM EDT\"), timezone, startTime, isPast, and location{name}. Flat 2 credits on the native path.",
+      "Pass a Facebook Page URL and get that page's /events list as clean JSON using the same Event shape as Event Search / Event Details: id, url, name, startDate (ISO with host offset — year resolved from yearless cards like \"Tue, Aug 4 at 8:00 PM EDT\"), timezone, startTime, isPast, and location{name}. Billing: flat 2 credits on the native path; Apify fallthrough is ~2 credits per returned event (min 4).",
   },
 ];
 
@@ -4391,7 +4396,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       name: "location",
       type: "string",
       required: false,
-      description: "City or place tokens required in title/venue (e.g. Chicago).",
+      description:
+        "City/place geo filter (e.g. London). Matches timezone, location.city, or coords near the city — not a title substring.",
     },
     {
       name: "from",

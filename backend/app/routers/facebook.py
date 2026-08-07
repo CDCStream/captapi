@@ -2149,14 +2149,20 @@ async def facebook_marketplace_location_search(
     description=(
         "Search public Facebook events. Upstream discovery (SERP / Facebook) can "
         "return past events — use upcoming=true or from=YYYY-MM-DD for a forward "
-        "window, or filter client-side on isPast. Flat 2 credits on the native path."
+        "window, or filter client-side on isPast. "
+        "Billing: flat 2 credits on the native path; Apify fallthrough is "
+        "~2 credits per returned event (min 4)."
     ),
 )
 async def facebook_event_search(
-    q: str = Query(..., min_length=2, description="Topic and/or place, e.g. 'comedy Chicago'"),
+    q: str = Query(..., min_length=2, description="Topic keyword, e.g. 'comedy'. Pair with location for city-scoped results."),
     location: str | None = Query(
         None,
-        description="Optional city/place filter tokens required in title/venue (e.g. Chicago).",
+        description=(
+            "Optional city/place geo filter (e.g. London, Chicago). Matches resolved "
+            "timezone, location.city, or coordinates near the city — not a required "
+            "substring of the event title."
+        ),
     ),
     from_date: str | None = Query(
         None,
@@ -2191,9 +2197,8 @@ async def facebook_event_search(
         base_credits=CREDIT_FB_EVENTS_NATIVE,
     ) as ctx:
         def _filter_apify(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
-            tokens = facebook_events_native._query_tokens(
-                f"{q} {(location or '').strip()}".strip()
-            )
+            # Topic relevance only — location is a post-normalize geo filter (FE4).
+            tokens = facebook_events_native._query_tokens(q)
             out: list[dict[str, Any]] = []
             for i in items:
                 if i.get("error"):
@@ -2204,6 +2209,8 @@ async def facebook_event_search(
                 if not facebook_events_native._event_in_date_range(
                     ev, from_date=effective_from, to_date=to_date
                 ):
+                    continue
+                if not facebook_events_native.event_matches_location(ev, location):
                     continue
                 out.append(ev)
                 if len(out) >= limit:
@@ -2221,11 +2228,17 @@ async def facebook_event_search(
             )
             if native:
                 ctx["source"] = "direct"
-                events = [_normalize_event(i) for i in native]
+                # Re-normalize + re-apply geo filter (router timezone resolution).
+                events = [
+                    ev
+                    for ev in (_normalize_event(i) for i in native)
+                    if facebook_events_native.event_matches_location(ev, location)
+                ][:limit]
                 payload: dict[str, Any] = {
                     "query": q,
                     "totalReturned": len(events),
                     "events": events,
+                    "source": "direct",
                 }
                 if location:
                     payload["location"] = location
@@ -2254,7 +2267,12 @@ async def facebook_event_search(
                     await apify.start_run(settings.APIFY_ACTOR_FACEBOOK_EVENTS, run_input)
                 events = _filter_apify(cached_items)
                 ctx["source"] = "apify"
-                return {"query": q, "totalReturned": len(events), "events": events}
+                return {
+                    "query": q,
+                    "totalReturned": len(events),
+                    "events": events,
+                    "source": "apify",
+                }
 
             try:
                 items = await apify.run_actor_sync(
@@ -2272,7 +2290,12 @@ async def facebook_event_search(
                     raise
             events = _filter_apify(items)
             ctx["source"] = "apify"
-            return {"query": q, "totalReturned": len(events), "events": events}
+            return {
+                "query": q,
+                "totalReturned": len(events),
+                "events": events,
+                "source": "apify",
+            }
 
         data = await cached_or_run(
             endpoint="facebook.event-search",
@@ -2283,7 +2306,8 @@ async def facebook_event_search(
                 "from": effective_from or "",
                 "to": to_date or "",
                 "upcoming": upcoming,
-                "v": 8,
+                # v9: location is geo (timezone/city/coords); dual credit docs (FE3/FE4).
+                "v": 9,
             },
             runner=_run,
             ctx=ctx,
@@ -2293,6 +2317,7 @@ async def facebook_event_search(
         if ctx.get("source") == "direct":
             ctx["credits_override"] = CREDIT_FB_EVENTS_NATIVE
         else:
+            # Apify path — 2 credits/result (RATE_FB_EVENTS), min 4. Documented dual price.
             ctx["credits_override"] = _scaled_credits(len(data["events"]), RATE_FB_EVENTS, 4)
         return ApiResponse(data=data)
 

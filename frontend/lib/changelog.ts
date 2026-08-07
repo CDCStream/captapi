@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Facebook event-search: honest dual credits + geo location",
+    description:
+      "Docs said Flat 2 credits while Apify fallthrough billed 2/result (19 events → 38). Label is now \"2 credits native (~2/result Apify)\". location is a geo filter on timezone/city/coords — not a required title substring (London venues rarely contain \"London\").",
+    items: [
+      "Endpoint label: 2 credits native (~2/result Apify)",
+      "location matches timezone / city / coords (FE4)",
+      "Response source: direct|apify for invoice clarity",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Facebook events: real IANA timezone, never Etc/GMT",
     description:
       "GMT on UK events was mapped to Etc/GMT — a fixed-offset zone that never observes DST. timezone now prefers venue lat/lng → IANA (timezonefinder), then real abbrev maps (GMT→Europe/London); Etc/* is rejected as null. event-search documents historical SERP hits and adds upcoming=true (sets from=today).",

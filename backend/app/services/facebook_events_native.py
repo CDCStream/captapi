@@ -1216,6 +1216,149 @@ def _event_matches_query(raw: dict[str, Any], tokens: list[str]) -> bool:
     return hits >= need
 
 
+# Place name → IANA zones + city tokens + optional lat/lng radius (FE4).
+# ``location`` is a geo filter on the resolved event, not a title substring.
+_PLACE_GEO: dict[str, dict[str, Any]] = {
+    "london": {
+        "timezones": {"Europe/London"},
+        "city_tokens": {"london"},
+        "lat": 51.5074,
+        "lng": -0.1276,
+        "radius_km": 60,
+    },
+    "paris": {
+        "timezones": {"Europe/Paris"},
+        "city_tokens": {"paris"},
+        "lat": 48.8566,
+        "lng": 2.3522,
+        "radius_km": 50,
+    },
+    "amsterdam": {
+        "timezones": {"Europe/Amsterdam"},
+        "city_tokens": {"amsterdam"},
+        "lat": 52.3676,
+        "lng": 4.9041,
+        "radius_km": 40,
+    },
+    "berlin": {
+        "timezones": {"Europe/Berlin"},
+        "city_tokens": {"berlin"},
+        "lat": 52.52,
+        "lng": 13.405,
+        "radius_km": 50,
+    },
+    "chicago": {
+        "timezones": {"America/Chicago"},
+        "city_tokens": {"chicago"},
+        "lat": 41.8781,
+        "lng": -87.6298,
+        "radius_km": 60,
+    },
+    "new york": {
+        "timezones": {"America/New_York"},
+        "city_tokens": {"new york", "nyc", "brooklyn", "manhattan", "queens"},
+        "lat": 40.7128,
+        "lng": -74.006,
+        "radius_km": 50,
+    },
+    "nyc": {
+        "timezones": {"America/New_York"},
+        "city_tokens": {"new york", "nyc", "brooklyn", "manhattan", "queens"},
+        "lat": 40.7128,
+        "lng": -74.006,
+        "radius_km": 50,
+    },
+    "los angeles": {
+        "timezones": {"America/Los_Angeles"},
+        "city_tokens": {"los angeles", "la", "hollywood"},
+        "lat": 34.0522,
+        "lng": -118.2437,
+        "radius_km": 70,
+    },
+    "auckland": {
+        "timezones": {"Pacific/Auckland"},
+        "city_tokens": {"auckland"},
+        "lat": -36.8509,
+        "lng": 174.7645,
+        "radius_km": 50,
+    },
+    "detroit": {
+        "timezones": {"America/Detroit"},
+        "city_tokens": {"detroit"},
+        "lat": 42.3314,
+        "lng": -83.0458,
+        "radius_km": 50,
+    },
+}
+
+
+def _haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    from math import asin, cos, radians, sin, sqrt
+
+    r = 6371.0
+    dlat = radians(lat2 - lat1)
+    dlng = radians(lng2 - lng1)
+    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlng / 2) ** 2
+    return 2 * r * asin(sqrt(a))
+
+
+def _place_geo_spec(location: str | None) -> dict[str, Any] | None:
+    raw = (location or "").strip().lower()
+    if not raw:
+        return None
+    if raw in _PLACE_GEO:
+        return _PLACE_GEO[raw]
+    # "London, UK" / "new york city"
+    for key, spec in _PLACE_GEO.items():
+        if key in raw or raw in key:
+            return spec
+    return None
+
+
+def event_matches_location(ev: dict[str, Any], location: str | None) -> bool:
+    """Geo filter: timezone / city / coords — not event-title substring (FE4)."""
+    loc_q = (location or "").strip()
+    if not loc_q:
+        return True
+    place = ev.get("location") if isinstance(ev.get("location"), dict) else {}
+    tz = safe_str(ev.get("timezone"))
+    city = " ".join(
+        str(x)
+        for x in (
+            place.get("city"),
+            place.get("name"),
+            ev.get("location_city"),
+            ev.get("location_name"),
+            place.get("countryCode"),
+        )
+        if x
+    ).lower()
+
+    spec = _place_geo_spec(loc_q)
+    if spec:
+        zones = spec.get("timezones") or set()
+        if tz and tz in zones:
+            return True
+        tokens = spec.get("city_tokens") or set()
+        if any(t in city for t in tokens):
+            return True
+        try:
+            elat = float(place.get("latitude"))
+            elng = float(place.get("longitude"))
+            clat = float(spec["lat"])
+            clng = float(spec["lng"])
+            if _haversine_km(elat, elng, clat, clng) <= float(spec.get("radius_km") or 50):
+                return True
+        except (TypeError, ValueError, KeyError):
+            pass
+        return False
+
+    # Unknown place: match city/venue/timezone text only — never the event title.
+    needle = loc_q.lower()
+    hay = f"{city} {tz or ''}".lower()
+    return needle in hay
+
+
 def _event_in_date_range(
     ev: dict[str, Any],
     *,
@@ -1357,8 +1500,10 @@ async def fetch_search_events(
     Discovery always runs when SERP is empty (even after SERP timeouts) so a
     dead Google/Yahoo hop cannot zero the whole endpoint.
 
-    Optional ``location`` tokens are required matches (same as query tokens).
-    ``from_date`` / ``to_date`` are YYYY-MM-DD bounds on local startDate.
+    ``location`` is a geo filter on timezone / city / coords after hydrate (FE4)
+    — not a required title/venue substring. SERP may still bias with the place
+    name for discovery. ``from_date`` / ``to_date`` are YYYY-MM-DD bounds on
+    local startDate.
     """
     if limit <= 0:
         return []
@@ -1366,8 +1511,12 @@ async def fetch_search_events(
     if len(query) < 2:
         return None
     loc = (location or "").strip()
-    combined = f"{query} {loc}".strip() if loc else query
-    tokens = _query_tokens(combined)
+    # Topic tokens only — do not require "London" in the event title (FE4).
+    tokens = _query_tokens(query)
+    # Bias SERP toward the place without making it a hard haystack token.
+    serp_q = f"{query} {loc}".strip() if loc else query
+    # Over-fetch when geo-filtering so limit can still fill after the cut.
+    fetch_limit = min(40, max(limit * 3, limit + 10)) if loc else limit
     # Reserve ~20s for discovery/page hydrate even if SERP is slow.
     deadline = time.monotonic() + 50.0
     serp_deadline = time.monotonic() + 18.0
@@ -1377,6 +1526,7 @@ async def fetch_search_events(
             e
             for e in rows
             if _event_in_date_range(e, from_date=from_date, to_date=to_date)
+            and event_matches_location(e, loc)
         ]
         ranked = _prefer_upcoming(filtered)[:limit]
         log.info(
@@ -1390,15 +1540,17 @@ async def fetch_search_events(
 
     # 1) SERP → native event-details (query-relevant IDs).
     ids = await _search_event_ids_via_serp(
-        combined, limit=min(40, max(15, limit * 2)), deadline=serp_deadline
+        serp_q, limit=min(40, max(15, fetch_limit * 2)), deadline=serp_deadline
     )
     if ids and time.monotonic() < deadline:
-        hydrated = await _hydrate_event_ids(ids, limit=max(limit, 8), tokens=tokens)
+        hydrated = await _hydrate_event_ids(
+            ids, limit=max(fetch_limit, 8), tokens=tokens
+        )
         if hydrated:
             return _finalize(hydrated, "serp")
 
     # 2) Facebook discovery shell — always try when SERP missed (strict match).
-    url = search_events_url(combined)
+    url = search_events_url(serp_q)
     html = await _fetch_html(url, scroll=False)
     if html:
         raw = extract_events_from_html(html)
