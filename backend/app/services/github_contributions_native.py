@@ -2,13 +2,14 @@
 
 Public HTML at ``https://github.com/users/{login}/contributions`` exposes
 the last ~365 days with per-day counts (tool-tip text) and intensity levels.
-This is the contribution graph ? not ``/users/{u}/events/public`` (max 90
+This is the contribution graph — not ``/users/{u}/events/public`` (max 90
 events / 90 days).
 """
 
 from __future__ import annotations
 
 import re
+from datetime import date
 from typing import Any
 
 import httpx
@@ -51,8 +52,50 @@ def _tip_count(text: str) -> int:
     return 0
 
 
-def parse_contributions_html(html: str) -> dict[str, Any] | None:
-    """Return totalContributions + days[{date,count,level}] from the calendar HTML."""
+def _current_streak(days: list[dict[str, Any]], *, today: str | None = None) -> int:
+    """Consecutive nonzero days ending at the latest calendar day.
+
+    GitHub convention: a zero on *today* does not break the streak (the day is
+    not over). A zero on any earlier day does.
+    ``days`` must already be ascending by ``date``.
+    """
+    if not days:
+        return 0
+    today_s = today or date.today().isoformat()
+    i = len(days) - 1
+    if days[i].get("date") == today_s and int(days[i].get("count") or 0) == 0:
+        i -= 1
+    n = 0
+    while i >= 0 and int(days[i].get("count") or 0) > 0:
+        n += 1
+        i -= 1
+    return n
+
+
+def _longest_streak(days: list[dict[str, Any]]) -> int:
+    """Longest run of consecutive days with count > 0 (any position in the window)."""
+    best = cur = 0
+    for d in days:
+        if int(d.get("count") or 0) > 0:
+            cur += 1
+            if cur > best:
+                best = cur
+        else:
+            cur = 0
+    return best
+
+
+def parse_contributions_html(
+    html: str,
+    *,
+    today: str | None = None,
+) -> dict[str, Any] | None:
+    """Return totalContributions + days[{date,count,level}] from the calendar HTML.
+
+    GitHub emits day cells weekday-major (all Sundays, then Mondays, …). We sort
+    ascending by date before deriving from/to/streaks so windowed callers and
+    streak walks see chronological order.
+    """
     if not html:
         return None
     days_meta = _DAY_RE.findall(html)
@@ -61,32 +104,29 @@ def parse_contributions_html(html: str) -> dict[str, Any] | None:
         return None
     # Tips are emitted in the same order as day cells on the public calendar.
     days: list[dict[str, Any]] = []
-    for i, (date, level_s) in enumerate(days_meta):
+    for i, (dt, level_s) in enumerate(days_meta):
         count = _tip_count(tips[i]) if i < len(tips) else 0
         days.append(
             {
-                "date": date,
+                "date": dt,
                 "count": count,
                 "level": safe_int(level_s) or 0,
             }
         )
+    # DOM order is weekday-major — force chronological before any derived field.
+    days.sort(key=lambda d: d["date"])
+
     total_m = _TOTAL_RE.search(html)
     total = _comma_int(total_m.group(1) if total_m else None)
     if total is None:
         total = sum(d["count"] for d in days)
-    # currentStreak: consecutive days with count>0 ending at the most recent day.
-    # A zero on the latest day means streak is 0 (no activity today).
-    streak = 0
-    for d in reversed(days):
-        if d["count"] > 0:
-            streak += 1
-        else:
-            break
+
     return {
         "totalContributions": total,
         "from": days[0]["date"],
         "to": days[-1]["date"],
-        "currentStreak": streak,
+        "currentStreak": _current_streak(days, today=today),
+        "longestStreak": _longest_streak(days),
         "days": days,
     }
 
@@ -139,15 +179,17 @@ async def contributions_native(login: str) -> dict[str, Any] | None:
             "from": parsed["from"],
             "to": parsed["to"],
             "currentStreak": parsed["currentStreak"],
+            "longestStreak": parsed["longestStreak"],
             "days": parsed["days"],
         }
     )
-    # Fix source literal with login
     out["source"] = f"github.com/users/{login_n}/contributions"
     log.info(
         "github_contributions_ok",
         login=login_n,
         total=out.get("totalContributions"),
         days=len(parsed["days"]),
+        current_streak=out.get("currentStreak"),
+        longest_streak=out.get("longestStreak"),
     )
     return out

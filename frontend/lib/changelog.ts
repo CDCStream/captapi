@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "GitHub contributions: sort days[] chronologically and fix currentStreak",
+    description:
+      "GET /v1/github/contributions was emitting the heatmap in GitHub's weekday-major DOM order (all Sundays, then Mondays, …), so days.slice(-30) returned Saturdays across months and currentStreak counted consecutive Saturdays (e.g. 52). days[] is now sorted ascending by date before any derived field; from/to are min/max date; currentStreak uses GitHub's today-grace rule (a zero on today does not break the streak); longestStreak is added for free.",
+    items: [
+      "days[] strictly ascending by date",
+      "currentStreak from sorted tail + today-grace docs",
+      "longestStreak + from/to = min/max(days[].date)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Snapchat user-profile: drop naming twins (handle/subscriberCount/avatar aliases)",
     description:
       "GET /v1/snapchat/user-profile now keeps one key per concept — username, followers, avatar, banner — and no longer re-emits handle, subscriberCount, profilePictureUrl, or squareHeroImageUrl with the same values. highlights[] (curated Story albums) stays distinct from spotlightHighlights[] (Spotlight posts); createdAt ISO and creationTimestampMs remain as two representations of the same instant. Docs spell out both pairs.",

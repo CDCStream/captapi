@@ -2179,9 +2179,9 @@ const GITHUB: Spec[] = [
     path: "/v1/github/contributions",
     credits: 2,
     tagline:
-      "GitHub contribution graph — totalContributions, currentStreak, days[{date,count,level}] (2 credits).",
+      "GitHub contribution graph — sorted days[], currentStreak (today grace), longestStreak (2 credits).",
     longDescription:
-      "Pass a GitHub username or profile URL and get the real last-year contribution calendar from github.com/users/{login}/contributions: totalContributions, from/to date range, currentStreak, and days[{date, count, level}] (the heatmap). source discloses that HTML calendar. This is not /users/{u}/events/public (max 90 events / 90 days) and not a sampled stars sum. Flat 2 credits.",
+      "Pass a GitHub username or profile URL and get the real last-year contribution calendar from github.com/users/{login}/contributions: totalContributions, from/to (min/max date), currentStreak, longestStreak, and days[{date, count, level}] sorted ascending by date (not GitHub's weekday-major DOM order). currentStreak uses GitHub's today-grace rule: a zero on today does not break the streak; a zero on any earlier day does. source discloses that HTML calendar. This is not /users/{u}/events/public (max 90 events / 90 days) and not a sampled stars sum. Flat 2 credits.",
   },
   {
     slug: "github-repository",
@@ -6379,11 +6379,15 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
   if (ep.slug === "github-contributions") {
     list.push({
       q: `Is recentPublicEvents still returned?`,
-      a: `No. That field was a count of /users/{u}/events/public rows (hard-capped at 90) and was not a contribution metric. This endpoint returns the heatmap: totalContributions, currentStreak, and days[].`,
+      a: `No. That field was a count of /users/{u}/events/public rows (hard-capped at 90) and was not a contribution metric. This endpoint returns the heatmap: totalContributions, currentStreak, longestStreak, and days[] sorted by date.`,
     });
     list.push({
       q: `Where does the calendar come from?`,
       a: `The public HTML at github.com/users/{login}/contributions (same graph as the profile). source echoes that path.`,
+    });
+    list.push({
+      q: `Does a zero today break currentStreak?`,
+      a: `No — today-grace: if the last day is today and count is 0, it is skipped because the day is not over. A zero on any earlier day breaks the streak. days[] is sorted ascending so days.slice(-30) is the last 30 calendar days.`,
     });
   }
   if (ep.slug === "github-pull-requests") {
@@ -7572,11 +7576,16 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "github-contributions": {
     source: "Public contribution calendar HTML path (github.com/users/{login}/contributions).",
-    totalContributions: "Contributions in the last year — the number on the profile graph heading.",
-    currentStreak: "Consecutive days with count>0 ending at the most recent calendar day (0 if today is empty).",
-    from: "First date in days[] (start of the calendar window).",
-    to: "Last date in days[] (end of the calendar window).",
-    days: "Per-day rows [{date, count, level}] for the heatmap. count is the contribution total; level is GitHub's 0–4 intensity.",
+    totalContributions:
+      "Contributions in the last year — the number on the profile graph heading. Equals sum(days[].count).",
+    from: "Earliest date in days[] (YYYY-MM-DD). Always min(days[].date).",
+    to: "Latest date in days[] (YYYY-MM-DD). Always max(days[].date) — the calendar window ends on today.",
+    currentStreak:
+      "Consecutive days with count>0 ending at the latest calendar day. Today-grace: if the last day is today and count is 0, that day is skipped (the day is not over); a zero on any earlier day breaks the streak. Computed after sorting days ascending.",
+    longestStreak:
+      "Longest run of consecutive days with count>0 anywhere in the window (independent of currentStreak).",
+    days:
+      "Per-day rows [{date (YYYY-MM-DD), count, level (0–4)}] sorted ascending by date — not GitHub's weekday-major DOM order. days.slice(-30) is the last 30 calendar days.",
     count: "Contributions on that date (from the calendar tool-tip).",
     level: "GitHub intensity 0–4 for the heatmap cell.",
   },

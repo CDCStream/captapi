@@ -912,7 +912,8 @@ async def following(
     summary="GitHub contribution graph",
     description=(
         "Last-year contribution calendar from github.com/users/{login}/contributions — "
-        "totalContributions, from/to, currentStreak, and days[{date,count,level}]. "
+        "totalContributions, from/to, currentStreak (today grace), longestStreak, "
+        "and days[{date,count,level}] sorted ascending by date. "
         "This is the heatmap graph, not /users/{u}/events/public (that feed caps at 90 "
         "events / 90 days and is not a contribution metric). Flat 2 credits."
     ),
