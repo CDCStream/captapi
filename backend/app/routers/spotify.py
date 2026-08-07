@@ -1398,11 +1398,12 @@ async def podcast_episodes(
         "web-player Pathfinder GraphQL (same family as /spotify/artist|track|album); "
         "Apify scraper is fallthrough only — its raw shape differs (flat albumName/"
         "isExplicit vs GraphQL __typename). Each result ships a canonical "
-        "spotify:{type}:{id} URI, url, name, and explicit/playable when known. "
-        "Envelope includes fetchedAt (not duplicated per row). Pathfinder search does "
-        "not expose playCount — use /spotify/track or album.tracks[]. Flat 2 credits "
-        "on native; Apify fallthrough scales per result. No cursor (max limit 50). "
-        "Pass raw=true to include per-result upstream payloads (omitted by default)."
+        "spotify:{type}:{id} URI, url, name, explicit, and contentRating when known. "
+        "Envelope includes fetchedAt (not duplicated per row). Pathfinder search "
+        "(decorateContextTracks) does not expose playCount or playable — use "
+        "/spotify/track. Flat 2 credits on native; Apify fallthrough scales per "
+        "result. No cursor (max limit 50). Pass raw=true to include per-result "
+        "upstream payloads (omitted by default)."
     ),
 )
 async def search(

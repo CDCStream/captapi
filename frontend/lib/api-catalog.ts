@@ -2377,11 +2377,12 @@ const SPOTIFY: Spec[] = [
     path: "/v1/spotify/search",
     credits: 2,
     tagline:
-      "Search Spotify — canonical spotify: URIs, explicit/playable, fetchedAt (flat 2 credits).",
+      "Search Spotify — canonical spotify: URIs, explicit, fetchedAt (flat 2 credits).",
     longDescription:
-      "Pass q plus optional type=tracks|albums|artists|podcasts|episodes (default tracks) and limit (max 50, no cursor). Primary path is web-player Pathfinder GraphQL (same family as /spotify/artist|track|album); Apify scraper is fallthrough only — do not assume one raw schema across both (GraphQL __typename vs flat albumName/isExplicit). Envelope: query, type, fetchedAt, source (pathfinder|apify), results[]. Each result ships a canonical Spotify URI (spotify:track:… not a bare id), url, name, artists (structured on Pathfinder track/album hits), durationMs/durationFormatted, explicit, playable, and image. Request freshness is envelope fetchedAt only — not copied onto every row. Pathfinder search does not expose playCount (absence ≠ zero); chain uri into /spotify/track or read album.tracks[].playCount. Flat 2 credits on native Pathfinder; Apify fallthrough scales per result. Pass raw=true for per-result upstream payloads (omitted by default; searchTerm is not repeated inside raw).",
+      "Pass q plus optional type=tracks|albums|artists|podcasts|episodes (default tracks) and limit (max 50, no cursor). Primary path is web-player Pathfinder GraphQL (same family as /spotify/artist|track|album); Apify scraper is fallthrough only — do not assume one raw schema across both (GraphQL __typename vs flat albumName/isExplicit). Envelope: query, type, fetchedAt, source (pathfinder|apify), results[]. Each result ships a canonical Spotify URI (spotify:track:… not a bare id), url, name, artists (structured on Pathfinder track/album hits), durationMs/durationFormatted, explicit, contentRating, and image. Request freshness is envelope fetchedAt only — not copied onto every row. Pathfinder search (decorateContextTracks) does not expose playCount or playable (absence ≠ false/zero); chain uri into /spotify/track for those. Flat 2 credits on native Pathfinder; Apify fallthrough scales per result. Pass raw=true for per-result upstream payloads (omitted by default; searchTerm is not repeated inside raw).",
     platformLimits: [
       "playCount is not on search.results[] — Pathfinder search hydrate omits stream counts; use /spotify/track or /spotify/album tracks[].",
+      "playable is not on search.results[] — decorateContextTracks omits playability; use /spotify/track.",
       "fetchedAt is envelope-only — results[] do not carry scrapedAt.",
     ],
   },
@@ -6291,6 +6292,10 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       a: `Pathfinder search hydrate does not expose stream counts. Absence is not zero — chain results[].uri into /spotify/track or read playCount from /spotify/album tracks[].`,
     });
     list.push({
+      q: `Why is playable missing on search results?`,
+      a: `decorateContextTracks (Pathfinder search hydrate) omits playability. Absence is not false — chain results[].uri into /spotify/track, which returns playable when Spotify exposes it.`,
+    });
+    list.push({
       q: `Is billing per result or flat?`,
       a: `Flat 2 credits on the native Pathfinder path. Apify fallthrough scales per result (~1.15×). The limit param does not mean "billed per result" on the primary path.`,
     });
@@ -6904,7 +6909,7 @@ const FIELD_DESCS: Record<string, string> = {
   mediaType: "Media type label for this item (platform-specific enum).",
   playable: "Whether the track is playable in the web player.",
   scrapedAt:
-    "When this result was collected (ISO 8601). On Spotify Search, Apify may stamp each hit a few hundred ms apart; native Pathfinder uses the request fetch time.",
+    "When this response was collected (ISO 8601). Envelope-level freshness on listings that expose it (e.g. Facebook profile-posts) — not a per-row stamp on Spotify search.",
   videoCount:
     "Population video count when the source is authoritative (e.g. TikTok challenge/detail statsV2 on popular-hashtags, or a channel's uploaded-video total). Never a sample tally — sample sizes use sampleVideoCount / sampleSize.",
   sampleVideoCount:
@@ -7939,8 +7944,12 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     artists:
       "On Pathfinder track/album hits: [{id, uri, name, url}]. Apify fallthrough may still ship name strings.",
     explicit: "Whether the item is marked explicit (from contentRating or Apify isExplicit).",
+    contentRating:
+      "Pathfinder contentRating.label when present on the search hydrate (NONE | EXPLICIT | NINETEEN_PLUS | UNKNOWN).",
     playCount:
       "Not returned on search — Pathfinder search hydrate omits stream counts. Chain uri into /spotify/track or use album.tracks[].playCount. Absence is not zero.",
+    playable:
+      "Not returned on search — decorateContextTracks omits playability. Chain uri into /spotify/track. Absence is not false.",
     durationFormatted: "Human duration (m:ss) when known.",
     fetchedAt: "When this search request completed (envelope only — not duplicated on results[]).",
     source: 'Upstream used for this response: "pathfinder" (GraphQL) or "apify" (scraper fallthrough).',
@@ -9035,6 +9044,72 @@ export function lintFieldDescPlatformBleed(): string[] {
   return errors;
 }
 
+function _collectExampleKeys(value: unknown, out: Set<string>): void {
+  if (!value || typeof value !== "object") return;
+  if (Array.isArray(value)) {
+    for (const item of value) _collectExampleKeys(item, out);
+    return;
+  }
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    out.add(k);
+    _collectExampleKeys(v, out);
+  }
+}
+
+/**
+ * Explicit absence claims in platformLimits. The field must be the subject or
+ * object of the claim — not merely mentioned on the same line (e.g. "fetchedAt
+ * is envelope-only — results[] do not carry scrapedAt" must not flag fetchedAt).
+ */
+function _limitsDocumentAbsence(ep: ApiEndpoint, field: string): boolean {
+  const escaped = field.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const patterns = [
+    // "playCount is not on search.results[]" / "playable is not returned"
+    new RegExp(`(?:^|[.!?\\s])\`?${escaped}\`?\\s+is\\s+not\\b`, "i"),
+    // Shape absence: "do not carry scrapedAt" / "does not return playCount"
+    // (not "does not expose …" — that often means unfilled/null, not missing key)
+    new RegExp(
+      `\\b(?:do not carry|does not (?:return|carry)|omits)\\s+\`?${escaped}\\b`,
+      "i",
+    ),
+    // "no per-row scrapedAt" / "There is no scrapedAt"
+    new RegExp(`\\bno(?:\\s+per-row)?\\s+\`?${escaped}\\b`, "i"),
+  ];
+  for (const line of ep.platformLimits ?? []) {
+    if (patterns.some((re) => re.test(line))) return true;
+  }
+  return false;
+}
+
+/**
+ * Fail when platformLimits document a field as absent but the generated
+ * example still contains it (stale snapshot — the SP2-docs failure mode).
+ *
+ * Pairs with `npm run gen:examples` from api_snapshots.json. Live capture
+ * stays a separate refresh step (credits); this guard makes that drift a
+ * build error instead of an audit finding.
+ */
+export function lintDocsExampleFieldCoverage(): string[] {
+  const errors: string[] = [];
+  for (const ep of ALL_ENDPOINTS) {
+    if (ep.platform === "account" || ep.platform === "utilities") continue;
+    if (!ep.platformLimits?.length) continue;
+    const example = API_EXAMPLES[ep.slug];
+    if (!example || Object.keys(example).length === 0) continue;
+    const keys = new Set<string>();
+    _collectExampleKeys(example, keys);
+
+    for (const field of keys) {
+      if (_limitsDocumentAbsence(ep, field)) {
+        errors.push(
+          `${ep.slug}: example still contains \`${field}\` but platformLimits say it is absent — regenerate api_snapshots.json / gen_examples.py`,
+        );
+      }
+    }
+  }
+  return errors;
+}
+
 /** Build the documented response structure from a real example payload. */
 function structureFromExample(data: Record<string, unknown>, slug?: string): ResponseGroup[] {
   const top: ResponseField[] = [];
@@ -9746,7 +9821,7 @@ const SLUG_USE_CASES: Record<string, UseCase[]> = {
     },
     {
       title: "Freshness-aware ingest",
-      desc: "Use fetchedAt / scrapedAt to know when results were pulled (no cursor beyond limit 50).",
+      desc: "Use envelope fetchedAt to know when results were pulled (no cursor beyond limit 50).",
     },
   ],
   "spotify-podcast": [

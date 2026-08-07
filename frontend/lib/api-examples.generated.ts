@@ -4764,38 +4764,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "platform": "spotify",
     "query": "lofi beats",
     "type": "tracks",
-    "fetchedAt": "2026-08-05T18:55:46.523Z",
+    "fetchedAt": "2026-08-07T10:56:53.985Z",
     "source": "pathfinder",
     "totalReturned": 5,
     "results": [
-      {
-        "platform": "spotify",
-        "type": "track",
-        "uri": "spotify:track:48Ltu18o0gZ5M6bpPujrnX",
-        "url": "https://open.spotify.com/track/48Ltu18o0gZ5M6bpPujrnX",
-        "name": "Call me",
-        "artists": [
-          {
-            "id": "6OOxsmeDk34xk6Ok3Ap95C",
-            "uri": "spotify:artist:6OOxsmeDk34xk6Ok3Ap95C",
-            "name": "90sFlav",
-            "url": "https://open.spotify.com/artist/6OOxsmeDk34xk6Ok3Ap95C"
-          }
-        ],
-        "album": {
-          "id": "16rpLyQoz4GQomc5KKivAJ",
-          "uri": "spotify:album:16rpLyQoz4GQomc5KKivAJ",
-          "name": "Collection",
-          "url": "https://open.spotify.com/album/16rpLyQoz4GQomc5KKivAJ"
-        },
-        "durationMs": 126250,
-        "durationFormatted": "2:06",
-        "image": "https://i.scdn.co/image/ab67616d0000b273a13ce5870cd54091da11d981",
-        "id": "48Ltu18o0gZ5M6bpPujrnX",
-        "contentRating": "NONE",
-        "explicit": false,
-        "scrapedAt": "2026-08-05T18:55:46.523Z"
-      },
       {
         "platform": "spotify",
         "type": "track",
@@ -4821,8 +4793,34 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "image": "https://i.scdn.co/image/ab67616d0000b2739322ff440b23b5717ddd8c9b",
         "id": "1xqpCUhTXEG3Zj7E6VEyj4",
         "contentRating": "EXPLICIT",
-        "explicit": true,
-        "scrapedAt": "2026-08-05T18:55:46.523Z"
+        "explicit": true
+      },
+      {
+        "platform": "spotify",
+        "type": "track",
+        "uri": "spotify:track:5SFVfPQNHzrsVjO2YmOl7u",
+        "url": "https://open.spotify.com/track/5SFVfPQNHzrsVjO2YmOl7u",
+        "name": "Lofi Beats",
+        "artists": [
+          {
+            "id": "0uXJZ5oJisbrkihiMUDiya",
+            "uri": "spotify:artist:0uXJZ5oJisbrkihiMUDiya",
+            "name": "Productivity Booster Music",
+            "url": "https://open.spotify.com/artist/0uXJZ5oJisbrkihiMUDiya"
+          }
+        ],
+        "album": {
+          "id": "7D6QtZp3B4UAjd9J8hzjS2",
+          "uri": "spotify:album:7D6QtZp3B4UAjd9J8hzjS2",
+          "name": "All-Day Flow: Lo-Fi Beats for Creative Work",
+          "url": "https://open.spotify.com/album/7D6QtZp3B4UAjd9J8hzjS2"
+        },
+        "durationMs": 158000,
+        "durationFormatted": "2:38",
+        "image": "https://i.scdn.co/image/ab67616d0000b27356f94cadfab4bf5902a8f30c",
+        "id": "5SFVfPQNHzrsVjO2YmOl7u",
+        "contentRating": "NONE",
+        "explicit": false
       }
     ]
   },

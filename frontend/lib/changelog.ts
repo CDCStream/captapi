@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
+    category: "fix",
+    title: "Spotify search docs: regenerate example; drop playable promise; field-coverage lint",
+    description:
+      "The /apis/spotify-search page still showed scrapedAt in the field table and code examples after the per-row stamp was removed from the API. Snapshot regenerated from a live Pathfinder call (no scrapedAt). Prose no longer promises playable — decorateContextTracks omits playability (use /spotify/track). npm run gen:examples + lint:docs-fields fail the build when platformLimits say a field is absent but the generated example still contains it.",
+    items: [
+      "Live-regenerated spotify-search example without scrapedAt",
+      "Docs: playable not on search (Pathfinder hydrate)",
+      "lint:docs-fields + gen:examples / check:docs scripts",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
     category: "improvement",
     title: "Spotify polish: keep contentRating enum, drop search scrapedAt, album track id",
     description:
