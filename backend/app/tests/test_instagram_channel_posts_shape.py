@@ -190,6 +190,69 @@ def test_channel_user_uses_is_private_not_private() -> None:
     assert user["url"] == "https://www.instagram.com/kerrodgraygolf/"
 
 
+def test_finalise_payload_emits_degraded_false() -> None:
+    from app.routers import instagram as ig
+
+    out = ig._finalise_channel_list_payload(
+        {"url": "https://www.instagram.com/nasa/", "posts": [], "totalReturned": 0},
+        degraded=False,
+    )
+    assert out["degraded"] is False
+    assert "degradedReason" not in out
+
+
+def test_finalise_payload_emits_degraded_reason() -> None:
+    from app.routers import instagram as ig
+
+    out = ig._finalise_channel_list_payload(
+        {"url": "https://www.instagram.com/nasa/", "posts": [], "totalReturned": 0},
+        degraded=True,
+        degraded_reason="apify-fallback",
+    )
+    assert out["degraded"] is True
+    assert out["degradedReason"] == "apify-fallback"
+
+
+def test_sidecar_without_children_media_count_is_null() -> None:
+    """Unexpanded Sidecar must not fabricate mediaCount: 1 (looks complete)."""
+    out = decodo.finalise_channel_post(
+        {
+            "id": "Side1",
+            "shortcode": "Side1",
+            "mediaId": "9",
+            "postType": "Sidecar",
+            "productType": "carousel_container",
+            "caption": "album",
+            "thumbnailUrl": "https://cdn.example/cover.jpg",
+            "children": [],
+            "engagement": {"likes": 1, "comments": 0, "views": None},
+        }
+    )
+    assert out["postType"] == "Sidecar"
+    assert out["children"] == []
+    assert out["mediaCount"] is None
+
+
+def test_apify_normalize_sidecar_without_slides_null_count() -> None:
+    from app.routers import instagram as ig
+
+    mapped = ig._normalize_post(
+        {
+            "type": "Sidecar",
+            "shortCode": "ApifySide",
+            "id": "99",
+            "caption": "x",
+            "displayUrl": "https://cdn.example/c.jpg",
+            "ownerUsername": "nasa",
+        }
+    )
+    final = decodo.finalise_channel_post(mapped)
+    assert final["postType"] == "Sidecar"
+    assert final["children"] == []
+    assert final["mediaCount"] is None
+    assert "description" not in final
+
+
 def test_map_feed_post_emits_carousel_children() -> None:
     mapped = native.map_feed_post(
         {

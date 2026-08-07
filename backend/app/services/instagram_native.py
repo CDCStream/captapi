@@ -1207,17 +1207,34 @@ def _carousel_child_from_media(child: dict[str, Any]) -> dict[str, Any] | None:
     return out
 
 
-def _carousel_children_from_feed(media: dict[str, Any]) -> tuple[list[dict[str, Any]], int]:
-    """Return (children, mediaCount). Non-carousels → ([], 1)."""
+def _carousel_children_from_feed(
+    media: dict[str, Any],
+) -> tuple[list[dict[str, Any]], int | None]:
+    """Return (children, mediaCount).
+
+    Non-carousels → ``([], 1)``. Sidecar with expanded ``carousel_media`` →
+    ``(children, len(children))``. Sidecar without slide data → ``([], None)``
+    — never fabricate ``mediaCount: 1`` (that reads as a complete single).
+    """
     raw = media.get("carousel_media")
+    media_type = safe_int(media.get("media_type"))
+    product = (safe_str(media.get("product_type")) or "").lower()
+    is_sidecar = media_type == 8 or product in {
+        "carousel_container",
+        "carousel",
+        "sidecar",
+        "album",
+    }
     if not isinstance(raw, list) or not raw:
-        return [], 1
+        return [], (None if is_sidecar else 1)
     children: list[dict[str, Any]] = []
     for item in raw:
         mapped = _carousel_child_from_media(item)
         if mapped:
             children.append(mapped)
-    return children, max(len(children), 1)
+    if not children:
+        return [], (None if is_sidecar else 1)
+    return children, len(children)
 
 
 def map_feed_post(

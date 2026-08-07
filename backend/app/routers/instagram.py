@@ -156,10 +156,60 @@ def _clean_hashtags(raw: Any) -> list[str]:
     return decodo.dedupe_preserve([tag for tag in cleaned if tag])
 
 
+def _apify_carousel_children(item: dict[str, Any]) -> list[dict[str, Any]]:
+    """Best-effort Sidecar slides from Apify listing shapes (often absent)."""
+    children: list[dict[str, Any]] = []
+    raw_posts = item.get("childPosts") or item.get("sidecarChildren") or item.get("children")
+    if isinstance(raw_posts, list):
+        for idx, child in enumerate(raw_posts):
+            if not isinstance(child, dict):
+                continue
+            is_vid = bool(
+                child.get("videoUrl")
+                or child.get("video_url")
+                or (safe_str(child.get("type")) or "").lower() in {"video", "reel", "clips"}
+            )
+            children.append(
+                {
+                    "id": safe_str(child.get("id") or child.get("pk")) or str(idx),
+                    "mediaType": "video" if is_vid else "image",
+                    "thumbnailUrl": safe_str(
+                        child.get("displayUrl")
+                        or child.get("thumbnailUrl")
+                        or child.get("thumbnail")
+                        or child.get("url")
+                    ),
+                    "videoUrl": (
+                        safe_str(child.get("videoUrl") or child.get("video_url") or child.get("downloadUrl"))
+                        if is_vid
+                        else None
+                    ),
+                }
+            )
+        if children:
+            return children
+    # Image-URL-only lists (no per-slide video) — still better than empty.
+    images = item.get("images")
+    if isinstance(images, list) and images:
+        for idx, img in enumerate(images):
+            url = safe_str(img if not isinstance(img, dict) else (img.get("url") or img.get("displayUrl")))
+            if not url:
+                continue
+            children.append(
+                {
+                    "id": str(idx),
+                    "mediaType": "image",
+                    "thumbnailUrl": url,
+                    "videoUrl": None,
+                }
+            )
+    return children
+
+
 def _normalize_post(item: dict) -> dict:
     owner = item.get("owner") or {}
     author = item.get("ownerUsername") or owner.get("username")
-    post_type = safe_str(item.get("type"))
+    raw_type = (safe_str(item.get("type")) or "").lower()
     duration = safe_float(item.get("videoDuration") or item.get("duration") or item.get("durationSeconds"))
     caption = safe_str(item.get("caption") or item.get("text") or item.get("description")) or ""
     shortcode = safe_str(item.get("shortCode") or item.get("shortcode"))
@@ -176,12 +226,28 @@ def _normalize_post(item: dict) -> dict:
     ig_play_count = safe_int(item.get("igPlayCount") or item.get("ig_play_count"))
     fb_play_count = safe_int(item.get("fbPlayCount") or item.get("fb_play_count"))
     likes = decodo.hidden_count(item.get("likesCount") or item.get("likeCount"))
-    is_video = (post_type or "").lower() in {"video", "reel", "clips"} or bool(
-        item.get("videoUrl") or item.get("video_url") or item.get("isVideo")
+    is_sidecar = raw_type in {"sidecar", "carousel", "album", "graphsidecar"}
+    is_video = (not is_sidecar) and (
+        raw_type in {"video", "reel", "clips"}
+        or bool(item.get("videoUrl") or item.get("video_url") or item.get("isVideo"))
     )
-    product = safe_str(item.get("productType") or item.get("product_type")) or (
-        "clips" if is_video else None
-    )
+    if is_sidecar:
+        post_type = "Sidecar"
+        product = safe_str(item.get("productType") or item.get("product_type")) or "carousel_container"
+    elif is_video:
+        post_type = "Video"
+        product = safe_str(item.get("productType") or item.get("product_type")) or "clips"
+    else:
+        post_type = "Image" if raw_type in {"image", "photo", "graphimage", ""} else (safe_str(item.get("type")) or "Image")
+        product = safe_str(item.get("productType") or item.get("product_type")) or "feed"
+    children = _apify_carousel_children(item) if is_sidecar else []
+    # Sidecar without expansion → mediaCount null (never fabricate 1).
+    if children:
+        media_count: int | None = len(children)
+    elif is_sidecar:
+        media_count = None
+    else:
+        media_count = 1
     mentions_raw = item.get("mentions")
     if not isinstance(mentions_raw, list):
         mentions_raw = decodo._MENTION_RE.findall(caption)
@@ -198,9 +264,6 @@ def _normalize_post(item: dict) -> dict:
             "title": safe_str(music_raw.get("song_name") or music_raw.get("title") or music_raw.get("trackName")),
             "artist": safe_str(music_raw.get("artist_name") or music_raw.get("artist") or music_raw.get("artistName")),
         }
-    location = decodo.map_ig_location(
-        item.get("location") if isinstance(item.get("location"), dict) else None
-    )
     out: dict[str, Any] = {
         "platform": "instagram",
         "url": safe_str(item.get("url") or item.get("permalink") or item.get("shortcodeUrl")),
@@ -212,14 +275,19 @@ def _normalize_post(item: dict) -> dict:
         "postType": post_type,
         "productType": product,
         "caption": caption,
-        "description": caption,
         "publishedAt": safe_str(item.get("timestamp") or item.get("takenAt") or item.get("taken_at")),
         # Apify reports durations as float32 noise (17.95800018310547); round
         # to millisecond precision like the native mappers.
         "durationSeconds": round(duration, 3) if duration is not None else None,
         "thumbnailUrl": safe_str(item.get("displayUrl") or item.get("thumbnailUrl") or item.get("thumbnail")),
-        "videoUrl": safe_str(item.get("videoUrl") or item.get("video_url") or item.get("downloadUrl")),
+        "videoUrl": (
+            None
+            if is_sidecar
+            else safe_str(item.get("videoUrl") or item.get("video_url") or item.get("downloadUrl"))
+        ),
         "hasAudio": item.get("hasAudio") if item.get("hasAudio") is not None else item.get("has_audio"),
+        "mediaCount": media_count,
+        "children": children,
         "author": {
             "id": safe_str(owner.get("id") or item.get("ownerId")),
             "username": safe_str(author),
@@ -257,7 +325,6 @@ def _normalize_post(item: dict) -> dict:
         "isAd": bool(item.get("isAd") or item.get("is_ad") or item.get("ad_id")),
         "isAffiliate": bool(item.get("isAffiliate") or item.get("is_affiliate") or item.get("affiliate_info")),
         "accessibilityCaption": safe_str(item.get("accessibilityCaption") or item.get("accessibility_caption")),
-        "location": location,
         "music": music,
         "musicId": (music or {}).get("id") if music else safe_str(item.get("musicId")),
     }
@@ -1599,6 +1666,8 @@ def _finalise_channel_list_payload(
     *,
     items_key: str = "posts",
     reels: bool = False,
+    degraded: bool | None = None,
+    degraded_reason: str | None = None,
 ) -> dict[str, Any]:
     """Unify GraphQL + feed (+ Apify) list rows before they leave the API."""
     items = data.get(items_key)
@@ -1611,6 +1680,19 @@ def _finalise_channel_list_payload(
         data["totalReturned"] = len(data[items_key])
     if isinstance(data.get("user"), dict):
         data["user"] = decodo.finalise_channel_user(data["user"])
+    # Explicit boolean so typed clients / schema gens see one shape.
+    if degraded is not None:
+        data["degraded"] = bool(degraded)
+    elif "degraded" not in data:
+        data["degraded"] = False
+    else:
+        data["degraded"] = bool(data.get("degraded"))
+    if data["degraded"]:
+        reason = degraded_reason or safe_str(data.get("degradedReason"))
+        if reason:
+            data["degradedReason"] = reason
+    else:
+        data.pop("degradedReason", None)
     return data
 
 
@@ -1654,7 +1736,8 @@ async def instagram_channel_posts(
                         "posts": posts,
                         "nextCursor": next_cursor,
                         "hasMore": next_cursor is not None,
-                    }
+                    },
+                    degraded=False,
                 )
 
             async def _apify() -> dict[str, Any]:
@@ -1695,9 +1778,12 @@ async def instagram_channel_posts(
                         "totalReturned": len(posts),
                         "posts": posts,
                         "nextCursor": None,
-                        "hasMore": None,
-                        "degraded": True,
-                    }
+                        "hasMore": False,
+                    },
+                    # Apify listing is the soft-fail path when Decodo/native
+                    # miss — often what keeps a response under the edge timeout.
+                    degraded=True,
+                    degraded_reason="apify-fallback",
                 )
 
             async def _decodo_run() -> dict[str, Any] | None:
@@ -1722,14 +1808,14 @@ async def instagram_channel_posts(
                     out["user"] = channel_user
                 if user_id:
                     out["userId"] = user_id
-                return _finalise_channel_list_payload(out)
+                return _finalise_channel_list_payload(out, degraded=False)
 
             return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            # v20: carousel children[] + mediaCount; drop description/location twin/dead.
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 20},
+            # v21: Sidecar mediaCount null when unexpanded; explicit degraded.
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 21},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

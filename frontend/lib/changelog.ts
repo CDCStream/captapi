@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Instagram channel-posts: honest Sidecar mediaCount + explicit degraded",
+    description:
+      "The Apify soft-fail path stamped Sidecar rows as mediaCount:1 with empty children — a fabricated complete single. Unexpanded carousels now return mediaCount:null (mediaCount === children.length only when expansion ran). Envelope always includes degraded (false on healthy; true + degradedReason on apify-fallback). accessibilityCaption kept — populated on mixed carousels like @instagram/DbbY9pdm6Q2.",
+    items: [
+      "Sidecar mediaCount null when children not expanded",
+      "degraded: false | true + degradedReason",
+      "Docs: soft-fail vs edge timeout",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Instagram channel-posts: carousel children[] + canonical profile URLs",
     description:
       "Sidecar posts only shipped a cover thumbnail with no slide list — a quarter of a typical feed was silently incomplete. posts[] now include mediaCount and children[{id, mediaType, thumbnailUrl, videoUrl}] ([] on singles). Dropped the caption===description twin and location (never present on measured logged-out feeds). accessibilityCaption stays (populated on some accounts). All profile URLs go through canonical_instagram_profile_url (www + trailing slash) so user.url and author.url match.",

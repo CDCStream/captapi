@@ -706,9 +706,19 @@ def finalise_channel_post(post: dict[str, Any] | None) -> dict[str, Any]:
         if not isinstance(child, dict):
             continue
         children.append(_finalise_keys(IG_CAROUSEL_CHILD_KEYS, child))
-    media_count = safe_int(src.get("mediaCount"))
-    if media_count is None or media_count < 1:
-        media_count = len(children) if children else 1
+    is_sidecar = (
+        src.get("postType") == "Sidecar"
+        or (safe_str(src.get("productType")) or "").lower()
+        in {"carousel_container", "carousel", "sidecar", "album"}
+    )
+    # mediaCount === children.length only when expansion ran. Sidecar without
+    # slides → null (honest unknown), never fabricated 1.
+    if children:
+        media_count: int | None = len(children)
+    elif is_sidecar:
+        media_count = None
+    else:
+        media_count = 1
     src["children"] = children
     src["mediaCount"] = media_count
 
@@ -1025,8 +1035,12 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
     return strip_null_post_fields(result)
 
 
-def _carousel_children_from_graphql(node: dict[str, Any]) -> tuple[list[dict[str, Any]], int]:
-    """GraphQL ``edge_sidecar_to_children`` → (children, mediaCount)."""
+def _carousel_children_from_graphql(
+    node: dict[str, Any],
+) -> tuple[list[dict[str, Any]], int | None]:
+    """GraphQL ``edge_sidecar_to_children`` → (children, mediaCount | None)."""
+    typename = safe_str(node.get("__typename"))
+    is_sidecar = typename == "GraphSidecar"
     edge = node.get("edge_sidecar_to_children")
     edges = edge.get("edges") if isinstance(edge, dict) else None
     if not isinstance(edges, list) or not edges:
@@ -1041,8 +1055,9 @@ def _carousel_children_from_graphql(node: dict[str, Any]) -> tuple[list[dict[str
                 child = _graphql_child_node(media)
                 if child:
                     children.append(child)
-            return children, max(len(children), 1)
-        return [], 1
+            if children:
+                return children, len(children)
+        return [], (None if is_sidecar else 1)
     children = []
     for edge_item in edges:
         if not isinstance(edge_item, dict):
@@ -1051,7 +1066,9 @@ def _carousel_children_from_graphql(node: dict[str, Any]) -> tuple[list[dict[str
         child = _graphql_child_node(child_node)
         if child:
             children.append(child)
-    return children, max(len(children), 1)
+    if not children:
+        return [], (None if is_sidecar else 1)
+    return children, len(children)
 
 
 def _graphql_child_node(node: dict[str, Any] | None) -> dict[str, Any] | None:
