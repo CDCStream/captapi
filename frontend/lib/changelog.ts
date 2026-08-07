@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
+    category: "fix",
+    title: "Uniform object-array rows in every API response + Komi links[] finaliser",
+    description:
+      "Successful JSON responses now pad every object array in data to the union of keys present (absent → null) in the billing/response middleware — the same bug that hit rumble/search, rumble/streams, ad-library/tiktok/search, Instagram channel-posts/details, and komi/page links[] no longer needs a per-endpoint patch. Komi links[] also declare an explicit fixed key set (id/moduleId/versionId/order/type/title/url/visible/thumbnail/price/currency) and read YouTube embed titles/thumbnails from item.metadata when the module label is empty.",
+    items: [
+      "Response-layer normalise_object_arrays on success envelopes",
+      "Komi links[] fixed key set + metadata.title / thumbnail_url",
+      "price/currency null on non-product rows (type still distinguishes)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
     category: "improvement",
     title: "One canonical name per profile concept — drop identical-value aliases",
     description:

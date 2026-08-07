@@ -2766,7 +2766,7 @@ const KOMI: Spec[] = [
     tagline:
       "Komi link-in-bio → identity, socials{} (incl. website), content LINK/PRODUCT rows with price/currency. Flat 1 credit.",
     longDescription:
-      "Paste a Komi URL (komi.io/user or user.komi.io) and get the public page as clean JSON. Identity: id (string UUID), handle/username, url, displayName (name is a deprecated alias), firstName/lastName, bio (description is a deprecated alias — may be an empty string), avatar. socials{} maps typed Komi social icons (instagram/tiktok/youtube/twitter/facebook/snapchat/spotify/appleMusic/…) and includes website when the creator publishes a WEBSITE row. links[] are content modules only — flattened LINK/PRODUCT (and similar) rows with id, url, title, type, order, visible, thumbnail, moduleId, versionId, plus price/currency on products. Social icon rows are not duplicated into links[]. Komi does not expose follower counts or a verified badge. Flat 1 credit via Komi's public JSON APIs (not HTML scrape). Pass cache=true or cacheMaxAge (1d/3d/7d/14d/30d) for the shared response cache.",
+      "Paste a Komi URL (komi.io/user or user.komi.io) and get the public page as clean JSON. Identity: id (string UUID), username, url, displayName, firstName/lastName, bio (may be an empty string), avatar. socials{} maps typed Komi social icons (instagram/tiktok/youtube/twitter/facebook/snapchat/spotify/appleMusic/…) and includes website when the creator publishes a WEBSITE row. links[] are content modules only — every row shares the same keys (id, moduleId, versionId, order, type, title, url, visible, thumbnail, price, currency); absent values are null, never missing keys. type distinguishes PRODUCT (price/currency filled) from LINK/YOUTUBE_VIDEO. YouTube embed rows read title/thumbnail from item.metadata when the module label is empty. Social icon rows are not duplicated into links[]. Komi does not expose follower counts or a verified badge. Flat 1 credit via Komi's public JSON APIs (not HTML scrape). Pass cache=true or cacheMaxAge (1d/3d/7d/14d/30d) for the shared response cache.",
     delivers: [
       "Page id + displayName + bio (empty string when unset)",
       "socials{} incl. website when published",
@@ -7652,15 +7652,13 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "komi-page": {
     id: "Komi talentProfile id as a string UUID (catalog-wide id convention).",
-    displayName: "Creator display name from Komi. Canonical; name is a deprecated alias.",
-    name: "Deprecated alias of displayName — prefer displayName.",
-    handle: "Komi username. Canonical alongside username.",
-    bio: "Creator bio. Always present — empty string when Komi has none. description is a deprecated alias.",
-    description: "Deprecated alias of bio — prefer bio.",
+    displayName: "Creator display name from Komi.",
+    username: "Komi account username (bare, no @).",
+    bio: "Creator bio. Always present — empty string when Komi has none.",
     linkCount: "Number of content rows in links[] (hidden PRODUCT rows included when Komi marks visible:false).",
     links:
-      "Content modules only [{id, url, title, type, order, visible, thumbnail, moduleId, versionId, price?, currency?}]. Social icons live in socials{}, not here. PRODUCT rows include price/currency when Komi exposes them.",
-    type: "On links[]: Komi module type (LINK, PRODUCT, TIKTOK_VIDEO, …).",
+      "Content modules only — every row has the same keys: id, moduleId, versionId, order, type, title, url, visible, thumbnail, price, currency (absent → null). Social icons live in socials{}, not here. type distinguishes PRODUCT (price/currency filled) from LINK/YOUTUBE_VIDEO; null price means non-product, not a scrape miss. YouTube embeds fill title/thumbnail from item.metadata when needed.",
+    type: "On links[]: Komi module type (LINK, PRODUCT, YOUTUBE_VIDEO, …).",
     socials:
       "CamelCase social URL map from Komi's socialProfileLinks — instagram/tiktok/youtube/twitter/facebook/snapchat/spotify/appleMusic/… plus website when a WEBSITE row (or website field) is published.",
     other:

@@ -498,11 +498,33 @@ def _komi_socials(
     return _partition_socials(candidates)
 
 
+# Fixed key set for every komi links[] row (absent → null, never missing).
+KOMI_LINK_KEYS: tuple[str, ...] = (
+    "id",
+    "moduleId",
+    "versionId",
+    "order",
+    "type",
+    "title",
+    "url",
+    "visible",
+    "thumbnail",
+    "price",
+    "currency",
+)
+
+
+def _finalise_komi_link(row: dict[str, Any] | None) -> dict[str, Any]:
+    src = row if isinstance(row, dict) else {}
+    return {k: src.get(k, None) for k in KOMI_LINK_KEYS}
+
+
 def _komi_flatten_module_links(modules: list[Any]) -> list[dict[str, Any]]:
     """Flatten talent-profiles modules into SC-shaped LINK/PRODUCT rows.
 
     Komi nests content under GROUP → LINK|PRODUCT modules → items[{url,title,…}].
     Social icon rows live on socialProfileLinks and are NOT duplicated here.
+    Every row is finalised to ``KOMI_LINK_KEYS`` (null fillers).
     """
     out: list[dict[str, Any]] = []
 
@@ -520,32 +542,34 @@ def _komi_flatten_module_links(modules: list[Any]) -> list[dict[str, Any]]:
                 url = safe_str(item.get("url") or item.get("link"))
                 if not url:
                     continue
-                title = safe_str(item.get("title") or item.get("name") or mod.get("name"))
+                meta = item.get("metadata") if isinstance(item.get("metadata"), dict) else {}
+                # Prefer item label, then YouTube/embed metadata.title, then module name.
+                title = safe_str(
+                    item.get("title")
+                    or item.get("name")
+                    or meta.get("title")
+                    or mod.get("name")
+                )
+                thumb = safe_str(
+                    item.get("thumbnail")
+                    or item.get("image")
+                    or meta.get("thumbnail_url")
+                    or meta.get("thumbnailUrl")
+                )
                 row: dict[str, Any] = {
                     "id": safe_str(item.get("id")),
                     "url": url,
                     "title": title,
                     "type": mod_type,
+                    "order": item["order"] if isinstance(item.get("order"), int) else None,
+                    "visible": item["visible"] if isinstance(item.get("visible"), bool) else None,
+                    "thumbnail": thumb,
+                    "moduleId": safe_str(item.get("moduleId") or mod.get("id")),
+                    "versionId": safe_str(item.get("versionId")),
+                    "price": item.get("price") if item.get("price") is not None else None,
+                    "currency": safe_str(item.get("currency")),
                 }
-                if isinstance(item.get("order"), int):
-                    row["order"] = item["order"]
-                if isinstance(item.get("visible"), bool):
-                    row["visible"] = item["visible"]
-                thumb = safe_str(item.get("thumbnail") or item.get("image"))
-                if thumb:
-                    row["thumbnail"] = thumb
-                module_id = safe_str(item.get("moduleId") or mod.get("id"))
-                if module_id:
-                    row["moduleId"] = module_id
-                version_id = safe_str(item.get("versionId"))
-                if version_id:
-                    row["versionId"] = version_id
-                if item.get("price") is not None:
-                    row["price"] = item.get("price")
-                currency = safe_str(item.get("currency"))
-                if currency:
-                    row["currency"] = currency
-                out.append(row)
+                out.append(_finalise_komi_link(row))
             return
         # Nested modules (GROUP children, etc.).
         for child in items:

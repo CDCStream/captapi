@@ -131,6 +131,13 @@ class BillingHeaderMiddleware:
                         cache_hit = bool(meta.get("cache_hit"))
                         fetched_at = meta.get("fetched_at")
                         data = payload.get("data")
+                        # Pad every object-array to a uniform key set (absent → null)
+                        # before clients see the body. Safe default — only adds nulls.
+                        if data is not None:
+                            from app.utils.array_normalise import normalise_object_arrays
+
+                            data = normalise_object_arrays(data)
+                            payload["data"] = data
                         if fetched_at is None and isinstance(data, dict):
                             fetched_at = data.get("fetchedAt")
                         payload["cached"] = cache_hit
