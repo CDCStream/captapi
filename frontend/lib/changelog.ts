@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Kwai post/user-posts: stop inventing captions from SEO titles",
+    description:
+      "text was falling back to VideoObject.name when description was empty — Kwai's SEO boilerplate (\"Display (handle). Áudio original criado por …\"). Shared _normalize_post now maps caption only: \"\" when none/placeholder, never name/title/meta. Both /kwai/post and /kwai/user-posts use the same mapper.",
+    items: [
+      "text: \"\" when caption empty",
+      "No SEO name / audio-title fallback",
+      "Shared mapper for post + user-posts",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Instagram channel-posts: stale-serve on Apify timeout + 105s budget",
     description:
       "The 90s Apify deadline turned working natgeo fallbacks (94–123s) into empty apify-timeout pages. Budget raised to ~105s (20s under the 125s edge). On timeout, serve the last cached payload with degradedReason=apify-timeout-served-stale and cachedAt (0 credits) instead of posts:[]. Apify path now uses start_run+wait so logs expose queue_ms vs scrape_ms. accessibilityCaption backfilled from feed overlay when GraphQL omits it.",

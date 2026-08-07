@@ -2747,9 +2747,9 @@ const KWAI: Spec[] = [
     credits: 20,
     creditsPerResult: 1,
     tagline:
-      "Kwai profile posts — caption, engagement, mp4 + transcript when Kwai exposes it (~1 credit/post).",
+      "Kwai profile posts — caption (\"\" when none), engagement, mp4 + transcript (~1 credit/post).",
     longDescription:
-      "Pass a Kwai profile URL or @handle and get that creator's public posts as clean JSON. Each post: id/url, text (real captions only — Kwai's placeholder \"...\" descriptions are omitted), publishedAt, durationSeconds, thumbnailUrl, videoUrl with videoType (\"mp4\" or \"hls\"), mediaUrlsExpireAt parsed from the signed CDN tag=, engagement{views,likes,comments,shares}, and transcript when Kwai's JSON-LD auto-captions are present (duplicate merged tracks are deduped). Author{id,username,displayName,avatar,url} is returned once at the top — not repeated on every row. Opaque nextCursor pages within the posts Kwai exposes on one profile fetch (the public web surface does not offer a deep archive API). ~1 credit per post returned (min 2; default limit 20 → ~20 credits). Transcript is included when Kwai publishes it — not a separate Whisper bill.",
+      "Pass a Kwai profile URL or @handle and get that creator's public posts as clean JSON. Each post: id/url, text (the post caption only — empty string when none; never Kwai's SEO title / \"Áudio original criado por …\" boilerplate), publishedAt, durationSeconds, thumbnailUrl, videoUrl with videoType (\"mp4\" or \"hls\"), mediaUrlsExpireAt parsed from the signed CDN tag=, engagement{views,likes,comments,shares}, and transcript when Kwai's JSON-LD auto-captions are present (duplicate merged tracks are deduped). Author{id,username,displayName,avatar,url} is returned once at the top — not repeated on every row. Opaque nextCursor pages within the posts Kwai exposes on one profile fetch (the public web surface does not offer a deep archive API). ~1 credit per post returned (min 2; default limit 20 → ~20 credits). Transcript is included when Kwai publishes it — not a separate Whisper bill. Shares _normalize_post with /kwai/post.",
     delivers: [
       "Posts with engagement + signed mp4 videoUrl",
       "videoType + mediaUrlsExpireAt from CDN tag=",
@@ -2766,14 +2766,17 @@ const KWAI: Spec[] = [
     path: "/v1/kwai/post",
     credits: 2,
     tagline:
-      "Single Kwai video — caption, author, engagement, mp4, transcript + hashtags (2 credits).",
+      "Single Kwai video — caption (\"\" when none), author, engagement, mp4, transcript (2 credits).",
     longDescription:
-      "Pass a Kwai video URL and get one post as clean JSON: same core card as a user-posts row (text when published, author{}, engagement, videoUrl/videoType, mediaUrlsExpireAt, transcript when Kwai exposes auto-captions) plus hashtags[] parsed from the caption. Placeholder \"...\" captions are omitted. Flat 2 credits — priced in line with one list item, not the old 17-credit Apify-era rate.",
+      "Pass a Kwai video URL and get one post as clean JSON: same core card as a user-posts row (text = caption only, empty string when the post has none — never SEO title boilerplate; author{}, engagement, videoUrl/videoType, mediaUrlsExpireAt, transcript when Kwai exposes auto-captions) plus hashtags[] parsed from the caption. Flat 2 credits — priced in line with one list item, not the old 17-credit Apify-era rate. Shares _normalize_post with /kwai/user-posts.",
     delivers: [
-      "Caption + hashtags[] when published",
+      "text = caption only (\"\" when none)",
       "author{} + engagement{}",
       "videoUrl / videoType / mediaUrlsExpireAt",
       "transcript when Kwai exposes auto-captions",
+    ],
+    platformLimits: [
+      "text is never synthesised from meta description, og:description, author name, or audio title — empty caption → \"\".",
     ],
   },
 ];

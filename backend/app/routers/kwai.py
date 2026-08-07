@@ -31,7 +31,12 @@ router = APIRouter()
 
 _PROFILE_EXAMPLE = "https://www.kwai.com/@topfilmeseseriesnatv"
 _HANDLE_RE = re.compile(r"[A-Za-z0-9._-]{2,}")
-_PLACEHOLDER_CAPTION = frozenset({".", "..", "...", "…", "....", "……"})
+_PLACEHOLDER_CAPTION = frozenset({".", "..", "...", "…", "....", "……", ""})
+# Kwai SEO ``name`` / Apify title when the real caption is empty — not a caption.
+_SEO_TITLE_BOILERPLATE_RE = re.compile(
+    r"(?i)(?:áudio|audio)\s+original\s+(?:criado|created)\s+(?:por|by)\b"
+    r"|\bÁudio original criado por\b"
+)
 # Kwai headshot size suffixes on overseaHead / similar CDN paths.
 _AVATAR_VARIANT_RE = re.compile(
     r"_(?:t|tw|l|m|s)\.(?:jpe?g|webp|png)(\?|$)",
@@ -106,16 +111,37 @@ def _normalize_avatar(url: str | None) -> str | None:
     return raw
 
 
-def _clean_caption(caption: Any, *, title: Any = None) -> str | None:
-    """Drop Kwai placeholder descriptions (``.`` / ``...``). Never invent text."""
-    for candidate in (caption, title):
-        text = safe_str(candidate)
-        if not text:
-            continue
-        if text.strip() in _PLACEHOLDER_CAPTION:
-            continue
-        return text
-    return None
+def _is_seo_boilerplate(text: str) -> bool:
+    """True for Kwai-generated titles that are not user captions."""
+    raw = text.strip()
+    if not raw:
+        return False
+    if _SEO_TITLE_BOILERPLATE_RE.search(raw):
+        return True
+    # "DisplayName (handle). …" / "DisplayName (@handle). …"
+    if re.match(
+        r"^[^()]{1,80}\s+\(@?[A-Za-z0-9._-]{2,}\)\.\s*",
+        raw,
+    ):
+        return True
+    return False
+
+
+def _clean_caption(caption: Any) -> str:
+    """Post caption only — never title / meta / author boilerplate.
+
+    ``\"\"`` means we read an empty/placeholder caption. Callers must not
+    treat a missing key as \"no caption\" — empty string is the honest empty.
+    """
+    text = safe_str(caption)
+    if text is None:
+        return ""
+    stripped = text.strip()
+    if stripped in _PLACEHOLDER_CAPTION:
+        return ""
+    if _is_seo_boilerplate(stripped):
+        return ""
+    return text
 
 
 def _dedupe_transcript(text: str | None) -> str | None:
@@ -263,7 +289,8 @@ def _normalize_post(
     duration = item.get("duration")
     video_url = safe_str(item.get("playUrl"))
     thumb = safe_str(item.get("thumb"))
-    text = _clean_caption(item.get("caption"), title=item.get("name") or item.get("title"))
+    # Shared by /post and /user-posts — caption only, never name/title fallback.
+    text = _clean_caption(item.get("caption"))
     transcript = _dedupe_transcript(safe_str(item.get("transcript")))
     expires = cdn_expires_at(video_url) or cdn_expires_at(thumb)
     out: dict[str, Any] = {
@@ -290,7 +317,6 @@ def _normalize_post(
         if card:
             out["author"] = card
     for key in (
-        "text",
         "transcript",
         "durationSeconds",
         "thumbnailUrl",
@@ -345,8 +371,8 @@ async def profile(
     "/user-posts",
     summary="Kwai user posts",
     description=(
-        "Public posts for a Kwai profile as clean JSON. Each post includes caption when "
-        "Kwai publishes one (placeholder \"...\" descriptions are omitted), engagement, "
+        "Public posts for a Kwai profile as clean JSON. text is the post caption only "
+        "(empty string when none — never SEO title / meta boilerplate), engagement, "
         "mp4 videoUrl + videoType, mediaUrlsExpireAt from the signed CDN tag, and "
         "transcript when Kwai's JSON-LD exposes auto-captions (deduped). Author{} is "
         "hoisted once at the top. Opaque cursor pages within the posts returned from "
@@ -416,7 +442,8 @@ async def user_posts(
 
         data = await cached_or_run(
             "kwai.user-posts",
-            {"url": profile_url, "limit": limit, "cursor": cursor or "", "v": 8},
+            # v9: text = caption only ("" when empty; never SEO name fallback).
+            {"url": profile_url, "limit": limit, "cursor": cursor or "", "v": 9},
             _run,
             ctx,
             use_cache=cache,
@@ -429,11 +456,12 @@ async def user_posts(
     "/post",
     summary="Kwai post",
     description=(
-        "Single Kwai video as clean JSON: caption when published (placeholder "
-        "\"...\" omitted), author{}, engagement, videoUrl/videoType=mp4, "
-        "mediaUrlsExpireAt from the signed CDN tag, hashtags[] from the caption, "
-        "and transcript when Kwai JSON-LD exposes auto-captions (deduped). Same "
-        "core card as user-posts rows, plus hashtags. Flat 2 credits."
+        "Single Kwai video as clean JSON: text is the post caption only "
+        "(\"\" when none — never SEO title / author boilerplate), author{}, "
+        "engagement, videoUrl/videoType=mp4, mediaUrlsExpireAt from the signed "
+        "CDN tag, hashtags[] from the caption, and transcript when Kwai JSON-LD "
+        "exposes auto-captions (deduped). Same core card as user-posts rows, "
+        "plus hashtags. Flat 2 credits."
     ),
 )
 async def post(
@@ -468,5 +496,6 @@ async def post(
                 out["hashtags"] = tags
             return out
 
-        data = await cached_or_run("kwai.post", {"url": video_url, "v": 8}, _run, ctx, use_cache=cache)
+        # v9: text = caption only ("" when empty; never SEO name fallback).
+        data = await cached_or_run("kwai.post", {"url": video_url, "v": 9}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

@@ -485,11 +485,12 @@ def _post_from_video_ld(video: dict[str, Any], *, profile_url: str | None = None
         person = {}
     author = _author_meta_from_person(person, fallback_url=profile_url)
     stats = video.get("interactionStatistic")
+    # Caption = VideoObject.description only. Never fall back to ``name`` —
+    # Kwai stuffs SEO boilerplate there ("Display (handle). Áudio original…")
+    # when the post has no real caption.
     caption = safe_str(video.get("description"))
-    # Kwai often publishes description as "..." — leave empty so the router omits
-    # text rather than shipping a placeholder or stuffing transcript into caption.
-    if caption and caption.strip() in {".", "..", "...", "…", "...."}:
-        caption = None
+    if caption is not None and caption.strip() in {".", "..", "...", "…", "....", ""}:
+        caption = ""
     title = safe_str(video.get("name"))
     if title and title.strip() in {".", "..", "...", "…", "...."}:
         title = None
@@ -497,7 +498,8 @@ def _post_from_video_ld(video: dict[str, Any], *, profile_url: str | None = None
     return {
         "id": _video_id(url),
         "url": url,
-        "caption": caption or title,
+        # "" when Kwai published an empty/placeholder description; never title.
+        "caption": caption if caption is not None else "",
         "name": title,
         "transcript": transcript,
         "createTime": safe_str(video.get("uploadDate")),
