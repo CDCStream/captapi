@@ -2350,7 +2350,10 @@ const SPOTIFY: Spec[] = [
     tagline:
       "Spotify track — playCount, joinable artists[]/album{}, explicit, releaseDate (1 credit).",
     longDescription:
-      "Pass a Spotify track URL, URI, or ID and get clean JSON: id, name (song title), playCount (stream count from Spotify's web GraphQL — same metric as artist topTracks[].playCount), trackNumber, contentRating/explicit, durationMs, artists[{id,uri,name,url}] (chain into /spotify/artist), album{id,uri,name,url,releaseDate} (chain into /spotify/album), releaseDate, and previewUrl / isrc / popularity when this Pathfinder surface exposes them. Flat 1 credit (same as artist — not 2). Pass raw=true only for the full GraphQL payload (omitted by default). Note: Spotify's official 0–100 popularity and ISRC are often absent on getTrack; playCount is the listen metric here.",
+      "Pass a Spotify track URL, URI, or ID and get clean JSON: id, name (song title), playCount (stream count from Spotify's web GraphQL — same metric as artist topTracks[].playCount), trackNumber, contentRating + explicit, durationMs, artists[{id,uri,name,url}] (chain into /spotify/artist), album{id,uri,name,url,releaseDate} (chain into /spotify/album), releaseDate, and previewUrl / isrc / popularity when this Pathfinder surface exposes them. Flat 1 credit (same as artist — not 2). Pass raw=true only for the full GraphQL payload (omitted by default). Note: Spotify's official 0–100 popularity and ISRC are often absent on getTrack; playCount is the listen metric here.",
+    platformLimits: [
+      "contentRating is Spotify's Pathfinder label enum (tracks: NONE | EXPLICIT | NINETEEN_PLUS | UNKNOWN) — not a 2-valued alias of explicit. explicit is true only when the label is EXPLICIT.",
+    ],
   },
   {
     slug: "spotify-album",
@@ -2363,7 +2366,7 @@ const SPOTIFY: Spec[] = [
     tagline:
       "Spotify album — tracks[] with playCount, joinable artists[], releaseDate, explicit (1 credit).",
     longDescription:
-      "Pass a Spotify album URL, URI, or ID and get clean JSON: name, artists[{id,uri,name,url}] (chain into /spotify/artist), tracks[{trackNumber,discNumber,name,uri,url,durationMs,playCount,explicit,artists}] from tracksV2 (per-track stream counts), totalTracks, releaseDate (full ISO — not year-only), releaseYear, album-level explicit (derived from track contentRating), and cover image. Flat 1 credit (same as artist/track — not 2). Pass raw=true only if you need the full GraphQL payload (omitted by default).",
+      "Pass a Spotify album URL, URI, or ID and get clean JSON: name, artists[{id,uri,name,url}] (chain into /spotify/artist), tracks[{id,trackNumber,discNumber,name,uri,url,durationMs,playCount,explicit,artists}] from tracksV2 (per-track stream counts; id matches the uri suffix for joins into /spotify/track), totalTracks, releaseDate (full ISO — not year-only), releaseYear, album-level explicit (true if any track label is EXPLICIT), and cover image. Flat 1 credit (same as artist/track — not 2). Pass raw=true only if you need the full GraphQL payload (omitted by default).",
   },
   {
     slug: "spotify-search",
@@ -2376,7 +2379,11 @@ const SPOTIFY: Spec[] = [
     tagline:
       "Search Spotify — canonical spotify: URIs, explicit/playable, fetchedAt (flat 2 credits).",
     longDescription:
-      "Pass q plus optional type=tracks|albums|artists|podcasts|episodes (default tracks) and limit (max 50, no cursor). Primary path is web-player Pathfinder GraphQL (same family as /spotify/artist|track|album); Apify scraper is fallthrough only — do not assume one raw schema across both (GraphQL __typename vs flat albumName/isExplicit/scrapedAt). Envelope: query, type, fetchedAt, source (pathfinder|apify), results[]. Each result ships a canonical Spotify URI (spotify:track:… not a bare id), url, name, artists (structured on Pathfinder track/album hits), durationMs/durationFormatted, explicit, playable, image, and scrapedAt. Flat 2 credits on native Pathfinder; Apify fallthrough scales per result. Pass raw=true for per-result upstream payloads (omitted by default; searchTerm is not repeated inside raw).",
+      "Pass q plus optional type=tracks|albums|artists|podcasts|episodes (default tracks) and limit (max 50, no cursor). Primary path is web-player Pathfinder GraphQL (same family as /spotify/artist|track|album); Apify scraper is fallthrough only — do not assume one raw schema across both (GraphQL __typename vs flat albumName/isExplicit). Envelope: query, type, fetchedAt, source (pathfinder|apify), results[]. Each result ships a canonical Spotify URI (spotify:track:… not a bare id), url, name, artists (structured on Pathfinder track/album hits), durationMs/durationFormatted, explicit, playable, and image. Request freshness is envelope fetchedAt only — not copied onto every row. Pathfinder search does not expose playCount (absence ≠ zero); chain uri into /spotify/track or read album.tracks[].playCount. Flat 2 credits on native Pathfinder; Apify fallthrough scales per result. Pass raw=true for per-result upstream payloads (omitted by default; searchTerm is not repeated inside raw).",
+    platformLimits: [
+      "playCount is not on search.results[] — Pathfinder search hydrate omits stream counts; use /spotify/track or /spotify/album tracks[].",
+      "fetchedAt is envelope-only — results[] do not carry scrapedAt.",
+    ],
   },
   {
     slug: "spotify-podcast",
@@ -2389,7 +2396,10 @@ const SPOTIFY: Spec[] = [
     tagline:
       "Spotify podcast show — publisher, rating, topics, explicit flag, and totalEpisodes as clean JSON.",
     longDescription:
-      "Pass a Spotify show/podcast URL, URI, or ID (not an artist URL) and get clean JSON: id, name, description, publisher{name}, rating{average, totalRatings}, topics[{title, uri}], contentRating/explicit, mediaType, showTypes, totalEpisodes, and cover image. Publisher is the show's publisher (not host names stuffed into artists[]). Flat 1 credit per call. Does not ship Spotify's UI color palette (visualIdentity) or a bulky raw dump. For the episode archive, use /spotify/podcast-episodes (cursor pagination).",
+      "Pass a Spotify show/podcast URL, URI, or ID (not an artist URL) and get clean JSON: id, name, description, publisher{name}, rating{average, totalRatings}, topics[{title, uri}], contentRating / contentRatingLabels / explicit, mediaType, showTypes, totalEpisodes, and cover image. Publisher is the show's publisher (not host names stuffed into artists[]). Flat 1 credit per call. Does not ship Spotify's UI color palette (visualIdentity) or a bulky raw dump. For the episode archive, use /spotify/podcast-episodes (cursor pagination).",
+    platformLimits: [
+      "contentRatingLabels can include EXPLICIT | NINETEEN_PLUS | NOT_FOR_CHILDREN | SPOTIFY_EIGHTEEN_PLUS | UNKNOWN (and NONE on some surfaces). explicit is true only when EXPLICIT is among the labels — keep contentRating for age-gate values.",
+    ],
   },
   {
     slug: "spotify-podcast-episodes",
@@ -6248,11 +6258,15 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       q: `Why are popularity / isrc / previewUrl often missing?`,
       a: `Pathfinder getTrack frequently omits Spotify Web API popularity (0–100), ISRC, and preview URLs. When present they are returned; playCount is the listen metric on this surface.`,
     });
+    list.push({
+      q: `Are contentRating and explicit the same field?`,
+      a: `No. contentRating is Spotify's Pathfinder label enum (NONE | EXPLICIT | NINETEEN_PLUS | UNKNOWN on tracks). explicit is a convenience boolean that is true only for EXPLICIT — age-gate labels are not collapsed into that bit.`,
+    });
   }
   if (ep.slug === "spotify-album") {
     list.push({
       q: `Where is the track list?`,
-      a: `tracks[] — each row has trackNumber, discNumber, name, uri/url, durationMs, playCount, explicit, and artists[{id,uri,name,url}]. totalTracks matches the album; tracksHasMore is true only if a page was truncated.`,
+      a: `tracks[] — each row has id, trackNumber, discNumber, name, uri/url, durationMs, playCount, explicit, and artists[{id,uri,name,url}]. id matches the uri suffix for joins into /spotify/track. totalTracks matches the album; tracksHasMore is true only if a page was truncated.`,
     });
     list.push({
       q: `Is releaseDate the full date or just the year?`,
@@ -6266,11 +6280,15 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     });
     list.push({
       q: `Is search raw the same as artist/track/album raw?`,
-      a: `Not always. The primary path is Pathfinder GraphQL (same family as details). Apify fallthrough uses a flat scraper object (albumName, isExplicit, scrapedAt). Envelope source is pathfinder or apify — do not write one raw parser for both. Prefer normalized fields; pass raw=true only when needed.`,
+      a: `Not always. The primary path is Pathfinder GraphQL (same family as details). Apify fallthrough uses a flat scraper object (albumName, isExplicit). Envelope source is pathfinder or apify — do not write one raw parser for both. Prefer normalized fields; pass raw=true only when needed.`,
     });
     list.push({
       q: `How fresh are results?`,
-      a: `Envelope fetchedAt is when this request completed. Each result has scrapedAt (Apify stamp when present, otherwise the same fetch time). There is no cursor — max 50 results per call.`,
+      a: `Envelope fetchedAt is when this request completed. It is not copied onto results[] (no per-row scrapedAt). There is no cursor — max 50 results per call.`,
+    });
+    list.push({
+      q: `Why is playCount missing on search results?`,
+      a: `Pathfinder search hydrate does not expose stream counts. Absence is not zero — chain results[].uri into /spotify/track or read playCount from /spotify/album tracks[].`,
     });
     list.push({
       q: `Is billing per result or flat?`,
@@ -6870,8 +6888,10 @@ const FIELD_DESCS: Record<string, string> = {
   lastBroadcast: "Most recent broadcast metadata ({startedAt, title}).",
   playCount: "Play/stream count for the item.",
   trackNumber: "Track position on the album.",
-  contentRating: "Spotify content rating label (e.g. NONE, EXPLICIT).",
-  explicit: "Whether the track is marked explicit.",
+  contentRating:
+    "Spotify Pathfinder contentRating.label — tracks: NONE | EXPLICIT | NINETEEN_PLUS | UNKNOWN; podcasts may also use NOT_FOR_CHILDREN | SPOTIFY_EIGHTEEN_PLUS. Not a twin of explicit.",
+  explicit:
+    "Convenience boolean: true only when contentRating is EXPLICIT (or EXPLICIT is among contentRatingLabels).",
   artistItems:
     "Legacy alias — prefer artists[{id, uri, name, url}] on /spotify/track.",
   albumInfo:
@@ -7879,7 +7899,10 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
       "Spotify Web API 0–100 popularity when Pathfinder exposes it; often absent — prefer playCount.",
     isrc: "ISRC when Pathfinder exposes it; often absent on getTrack.",
     previewUrl: "30s MP3 preview URL when Spotify exposes one; often absent on getTrack.",
-    explicit: "Derived from contentRating.label (EXPLICIT → true, NONE → false).",
+    contentRating:
+      "Pathfinder contentRating.label: NONE | EXPLICIT | NINETEEN_PLUS | UNKNOWN. Not a 2-valued twin of explicit — age-gate labels stay here.",
+    explicit:
+      "Convenience boolean: true only when contentRating is EXPLICIT. NINETEEN_PLUS / UNKNOWN / NONE → false.",
     releaseDate: "Album release date (ISO) when Spotify exposes it on the track payload.",
     mediaType: "Spotify media type (e.g. AUDIO).",
   },
@@ -7901,11 +7924,11 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     artists:
       "Album artists as [{id, uri, name, url}] — chain uri into /spotify/artist.",
     tracks:
-      "Album track list from tracksV2 — [{trackNumber, discNumber, name, uri, url, durationMs, playCount, explicit, artists}].",
+      "Album track list from tracksV2 — [{id, trackNumber, discNumber, name, uri, url, durationMs, playCount, explicit, artists}]. id is the uri suffix for joins into /spotify/track.",
     playCount: "Lifetime stream count for a tracks[] row (same GraphQL metric as /spotify/track).",
     releaseDate: "Full album release timestamp (ISO) when Spotify precision is DAY — prefer over releaseYear alone.",
     releaseYear: "Convenience year derived from releaseDate / date.year.",
-    explicit: "True if any track is EXPLICIT; false when all rated tracks are NONE.",
+    explicit: "True if any track contentRating is EXPLICIT; false when no track is EXPLICIT.",
     tracksHasMore: "True when totalTracks exceeds the tracks[] page returned (rare after full pagination).",
     totalTracks: "Album track count from Spotify (matches tracks[] length when the catalog page is complete).",
   },
@@ -7916,16 +7939,20 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     artists:
       "On Pathfinder track/album hits: [{id, uri, name, url}]. Apify fallthrough may still ship name strings.",
     explicit: "Whether the item is marked explicit (from contentRating or Apify isExplicit).",
+    playCount:
+      "Not returned on search — Pathfinder search hydrate omits stream counts. Chain uri into /spotify/track or use album.tracks[].playCount. Absence is not zero.",
     durationFormatted: "Human duration (m:ss) when known.",
-    scrapedAt: "When this result was scraped/fetched (Apify stamp or request fetch time).",
-    fetchedAt: "When this search request completed (envelope).",
+    fetchedAt: "When this search request completed (envelope only — not duplicated on results[]).",
     source: 'Upstream used for this response: "pathfinder" (GraphQL) or "apify" (scraper fallthrough).',
     query: "Echo of the q parameter.",
   },
   "spotify-podcast": {
     platform: 'Always "spotify" on this endpoint.',
     name: "Podcast show title. Not a profile displayName alias.",
-    explicit: "Whether the show is marked explicit (from contentRating labels).",
+    contentRating:
+      "Primary Pathfinder label (first of contentRatingLabels). Podcast enum includes EXPLICIT | NINETEEN_PLUS | NOT_FOR_CHILDREN | SPOTIFY_EIGHTEEN_PLUS | UNKNOWN (and NONE on some surfaces).",
+    contentRatingLabels: "Full label list from contentRatingV2 when present.",
+    explicit: "True only when EXPLICIT is among contentRatingLabels — age-gate labels are not collapsed into this bit.",
     playable: "Whether the show is playable in the current market when Spotify exposes it.",
     rating: "Show rating object {average, totalRatings} — Spotify web GraphQL; not on the free Web API.",
     publisher: "Show publisher {name} — not episode hosts and never stuffed into artists[].",
@@ -7936,7 +7963,9 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     platform: 'Always "spotify" on this endpoint.',
     name: "Episode title. Not a profile displayName alias.",
     id: "Episode id (same id as in spotify:episode:{id}).",
-    explicit: "Whether this episode is marked explicit (from contentRating.label).",
+    contentRating:
+      "Pathfinder contentRating.label (NONE | EXPLICIT | NINETEEN_PLUS | UNKNOWN, plus podcast age-gate labels when present).",
+    explicit: "True only when contentRating is EXPLICIT.",
     playable: "Whether this episode is playable in the current market.",
     previewUrl: "MP3 preview URL from previewPlayback.audioPreview.cdnUrl when Spotify exposes one.",
     audioUrls: "Additional mp3 preview source URLs from audio.items[].",

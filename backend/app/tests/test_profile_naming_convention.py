@@ -5,12 +5,39 @@ from __future__ import annotations
 from app.routers import creator_pages as cp
 from app.services.instagram_native import map_channel_details, map_profile_search_user
 from app.utils.profile_core import stamp_profile_core
-from app.utils.profile_duplicates import duplicate_non_boolean_keys, drop_alias_twins
+from app.utils.profile_duplicates import (
+    correlated_field_pairs,
+    duplicate_non_boolean_keys,
+    drop_alias_twins,
+)
 
 
 def _assert_no_dup_values(data: dict, *, label: str) -> None:
     dups = duplicate_non_boolean_keys(data)
     assert not dups, f"{label}: duplicate non-boolean values {dups!r}"
+
+
+def test_correlated_field_pairs_catches_explicit_content_rating_bijection():
+    rows = [
+        {"explicit": False, "contentRating": "NONE", "name": f"t{i}"}
+        for i in range(3)
+    ] + [
+        {"explicit": True, "contentRating": "EXPLICIT", "name": f"e{i}"}
+        for i in range(3)
+    ]
+    hits = correlated_field_pairs(rows, min_rows=5)
+    assert ("contentRating", "explicit") in hits or ("explicit", "contentRating") in hits
+
+
+def test_correlated_field_pairs_ignores_when_third_rating_breaks_bijection():
+    rows = [
+        {"explicit": False, "contentRating": "NONE"},
+        {"explicit": True, "contentRating": "EXPLICIT"},
+        {"explicit": False, "contentRating": "NINETEEN_PLUS"},
+        {"explicit": False, "contentRating": "NONE"},
+        {"explicit": True, "contentRating": "EXPLICIT"},
+    ]
+    assert correlated_field_pairs(rows, min_rows=5) == []
 
 
 def test_drop_alias_twins_prefers_canonical():

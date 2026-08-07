@@ -689,6 +689,7 @@ def _album_track_row(entry: Any) -> dict[str, Any] | None:
         explicit = _as_bool(track.get("isExplicit") or track.get("explicit"))
     artists = _track_artist_items(track)
     row = {
+        "id": tid,
         "trackNumber": safe_int(track.get("trackNumber") or track.get("track_number")),
         "discNumber": safe_int(track.get("discNumber") or track.get("disc_number")),
         "name": safe_str(track.get("name")),
@@ -1396,11 +1397,12 @@ async def podcast_episodes(
         "Search Spotify tracks, albums, artists, podcasts, or episodes. Primary path is "
         "web-player Pathfinder GraphQL (same family as /spotify/artist|track|album); "
         "Apify scraper is fallthrough only — its raw shape differs (flat albumName/"
-        "isExplicit/scrapedAt vs GraphQL __typename). Each result ships a canonical "
-        "spotify:{type}:{id} URI, url, name, explicit/playable when known, and "
-        "scrapedAt. Envelope includes fetchedAt. Flat 2 credits on native; Apify "
-        "fallthrough scales per result. No cursor (max limit 50). Pass raw=true to "
-        "include per-result upstream payloads (omitted by default)."
+        "isExplicit vs GraphQL __typename). Each result ships a canonical "
+        "spotify:{type}:{id} URI, url, name, and explicit/playable when known. "
+        "Envelope includes fetchedAt (not duplicated per row). Pathfinder search does "
+        "not expose playCount — use /spotify/track or album.tracks[]. Flat 2 credits "
+        "on native; Apify fallthrough scales per result. No cursor (max limit 50). "
+        "Pass raw=true to include per-result upstream payloads (omitted by default)."
     ),
 )
 async def search(
@@ -1427,16 +1429,16 @@ async def search(
             kind = type[:-1] if type.endswith("s") else type
             fetched_at = utc_now_iso()
 
-            def _stamp(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
-                # Promote per-item Apify scrapedAt when present; else stamp fetch time.
+            def _finalize(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+                # fetchedAt on the envelope is the request timestamp — do not copy
+                # it (or Apify scrapedAt) onto every row.
                 for row in results:
-                    if not row.get("scrapedAt"):
-                        row["scrapedAt"] = fetched_at
+                    row.pop("scrapedAt", None)
                 return results
 
             native_items = await spotify_native.search_native(q, type, limit)
             if native_items is not None:
-                results = _stamp([_normalize(i, kind) for i in native_items])
+                results = _finalize([_normalize(i, kind) for i in native_items])
                 ctx["source"] = "direct"
                 return {
                     "platform": "spotify",
@@ -1469,7 +1471,9 @@ async def search(
                     },
                     max_items=limit,
                 )
-            results = _stamp([_normalize(i, kind) for i in items[:limit] if not i.get("error")])
+            results = _finalize(
+                [_normalize(i, kind) for i in items[:limit] if not i.get("error")]
+            )
             ctx["source"] = "apify"
             return {
                 "platform": "spotify",
@@ -1483,7 +1487,7 @@ async def search(
 
         data = await cached_or_run(
             "spotify.search",
-            {"q": q, "type": type, "limit": limit, "v": 10, "raw": bool(raw)},
+            {"q": q, "type": type, "limit": limit, "v": 11, "raw": bool(raw)},
             _run,
             ctx,
             use_cache=cache,
@@ -1492,6 +1496,7 @@ async def search(
             for row in data.get("results") or []:
                 if isinstance(row, dict):
                     row.pop("raw", None)
+                    row.pop("scrapedAt", None)
         if ctx.get("source") != "direct":
             ctx["credits_override"] = _scaled(len(data["results"]))
         return ApiResponse(data=data)

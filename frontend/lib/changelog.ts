@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
+    category: "improvement",
+    title: "Spotify polish: keep contentRating enum, drop search scrapedAt, album track id",
+    description:
+      "Spotify Pathfinder's contentRating.label is not a 2-valued twin of explicit — the web-player enum includes NONE | EXPLICIT | NINETEEN_PLUS | UNKNOWN on tracks, plus NOT_FOR_CHILDREN | SPOTIFY_EIGHTEEN_PLUS on podcast surfaces — so both fields stay; docs spell out the enum and that explicit is true only for EXPLICIT. Search no longer copies fetchedAt/scrapedAt onto every results[] row. Docs state playCount is absent on search (Pathfinder hydrate). album.tracks[] now include id for joins into /spotify/track. Shared correlated_field_pairs helper catches bool↔string bijections the identical-value scan misses.",
+    items: [
+      "Document contentRating enum; keep explicit as EXPLICIT-only convenience",
+      "Drop results[].scrapedAt; document missing search playCount",
+      "album.tracks[].id + correlated_field_pairs in profile_duplicates",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
     category: "fix",
     title: "Instagram profile-search: cut ~29s cold path; cache on by default",
     description:

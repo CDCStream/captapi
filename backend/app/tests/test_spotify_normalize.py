@@ -199,6 +199,7 @@ def test_album_normalize_tracks_joins_release_date_explicit():
     out = sp._normalize(_sample_album_payload(), "album")
     assert len(out["tracks"]) == 2
     assert out["tracks"][0]["name"] == "Lavender Haze"
+    assert out["tracks"][0]["id"] == "5jQI2r1RdgtuT8S3iG8zFC"
     assert out["tracks"][0]["playCount"] == 901032338
     assert out["tracks"][0]["explicit"] is True
     assert out["tracks"][0]["uri"].startswith("spotify:track:")
@@ -208,6 +209,15 @@ def test_album_normalize_tracks_joins_release_date_explicit():
     assert out["releaseYear"] == 2022
     assert out["explicit"] is True
     assert out["totalTracks"] == 2
+
+
+def test_track_nineteen_plus_keeps_content_rating():
+    """contentRating is not a 2-valued alias of explicit — NINETEEN_PLUS ≠ EXPLICIT."""
+    payload = _sample_track_payload()
+    payload["contentRating"] = {"label": "NINETEEN_PLUS"}
+    out = sp._normalize(payload, "track")
+    assert out["contentRating"] == "NINETEEN_PLUS"
+    assert out["explicit"] is False
 
 
 def test_search_apify_bare_id_becomes_canonical_uri():
@@ -229,7 +239,8 @@ def test_search_apify_bare_id_becomes_canonical_uri():
     assert out["explicit"] is False
     assert out["playable"] is True
     assert out["durationFormatted"] == "3:27"
-    assert out["scrapedAt"] == "2026-07-18T11:28:01.801Z"
+    # Normalize may still lift Apify scrapedAt; search strips it before return.
+    assert out.get("scrapedAt") == "2026-07-18T11:28:01.801Z"
     assert "searchTerm" not in (out.get("raw") or {})
 
 
