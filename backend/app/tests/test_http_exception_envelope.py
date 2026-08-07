@@ -35,7 +35,11 @@ def test_http_exception_envelope_structured_detail():
     async def _boom():
         raise HTTPException(
             status_code=504,
-            detail={"code": "UPSTREAM_TIMEOUT", "message": "timed out"},
+            detail={
+                "code": "UPSTREAM_TIMEOUT",
+                "message": "timed out",
+                "timings": {"path": "search", "fetchMs": 41435, "totalMs": 41435},
+            },
         )
 
     client = TestClient(app, raise_server_exceptions=False)
@@ -45,3 +49,6 @@ def test_http_exception_envelope_structured_detail():
     assert body["success"] is False
     assert body["error"]["code"] == "UPSTREAM_TIMEOUT"
     assert body["error"]["message"] == "timed out"
+    assert "timings" not in body["error"]
+    assert body["timings"]["path"] == "search"
+    assert body["timings"]["fetchMs"] == 41435

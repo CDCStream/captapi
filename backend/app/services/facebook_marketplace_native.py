@@ -31,10 +31,19 @@ log = structlog.get_logger(__name__)
 CREDIT_FB_MARKETPLACE_NATIVE = 2
 CREDIT_FB_MARKETPLACE_ITEM_NATIVE = 2
 
-# Decodo budgets under Cloudflare's ~125s proxy read (MP1).
-_SEARCH_TIMEOUT_SECS = 40.0
-_SEARCH_SCROLL_TIMEOUT_SECS = 50.0
-_ITEM_TIMEOUT_SECS = 40.0
+# Decodo budgets under Cloudflare's ~125s proxy read.
+# Live probes 2026-08-07 (geo=US): search completed in ~25–53s; one attempt
+# exhausted 65s — keep headroom so variance does not false-timeout (MS1).
+_SEARCH_TIMEOUT_SECS = 80.0
+_SEARCH_SCROLL_TIMEOUT_SECS = 90.0
+_ITEM_TIMEOUT_SECS = 50.0
+
+_US_STATE_ABBR = {
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA",
+    "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
+    "VA", "WA", "WV", "WI", "WY", "DC",
+}
 
 
 @dataclass(frozen=True)
@@ -442,6 +451,29 @@ def _offers_shipping(delivery: list[Any] | None) -> bool:
     return False
 
 
+def location_object(
+    *,
+    name: str | None,
+    city: str | None = None,
+    state: str | None = None,
+    latitude: float | None = None,
+    longitude: float | None = None,
+    country_code: str | None = None,
+) -> dict[str, Any]:
+    """Shared Facebook ``location{}`` shape (MS2) — same keys as event endpoints."""
+    country = country_code
+    if not country and state and state.upper() in _US_STATE_ABBR:
+        country = "US"
+    return {
+        "name": name,
+        "city": city,
+        "state": state,
+        "countryCode": country,
+        "latitude": latitude,
+        "longitude": longitude,
+    }
+
+
 def annotate_search_locality(
     listing: dict[str, Any],
     *,
@@ -453,9 +485,13 @@ def annotate_search_locality(
 ) -> dict[str, Any]:
     """Attach isLocal / distanceMiles / shipsOutsideRadius for search rows."""
     out = dict(listing)
-    city = safe_str(out.get("city"))
-    state = safe_str(out.get("state"))
-    loc = safe_str(out.get("location")) or ""
+    loc_obj = out.get("location") if isinstance(out.get("location"), dict) else None
+    city = safe_str(out.get("city") or (loc_obj or {}).get("city"))
+    state = safe_str(out.get("state") or (loc_obj or {}).get("state"))
+    if loc_obj:
+        loc = safe_str(loc_obj.get("name")) or ""
+    else:
+        loc = safe_str(out.get("location")) or ""
     is_local = False
     if origin_city and city and city.lower() == origin_city.lower():
         is_local = True
@@ -468,8 +504,8 @@ def annotate_search_locality(
             if state and state.upper() != origin_state.upper():
                 is_local = False
 
-    lat = safe_float(out.get("latitude"))
-    lng = safe_float(out.get("longitude"))
+    lat = safe_float(out.get("latitude") if out.get("latitude") is not None else (loc_obj or {}).get("latitude"))
+    lng = safe_float(out.get("longitude") if out.get("longitude") is not None else (loc_obj or {}).get("longitude"))
     distance: float | None = None
     if (
         origin_lat is not None
@@ -488,7 +524,12 @@ def annotate_search_locality(
         out["distanceMiles"] = distance
     if _offers_shipping(out.get("deliveryTypes") if isinstance(out.get("deliveryTypes"), list) else None) and not is_local:
         out["shipsOutsideRadius"] = True
-    return strip_empty(out)
+    # Preserve location{} key set (MS2) — strip_empty would drop null lat/lng.
+    loc_keep = out.get("location") if isinstance(out.get("location"), dict) else None
+    cleaned = strip_empty(out)
+    if loc_keep is not None:
+        cleaned["location"] = loc_keep
+    return cleaned
 
 
 def _seller(node: dict[str, Any]) -> dict[str, Any] | None:
@@ -594,7 +635,7 @@ def _map_listing(node: dict[str, Any]) -> dict[str, Any] | None:
     strike_fields = _price_fields(strike) if strike else {}
     # List cards: cover is ``image``. Omit one-element photos[] (duplicate of image).
     photos_out = photos if len(photos) > 1 else None
-    return strip_empty(
+    out = strip_empty(
         {
             "platform": "facebook",
             "id": lid,
@@ -605,7 +646,7 @@ def _map_listing(node: dict[str, Any]) -> dict[str, Any] | None:
             "strikethroughPriceFormatted": strike_fields.get("priceFormatted"),
             "strikethroughPriceAmount": strike_fields.get("priceAmount"),
             "categoryId": safe_str(node.get("marketplace_listing_category_id")),
-            "location": loc_display,
+            # Top-level geo kept one release for clients that still read flat keys (MS2).
             "city": city,
             "state": state,
             "cityPageId": safe_str(city_page.get("id")),
@@ -617,6 +658,9 @@ def _map_listing(node: dict[str, Any]) -> dict[str, Any] | None:
             "createdAt": _created_at(node),
         }
     )
+    # Fixed key set (MS2) — null when unknown, never omit (strip_empty would).
+    out["location"] = location_object(name=loc_display, city=city, state=state)
+    return out
 
 
 def _map_item_detail(node: dict[str, Any], url: str) -> dict[str, Any] | None:
@@ -654,7 +698,9 @@ def _map_item_detail(node: dict[str, Any], url: str) -> dict[str, Any] | None:
     if not isinstance(delivery, list):
         delivery = []
     strike_fields = _price_fields(strike) if strike else {}
-    return strip_empty(
+    lat = safe_float(coords.get("latitude"))
+    lng = safe_float(coords.get("longitude"))
+    out = strip_empty(
         {
             "platform": "facebook",
             "id": lid,
@@ -667,12 +713,12 @@ def _map_item_detail(node: dict[str, Any], url: str) -> dict[str, Any] | None:
             "strikethroughPriceAmount": strike_fields.get("priceAmount"),
             "categoryId": safe_str(node.get("marketplace_listing_category_id")),
             "condition": _condition_label(node),
-            "location": loc_display,
+            # Top-level geo kept one release for clients that still read flat keys (MS2).
             "city": city,
             "state": state,
             "cityPageId": safe_str(city_page.get("id")),
-            "latitude": coords.get("latitude"),
-            "longitude": coords.get("longitude"),
+            "latitude": lat,
+            "longitude": lng,
             **_status_fields(node),
             "seller": _seller(node),
             "deliveryTypes": delivery or None,
@@ -681,6 +727,14 @@ def _map_item_detail(node: dict[str, Any], url: str) -> dict[str, Any] | None:
             "createdAt": _created_at(node),
         }
     )
+    out["location"] = location_object(
+        name=loc_display,
+        city=city,
+        state=state,
+        latitude=lat,
+        longitude=lng,
+    )
+    return out
 
 
 async def _fetch_search_html(
@@ -695,14 +749,17 @@ async def _fetch_search_html(
         timeout=timeout,
         headless="html",
         browser_actions=actions,
+        geo="US",
     )
     elapsed = time.perf_counter() - t0
     if got:
         return got, False
     if scroll:
-        # Scroll path sometimes 400s; fall back to plain SSR.
+        # Scroll path sometimes 400s; fall back to plain SSR (no second long wait).
         t1 = time.perf_counter()
-        got = await decodo_fetch.fetch_url(url, timeout=_SEARCH_TIMEOUT_SECS, headless="html")
+        got = await decodo_fetch.fetch_url(
+            url, timeout=_SEARCH_TIMEOUT_SECS, headless="html", geo="US"
+        )
         elapsed = time.perf_counter() - t1
         if got:
             return got, False
@@ -718,9 +775,20 @@ async def marketplace_search_native(
     filters: dict[str, str] | None = None,
     cursor: str | None = None,
 ) -> MarketplaceFetchResult:
-    """Search Marketplace. Returns listings page or a typed failure."""
+    """Search Marketplace. Returns listings page or a typed failure.
+
+    Location is a city/place string turned into a Marketplace hub slug
+    (``Austin, TX`` → ``austin``) — it does **not** call location-search /
+    Decodo hub resolve (MS1). ``resolveMs`` is that slug step only.
+    """
     t0 = time.perf_counter()
-    timings: dict[str, Any] = {"path": "search", "fetchMs": 0, "totalMs": 0}
+    timings: dict[str, Any] = {
+        "path": "search",
+        "resolveMs": 0,
+        "fetchMs": 0,
+        "parseMs": 0,
+        "totalMs": 0,
+    }
     if limit <= 0:
         timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
         return MarketplaceFetchResult(
@@ -750,7 +818,9 @@ async def marketplace_search_native(
         if isinstance(decoded.get("f"), dict):
             filters = {str(k): str(v) for k, v in decoded["f"].items()}
 
+    t_resolve = time.perf_counter()
     url = search_url(q, location, filters=filters)
+    timings["resolveMs"] = int((time.perf_counter() - t_resolve) * 1000)
     if not url:
         timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
         return MarketplaceFetchResult(status="upstream", timings=timings)
@@ -773,6 +843,7 @@ async def marketplace_search_native(
         timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
         return MarketplaceFetchResult(status="upstream", timings=timings)
 
+    t_parse = time.perf_counter()
     origin_city, origin_state = parse_city_state(location)
     radius = None
     if filters and filters.get("radius"):
@@ -816,6 +887,7 @@ async def marketplace_search_native(
                 "ec": page_cursor,
             }
         )
+    timings["parseMs"] = int((time.perf_counter() - t_parse) * 1000)
 
     timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
     log.info(
@@ -826,7 +898,9 @@ async def marketplace_search_native(
         has_more=more_in_page,
         fb_has_next=has_next,
         filters=bool(filters),
+        resolve_ms=timings["resolveMs"],
         fetch_ms=timings["fetchMs"],
+        parse_ms=timings["parseMs"],
         total_ms=timings["totalMs"],
     )
     return MarketplaceFetchResult(
@@ -843,13 +917,20 @@ async def marketplace_search_native(
 async def marketplace_item_native(url: str) -> MarketplaceFetchResult:
     listing_id = item_id_from_url(url)
     t0 = time.perf_counter()
-    timings: dict[str, Any] = {"path": "item", "fetchMs": 0, "totalMs": 0}
+    timings: dict[str, Any] = {
+        "path": "item",
+        "resolveMs": 0,
+        "fetchMs": 0,
+        "totalMs": 0,
+    }
     if not listing_id or not decodo_fetch.enabled():
         timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
         return MarketplaceFetchResult(status="not_found", timings=timings)
     page_url = item_url(listing_id)
     t_fetch = time.perf_counter()
-    got = await decodo_fetch.fetch_url(page_url, timeout=_ITEM_TIMEOUT_SECS, headless="html")
+    got = await decodo_fetch.fetch_url(
+        page_url, timeout=_ITEM_TIMEOUT_SECS, headless="html", geo="US"
+    )
     timings["fetchMs"] = int((time.perf_counter() - t_fetch) * 1000)
     if not got:
         timed_out = timings["fetchMs"] >= int((_ITEM_TIMEOUT_SECS - 1.0) * 1000)

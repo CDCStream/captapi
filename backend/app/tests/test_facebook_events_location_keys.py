@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from app.routers import facebook as fb
 
-_LOCATION_KEYS = {"name", "city", "latitude", "longitude", "countryCode"}
+_LOCATION_KEYS = {"name", "city", "state", "latitude", "longitude", "countryCode"}
 
 
 def test_location_key_set_identical_across_events():

@@ -248,15 +248,16 @@ def create_app() -> FastAPI:
         code: str,
         message: str,
         extra: dict | None = None,
+        timings: dict | None = None,
     ) -> dict:
-        """Catalogue-wide error body (MP2) — same fields as success envelopes."""
+        """Catalogue-wide error body — same outer fields as success envelopes."""
         from app.core.credits import request_meta
 
         meta = request_meta.get() or {}
         error_obj: dict = {"code": code, "message": message}
         if extra:
             for key, value in extra.items():
-                if key in ("code", "message") or value is None:
+                if key in ("code", "message", "timings") or value is None:
                     continue
                 error_obj[key] = value
         body: dict = {
@@ -266,6 +267,11 @@ def create_app() -> FastAPI:
             "requestId": meta.get("request_id") or None,
             "fetchedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
+        # Stage timings sit beside error (MS1) — not buried inside error{}.
+        if timings:
+            body["timings"] = timings
+        elif isinstance(extra, dict) and isinstance(extra.get("timings"), dict):
+            body["timings"] = extra["timings"]
         return body
 
     _STATUS_ERROR_CODES = {
@@ -281,8 +287,13 @@ def create_app() -> FastAPI:
         504: "UPSTREAM_TIMEOUT",
     }
 
-    def _http_exception_parts(exc: StarletteHTTPException) -> tuple[str, str, dict]:
+    def _http_exception_parts(
+        exc: StarletteHTTPException,
+    ) -> tuple[str, str, dict, dict | None]:
         detail = exc.detail
+        timings: dict | None = None
+        if isinstance(detail, dict) and isinstance(detail.get("timings"), dict):
+            timings = detail["timings"]
         if isinstance(detail, dict):
             nested = detail.get("error")
             if isinstance(nested, dict) and nested.get("code"):
@@ -294,26 +305,31 @@ def create_app() -> FastAPI:
                     or code
                 )
                 extra = {k: v for k, v in nested.items() if k not in ("code", "message")}
-                return code, message, extra
+                if timings is None and isinstance(nested.get("timings"), dict):
+                    timings = nested["timings"]
+                return code, message, extra, timings
             if detail.get("code") and (detail.get("message") or detail.get("detail")):
                 code = str(detail["code"])
                 message = str(detail.get("message") or detail.get("detail") or code)
                 extra = {
                     k: v
                     for k, v in detail.items()
-                    if k not in ("code", "message", "detail", "error")
+                    if k not in ("code", "message", "detail", "error", "timings")
                 }
-                return code, message, extra
+                return code, message, extra, timings
             # Opaque structured detail — stringify for message, keep as extras.
             code = _STATUS_ERROR_CODES.get(exc.status_code, "HTTP_ERROR")
-            return code, str(detail.get("message") or detail), {
-                k: v for k, v in detail.items() if k != "message"
-            }
+            return (
+                code,
+                str(detail.get("message") or detail),
+                {k: v for k, v in detail.items() if k not in ("message", "timings")},
+                timings,
+            )
         if isinstance(detail, str) and detail.strip():
             code = _STATUS_ERROR_CODES.get(exc.status_code, "HTTP_ERROR")
-            return code, detail, {}
+            return code, detail, {}, None
         code = _STATUS_ERROR_CODES.get(exc.status_code, "HTTP_ERROR")
-        return code, code.replace("_", " ").title(), {}
+        return code, code.replace("_", " ").title(), {}, None
 
     @app.exception_handler(StarletteHTTPException)
     @app.exception_handler(HTTPException)
@@ -322,7 +338,7 @@ def create_app() -> FastAPI:
     ) -> JSONResponse:
         # HTTPException used to return raw {"detail": "..."} — a second contract
         # from ApiResponse. Wrap every raised HTTP error in the catalogue envelope.
-        code, message, extra = _http_exception_parts(exc)
+        code, message, extra, timings = _http_exception_parts(exc)
         headers = _error_cors_headers(request)
         if getattr(exc, "headers", None):
             headers = {**headers, **dict(exc.headers)}
@@ -333,6 +349,7 @@ def create_app() -> FastAPI:
                 code=code,
                 message=message,
                 extra=extra or None,
+                timings=timings,
             ),
             headers=headers,
         )

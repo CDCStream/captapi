@@ -1251,7 +1251,7 @@ const FACEBOOK_MARKETPLACE: Spec[] = [
     tagline:
       "Search Marketplace by keyword + city — filters, isLocal/shipsOutsideRadius, opaque cursor (2 credits).",
     longDescription:
-      "Search Facebook Marketplace with a product keyword and a city/place name (no lat/lng required). Each result: title, price + priceAmount (minor units), categoryId, location/city/state, deliveryTypes, status (available|pending|sold) with isSold/isPending/isHidden, cover image, createdAt, plus isLocal and shipsOutsideRadius so nationwide shipped listings (SHIPPING / SHIPPING_ONSITE) are not mistaken for nearby pickups. Facebook can surface shipped inventory outside radiusMiles — use deliveryMethod=local_pickup for local-only, or filter on isLocal. Optional filters: minPrice, maxPrice, sortBy, daysSinceListed, condition, deliveryMethod, availability, radiusMiles, category. Opaque nextCursor within the fetched SSR page. Default list path is flat 2 credits (cover photo in image — photos[] only when the card has more than one). Pass details=true for description, condition, coordinates, full photo gallery, seller{} when Facebook exposes it, and distanceMiles — billed as 2 + 2 credits per listing. Decodo search budgets ~40s (~50s with scroll); timeouts return HTTP 504 UPSTREAM_TIMEOUT. Envelope timings{fetchMs,totalMs,path}. Client timeout ≥60s.",
+      "Search Facebook Marketplace with a product keyword and a city/place name (no lat/lng required — resolved to a hub slug, not a Decodo location-search). Each result: title, price + priceAmount (minor units), categoryId, location{name,city,state,countryCode,latitude,longitude} (same object shape as Event endpoints; flat city/state kept one release), deliveryTypes, status (available|pending|sold) with isSold/isPending/isHidden, cover image, createdAt, plus isLocal and shipsOutsideRadius so nationwide shipped listings (SHIPPING / SHIPPING_ONSITE) are not mistaken for nearby pickups. Facebook can surface shipped inventory outside radiusMiles — use deliveryMethod=local_pickup for local-only, or filter on isLocal. Optional filters: minPrice, maxPrice, sortBy, daysSinceListed, condition, deliveryMethod, availability, radiusMiles, category. Opaque nextCursor within the fetched SSR page. Default list path is flat 2 credits (cover photo in image — photos[] only when the card has more than one). Pass details=true for description, condition, coordinates, full photo gallery, seller{} when Facebook exposes it, and distanceMiles — billed as 2 + 2 credits per listing. Decodo search typically ~25–60s; budgets 80s (90s with scroll). Timeouts return HTTP 504 UPSTREAM_TIMEOUT with timings{resolveMs,fetchMs,parseMs,totalMs,path} on the error envelope. Client timeout ≥100s.",
     delivers: [
       "12 filters + city-name location (no lat/lng required)",
       "isLocal / shipsOutsideRadius on every row",
@@ -1261,7 +1261,7 @@ const FACEBOOK_MARKETPLACE: Spec[] = [
     platformLimits: [
       "Shipped listings can appear outside radiusMiles — prefer deliveryMethod=local_pickup or isLocal.",
       "Deep feed pagination beyond one SSR/scroll page is not replayable across Decodo calls.",
-      "Client timeout ≥60s recommended — fail-fast under Cloudflare's ~125s proxy read.",
+      "Client timeout ≥100s recommended — Decodo search often lands near 25–60s, occasionally longer.",
     ],
   },
   {
@@ -1298,7 +1298,7 @@ const FACEBOOK_MARKETPLACE: Spec[] = [
     tagline:
       "Marketplace listing — title, priceAmount, status, seller{}, condition, coords (2 credits).",
     longDescription:
-      "Paste a Facebook Marketplace item URL and get the listing as clean JSON aligned with search rows: title, price + priceAmount (minor units), currency, categoryId, location/city/state/cityPageId, status (available|pending|sold) with isSold/isPending/isHidden, deliveryTypes, image + photos[], createdAt, plus detail-only description, condition, latitude/longitude, and seller{id,name,url,joinedAt,rating} when Facebook's public page exposes marketplace_listing_seller. Decodo fetch budgets ~40s — timeouts return HTTP 504 UPSTREAM_TIMEOUT (not 404). Flat 2 credits. Session-only isViewerSeller is never returned.",
+      "Paste a Facebook Marketplace item URL and get the listing as clean JSON aligned with search rows: title, price + priceAmount (minor units), currency, categoryId, location{name,city,state,countryCode,latitude,longitude} (same object shape as Event endpoints), cityPageId, status (available|pending|sold) with isSold/isPending/isHidden, deliveryTypes, image + photos[], createdAt, plus detail-only description, condition, and seller{id,name,url,joinedAt,rating} when Facebook's public page exposes marketplace_listing_seller. Flat city/state/latitude/longitude kept one release. Decodo fetch budgets ~50s — timeouts return HTTP 504 UPSTREAM_TIMEOUT with timings (not a mislabelled 404). Flat 2 credits. Session-only isViewerSeller is never returned.",
     delivers: [
       "Same core fields as search rows (incl. priceAmount, city/state)",
       "status enum — not livestream isLive",
@@ -8130,7 +8130,8 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     privatePostCount: "Private posts count when Kwai exposes it.",
   },
   "facebook-marketplace-search": {
-    location: "Search-origin city echoed from the location query param (not each listing's city).",
+    location:
+      "Top-level string echoes the query param. Each listing.location is {name,city,state,countryCode,latitude,longitude} — same keys as Event endpoints.",
     status: 'Listing availability: "available" | "pending" | "sold". Prefer this over isPublished.',
     isSold: "Convenience bool for status === sold.",
     isPending: "Convenience bool for status === pending.",
@@ -8147,7 +8148,8 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     seller: "Seller card when Facebook exposes marketplace_listing_seller on the enriched/item path.",
   },
   "facebook-marketplace-item": {
-    location: "Listing city/area text from the item page (not the search query).",
+    location:
+      "Venue block {name, city, state, countryCode, latitude, longitude} — same keys as Event endpoints. Flat city/state/lat/lng kept one release.",
     status: 'Listing availability: "available" | "pending" | "sold". Sold listings can still be published.',
     isSold: "Convenience bool for status === sold.",
     isPending: "Convenience bool for status === pending.",

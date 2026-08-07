@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Facebook Marketplace search: 65s budget + shared location{}",
+    description:
+      "marketplace-search was timing out at 40s while Decodo search needs ~25–60s (occasionally longer) — raised to 80s (geo=US) and returns rows. Failures include timings{resolveMs,fetchMs,parseMs,totalMs} on the error envelope (resolveMs is slug-only — search never called the old slow location-search path). Marketplace location is now the same object shape as Event endpoints (name/city/state/countryCode/lat/lng); events gained state for key parity.",
+    items: [
+      "Search budget 80s + geo=US (MS1)",
+      "timings on 504/502 error envelopes (MS1)",
+      "location{} object on marketplace + state on events (MS2)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Facebook Marketplace: under-60s location resolve + error envelope",
     description:
       "marketplace-location-search no longer serializes three 120s Decodo hub fetches for bare cities like Austin — ambiguous hubs resolve from a local table (typically <1s) with timings{}. Search/item Decodo budgets drop to ~40s and return 504 UPSTREAM_TIMEOUT instead of a mislabelled 404. HTTPException now uses the catalogue error envelope (success/error/code/creditsUsed/requestId) everywhere. Dropped duplicate location.cityPageId; Playground marketplace-item fixture points at an available listing.",

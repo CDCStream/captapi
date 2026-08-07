@@ -1309,6 +1309,8 @@ def _normalize_event(item: dict) -> dict:
         "location": {
             "name": loc_name,
             "city": city,
+            # state: US/CA/AU region when known; null elsewhere (MS2 / FE6 key parity).
+            "state": safe_str(loc.get("state") or item.get("state") or item.get("location_state")),
             "latitude": loc.get("latitude") if loc.get("latitude") is not None else item.get("latitude"),
             "longitude": loc.get("longitude") if loc.get("longitude") is not None else item.get("longitude"),
             "countryCode": country,
@@ -2039,25 +2041,31 @@ async def facebook_marketplace_item(
                     detail={
                         "code": "UPSTREAM_TIMEOUT",
                         "message": "Facebook Marketplace listing fetch timed out",
+                        "timings": result.timings,
                     },
                 )
             if result.status == "not_found":
                 raise HTTPException(
                     status_code=404,
-                    detail={"code": "NOT_FOUND", "message": "Listing not found"},
+                    detail={
+                        "code": "NOT_FOUND",
+                        "message": "Listing not found",
+                        "timings": result.timings,
+                    },
                 )
             raise HTTPException(
                 status_code=502,
                 detail={
                     "code": "UPSTREAM_UNAVAILABLE",
                     "message": "Facebook Marketplace listing temporarily unavailable",
+                    "timings": result.timings,
                 },
             )
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-item",
-            # v6: fail-fast timeouts + distinct timeout vs not-found (MP1/MP3).
-            params={"url": url, "v": 6},
+            # v7: location{} object (MS2); timings on errors (MS1).
+            params={"url": url, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2174,6 +2182,7 @@ async def facebook_marketplace_search(
                     detail={
                         "code": "UPSTREAM_TIMEOUT",
                         "message": "Facebook Marketplace search timed out",
+                        "timings": result.timings,
                     },
                 )
             if result.status != "ok" or not result.data:
@@ -2182,25 +2191,24 @@ async def facebook_marketplace_search(
                     detail={
                         "code": "UPSTREAM_UNAVAILABLE",
                         "message": "Facebook Marketplace search temporarily unavailable",
+                        "timings": result.timings,
                     },
                 )
             ctx["source"] = "direct"
             page = result.data
             listings = page.get("listings") or []
-            out = strip_empty(
-                {
-                    "query": q,
-                    "location": location,
-                    "filters": filters or None,
-                    "totalReturned": len(listings),
-                    "hasMore": bool(page.get("hasMore")),
-                    "nextCursor": page.get("nextCursor"),
-                    "listings": listings,
-                }
-            )
+            out = {
+                "query": q,
+                "location": location,
+                "filters": filters or None,
+                "totalReturned": len(listings),
+                "hasMore": bool(page.get("hasMore")),
+                "nextCursor": page.get("nextCursor"),
+                "listings": listings,
+            }
             if result.timings:
                 out["timings"] = result.timings
-            return out
+            return strip_empty(out)
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-search",
@@ -2211,8 +2219,8 @@ async def facebook_marketplace_search(
                 "details": details,
                 "filters": filters,
                 "cursor": cursor or "",
-                # v8: Decodo budgets under CF + timings + typed timeout (MP1).
-                "v": 8,
+                # v9: 65s search budget (measured ~53s) + geo=US + location{} (MS1/MS2).
+                "v": 9,
             },
             runner=_run,
             ctx=ctx,

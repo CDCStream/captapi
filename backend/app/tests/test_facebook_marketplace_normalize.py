@@ -16,7 +16,7 @@ def test_annotate_ships_outside_radius():
     row = {
         "city": "Fresno",
         "state": "CA",
-        "location": "Fresno, CA",
+        "location": m.location_object(name="Fresno, CA", city="Fresno", state="CA"),
         "deliveryTypes": ["IN_PERSON", "SHIPPING_ONSITE"],
     }
     out = m.annotate_search_locality(
@@ -30,12 +30,15 @@ def test_annotate_local_city_match():
     row = {
         "city": "Austin",
         "state": "TX",
-        "location": "Austin, TX",
+        "location": m.location_object(name="Austin, TX", city="Austin", state="TX"),
         "deliveryTypes": ["IN_PERSON"],
     }
     out = m.annotate_search_locality(row, origin_city="Austin", origin_state="TX")
     assert out["isLocal"] is True
     assert "shipsOutsideRadius" not in out
+
+
+_LOCATION_KEYS = {"name", "city", "state", "countryCode", "latitude", "longitude"}
 
 
 def test_map_listing_drops_viewer_seller_and_singleton_photos():
@@ -72,6 +75,11 @@ def test_map_listing_drops_viewer_seller_and_singleton_photos():
     assert out["image"] == "https://example.com/a.jpg"
     assert "photos" not in out
     assert out["priceAmount"] == 5000
+    assert set(out["location"].keys()) == _LOCATION_KEYS
+    assert out["location"]["name"] == "Benson, AZ"
+    assert out["location"]["city"] == "Benson"
+    assert out["location"]["state"] == "AZ"
+    assert out["location"]["countryCode"] == "US"
 
 
 def test_map_item_seller_and_status_sold():
@@ -104,3 +112,10 @@ def test_map_item_seller_and_status_sold():
     assert out["state"] == "VA"
     assert out["priceAmount"] == 12500
     assert len(out["photos"]) == 2
+    assert set(out["location"].keys()) == _LOCATION_KEYS
+    assert out["location"]["name"] == "Arlington, VA"
+    assert out["location"]["city"] == "Arlington"
+    assert out["location"]["state"] == "VA"
+    assert out["location"]["countryCode"] == "US"
+    assert out["location"]["latitude"] == 38.8
+    assert isinstance(out["location"], dict)

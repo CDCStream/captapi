@@ -876,7 +876,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "price": 50.0,
     "priceFormatted": "$50",
     "currency": "USD",
-    "location": "Fresno, CA",
+    "location": {
+      "name": "Fresno, CA",
+      "city": "Fresno",
+      "state": "CA",
+      "countryCode": "US",
+      "latitude": null,
+      "longitude": null
+    },
     "city": "Fresno",
     "state": "CA",
     "cityPageId": "107983435897193",
