@@ -26,7 +26,7 @@ from app.services import decodo_fetch
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.services.http_fetch import DEFAULT_HEADERS
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import first_present, safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
@@ -233,7 +233,15 @@ def _normalize_fields(raw: Any) -> list[dict[str, Any]]:
 
 
 def _normalize_account(item: dict[str, Any]) -> dict[str, Any]:
-    username = item.get("username") or item.get("acct") or item.get("authorUsername")
+    """Map a Truth Social / Mastodon account (shared by profile + user-posts + post).
+
+    Catalogue names only — no Mastodon twin keys (handle/acct/name/avatarStatic/
+    headerStatic/locked). Upstream ``acct`` equals ``username`` on every public
+    account we can reach; mentions still keep ``acct`` for federation shape.
+    """
+    username = first_present(
+        item.get("username"), item.get("acct"), item.get("authorUsername")
+    )
     # Full Mastodon/Truth account payloads expose these; Apify author stubs often don't.
     rich = any(
         k in item
@@ -253,41 +261,60 @@ def _normalize_account(item: dict[str, Any]) -> dict[str, Any]:
     from app.utils.profile_core import stamp_profile_core
 
     locked = item.get("locked") if "locked" in item else item.get("isPrivate")
-    locked_bool = bool(locked) if locked is not None else False
+    is_private = bool(locked) if locked is not None else False
     out: dict[str, Any] = {
         "platform": "truth_social",
         "id": safe_str(item.get("id") or item.get("authorId")),
         "username": safe_str(username),
-        "handle": safe_str(username),  # canonical — username kept as deprecated alias
-        "acct": safe_str(item.get("acct") or username),
         "url": safe_str(item.get("url") or item.get("authorUrl"))
         or (f"https://truthsocial.com/@{username}" if username else None),
         "displayName": safe_str(
-            item.get("display_name") or item.get("displayName") or item.get("authorName")
+            first_present(
+                item.get("display_name"),
+                item.get("displayName"),
+                item.get("authorName"),
+            )
         ),
         "bio": _strip_html(item.get("note") or item.get("bio")),
-        "avatar": safe_str(item.get("avatar") or item.get("authorAvatar")),
-        "avatarStatic": safe_str(item.get("avatar_static") or item.get("avatarStatic")),
-        "banner": safe_str(item.get("header") or item.get("banner")),
-        "headerStatic": safe_str(item.get("header_static") or item.get("headerStatic")),
+        "avatar": safe_str(
+            first_present(
+                item.get("avatar"),
+                item.get("avatar_static"),
+                item.get("authorAvatar"),
+            )
+        ),
+        "banner": safe_str(
+            first_present(item.get("header"), item.get("header_static"), item.get("banner"))
+        ),
         "verified": bool(item.get("verified") or item.get("authorVerified")),
-        "followers": safe_int(item.get("followers_count") or item.get("followersCount")),
-        "following": safe_int(item.get("following_count") or item.get("followingCount")),
-        "postCount": safe_int(item.get("statuses_count") or item.get("statusesCount")),
+        "followers": safe_int(
+            first_present(item.get("followers_count"), item.get("followersCount"))
+        ),
+        "following": safe_int(
+            first_present(item.get("following_count"), item.get("followingCount"))
+        ),
+        "postCount": safe_int(
+            first_present(item.get("statuses_count"), item.get("statusesCount"))
+        ),
         "location": safe_str(item.get("location")),
         "website": safe_str(item.get("website")),
         "createdAt": safe_str(
-            item.get("created_at") or item.get("createdAt") or item.get("authorCreatedAt")
+            first_present(
+                item.get("created_at"),
+                item.get("createdAt"),
+                item.get("authorCreatedAt"),
+            )
         ),
-        "lastStatusAt": _status_at_iso(item.get("last_status_at") or item.get("lastStatusAt")),
+        "lastStatusAt": _status_at_iso(
+            first_present(item.get("last_status_at"), item.get("lastStatusAt"))
+        ),
         "emojis": _normalize_emojis(item.get("emojis")),
         "fields": _normalize_fields(item.get("fields")),
     }
     if rich:
-        # Classification triad — not Mastodon junk flags; keep always-key on rich payloads.
+        # Classification triad — catalogue name is isPrivate (upstream: locked).
         out["bot"] = bool(item.get("bot"))
-        out["locked"] = locked_bool
-        out["isPrivate"] = locked_bool  # BC alias of locked
+        out["isPrivate"] = is_private
         out["group"] = bool(item.get("group"))
         out["discoverable"] = _bool_or_none(item.get("discoverable"))
         if out.get("location") == "":
@@ -302,14 +329,14 @@ def _normalize_account(item: dict[str, Any]) -> dict[str, Any]:
             )
         if "tv_account" in item or "tvAccount" in item:
             out["tvAccount"] = _bool_or_none(item.get("tv_account", item.get("tvAccount")))
-        for key in ("website", "avatarStatic", "headerStatic"):
-            if out.get(key) in (None, ""):
-                out.pop(key, None)
+        if out.get("website") in (None, ""):
+            out.pop("website", None)
     else:
-        for key in ("location", "website", "avatarStatic", "headerStatic", "acct"):
+        for key in ("location", "website"):
             if out.get(key) in (None, ""):
                 out.pop(key, None)
-    return stamp_profile_core(out, platform="truth_social")
+    # Strict: do not re-emit handle/name twins from stamp_profile_core.
+    return stamp_profile_core(out, platform="truth_social", emit_deprecated_aliases=False)
 
 
 def _author_slim(full: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -540,12 +567,40 @@ def _normalize_post(
     else:
         author = full_author
 
+    # favourites_count === upvotes_count on every live status we inspected — keep
+    # catalogue ``likes`` only. downvotes_count is real (often 0); never use `or`
+    # (0 is falsy and was collapsing to null).
     engagement = {
-        "replies": safe_int(item.get("replies_count") or item.get("repliesCount") or item.get("replyCount")),
-        "reblogs": safe_int(item.get("reblogs_count") or item.get("reblogsCount") or item.get("repostCount")),
-        "likes": safe_int(item.get("favourites_count") or item.get("favouritesCount") or item.get("likeCount")),
-        "upvotes": safe_int(item.get("upvotes_count") or item.get("upvotesCount") or item.get("upvotes")),
-        "downvotes": safe_int(item.get("downvotes_count") or item.get("downvotesCount") or item.get("downvotes")),
+        "replies": safe_int(
+            first_present(
+                item.get("replies_count"),
+                item.get("repliesCount"),
+                item.get("replyCount"),
+            )
+        ),
+        "reblogs": safe_int(
+            first_present(
+                item.get("reblogs_count"),
+                item.get("reblogsCount"),
+                item.get("repostCount"),
+            )
+        ),
+        "likes": safe_int(
+            first_present(
+                item.get("favourites_count"),
+                item.get("favouritesCount"),
+                item.get("likeCount"),
+                item.get("upvotes_count"),
+                item.get("upvotesCount"),
+            )
+        ),
+        "downvotes": safe_int(
+            first_present(
+                item.get("downvotes_count"),
+                item.get("downvotesCount"),
+                item.get("downvotes"),
+            )
+        ),
     }
     out: dict[str, Any] = {
         "platform": "truth_social",
@@ -790,7 +845,7 @@ async def profile(
 
         data = await cached_or_run(
             "truth-social.profile",
-            {"username": username, "v": 4},
+            {"username": username, "v": 5},
             _run,
             ctx,
             use_cache=cache,
@@ -910,7 +965,7 @@ async def user_posts(
 
         data = await cached_or_run(
             "truth-social.user-posts",
-            {"username": username, "limit": limit, "cursor": cursor or "", "v": 6},
+            {"username": username, "limit": limit, "cursor": cursor or "", "v": 7},
             _run,
             ctx,
             use_cache=cache,
@@ -951,5 +1006,5 @@ async def post(
                     raise
             return await _actor_post(post_id, url)
 
-        data = await cached_or_run("truth-social.post", {"post_id": post_id, "v": 5}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("truth-social.post", {"post_id": post_id, "v": 6}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

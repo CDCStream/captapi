@@ -92,13 +92,25 @@ def test_normalize_post_links_card_media_external():
     assert full["links"] == [{"url": "https://www.whitehouse.gov/election-integrity/"}]
     assert full["externalVideoId"] == "v6surln"
     assert full["externalVideoUrl"] == "https://rumble.com/v6surln"
-    assert full["engagement"]["upvotes"] == 3
+    # likes from favourites_count; upvotes twin dropped; downvotes keeps real zeros.
+    assert full["engagement"]["likes"] == 10
+    assert "upvotes" not in full["engagement"]
     assert full["engagement"]["downvotes"] == 1
     assert full["card"]["title"] == "Election Integrity"
     assert full["media"][0]["previewUrl"] is None
     assert full["media"][0]["meta"]["width"] == 1280
     assert full["media"][0]["durationSeconds"] == 12.5
     assert full["author"]["followers"] == 1
+    assert full["author"]["isPrivate"] is False
+    for twin in (
+        "handle",
+        "acct",
+        "name",
+        "avatarStatic",
+        "headerStatic",
+        "locked",
+    ):
+        assert twin not in full["author"]
 
     slim = ts._normalize_post(raw, author_mode="slim")
     assert set(slim["author"].keys()) == {
@@ -109,6 +121,79 @@ def test_normalize_post_links_card_media_external():
         "verified",
     }
     assert "followers" not in slim["author"]
+
+
+def test_engagement_downvotes_zero_not_null():
+    """Upstream sends downvotes_count: 0 — must not collapse via `or` to null."""
+    out = ts._normalize_post(
+        {
+            "id": "1",
+            "content": "<p>x</p>",
+            "favourites_count": 5,
+            "upvotes_count": 5,
+            "downvotes_count": 0,
+            "replies_count": 0,
+            "reblogs_count": 0,
+            "account": {
+                "id": "9",
+                "username": "a",
+                "display_name": "A",
+                "followers_count": 0,
+                "statuses_count": 1,
+                "locked": False,
+                "bot": False,
+                "group": False,
+            },
+        },
+        author_mode="slim",
+    )
+    assert out["engagement"] == {
+        "replies": 0,
+        "reblogs": 0,
+        "likes": 5,
+        "downvotes": 0,
+    }
+    assert "upvotes" not in out["engagement"]
+
+
+def test_normalize_account_drops_mastodon_twins():
+    out = ts._normalize_account(
+        {
+            "id": "1",
+            "username": "realDonaldTrump",
+            "acct": "realDonaldTrump",
+            "display_name": "Donald J. Trump",
+            "avatar": "https://cdn.example.com/a.jpg",
+            "avatar_static": "https://cdn.example.com/a.jpg",
+            "header": "https://cdn.example.com/h.jpg",
+            "header_static": "https://cdn.example.com/h.jpg",
+            "followers_count": 10,
+            "following_count": 1,
+            "statuses_count": 2,
+            "locked": False,
+            "bot": False,
+            "group": False,
+            "discoverable": None,
+            "location": "",
+            "note": "<p>bio</p>",
+        }
+    )
+    assert out["username"] == "realDonaldTrump"
+    assert out["displayName"] == "Donald J. Trump"
+    assert out["avatar"] == "https://cdn.example.com/a.jpg"
+    assert out["banner"] == "https://cdn.example.com/h.jpg"
+    assert out["isPrivate"] is False
+    assert out["location"] is None
+    assert out["discoverable"] is None
+    for twin in (
+        "handle",
+        "acct",
+        "name",
+        "avatarStatic",
+        "headerStatic",
+        "locked",
+    ):
+        assert twin not in out
 
 
 def test_scaled_posts_native_floor():

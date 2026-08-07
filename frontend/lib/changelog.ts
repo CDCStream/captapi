@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Truth Social: drop author twins; fix downvotes 0→null",
+    description:
+      "Profile / user-posts / post share one _normalize_account and one _normalize_post. Dropped Mastodon twin keys on author (handle/acct/name/avatarStatic/headerStatic/locked) — keep username/displayName/avatar/banner/isPrivate. Upstream acct equals username on reachable public accounts; location/discoverable stay (real when set). Engagement keeps likes + downvotes; dropped upvotes (identical to favourites_count). downvotes_count: 0 no longer collapses to null via Python `or`.",
+    items: [
+      "Canonical author keys; drop 5 Mastodon twins + locked (TS1)",
+      "likes only; downvotes keeps real zeros (TS2)",
+      "Shared mapper on profile + user-posts + post",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Facebook Marketplace search: 65s budget + shared location{}",
     description:
       "marketplace-search was timing out at 40s while Decodo search needs ~25–60s (occasionally longer) — raised to 80s (geo=US) and returns rows. Failures include timings{resolveMs,fetchMs,parseMs,totalMs} on the error envelope (resolveMs is slug-only — search never called the old slow location-search path). Marketplace location is now the same object shape as Event endpoints (name/city/state/countryCode/lat/lng); events gained state for key parity.",

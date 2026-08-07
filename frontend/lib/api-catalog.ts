@@ -2550,13 +2550,13 @@ const TRUTH_SOCIAL: Spec[] = [
     path: "/v1/truth-social/profile",
     credits: 1,
     tagline:
-      "Prominent public Truth Social profiles — locked/bot/group flags, fields[], static media. Flat 1 credit.",
+      "Prominent public Truth Social profiles — isPrivate/bot/group, fields[], avatar/banner. Flat 1 credit.",
     longDescription:
-      `Pass a Truth Social @username or profile URL and get the public account as clean JSON. Canonical profile core: platform, id, handle, url, displayName, bio, avatar, banner, followers, following, postCount, verified, createdAt — plus deprecated username alias for one release. Also: avatarStatic/headerStatic, bot/locked (+ isPrivate alias)/group, discoverable, location/website, ISO lastStatusAt, emojis[], and profile fields[] with verifiedAt for confirmed links. ${TRUTH_AUTH_LIMIT} Flat 1 credit.`,
+      `Pass a Truth Social @username or profile URL and get the public account as clean JSON. Canonical profile core: platform, id, username, url, displayName, bio, avatar, banner, followers, following, postCount, verified, createdAt. Also: bot/isPrivate/group, discoverable, location/website, ISO lastStatusAt, emojis[], and profile fields[] with verifiedAt for confirmed links. Mastodon twin keys (handle/acct/name/avatarStatic/headerStatic/locked) are omitted — acct never differs from username on reachable public accounts. ${TRUTH_AUTH_LIMIT} Flat 1 credit.`,
     delivers: [
-      "locked / bot / group classification flags",
+      "isPrivate / bot / group classification flags",
       "fields[] with verifiedAt for confirmed profile links",
-      "HTML-stripped bio + static avatar/banner URLs",
+      "HTML-stripped bio + avatar/banner URLs",
       "Honest prominent-only access limit (most accounts 404)",
     ],
   },
@@ -2572,7 +2572,7 @@ const TRUTH_SOCIAL: Spec[] = [
     tagline:
       "Recent Truths — same post mapper as /post (links, card, reblog/quote, mentions). 2 credits native.",
     longDescription:
-      `Pass a Truth Social @username or profile URL and get recent public posts as clean JSON — same status mapper as /post (not a slim sibling). Full author{} once at the top; each post keeps a slim author {id,username,displayName,avatar,verified}. text + links[] (unbroken URLs), card, media.meta, externalVideoId→Rumble, engagement (incl. upvotes/downvotes). Chain fields when present: reblog{}, quote{}/quoteId, inReplyToId/inReplyToAccountId/inReplyTo{} — so a boost is not mistaken for an original. Also mentions[]/tags[] (platform lists), poll{}, visibility, spoilerText, sponsored, pinned, group. Session-only flags (favourited/reblogged/muted/bookmarked) are omitted. Native timeline excludes replies (Truth Social exclude_replies); reblogs and quotes still appear. nextCursor/hasMore; max limit 80. ${TRUTH_AUTH_LIMIT} Native path flat 2 credits; Apify fallback ~0.85/post (min 2).`,
+      `Pass a Truth Social @username or profile URL and get recent public posts as clean JSON — same status mapper as /post (not a slim sibling). Full author{} once at the top (same shape as /profile); each post keeps a slim author {id,username,displayName,avatar,verified}. text + links[] (unbroken URLs), card, media.meta, externalVideoId→Rumble, engagement {replies,reblogs,likes,downvotes} (likes is favourites/upvotes — identical upstream; downvotes keeps real zeros). Chain fields when present: reblog{}, quote{}/quoteId, inReplyToId/inReplyToAccountId/inReplyTo{} — so a boost is not mistaken for an original. Also mentions[]/tags[] (platform lists), poll{}, visibility, spoilerText, sponsored, pinned, group. Session-only flags (favourited/reblogged/muted/bookmarked) are omitted. Native timeline excludes replies (Truth Social exclude_replies); reblogs and quotes still appear. nextCursor/hasMore; max limit 80. ${TRUTH_AUTH_LIMIT} Native path flat 2 credits; Apify fallback ~0.85/post (min 2).`,
     delivers: [
       "Same _normalize_post mapper as /post (links/card/media.meta/externalVideoId)",
       "reblog / quote / inReplyTo chain fields for monitoring accuracy",
@@ -2595,7 +2595,7 @@ const TRUTH_SOCIAL: Spec[] = [
     tagline:
       "One Truth — text, links[], card, reblog/quote chain, media.meta, externalVideoId. Flat 1 credit.",
     longDescription:
-      `Pass a Truth Social post URL or numeric ID and get the public status as clean JSON (same mapper as user-posts rows): text with unbroken URLs, links[], full author{}, engagement (incl. upvotes/downvotes), card, media[] with meta/durationSeconds, externalVideoId when the clip is on Rumble, plus reblog/quote/inReplyTo chain fields, mentions[]/tags[], poll, visibility, spoilerText, sponsored, pinned when present. Session-only favourited/reblogged/muted/bookmarked are omitted. ${TRUTH_AUTH_LIMIT} Flat 1 credit.`,
+      `Pass a Truth Social post URL or numeric ID and get the public status as clean JSON (same mapper as user-posts rows): text with unbroken URLs, links[], full author{} (same _normalize_account as /profile), engagement {replies,reblogs,likes,downvotes}, card, media[] with meta/durationSeconds, externalVideoId when the clip is on Rumble, plus reblog/quote/inReplyTo chain fields, mentions[]/tags[], poll, visibility, spoilerText, sponsored, pinned when present. Session-only favourited/reblogged/muted/bookmarked are omitted. ${TRUTH_AUTH_LIMIT} Flat 1 credit.`,
   },
 ];
 
@@ -8444,12 +8444,13 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "truth-social-profile": {
     platform: 'Always "truth_social" on this endpoint.',
-    locked: "Whether the account is locked (follow approval required). Same signal as isPrivate.",
-    isPrivate: "Alias of locked for Captapi consistency with Instagram/Threads.",
+    username: "Local username (canonical). Upstream acct matches on reachable public accounts.",
+    isPrivate:
+      "Follow-approval / locked account (upstream locked). Catalogue name shared with Instagram/Threads.",
     bot: "Whether Truth Social marks the account as a bot — filter before creator metrics.",
     group: "Whether this is a Truth Social group account (not a personal creator).",
     location: "Profile location string when Truth Social exposes one; null when empty.",
-    acct: "Mastodon acct handle (local username, or user@domain for remote accounts).",
+    discoverable: "Whether Truth Social marks the account discoverable; null when upstream omits it.",
     lastStatusAt:
       "Last status day from Truth Social, normalized to ISO-8601 UTC midnight (e.g. 2026-08-02T00:00:00.000Z). Upstream often sends YYYY-MM-DD only.",
     fields:
@@ -8459,7 +8460,7 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   "truth-social-user-posts": {
     platform: 'Always "truth_social" on this endpoint (posts[].platform).',
     author:
-      "Top-level: full profile card (same shape as Profile). On each post: slim {id, username, displayName, avatar, verified} only — stats live once at the top.",
+      "Top-level: full profile card (same _normalize_account as /profile). On each post: slim {id, username, displayName, avatar, verified} only — stats live once at the top.",
     text:
       "Plain text from the status HTML. <a href> is replaced by the real URL so Truth Social span soft-wraps do not insert spaces into links.",
     links: "Authoritative http(s) URLs from <a href> attributes (deduped). Prefer this over regex on text.",
@@ -8470,7 +8471,7 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     inReplyToId: "Parent status id when this post is a reply (rare on user-posts — native feed excludes replies).",
     inReplyToAccountId: "Parent author's account id when this post is a reply.",
     inReplyTo: "Nested parent status when Truth Social embeds it.",
-    mentions: "Platform mention list [{id,username,acct,url}] — not regex-from-text.",
+    mentions: "Platform mention list [{id,username,acct,url}] — not regex-from-text. mentions[].acct kept for federation shape.",
     tags: "Platform hashtag list [{name,url}] — not regex-from-text.",
     poll: "Poll block {id,expiresAt,expired,multiple,votesCount,votersCount,options[{title,votes}]} when the status is a poll.",
     visibility: 'Mastodon visibility string when set (e.g. "public", "unlisted").',
@@ -8479,15 +8480,16 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     pinned: "Whether the status is pinned on the profile when exposed.",
     language:
       "Language code from Truth Social/Mastodon auto-detect — often wrong on short posts (e.g. fy for English). Not a Captapi detection.",
-    locked: "Top-level author locked flag when the account payload is rich.",
-    isPrivate: "Alias of author.locked on the top-level author card.",
+    isPrivate: "Top-level author isPrivate (upstream locked) when the account payload is rich.",
     bot: "Top-level author bot flag when present.",
     group: "Author.group on the top-level card; posts[].group when the status itself is a group post.",
     lastStatusAt:
       "Top-level author's last status time as ISO-8601 UTC (date-only upstream → midnight Z).",
     fields: "Top-level author profile fields ({name, value, verifiedAt}).",
-    upvotes: "Truth Social upvotes (separate from favourites/likes) when exposed.",
-    downvotes: "Truth Social downvotes when exposed.",
+    likes:
+      "Favourites count (identical to upstream upvotes_count on Truth Social). Catalogue name — upvotes twin omitted.",
+    downvotes:
+      "Truth Social downvotes_count (integer, often 0). Not null when upstream sends zero.",
     card: "Link preview card ({url, title, description, image, type, providerName}) when the status has one.",
     externalVideoId:
       "Rumble video id when Truth Social hosts the clip on Rumble — pass to /v1/rumble/video-details.",
@@ -8514,15 +8516,16 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     pinned: "Pinned-on-profile flag when present.",
     language:
       "Language code from Truth Social/Mastodon auto-detect — unreliable on short posts. Not Captapi-detected.",
-    locked: "Author locked flag when the embedded account is rich.",
-    isPrivate: "Alias of author.locked.",
+    isPrivate: "Author isPrivate (upstream locked) when the embedded account is rich.",
     bot: "Author bot flag when present.",
     group: "Author group flag, or post-level group when the status itself is a group post.",
     lastStatusAt:
       "Author's last status time as ISO-8601 UTC (date-only upstream → midnight Z).",
     fields: "Author profile fields ({name, value, verifiedAt}) when present.",
-    upvotes: "Truth Social upvotes (separate from favourites/likes) when exposed.",
-    downvotes: "Truth Social downvotes when exposed.",
+    likes:
+      "Favourites count (identical to upstream upvotes_count). Catalogue name — upvotes twin omitted.",
+    downvotes:
+      "Truth Social downvotes_count (integer, often 0). Not null when upstream sends zero.",
     card: "Link preview card when the status has one.",
     externalVideoId:
       "Rumble video id when present — bridge to Captapi's Rumble video-details / comments.",
