@@ -41,10 +41,16 @@ def test_tiktok_id():
 
 
 def test_instagram():
+    from app.utils.url import canonical_instagram_profile_url
+
     assert extract_instagram_shortcode("https://www.instagram.com/reel/Cabcdef123/") == "Cabcdef123"
     assert extract_instagram_shortcode("https://www.instagram.com/p/Cabcdef123/") == "Cabcdef123"
     assert extract_instagram_username("https://instagram.com/zuck/") == "zuck"
     assert extract_instagram_username("https://instagram.com/p/Cabcdef123/") is None
+    assert canonical_instagram_profile_url("nasa") == "https://www.instagram.com/nasa/"
+    assert canonical_instagram_profile_url("@nasa") == "https://www.instagram.com/nasa/"
+    assert canonical_instagram_profile_url("https://instagram.com/nasa") == "https://www.instagram.com/nasa/"
+    assert canonical_instagram_profile_url("https://www.instagram.com/nasa/") == "https://www.instagram.com/nasa/"
 
 
 def test_facebook():

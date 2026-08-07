@@ -32,16 +32,17 @@ def test_finalise_unifies_graphql_and_feed_shapes() -> None:
         "postType": "Video",
         "productType": "clips",
         "caption": "a",
-        "description": "a",
         "publishedAt": "2026-08-01T00:00:00Z",
         "durationSeconds": 12.5,
         "thumbnailUrl": "https://cdn.example/a.jpg",
         "videoUrl": "https://cdn.example/a.mp4",
         "hasAudio": True,
+        "mediaCount": 1,
+        "children": [],
         "author": {
             "id": "1",
             "username": "golfzonleadbettereducation",
-            "url": "https://www.instagram.com/golfzonleadbettereducation/",
+            "url": "https://instagram.com/golfzonleadbettereducation",
         },
         "engagement": {"likes": 10, "comments": 1, "views": 100, "viewsSource": "instagram"},
         "hashtags": [],
@@ -53,12 +54,6 @@ def test_finalise_unifies_graphql_and_feed_shapes() -> None:
         "commentsDisabled": False,
         "music": {"id": "m1", "title": "Song", "artist": "Artist"},
         "musicId": "m1",
-        "location": {
-            "id": "loc1",
-            "name": "Course",
-            "slug": "course",
-            "hasPublicPage": True,
-        },
     }
     feedish = {
         "platform": "instagram",
@@ -68,7 +63,6 @@ def test_finalise_unifies_graphql_and_feed_shapes() -> None:
         "postType": "Video",
         "productType": "clips",
         "caption": "b",
-        "description": "b",
         "publishedAt": "2026-07-01T00:00:00Z",
         "durationSeconds": 8.0,
         "thumbnailUrl": "https://cdn.example/b.jpg",
@@ -104,17 +98,16 @@ def test_finalise_unifies_graphql_and_feed_shapes() -> None:
             "isTrendingInClips": False,
         },
         "musicId": "c1",
-        "location": {
-            "id": "loc2",
-            "name": "Range",
-            "latitude": 1.0,
-            "longitude": 2.0,
-        },
     }
     posts = decodo.finalise_channel_posts([graphqlish, feedish])
     keysets = {tuple(sorted(p.keys())) for p in posts}
     assert len(keysets) == 1
     assert set(posts[0].keys()) == set(decodo.IG_CHANNEL_POST_KEYS)
+    assert "description" not in posts[0]
+    assert "location" not in posts[0]
+    assert posts[0]["mediaCount"] == 1
+    assert posts[0]["children"] == []
+    assert posts[0]["author"]["url"] == "https://www.instagram.com/golfzonleadbettereducation/"
 
     assert posts[0]["id"] == "Dbsv8poug94"
     assert posts[1]["id"] == "Da5-Oe-vSE_"
@@ -132,14 +125,6 @@ def test_finalise_unifies_graphql_and_feed_shapes() -> None:
         tuple(sorted(p["music"].keys())) for p in posts if isinstance(p.get("music"), dict)
     }
     assert music_sets == {tuple(sorted(decodo.IG_MUSIC_KEYS))}
-    loc_sets = {
-        tuple(sorted(p["location"].keys()))
-        for p in posts
-        if isinstance(p.get("location"), dict)
-    }
-    assert loc_sets == {tuple(sorted(decodo.IG_LOCATION_KEYS))}
-    assert posts[0]["location"]["latitude"] is None
-    assert posts[1]["location"]["slug"] is None
 
 
 def test_finalise_parses_shortcode_from_reel_url() -> None:
@@ -202,6 +187,49 @@ def test_channel_user_uses_is_private_not_private() -> None:
     assert "private" not in user
     assert user["isPrivate"] is False
     assert set(user.keys()) == set(decodo.IG_CHANNEL_USER_KEYS)
+    assert user["url"] == "https://www.instagram.com/kerrodgraygolf/"
+
+
+def test_map_feed_post_emits_carousel_children() -> None:
+    mapped = native.map_feed_post(
+        {
+            "pk": "111",
+            "code": "CarouselABC",
+            "media_type": 8,
+            "product_type": "carousel_container",
+            "taken_at": 1700000000,
+            "like_count": 2,
+            "comment_count": 0,
+            "caption": {"text": "album"},
+            "user": {"pk": "9", "username": "nasa"},
+            "image_versions2": {"candidates": [{"url": "https://cdn.example/cover.jpg"}]},
+            "carousel_media": [
+                {
+                    "pk": "201",
+                    "media_type": 1,
+                    "image_versions2": {"candidates": [{"url": "https://cdn.example/1.jpg"}]},
+                },
+                {
+                    "pk": "202",
+                    "media_type": 2,
+                    "image_versions2": {"candidates": [{"url": "https://cdn.example/2.jpg"}]},
+                    "video_versions": [{"url": "https://cdn.example/2.mp4"}],
+                },
+            ],
+        }
+    )
+    assert mapped["postType"] == "Sidecar"
+    assert mapped["mediaCount"] == 2
+    assert len(mapped["children"]) == 2
+    assert mapped["children"][0]["mediaType"] == "image"
+    assert mapped["children"][0]["thumbnailUrl"] == "https://cdn.example/1.jpg"
+    assert mapped["children"][0]["videoUrl"] is None
+    assert mapped["children"][1]["mediaType"] == "video"
+    assert mapped["children"][1]["videoUrl"] == "https://cdn.example/2.mp4"
+    final = decodo.finalise_channel_post(mapped)
+    assert final["mediaCount"] == 2
+    assert len(final["children"]) == 2
+    assert "description" not in final
 
 
 def test_image_omits_views_source() -> None:
@@ -257,4 +285,6 @@ def test_finalise_channel_reel_drops_tautologies_and_dead_fields() -> None:
     assert "postCount" not in out["author"]
     assert "trendRank" not in out["music"]
     assert "previousTrendRank" not in out["music"]
-    assert out["location"] is None
+    assert "location" not in out
+    assert "children" not in out
+    assert "mediaCount" not in out

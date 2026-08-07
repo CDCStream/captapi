@@ -199,10 +199,9 @@ _MENTION_RE = re.compile(r"@([A-Za-z0-9_](?:[A-Za-z0-9_.]*[A-Za-z0-9_])?)")
 
 def _canonical_profile_url(username: str | None) -> str | None:
     """``https://www.instagram.com/{user}/`` — join-safe with channel-details."""
-    uname = safe_str(username)
-    if not uname:
-        return None
-    return f"https://www.instagram.com/{uname.lstrip('@')}/"
+    from app.utils.url import canonical_instagram_profile_url
+
+    return canonical_instagram_profile_url(username)
 
 
 def build_ig_author(
@@ -514,12 +513,13 @@ IG_CHANNEL_POST_KEYS: tuple[str, ...] = (
     "postType",
     "productType",
     "caption",
-    "description",
     "publishedAt",
     "durationSeconds",
     "thumbnailUrl",
     "videoUrl",
     "hasAudio",
+    "mediaCount",
+    "children",
     "author",
     "engagement",
     "hashtags",
@@ -532,7 +532,12 @@ IG_CHANNEL_POST_KEYS: tuple[str, ...] = (
     "commentsDisabled",
     "music",
     "musicId",
-    "location",
+)
+IG_CAROUSEL_CHILD_KEYS: tuple[str, ...] = (
+    "id",
+    "mediaType",
+    "thumbnailUrl",
+    "videoUrl",
 )
 IG_AUTHOR_KEYS: tuple[str, ...] = (
     "id",
@@ -563,7 +568,7 @@ IG_MUSIC_KEYS: tuple[str, ...] = (
     "hasLyrics",
 )
 # channel-reels only: drop tautologies (postType/productType), caption twin
-# (description), and fields that are null on every measured row.
+# (description), carousel children (reels are single-media), and dead nulls.
 IG_CHANNEL_REEL_KEYS: tuple[str, ...] = (
     "platform",
     "url",
@@ -586,7 +591,6 @@ IG_CHANNEL_REEL_KEYS: tuple[str, ...] = (
     "likeAndViewCountsDisabled",
     "music",
     "musicId",
-    "location",
 )
 IG_REEL_AUTHOR_KEYS: tuple[str, ...] = tuple(
     k for k in IG_AUTHOR_KEYS if k != "postCount"
@@ -656,6 +660,11 @@ def finalise_channel_post(post: dict[str, Any] | None) -> dict[str, Any]:
     if author.get("avatar") in (None, "") and author.get("profileImage") not in (None, ""):
         author = {**author, "avatar": author.get("profileImage")}
     author = {k: v for k, v in author.items() if k not in ("private", "profileImage", "handle")}
+    # Re-canonicalize — older mappers emitted https://instagram.com/x (no www).
+    if author.get("username") or author.get("url"):
+        author["url"] = _canonical_profile_url(
+            safe_str(author.get("username")) or safe_str(author.get("url"))
+        )
     src["author"] = _finalise_keys(IG_AUTHOR_KEYS, author)
 
     music = src.get("music")
@@ -665,12 +674,6 @@ def finalise_channel_post(post: dict[str, Any] | None) -> dict[str, Any]:
             src["musicId"] = src["music"].get("id")
     else:
         src["music"] = None
-
-    location = src.get("location")
-    if isinstance(location, dict) and location:
-        src["location"] = _finalise_keys(IG_LOCATION_KEYS, location)
-    else:
-        src["location"] = None
 
     canonical_post_ids(src)
 
@@ -697,14 +700,27 @@ def finalise_channel_post(post: dict[str, Any] | None) -> dict[str, Any]:
     if not isinstance(src.get("mentions"), list):
         src["mentions"] = []
 
+    raw_children = src.get("children") if isinstance(src.get("children"), list) else []
+    children: list[dict[str, Any]] = []
+    for child in raw_children:
+        if not isinstance(child, dict):
+            continue
+        children.append(_finalise_keys(IG_CAROUSEL_CHILD_KEYS, child))
+    media_count = safe_int(src.get("mediaCount"))
+    if media_count is None or media_count < 1:
+        media_count = len(children) if children else 1
+    src["children"] = children
+    src["mediaCount"] = media_count
+
     out = _finalise_keys(IG_CHANNEL_POST_KEYS, src)
     out["platform"] = out.get("platform") or "instagram"
     out["author"] = src["author"]
     out["engagement"] = src["engagement"]
     out["music"] = src["music"]
-    out["location"] = src["location"]
     out["hashtags"] = src["hashtags"]
     out["mentions"] = src["mentions"]
+    out["children"] = children
+    out["mediaCount"] = media_count
     return out
 
 
@@ -725,9 +741,6 @@ def finalise_channel_reel(post: dict[str, Any] | None) -> dict[str, Any]:
             out["musicId"] = out["music"].get("id")
     else:
         out["music"] = None
-    # location stays null when untagged (do not ship empty objects).
-    if not (isinstance(out.get("location"), dict) and out["location"]):
-        out["location"] = None
     return out
 
 
@@ -746,6 +759,9 @@ def finalise_channel_user(user: dict[str, Any] | None) -> dict[str, Any] | None:
     src.pop("private", None)
     src.pop("profileImage", None)
     src.pop("handle", None)
+    src["url"] = _canonical_profile_url(
+        safe_str(src.get("username")) or safe_str(src.get("url"))
+    )
     return _finalise_keys(IG_CHANNEL_USER_KEYS, src)
 
 
@@ -942,6 +958,7 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         else safe_int(node.get("fb_play_count") or node.get("fbPlayCount"))
     )
     product = safe_str(node.get("product_type")) or ("clips" if is_video else None)
+    children, media_count = _carousel_children_from_graphql(node)
     # Prefer shortcode as id; mediaId is always the numeric pk when known.
     result = {
         "platform": "instagram",
@@ -953,12 +970,14 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         "postType": "Sidecar" if is_sidecar else ("Video" if is_video else "Image"),
         "productType": product,
         "caption": caption,
-        "description": caption,
         "publishedAt": _iso_timestamp(node.get("taken_at_timestamp") or node.get("date_posted")),
         "durationSeconds": safe_float(node.get("video_duration") or node.get("length")),
         "thumbnailUrl": _image_url(node),
-        "videoUrl": safe_str(node.get("video_url")) or None,
+        # Cover videoUrl is for single videos; carousel videos live in children[].
+        "videoUrl": (safe_str(node.get("video_url")) or None) if is_video and not is_sidecar else None,
         "hasAudio": node.get("has_audio") if node.get("has_audio") is not None else None,
+        "mediaCount": media_count,
+        "children": children,
         "author": build_ig_author(author, username=username),
         "engagement": engagement_with_play_split(
             {
@@ -993,11 +1012,6 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
             else None
         ),
     }
-    location = map_ig_location(
-        node.get("location") if isinstance(node.get("location"), dict) else None
-    )
-    if location:
-        result["location"] = location
     music = node.get("clips_music_attribution_info")
     if isinstance(music, dict) and (
         music.get("audio_id") or music.get("song_name") or music.get("artist_name")
@@ -1009,6 +1023,52 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         }
         result["musicId"] = result["music"].get("id")
     return strip_null_post_fields(result)
+
+
+def _carousel_children_from_graphql(node: dict[str, Any]) -> tuple[list[dict[str, Any]], int]:
+    """GraphQL ``edge_sidecar_to_children`` → (children, mediaCount)."""
+    edge = node.get("edge_sidecar_to_children")
+    edges = edge.get("edges") if isinstance(edge, dict) else None
+    if not isinstance(edges, list) or not edges:
+        # Some scrapers flatten carousel children onto the node.
+        flat = node.get("carousel_media") or node.get("children")
+        if isinstance(flat, list) and flat:
+            children: list[dict[str, Any]] = []
+            for item in flat:
+                if not isinstance(item, dict):
+                    continue
+                media = item.get("media") if isinstance(item.get("media"), dict) else item
+                child = _graphql_child_node(media)
+                if child:
+                    children.append(child)
+            return children, max(len(children), 1)
+        return [], 1
+    children = []
+    for edge_item in edges:
+        if not isinstance(edge_item, dict):
+            continue
+        child_node = edge_item.get("node") if isinstance(edge_item.get("node"), dict) else edge_item
+        child = _graphql_child_node(child_node)
+        if child:
+            children.append(child)
+    return children, max(len(children), 1)
+
+
+def _graphql_child_node(node: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(node, dict):
+        return None
+    typename = safe_str(node.get("__typename"))
+    is_video = bool(node.get("is_video")) or typename == "GraphVideo"
+    child_id = safe_str(node.get("id") or node.get("pk"))
+    if child_id and not child_id.isdigit():
+        # Prefer numeric pk when shortcode leaked into id.
+        child_id = safe_str(node.get("pk")) if safe_str(node.get("pk") or "").isdigit() else child_id
+    return {
+        "id": child_id,
+        "mediaType": "video" if is_video else "image",
+        "thumbnailUrl": _image_url(node),
+        "videoUrl": (safe_str(node.get("video_url")) or None) if is_video else None,
+    }
 
 
 async def _profile(handle: str) -> dict[str, Any] | None:
@@ -1063,7 +1123,7 @@ def _channel_user_summary(user: dict[str, Any]) -> dict[str, Any]:
         "id": safe_str(user.get("id") or user.get("pk")),
         "username": username,
         "displayName": safe_str(user.get("full_name")),
-        "url": f"https://instagram.com/{username}" if username else None,
+        "url": _canonical_profile_url(username),
         "verified": user.get("is_verified"),
         # Same key as nested author{} / channel-details (A21) — never ``private``.
         "isPrivate": user.get("is_private"),

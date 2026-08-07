@@ -619,7 +619,7 @@ def _normalize_audio_reel(item: dict) -> dict:
         "author": {
             "username": safe_str(username),
             "displayName": safe_str(author.get("fullname")),
-            "url": f"https://instagram.com/{username}" if username else None,
+            "url": instagram_native.canonical_instagram_profile_url(username),
             "verified": author.get("isVerified"),
             "profileImage": safe_str(author.get("temporaryProfilePictureUrl")),
         },
@@ -1527,10 +1527,13 @@ async def _overlay_feed_engagement(
             affiliate = raw.get("affiliate_info")
             if affiliate not in (None, [], {}, False) or raw.get("is_affiliate"):
                 post["isAffiliate"] = True
-            if not post.get("location"):
-                loc = instagram_native._location_from_media(raw)
-                if loc:
-                    post["location"] = loc
+            # Carousel slides: GraphQL timeline often omits sidecar children;
+            # the api/v1 feed row carries carousel_media with per-slide URLs.
+            if not post.get("children"):
+                children, media_count = instagram_native._carousel_children_from_feed(raw)
+                if children:
+                    post["children"] = children
+                    post["mediaCount"] = media_count
             # Backfill video/meta fields GraphQL timeline often omits.
             product = safe_str(raw.get("product_type")) or ("clips" if is_video else None)
             if product and not safe_str(post.get("productType")):
@@ -1620,6 +1623,7 @@ async def instagram_channel_posts(
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
+    profile_url = instagram_native.canonical_instagram_profile_url(handle) or url
     settings = get_settings()
     if cursor and not _IG_CURSOR_RE.match(cursor):
         raise HTTPException(status_code=400, detail="Invalid cursor. Pass the nextCursor value from a previous response.")
@@ -1628,7 +1632,7 @@ async def instagram_channel_posts(
         caller=caller,
         endpoint="/v1/instagram/channel-posts",
         platform="instagram",
-        resource_url=url,
+        resource_url=profile_url,
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
@@ -1645,7 +1649,7 @@ async def instagram_channel_posts(
                 ctx["source"] = "direct"
                 return _finalise_channel_list_payload(
                     {
-                        "url": url,
+                        "url": profile_url,
                         "totalReturned": len(posts),
                         "posts": posts,
                         "nextCursor": next_cursor,
@@ -1687,7 +1691,7 @@ async def instagram_channel_posts(
                     posts.append(decodo.strip_null_post_fields(post))
                 return _finalise_channel_list_payload(
                     {
-                        "url": url,
+                        "url": profile_url,
                         "totalReturned": len(posts),
                         "posts": posts,
                         "nextCursor": None,
@@ -1708,7 +1712,7 @@ async def instagram_channel_posts(
                         more_posts, next_cursor = extra
                         posts = posts + more_posts
                 out: dict[str, Any] = {
-                    "url": url,
+                    "url": profile_url,
                     "totalReturned": len(posts),
                     "posts": posts,
                     "nextCursor": next_cursor,
@@ -1724,8 +1728,8 @@ async def instagram_channel_posts(
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            # v19: finalise_channel_post — uniform keys + shortcode id across GraphQL/feed.
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 19},
+            # v20: carousel children[] + mediaCount; drop description/location twin/dead.
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 20},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

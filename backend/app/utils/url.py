@@ -201,6 +201,24 @@ def extract_instagram_shortcode(url: str) -> str | None:
     return m.group(1) if m else None
 
 
+def canonical_instagram_profile_url(username: str | None) -> str | None:
+    """Canonical profile URL: ``https://www.instagram.com/{user}/`` (www + slash).
+
+    One helper for every Instagram profile URL in the catalogue — never emit
+    ``https://instagram.com/x`` (no www / no trailing slash) beside a www form.
+    """
+    raw = (username or "").strip()
+    if not raw:
+        return None
+    # Accept a full URL and normalize to the handle form.
+    handle = extract_instagram_username(raw) or raw.lstrip("@").strip().strip("/")
+    if not handle or "/" in handle or handle in {"p", "reel", "reels", "tv", "explore", "stories"}:
+        return None
+    if not re.fullmatch(r"[A-Za-z0-9_.]{1,30}", handle):
+        return None
+    return f"https://www.instagram.com/{handle}/"
+
+
 def canonical_instagram_media_url(url: str) -> str:
     """Strip share junk (``igsh=``, tracking) and return a clean /reel|p/ URL.
 

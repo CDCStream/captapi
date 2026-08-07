@@ -35,6 +35,7 @@ from app.services.instagram_decodo import (
     merge_ig_author,
 )
 from app.utils.formatters import safe_float, safe_int, safe_str
+from app.utils.url import canonical_instagram_profile_url as canonical_instagram_profile_url
 
 log = structlog.get_logger(__name__)
 
@@ -43,14 +44,6 @@ _UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"
 )
-
-
-def canonical_instagram_profile_url(username: str | None) -> str | None:
-    """Canonical profile URL: ``https://www.instagram.com/{user}/`` (www + slash)."""
-    u = safe_str(username)
-    if not u:
-        return None
-    return f"https://www.instagram.com/{u.lstrip('@')}/"
 
 
 def cdn_image_expires_at(url: str | None) -> str | None:
@@ -205,7 +198,7 @@ def _coauthors_from_media(media: dict[str, Any]) -> list[dict[str, Any]]:
                 "id": safe_str(user.get("pk") or user.get("pk_id") or user.get("id")),
                 "username": username,
                 "displayName": safe_str(user.get("full_name")),
-                "url": f"https://instagram.com/{username}" if username else None,
+                "url": canonical_instagram_profile_url(username),
                 "verified": user.get("is_verified"),
                 "profileImage": safe_str(user.get("profile_pic_url")),
             }
@@ -1054,7 +1047,7 @@ def map_highlight_tray_item(node: dict[str, Any]) -> dict[str, Any]:
         "owner": {
             "id": safe_str(owner.get("pk") or owner.get("id")),
             "username": owner_username,
-            "url": f"https://instagram.com/{owner_username}" if owner_username else None,
+            "url": canonical_instagram_profile_url(owner_username),
             "profileImage": safe_str(owner.get("profile_pic_url")),
         },
     }
@@ -1177,7 +1170,7 @@ def map_highlight_reel(node: dict[str, Any]) -> dict[str, Any]:
         "owner": {
             "id": safe_str(owner.get("pk") or owner.get("id")),
             "username": owner_username,
-            "url": f"https://instagram.com/{owner_username}" if owner_username else None,
+            "url": canonical_instagram_profile_url(owner_username),
             "profileImage": safe_str(owner.get("profile_pic_url")),
         },
     }
@@ -1185,6 +1178,46 @@ def map_highlight_reel(node: dict[str, Any]) -> dict[str, Any]:
     if not out["owner"]:
         out.pop("owner", None)
     return {k: v for k, v in out.items() if v is not None}
+
+
+def _carousel_child_from_media(child: dict[str, Any]) -> dict[str, Any] | None:
+    """One carousel slide for channel-posts ``children[]``."""
+    if not isinstance(child, dict):
+        return None
+    media_type = safe_int(child.get("media_type"))
+    is_video = media_type == 2
+    videos = child.get("video_versions") or []
+    images = (child.get("image_versions2") or {}).get("candidates") or []
+    child_pk = safe_str(child.get("pk") or child.get("pk_id") or child.get("id"))
+    if child_pk and "_" in child_pk:
+        child_pk = child_pk.split("_", 1)[0]
+    if child_pk and not child_pk.isdigit():
+        child_pk = None
+    thumb = safe_str(images[0].get("url")) if images else None
+    video_url = safe_str(videos[0].get("url")) if videos else None
+    media_label = "video" if is_video else "image"
+    if media_type == 8:
+        media_label = "sidecar"
+    out: dict[str, Any] = {
+        "id": child_pk,
+        "mediaType": media_label,
+        "thumbnailUrl": thumb,
+        "videoUrl": video_url if is_video else None,
+    }
+    return out
+
+
+def _carousel_children_from_feed(media: dict[str, Any]) -> tuple[list[dict[str, Any]], int]:
+    """Return (children, mediaCount). Non-carousels → ([], 1)."""
+    raw = media.get("carousel_media")
+    if not isinstance(raw, list) or not raw:
+        return [], 1
+    children: list[dict[str, Any]] = []
+    for item in raw:
+        mapped = _carousel_child_from_media(item)
+        if mapped:
+            children.append(mapped)
+    return children, max(len(children), 1)
 
 
 def map_feed_post(
@@ -1211,6 +1244,7 @@ def map_feed_post(
     cover = (media.get("carousel_media") or [media])[0]
     videos = cover.get("video_versions") or []
     images = (cover.get("image_versions2") or {}).get("candidates") or []
+    children, media_count = _carousel_children_from_feed(media)
 
     taken_at = safe_int(media.get("taken_at"))
     published = (
@@ -1249,6 +1283,8 @@ def map_feed_post(
         comments_disabled = bool(comments_disabled)
 
     # id = shortcode (same contract as GraphQL ``_post``); mediaId = numeric pk.
+    # Cover videoUrl stays null on Sidecar — per-slide video lives in children[].
+    cover_video = safe_str(videos[0].get("url")) if videos and is_video else None
     return strip_null_post_fields(
         {
             "platform": "instagram",
@@ -1259,12 +1295,13 @@ def map_feed_post(
             "postType": _MEDIA_TYPE_NAMES.get(media_type or 0),
             "productType": product,
             "caption": caption,
-            "description": caption,
             "publishedAt": published,
             "durationSeconds": _video_duration(media, cover),
             "thumbnailUrl": safe_str(images[0].get("url")) if images else None,
-            "videoUrl": safe_str(videos[0].get("url")) if videos else None,
+            "videoUrl": cover_video,
             "hasAudio": media.get("has_audio") if media.get("has_audio") is not None else None,
+            "mediaCount": media_count,
+            "children": children,
             "author": author,
             "engagement": engagement_with_play_split(
                 {
@@ -1288,7 +1325,6 @@ def map_feed_post(
             "commentsDisabled": comments_disabled,
             "music": music,
             "musicId": (music or {}).get("id") if music else None,
-            "location": _location_from_media(media),
         }
     )
 

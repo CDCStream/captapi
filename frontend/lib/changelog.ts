@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Instagram channel-posts: carousel children[] + canonical profile URLs",
+    description:
+      "Sidecar posts only shipped a cover thumbnail with no slide list — a quarter of a typical feed was silently incomplete. posts[] now include mediaCount and children[{id, mediaType, thumbnailUrl, videoUrl}] ([] on singles). Dropped the caption===description twin and location (never present on measured logged-out feeds). accessibilityCaption stays (populated on some accounts). All profile URLs go through canonical_instagram_profile_url (www + trailing slash) so user.url and author.url match.",
+    items: [
+      "Sidecar children[] + mediaCount on every post",
+      "Drop description twin; drop null location",
+      "canonical_instagram_profile_url for envelope/user/author",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Instagram channel-reels: race feed sessions + IPS1 resolve; lean reel shape",
     description:
       "channel-reels was burning minutes paging the mixed photo timeline (not a per-reel hydrate) and still used sequential WPI for handle→ID while profile-search raced. Reels now prefer POST /api/v1/clips/user/ (dense pages); feed/session candidates race in a bounded pool; url/@handle reuses _race_resolve_ig_user. Envelope url is a real profile URL or null (never instagram_user:{id}). reels[] drop description/postType/productType and always-null dead fields. Docs state ceil(n×0.3) credits.",

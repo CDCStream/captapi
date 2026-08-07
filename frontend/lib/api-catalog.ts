@@ -931,14 +931,18 @@ const INSTAGRAM: Spec[] = [
     credits: 6,
     creditsPerResult: 0.3,
     tagline:
-      "Latest posts from a public Instagram profile — engagement.views + viewsSource, profile user{} in one call.",
+      "Latest posts from a public Instagram profile — carousel children[], mediaCount, user{} in one call.",
     longDescription:
-      "Send a profile URL or @handle and get recent posts as JSON plus a top-level user{} profile block (id, username, displayName, verified, followers, avatar, isPrivate) so you do not need a second channel-details call. Each item includes postType, productType (clips/feed — never an empty string), caption, media, likes, comments, and on videos: durationSeconds, hasAudio, music{}, location{}, isAd / isAffiliate / isPaidPartnership when Instagram exposes them. Metrics: engagement.views (canonical play count) + viewsSource (instagram|facebook|null) + deprecated plays alias. Image/Sidecar keep engagement.views as null. Cursor pagination via nextCursor + hasMore. Pass cache=true for the 24h shared cache.",
+      "Send a profile URL or @handle and get recent posts as JSON plus a top-level user{} profile block (id, username, displayName, url, verified, followers, avatar, isPrivate) so you do not need a second channel-details call. Profile URLs are always https://www.instagram.com/{username}/ (www + trailing slash) on the envelope, user{}, and author{}. Each item includes postType / productType (Image/feed, Video/clips, Sidecar/carousel_container — the discriminator a mixed feed needs), caption (not a duplicated description), mediaCount (1 for singles; slide count for carousels), and children[] (per-slide id / mediaType / thumbnailUrl / videoUrl — [] on non-carousels). Cover thumbnailUrl is the first slide; Sidecar cover videoUrl stays null — video slides live in children[]. Also likes, comments, and on videos: durationSeconds, hasAudio, music{}, isAd / isAffiliate / isPaidPartnership when Instagram exposes them. accessibilityCaption when Instagram provides one. Metrics: engagement.views + viewsSource on videos. Cursor pagination via nextCursor + hasMore. Billing ceil(n × 0.3). Pass cache=true for the 24h shared cache.",
     delivers: [
       "Top-level user{} profile (no second call)",
+      "Sidecar children[] + mediaCount on every post",
       "engagement.views + viewsSource on videos",
-      "productType, durationSeconds, hasAudio, music{}, location{}, commercial flags",
       "nextCursor + hasMore pagination",
+    ],
+    platformLimits: [
+      "location is not returned — logged-out feed/GraphQL samples never carry a tagged place (0/72 across nasa/natgeo/instagram); not a silent cover-only gap.",
+      "description is not returned — caption is the text field (same as channel-reels).",
     ],
   },
   {
