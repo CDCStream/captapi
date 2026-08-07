@@ -6,15 +6,18 @@ import json
 from typing import Any
 
 PROFILE_ALIAS_TWINS: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("username", ("handle",)),
+    ("username", ("handle", "mutableUsername")),
     ("displayName", ("name",)),
     ("bio", ("description",)),
-    ("avatar", ("profileImage", "profileImageHd", "thumbnailUrl")),
-    ("banner", ("bannerUrl", "bannerImage")),
-    ("followers", ("subscriberCount",)),
+    ("avatar", ("profileImage", "profileImageHd", "thumbnailUrl", "profilePictureUrl")),
+    ("banner", ("bannerUrl", "bannerImage", "squareHeroImageUrl", "squareHeroImage")),
+    ("followers", ("subscriberCount", "subscribers")),
     ("postCount", ("videoCount", "posts", "tweetCount")),
     ("isPrivate", ("private",)),
     ("createdAt", ("joinedAt",)),
+    ("website", ("websiteUrl",)),
+    ("url", ("webUrl", "profileUrl")),
+    ("highlights", ("curatedHighlights",)),
 )
 
 _DISPLAY_DATE_KEYS = frozenset({"joinedDate"})
@@ -59,25 +62,42 @@ def drop_alias_twins(card: dict[str, Any] | None) -> dict[str, Any]:
     if first is not None and display is not None and first == display and not last:
         out.pop("firstName", None)
 
+    if "verified" in out and "isVerified" in out:
+        out.pop("isVerified", None)
+
+    # Drop leftover same-value twins (e.g. title == displayName on Snapchat).
+    for a, b in (("displayName", "title"), ("snapcode", "snapcodeImageUrl")):
+        if a in out and b in out and out.get(a) == out.get(b):
+            out.pop(b, None)
+
     return out
 
 
-def duplicate_non_boolean_keys(data: dict[str, Any]) -> list[tuple[str, str, Any]]:
-    """Return (key_a, key_b, value) pairs that violate the one-concept rule."""
+def duplicate_non_boolean_keys(
+    data: dict[str, Any],
+    *,
+    include_containers: bool = False,
+) -> list[tuple[str, str, Any]]:
+    """Return (key_a, key_b, value) pairs that violate the one-concept rule.
+
+    By default skips dict/list values (profile scalars). Pass
+    ``include_containers=True`` for the catalogue-wide audit that matches the
+    auditor JS (JSON.stringify equality on every non-boolean key).
+    """
     keys = list(data.keys())
     dups: list[tuple[str, str, Any]] = []
     for i, ka in enumerate(keys):
         va = data[ka]
         if va is None or _is_whitelisted_boolish(ka, va):
             continue
-        if isinstance(va, (dict, list)):
+        if not include_containers and isinstance(va, (dict, list)):
             continue
         sa = json.dumps(va, sort_keys=True, default=str)
         for kb in keys[i + 1 :]:
             vb = data[kb]
             if vb is None or _is_whitelisted_boolish(kb, vb):
                 continue
-            if isinstance(vb, (dict, list)):
+            if not include_containers and isinstance(vb, (dict, list)):
                 continue
             if json.dumps(vb, sort_keys=True, default=str) == sa:
                 dups.append((ka, kb, va))

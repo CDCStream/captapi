@@ -86,56 +86,57 @@ def _normalize(item: dict[str, Any]) -> dict[str, Any]:
         elif listed:
             story = {**story, "snapCount": len(listed)}
 
+    from app.utils.profile_duplicates import drop_alias_twins
+
     avatar = safe_str(data.get("avatar") or data.get("profilePictureUrl"))
     banner = safe_str(data.get("banner") or data.get("squareHeroImageUrl"))
     website = safe_str(data.get("website") or data.get("websiteUrl"))
     if website and "://" not in website:
         website = native._abs_url(website)
 
-    return strip_empty(
-        {
-            "platform": "snapchat",
-            "username": username,
-            "handle": username,
-            "url": safe_str(data.get("url") or data.get("webUrl") or data.get("profileUrl"))
-            or (f"https://www.snapchat.com/@{username}" if username else None),
-            "displayName": safe_str(
-                data.get("displayName") or data.get("title") or data.get("name")
-            ),
-            "bio": safe_str(data.get("bio") or data.get("description")),
-            "category": safe_str(data.get("category")),
-            "categoryId": safe_str(data.get("categoryId") or data.get("categoryStringId")),
-            "subcategory": safe_str(data.get("subcategory")),
-            "subcategoryId": safe_str(
-                data.get("subcategoryId") or data.get("subcategoryStringId")
-            ),
-            "subscriberCount": safe_int(data.get("subscriberCount") or data.get("subscribers")),
-            "followers": safe_int(
-                data.get("followers") or data.get("subscriberCount") or data.get("subscribers")
-            ),
-            "verified": bool(
-                data.get("isVerified") or data.get("verified") or data.get("badge")
-            ),
-            "badge": safe_int(data.get("badge")),
-            "avatar": avatar,
-            "banner": banner,
-            "profilePictureUrl": avatar,
-            "squareHeroImageUrl": banner,
-            "snapcode": safe_str(data.get("snapcodeImageUrl") or data.get("snapcode")),
-            "website": website,
-            "businessProfileId": safe_str(data.get("businessProfileId")),
-            "creationTimestampMs": safe_int(data.get("creationTimestampMs")),
-            "createdAt": safe_str(data.get("createdAt")),
-            "lastUpdateTimestampMs": safe_int(data.get("lastUpdateTimestampMs")),
-            "updatedAt": safe_str(data.get("updatedAt")),
-            "hasStory": data.get("hasStory"),
-            "hasCuratedHighlights": data.get("hasCuratedHighlights"),
-            "hasSpotlightHighlights": data.get("hasSpotlightHighlights"),
-            "story": story,
-            "highlights": highlights,
-            "spotlightHighlights": data.get("spotlightHighlights") or [],
-            "relatedAccounts": related,
-        }
+    return drop_alias_twins(
+        strip_empty(
+            {
+                "platform": "snapchat",
+                "username": username,
+                "url": safe_str(data.get("url") or data.get("webUrl") or data.get("profileUrl"))
+                or (f"https://www.snapchat.com/@{username}" if username else None),
+                "displayName": safe_str(
+                    data.get("displayName") or data.get("title") or data.get("name")
+                ),
+                "bio": safe_str(data.get("bio") or data.get("description")),
+                "category": safe_str(data.get("category")),
+                "categoryId": safe_str(data.get("categoryId") or data.get("categoryStringId")),
+                "subcategory": safe_str(data.get("subcategory")),
+                "subcategoryId": safe_str(
+                    data.get("subcategoryId") or data.get("subcategoryStringId")
+                ),
+                "followers": safe_int(
+                    data.get("followers") or data.get("subscriberCount") or data.get("subscribers")
+                ),
+                "verified": bool(
+                    data.get("isVerified") or data.get("verified") or data.get("badge")
+                ),
+                "badge": safe_int(data.get("badge")),
+                "avatar": avatar,
+                "banner": banner,
+                "snapcode": safe_str(data.get("snapcodeImageUrl") or data.get("snapcode")),
+                "website": website,
+                "businessProfileId": safe_str(data.get("businessProfileId")),
+                "creationTimestampMs": safe_int(data.get("creationTimestampMs")),
+                "createdAt": safe_str(data.get("createdAt")),
+                "lastUpdateTimestampMs": safe_int(data.get("lastUpdateTimestampMs")),
+                "updatedAt": safe_str(data.get("updatedAt")),
+                "hasStory": data.get("hasStory"),
+                "hasCuratedHighlights": data.get("hasCuratedHighlights"),
+                "hasSpotlightHighlights": data.get("hasSpotlightHighlights"),
+                "story": story,
+                # highlights = curated collections; spotlightHighlights = Spotlight posts.
+                "highlights": highlights,
+                "spotlightHighlights": data.get("spotlightHighlights") or [],
+                "relatedAccounts": related,
+            }
+        )
     )
 
 

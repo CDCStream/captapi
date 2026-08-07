@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Snapchat user-profile: drop naming twins (handle/subscriberCount/avatar aliases)",
+    description:
+      "GET /v1/snapchat/user-profile now keeps one key per concept — username, followers, avatar, banner — and no longer re-emits handle, subscriberCount, profilePictureUrl, or squareHeroImageUrl with the same values. highlights[] (curated Story albums) stays distinct from spotlightHighlights[] (Spotlight posts); createdAt ISO and creationTimestampMs remain as two representations of the same instant. Docs spell out both pairs.",
+    items: [
+      "Canonical username/followers/avatar/banner only",
+      "Drop handle/subscriberCount/profilePictureUrl/squareHeroImageUrl twins",
+      "Document highlights vs spotlightHighlights",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Uniform object-array rows in every API response + Komi links[] finaliser",
     description:
       "Successful JSON responses now pad every object array in data to the union of keys present (absent → null) in the billing/response middleware — the same bug that hit rumble/search, rumble/streams, ad-library/tiktok/search, Instagram channel-posts/details, and komi/page links[] no longer needs a per-endpoint patch. Komi links[] also declare an explicit fixed key set (id/moduleId/versionId/order/type/title/url/visible/thumbnail/price/currency) and read YouTube embed titles/thumbnails from item.metadata when the module label is empty.",

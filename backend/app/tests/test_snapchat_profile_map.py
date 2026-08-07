@@ -151,3 +151,73 @@ def test_no_python_repr_in_serialized_highlights():
     blob = json.dumps(mapped)
     assert "{'value'" not in blob
     assert mapped[0]["highlightId"] == "abc"
+
+def test_profile_card_no_duplicate_alias_twins():
+    from app.routers.snapchat import _normalize
+    from app.utils.profile_duplicates import duplicate_non_boolean_keys
+
+    card = _normalize(
+        {
+            "username": "nba",
+            "handle": "nba",
+            "mutableUsername": "nba",
+            "title": "NBA",
+            "displayName": "NBA",
+            "bio": "Hoops",
+            "description": "Hoops",
+            "avatar": "https://cdn/a.jpg",
+            "profilePictureUrl": "https://cdn/a.jpg",
+            "banner": "https://cdn/b.jpg",
+            "squareHeroImageUrl": "https://cdn/b.jpg",
+            "followers": 100,
+            "subscriberCount": 100,
+            "url": "https://www.snapchat.com/@nba",
+            "webUrl": "https://www.snapchat.com/@nba",
+            "website": "https://nba.com",
+            "websiteUrl": "https://nba.com",
+            "highlights": [{"highlightId": "h1"}],
+            "curatedHighlights": [{"highlightId": "h1"}],
+            "spotlightHighlights": [{"highlightId": "s1"}],
+            "verified": True,
+            "isVerified": True,
+            "badge": 1,
+        }
+    )
+    for gone in (
+        "handle",
+        "mutableUsername",
+        "subscriberCount",
+        "profilePictureUrl",
+        "squareHeroImageUrl",
+        "description",
+        "webUrl",
+        "websiteUrl",
+        "curatedHighlights",
+        "isVerified",
+    ):
+        assert gone not in card, gone
+    assert card["username"] == "nba"
+    assert card["followers"] == 100
+    assert card["avatar"] == "https://cdn/a.jpg"
+    assert card["banner"] == "https://cdn/b.jpg"
+    assert card["highlights"]
+    assert card["spotlightHighlights"]
+    assert not duplicate_non_boolean_keys(card, include_containers=True)
+
+
+def test_related_no_alias_twins():
+    rows = sn._related(
+        [
+            {
+                "publicProfileInfo": {
+                    "username": "team",
+                    "title": "Team",
+                    "profilePictureUrl": "https://cdn/a.jpg",
+                    "badge": 1,
+                }
+            }
+        ]
+    )
+    assert "profilePictureUrl" not in rows[0]
+    assert "profileUrl" not in rows[0]
+    assert rows[0]["avatar"] == "https://cdn/a.jpg"

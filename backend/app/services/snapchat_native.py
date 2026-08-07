@@ -329,16 +329,10 @@ def _related(raw: Any) -> list[dict[str, Any]]:
                     "displayName": safe_str(
                         _val(info.get("title") or info.get("displayName"))
                     ),
-                    # Same naming as the top-level profile card.
+                    # Same naming as the top-level profile card (no alias twins).
                     "url": profile_url,
                     "avatar": avatar,
-                    # Deprecated aliases — prefer url / avatar.
-                    "profileUrl": profile_url,
-                    "profilePictureUrl": avatar,
                     "verified": bool(info.get("badge"))
-                    if info.get("badge") is not None
-                    else None,
-                    "isVerified": bool(info.get("badge"))
                     if info.get("badge") is not None
                     else None,
                     "hasStory": bool(info.get("hasStory"))
@@ -425,6 +419,8 @@ async def fetch_user_profile(username: str) -> dict[str, Any] | None:
     related = _related(info.get("relatedAccountsInfo") or [])
     story = _story(page.get("story"))
     badge = safe_int(_val(info.get("badge")))
+    from app.utils.profile_duplicates import drop_alias_twins
+
     avatar = safe_str(_val(info.get("profilePictureUrl")))
     banner = safe_str(_val(info.get("squareHeroImageUrl")))
     website = _abs_url(info.get("websiteUrl"))
@@ -433,32 +429,21 @@ async def fetch_user_profile(username: str) -> dict[str, Any] | None:
         {
             "platform": "snapchat",
             "username": uname,
-            "handle": uname,
-            "mutableUsername": uname,
             "url": f"https://www.snapchat.com/@{uname}",
-            "webUrl": f"https://www.snapchat.com/@{uname}",
             "displayName": safe_str(_val(info.get("title") or info.get("mutableName"))),
-            "title": safe_str(_val(info.get("title"))),
             "bio": safe_str(_val(info.get("bio"))),
-            "description": safe_str(_val(info.get("bio"))),
             "categoryId": category_id,
             "category": _category_label(category_id),
             "subcategoryId": subcategory_id,
             "subcategory": _category_label(subcategory_id),
-            "subscriberCount": safe_int(_val(info.get("subscriberCount"))),
             "followers": safe_int(_val(info.get("subscriberCount"))),
             # Snapchat public badge: 0/absent = none, 1 = official verified.
             "badge": badge,
-            "isVerified": bool(badge),
             "verified": bool(badge),
             "avatar": avatar,
             "banner": banner,
-            # Deprecated aliases — prefer avatar / banner / website.
-            "profilePictureUrl": avatar,
-            "squareHeroImageUrl": banner,
-            "snapcodeImageUrl": safe_str(_val(info.get("snapcodeImageUrl"))),
+            "snapcode": safe_str(_val(info.get("snapcodeImageUrl"))),
             "website": website,
-            "websiteUrl": website,
             "businessProfileId": safe_str(_val(info.get("businessProfileId"))),
             "creationTimestampMs": safe_int(_val(info.get("creationTimestampMs"))),
             "createdAt": _ms_to_iso(info.get("creationTimestampMs")),
@@ -472,16 +457,17 @@ async def fetch_user_profile(username: str) -> dict[str, Any] | None:
             if info.get("hasSpotlightHighlights") is not None
             else None,
             "story": story,
-            "curatedHighlights": highlights,
+            # highlights = curated story collections; spotlightHighlights = Spotlight posts.
             "highlights": highlights,
             "spotlightHighlights": spotlights,
             "relatedAccounts": related,
         }
     )
+    out = drop_alias_twins(out)
     log.info(
         "snapchat_native_profile_ok",
         username=uname,
-        subscribers=out.get("subscriberCount"),
+        followers=out.get("followers"),
         highlights=len(highlights),
         spotlights=len(spotlights),
         story_snaps=len((story or {}).get("snapList") or []),

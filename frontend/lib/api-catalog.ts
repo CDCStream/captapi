@@ -2475,11 +2475,11 @@ const SNAPCHAT: Spec[] = [
     tagline:
       "Snapchat profile — unwrapped highlight ids, mediaType image/video, category labels, Spotlight boosts (1 credit).",
     longDescription:
-      "Pass a Snapchat username or profile URL and get the public profile as clean JSON — not Snapchat's protobuf wrappers. Canonical-ish card: displayName, bio, avatar, banner (square hero), url, subscriberCount as a number, verified (from badge), human-readable category (public-profile-category-v3-business-group → Business Group), absolute website URL, snapcode, createdAt. Highlights unwrap highlightId/storyTitle to plain strings (never Python dict repr). Each snap has mediaType image|video from snapMediaType 0|1, plus embeddedTextCaption / contextCards / hashtags / lensMetadata when Snapchat exposes them. story.snapCount always equals story.snapList length. Spotlight rows add engagement{views,shares,comments,boosts,recommends}. relatedAccounts[] use the same avatar/url keys as the top-level card. Flat 1 credit.",
+      "Pass a Snapchat username or profile URL and get the public profile as clean JSON — not Snapchat's protobuf wrappers. Canonical card: username, displayName, bio, avatar, banner (square hero), url, followers, verified (from badge), human-readable category (public-profile-category-v3-business-group → Business Group), absolute website URL, snapcode, createdAt (+ creationTimestampMs for the same instant). Identical-value aliases (handle/subscriberCount/profilePictureUrl/squareHeroImageUrl) are not emitted. highlights[] are curated Story albums; spotlightHighlights[] are Spotlight posts — different collections. Highlight ids/titles unwrap to plain strings (never Python dict repr). Each snap has mediaType image|video from snapMediaType 0|1, plus embeddedTextCaption / contextCards / hashtags / lensMetadata when Snapchat exposes them. story.snapCount always equals story.snapList length. Spotlight rows add engagement{views,shares,comments,boosts,recommends}. relatedAccounts[] use the same avatar/url keys as the top-level card. Flat 1 credit.",
     delivers: [
       "Unwrapped highlightId / storyTitle (no protobuf {value} leaks)",
       "mediaType image|video on every snap (snapMediaType 0 and 1)",
-      "Category labels + numeric subscriberCount + verified from badge",
+      "Canonical username/followers/avatar/banner (no alias twins)",
       "Spotlight boosts/recommends + relatedAccounts with avatar/url",
     ],
   },
@@ -7795,14 +7795,21 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     animatedPreviewUrl: "VOD storyboard / animated preview strip when Twitch exposes it.",
   },
   "snapchat-user-profile": {
+    username: "Snapchat @handle without @. Canonical account identifier (no handle twin).",
+    followers: "Subscriber count from Snapchat's public profile (no subscriberCount twin).",
     categoryId: "Snapchat public-profile category string id (e.g. public-profile-category-v3-business-group). Prefer human-readable category.",
     category: "Human-readable category label derived from categoryId (e.g. Business Group).",
     badge: "Snapchat official badge code: 0/absent = none, 1 = official verified. verified is derived from this.",
     verified: "Whether the profile shows Snapchat's official badge (badge === 1).",
-    avatar: "Profile picture URL. Canonical; profilePictureUrl is a deprecated alias.",
-    banner: "Square hero / cover image URL. Canonical; squareHeroImageUrl is a deprecated alias.",
-    squareHeroImageUrl: "Deprecated alias of banner — prefer banner.",
+    avatar: "Profile picture URL (no profilePictureUrl twin).",
+    banner: "Square hero / cover image URL (no squareHeroImageUrl twin).",
     website: "Absolute https website URL (scheme added when Snapchat omits it, e.g. NBA.com → https://NBA.com).",
+    createdAt: "Profile creation time as ISO-8601. Prefer this over creationTimestampMs for sorting.",
+    creationTimestampMs: "Profile creation time as Unix milliseconds — same instant as createdAt, different representation.",
+    highlights:
+      "Curated Story Highlight collections (albums with snapList[]) — persistent highlight reels, not Spotlight.",
+    spotlightHighlights:
+      "Spotlight posts on the profile (short-form public snaps with engagement). Distinct from highlights[] curated albums.",
     highlightId: "Curated highlight id as a plain UUID string — never a protobuf {value} wrapper or Python dict repr.",
     storyTitle: "Highlight title as a plain string (unwrapped from Snapchat's {value} wrapper).",
     mediaType: 'Derived media kind: "image" when snapMediaType is 0, "video" when 1 (or 2). Always present when snapMediaType is known.',
