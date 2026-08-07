@@ -2108,7 +2108,11 @@ async def lookup_web_profile_info(
     handle = username.lstrip("@")
     url = f"https://www.instagram.com/api/v1/users/web_profile_info/?username={urllib.parse.quote(handle)}"
     referer = f"https://www.instagram.com/{handle}/"
-    stages: dict[str, int] = {}
+    stages: dict[str, Any] = {
+        # Proxy acquisition is inlined in each HTTP attempt (not a separate stage).
+        "session_pool": len(_ig_session_pool()) if use_sessions else 0,
+        "use_sessions": use_sessions,
+    }
     t_all = time.perf_counter()
 
     t0 = time.perf_counter()
@@ -2127,6 +2131,7 @@ async def lookup_web_profile_info(
                 "ig_profile_lookup_stages",
                 handle=handle,
                 source="wpi",
+                path="native",
                 **stages,
                 total_ms=int((time.perf_counter() - t_all) * 1000),
             )
@@ -2144,6 +2149,7 @@ async def lookup_web_profile_info(
                     "ig_profile_lookup_stages",
                     handle=handle,
                     source="session",
+                    path="native",
                     **stages,
                     total_ms=int((time.perf_counter() - t_all) * 1000),
                 )
@@ -2164,6 +2170,7 @@ async def lookup_web_profile_info(
                 "ig_profile_lookup_stages",
                 handle=handle,
                 source="html_http",
+                path="native",
                 **stages,
                 total_ms=int((time.perf_counter() - t_all) * 1000),
             )
@@ -2173,6 +2180,7 @@ async def lookup_web_profile_info(
                 "ig_profile_lookup_stages",
                 handle=handle,
                 source="html_http_missing",
+                path="native",
                 **stages,
                 total_ms=int((time.perf_counter() - t_all) * 1000),
             )
@@ -2187,6 +2195,7 @@ async def lookup_web_profile_info(
                 "ig_profile_lookup_stages",
                 handle=handle,
                 source="html_headless",
+                path="decodo",
                 **stages,
                 total_ms=int((time.perf_counter() - t_all) * 1000),
             )
@@ -2195,6 +2204,7 @@ async def lookup_web_profile_info(
             "ig_profile_lookup_stages",
             handle=handle,
             source="miss",
+            path="native",
             **stages,
             total_ms=int((time.perf_counter() - t_all) * 1000),
         )
@@ -2204,6 +2214,7 @@ async def lookup_web_profile_info(
         "ig_profile_lookup_stages",
         handle=handle,
         source="miss_no_html",
+        path="native",
         **stages,
         total_ms=int((time.perf_counter() - t_all) * 1000),
     )

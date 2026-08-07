@@ -1032,6 +1032,82 @@ async def instagram_channel_details(
         return ApiResponse(data=data)
 
 
+async def _race_resolve_ig_user(
+    handle: str,
+) -> tuple[dict[str, Any] | None, str | None, dict[str, Any], bool]:
+    """Race WPI (no sessions) vs Decodo GraphQL vs Decodo headless HTML.
+
+    Same strategy as channel-details: session-pool redirect loops were burning
+    30–85s on the sequential cascade. Returns
+    ``(raw_user, winner, stages, confirmed_missing)``.
+    """
+    stages: dict[str, Any] = {"handle": handle, "path": "native"}
+    t_all = time.perf_counter()
+    t_race = time.perf_counter()
+    tasks: dict[str, asyncio.Task] = {
+        "wpi": asyncio.create_task(
+            instagram_native.lookup_web_profile_info(
+                handle,
+                fallback_html=False,
+                fallback_decodo_html=False,
+                use_sessions=False,
+            )
+        ),
+    }
+    if decodo.enabled():
+        tasks["graphql"] = asyncio.create_task(decodo.profile_user(handle))
+        tasks["html_headless"] = asyncio.create_task(
+            instagram_native.fetch_web_profile_info_via_decodo(handle, timeout=20.0)
+        )
+    else:
+        tasks["html_http"] = asyncio.create_task(
+            instagram_native.fetch_web_profile_info_via_html_http(handle)
+        )
+    pending = set(tasks.values())
+    winner: str | None = None
+    user: dict[str, Any] | None = None
+    saw_missing = False
+    while pending and user is None:
+        done, pending = await asyncio.wait(
+            pending, return_when=asyncio.FIRST_COMPLETED
+        )
+        for task in done:
+            name = next(n for n, t in tasks.items() if t is task)
+            try:
+                result = task.result()
+            except Exception as exc:  # noqa: BLE001
+                log.info(
+                    "ig_profile_race_error",
+                    handle=handle,
+                    stage=name,
+                    error=str(exc)[:120],
+                )
+                continue
+            if name == "wpi":
+                raw, miss = result
+                if raw is not None:
+                    winner, user = name, raw
+                    stages["path"] = "native"
+                elif miss:
+                    saw_missing = True
+            elif name == "graphql" and isinstance(result, dict):
+                winner, user = name, result
+                stages["path"] = "decodo"
+            elif name in {"html_headless", "html_http"}:
+                raw, miss = result
+                if raw is not None:
+                    winner, user = name, raw
+                    stages["path"] = "decodo" if name == "html_headless" else "native"
+                elif miss:
+                    saw_missing = True
+    for task in pending:
+        task.cancel()
+    stages["race_ms"] = int((time.perf_counter() - t_race) * 1000)
+    stages["source"] = winner or ("missing" if saw_missing else "miss")
+    stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+    return user, winner, stages, saw_missing
+
+
 @router.get("/basic-profile", summary="Full Instagram profile by user ID")
 async def instagram_basic_profile(
     userId: str = Query(
@@ -1075,21 +1151,23 @@ async def instagram_basic_profile(
             else:
                 username = ident
 
-            # Rich profile from the logged-out web_profile_info endpoint; fall
-            # back to Decodo (same underlying data) if the native call fails.
-            user = await instagram_native.fetch_web_profile_info(username)
+            # Same raced resolve as profile-search / channel-details — sequential
+            # session-pool WPI was dominating cold latency (~30–85s).
+            user, winner, stages, _missing = await _race_resolve_ig_user(username)
+            t_norm = time.perf_counter()
             if user is not None:
-                ctx["source"] = "native"
-            else:
-                user = await decodo._profile(username)
-                ctx["source"] = "decodo"
-            if not user:
-                raise HTTPException(status_code=404, detail="Profile not found")
-            return instagram_native.map_basic_profile(user)
+                mapped = instagram_native.map_basic_profile(user)
+                stages["normalize_ms"] = int((time.perf_counter() - t_norm) * 1000)
+                log.info("ig_basic_profile_stages", **stages)
+                ctx["source"] = "decodo" if stages.get("path") == "decodo" else "native"
+                return mapped
+            stages["normalize_ms"] = int((time.perf_counter() - t_norm) * 1000)
+            log.info("ig_basic_profile_stages", **stages)
+            raise HTTPException(status_code=404, detail="Profile not found")
 
         data = await cached_or_run(
             endpoint="instagram.basic-profile",
-            params={"target": f"{mode}:{ident}", "v": 7, "cacheMaxAge": cacheMaxAge},
+            params={"target": f"{mode}:{ident}", "v": 8, "cacheMaxAge": cacheMaxAge},
             runner=_run,
             ctx=ctx,
             use_cache=use_cache,
@@ -2743,7 +2821,13 @@ def _profile_to_search_user(profile: dict) -> dict:
 @router.get("/profile-search", summary="Find an Instagram profile by name or @handle")
 async def instagram_profile_search(
     q: str = Query(..., min_length=2),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    cache: bool = Query(
+        True,
+        description=(
+            "Serve from the 24h shared cache when available (0 credits on hit). "
+            "Default true — resolve answers barely change; set false to always fetch fresh."
+        ),
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
     async with billed_call(
@@ -2756,24 +2840,30 @@ async def instagram_profile_search(
         async def _run() -> dict[str, Any]:
             users: list[dict[str, Any]] = []
             for candidate in _profile_search_candidates(q):
-                # Native first — same web_profile_info path as basic-profile.
-                user = await instagram_native.fetch_web_profile_info(candidate)
+                t_cand = time.perf_counter()
+                user, winner, stages, missing = await _race_resolve_ig_user(candidate)
+                t_norm = time.perf_counter()
                 if user is not None:
-                    ctx["source"] = "direct"
-                    users.append(instagram_native.map_profile_search_user(user))
+                    mapped = instagram_native.map_profile_search_user(user)
+                    stages["normalize_ms"] = int((time.perf_counter() - t_norm) * 1000)
+                    stages["candidate_ms"] = int((time.perf_counter() - t_cand) * 1000)
+                    stages["candidate"] = candidate
+                    log.info("ig_profile_search_stages", query=q, **stages)
+                    ctx["source"] = "decodo" if stages.get("path") == "decodo" else "direct"
+                    users.append(mapped)
                     break
+                stages["normalize_ms"] = int((time.perf_counter() - t_norm) * 1000)
+                stages["candidate_ms"] = int((time.perf_counter() - t_cand) * 1000)
+                stages["candidate"] = candidate
                 mapped: dict[str, Any] | None = None
-                if decodo.enabled():
-                    # Prefer raw GraphQL user so search rows get id/bio/links,
-                    # not the sparse basic_profile subset.
-                    raw = await decodo.profile_user(candidate)
-                    if raw is not None:
-                        ctx["source"] = "decodo"
-                        mapped = instagram_native.map_profile_search_user(raw)
-                if mapped is None:
-                    meta = await _public_instagram_meta(f"https://www.instagram.com/{candidate}/")
+                if not missing:
+                    meta = await _public_instagram_meta(
+                        f"https://www.instagram.com/{candidate}/"
+                    )
                     if meta:
                         ctx["source"] = "meta"
+                        stages["source"] = "meta"
+                        stages["path"] = "native"
                         mapped = _profile_to_search_user(
                             {
                                 "username": candidate,
@@ -2784,6 +2874,7 @@ async def instagram_profile_search(
                                 "profileImage": meta["image"],
                             }
                         )
+                log.info("ig_profile_search_stages", query=q, **stages)
                 if mapped:
                     users.append(mapped)
                     break
@@ -2800,7 +2891,7 @@ async def instagram_profile_search(
 
         data = await cached_or_run(
             endpoint="instagram.profile-search",
-            params={"q": q, "v": 8},
+            params={"q": q, "v": 9},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

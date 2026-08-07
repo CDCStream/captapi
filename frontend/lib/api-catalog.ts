@@ -1081,11 +1081,12 @@ const INSTAGRAM: Spec[] = [
     ],
     platformLimits: [
       "mode is always resolve — Instagram's multi-result keyword search requires login; there is no search mode and no nextCursor/hasMore on this endpoint.",
+      "Cold resolve typically finishes in a few seconds when Decodo GraphQL or logged-out WPI wins; budget ~15s client-side. Cache hits are ~2–3s and free.",
       "avatar is a signed Instagram CDN URL (oe= expiry). imageExpiresAt is ISO when oe= is present; re-host for long-term storage.",
       "0 or 1 users[] — not a paginated discovery feed. Use relatedProfiles[] for adjacent accounts.",
     ],
     longDescription:
-      "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, instagram.com/natgeo) and this endpoint resolves it to the matching public Instagram account — a name→username resolver, not a Google-style niche discovery search (queries like \"fitness coach\" will not return a creator list). Response: mode=resolve (the only mode; Instagram keyword search is login-gated), users[0] with platform, id (numeric), username, displayName, url (canonical https://www.instagram.com/{user}/), bio, bioLinks[], externalUrl, categoryName, fbid, relatedProfiles[], businessAddress, likeAndViewCountsDisabled, followers/following/postCount, verified, isPrivate, isBusinessAccount/isProfessionalAccount, avatar, and imageExpiresAt when the CDN oe= param is present. No nextCursor — resolve returns at most one user. Walk relatedProfiles for niche discovery without a separate creator-search endpoint. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+      "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, instagram.com/natgeo) and this endpoint resolves it to the matching public Instagram account — a name→username resolver, not a Google-style niche discovery search (queries like \"fitness coach\" will not return a creator list). Response: mode=resolve (the only mode; Instagram keyword search is login-gated), users[0] with platform, id (numeric), username, displayName, url (canonical https://www.instagram.com/{user}/), bio, bioLinks[], externalUrl, categoryName, fbid, relatedProfiles[], businessAddress, likeAndViewCountsDisabled, followers/following/postCount, verified, isPrivate, isBusinessAccount/isProfessionalAccount, avatar, and imageExpiresAt when the CDN oe= param is present. No nextCursor — resolve returns at most one user. Walk relatedProfiles for niche discovery without a separate creator-search endpoint. Flat 1 credit. Cache is on by default (24h shared cache, 0 credits on hit) because a resolve answer barely changes — pass cache=false to force a fresh upstream lookup. Cold path is a raced native WPI + Decodo GraphQL resolve (not Apify); set client timeouts ≥15s, not 10s.",
   },
   { slug: "instagram-embed", name: "Instagram Embed HTML API", shortName: "Embed HTML", category: "details", method: "GET", path: "/v1/instagram/embed", credits: 1, tagline: "Get Instagram's own self-contained embed HTML for any post, reel, or profile — ready to drop into an iframe on your site.", longDescription: "Pass an Instagram post, reel, or profile URL (or an @handle) and get back Instagram's own self-contained embed page as ready-to-use HTML — the full <html> document Instagram serves at /embed/, which you can drop straight into an <iframe srcdoc> or render server-side. The response also returns embedUrl, so you can point an <iframe src> at it directly instead. Posts and reels come back as a rich media card (with caption); profiles come back as a profile card that links to the account. No login or OAuth needed — it's fast, costs just 1 credit. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh. If Instagram's embed page is ever unavailable, the response falls back to the classic blockquote + embed.js snippet.", delivers: ["Instagram's full self-contained embed HTML document", "embedUrl you can load directly in an <iframe src>", "Canonical Instagram permalink for the post/reel/profile", "Type flag (post/reel/profile) plus shortcode or username"] },
   {
@@ -1689,7 +1690,7 @@ const BLUESKY: Spec[] = [
     tagline:
       "Author feed — posts and reposts (isRepost marked), quote/external/images embeds, opaque cursor.",
     longDescription:
-      "Send a Bluesky profile URL, @handle, or handle and get that account's public author feed (app.bsky.feed.getAuthorFeed) as clean JSON — original posts and reposts. Reposts keep the original author{} and engagement; they are marked isRepost=true with repostedBy{handle,displayName,did,avatar} and repostedAt so analytics do not credit someone else's likes to the profile you queried. Pass includeReposts=false to drop reposts. Optional filter maps to Bluesky's feed filter (posts_with_replies | posts_no_replies | posts_with_media | posts_and_author_threads | posts_with_video) — that controls replies/media/threads, not reposts. Each row: uri/url/cid, text, publishedAt, indexedAt, author{}, engagement{likes,reposts,replies,quotes}, and embed as one of type external | images | video | quote (quotes include uri/url/text/author — never a raw lexicon NSID). nextCursor is Bluesky's opaque cursor (feed order includes repost time — do not derive a cursor from publishedAt). Billed ~0.1 credits per returned row (limit max 100). Pass cache=true for the 24h shared cache.",
+      "Send a Bluesky profile URL, @handle, or handle and get that account's public author feed (app.bsky.feed.getAuthorFeed) as clean JSON — original posts and reposts. Reposts keep the original author{} and engagement; they are marked isRepost=true with repostedBy{handle,displayName,did,avatar} and repostedAt so analytics do not credit someone else's likes to the profile you queried. Pass includeReposts=false to drop reposts. Optional filter maps to Bluesky's feed filter (posts_with_replies | posts_no_replies | posts_with_media | posts_and_author_threads | posts_with_video) — that controls replies/media/threads, not reposts. Each row: uri/url/cid, text, publishedAt, indexedAt, author{}, engagement{likes,reposts,replies,quotes}, and embed as one of type external | images | video | quote (quotes include uri/url/text/author — never a raw lexicon NSID). Rows are ordered by effective timestamp — repostedAt for reposts, publishedAt otherwise — matching Bluesky's author-feed order; re-sorting by publishedAt alone yields a different feed. nextCursor is Bluesky's opaque cursor (do not derive it from publishedAt). Billed ~0.1 credits per returned row (limit max 100). Pass cache=true for the 24h shared cache.",
     delivers: [
       "Author feed: originals + reposts with isRepost / repostedBy / repostedAt",
       "includeReposts=false and Bluesky filter= for replies/media/threads",
@@ -1700,7 +1701,8 @@ const BLUESKY: Spec[] = [
     platformLimits: [
       "getAuthorFeed includes reposts by default — check isRepost before averaging engagement on author.handle.",
       "filter does not exclude reposts; use includeReposts=false for that.",
-      "Feed order is by feed/repost time, not publishedAt — always pass nextCursor through.",
+      "Ordered by effective timestamp (repostedAt for reposts, else publishedAt) — Bluesky author-feed order; re-sorting by publishedAt alone changes the feed.",
+      "Always pass nextCursor through — do not invent a cursor from publishedAt.",
     ],
   },
   {
@@ -4203,7 +4205,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   ],
   "instagram-profile-search": [
     qp("Account name, @handle, or profile URL to resolve (min 2 characters). Not a niche keyword search."),
-    cacheP(),
+    cachePDefaultTrue(),
   ],
   "instagram-embed": [up("Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/.")],
   "instagram-highlights": [
@@ -6140,7 +6142,9 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
                 : ep.creditsPerResult
                   ? `At the default limit this endpoint costs ${ep.credits} credits (${ep.creditsPerResult} per result). Billing scales with how many results you request. ${CACHE_NOTE} Failed or empty results are never charged.`
                   : `Each successful call costs ${ep.credits} credit${ep.credits === 1 ? "" : "s"}. ${
-                      ep.slug === "tiktok-transcript" ? CACHE_NOTE_DEFAULT_TRUE : CACHE_NOTE
+                      ep.slug === "tiktok-transcript" || ep.slug === "instagram-profile-search"
+                        ? CACHE_NOTE_DEFAULT_TRUE
+                        : CACHE_NOTE
                     } Failed or empty results are never charged.`,
     },
     {
@@ -8509,7 +8513,8 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     url: "bsky.app permalink for the post.",
     cid: "Content ID (CID) of this post record — stable content-addressed hash.",
     text: "Post text body. Long URLs may be truncated here — use links[] from facets for the full URI.",
-    publishedAt: "When the original post was created (record createdAt). Not repost time.",
+    publishedAt:
+      "When the original post was created (record createdAt). Not repost time — feed order uses repostedAt for isRepost rows.",
     indexedAt:
       "When the AppView indexed this post. For reposts, feed order follows repostedAt — not this field.",
     author:
@@ -8518,7 +8523,8 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
       "true when this feed row is a repost (reasonRepost). Engagement and author belong to the original post — use repostedBy for the account that boosted it.",
     repostedBy:
       "Who reposted: {handle, displayName, did, avatar}. Present only when isRepost is true (usually the requested handle).",
-    repostedAt: "When the repost happened (ISO-8601). Present only when isRepost is true.",
+    repostedAt:
+      "When the repost happened (ISO-8601). Present only when isRepost is true. This is the sort key for that row in the author feed.",
     isReply: "true when parentUri is set (this post replies to another).",
     parentUri: "AT URI of the immediate parent when this is a reply.",
     rootUri: "AT URI of the thread root when this is a reply.",

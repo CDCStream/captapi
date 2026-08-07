@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Instagram profile-search: cut ~29s cold path; cache on by default",
+    description:
+      "GET /v1/instagram/profile-search was walking the sequential WPI → session-pool → HTML → Decodo headless cascade (same path as basic-profile). Stage timings showed the session pool's redirect loops dominating (~85s locally; ~29s in production) before Decodo headless won — not Apify. It now races logged-out WPI (no sessions) against Decodo GraphQL and short headless from t=0, logs ig_profile_search_stages / ig_basic_profile_stages (race_ms, source, path, normalize_ms), and defaults cache=true for this resolve endpoint (cache=false to force fresh). Docs state expected cold latency and Bluesky user-posts effective-timestamp ordering.",
+    items: [
+      "Parallel race (WPI + Decodo GraphQL + headless) — cold path a few seconds",
+      "Stage timings in logs; path native|decodo (not Apify)",
+      "cache defaults true; docs: budget ≥15s cold, ~2–3s cache hit",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "GitHub contributions: sort days[] chronologically and fix currentStreak",
     description:
       "GET /v1/github/contributions was emitting the heatmap in GitHub's weekday-major DOM order (all Sundays, then Mondays, …), so days.slice(-30) returned Saturdays across months and currentStreak counted consecutive Saturdays (e.g. 52). days[] is now sorted ascending by date before any derived field; from/to are min/max date; currentStreak uses GitHub's today-grace rule (a zero on today does not break the streak); longestStreak is added for free.",
