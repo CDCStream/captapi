@@ -1211,6 +1211,7 @@ def _normalize_event(item: dict) -> dict:
         "usersGoing": users_going,
         "usersInterested": users_interested,
         "usersResponded": users_responded,
+        # Fixed key set (FE6) — null when unknown, never omit city/countryCode.
         "location": {
             "name": loc_name,
             "city": city,
@@ -1224,15 +1225,6 @@ def _normalize_event(item: dict) -> dict:
         "categories": categories,
         "externalLinks": external_links,
     }
-    # Omit empties so native (Decodo) and Apify share the same sparse shape —
-    # never emit null keys for fields upstream did not provide.
-    loc_out = out["location"]
-    if isinstance(loc_out, dict):
-        for key in list(loc_out.keys()):
-            if loc_out.get(key) in (None, "", [], {}):
-                loc_out.pop(key, None)
-        if not loc_out:
-            out.pop("location", None)
     for key in list(out.keys()):
         if key == "location":
             continue
@@ -1862,8 +1854,8 @@ async def facebook_profile_events(
 
         data = await cached_or_run(
             endpoint="facebook.profile-events",
-            # v8: timezone via lat/lng → IANA; never Etc/* (FE1).
-            params={"url": url, "limit": limit, "v": 8},
+            # v9: fixed location{} keys (FE6).
+            params={"url": url, "limit": limit, "v": 9},
             runner=_run,
             ctx=ctx,
             # Events actor runs take minutes (280s timeout); serve the last
@@ -2151,7 +2143,10 @@ async def facebook_marketplace_location_search(
         "return past events — use upcoming=true or from=YYYY-MM-DD for a forward "
         "window, or filter client-side on isPast. "
         "Billing: flat 2 credits on the native path; Apify fallthrough is "
-        "~2 credits per returned event (min 4)."
+        "~2 credits per returned event (min 4). "
+        "Latency: native search hydrates event pages via Decodo — set client "
+        "timeouts ≥130s until typical calls stay under 60s. Response includes "
+        "timings{serpMs,hydrateMs,hydrateAttempts,discoveryMs,totalMs,path}."
     ),
 )
 async def facebook_event_search(
@@ -2219,14 +2214,14 @@ async def facebook_event_search(
 
         async def _run() -> dict[str, Any]:
             # 1) Native — SERP → details, then relevance-filtered discovery.
-            native = await facebook_events_native.fetch_search_events(
+            native, timings = await facebook_events_native.fetch_search_events(
                 q,
                 limit=limit,
                 location=location,
                 from_date=effective_from,
                 to_date=to_date,
             )
-            if native:
+            if native is not None:
                 ctx["source"] = "direct"
                 # Re-normalize + re-apply geo filter (router timezone resolution).
                 events = [
@@ -2239,6 +2234,7 @@ async def facebook_event_search(
                     "totalReturned": len(events),
                     "events": events,
                     "source": "direct",
+                    "timings": timings,
                 }
                 if location:
                     payload["location"] = location
@@ -2272,6 +2268,7 @@ async def facebook_event_search(
                     "totalReturned": len(events),
                     "events": events,
                     "source": "apify",
+                    "timings": {**timings, "path": "apify-cache"},
                 }
 
             try:
@@ -2295,6 +2292,7 @@ async def facebook_event_search(
                 "totalReturned": len(events),
                 "events": events,
                 "source": "apify",
+                "timings": {**timings, "path": "apify"},
             }
 
         data = await cached_or_run(
@@ -2306,8 +2304,8 @@ async def facebook_event_search(
                 "from": effective_from or "",
                 "to": to_date or "",
                 "upcoming": upcoming,
-                # v9: location is geo (timezone/city/coords); dual credit docs (FE3/FE4).
-                "v": 9,
+                # v10: fixed location{} keys (FE6); incremental hydrate + timings (FE5).
+                "v": 10,
             },
             runner=_run,
             ctx=ctx,
@@ -2391,8 +2389,8 @@ async def facebook_event_details(
 
         data = await cached_or_run(
             endpoint="facebook.event-details",
-            # v7: timezone via lat/lng → IANA; never Etc/* (FE1).
-            params={"url": url, "v": 7},
+            # v8: fixed location{} keys (FE6).
+            params={"url": url, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

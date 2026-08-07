@@ -1319,11 +1319,12 @@ const FACEBOOK_EVENTS: Spec[] = [
     tagline:
       "Search Facebook events by topic and city — local startDate/timezone, venue. 2 credits native (~2/result Apify).",
     longDescription:
-      "Search public Facebook events with a topic query (e.g. comedy) and optional location / from / to / upcoming filters. Each result uses the same Event shape as Event Details and Profile Events: startDate/endDate as ISO with the host timezone offset (calendar day matches startTime — evening CDT events do not roll to the next UTC day), IANA timezone (from venue lat/lng when present — never Etc/*), isPast, eventType, location{}, image, and usersGoing/usersInterested when Facebook exposes them. Relative labels like \"Happening now\" are never returned as startTime. Billing: flat 2 credits on the native path; Apify fallthrough bills ~2 credits per returned event (min 4) — check x-captapi-source. A 19-result Apify call is 38 credits, not 2.",
+      "Search public Facebook events with a topic query (e.g. comedy) and optional location / from / to / upcoming filters. Each result uses the same Event shape as Event Details and Profile Events: startDate/endDate as ISO with the host timezone offset (calendar day matches startTime — evening CDT events do not roll to the next UTC day), IANA timezone (from venue lat/lng when present — never Etc/*), isPast, eventType, location{name,city,latitude,longitude,countryCode} (all five keys always — null when unknown), image, and usersGoing/usersInterested when Facebook exposes them. Relative labels like \"Happening now\" are never returned as startTime. Billing: flat 2 credits on the native path; Apify fallthrough bills ~2 credits per returned event (min 4) — check x-captapi-source. A 19-result Apify call is 38 credits, not 2. Envelope timings{serpMs,hydrateMs,hydrateAttempts,discoveryMs,totalMs,path} exposes per-stage latency. Set client timeouts ≥130s until typical searches stay under 60s.",
     platformLimits: [
       "Facebook/SERP discovery can return past events. Use upcoming=true (sets from=today UTC) or from=YYYY-MM-DD for a forward window, or filter client-side on isPast — same pattern as playCount absence on Spotify search.",
       "timezone is a real IANA zone or null — never Etc/GMT. Prefer location.latitude/longitude → IANA when coords exist.",
       "location is a geo filter (timezone / city / coords near the place) — not a required substring of the event title. Most London venues do not contain \"London\" in their name.",
+      "Client timeouts ≥130s recommended — native path hydrates event pages (timings.hydrateMs is usually the dominant stage).",
     ],
   },
   {
@@ -1337,9 +1338,10 @@ const FACEBOOK_EVENTS: Spec[] = [
     tagline:
       "Get a Facebook event — title, local start/end, timezone, place, host id, and attendance when exposed.",
     longDescription:
-      "Paste a Facebook event URL and get clean JSON: title, description, startDate/endDate as ISO with the host timezone offset (calendar day matches startTime), IANA timezone resolved from venue coordinates when present (else the display-sentence abbreviation — GMT→Europe/London; never Etc/*; null when unknown), duration, location, organizers[{id,name,url,verified}], categories, ticketsUrl, and going/interested counts when Facebook exposes them on the logged-out hydrate. Flat 2 credits per call.",
+      "Paste a Facebook event URL and get clean JSON: title, description, startDate/endDate as ISO with the host timezone offset (calendar day matches startTime), IANA timezone resolved from venue coordinates when present (else the display-sentence abbreviation — GMT→Europe/London; never Etc/*; null when unknown), duration, location{name,city,latitude,longitude,countryCode} (fixed key set — null when unknown), organizers[{id,name,url,verified}], categories, ticketsUrl, and going/interested counts when Facebook exposes them on the logged-out hydrate. Flat 2 credits per call.",
     platformLimits: [
       "timezone is never an Etc/* fixed-offset stand-in. lat/lng → IANA when coords exist; otherwise null.",
+      "location always has name, city, latitude, longitude, countryCode — null when Facebook omits them.",
     ],
   },
   {

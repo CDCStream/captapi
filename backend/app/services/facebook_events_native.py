@@ -1082,7 +1082,9 @@ def _html_event_signal(body: str) -> int:
     return len(_EVENT_HREF_RE.findall(body)) + body.count("eventUrl") + body.count("start_timestamp")
 
 
-async def _fetch_html(url: str, *, scroll: bool = True) -> str | None:
+async def _fetch_html(
+    url: str, *, scroll: bool = True, timeout: float | None = None
+) -> str | None:
     if not decodo_fetch.enabled():
         return None
     # Scroll first so we don't settle for the ~8-card Relay stub. Decodo
@@ -1096,9 +1098,12 @@ async def _fetch_html(url: str, *, scroll: bool = True) -> str | None:
 
     candidates: list[str] = []
     for actions, target in attempts:
+        # Search hydrate passes a short timeout so one stuck Decodo call cannot
+        # burn the whole wall budget (FE5).
+        per_try = timeout if timeout is not None else (180.0 if actions else 120.0)
         got = await decodo_fetch.fetch_url(
             url,
-            timeout=180.0 if actions else 120.0,
+            timeout=per_try,
             headless="html",
             browser_actions=actions,
             target=target,
@@ -1455,35 +1460,82 @@ async def _search_event_ids_via_serp(
     return ids
 
 
+# Search hydrate concurrency / batching (FE5). Measured bottleneck is Decodo
+# event-details (~8–15s each); never await dozens serially behind a tiny pool.
+_HYDRATE_CONCURRENCY = 6
+_HYDRATE_BATCH = 6
+# Wall budget for one native search — set from measured completion (~40–70s
+# healthy; was 107s when over-hydrating). Leave headroom under Cloudflare 125s.
+_SEARCH_WALL_SECS = 95.0
+_SERP_WALL_SECS = 15.0
+
+
 async def _hydrate_event_ids(
-    ids: list[str], *, limit: int, tokens: list[str]
-) -> list[dict[str, Any]]:
+    ids: list[str],
+    *,
+    limit: int,
+    tokens: list[str],
+    location: str | None = None,
+    from_date: str | None = None,
+    to_date: str | None = None,
+    deadline: float | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Hydrate event IDs in batches; stop once ``limit`` pass filters (FE5).
+
+    Returns ``(rows, stats)`` where stats includes attempts / accepted / ms.
+    """
+    stats: dict[str, Any] = {
+        "hydrateAttempts": 0,
+        "hydrateAccepted": 0,
+        "hydrateBatches": 0,
+        "hydrateMs": 0,
+    }
     if not ids or limit <= 0:
-        return []
-    sem = asyncio.Semaphore(3)
-    selected = ids[: max(limit * 2, limit + 5)]
+        return [], stats
+    t0 = time.monotonic()
+    sem = asyncio.Semaphore(_HYDRATE_CONCURRENCY)
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
 
     async def _one(eid: str) -> dict[str, Any] | None:
         async with sem:
-            return await fetch_event_details(f"https://www.facebook.com/events/{eid}/")
+            # Cap each details fetch — search lists cannot afford 120s/item.
+            return await fetch_event_details(
+                f"https://www.facebook.com/events/{eid}/",
+                timeout=28.0,
+            )
 
-    rows = await asyncio.gather(*[_one(eid) for eid in selected])
-    out: list[dict[str, Any]] = []
-    seen: set[str] = set()
-    for row in rows:
-        if not row or not row.get("id") or not row.get("name"):
-            continue
-        eid = str(row["id"])
-        if eid in seen:
-            continue
-        # Re-check relevance on hydrated fields (SERP titles can be noisy).
-        if tokens and not _event_matches_query(row, tokens):
-            continue
-        seen.add(eid)
-        out.append(row)
+    # Cap candidate pool — do not pre-schedule 80 Decodo calls.
+    pool = ids[: min(len(ids), max(limit * 2, limit + 8, 24))]
+    for i in range(0, len(pool), _HYDRATE_BATCH):
+        if deadline is not None and time.monotonic() >= deadline:
+            stats["hydrateStopped"] = "deadline"
+            break
         if len(out) >= limit:
             break
-    return out
+        batch = pool[i : i + _HYDRATE_BATCH]
+        stats["hydrateBatches"] += 1
+        rows = await asyncio.gather(*[_one(eid) for eid in batch])
+        stats["hydrateAttempts"] += len(batch)
+        for row in rows:
+            if not row or not row.get("id") or not row.get("name"):
+                continue
+            eid = str(row["id"])
+            if eid in seen:
+                continue
+            if tokens and not _event_matches_query(row, tokens):
+                continue
+            if not _event_in_date_range(row, from_date=from_date, to_date=to_date):
+                continue
+            if not event_matches_location(row, location):
+                continue
+            seen.add(eid)
+            out.append(row)
+            if len(out) >= limit:
+                break
+    stats["hydrateAccepted"] = len(out)
+    stats["hydrateMs"] = int((time.monotonic() - t0) * 1000)
+    return out, stats
 
 
 async def fetch_search_events(
@@ -1493,7 +1545,7 @@ async def fetch_search_events(
     location: str | None = None,
     from_date: str | None = None,
     to_date: str | None = None,
-) -> list[dict[str, Any]] | None:
+) -> tuple[list[dict[str, Any]] | None, dict[str, Any]]:
     """Keyword search: SERP → details, then relevance-filtered discovery.
 
     Logged-out /events/?q= often returns an unrelated feed; SERP is preferred.
@@ -1504,24 +1556,39 @@ async def fetch_search_events(
     — not a required title/venue substring. SERP may still bias with the place
     name for discovery. ``from_date`` / ``to_date`` are YYYY-MM-DD bounds on
     local startDate.
+
+    Returns ``(events|None, timings)`` — timings always present for FE5 diagnosis.
     """
+    timings: dict[str, Any] = {
+        "serpMs": 0,
+        "hydrateMs": 0,
+        "hydrateAttempts": 0,
+        "hydrateAccepted": 0,
+        "hydrateBatches": 0,
+        "discoveryMs": 0,
+        "totalMs": 0,
+        "path": None,
+        "serpIds": 0,
+    }
+    t_all = time.monotonic()
     if limit <= 0:
-        return []
+        timings["totalMs"] = 0
+        return [], timings
     query = (q or "").strip()
     if len(query) < 2:
-        return None
+        timings["totalMs"] = int((time.monotonic() - t_all) * 1000)
+        return None, timings
     loc = (location or "").strip()
     # Topic tokens only — do not require "London" in the event title (FE4).
     tokens = _query_tokens(query)
     # Bias SERP toward the place without making it a hard haystack token.
     serp_q = f"{query} {loc}".strip() if loc else query
-    # Over-fetch when geo-filtering so limit can still fill after the cut.
-    fetch_limit = min(40, max(limit * 3, limit + 10)) if loc else limit
-    # Reserve ~20s for discovery/page hydrate even if SERP is slow.
-    deadline = time.monotonic() + 50.0
-    serp_deadline = time.monotonic() + 18.0
+    deadline = time.monotonic() + _SEARCH_WALL_SECS
+    serp_deadline = time.monotonic() + _SERP_WALL_SECS
 
     def _finalize(rows: list[dict[str, Any]], path: str) -> list[dict[str, Any]]:
+        # Filters already applied during incremental hydrate; re-apply for
+        # discovery path and safety.
         filtered = [
             e
             for e in rows
@@ -1529,39 +1596,80 @@ async def fetch_search_events(
             and event_matches_location(e, loc)
         ]
         ranked = _prefer_upcoming(filtered)[:limit]
+        timings["path"] = path
         log.info(
             "facebook_events_native_search_ok",
             q=query[:80],
             n=len(ranked),
             path=path,
             location=(loc[:40] if loc else None),
+            **{k: timings[k] for k in ("serpMs", "hydrateMs", "hydrateAttempts", "discoveryMs")},
         )
         return ranked
 
     # 1) SERP → native event-details (query-relevant IDs).
+    t_serp = time.monotonic()
     ids = await _search_event_ids_via_serp(
-        serp_q, limit=min(40, max(15, fetch_limit * 2)), deadline=serp_deadline
+        serp_q, limit=min(30, max(12, limit * 2)), deadline=serp_deadline
     )
+    timings["serpMs"] = int((time.monotonic() - t_serp) * 1000)
+    timings["serpIds"] = len(ids)
     if ids and time.monotonic() < deadline:
-        hydrated = await _hydrate_event_ids(
-            ids, limit=max(fetch_limit, 8), tokens=tokens
+        hydrated, hstats = await _hydrate_event_ids(
+            ids,
+            limit=limit,
+            tokens=tokens,
+            location=loc or None,
+            from_date=from_date,
+            to_date=to_date,
+            deadline=deadline,
         )
+        timings.update({k: hstats[k] for k in hstats if k in timings or k.startswith("hydrate")})
+        timings["hydrateMs"] = hstats.get("hydrateMs", 0)
+        timings["hydrateAttempts"] = hstats.get("hydrateAttempts", 0)
+        timings["hydrateAccepted"] = hstats.get("hydrateAccepted", 0)
+        timings["hydrateBatches"] = hstats.get("hydrateBatches", 0)
+        if hstats.get("hydrateStopped"):
+            timings["hydrateStopped"] = hstats["hydrateStopped"]
         if hydrated:
-            return _finalize(hydrated, "serp")
+            out = _finalize(hydrated, "serp")
+            timings["totalMs"] = int((time.monotonic() - t_all) * 1000)
+            return out, timings
+        # SERP produced IDs and we hydrated some — empty after filters is a real
+        # zero, not a native miss. Do not burn another minute on Apify/discovery.
+        if hstats.get("hydrateAttempts", 0) > 0:
+            timings["path"] = "serp"
+            timings["totalMs"] = int((time.monotonic() - t_all) * 1000)
+            log.info(
+                "facebook_events_native_search_ok",
+                q=query[:80],
+                n=0,
+                path="serp",
+                location=(loc[:40] if loc else None),
+                **{k: timings[k] for k in ("serpMs", "hydrateMs", "hydrateAttempts")},
+            )
+            return [], timings
 
-    # 2) Facebook discovery shell — always try when SERP missed (strict match).
-    url = search_events_url(serp_q)
-    html = await _fetch_html(url, scroll=False)
-    if html:
-        raw = extract_events_from_html(html)
-        matched = [e for e in raw if _event_matches_query(e, tokens)]
-        out = [normalize_raw_event(e) for e in matched]
-        out = [e for e in out if e.get("id") and e.get("name")]
-        if out:
-            return _finalize(out, "discovery")
+    # 2) Facebook discovery shell — only when SERP/hydrate missed and budget left.
+    if time.monotonic() < deadline:
+        t_disc = time.monotonic()
+        url = search_events_url(serp_q)
+        html = await _fetch_html(url, scroll=False)
+        timings["discoveryMs"] = int((time.monotonic() - t_disc) * 1000)
+        if html:
+            raw = extract_events_from_html(html)
+            matched = [e for e in raw if _event_matches_query(e, tokens)]
+            out = [normalize_raw_event(e) for e in matched]
+            out = [e for e in out if e.get("id") and e.get("name")]
+            if out:
+                ranked = _finalize(out, "discovery")
+                timings["totalMs"] = int((time.monotonic() - t_all) * 1000)
+                return ranked, timings
 
-    log.info("facebook_events_native_search_empty", q=query[:80])
-    return None
+    timings["path"] = "empty"
+    timings["totalMs"] = int((time.monotonic() - t_all) * 1000)
+    log.info("facebook_events_native_search_empty", q=query[:80], **timings)
+    return None, timings
 
 
 def _og_meta(html: str, key: str) -> str | None:
@@ -1573,14 +1681,16 @@ def _og_meta(html: str, key: str) -> str | None:
     return html_lib.unescape(match.group(1)).strip() if match else None
 
 
-async def fetch_event_details(url: str) -> dict[str, Any] | None:
+async def fetch_event_details(
+    url: str, *, timeout: float | None = None
+) -> dict[str, Any] | None:
     """Single event page via Decodo headless HTML (richer than OG stub)."""
     target = (url or "").strip()
     if not target:
         return None
     eid_match = re.search(r"/events/(\d+)", target)
     eid = eid_match.group(1) if eid_match else None
-    html = await _fetch_html(target, scroll=False)
+    html = await _fetch_html(target, scroll=False, timeout=timeout)
     if not html:
         return None
     raw_list = extract_events_from_html(html)

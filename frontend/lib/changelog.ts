@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Facebook events: fixed location{} keys + search stage timings",
+    description:
+      "event.location omitted city/countryCode when unknown (two shapes). Now always emits name/city/latitude/longitude/countryCode (null when unknown). event-search hydrates in batches and stops once limit matches (was over-fetching ~40 Decodo details — the 107s cost), exposes timings{}, and documents client timeouts ≥130s.",
+    items: [
+      "location{}: five keys always (FE6)",
+      "Incremental hydrate + timings envelope (FE5)",
+      "Docs: client timeouts ≥130s",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Facebook event-search: honest dual credits + geo location",
     description:
       "Docs said Flat 2 credits while Apify fallthrough billed 2/result (19 events → 38). Label is now \"2 credits native (~2/result Apify)\". location is a geo filter on timezone/city/coords — not a required title substring (London venues rarely contain \"London\").",
