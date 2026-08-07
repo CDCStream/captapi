@@ -969,8 +969,16 @@ def _event_local_dates(item: dict, start_time: str | None) -> tuple[str | None, 
     instant using the TZ abbreviation in ``startTime`` so the calendar day
     matches the host-facing sentence (CDT 7pm ≠ next UTC midnight). Yearless
     listing sentences (``Tue, Aug 4 at 8:00 PM EDT``) are parsed directly.
+
+    ``timezone`` is a real IANA zone (coords → abbrev) or null — never ``Etc/*``.
     """
-    tz_name = safe_str(item.get("timezone")) or facebook_events_native._timezone_from_sentence(start_time)
+    loc = item.get("location") if isinstance(item.get("location"), dict) else {}
+    tz_name = facebook_events_native.resolve_event_timezone(
+        raw_timezone=safe_str(item.get("timezone")),
+        sentence=start_time,
+        latitude=loc.get("latitude") if loc.get("latitude") is not None else item.get("latitude"),
+        longitude=loc.get("longitude") if loc.get("longitude") is not None else item.get("longitude"),
+    )
     start_date = safe_str(item.get("startDate") or item.get("start_date"))
     end_date = safe_str(item.get("endDate") or item.get("end_date"))
     utc_start = safe_str(item.get("utcStartDate"))
@@ -1002,7 +1010,7 @@ def _event_local_dates(item: dict, start_time: str | None) -> tuple[str | None, 
             if not end_date and parsed.get("endDate"):
                 end_date = parsed["endDate"]
             if not tz_name:
-                tz_name = parsed.get("timezone")
+                tz_name = facebook_events_native.sanitize_iana_timezone(parsed.get("timezone"))
 
     if not start_date:
         start_date = utc_start
@@ -1227,6 +1235,9 @@ def _normalize_event(item: dict) -> dict:
             out.pop("location", None)
     for key in list(out.keys()):
         if key == "location":
+            continue
+        # timezone stays when null — "should have a zone, we failed" (FE1), not omit.
+        if key == "timezone":
             continue
         if out.get(key) in (None, "", [], {}):
             out.pop(key, None)
@@ -1851,7 +1862,8 @@ async def facebook_profile_events(
 
         data = await cached_or_run(
             endpoint="facebook.profile-events",
-            params={"url": url, "limit": limit, "v": 7},
+            # v8: timezone via lat/lng → IANA; never Etc/* (FE1).
+            params={"url": url, "limit": limit, "v": 8},
             runner=_run,
             ctx=ctx,
             # Events actor runs take minutes (280s timeout); serve the last
@@ -2131,7 +2143,15 @@ async def facebook_marketplace_location_search(
 
 
 
-@router.get("/event-search", summary="Search Facebook events by keyword/location")
+@router.get(
+    "/event-search",
+    summary="Search Facebook events by keyword/location",
+    description=(
+        "Search public Facebook events. Upstream discovery (SERP / Facebook) can "
+        "return past events — use upcoming=true or from=YYYY-MM-DD for a forward "
+        "window, or filter client-side on isPast. Flat 2 credits on the native path."
+    ),
+)
 async def facebook_event_search(
     q: str = Query(..., min_length=2, description="Topic and/or place, e.g. 'comedy Chicago'"),
     location: str | None = Query(
@@ -2141,18 +2161,28 @@ async def facebook_event_search(
     from_date: str | None = Query(
         None,
         alias="from",
-        description="Inclusive local start date filter YYYY-MM-DD.",
+        description="Inclusive local start date filter YYYY-MM-DD. Prefer over client-side isPast for upcoming-only.",
     ),
     to_date: str | None = Query(
         None,
         alias="to",
         description="Inclusive local start date filter YYYY-MM-DD.",
     ),
+    upcoming: bool = Query(
+        False,
+        description=(
+            "When true and from is omitted, sets from to today's UTC date so past "
+            "events are dropped. Facebook/SERP otherwise may return historical hits."
+        ),
+    ),
     limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
+    effective_from = from_date
+    if upcoming and not effective_from:
+        effective_from = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/event-search",
@@ -2172,7 +2202,7 @@ async def facebook_event_search(
                     continue
                 ev = _normalize_event(i)
                 if not facebook_events_native._event_in_date_range(
-                    ev, from_date=from_date, to_date=to_date
+                    ev, from_date=effective_from, to_date=to_date
                 ):
                     continue
                 out.append(ev)
@@ -2186,7 +2216,7 @@ async def facebook_event_search(
                 q,
                 limit=limit,
                 location=location,
-                from_date=from_date,
+                from_date=effective_from,
                 to_date=to_date,
             )
             if native:
@@ -2199,10 +2229,12 @@ async def facebook_event_search(
                 }
                 if location:
                     payload["location"] = location
-                if from_date:
-                    payload["from"] = from_date
+                if effective_from:
+                    payload["from"] = effective_from
                 if to_date:
                     payload["to"] = to_date
+                if upcoming:
+                    payload["upcoming"] = True
                 return payload
 
             # 2) Apify snapshot-first when native search is empty/login-walled.
@@ -2248,9 +2280,10 @@ async def facebook_event_search(
                 "q": q,
                 "limit": limit,
                 "location": location or "",
-                "from": from_date or "",
+                "from": effective_from or "",
                 "to": to_date or "",
-                "v": 7,
+                "upcoming": upcoming,
+                "v": 8,
             },
             runner=_run,
             ctx=ctx,
@@ -2333,7 +2366,8 @@ async def facebook_event_details(
 
         data = await cached_or_run(
             endpoint="facebook.event-details",
-            params={"url": url, "v": 6},
+            # v7: timezone via lat/lng → IANA; never Etc/* (FE1).
+            params={"url": url, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

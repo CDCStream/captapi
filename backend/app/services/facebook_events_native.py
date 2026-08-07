@@ -28,9 +28,10 @@ log = structlog.get_logger(__name__)
 
 # Facebook day_time_sentence ends with a TZ abbreviation (CDT, EDT, …).
 # Map to IANA so startDate keeps the calendar day the host advertised.
+# Never map to Etc/* — fixed-offset zones do not observe DST (FE1).
 _TZ_ABBREV_TO_IANA: dict[str, str] = {
-    "UTC": "Etc/UTC",
-    "GMT": "Etc/GMT",
+    "UTC": "UTC",
+    "GMT": "Europe/London",
     "BST": "Europe/London",
     "CET": "Europe/Berlin",
     "CEST": "Europe/Berlin",
@@ -55,6 +56,75 @@ _TZ_ABBREV_TO_IANA: dict[str, str] = {
     "NST": "America/St_Johns",
     "NDT": "America/St_Johns",
 }
+
+_tf: Any = None
+
+
+def _timezone_finder() -> Any:
+    """Lazy TimezoneFinder singleton (lat/lng → IANA)."""
+    global _tf
+    if _tf is None:
+        from timezonefinder import TimezoneFinder
+
+        _tf = TimezoneFinder()
+    return _tf
+
+
+def sanitize_iana_timezone(name: str | None) -> str | None:
+    """Accept a real IANA zone; reject empty and fixed-offset ``Etc/*`` (FE1)."""
+    raw = (name or "").strip()
+    if not raw:
+        return None
+    if raw.startswith("Etc/"):
+        return None
+    try:
+        ZoneInfo(raw)
+    except Exception:  # noqa: BLE001
+        return None
+    return raw
+
+
+def timezone_from_coords(latitude: Any, longitude: Any) -> str | None:
+    """lat/lng → IANA. Returns None when unknown or would be Etc/*."""
+    try:
+        lat = float(latitude)
+        lng = float(longitude)
+    except (TypeError, ValueError):
+        return None
+    if not (-90.0 <= lat <= 90.0 and -180.0 <= lng <= 180.0):
+        return None
+    try:
+        found = _timezone_finder().timezone_at(lng=lng, lat=lat)
+    except Exception:  # noqa: BLE001
+        return None
+    return sanitize_iana_timezone(found)
+
+
+def resolve_event_timezone(
+    *,
+    raw_timezone: str | None = None,
+    sentence: str | None = None,
+    latitude: Any = None,
+    longitude: Any = None,
+) -> str | None:
+    """Pick a venue IANA zone — coords first, then abbrev / raw, never Etc/*.
+
+    Order (FE1):
+    1. lat/lng → IANA (venue ground truth; handles GMT vs Europe/London)
+    2. Facebook/raw timezone when it is a real non-Etc zone
+    3. Abbreviation from the display sentence (GMT → Europe/London)
+    4. null — caller must not invent a fixed-offset stand-in
+    """
+    from_coords = timezone_from_coords(latitude, longitude)
+    if from_coords:
+        return from_coords
+    for candidate in (
+        sanitize_iana_timezone(raw_timezone),
+        sanitize_iana_timezone(_timezone_from_sentence(sentence)),
+    ):
+        if candidate:
+            return candidate
+    return None
 
 # One Decodo JS render is ~$0.001–0.01; flat 2 credits (~120% markup headroom).
 CREDIT_FB_EVENTS_NATIVE = 2
@@ -404,7 +474,7 @@ def _timezone_from_sentence(sentence: str | None) -> str | None:
     m = re.search(r"\b([A-Z]{2,5})\s*$", cleaned)
     if not m:
         return None
-    return _TZ_ABBREV_TO_IANA.get(m.group(1))
+    return sanitize_iana_timezone(_TZ_ABBREV_TO_IANA.get(m.group(1)))
 
 
 _RELATIVE_SCHEDULE_RE = re.compile(
@@ -481,7 +551,7 @@ def parse_schedule_sentence(
     if not cleaned or is_relative_schedule(cleaned):
         return empty
 
-    tz_name = _timezone_from_sentence(cleaned)
+    tz_name = sanitize_iana_timezone(_timezone_from_sentence(cleaned))
     # Strip trailing TZ abbrev for date/time parsing.
     body = re.sub(r"\s+[A-Z]{2,5}$", "", cleaned).strip()
 
@@ -871,9 +941,14 @@ def normalize_raw_event(raw: dict[str, Any]) -> dict[str, Any]:
         if isinstance(sentence, str) and is_relative_schedule(sentence):
             sentence = None
 
-    tz_name = raw.get("timezone") if isinstance(raw.get("timezone"), str) else None
-    if not tz_name:
-        tz_name = _timezone_from_sentence(sentence if isinstance(sentence, str) else None)
+    place = _place(raw)
+    # Coords first (FE1) — never emit Etc/GMT as a stand-in for "unknown".
+    tz_name = resolve_event_timezone(
+        raw_timezone=raw.get("timezone") if isinstance(raw.get("timezone"), str) else None,
+        sentence=sentence if isinstance(sentence, str) else None,
+        latitude=place.get("latitude"),
+        longitude=place.get("longitude"),
+    )
 
     utc_start = _fmt_utc_iso(start_ts_i)
     local_start = _fmt_local_iso(start_ts_i, tz_name)
@@ -886,7 +961,7 @@ def normalize_raw_event(raw: dict[str, Any]) -> dict[str, Any]:
         if not local_end:
             local_end = parsed.get("endDate")  # type: ignore[assignment]
         if not tz_name:
-            tz_name = parsed.get("timezone")  # type: ignore[assignment]
+            tz_name = sanitize_iana_timezone(parsed.get("timezone"))  # type: ignore[arg-type]
     if not local_start:
         local_start = utc_start
 
@@ -897,8 +972,6 @@ def normalize_raw_event(raw: dict[str, Any]) -> dict[str, Any]:
         duration_seconds,
         safe_str(raw.get("display_duration") or raw.get("duration") or raw.get("durationText")),
     )
-
-    place = _place(raw)
     going, interested = _social_counts(raw)
     is_online = raw.get("is_online")
     if is_online is None:

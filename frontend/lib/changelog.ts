@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Facebook events: real IANA timezone, never Etc/GMT",
+    description:
+      "GMT on UK events was mapped to Etc/GMT — a fixed-offset zone that never observes DST. timezone now prefers venue lat/lng → IANA (timezonefinder), then real abbrev maps (GMT→Europe/London); Etc/* is rejected as null. event-search documents historical SERP hits and adds upcoming=true (sets from=today).",
+    items: [
+      "lat/lng → IANA when coordinates exist",
+      "GMT → Europe/London; never emit Etc/*",
+      "event-search upcoming + from/to docs for past results",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Kwai user-posts hasMore + profile key parity",
     description:
       "user-posts was capping the SSR fetch at limit, so limit=5 always returned hasMore:false even when the profile HTML still had rows (KU1). Now hydrates the full first-page window before slicing; docs state the hard page limit (SSR window ≠ postCount). Profile always emits verifiedDescription/gender/privatePostCount (null when unknown), drops eid/videoCount/verifiedNumber, and sets postCount = public + private when both known. Envelope profileUrl → url.",

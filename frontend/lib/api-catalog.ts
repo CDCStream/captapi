@@ -1316,9 +1316,28 @@ const FACEBOOK_EVENTS: Spec[] = [
     tagline:
       "Search Facebook events by topic and city — local startDate/timezone, venue, and attendance when exposed. Flat 2 credits.",
     longDescription:
-      "Search public Facebook events with a topic query (e.g. comedy) and optional location / from / to filters. Each result uses the same Event shape as Event Details and Profile Events: startDate/endDate as ISO with the host timezone offset (calendar day matches startTime — evening CDT events do not roll to the next UTC day), timezone, isPast, eventType, location{}, image, and usersGoing/usersInterested when Facebook exposes them. Relative labels like \"Happening now\" are never returned as startTime. Flat 2 credits on the native path.",
+      "Search public Facebook events with a topic query (e.g. comedy) and optional location / from / to / upcoming filters. Each result uses the same Event shape as Event Details and Profile Events: startDate/endDate as ISO with the host timezone offset (calendar day matches startTime — evening CDT events do not roll to the next UTC day), IANA timezone (from venue lat/lng when present — never Etc/*), isPast, eventType, location{}, image, and usersGoing/usersInterested when Facebook exposes them. Relative labels like \"Happening now\" are never returned as startTime. Flat 2 credits on the native path.",
+    platformLimits: [
+      "Facebook/SERP discovery can return past events. Use upcoming=true (sets from=today UTC) or from=YYYY-MM-DD for a forward window, or filter client-side on isPast — same pattern as playCount absence on Spotify search.",
+      "timezone is a real IANA zone or null — never Etc/GMT. Prefer location.latitude/longitude → IANA when coords exist.",
+    ],
   },
-  { slug: "facebook-event-details", name: "Facebook Event Details API", shortName: "Event Details", category: "details", method: "GET", path: "/v1/facebook/event-details", credits: 2 , tagline: "Get a Facebook event — title, local start/end, timezone, place, host id, and attendance when exposed.", longDescription: "Paste a Facebook event URL and get clean JSON: title, description, startDate/endDate as ISO with the host timezone offset (calendar day matches startTime), IANA timezone, duration, location, organizers[{id,name,url,verified}], categories, ticketsUrl, and going/interested counts when Facebook exposes them on the logged-out hydrate. Flat 2 credits per call." },
+  {
+    slug: "facebook-event-details",
+    name: "Facebook Event Details API",
+    shortName: "Event Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/facebook/event-details",
+    credits: 2,
+    tagline:
+      "Get a Facebook event — title, local start/end, timezone, place, host id, and attendance when exposed.",
+    longDescription:
+      "Paste a Facebook event URL and get clean JSON: title, description, startDate/endDate as ISO with the host timezone offset (calendar day matches startTime), IANA timezone resolved from venue coordinates when present (else the display-sentence abbreviation — GMT→Europe/London; never Etc/*; null when unknown), duration, location, organizers[{id,name,url,verified}], categories, ticketsUrl, and going/interested counts when Facebook exposes them on the logged-out hydrate. Flat 2 credits per call.",
+    platformLimits: [
+      "timezone is never an Etc/* fixed-offset stand-in. lat/lng → IANA when coords exist; otherwise null.",
+    ],
+  },
   {
     slug: "facebook-profile-events",
     name: "Facebook Profile Events API",
@@ -4378,13 +4397,21 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       name: "from",
       type: "string",
       required: false,
-      description: "Inclusive local start date filter YYYY-MM-DD.",
+      description:
+        "Inclusive local start date filter YYYY-MM-DD. Use for upcoming-only windows — Facebook/SERP may return past events.",
     },
     {
       name: "to",
       type: "string",
       required: false,
       description: "Inclusive local start date filter YYYY-MM-DD.",
+    },
+    {
+      name: "upcoming",
+      type: "boolean",
+      required: false,
+      description:
+        "When true and from is omitted, sets from to today's UTC date so past events are dropped.",
     },
     lpFlat(20, 200, 2),
   ],

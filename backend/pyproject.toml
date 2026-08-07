@@ -25,6 +25,7 @@ dependencies = [
   "tenacity>=9.0.0",
   "structlog>=24.4.0",
   "pyotp>=2.9.0",
+  "timezonefinder>=6.5.0",
 ]
 
 [project.optional-dependencies]
