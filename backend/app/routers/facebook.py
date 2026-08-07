@@ -2015,7 +2015,7 @@ async def facebook_marketplace_item(
     _require_facebook_path(
         url,
         "/marketplace/item/",
-        "https://www.facebook.com/marketplace/item/123456789",
+        "https://www.facebook.com/marketplace/item/2467979733629080",
         "Marketplace item",
     )
     async with billed_call(
@@ -2026,15 +2026,38 @@ async def facebook_marketplace_item(
         base_credits=CREDIT_FB_MARKETPLACE_ITEM_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await facebook_marketplace_native.marketplace_item_native(url)
-            if native:
+            result = await facebook_marketplace_native.marketplace_item_native(url)
+            if result.status == "ok" and result.data:
                 ctx["source"] = "direct"
-                return native
-            raise HTTPException(status_code=404, detail="Listing not found")
+                out = dict(result.data)
+                if result.timings:
+                    out["timings"] = result.timings
+                return out
+            if result.status == "timeout":
+                raise HTTPException(
+                    status_code=504,
+                    detail={
+                        "code": "UPSTREAM_TIMEOUT",
+                        "message": "Facebook Marketplace listing fetch timed out",
+                    },
+                )
+            if result.status == "not_found":
+                raise HTTPException(
+                    status_code=404,
+                    detail={"code": "NOT_FOUND", "message": "Listing not found"},
+                )
+            raise HTTPException(
+                status_code=502,
+                detail={
+                    "code": "UPSTREAM_UNAVAILABLE",
+                    "message": "Facebook Marketplace listing temporarily unavailable",
+                },
+            )
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-item",
-            params={"url": url, "v": 5},
+            # v6: fail-fast timeouts + distinct timeout vs not-found (MP1/MP3).
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2138,21 +2161,33 @@ async def facebook_marketplace_search(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             if details:
-                page = await facebook_marketplace_native.marketplace_search_details_native(
+                result = await facebook_marketplace_native.marketplace_search_details_native(
                     q, location, limit, filters=filters or None, cursor=cursor
                 )
             else:
-                page = await facebook_marketplace_native.marketplace_search_native(
+                result = await facebook_marketplace_native.marketplace_search_native(
                     q, location, limit, filters=filters or None, cursor=cursor
                 )
-            if page is None:
+            if result.status == "timeout":
+                raise HTTPException(
+                    status_code=504,
+                    detail={
+                        "code": "UPSTREAM_TIMEOUT",
+                        "message": "Facebook Marketplace search timed out",
+                    },
+                )
+            if result.status != "ok" or not result.data:
                 raise HTTPException(
                     status_code=502,
-                    detail="Facebook Marketplace search temporarily unavailable",
+                    detail={
+                        "code": "UPSTREAM_UNAVAILABLE",
+                        "message": "Facebook Marketplace search temporarily unavailable",
+                    },
                 )
             ctx["source"] = "direct"
+            page = result.data
             listings = page.get("listings") or []
-            return strip_empty(
+            out = strip_empty(
                 {
                     "query": q,
                     "location": location,
@@ -2163,6 +2198,9 @@ async def facebook_marketplace_search(
                     "listings": listings,
                 }
             )
+            if result.timings:
+                out["timings"] = result.timings
+            return out
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-search",
@@ -2173,7 +2211,8 @@ async def facebook_marketplace_search(
                 "details": details,
                 "filters": filters,
                 "cursor": cursor or "",
-                "v": 7,
+                # v8: Decodo budgets under CF + timings + typed timeout (MP1).
+                "v": 8,
             },
             runner=_run,
             ctx=ctx,
@@ -2191,10 +2230,11 @@ async def facebook_marketplace_search(
     summary="Resolve Facebook Marketplace locations",
     description=(
         "Disambiguate a city/place name into Marketplace hubs with lat/lng and "
-        "Facebook cityPageId (same id search listings expose). marketplace-search "
-        "already accepts a city string — use this when the name is ambiguous "
-        "(Austin TX vs Austin MN) or you need coordinates / cityPageId before searching. "
-        "Flat 2 credits."
+        "Facebook city page id (same value search listings expose as cityPageId). "
+        "marketplace-search already accepts a city string — use this when the name "
+        "is ambiguous (Austin TX vs Austin MN) or you need coordinates / id before "
+        "searching. Bare ambiguous cities resolve from a local table (typically <1s); "
+        "single-hub Decodo fetches budget ~35s (client timeout ≥60s). Flat 2 credits."
     ),
 )
 async def facebook_marketplace_location_search(
@@ -2218,17 +2258,34 @@ async def facebook_marketplace_location_search(
         base_credits=CREDIT_FB_MARKETPLACE_LOCATION_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            results = await facebook_marketplace_location_native.marketplace_location_search_native(
+            results, timings = await facebook_marketplace_location_native.marketplace_location_search_native(
                 q, limit=limit
             )
             if not results:
-                raise HTTPException(status_code=404, detail="Marketplace location not found")
+                if timings.get("path") == "hub_timeout":
+                    raise HTTPException(
+                        status_code=504,
+                        detail={
+                            "code": "UPSTREAM_TIMEOUT",
+                            "message": "Facebook Marketplace location fetch timed out",
+                        },
+                    )
+                raise HTTPException(
+                    status_code=404,
+                    detail={"code": "NOT_FOUND", "message": "Marketplace location not found"},
+                )
             ctx["source"] = "direct"
-            return {"query": q, "totalReturned": len(results), "locations": results}
+            return {
+                "query": q,
+                "totalReturned": len(results),
+                "locations": results,
+                "timings": timings,
+            }
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-location-search",
-            params={"q": q, "limit": limit, "v": 5},
+            # v6: ambiguous table path (no serial Decodo) + timings (MP1); drop cityPageId alias (MP4).
+            params={"q": q, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

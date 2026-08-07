@@ -28,7 +28,8 @@ def test_location_row_uses_city_page_id_not_pipe_key():
         slug="austin",
     )
     assert row["id"] == "109791499039942"
-    assert row["cityPageId"] == "109791499039942"
+    # MP4: no duplicate cityPageId alias — join search via id === listing.cityPageId.
+    assert "cityPageId" not in row
     assert "|" not in str(row.get("id") or "")
 
 
@@ -45,6 +46,19 @@ def test_location_row_omits_fabricated_id_when_missing():
     assert "id" not in row
     assert "cityPageId" not in row
     assert row["slug"] == "austin-minnesota"
+
+
+def test_ambiguous_austin_is_table_path_without_decodo():
+    import asyncio
+
+    results, timings = asyncio.run(loc.marketplace_location_search_native("Austin", limit=3))
+    assert results is not None
+    assert len(results) == 3
+    assert timings["path"] == "ambiguous_table"
+    assert timings["hubCount"] == 0
+    assert timings["totalMs"] < 500
+    assert results[0]["id"] == "109791499039942"
+    assert "cityPageId" not in results[0]
 
 
 def test_parse_city_state():

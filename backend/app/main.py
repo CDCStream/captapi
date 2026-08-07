@@ -5,14 +5,17 @@ from __future__ import annotations
 import asyncio
 import logging
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import sentry_sdk
 import structlog
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from sentry_sdk.integrations.fastapi import FastApiIntegration
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import __version__
 from app.core.config import get_settings
@@ -239,6 +242,117 @@ def create_app() -> FastAPI:
             }
         return {}
 
+    def _error_envelope(
+        *,
+        status_code: int,
+        code: str,
+        message: str,
+        extra: dict | None = None,
+    ) -> dict:
+        """Catalogue-wide error body (MP2) — same fields as success envelopes."""
+        from app.core.credits import request_meta
+
+        meta = request_meta.get() or {}
+        error_obj: dict = {"code": code, "message": message}
+        if extra:
+            for key, value in extra.items():
+                if key in ("code", "message") or value is None:
+                    continue
+                error_obj[key] = value
+        body: dict = {
+            "success": False,
+            "error": error_obj,
+            "creditsUsed": int(meta.get("credits") or 0),
+            "requestId": meta.get("request_id") or None,
+            "fetchedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }
+        return body
+
+    _STATUS_ERROR_CODES = {
+        400: "BAD_REQUEST",
+        401: "UNAUTHORIZED",
+        403: "FORBIDDEN",
+        404: "NOT_FOUND",
+        409: "CONFLICT",
+        422: "VALIDATION_ERROR",
+        429: "RATE_LIMITED",
+        502: "UPSTREAM_UNAVAILABLE",
+        503: "SERVICE_UNAVAILABLE",
+        504: "UPSTREAM_TIMEOUT",
+    }
+
+    def _http_exception_parts(exc: StarletteHTTPException) -> tuple[str, str, dict]:
+        detail = exc.detail
+        if isinstance(detail, dict):
+            nested = detail.get("error")
+            if isinstance(nested, dict) and nested.get("code"):
+                code = str(nested["code"])
+                message = str(
+                    detail.get("message")
+                    or nested.get("message")
+                    or nested.get("reason")
+                    or code
+                )
+                extra = {k: v for k, v in nested.items() if k not in ("code", "message")}
+                return code, message, extra
+            if detail.get("code") and (detail.get("message") or detail.get("detail")):
+                code = str(detail["code"])
+                message = str(detail.get("message") or detail.get("detail") or code)
+                extra = {
+                    k: v
+                    for k, v in detail.items()
+                    if k not in ("code", "message", "detail", "error")
+                }
+                return code, message, extra
+            # Opaque structured detail — stringify for message, keep as extras.
+            code = _STATUS_ERROR_CODES.get(exc.status_code, "HTTP_ERROR")
+            return code, str(detail.get("message") or detail), {
+                k: v for k, v in detail.items() if k != "message"
+            }
+        if isinstance(detail, str) and detail.strip():
+            code = _STATUS_ERROR_CODES.get(exc.status_code, "HTTP_ERROR")
+            return code, detail, {}
+        code = _STATUS_ERROR_CODES.get(exc.status_code, "HTTP_ERROR")
+        return code, code.replace("_", " ").title(), {}
+
+    @app.exception_handler(StarletteHTTPException)
+    @app.exception_handler(HTTPException)
+    async def http_exception_envelope(
+        request: Request, exc: StarletteHTTPException
+    ) -> JSONResponse:
+        # HTTPException used to return raw {"detail": "..."} — a second contract
+        # from ApiResponse. Wrap every raised HTTP error in the catalogue envelope.
+        code, message, extra = _http_exception_parts(exc)
+        headers = _error_cors_headers(request)
+        if getattr(exc, "headers", None):
+            headers = {**headers, **dict(exc.headers)}
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=_error_envelope(
+                status_code=exc.status_code,
+                code=code,
+                message=message,
+                extra=extra or None,
+            ),
+            headers=headers,
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_envelope(
+        request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
+        # Default FastAPI shape is {"detail": [...]} — same second contract (MP2).
+        return JSONResponse(
+            status_code=422,
+            content=_error_envelope(
+                status_code=422,
+                code="VALIDATION_ERROR",
+                message="Request validation failed",
+                extra={"issues": exc.errors()},
+            ),
+            headers=_error_cors_headers(request),
+        )
+
     @app.exception_handler(ApifyError)
     async def upstream_actor_error(request: Request, exc: ApifyError) -> JSONResponse:
         # A third-party Apify actor failed (unrented/quota/timeout/upstream 4xx-5xx).
@@ -248,7 +362,12 @@ def create_app() -> FastAPI:
         logger.warning("apify_actor_error", error=str(exc), path=request.url.path)
         return JSONResponse(
             status_code=502,
-            content={"success": False, "error": "upstream_actor_error"},
+            content=_error_envelope(
+                status_code=502,
+                code="UPSTREAM_UNAVAILABLE",
+                message=str(exc) or "Upstream actor error",
+                extra={"reason": "upstream_actor_error"},
+            ),
             headers=_error_cors_headers(request),
         )
 
@@ -262,21 +381,25 @@ def create_app() -> FastAPI:
         if getattr(exc, "code", "") in ("42P01", "PGRST205"):
             return JSONResponse(
                 status_code=503,
-                content={
-                    "success": False,
-                    "error": "not_provisioned",
-                    "detail": (
+                content=_error_envelope(
+                    status_code=503,
+                    code="NOT_PROVISIONED",
+                    message=(
                         "A required database table is missing. Apply the latest "
                         "files in supabase/migrations/ to enable this feature."
                     ),
-                },
+                ),
                 headers=_error_cors_headers(request),
             )
         sentry_sdk.capture_exception(exc)
         structlog.get_logger().exception("postgrest_error", error=str(exc))
         return JSONResponse(
             status_code=500,
-            content={"success": False, "error": "internal_server_error"},
+            content=_error_envelope(
+                status_code=500,
+                code="INTERNAL_SERVER_ERROR",
+                message="Internal server error",
+            ),
             headers=_error_cors_headers(request),
         )
 
@@ -289,7 +412,11 @@ def create_app() -> FastAPI:
         logger.exception("unhandled_exception", error=str(exc))
         return JSONResponse(
             status_code=500,
-            content={"success": False, "error": "internal_server_error"},
+            content=_error_envelope(
+                status_code=500,
+                code="INTERNAL_SERVER_ERROR",
+                message="Internal server error",
+            ),
             headers=_error_cors_headers(request),
         )
 

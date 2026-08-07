@@ -19,9 +19,19 @@ class ApiResponse(BaseModel, Generic[T]):
     cachedAt: str | None = None
 
 
+class ErrorBody(BaseModel):
+    code: str
+    message: str
+
+
 class ErrorResponse(BaseModel):
+    """Catalogue-wide failure envelope (same outer fields as success responses)."""
+
     success: bool = False
-    error: str
+    error: ErrorBody | str
+    creditsUsed: int | None = None
+    requestId: str | None = None
+    fetchedAt: str | None = None
     detail: Any | None = None
 
 

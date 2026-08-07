@@ -1251,7 +1251,7 @@ const FACEBOOK_MARKETPLACE: Spec[] = [
     tagline:
       "Search Marketplace by keyword + city — filters, isLocal/shipsOutsideRadius, opaque cursor (2 credits).",
     longDescription:
-      "Search Facebook Marketplace with a product keyword and a city/place name (no lat/lng required). Each result: title, price + priceAmount (minor units), categoryId, location/city/state, deliveryTypes, status (available|pending|sold) with isSold/isPending/isHidden, cover image, createdAt, plus isLocal and shipsOutsideRadius so nationwide shipped listings (SHIPPING / SHIPPING_ONSITE) are not mistaken for nearby pickups. Facebook can surface shipped inventory outside radiusMiles — use deliveryMethod=local_pickup for local-only, or filter on isLocal. Optional filters: minPrice, maxPrice, sortBy, daysSinceListed, condition, deliveryMethod, availability, radiusMiles, category. Opaque nextCursor within the fetched SSR page. Default list path is flat 2 credits (cover photo in image — photos[] only when the card has more than one). Pass details=true for description, condition, coordinates, full photo gallery, seller{} when Facebook exposes it, and distanceMiles — billed as 2 + 2 credits per listing.",
+      "Search Facebook Marketplace with a product keyword and a city/place name (no lat/lng required). Each result: title, price + priceAmount (minor units), categoryId, location/city/state, deliveryTypes, status (available|pending|sold) with isSold/isPending/isHidden, cover image, createdAt, plus isLocal and shipsOutsideRadius so nationwide shipped listings (SHIPPING / SHIPPING_ONSITE) are not mistaken for nearby pickups. Facebook can surface shipped inventory outside radiusMiles — use deliveryMethod=local_pickup for local-only, or filter on isLocal. Optional filters: minPrice, maxPrice, sortBy, daysSinceListed, condition, deliveryMethod, availability, radiusMiles, category. Opaque nextCursor within the fetched SSR page. Default list path is flat 2 credits (cover photo in image — photos[] only when the card has more than one). Pass details=true for description, condition, coordinates, full photo gallery, seller{} when Facebook exposes it, and distanceMiles — billed as 2 + 2 credits per listing. Decodo search budgets ~40s (~50s with scroll); timeouts return HTTP 504 UPSTREAM_TIMEOUT. Envelope timings{fetchMs,totalMs,path}. Client timeout ≥60s.",
     delivers: [
       "12 filters + city-name location (no lat/lng required)",
       "isLocal / shipsOutsideRadius on every row",
@@ -1261,6 +1261,7 @@ const FACEBOOK_MARKETPLACE: Spec[] = [
     platformLimits: [
       "Shipped listings can appear outside radiusMiles — prefer deliveryMethod=local_pickup or isLocal.",
       "Deep feed pagination beyond one SSR/scroll page is not replayable across Decodo calls.",
+      "Client timeout ≥60s recommended — fail-fast under Cloudflare's ~125s proxy read.",
     ],
   },
   {
@@ -1272,17 +1273,18 @@ const FACEBOOK_MARKETPLACE: Spec[] = [
     path: "/v1/facebook/marketplace-location-search",
     credits: 2,
     tagline:
-      "Disambiguate city names into Marketplace hubs — Facebook cityPageId + lat/lng (2 credits).",
+      "Disambiguate city names into Marketplace hubs — id + lat/lng. Flat 2 credits.",
     longDescription:
-      "Resolve a city/place query into Facebook Marketplace location hubs with the canonical cityPageId (same id marketplace-search listings expose), slug, city/state, and coordinates when available. marketplace-search already accepts a city string with no lat/lng required — use this endpoint when the name is ambiguous (Austin TX vs Austin MN vs Austin IN) or you need cityPageId/coordinates before searching. Bare city names may return multiple candidates; include a state (e.g. 'Austin, TX') for a single hit. Flat 2 credits.",
+      "Resolve a city/place query into Facebook Marketplace location hubs with id (Facebook city_page.id — same value marketplace-search listings expose as cityPageId), slug, city/state, and coordinates when available. marketplace-search already accepts a city string with no lat/lng required — use this endpoint when the name is ambiguous (Austin TX vs Austin MN vs Austin IN) or you need id/coordinates before searching. Bare ambiguous cities (Austin, Portland, Springfield) resolve from a local table in typically under 1s; single-hub Decodo fetches budget ~35s. Envelope timings{path,hubMs,hubCount,totalMs}. Client timeout ≥60s. Flat 2 credits.",
     delivers: [
-      "Facebook cityPageId as id (same as search cityPageId)",
+      "id = Facebook city_page.id (join to search cityPageId)",
       "Multi-candidate disambiguation for bare city names",
       "lat/lng + Marketplace hub slug when available",
     ],
     platformLimits: [
       "Optional geocode — skip when marketplace-search's city string is enough.",
-      "cityPageId may be omitted when Facebook's hub HTML does not expose city_page.id.",
+      "id may be omitted when Facebook's hub HTML does not expose city_page.id.",
+      "Client timeout ≥60s recommended (ambiguous table path is usually <1s).",
     ],
   },
   {
@@ -1296,7 +1298,7 @@ const FACEBOOK_MARKETPLACE: Spec[] = [
     tagline:
       "Marketplace listing — title, priceAmount, status, seller{}, condition, coords (2 credits).",
     longDescription:
-      "Paste a Facebook Marketplace item URL and get the listing as clean JSON aligned with search rows: title, price + priceAmount (minor units), currency, categoryId, location/city/state/cityPageId, status (available|pending|sold) with isSold/isPending/isHidden, deliveryTypes, image + photos[], createdAt, plus detail-only description, condition, latitude/longitude, and seller{id,name,url,joinedAt,rating} when Facebook's public page exposes marketplace_listing_seller. Flat 2 credits. Session-only isViewerSeller is never returned.",
+      "Paste a Facebook Marketplace item URL and get the listing as clean JSON aligned with search rows: title, price + priceAmount (minor units), currency, categoryId, location/city/state/cityPageId, status (available|pending|sold) with isSold/isPending/isHidden, deliveryTypes, image + photos[], createdAt, plus detail-only description, condition, latitude/longitude, and seller{id,name,url,joinedAt,rating} when Facebook's public page exposes marketplace_listing_seller. Decodo fetch budgets ~40s — timeouts return HTTP 504 UPSTREAM_TIMEOUT (not 404). Flat 2 credits. Session-only isViewerSeller is never returned.",
     delivers: [
       "Same core fields as search rows (incl. priceAmount, city/state)",
       "status enum — not livestream isLive",
@@ -5845,7 +5847,8 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
         return "https://www.twitch.tv/criticalrole";
       }
       if (ep.slug === "facebook-marketplace-item" || d.includes("marketplace item"))
-        return "https://www.facebook.com/marketplace/item/2228870800986975/";
+        // Available listing from marketplace-search fixture (sold URLs 404 after expiry).
+        return "https://www.facebook.com/marketplace/item/2467979733629080/";
       if (d.includes("playlist"))
         return "https://www.youtube.com/playlist?list=PLrAXtmqj7v3Y";
       // Music/sound/audio heuristics — never apply to SoundCloud (use profile/track URLs).
@@ -6442,8 +6445,8 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       a: `marketplace-search already accepts a city/place name with no lat/lng required. Use location resolve when the name is ambiguous (Austin TX vs Austin MN) or you need Facebook's cityPageId / coordinates before searching. Otherwise skip it — it is an optional 2-credit geocode/disambiguation step.`,
     });
     list.push({
-      q: `What is id / cityPageId?`,
-      a: `Facebook's Marketplace city page id (city_page.id) — the same value marketplace-search listings expose as cityPageId. It is not a fabricated "city|city|state" string.`,
+      q: `What is id on a location row?`,
+      a: `Facebook's Marketplace city_page.id — the same value marketplace-search listings expose as cityPageId. Join with location.id === listing.cityPageId. It is not a fabricated "city|city|state" string, and it is not duplicated as cityPageId on the location row.`,
     });
   }
   if (ep.slug === "github-repository") {
@@ -7742,8 +7745,8 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     nextCursor: "Opaque Link-header cursor (not a bare page number).",
   },
   "facebook-marketplace-location-search": {
-    id: "Facebook Marketplace city page id — same value as cityPageId and as search listings' cityPageId. Omitted when Facebook's hub HTML does not expose it.",
-    cityPageId: "Alias of id — Facebook city_page.id for the Marketplace hub.",
+    id: "Facebook Marketplace city_page.id — same value search listings expose as cityPageId. Omitted when unknown. Not duplicated as cityPageId.",
+    timings: "Stage timings {path, hubMs, hubCount, totalMs}. path=ambiguous_table skips Decodo.",
     slug: "Marketplace hub path slug (e.g. austin, austin-minnesota).",
     name: "Display label, usually 'City, ST'.",
     city: "City name from the query / hub.",
@@ -10292,7 +10295,7 @@ const SLUG_USE_CASES: Record<string, UseCase[]> = {
     },
     {
       title: "Canonical place id",
-      desc: "Use id / cityPageId (Facebook city_page.id) — the same identifier marketplace-search cards expose.",
+      desc: "Use location.id (Facebook city_page.id) — the same identifier marketplace-search cards expose as cityPageId.",
     },
     {
       title: "Optional geocode",

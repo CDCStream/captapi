@@ -15,8 +15,10 @@ import base64
 import json
 import math
 import re
+import time
+from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import urlencode
 
 import structlog
@@ -28,6 +30,20 @@ log = structlog.get_logger(__name__)
 
 CREDIT_FB_MARKETPLACE_NATIVE = 2
 CREDIT_FB_MARKETPLACE_ITEM_NATIVE = 2
+
+# Decodo budgets under Cloudflare's ~125s proxy read (MP1).
+_SEARCH_TIMEOUT_SECS = 40.0
+_SEARCH_SCROLL_TIMEOUT_SECS = 50.0
+_ITEM_TIMEOUT_SECS = 40.0
+
+
+@dataclass(frozen=True)
+class MarketplaceFetchResult:
+    """Native Marketplace outcome — distinguish timeout from not-found (MP3)."""
+
+    data: dict[str, Any] | None = None
+    status: Literal["ok", "not_found", "timeout", "upstream"] = "upstream"
+    timings: dict[str, Any] | None = None
 
 _SCRIPT_RE = re.compile(r"<script[^>]*>(\{.*?\})</script>", re.S)
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
@@ -667,20 +683,31 @@ def _map_item_detail(node: dict[str, Any], url: str) -> dict[str, Any] | None:
     )
 
 
-async def _fetch_search_html(url: str, *, scroll: bool) -> tuple[int, str] | None:
+async def _fetch_search_html(
+    url: str, *, scroll: bool
+) -> tuple[tuple[int, str] | None, bool]:
+    """Return ``(got, timed_out)``. ``timed_out`` when Decodo hit our client budget."""
     actions = _SCROLL_ACTIONS if scroll else None
+    timeout = _SEARCH_SCROLL_TIMEOUT_SECS if scroll else _SEARCH_TIMEOUT_SECS
+    t0 = time.perf_counter()
     got = await decodo_fetch.fetch_url(
         url,
-        timeout=120.0 if not scroll else 150.0,
+        timeout=timeout,
         headless="html",
         browser_actions=actions,
     )
+    elapsed = time.perf_counter() - t0
     if got:
-        return got
+        return got, False
     if scroll:
         # Scroll path sometimes 400s; fall back to plain SSR.
-        return await decodo_fetch.fetch_url(url, timeout=120.0, headless="html")
-    return None
+        t1 = time.perf_counter()
+        got = await decodo_fetch.fetch_url(url, timeout=_SEARCH_TIMEOUT_SECS, headless="html")
+        elapsed = time.perf_counter() - t1
+        if got:
+            return got, False
+        return None, elapsed >= (_SEARCH_TIMEOUT_SECS - 1.0)
+    return None, elapsed >= (timeout - 1.0)
 
 
 async def marketplace_search_native(
@@ -690,19 +717,32 @@ async def marketplace_search_native(
     *,
     filters: dict[str, str] | None = None,
     cursor: str | None = None,
-) -> dict[str, Any] | None:
-    """Search Marketplace. Returns ``{listings, hasMore, nextCursor}`` or None."""
+) -> MarketplaceFetchResult:
+    """Search Marketplace. Returns listings page or a typed failure."""
+    t0 = time.perf_counter()
+    timings: dict[str, Any] = {"path": "search", "fetchMs": 0, "totalMs": 0}
     if limit <= 0:
-        return {"listings": [], "hasMore": False, "nextCursor": None}
+        timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
+        return MarketplaceFetchResult(
+            data={"listings": [], "hasMore": False, "nextCursor": None},
+            status="ok",
+            timings=timings,
+        )
     if not decodo_fetch.enabled():
-        return None
+        timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
+        return MarketplaceFetchResult(status="upstream", timings=timings)
 
     skip = 0
     end_cursor_in: str | None = None
     if cursor:
         decoded = _decode_cursor(cursor)
         if not decoded:
-            return {"listings": [], "hasMore": False, "nextCursor": None}
+            timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
+            return MarketplaceFetchResult(
+                data={"listings": [], "hasMore": False, "nextCursor": None},
+                status="ok",
+                timings=timings,
+            )
         # Cursor is page-offset within SSR/scroll results for the same query.
         skip = max(0, safe_int(decoded.get("skip")) or 0)
         end_cursor_in = safe_str(decoded.get("ec"))
@@ -712,16 +752,26 @@ async def marketplace_search_native(
 
     url = search_url(q, location, filters=filters)
     if not url:
-        return None
+        timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
+        return MarketplaceFetchResult(status="upstream", timings=timings)
 
     # Need more than a typical first paint (~15–24) → try scroll once.
     need = skip + limit
-    got = await _fetch_search_html(url, scroll=need > 20)
+    t_fetch = time.perf_counter()
+    got, timed_out = await _fetch_search_html(url, scroll=need > 20)
+    timings["fetchMs"] = int((time.perf_counter() - t_fetch) * 1000)
     if not got:
-        return None
+        timings["path"] = "search_timeout" if timed_out else "search_empty"
+        timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
+        return MarketplaceFetchResult(
+            status="timeout" if timed_out else "upstream",
+            timings=timings,
+        )
     status, body = got
     if status != 200 or not body or "marketplace_listing_title" not in body:
-        return None
+        timings["path"] = "search_empty"
+        timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
+        return MarketplaceFetchResult(status="upstream", timings=timings)
 
     origin_city, origin_state = parse_city_state(location)
     radius = None
@@ -767,6 +817,7 @@ async def marketplace_search_native(
             }
         )
 
+    timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
     log.info(
         "fb_marketplace_search_ok",
         n=len(window),
@@ -775,29 +826,55 @@ async def marketplace_search_native(
         has_more=more_in_page,
         fb_has_next=has_next,
         filters=bool(filters),
+        fetch_ms=timings["fetchMs"],
+        total_ms=timings["totalMs"],
     )
-    return {
-        "listings": window,
-        "hasMore": more_in_page,
-        "nextCursor": next_cursor,
-    }
+    return MarketplaceFetchResult(
+        data={
+            "listings": window,
+            "hasMore": more_in_page,
+            "nextCursor": next_cursor,
+        },
+        status="ok",
+        timings=timings,
+    )
 
 
-async def marketplace_item_native(url: str) -> dict[str, Any] | None:
+async def marketplace_item_native(url: str) -> MarketplaceFetchResult:
     listing_id = item_id_from_url(url)
+    t0 = time.perf_counter()
+    timings: dict[str, Any] = {"path": "item", "fetchMs": 0, "totalMs": 0}
     if not listing_id or not decodo_fetch.enabled():
-        return None
+        timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
+        return MarketplaceFetchResult(status="not_found", timings=timings)
     page_url = item_url(listing_id)
-    got = await decodo_fetch.fetch_url(page_url, timeout=120.0, headless="html")
+    t_fetch = time.perf_counter()
+    got = await decodo_fetch.fetch_url(page_url, timeout=_ITEM_TIMEOUT_SECS, headless="html")
+    timings["fetchMs"] = int((time.perf_counter() - t_fetch) * 1000)
     if not got:
-        return None
+        timed_out = timings["fetchMs"] >= int((_ITEM_TIMEOUT_SECS - 1.0) * 1000)
+        timings["path"] = "item_timeout" if timed_out else "item_empty"
+        timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
+        return MarketplaceFetchResult(
+            status="timeout" if timed_out else "upstream",
+            timings=timings,
+        )
     status, body = got
     if status != 200 or not body or listing_id not in body:
-        return None
+        timings["path"] = "item_not_found"
+        timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
+        return MarketplaceFetchResult(status="not_found", timings=timings)
     merged = _merge_nodes(_extract_nodes_for_id(body, listing_id))
     if not merged:
-        return None
-    return _map_item_detail(merged, page_url)
+        timings["path"] = "item_not_found"
+        timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
+        return MarketplaceFetchResult(status="not_found", timings=timings)
+    timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
+    return MarketplaceFetchResult(
+        data=_map_item_detail(merged, page_url),
+        status="ok",
+        timings=timings,
+    )
 
 
 def _merge_detail_into_listing(
@@ -848,16 +925,18 @@ async def marketplace_search_details_native(
     *,
     filters: dict[str, str] | None = None,
     cursor: str | None = None,
-) -> dict[str, Any] | None:
+) -> MarketplaceFetchResult:
     """List search + per-item Decodo enrich (description / coords / full photos)."""
-    page = await marketplace_search_native(
+    t0 = time.perf_counter()
+    page_result = await marketplace_search_native(
         q, location, limit, filters=filters, cursor=cursor
     )
-    if page is None:
-        return None
+    if page_result.status != "ok" or not page_result.data:
+        return page_result
+    page = page_result.data
     listings = page.get("listings") or []
     if not listings:
-        return page
+        return page_result
 
     origin_city, origin_state = parse_city_state(location)
     radius = None
@@ -872,7 +951,9 @@ async def marketplace_search_details_native(
     try:
         from app.services import facebook_marketplace_location_native as _loc_native
 
-        places = await _loc_native.marketplace_location_search_native(location, limit=1)
+        places, _loc_timings = await _loc_native.marketplace_location_search_native(
+            location, limit=1
+        )
         if places:
             origin_lat = safe_float(places[0].get("latitude"))
             origin_lng = safe_float(places[0].get("longitude"))
@@ -884,7 +965,11 @@ async def marketplace_search_details_native(
     async def _enrich(row: dict[str, Any]) -> dict[str, Any]:
         async with sem:
             detail = await marketplace_item_native(safe_str(row.get("url")) or "")
-        merged = _merge_detail_into_listing(row, detail) if detail else row
+        merged = (
+            _merge_detail_into_listing(row, detail.data)
+            if detail.status == "ok" and detail.data
+            else row
+        )
         return annotate_search_locality(
             merged,
             origin_city=origin_city,
@@ -895,11 +980,19 @@ async def marketplace_search_details_native(
         )
 
     enriched = list(await asyncio.gather(*[_enrich(row) for row in listings]))
-    return {
-        "listings": enriched,
-        "hasMore": page.get("hasMore"),
-        "nextCursor": page.get("nextCursor"),
-    }
+    timings = dict(page_result.timings or {})
+    timings["path"] = "search_details"
+    timings["enrichCount"] = len(listings)
+    timings["totalMs"] = int((time.perf_counter() - t0) * 1000)
+    return MarketplaceFetchResult(
+        data={
+            "listings": enriched,
+            "hasMore": page.get("hasMore"),
+            "nextCursor": page.get("nextCursor"),
+        },
+        status="ok",
+        timings=timings,
+    )
 
 
 def credits_for_details(n: int) -> int:

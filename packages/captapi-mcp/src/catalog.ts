@@ -314,8 +314,32 @@ const FACEBOOK_MARKETPLACE: Omit<Endpoint, "platform">[] = [
     { name: "cursor", type: "string", required: false, description: "Pagination cursor from a previous nextCursor." },
     { name: "details", type: "string", required: false, description: "Set true for description/condition/coordinates/full gallery (2 + 2 credits per listing). Cover photo is included even when false." },
   ] },
-  { tool: "facebook_marketplace_location_search", name: "Facebook Marketplace Location Search", path: "/v1/facebook/marketplace-location-search", credits: 2, summary: "Disambiguate city names into Marketplace hubs with Facebook cityPageId + lat/lng. marketplace-search already accepts a city string — use this for ambiguous names (Austin TX vs MN) or when you need cityPageId. Flat 2 credits.", params: [q("City/place query. Bare 'Austin' may return TX/MN/IN; include a state for a single hit."), limitFlat(10, 50, 2), cacheParam()] },
-  { tool: "facebook_marketplace_item", name: "Facebook Marketplace Item", path: "/v1/facebook/marketplace-item", credits: 1, summary: "Details for a single Facebook Marketplace listing.", params: [url("Facebook Marketplace item URL.")] },
+  {
+    tool: "facebook_marketplace_location_search",
+    name: "Facebook Marketplace Location Search",
+    path: "/v1/facebook/marketplace-location-search",
+    credits: 2,
+    summary:
+      "Disambiguate city names into Marketplace hubs — id + lat/lng. Bare cities use a local table (<1s). Flat 2 credits.",
+    params: [
+      q("City/place query. Bare 'Austin' may return TX/MN/IN; include a state for a single hit."),
+      limitFlat(10, 50, 2),
+      cacheParam(),
+    ],
+  },
+  {
+    tool: "facebook_marketplace_item",
+    name: "Facebook Marketplace Item",
+    path: "/v1/facebook/marketplace-item",
+    credits: 2,
+    summary:
+      "Marketplace listing details — title, price, status, seller when exposed. Flat 2 credits.",
+    params: [
+      url(
+        "Facebook Marketplace item URL, e.g. https://www.facebook.com/marketplace/item/2467979733629080/",
+      ),
+    ],
+  },
 ];
 
 const FACEBOOK_EVENTS: Omit<Endpoint, "platform">[] = [

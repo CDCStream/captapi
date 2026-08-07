@@ -870,32 +870,23 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "facebook-marketplace-item": {
     "platform": "facebook",
-    "id": "2228870800986975",
-    "url": "https://www.facebook.com/marketplace/item/2228870800986975/",
-    "title": "Elabest Mesh Office Chair, Ergonomic Computer Desk Chair, Sturdy Task Chair - Adjustable Lumbar Support",
-    "description": "Breathable mesh office chair has an ergonomic design with a high back and adjustable headrest. This light gray task chair is manufactured by Elabest and features adjustable armrests, a five-point rolling base, and integrated lumbar support.\n\nEstimated (WxDxH): 26 x 24 x 45 in",
-    "price": 125.0,
-    "priceFormatted": "$125",
+    "id": "2467979733629080",
+    "url": "https://www.facebook.com/marketplace/item/2467979733629080/",
+    "title": "Gaiam Classic Balance Ball Chair - Ergonomic Office/Desk Chair",
+    "price": 50.0,
+    "priceFormatted": "$50",
     "currency": "USD",
-    "condition": "Used - like new",
-    "location": "Arlington, VA",
-    "latitude": 38.888854980469,
-    "longitude": -77.085571289062,
-    "isSold": true,
-    "deliveryTypes": [
-      "IN_PERSON",
-      "DOOR_PICKUP"
-    ],
-    "image": "https://scontent-mad1-1.xx.fbcdn.net/v/t39.84726-6/749377945_1746854896315726_817991790771142418_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=Td50J02FhxwQ7kNvwEMS5Gk&_nc_oc=Adq3GF3R5f05eu3AlZfXV5BYX7n-dl-fGhjd7L4VfCb2IZztMYgOGJOLqDwEA8uVUvU&_nc_zt=14&_nc_ht=scontent-mad1-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQC6x7FebWsdvTVd2WTXik82gabWPwTIgqcmEHjtOn9PRA&oe=6A6D9DBB",
-    "photos": [
-      "https://scontent-mad1-1.xx.fbcdn.net/v/t39.84726-6/749377945_1746854896315726_817991790771142418_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=Td50J02FhxwQ7kNvwEMS5Gk&_nc_oc=Adq3GF3R5f05eu3AlZfXV5BYX7n-dl-fGhjd7L4VfCb2IZztMYgOGJOLqDwEA8uVUvU&_nc_zt=14&_nc_ht=scontent-mad1-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQC6x7FebWsdvTVd2WTXik82gabWPwTIgqcmEHjtOn9PRA&oe=6A6D9DBB",
-      "https://scontent-mad2-1.xx.fbcdn.net/v/t45.5328-4/750643688_1384573667068640_514500939676617077_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=111&ccb=1-7&_nc_sid=247b10&_nc_ohc=Aa-65J_vFfcQ7kNvwF56W3U&_nc_oc=AdqZo7FznGIikAd34m8FI2BzTOz3YUC3qQQ7lZPPYOm6lxpve9wXM1XMfZkSG1T1N-k&_nc_zt=23&_nc_ht=scontent-mad2-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQADpKLF9okchpYthAq_g22eIr1EZlOHwgG-Ih5jzyIFyQ&oe=6A6D812F"
-    ],
-    "createdAt": "2026-07-17T18:23:51+00:00",
-    "status": "sold",
-    "priceAmount": 12500,
-    "city": "Arlington",
-    "state": "VA"
+    "location": "Fresno, CA",
+    "city": "Fresno",
+    "state": "CA",
+    "cityPageId": "107983435897193",
+    "isSold": false,
+    "isPending": false,
+    "isHidden": false,
+    "deliveryTypes": ["IN_PERSON", "SHIPPING_ONSITE"],
+    "status": "available",
+    "priceAmount": 5000,
+    "createdAt": "2026-07-18T17:45:28+00:00"
   },
   "facebook-marketplace-location-search": {
     "query": "Austin",
@@ -903,7 +894,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "locations": [
       {
         "id": "109791499039942",
-        "cityPageId": "109791499039942",
         "slug": "austin",
         "name": "Austin, TX",
         "city": "Austin",
@@ -918,8 +908,22 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "state": "MN",
         "latitude": 43.6666,
         "longitude": -92.9746
+      },
+      {
+        "slug": "austin-indiana",
+        "name": "Austin, IN",
+        "city": "Austin",
+        "state": "IN",
+        "latitude": 38.7584,
+        "longitude": -85.808
       }
-    ]
+    ],
+    "timings": {
+      "path": "ambiguous_table",
+      "hubMs": 0,
+      "hubCount": 0,
+      "totalMs": 2
+    }
   },
   "facebook-marketplace-search": {
     "query": "desk chair",

@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Facebook Marketplace: under-60s location resolve + error envelope",
+    description:
+      "marketplace-location-search no longer serializes three 120s Decodo hub fetches for bare cities like Austin — ambiguous hubs resolve from a local table (typically <1s) with timings{}. Search/item Decodo budgets drop to ~40s and return 504 UPSTREAM_TIMEOUT instead of a mislabelled 404. HTTPException now uses the catalogue error envelope (success/error/code/creditsUsed/requestId) everywhere. Dropped duplicate location.cityPageId; Playground marketplace-item fixture points at an available listing.",
+    items: [
+      "Ambiguous location table path + timings (MP1)",
+      "Catalogue-wide HTTPException envelope (MP2)",
+      "Timeout vs not-found + working item fixture (MP3)",
+      "Drop location.cityPageId alias (MP4)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Facebook profile-events: full Event shape, source, visibility",
     description:
       "profile-events now returns the same Event key set as event-details / event-search (null when the card omits a field), adds source to the envelope for dual billing, splits eventType (category) from visibility (public|private|…), and always includes the year in startTime. Playground limit notes for event-search and profile-events no longer say Flat 2 when Apify bills per result.",
