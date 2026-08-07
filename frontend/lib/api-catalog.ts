@@ -2735,7 +2735,16 @@ const KWAI: Spec[] = [
     tagline:
       "Fetch Kwai profile — display name, bio, counts, and verification as structured JSON.",
     longDescription:
-      "Pass a Kwai profile URL or @handle and get the public account as clean JSON: id/eid, username, displayName, bio, avatar, verified + verifiedDescription/verifiedNumber when Kwai exposes them, gender, followers/following/likedCount, publicPostCount/privatePostCount/postCount/videoCount, and isPrivate. No redundant raw{} — normalized fields only. Parsed from Kwai's public web page (JSON-LD + Nuxt SSR state) — not HTML scraping of visible counters. Note: Kwai's web surface sometimes stubs follower/following to 1; when that happens we prefer schema.org counts for followers and omit following rather than ship a fake 1. Flat 1 credit (native web parse; not the 17-credit Apify post path).",
+      "Pass a Kwai profile URL or @handle and get the public account as clean JSON — one fixed key set on every profile: id (Kwai's opaque eid string — no twin eid key), username, displayName, bio, avatar, verified, verifiedDescription, gender, followers, following, likedCount, publicPostCount, privatePostCount, postCount (= public + private when both known), isPrivate. Sparse fields are null, never omitted (verifiedDescription / gender / privatePostCount included). No videoCount (Kwai posts are videos — structurally equal to postCount). No verifiedNumber (Kwai's verified_num is an undocumented enum; use verified + verifiedDescription). No redundant raw{}. Parsed from Kwai's public web page (JSON-LD + Nuxt SSR state). Note: Kwai's web surface sometimes stubs follower/following to 1; when that happens we prefer schema.org counts for followers and set following to null rather than ship a fake 1. Flat 1 credit.",
+    delivers: [
+      "verifiedDescription / gender / privatePostCount always present",
+      "postCount = public + private when both known",
+      "No eid twin, no videoCount, no verifiedNumber",
+    ],
+    platformLimits: [
+      "publicPostCount can diverge from postCount when privatePostCount > 0; videoCount is never emitted (posts ≡ videos).",
+      "verifiedNumber is not exposed — Kwai's verified_num values beyond 0 (none) and 3 (Conta Oficial) are not documented upstream.",
+    ],
   },
   {
     slug: "kwai-user-posts",
@@ -2749,12 +2758,15 @@ const KWAI: Spec[] = [
     tagline:
       "Kwai profile posts — caption (\"\" when none), engagement, mp4 + transcript (~1 credit/post).",
     longDescription:
-      "Pass a Kwai profile URL or @handle and get that creator's public posts as clean JSON. Each post: id/url, text (the post caption only — empty string when none; never Kwai's SEO title / \"Áudio original criado por …\" boilerplate), hashtags[] (always present — [] when the caption has no tags), publishedAt, durationSeconds, thumbnailUrl, videoUrl with videoType (\"mp4\" or \"hls\"), mediaUrlsExpireAt parsed from the signed CDN tag=, engagement{views,likes,comments,shares}, and transcript when Kwai's JSON-LD auto-captions are present (duplicate merged tracks are deduped). Author{id,username,displayName,avatar,url} is returned once at the top — not repeated on every row. Opaque nextCursor pages within the posts Kwai exposes on one profile fetch (the public web surface does not offer a deep archive API). ~1 credit per post returned (min 2; default limit 20 → ~20 credits). Transcript is included when Kwai publishes it — not a separate Whisper bill. Shares _normalize_post with /kwai/post.",
+      "Pass a Kwai profile URL or @handle and get that creator's public posts as clean JSON. Each post: id/url, text (the post caption only — empty string when none; never Kwai's SEO title / \"Áudio original criado por …\" boilerplate), hashtags[] (always present — [] when the caption has no tags), publishedAt, durationSeconds, thumbnailUrl, videoUrl with videoType (\"mp4\" or \"hls\"), mediaUrlsExpireAt parsed from the signed CDN tag=, engagement{views,likes,comments,shares}, and transcript when Kwai's JSON-LD auto-captions are present (duplicate merged tracks are deduped). Author{id,username,displayName,avatar,url} is returned once at the top — not repeated on every row. Envelope uses url (the requested profile) — same key as /kwai/post and /kwai/profile. HARD PAGE LIMIT: Kwai's public web only SSR-embeds a first-page window of posts (typically a handful — observed ~6 on large accounts), not the full postCount from /kwai/profile. hasMore/nextCursor page within that window; hasMore=false means the window is exhausted, not that the account has no more posts upstream. ~1 credit per post returned (min 2; default limit 20 → ~20 credits). Transcript is included when Kwai publishes it — not a separate Whisper bill. Shares _normalize_post with /kwai/post.",
     delivers: [
       "Posts with engagement + signed mp4 videoUrl",
       "hashtags[] always present ([] when none)",
-      "videoType + mediaUrlsExpireAt from CDN tag=",
-      "Author{} once; opaque cursor within one fetch",
+      "hasMore/nextCursor within SSR first-page window",
+      "Author{} once; envelope url",
+    ],
+    platformLimits: [
+      "hasMore=false is end of Kwai's SSR first-page window, not the account archive. Use /kwai/profile postCount for universe size — there is no public deep-archive pagination API.",
     ],
   },
   {

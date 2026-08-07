@@ -229,19 +229,29 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     author = _author(item)
     handle = author.get("username") or author.get("name")
     page_url = author.get("url") or (f"https://www.kwai.com/@{handle}" if handle else None)
-    eid = safe_str(author.get("eid") or author.get("id"))
+    # Kwai's opaque string id (Nuxt ``eid`` / JSON-LD ``identifier``). Always the
+    # same value — never emit a twin ``eid`` key. Numeric ``user_id`` is a
+    # different upstream field and is not exposed here.
+    profile_id = safe_str(author.get("eid") or author.get("id"))
     public_posts = safe_int(author.get("publicPostCount") or author.get("videosCount"))
     private_posts = safe_int(author.get("privatePostCount"))
+    # public + private can diverge (privatePostCount > 0). videoCount cannot —
+    # Kwai posts are videos — so it is not emitted (Spotify contentRating rule).
+    if public_posts is not None and private_posts is not None:
+        post_count = public_posts + private_posts
+    else:
+        post_count = public_posts
     verified = author.get("verified")
     if not isinstance(verified, bool):
         verified = None
     is_private = author.get("isPrivate")
     if not isinstance(is_private, bool):
         is_private = None
-    out: dict[str, Any] = {
+    # Fixed key set on every profile (KP3 + envelope parity). Null = unknown —
+    # never omit a key that another profile would include.
+    return {
         "platform": "kwai",
-        "id": eid,
-        "eid": eid,
+        "id": profile_id,
         "url": safe_str(page_url),
         "username": safe_str(handle),
         "displayName": safe_str(author.get("name")),
@@ -249,35 +259,15 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
         "avatar": _normalize_avatar(safe_str(author.get("avatar"))),
         "verified": verified,
         "verifiedDescription": safe_str(author.get("verifiedDescription")),
-        "verifiedNumber": safe_int(author.get("verifiedNumber")),
         "gender": safe_str(author.get("gender")),
         "followers": safe_int(author.get("followersCount")),
         "following": safe_int(author.get("followingCount")),
         "likedCount": safe_int(author.get("likesCount")),
         "publicPostCount": public_posts,
         "privatePostCount": private_posts,
-        "postCount": public_posts,
-        "videoCount": public_posts,
+        "postCount": post_count,
         "isPrivate": is_private,
     }
-    for key in (
-        "bio",
-        "verifiedDescription",
-        "verifiedNumber",
-        "gender",
-        "following",
-        "publicPostCount",
-        "privatePostCount",
-        "postCount",
-        "videoCount",
-        "eid",
-    ):
-        if out.get(key) in (None, "", []):
-            out.pop(key, None)
-    for key in ("verified", "isPrivate"):
-        if out.get(key) is None:
-            out.pop(key, None)
-    return out
 
 
 def _normalize_post(
@@ -343,7 +333,12 @@ def _hashtags(text: str | None) -> list[str]:
     summary="Kwai profile",
     description=(
         "Fetch a Kwai profile — display name, bio, counts, and verification as structured JSON. "
-        "Parsed from Kwai's public web page (JSON-LD + Nuxt SSR state)."
+        "Parsed from Kwai's public web page (JSON-LD + Nuxt SSR state). "
+        "verifiedDescription, gender, and privatePostCount are always present (null when "
+        "unknown). postCount = publicPostCount + privatePostCount when both are known; "
+        "publicPostCount can diverge from postCount when private posts exist. "
+        "No videoCount (posts are videos). No verifiedNumber (undocumented enum — use "
+        "verified + verifiedDescription)."
     ),
 )
 async def profile(
@@ -366,8 +361,15 @@ async def profile(
             ctx["source"] = "apify"
             return _normalize_profile(items[0])
 
-        data = await cached_or_run("kwai.profile", {"url": profile_url, "v": 7}, _run, ctx, use_cache=cache)
+        # v8: KP3 always-present keys; drop eid/videoCount/verifiedNumber; postCount=public+private.
+        data = await cached_or_run("kwai.profile", {"url": profile_url, "v": 8}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
+
+
+# Kwai's public profile HTML embeds a finite first-page window of VideoObjects
+# (typically a handful — observed ~6 on large accounts). There is no public deep
+# archive API; hasMore/nextCursor only page within that window.
+_USER_POSTS_WINDOW_CAP = 200
 
 
 @router.get(
@@ -379,8 +381,11 @@ async def profile(
         "always present ([] when none), engagement, mp4 videoUrl + videoType, "
         "mediaUrlsExpireAt from the signed CDN tag, and transcript when Kwai's "
         "JSON-LD exposes auto-captions (deduped). Author{} is hoisted once at the "
-        "top. Opaque cursor pages within the posts returned from one profile fetch "
-        "(Kwai's public web surface does not expose deep archive pagination). "
+        "top. "
+        "HARD PAGE LIMIT: Kwai's public web only SSR-embeds a first-page window of "
+        "posts (typically a handful — not the full postCount from /kwai/profile). "
+        "hasMore/nextCursor page within that window only; hasMore=false means the "
+        "window is exhausted, not that the account has no more posts upstream. "
         "~1 credit per post returned (min 2). Shares _normalize_post with /kwai/post."
     ),
 )
@@ -391,7 +396,8 @@ async def user_posts(
         None,
         description=(
             "Opaque pagination cursor from the previous nextCursor. Leave empty for "
-            "the first page. Pages within the posts Kwai exposes on one profile fetch."
+            "the first page. Pages only within Kwai's SSR first-page window — not "
+            "the full account archive (see endpoint description)."
         ),
     ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -401,8 +407,6 @@ async def user_posts(
     if not profile_url:
         raise HTTPException(status_code=400, detail="Invalid Kwai profile URL or handle")
     offset = _decode_posts_cursor(cursor)
-    # Over-fetch so cursor pages can walk the single HTML/Apify batch.
-    fetch_cap = min(200, max(limit + offset, limit))
     async with billed_call(
         caller=caller,
         endpoint="/v1/kwai/user-posts",
@@ -411,13 +415,21 @@ async def user_posts(
         base_credits=_scaled(limit),
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native_items = await native.fetch_user_posts(profile_url, limit=fetch_cap)
+            # Always hydrate the full SSR/Apify first-page window, then slice.
+            # Fetching only ``limit`` made hasMore=false on every first page
+            # (KU1) even when the window still had rows.
+            native_items = await native.fetch_user_posts(
+                profile_url, limit=_USER_POSTS_WINDOW_CAP
+            )
             if native_items:
                 ctx["source"] = "direct"
                 rows = native_items
             else:
                 items = _good_rows(
-                    await _run_kwai({"urls": [profile_url], "maxItems": fetch_cap}, max_items=fetch_cap)
+                    await _run_kwai(
+                        {"urls": [profile_url], "maxItems": _USER_POSTS_WINDOW_CAP},
+                        max_items=_USER_POSTS_WINDOW_CAP,
+                    )
                 )
                 if not items:
                     raise HTTPException(status_code=404, detail="Kwai profile not found")
@@ -434,7 +446,7 @@ async def user_posts(
             next_offset = offset + len(posts)
             has_more = next_offset < len(rows)
             out: dict[str, Any] = {
-                "profileUrl": profile_url,
+                "url": profile_url,
                 "totalReturned": len(posts),
                 "nextCursor": _encode_posts_cursor(next_offset) if has_more else None,
                 "hasMore": has_more,
@@ -446,8 +458,8 @@ async def user_posts(
 
         data = await cached_or_run(
             "kwai.user-posts",
-            # v10: hashtags always present ([] when none) via shared _normalize_post.
-            {"url": profile_url, "limit": limit, "cursor": cursor or "", "v": 10},
+            # v11: full SSR window before slice (KU1); envelope url (was profileUrl).
+            {"url": profile_url, "limit": limit, "cursor": cursor or "", "v": 11},
             _run,
             ctx,
             use_cache=cache,

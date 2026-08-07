@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Kwai user-posts hasMore + profile key parity",
+    description:
+      "user-posts was capping the SSR fetch at limit, so limit=5 always returned hasMore:false even when the profile HTML still had rows (KU1). Now hydrates the full first-page window before slicing; docs state the hard page limit (SSR window ≠ postCount). Profile always emits verifiedDescription/gender/privatePostCount (null when unknown), drops eid/videoCount/verifiedNumber, and sets postCount = public + private when both known. Envelope profileUrl → url.",
+    items: [
+      "hasMore true within SSR window when limit < window",
+      "Documented hard page limit (no deep archive API)",
+      "Profile KP3 always-present keys; drop eid/videoCount/verifiedNumber",
+      "user-posts envelope url (was profileUrl)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Kwai post/user-posts: always emit hashtags[]",
     description:
       "hashtags was omitted on caption-less posts and present when tags existed — two shapes for one endpoint. Shared _normalize_post now always emits hashtags ([] when none), matching Instagram children:[] on singles. Covers /kwai/post and /kwai/user-posts.",

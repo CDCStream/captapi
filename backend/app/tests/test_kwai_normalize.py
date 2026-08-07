@@ -125,3 +125,124 @@ def test_author_card_and_list_hoist_helpers():
     card = k._author_card(meta)
     assert card["avatar"].endswith("_s.jpg")
     assert card["displayName"] == "Name"
+
+
+_PROFILE_KEYS = {
+    "platform",
+    "id",
+    "url",
+    "username",
+    "displayName",
+    "bio",
+    "avatar",
+    "verified",
+    "verifiedDescription",
+    "gender",
+    "followers",
+    "following",
+    "likedCount",
+    "publicPostCount",
+    "privatePostCount",
+    "postCount",
+    "isPrivate",
+}
+
+
+def test_profile_kp3_same_key_set():
+    """One key set for verified + sparse profiles (KP3)."""
+    verified = k._normalize_profile(
+        {
+            "authorMeta": {
+                "eid": "abc",
+                "username": "KwaiBrasilOficial",
+                "name": "Kwai Brasil",
+                "url": "https://www.kwai.com/@KwaiBrasilOficial",
+                "bio": "Official",
+                "verified": True,
+                "verifiedDescription": "Conta Oficial",
+                "verifiedNumber": 3,
+                "publicPostCount": 100,
+                "privatePostCount": 0,
+                "followersCount": 1_000,
+                "followingCount": 1,
+                "likesCount": 50,
+                "isPrivate": False,
+            }
+        }
+    )
+    sparse = k._normalize_profile(
+        {
+            "authorMeta": {
+                "eid": "xyz",
+                "username": "topfilmeseseriesnatv",
+                "name": "Top",
+                "url": "https://www.kwai.com/@topfilmeseseriesnatv",
+                "publicPostCount": 50,
+                "followersCount": 10,
+                "likesCount": 2,
+            }
+        }
+    )
+    assert set(verified.keys()) == _PROFILE_KEYS
+    assert set(sparse.keys()) == _PROFILE_KEYS
+    assert sparse["verifiedDescription"] is None
+    assert sparse["gender"] is None
+    assert sparse["privatePostCount"] is None
+    assert sparse["verified"] is None
+    assert sparse["bio"] is None
+    assert sparse["following"] is None
+    assert sparse["isPrivate"] is None
+    assert verified["privatePostCount"] == 0
+    assert "eid" not in verified
+    assert "videoCount" not in verified
+    assert "verifiedNumber" not in verified
+    assert verified["postCount"] == 100  # public + private(0)
+    assert sparse["postCount"] == 50
+
+
+def test_profile_post_count_includes_private():
+    out = k._normalize_profile(
+        {
+            "authorMeta": {
+                "id": "a",
+                "username": "u",
+                "name": "U",
+                "url": "https://www.kwai.com/@u",
+                "publicPostCount": 10,
+                "privatePostCount": 3,
+            }
+        }
+    )
+    assert out["publicPostCount"] == 10
+    assert out["privatePostCount"] == 3
+    assert out["postCount"] == 13
+
+
+def test_user_posts_has_more_within_ssr_window():
+    """limit < window size → hasMore true + usable cursor (KU1)."""
+    rows = [
+        {
+            "id": str(i),
+            "url": f"https://www.kwai.com/@u/video/{i}",
+            "caption": "",
+            "playUrl": f"https://cdn.example/{i}.mp4",
+            "authorMeta": {
+                "username": "u",
+                "name": "U",
+                "url": "https://www.kwai.com/@u",
+            },
+        }
+        for i in range(6)
+    ]
+    offset = 0
+    limit = 5
+    page = rows[offset : offset + limit]
+    next_offset = offset + len(page)
+    has_more = next_offset < len(rows)
+    assert len(page) == 5
+    assert has_more is True
+    cursor = k._encode_posts_cursor(next_offset)
+    assert k._decode_posts_cursor(cursor) == 5
+    page2 = rows[5 : 5 + limit]
+    assert len(page2) == 1
+    assert (5 + len(page2)) >= len(rows)
