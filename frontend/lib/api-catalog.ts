@@ -317,10 +317,10 @@ const YOUTUBE: Spec[] = [
     tagline:
       "YouTube channel stats — ISO country/joinedAt, real banner, quote-aware SEO tags, absolute links. Flat 1 credit.",
     longDescription:
-      "Pass a channel URL, @handle, or UC… id and get clean JSON. Canonical profile core (same keys on every Captapi profile endpoint): platform, id, handle, url, displayName, bio, avatar, banner, followers, following, postCount, verified, createdAt — plus deprecated aliases for one release (name, description, thumbnailUrl, bannerUrl, subscriberCount, videoCount, joinedAt). Also: canonicalUrl (@handle when known), subscriberCountIsApproximate, viewCount (exact when About exposes it), country (ISO-3166 alpha-2) + countryName, joinedDate (English About label), links[{text,url}] with absolute https URLs, email when published in About/description (not the CAPTCHA reveal), and tags[] from channel SEO keywords (quote-aware — multi-word tags stay one entry). banner is null when the channel has no banner — we never substitute the avatar. Flat 1 credit.",
+      "Pass a channel URL, @handle, or UC… id and get clean JSON. Canonical profile core (same keys on every Captapi profile endpoint): platform, id, username, url, displayName, bio, avatar, banner, followers, following, postCount, verified, createdAt. Identical-value aliases (handle/name/description/thumbnailUrl/bannerUrl/subscriberCount/videoCount/joinedAt/joinedDate) are not emitted. Also: canonicalUrl (@handle when known), subscriberCountIsApproximate, viewCount (exact when About exposes it), country (ISO-3166 alpha-2) + countryName, links[{text,url}] with absolute https URLs, email when published in About/description (not the CAPTCHA reveal), and tags[] from channel SEO keywords (quote-aware — multi-word tags stay one entry). banner is null when the channel has no banner — we never substitute the avatar. Flat 1 credit.",
     platformLimits: [
-      "subscriberCount is YouTube's rounded shelf value; subscriberCountIsApproximate is true when the source used K/M/B compact form. viewCount is exact when the About panel exposes it.",
-      "bannerUrl is null when the channel has no banner — we never substitute the avatar.",
+      "followers is YouTube's rounded shelf value; subscriberCountIsApproximate is true when the source used K/M/B compact form. viewCount is exact when the About panel exposes it. createdAt is ISO-8601 (YYYY-MM-DD) — no parallel display-formatted date.",
+      "banner is null when the channel has no banner — we never substitute the avatar.",
       "email is only returned when the creator published it in description/About text or a mailto link — not from YouTube's CAPTCHA email reveal.",
     ],
   },
@@ -919,7 +919,7 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Instagram profile stats — fixed key set (null fillers), fbid, bioLinks, isBusinessAccount, approx flags.",
     longDescription:
-      "Send a profile URL or @handle and get clean JSON with a fixed key set on every profile (absent → null, never a missing key): platform, url, id, fbid, handle, displayName, bio, bioLinks, followers, following, postCount, verified, avatar, imageExpiresAt, externalUrl, isPrivate, isBusinessAccount, followersIsApproximate, followingIsApproximate, postCountIsApproximate, fetchedAt. Twin aliases username/name/profileImage and the duplicate profileImageHd key are not emitted — avatar is the single best profile-pic URL (CDN size token upgraded when Instagram only ships s150x150). Approx flags are derived from the source (true when a count came from a K/M/B display string such as og:description \"32K\"). Flat 1 credit. Cold path races WPI/GraphQL/HTML; hard cap 110s → 502, 0 credits. Pass cache / cacheMaxAge for the profile trust layer.",
+      "Send a profile URL or @handle and get clean JSON with a fixed key set on every profile (absent → null, never a missing key): platform, url, id, fbid, username, displayName, bio, bioLinks, followers, following, postCount, verified, avatar, imageExpiresAt, externalUrl, isPrivate, isBusinessAccount, followersIsApproximate, followingIsApproximate, postCountIsApproximate, fetchedAt. Twin aliases handle/name/profileImage and the duplicate profileImageHd key are not emitted — avatar is the single best profile-pic URL (CDN size token upgraded when Instagram only ships s150x150). Approx flags are derived from the source (true when a count came from a K/M/B display string such as og:description \"32K\"). Flat 1 credit. Cold path races WPI/GraphQL/HTML; hard cap 110s → 502, 0 credits. Pass cache / cacheMaxAge for the profile trust layer.",
   },
   {
     slug: "instagram-channel-posts",
@@ -933,7 +933,7 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Latest posts from a public Instagram profile — engagement.views + viewsSource, profile user{} in one call.",
     longDescription:
-      "Send a profile URL or @handle and get recent posts as JSON plus a top-level user{} profile block (id, username, displayName, verified, followers, profileImage) so you do not need a second channel-details call. Each item includes postType, productType (clips/feed — never an empty string), caption, media, likes, comments, and on videos: durationSeconds, hasAudio, music{}, location{}, isAd / isAffiliate / isPaidPartnership when Instagram exposes them. Metrics: engagement.views (canonical play count) + viewsSource (instagram|facebook|null) + deprecated plays alias. Image/Sidecar keep engagement.views as null. Cursor pagination via nextCursor + hasMore. Pass cache=true for the 24h shared cache.",
+      "Send a profile URL or @handle and get recent posts as JSON plus a top-level user{} profile block (id, username, displayName, verified, followers, avatar, isPrivate) so you do not need a second channel-details call. Each item includes postType, productType (clips/feed — never an empty string), caption, media, likes, comments, and on videos: durationSeconds, hasAudio, music{}, location{}, isAd / isAffiliate / isPaidPartnership when Instagram exposes them. Metrics: engagement.views (canonical play count) + viewsSource (instagram|facebook|null) + deprecated plays alias. Image/Sidecar keep engagement.views as null. Cursor pagination via nextCursor + hasMore. Pass cache=true for the 24h shared cache.",
     delivers: [
       "Top-level user{} profile (no second call)",
       "engagement.views + viewsSource on videos",
@@ -1081,11 +1081,11 @@ const INSTAGRAM: Spec[] = [
     ],
     platformLimits: [
       "mode is always resolve — Instagram's multi-result keyword search requires login; there is no search mode and no nextCursor/hasMore on this endpoint.",
-      "profileImage / profileImageHd are signed Instagram CDN URLs (oe= expiry). imageExpiresAt is ISO when oe= is present; re-host for long-term storage.",
+      "avatar is a signed Instagram CDN URL (oe= expiry). imageExpiresAt is ISO when oe= is present; re-host for long-term storage.",
       "0 or 1 users[] — not a paginated discovery feed. Use relatedProfiles[] for adjacent accounts.",
     ],
     longDescription:
-      "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, instagram.com/natgeo) and this endpoint resolves it to the matching public Instagram account — a name→handle resolver, not a Google-style niche discovery search (queries like \"fitness coach\" will not return a creator list). Response: mode=resolve (the only mode; Instagram keyword search is login-gated), users[0] with platform, id (numeric), username, displayName, url (canonical https://www.instagram.com/{user}/), bio, bioLinks[], externalUrl, categoryName, fbid, relatedProfiles[], businessAddress, likeAndViewCountsDisabled, followers/following/postCount, verified, isPrivate, isBusinessAccount/isProfessionalAccount, avatar (+ deprecated profileImage)/profileImageHd, and imageExpiresAt when the CDN oe= param is present. No nextCursor — resolve returns at most one user. Walk relatedProfiles for niche discovery without a separate creator-search endpoint. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+      "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, instagram.com/natgeo) and this endpoint resolves it to the matching public Instagram account — a name→username resolver, not a Google-style niche discovery search (queries like \"fitness coach\" will not return a creator list). Response: mode=resolve (the only mode; Instagram keyword search is login-gated), users[0] with platform, id (numeric), username, displayName, url (canonical https://www.instagram.com/{user}/), bio, bioLinks[], externalUrl, categoryName, fbid, relatedProfiles[], businessAddress, likeAndViewCountsDisabled, followers/following/postCount, verified, isPrivate, isBusinessAccount/isProfessionalAccount, avatar, and imageExpiresAt when the CDN oe= param is present. No nextCursor — resolve returns at most one user. Walk relatedProfiles for niche discovery without a separate creator-search endpoint. Flat 1 credit. Pass cache=true for the 24h shared cache.",
   },
   { slug: "instagram-embed", name: "Instagram Embed HTML API", shortName: "Embed HTML", category: "details", method: "GET", path: "/v1/instagram/embed", credits: 1, tagline: "Get Instagram's own self-contained embed HTML for any post, reel, or profile — ready to drop into an iframe on your site.", longDescription: "Pass an Instagram post, reel, or profile URL (or an @handle) and get back Instagram's own self-contained embed page as ready-to-use HTML — the full <html> document Instagram serves at /embed/, which you can drop straight into an <iframe srcdoc> or render server-side. The response also returns embedUrl, so you can point an <iframe src> at it directly instead. Posts and reels come back as a rich media card (with caption); profiles come back as a profile card that links to the account. No login or OAuth needed — it's fast, costs just 1 credit. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh. If Instagram's embed page is ever unavailable, the response falls back to the classic blockquote + embed.js snippet.", delivers: ["Instagram's full self-contained embed HTML document", "embedUrl you can load directly in an <iframe src>", "Canonical Instagram permalink for the post/reel/profile", "Type flag (post/reel/profile) plus shortcode or username"] },
   {
@@ -2832,7 +2832,7 @@ const LINKME: Spec[] = [
     tagline:
       "Linkme profile → bio, profileVisitCount, featured links, webLinks, email/infoLinks, stripeStatus. Flat 1 credit.",
     longDescription:
-      "Paste a Linkme URL (link.me/danucd) and get the public profile from Linkme's dehydrated SSR payload (TanStack $tsr) — not HTML meta tags or the site footer. Identity: id, username/handle, displayName, firstName/lastName, bio, avatar + isDefaultProfilePicture. Audience: profileVisitCount (e.g. 15.9k) and totalLinks. Flags: verifiedAccount, isAmbassador, isPrivate. Timestamps: createdAt/updatedAt. links[] are featured CTA rows; webLinks[] are social icon groups (linkValue/faceValue/baseUrl); infoLinks[] carry email/contact; stripeStatus{tipsEnabled,stripeEnabled} signals monetization; socials{} + other[] cover mapped/unmapped networks. Flat 1 credit. Pass cache=true or cacheMaxAge (1d/3d/7d/14d/30d) for the shared response cache.",
+      "Paste a Linkme URL (link.me/danucd) and get the public profile from Linkme's dehydrated SSR payload (TanStack $tsr) — not HTML meta tags or the site footer. Identity: id, username, displayName, firstName/lastName when distinct, bio, avatar + isDefaultProfilePicture. Audience: profileVisitCount (e.g. 15.9k) and totalLinks (Linkme's SSR counter — not links[].length). Flags: verifiedAccount, isAmbassador, isPrivate. Timestamps: createdAt/updatedAt. links[] are featured CTA rows; webLinks[] are social icon groups; infoLinks[] carry email/contact — three separate buckets, not a union. stripeStatus{tipsEnabled,stripeEnabled} signals monetization; socials{} + other[] cover mapped/unmapped networks. Flat 1 credit. Pass cache=true or cacheMaxAge (1d/3d/7d/14d/30d) for the shared response cache.",
   },
 ];
 
@@ -7710,23 +7710,27 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "linkme-profile": {
     id: "Linkme profile id as a hex string.",
-    displayName: "firstName + lastName when present. Canonical; name is a deprecated alias.",
-    name: "Deprecated alias of displayName — prefer displayName.",
-    handle: "Linkme username. Canonical alongside username.",
-    bio: "Creator bio from the dehydrated profile. Empty string when unset. description is a deprecated alias.",
-    description: "Deprecated alias of bio — prefer bio.",
+    displayName:
+      "firstName + lastName when present. Canonical human-readable name (no name/handle twins).",
+    username: "Linkme account username (bare, no @). Canonical account handle.",
+    firstName:
+      "Given name from Linkme when distinct from displayName. Omitted when it would duplicate displayName with no lastName.",
+    lastName: "Family name from Linkme when published.",
+    bio: "Creator bio from the dehydrated profile. Empty string when unset.",
     avatar: "Profile image URL on media.link.me. Check isDefaultProfilePicture before treating it as a real photo.",
     isDefaultProfilePicture:
       "True when Linkme is serving a placeholder avatar (e.g. default/profile/avatar-2.png) — not the creator's photo.",
     profileVisitCount:
       "Public profile visit count as Linkme displays it (string, e.g. \"15.9k\" or \"29\"). One of the few audience metrics in the link-in-bio block.",
-    totalLinks: "Linkme's reported total link count on the profile (may differ from links[].length when featured CTAs and icon rows diverge).",
-    linkCount: "Number of featured CTA rows in links[] (not footer chrome).",
-    links: "Featured CTA buttons [{id?, title, url, thumbnail?, description?}]. Never Privacy Policy / Terms footer rows.",
+    totalLinks:
+      "Linkme SSR profile.totalLinks — the platform's own counter from the dehydrated profile. Not derived from links[], webLinks[], or infoLinks[] (those are separate surfaces and their lengths can disagree with this number).",
+    linkCount: "Number of featured CTA rows in links[] (not footer chrome). Prefer this when you need array length.",
+    links:
+      "Featured CTA buttons [{id?, title, url, thumbnail?, description?}]. Never Privacy Policy / Terms footer rows. Not a union of webLinks/infoLinks — iterate links alone for CTAs.",
     webLinks:
-      "Social icon groups [{title, linkId?, links:[{linkValue, faceValue?, baseUrl?}]}] — Instagram, Spotify, Twitch, …",
+      "Social icon groups [{title, linkId?, links:[{linkValue, faceValue?, baseUrl?}]}] — Instagram, Spotify, Twitch, …. Separate from featured links[] (same destination may appear in both).",
     infoLinks:
-      "Contact groups [{title, linkId?, links:[{linkValue, faceValue?}]}]. Email usually appears here; mirrored on top-level email.",
+      "Contact groups [{title, linkId?, links:[{linkValue, faceValue?}]}]. Email usually appears here; mirrored on top-level email. Separate from links[] / webLinks[].",
     email: "Public email from infoLinks when published. Null when unset.",
     stripeStatus: "{tipsEnabled, stripeEnabled, stripeAccountId?} — monetization / tips signal from Linkme.",
     verifiedAccount: "True when Linkme marks the account verified.",
@@ -8082,27 +8086,22 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
   },
   "youtube-channel-details": {
     platform: "Platform identifier for this response (matches the endpoint's platform).",
-    displayName: "Channel title. Canonical; name is a deprecated alias for one release.",
-    name: "Deprecated alias of displayName — prefer displayName.",
-    bio: "Channel description. Canonical; description is a deprecated alias for one release.",
-    description: "Deprecated alias of bio — prefer bio.",
-    avatar: "Channel avatar. Canonical; thumbnailUrl is a deprecated alias for one release.",
-    thumbnailUrl: "Deprecated alias of avatar — prefer avatar.",
+    username: "Bare channel handle without @. Canonical account identifier (no handle twin).",
+    displayName: "Channel title. Canonical human-readable name (no name twin).",
+    bio: "Channel description. Canonical profile text (no description twin).",
+    avatar: "Channel avatar URL. Canonical profile picture (no thumbnailUrl twin).",
     banner:
-      "Channel banner when YouTube exposes one. null when none — never a downsized avatar. Canonical; bannerUrl is a deprecated alias.",
-    bannerUrl:
-      "Deprecated alias of banner. null when the channel has no banner — never a downsized avatar.",
-    followers: "Subscriber count. Canonical; subscriberCount is a deprecated alias for one release.",
-    subscriberCount:
-      "Deprecated alias of followers. YouTube's rounded display text (292K → 292000). Not always exact.",
-    postCount: "Public video count. Canonical; videoCount is a deprecated alias for one release.",
-    videoCount: "Deprecated alias of postCount — prefer postCount.",
-    createdAt: "Channel creation date as YYYY-MM-DD. Canonical; joinedAt is a deprecated alias.",
-    joinedAt: "Deprecated alias of createdAt (YYYY-MM-DD from About joinedDateText under en scrape).",
+      "Channel banner when YouTube exposes one. null when none — never a downsized avatar.",
+    followers:
+      "Subscriber count from YouTube's rounded display text (292K → 292000). Not always exact — see subscriberCountIsApproximate.",
+    subscriberCountIsApproximate:
+      "True when followers came from a K/M/B compact shelf label.",
+    postCount: "Public video count.",
+    createdAt:
+      "Channel creation date as YYYY-MM-DD (ISO). Display-formatted About labels are not emitted.",
     canonicalUrl: "Preferred public URL — https://www.youtube.com/@handle when known, else /channel/UC….",
     country: "ISO-3166 alpha-2 channel country (e.g. US, IN). Prefer this over countryName for joins.",
     countryName: "English display name for country (e.g. United States). Locale-stable English from our ISO map.",
-    joinedDate: "English About label (e.g. Jul 31, 2017). Prefer createdAt / joinedAt for sorting/filters.",
     viewCount: "Lifetime channel view count when the About panel exposes it (exact integer).",
     tags: "SEO keywords from channelMetadata. Multi-word tags stay one entry (quote-aware parse).",
     links: "About / primary links as {text, url} with absolute https:// URLs.",

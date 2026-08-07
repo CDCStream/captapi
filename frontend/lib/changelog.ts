@@ -49,6 +49,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 /** Static mirror of the migration seed — used only when the table is unavailable. */
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
+    publishedAt: "2026-08-07",
+    category: "improvement",
+    title: "One canonical name per profile concept — drop identical-value aliases",
+    description:
+      "Profile / channel-details responses now keep one key per concept: username (not handle), displayName (not name), bio (not description), avatar (not profileImage/profileImageHd/thumbnailUrl), banner (not bannerUrl), followers (not subscriberCount), postCount (not videoCount), isPrivate (not private), createdAt ISO (not joinedAt/joinedDate). Applies across the link-in-bio block (Komi, Pillar, Linkbio, Linkme), YouTube channel-details, and Instagram channel-details / profile-search / channel-posts author+user. Duplicate-value CI covers those surfaces. Linkme totalLinks stays as Linkme's SSR counter (not equal to links[].length); links / webLinks / infoLinks are separate buckets, not a union.",
+    items: [
+      "Canonical username/displayName/bio/avatar/banner/followers/postCount/isPrivate/createdAt",
+      "Drop identical-value twins + display-formatted joinedDate",
+      "Document Linkme totalLinks vs linkCount / links / webLinks / infoLinks",
+    ],
+  },
+  {
     publishedAt: "2026-08-06",
     category: "fix",
     title: "Instagram channel-details: approx flags, drop twin aliases, faster cold path",

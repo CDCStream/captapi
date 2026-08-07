@@ -215,7 +215,7 @@ def build_ig_author(
     """One author shape for hashtag / reels / tagged / channel list items.
 
     Always emits the same keys when values exist: id, username, displayName,
-    url (www + trailing slash), verified, profileImage, followers, postCount,
+    url (www + trailing slash), verified, avatar, followers, postCount,
     isPrivate. Callers that only have a lean owner still get username + url;
     enrich fills the rest.
     """
@@ -245,8 +245,10 @@ def build_ig_author(
         "displayName": safe_str(src.get("full_name") or src.get("displayName")),
         "url": _canonical_profile_url(uname),
         "verified": verified,
-        "profileImage": _image_url(src)
-        or safe_str(src.get("profile_pic_url") or src.get("profileImage"))
+        "avatar": _image_url(src)
+        or safe_str(
+            src.get("profile_pic_url") or src.get("avatar") or src.get("profileImage")
+        )
         or None,
         "followers": followers_n,
         "postCount": posts_n,
@@ -268,13 +270,20 @@ def merge_ig_author(
         base.pop("private", None)
     if extra.get("isPrivate") is None and extra.get("private") is not None:
         extra = {**extra, "isPrivate": extra["private"]}
+    # Promote legacy profileImage → avatar before merge.
+    if base.get("avatar") is None and base.get("profileImage") is not None:
+        base["avatar"] = base.pop("profileImage")
+    else:
+        base.pop("profileImage", None)
+    if extra.get("avatar") is None and extra.get("profileImage") is not None:
+        extra = {**extra, "avatar": extra["profileImage"]}
     for key in (
         "id",
         "username",
         "displayName",
         "url",
         "verified",
-        "profileImage",
+        "avatar",
         "followers",
         "postCount",
         "isPrivate",
@@ -284,7 +293,11 @@ def merge_ig_author(
     uname = safe_str(base.get("username"))
     if uname:
         base["url"] = _canonical_profile_url(uname)
-    return {k: v for k, v in base.items() if v is not None and k != "private"}
+    return {
+        k: v
+        for k, v in base.items()
+        if v is not None and k not in ("private", "profileImage", "handle")
+    }
 
 
 def hidden_count(value: Any) -> int | None:
@@ -527,7 +540,7 @@ IG_AUTHOR_KEYS: tuple[str, ...] = (
     "displayName",
     "url",
     "verified",
-    "profileImage",
+    "avatar",
     "followers",
     "postCount",
     "isPrivate",
@@ -564,7 +577,7 @@ IG_CHANNEL_USER_KEYS: tuple[str, ...] = (
     "url",
     "verified",
     "isPrivate",
-    "profileImage",
+    "avatar",
     "followers",
     "postCount",
 )
@@ -604,11 +617,13 @@ def canonical_post_ids(post: dict[str, Any]) -> dict[str, Any]:
 def finalise_channel_post(post: dict[str, Any] | None) -> dict[str, Any]:
     """One key set for every channel-posts / channel-reels list item."""
     src = dict(post or {})
-    # Legacy author.private → isPrivate (A21 / profile-search parity).
+    # Legacy author.private → isPrivate; profileImage → avatar (naming convention).
     author = src.get("author") if isinstance(src.get("author"), dict) else {}
     if author.get("isPrivate") is None and author.get("private") is not None:
         author = {**author, "isPrivate": author.get("private")}
-    author = {k: v for k, v in author.items() if k != "private"}
+    if author.get("avatar") in (None, "") and author.get("profileImage") not in (None, ""):
+        author = {**author, "avatar": author.get("profileImage")}
+    author = {k: v for k, v in author.items() if k not in ("private", "profileImage", "handle")}
     src["author"] = _finalise_keys(IG_AUTHOR_KEYS, author)
 
     music = src.get("music")
@@ -671,7 +686,11 @@ def finalise_channel_user(user: dict[str, Any] | None) -> dict[str, Any] | None:
     src = dict(user)
     if src.get("isPrivate") is None and src.get("private") is not None:
         src["isPrivate"] = src.get("private")
+    if src.get("avatar") in (None, "") and src.get("profileImage") not in (None, ""):
+        src["avatar"] = src.get("profileImage")
     src.pop("private", None)
+    src.pop("profileImage", None)
+    src.pop("handle", None)
     return _finalise_keys(IG_CHANNEL_USER_KEYS, src)
 
 
@@ -975,9 +994,9 @@ async def basic_profile(handle: str) -> dict[str, Any] | None:
         "id": safe_str(user.get("id")),
         "username": username,
         "displayName": safe_str(user.get("full_name")),
-        "profileImage": _image_url(user),
+        "avatar": _image_url(user),
         "verified": user.get("is_verified"),
-        "private": user.get("is_private"),
+        "isPrivate": user.get("is_private"),
         "followers": _count(user.get("edge_followed_by")) or safe_int(user.get("followers")),
     }
 
@@ -993,7 +1012,7 @@ def _channel_user_summary(user: dict[str, Any]) -> dict[str, Any]:
         "verified": user.get("is_verified"),
         # Same key as nested author{} / channel-details (A21) — never ``private``.
         "isPrivate": user.get("is_private"),
-        "profileImage": _image_url(user),
+        "avatar": _image_url(user),
         "followers": _count(user.get("edge_followed_by")) or safe_int(user.get("follower_count")),
         "postCount": _count(user.get("edge_owner_to_timeline_media"))
         or safe_int(user.get("media_count")),

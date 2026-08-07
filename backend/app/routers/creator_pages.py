@@ -598,19 +598,18 @@ async def _fetch_komi(value: str) -> dict[str, Any] | None:
     if bio_raw is None:
         bio_raw = data.get("bio")
     bio = "" if bio_raw is None else (safe_str(bio_raw) or "")
+    from app.utils.profile_duplicates import drop_alias_twins
+
     handle = safe_str(data.get("username") or username)
     page = {
         "platform": "komi",
         "id": profile_id,
         "url": f"https://komi.io/{handle or username}",
         "username": handle,
-        "handle": handle,
         "displayName": display,
-        "name": display,  # deprecated alias of displayName
         "firstName": safe_str(data.get("firstName") or profile.get("firstName")),
         "lastName": safe_str(data.get("lastName") or profile.get("lastName")),
         "bio": bio,
-        "description": bio,  # deprecated alias of bio
         "avatar": safe_str(data.get("avatar") or profile.get("avatar")),
         "linkCount": len(links),
         "links": links,
@@ -619,16 +618,15 @@ async def _fetch_komi(value: str) -> dict[str, Any] | None:
         "email": safe_str(data.get("email") or profile.get("email")),
         "website": socials.get("website"),
     }
-    # strip_empty drops "" — re-attach bio/description for SC-stable empty string.
+    # strip_empty drops "" — re-attach bio for SC-stable empty string.
     cleaned = strip_empty(
-        {k: v for k, v in page.items() if k not in ("bio", "description", "links", "other")}
+        {k: v for k, v in page.items() if k not in ("bio", "links", "other")}
     )
     cleaned["bio"] = bio
-    cleaned["description"] = bio
     cleaned["links"] = links
     cleaned["linkCount"] = len(links)
     cleaned["other"] = other
-    return cleaned
+    return drop_alias_twins(cleaned)
 
 
 def _pillar_username(value: str) -> str:
@@ -821,18 +819,17 @@ def _pillar_map_page(payload: dict[str, Any], *, page_key: str) -> dict[str, Any
         custom, influencer.get("socials") if isinstance(influencer.get("socials"), list) else []
     )
 
+    from app.utils.profile_duplicates import drop_alias_twins
+
     page = {
         "platform": "pillar",
         "id": safe_str(influencer.get("id")),
         "url": f"https://pillar.io/{username}",
         "username": username,
-        "handle": username,
         "displayName": display,
-        "name": display,  # deprecated alias of displayName
         "firstName": safe_str(user.get("first_name")),
         "lastName": safe_str(user.get("last_name")),
         "bio": bio,
-        "description": bio,  # deprecated alias of bio
         "avatar": _pillar_cloudinary_url(safe_str(user.get("profile_image"))),
         "location": safe_str(custom.get("location")),
         "email": email,
@@ -846,16 +843,15 @@ def _pillar_map_page(payload: dict[str, Any], *, page_key: str) -> dict[str, Any
         {
             k: v
             for k, v in page.items()
-            if k not in ("bio", "description", "links", "products", "other")
+            if k not in ("bio", "links", "products", "other")
         }
     )
     cleaned["bio"] = bio
-    cleaned["description"] = bio
     cleaned["links"] = links
     cleaned["linkCount"] = len(links)
     cleaned["products"] = products
     cleaned["other"] = other
-    return cleaned
+    return drop_alias_twins(cleaned)
 
 
 async def _pillar_graphql_creds(*, page_url: str | None = None) -> tuple[str, str]:
@@ -1215,24 +1211,28 @@ def _linkbio_parse_page(page: str, page_url: str) -> dict[str, Any] | None:
     if description and _LINKBIO_DESC_TEMPLATE.search(description):
         description = None
 
-    return {
-        "platform": "linkbio",
-        "id": safe_str(profile_id),
-        "url": f"https://lnk.bio/{username}",
-        "username": username,
-        "handle": username,
-        "displayName": display,
-        "name": display,  # deprecated alias — null when lnk.bio has no real name
-        "description": safe_str(description),
-        "avatar": safe_str(avatar),
-        "email": email,
-        "website": website,
-        "whatsapp": socials.get("whatsapp"),
-        "linkCount": len(links),
-        "links": links,
-        "socials": socials,
-        "other": other,
-    }
+    from app.utils.profile_duplicates import drop_alias_twins
+
+    # displayName only when lnk.bio publishes a real name — never "@"+username.
+    # bio from og:description when it is not the site-wide template string.
+    return drop_alias_twins(
+        {
+            "platform": "linkbio",
+            "id": safe_str(profile_id),
+            "url": f"https://lnk.bio/{username}",
+            "username": username,
+            "displayName": display,
+            "bio": safe_str(description) or None,
+            "avatar": safe_str(avatar),
+            "email": email,
+            "website": website,
+            "whatsapp": socials.get("whatsapp"),
+            "linkCount": len(links),
+            "links": links,
+            "socials": socials,
+            "other": other,
+        }
+    )
 
 
 async def _fetch_linkbio(value: str) -> dict[str, Any] | None:
@@ -1534,18 +1534,22 @@ def _linkme_parse_page(page: str, page_url: str) -> dict[str, Any] | None:
     except (TypeError, ValueError):
         total_links_i = len(links)
 
+    from app.utils.profile_duplicates import drop_alias_twins
+
+    # Field naming only — extraction still reads TanStack $tsr (do not scrape meta).
+    # totalLinks = Linkme profile.totalLinks from SSR (platform counter; not
+    # equal to links[].length / webLinks / infoLinks). Prefer linkCount for the
+    # featured CTA array size. links / webLinks / infoLinks are separate buckets
+    # (featured CTAs, social icon groups, contact rows) — not a union.
     out = {
         "platform": "linkme",
         "id": safe_str(profile.get("id")),
         "url": f"https://link.me/{username}",
         "username": username,
-        "handle": username,
         "displayName": display,
-        "name": display,
         "firstName": first or None,
         "lastName": last or None,
         "bio": bio,
-        "description": bio,
         "avatar": _linkme_avatar(profile),
         "isDefaultProfilePicture": _linkme_truthy(profile.get("isDefaultProfilePicture")),
         "profileVisitCount": safe_str(profile.get("profileVisitCount")),
@@ -1572,7 +1576,6 @@ def _linkme_parse_page(page: str, page_url: str) -> dict[str, Any] | None:
             if k
             not in (
                 "bio",
-                "description",
                 "links",
                 "webLinks",
                 "infoLinks",
@@ -1589,7 +1592,6 @@ def _linkme_parse_page(page: str, page_url: str) -> dict[str, Any] | None:
     )
     # Keep booleans / counts / empty bio even when falsy — they are signals.
     cleaned["bio"] = bio
-    cleaned["description"] = bio
     cleaned["links"] = links
     cleaned["linkCount"] = len(links)
     cleaned["totalLinks"] = total_links_i
@@ -1601,7 +1603,7 @@ def _linkme_parse_page(page: str, page_url: str) -> dict[str, Any] | None:
     cleaned["verifiedAccount"] = _linkme_truthy(profile.get("verifiedAccount"))
     cleaned["isAmbassador"] = _linkme_truthy(profile.get("isAmbassador"))
     cleaned["isPrivate"] = _linkme_truthy(profile.get("isPrivate"))
-    return cleaned
+    return drop_alias_twins(cleaned)
 
 
 async def _fetch_linkme(value: str) -> dict[str, Any] | None:

@@ -2543,7 +2543,7 @@ IG_CHANNEL_DETAILS_KEYS: tuple[str, ...] = (
     "url",
     "id",
     "fbid",
-    "handle",
+    "username",
     "displayName",
     "bio",
     "bioLinks",
@@ -2610,7 +2610,7 @@ def finalise_channel_details(data: dict[str, Any] | None) -> dict[str, Any]:
     """Force the shelved channel-details key set — absent ⇒ null, never missing."""
     src = dict(data) if isinstance(data, dict) else {}
     # Twin aliases + duplicate HD key must not leak past the finaliser.
-    for alias in ("username", "name", "profileImage", "private", "profileImageHd"):
+    for alias in ("handle", "name", "profileImage", "private", "profileImageHd"):
         src.pop(alias, None)
     return {k: src.get(k, None) for k in IG_CHANNEL_DETAILS_KEYS}
 
@@ -2625,6 +2625,7 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
     """
     from app.utils.media_urls import utc_now_iso
     from app.utils.profile_core import stamp_profile_core
+    from app.utils.profile_duplicates import drop_alias_twins
 
     username = safe_str(user.get("username")) or (handle or "").lstrip("@")
     pic = safe_str(user.get("profile_pic_url"))
@@ -2653,7 +2654,7 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
         "platform": "instagram",
         "url": canonical_instagram_profile_url(username),
         "id": safe_str(user.get("id") or user.get("pk")) or None,
-        "handle": username or None,
+        "username": username or None,
         "displayName": safe_str(user.get("full_name")) or None,
         "bio": safe_str(user.get("biography")) or None,
         "followers": followers,
@@ -2678,8 +2679,8 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
         ),
         "fetchedAt": utc_now_iso(),
     }
-    stamped = stamp_profile_core(
-        out, platform="instagram", emit_deprecated_aliases=False
+    stamped = drop_alias_twins(
+        stamp_profile_core(out, platform="instagram", emit_deprecated_aliases=False)
     )
     return finalise_channel_details(stamped)
 
@@ -2687,11 +2688,13 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
 def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
     """Profile-search row: stable id + channel-details enrichment (resolver, not discovery).
 
-    Still a single resolved account (name → @handle), but CRM-ready: numeric id,
+    Still a single resolved account (name → username), but CRM-ready: numeric id,
     bio, links, category, business flags, following/postCount — so callers do not
     need a second channel-details call for the common enrichment fields.
     """
     from app.utils.formatters import strip_empty
+    from app.utils.profile_core import stamp_profile_core
+    from app.utils.profile_duplicates import drop_alias_twins
 
     username = safe_str(user.get("username"))
     verified = user.get("is_verified")
@@ -2715,13 +2718,11 @@ def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
     if is_business is None:
         is_business = user.get("is_business")
     is_pro = user.get("is_professional_account")
-    from app.utils.profile_core import stamp_profile_core
-
-    profile_image = pic_hd or pic
+    # Prefer HD when distinct; never emit a parallel profileImageHd twin.
+    profile_image = _best_profile_avatar(pic_hd, pic)
     out: dict[str, Any] = {
         "platform": "instagram",
         "id": uid,
-        "handle": username,
         "username": username,
         "displayName": safe_str(user.get("full_name")),
         "url": canonical_instagram_profile_url(username),
@@ -2742,15 +2743,17 @@ def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
         "externalUrl": external,
         "bioLinks": bio_links,
         "avatar": profile_image,
-        "profileImage": profile_image,  # deprecated alias — prefer avatar
-        "profileImageHd": pic_hd,
         "imageExpiresAt": cdn_image_expires_at(profile_image),
         "fbid": safe_str(user.get("fbid") or user.get("fbid_v2")),
         "businessAddress": _business_address(user),
         "relatedProfiles": _related_profiles(user),
         "likeAndViewCountsDisabled": _like_and_view_counts_disabled(user),
     }
-    return strip_empty(stamp_profile_core(out, platform="instagram"))
+    return strip_empty(
+        drop_alias_twins(
+            stamp_profile_core(out, platform="instagram", emit_deprecated_aliases=False)
+        )
+    )
 
 
 # Logged-out api/v1 tags / clips-music endpoints return login HTML. Decodo

@@ -79,7 +79,7 @@ def test_finalise_unifies_graphql_and_feed_shapes() -> None:
             "displayName": "Kerrod",
             "url": "https://www.instagram.com/kerrodgraygolf/",
             "verified": False,
-            "profileImage": "https://cdn.example/p.jpg",
+            "avatar": "https://cdn.example/p.jpg",
             "followers": 1000,
             "isPrivate": False,
         },

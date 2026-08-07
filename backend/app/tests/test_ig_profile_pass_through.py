@@ -69,12 +69,12 @@ def test_channel_details_and_profile_search_parity() -> None:
     assert ch["fbid"] == "17841402777077586"
     assert ch["isBusinessAccount"] is True
     assert ch["url"] == "https://www.instagram.com/austinbbq/"
-    assert ch["handle"] == "austinbbq"
+    assert ch["username"] == "austinbbq"
     assert ch["avatar"]
-    # Twin aliases + duplicate HD key dropped (canonical handle/displayName/avatar).
+    # Twin aliases + duplicate HD key dropped (canonical username/displayName/avatar).
     assert "profileImage" not in ch
     assert "profileImageHd" not in ch
-    assert "username" not in ch
+    assert "handle" not in ch
     assert "name" not in ch
     assert "private" not in ch
     assert "categoryName" not in ch
@@ -87,8 +87,10 @@ def test_channel_details_and_profile_search_parity() -> None:
     assert ps["fbid"] == "17841402777077586"
     assert ps["relatedProfiles"][0]["id"] == "9"
     assert ps["url"] == "https://www.instagram.com/austinbbq/"
-    assert ps["handle"] == "austinbbq"
-    assert ps["avatar"] == ps["profileImage"]
+    assert ps["username"] == "austinbbq"
+    assert "handle" not in ps
+    assert "profileImage" not in ps
+    assert "profileImageHd" not in ps
     assert "private" not in ps
     assert ps["isPrivate"] is False
     assert ch["url"] == ps["url"]
@@ -145,7 +147,7 @@ def test_channel_details_no_duplicate_non_boolean_values() -> None:
         for k, v in out.items()
         if k not in bool_keys and not isinstance(v, (bool, dict, list))
     }
-    for a, b in (("handle", "username"), ("displayName", "name"), ("avatar", "profileImage")):
+    for a, b in (("username", "handle"), ("displayName", "name"), ("avatar", "profileImage")):
         assert not (a in out and b in out and out.get(a) == out.get(b))
     seen: dict[Any, str] = {}
     for k, v in non_bool.items():

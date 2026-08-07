@@ -2081,44 +2081,42 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
     )
 
     from app.utils.profile_core import stamp_profile_core
+    from app.utils.profile_duplicates import drop_alias_twins
 
-    # Canonical profile core + deprecated aliases (name/description/thumbnailUrl/
-    # bannerUrl/videoCount/subscriberCount) for one release.
+    # One concept → one key. Deprecated twins (name/description/thumbnailUrl/
+    # bannerUrl/videoCount/subscriberCount/joinedAt/joinedDate) are not re-emitted.
+    # ``username`` is the bare handle (no leading @); ``canonicalUrl`` keeps @form.
+    bare = (handle or "").lstrip("@") or None
     card = {
         "platform": "youtube",
         "id": channel_id,
-        "handle": handle,
+        "username": bare,
         "url": f"https://www.youtube.com/channel/{channel_id}",
         "canonicalUrl": canonical,
         "displayName": name or "",
-        "name": name or "",
         "bio": description,
-        "description": description,
         "avatar": avatar,
-        "thumbnailUrl": avatar,
         "banner": banner,
-        "bannerUrl": banner,
         "followers": subscriber_count,
-        "subscriberCount": subscriber_count,
         "subscriberCountIsApproximate": (
             bool(subscriber_count_is_approximate)
             if subscriber_count is not None
             else None
         ),
         "postCount": video_count,
-        "videoCount": video_count,
         "viewCount": view_count,
         "country": country_code,
         "countryName": country_display,
         "createdAt": joined_at,
-        "joinedAt": joined_at,
-        "joinedDate": joined,
         "verified": verified,
         "links": links,
         "email": email,
         "tags": tags,
     }
-    return stamp_profile_core(card, platform="youtube")
+    stamped = stamp_profile_core(
+        card, platform="youtube", emit_deprecated_aliases=False
+    )
+    return drop_alias_twins(stamped)
 
 
 _EMAIL_RE = re.compile(

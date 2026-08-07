@@ -3,7 +3,7 @@
     "url",
     "id",
     "fbid",
-    "handle",
+    "username",
     "displayName",
     "bio",
     "bioLinks",

@@ -30,7 +30,7 @@ def test_stamp_promotes_legacy_aliases_to_canonical():
     )
     assert card["platform"] == "youtube"
     assert card["id"] == "UCabc"
-    assert card["handle"] == "jay"
+    assert card["username"] == "jay"
     assert card["displayName"] == "Jay"
     assert card["bio"] == "bio text"
     assert card["avatar"] == "https://img/a.jpg"
@@ -38,12 +38,13 @@ def test_stamp_promotes_legacy_aliases_to_canonical():
     assert card["followers"] == 1000
     assert card["postCount"] == 12
     assert card["createdAt"] == "2020-01-01"
-    # Deprecated aliases re-emitted for YouTube.
+    # Deprecated aliases re-emitted for YouTube when emit_deprecated_aliases=True.
     assert card["name"] == "Jay"
     assert card["thumbnailUrl"] == "https://img/a.jpg"
     assert card["bannerUrl"] == "https://img/b.jpg"
     assert card["videoCount"] == 12
     assert card["subscriberCount"] == 1000
+    assert card["joinedAt"] == "2020-01-01"
 
 
 def test_stamp_bluesky_keeps_posts_alias():

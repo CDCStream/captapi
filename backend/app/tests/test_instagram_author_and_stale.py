@@ -23,17 +23,17 @@ def test_build_ig_author_stable_keys() -> None:
     assert author["username"] == "natgeo"
     assert author["displayName"] == "National Geographic"
     assert author["verified"] is True
-    assert author["profileImage"] == "https://cdn.example/a.jpg"
+    assert author["avatar"] == "https://cdn.example/a.jpg"
     assert author["url"] == "https://www.instagram.com/natgeo/"
 
 
 def test_merge_ig_author_fills_gaps() -> None:
     merged = decodo.merge_ig_author(
         {"username": "fan", "url": "https://www.instagram.com/fan/"},
-        {"verified": False, "profileImage": "https://cdn.example/f.jpg", "followers": 12},
+        {"verified": False, "avatar": "https://cdn.example/f.jpg", "followers": 12},
     )
     assert merged["verified"] is False
-    assert merged["profileImage"] == "https://cdn.example/f.jpg"
+    assert merged["avatar"] == "https://cdn.example/f.jpg"
     assert merged["followers"] == 12
 
 
@@ -84,6 +84,6 @@ def test_graphql_post_uses_build_ig_author() -> None:
         }
     )
     assert post["author"]["verified"] is True
-    assert post["author"]["profileImage"] == "https://cdn.example/c.jpg"
+    assert post["author"]["avatar"] == "https://cdn.example/c.jpg"
     assert post["engagement"]["likes"] == 100
     assert post["engagement"]["views"] == 5000

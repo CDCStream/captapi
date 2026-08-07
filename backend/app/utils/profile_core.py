@@ -3,12 +3,13 @@
 Every Captapi profile / channel-details endpoint should emit this core so a
 multi-platform dashboard can join without a per-platform rename table:
 
-  platform, id, handle, url, displayName, bio, avatar, banner,
+  platform, id, username, url, displayName, bio, avatar, banner,
   followers, following, postCount, verified, createdAt
 
-Platform-specific extras (Bluesky ``verification{}``, YouTube ``subscriberCount``,
-Instagram ``profileImage``, …) stay alongside. Legacy names are re-emitted as
-deprecated aliases for one release — see ``DEPRECATED_PROFILE_ALIASES``.
+Platform-specific extras stay alongside. Legacy names may be re-emitted as
+deprecated aliases when ``emit_deprecated_aliases=True`` — prefer
+``drop_alias_twins`` (or ``emit_deprecated_aliases=False``) on new surfaces so
+identical-value twins never ship.
 """
 
 from __future__ import annotations
@@ -23,14 +24,14 @@ DEPRECATED_PROFILE_ALIASES: dict[str, tuple[str, ...]] = {
     "banner": ("bannerUrl", "bannerImage"),
     "postCount": ("posts", "videoCount", "tweetCount"),
     "followers": ("subscriberCount",),
-    "handle": ("username",),
+    "username": ("handle",),
     "createdAt": ("joinedAt",),
 }
 
 CANONICAL_PROFILE_KEYS: tuple[str, ...] = (
     "platform",
     "id",
-    "handle",
+    "username",
     "url",
     "displayName",
     "bio",
@@ -52,6 +53,12 @@ def _first(*values: Any) -> Any:
             continue
         return v
     return None
+
+
+def _bare_username(value: Any) -> Any:
+    if isinstance(value, str) and value.startswith("@"):
+        return value[1:]
+    return value
 
 
 def stamp_profile_core(
@@ -78,7 +85,7 @@ def stamp_profile_core(
     bio = _first(out.get("bio"), out.get("description"))
     avatar = _first(out.get("avatar"), out.get("profileImage"), out.get("thumbnailUrl"))
     banner = _first(out.get("banner"), out.get("bannerUrl"), out.get("bannerImage"))
-    handle = _first(out.get("handle"), out.get("username"))
+    username = _bare_username(_first(out.get("username"), out.get("handle")))
     followers = _first(out.get("followers"), out.get("subscriberCount"))
     following = out.get("following")
     post_count = _first(
@@ -89,8 +96,8 @@ def stamp_profile_core(
 
     if ident is not None:
         out["id"] = ident
-    if handle is not None:
-        out["handle"] = handle
+    if username is not None:
+        out["username"] = username
     if display is not None:
         out["displayName"] = display
     if bio is not None:
@@ -143,14 +150,19 @@ def stamp_profile_core(
                 out.setdefault("tweetCount", post_count)
         if followers is not None and ("subscriberCount" in card or plat == "youtube"):
             out.setdefault("subscriberCount", followers)
-        if handle is not None and (
-            "username" in card
-            or plat in {"instagram", "truth_social", "twitter", "threads", "tiktok"}
-        ):
-            out.setdefault("username", handle if not str(handle).startswith("@") else str(handle)[1:])
-        if handle is not None and ("login" in card or plat == "twitch"):
-            out.setdefault("login", handle if not str(handle).startswith("@") else str(handle)[1:])
+        # Bluesky / AT Protocol still surfaces ``handle``; other platforms use username.
+        if username is not None and ("handle" in card or plat == "bluesky"):
+            out.setdefault("handle", username)
+        if username is not None and ("login" in card or plat == "twitch"):
+            out.setdefault("login", username)
         if created is not None and ("joinedAt" in card or plat == "youtube"):
             out.setdefault("joinedAt", created)
+
+    else:
+        # Strict mode: do not leave identical-value legacy keys on the card.
+        for aliases in DEPRECATED_PROFILE_ALIASES.values():
+            for a in aliases:
+                out.pop(a, None)
+        out.pop("joinedDate", None)
 
     return out
