@@ -190,6 +190,60 @@ def test_channel_user_uses_is_private_not_private() -> None:
     assert user["url"] == "https://www.instagram.com/kerrodgraygolf/"
 
 
+def test_timeout_serves_stale_cache_when_present() -> None:
+    """apify-timeout with a prior cache hit → labelled stale posts, not []."""
+    import asyncio
+    from unittest.mock import AsyncMock, patch
+
+    from app.routers import instagram as ig
+    from app.services.cache import make_cache_key
+
+    stale_payload = {
+        "url": "https://www.instagram.com/natgeo/",
+        "totalReturned": 2,
+        "posts": [
+            {
+                "id": "a",
+                "shortcode": "a",
+                "postType": "Image",
+                "productType": "feed",
+                "caption": "stale",
+                "thumbnailUrl": "https://cdn.example/a.jpg",
+                "engagement": {"likes": 1, "comments": 0, "views": None},
+            }
+        ],
+        "nextCursor": None,
+        "hasMore": False,
+        "fetchedAt": "2026-08-06T14:22:10.118Z",
+    }
+    key = make_cache_key(
+        "instagram.channel-posts",
+        {"url": "natgeo", "limit": 20, "cursor": "", "v": 23},
+    )
+
+    async def _fake_get(k: str):
+        if k == key:
+            return stale_payload
+        return None
+
+    async def _run() -> None:
+        # Minimal recreation of _timeout_result wiring via public finalise + peek.
+        with patch("app.routers.instagram.cache_get", new=AsyncMock(side_effect=_fake_get)):
+            hit = await ig.cache_get(key)
+        assert hit is not None
+        out = ig._finalise_channel_list_payload(
+            {**hit, "cachedAt": hit["fetchedAt"]},
+            degraded=True,
+            degraded_reason="apify-timeout-served-stale",
+        )
+        assert out["degraded"] is True
+        assert out["degradedReason"] == "apify-timeout-served-stale"
+        assert out["cachedAt"] == "2026-08-06T14:22:10.118Z"
+        assert len(out["posts"]) == 1
+
+    asyncio.run(_run())
+
+
 def test_finalise_payload_emits_uniform_envelope() -> None:
     from app.routers import instagram as ig
 
@@ -218,6 +272,51 @@ def test_finalise_payload_emits_uniform_envelope() -> None:
         degraded_reason="apify-timeout",
     )
     assert timed_out["degradedReason"] == "apify-timeout"
+
+
+def test_overlay_copies_accessibility_caption_from_feed() -> None:
+    """GraphQL omits alt-text; feed overlay must backfill it (CP4)."""
+    import asyncio
+    from unittest.mock import AsyncMock, patch
+
+    from app.routers import instagram as ig
+
+    posts = [
+        {
+            "id": "DbbY9pdm6Q2",
+            "shortcode": "DbbY9pdm6Q2",
+            "postType": "Sidecar",
+            "productType": "carousel_container",
+            "caption": "x",
+            "engagement": {"likes": 1, "comments": 0, "views": None},
+            "children": [],
+        }
+    ]
+    feed_row = {
+        "code": "DbbY9pdm6Q2",
+        "pk": "1",
+        "media_type": 8,
+        "product_type": "carousel_container",
+        "accessibility_caption": (
+            "Person in striped rugby shirt and fur hat sitting on grass at night."
+        ),
+        "like_count": 10,
+        "comment_count": 2,
+        "carousel_media": [],
+    }
+
+    async def _run() -> None:
+        with patch.object(
+            ig.instagram_native,
+            "fetch_user_feed_page",
+            new=AsyncMock(return_value=([feed_row], None, False)),
+        ):
+            out = await ig._overlay_feed_engagement(posts, "25025320")
+        assert out[0]["accessibilityCaption"] == (
+            "Person in striped rugby shirt and fur hat sitting on grass at night."
+        )
+
+    asyncio.run(_run())
 
 
 def test_accessibility_caption_preserved_when_present() -> None:

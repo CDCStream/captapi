@@ -21,6 +21,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services import instagram_decodo as decodo
 from app.services import instagram_native
+from app.services.cache import cache_get, make_cache_key
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript, transcribe_video_url
 from app.utils.formatters import (
@@ -56,14 +57,15 @@ _TRENDING_LIVE_BUDGET_SECS = _TRENDING_HARD_DEADLINE_SECS
 _TRENDING_SYNC_WAIT_SECS = _TRENDING_HARD_DEADLINE_SECS
 # channel-details: same Cloudflare-safe hard cap as trending-reels.
 _CHANNEL_DETAILS_HARD_DEADLINE_SECS = 110
-# channel-posts: Apify sync cold-starts were measured ~57–65s; the unbudgeted
-# fallback ran to ~123s (2s under Cloudflare's 125s proxy read timeout). Cap
-# the Apify leg and the whole first-page attempt at 90s so we return degraded
-# rather than a 524. Native soft-budget is high enough to keep a slow-but-fine
-# Decodo+overlay run (observed nasa 8s→35s) from being abandoned for Apify.
-_CHANNEL_POSTS_DEADLINE_SECS = 90.0
-_CHANNEL_POSTS_APIFY_TIMEOUT_SECS = 90.0
+# channel-posts: stay under Cloudflare's ~125s proxy read timeout. 90s was too
+# low — natgeo's working fallback was 94–123s — so the budget is 105s (20s
+# margin). On timeout, prefer a labelled stale cache hit over an empty page.
+_CHANNEL_POSTS_DEADLINE_SECS = 105.0
+_CHANNEL_POSTS_APIFY_TIMEOUT_SECS = 105.0
+# High enough to keep a slow-but-fine Decodo+overlay run (nasa 8s→35s) on native.
 _CHANNEL_POSTS_NATIVE_BUDGET_SECS = 55.0
+# Match the documented 24h cache; :stale (SWR) outlives it 4× for timeout serve.
+_CHANNEL_POSTS_CACHE_TTL_SECS = 86_400
 
 CREDIT_TRANSCRIPT = 2
 CREDIT_SUMMARIZE = 4
@@ -1630,6 +1632,11 @@ async def _overlay_feed_engagement(
                 if music:
                     post["music"] = music
                     post["musicId"] = music.get("id")
+            # GraphQL timeline usually omits alt-text; feed often has it.
+            if not post.get("accessibilityCaption"):
+                acc = safe_str(raw.get("accessibility_caption"))
+                if acc:
+                    post["accessibilityCaption"] = acc
         else:
             # No feed row — keep likes/comments; force null views on non-video.
             if not post_is_video:
@@ -1750,11 +1757,12 @@ async def instagram_channel_posts(
                 )
 
             # First page: Decodo/native first (soft-budgeted), then Apify with a
-            # hard deadline. Unbudgeted Apify previously ran ~123s — 2s under
-            # Cloudflare's 125s proxy read timeout.
+            # hard deadline. On timeout, serve labelled stale cache when present
+            # — empty is worse than a day-old page for this endpoint.
             t_all = time.perf_counter()
             t0 = time.monotonic()
             stages: dict[str, Any] = {"handle": handle, "limit": limit}
+            cache_params = {"url": url, "limit": limit, "cursor": cursor or "", "v": 23}
 
             def _remaining() -> float:
                 return max(0.0, _CHANNEL_POSTS_DEADLINE_SECS - (time.monotonic() - t0))
@@ -1774,6 +1782,43 @@ async def instagram_channel_posts(
                     degraded_reason=reason,
                 )
 
+            async def _timeout_result() -> dict[str, Any]:
+                """Prefer labelled stale cache over an empty apify-timeout page."""
+                key = make_cache_key("instagram.channel-posts", cache_params)
+                stale = None
+                for peek in (key, key + ":stale"):
+                    hit = await cache_get(peek)
+                    if (
+                        isinstance(hit, dict)
+                        and isinstance(hit.get("posts"), list)
+                        and hit["posts"]
+                    ):
+                        stale = hit
+                        stages["stale_key"] = "fresh" if peek == key else "stale"
+                        break
+                if stale is None:
+                    stages["path"] = "apify_timeout"
+                    stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+                    log.info("ig_channel_posts_stages", **stages)
+                    ctx["source"] = "apify"
+                    return _empty_degraded("apify-timeout")
+                out = dict(stale)
+                cached_at = safe_str(out.get("fetchedAt") or out.get("cachedAt"))
+                out["cachedAt"] = cached_at
+                out["url"] = profile_url
+                stages["path"] = "apify_timeout_served_stale"
+                stages["stale_posts"] = len(out.get("posts") or [])
+                stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+                log.info("ig_channel_posts_stages", **stages)
+                # 0 credits — labelled stale, not a fresh scrape.
+                ctx["cache_hit"] = True
+                ctx["source"] = "cache"
+                return _finalise_channel_list_payload(
+                    out,
+                    degraded=True,
+                    degraded_reason="apify-timeout-served-stale",
+                )
+
             async def _apify(reason: str = "apify-fallback") -> dict[str, Any]:
                 # No second Decodo _profile here — native already failed/timed
                 # out; another 75s scrape was compounding the edge-timeout risk.
@@ -1781,32 +1826,40 @@ async def instagram_channel_posts(
                 stages["apify_budget_s"] = round(apify_budget, 2)
                 if apify_budget < 3.0:
                     stages["path"] = "apify_skipped_budget"
-                    stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
-                    log.info("ig_channel_posts_stages", **stages)
-                    ctx["source"] = "apify"
-                    return _empty_degraded("apify-timeout")
+                    return await _timeout_result()
                 apify = ApifyClient(timeout=apify_budget, max_attempts=1)
+                candidates = _instagram_profile_candidates(
+                    settings, f"https://www.instagram.com/{handle}/", limit, "posts"
+                )
                 t_apify = time.perf_counter()
+                items: list[dict[str, Any]] = []
+                actor: str | None = None
+                # start_run + wait exposes queue vs scrape (sync endpoint cannot).
                 try:
-                    items, actor = await asyncio.wait_for(
-                        apify.run_with_fallback(
-                            _instagram_profile_candidates(
-                                settings, f"https://www.instagram.com/{handle}/", limit, "posts"
+                    for actor_id, run_input in candidates:
+                        left = apify_budget - (time.perf_counter() - t_apify)
+                        if left < 3.0:
+                            break
+                        timed_items, timing = await asyncio.wait_for(
+                            apify.run_actor_timed(
+                                actor_id, run_input, wait_secs=left, max_items=limit
                             ),
-                            max_items=limit,
-                        ),
-                        timeout=apify_budget,
-                    )
+                            timeout=left,
+                        )
+                        stages["apify_timing"] = timing
+                        if timed_items:
+                            items, actor = timed_items, actor_id
+                            break
                 except asyncio.TimeoutError:
                     stages["apify_ms"] = int((time.perf_counter() - t_apify) * 1000)
-                    stages["path"] = "apify_timeout"
-                    stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
-                    log.info("ig_channel_posts_stages", **stages)
-                    ctx["source"] = "apify"
-                    return _empty_degraded("apify-timeout")
+                    return await _timeout_result()
                 stages["apify_ms"] = int((time.perf_counter() - t_apify) * 1000)
                 stages["apify_actor"] = actor
-                stages["apify_items"] = len(items) if isinstance(items, list) else 0
+                stages["apify_items"] = len(items)
+                if not items:
+                    # Timed wait exhausted or actor returned nothing — same
+                    # customer outcome as a hard timeout; prefer stale.
+                    return await _timeout_result()
                 posts = []
                 t_norm = time.perf_counter()
                 for i in items[:limit]:
@@ -1902,13 +1955,16 @@ async def instagram_channel_posts(
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            # v22: Apify ≤90s budget; envelope always has user/userId/degradedReason.
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 22},
+            # v23: 105s Apify budget; stale-serve on timeout; 24h + SWR :stale.
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 23},
             runner=_run,
             ctx=ctx,
+            ttl=_CHANNEL_POSTS_CACHE_TTL_SECS,
+            stale_while_revalidate=True,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_CHANNEL, 1)
+        # Empty / labelled-stale timeout → 0; cache_hit also forces 0 in billed_call.
+        ctx["credits_override"] = _scaled_credits(len(data.get("posts") or []), RATE_IG_CHANNEL, 1)
         return ApiResponse(data=data)
 
 

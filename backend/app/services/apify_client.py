@@ -250,29 +250,89 @@ class ApifyClient:
     ) -> list[dict[str, Any]]:
         """Poll a run until it finishes or ``wait_secs`` elapses; returns its
         dataset items on success, [] otherwise (the run keeps going)."""
+        items, _run = await self.wait_for_run(run_id, wait_secs, max_items=max_items)
+        return items
+
+    @staticmethod
+    def _apify_ts_ms(value: Any) -> float | None:
+        if not isinstance(value, str) or not value:
+            return None
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp() * 1000
+        except ValueError:
+            return None
+
+    async def wait_for_run(
+        self,
+        run_id: str,
+        wait_secs: float,
+        max_items: int | None = None,
+    ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+        """Like ``wait_for_run_items`` but also returns the final run object."""
         deadline = time.monotonic() + wait_secs
+        last_run: dict[str, Any] = {}
         try:
             async with httpx.AsyncClient(timeout=90) as client:
                 while True:
                     remaining = deadline - time.monotonic()
                     if remaining <= 0:
-                        return []
+                        return [], last_run
                     resp = await client.get(
                         f"{self.BASE}/actor-runs/{run_id}",
                         params={"token": self.token, "waitForFinish": int(min(60, max(1, remaining)))},
                     )
                     resp.raise_for_status()
                     run = resp.json().get("data") or {}
+                    if isinstance(run, dict):
+                        last_run = run
                     status = run.get("status")
                     if status == "SUCCEEDED":
                         dataset_id = run.get("defaultDatasetId")
                         if not dataset_id:
-                            return []
-                        return await self.dataset_items(dataset_id, max_items=max_items)
+                            return [], last_run
+                        return await self.dataset_items(dataset_id, max_items=max_items), last_run
                     if status in ("FAILED", "ABORTED", "ABORTING", "TIMED-OUT"):
-                        return []
+                        return [], last_run
         except httpx.HTTPError:
-            return []
+            return [], last_run
+
+    async def run_actor_timed(
+        self,
+        actor_id: str,
+        run_input: dict[str, Any],
+        wait_secs: float,
+        max_items: int | None = None,
+    ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+        """Start a run and wait, returning ``(items, timing)``.
+
+        ``timing`` includes Apify created/started/finished deltas so callers can
+        separate actor cold-start/queue from scrape wall time (sync endpoint
+        cannot).
+        """
+        timing: dict[str, Any] = {"actor": actor_id}
+        t0 = time.perf_counter()
+        run = await self.start_run(actor_id, run_input)
+        timing["start_ms"] = int((time.perf_counter() - t0) * 1000)
+        if not isinstance(run, dict) or not run.get("id"):
+            timing["error"] = "start_failed"
+            return [], timing
+        timing["run_id"] = run.get("id")
+        t_wait = time.perf_counter()
+        items, final = await self.wait_for_run(run["id"], wait_secs, max_items=max_items)
+        timing["wait_ms"] = int((time.perf_counter() - t_wait) * 1000)
+        timing["status"] = final.get("status") if isinstance(final, dict) else None
+        created = self._apify_ts_ms((final or run).get("createdAt"))
+        started = self._apify_ts_ms((final or run).get("startedAt"))
+        finished = self._apify_ts_ms((final or {}).get("finishedAt"))
+        if created is not None and started is not None:
+            timing["queue_ms"] = int(max(0.0, started - created))
+        if started is not None and finished is not None:
+            timing["scrape_ms"] = int(max(0.0, finished - started))
+        elif started is not None:
+            timing["scrape_ms"] = int(max(0.0, (time.time() * 1000) - started))
+        timing["total_ms"] = int((time.perf_counter() - t0) * 1000)
+        timing["items"] = len(items)
+        return items, timing
 
     async def run_with_fallback(
         self,
