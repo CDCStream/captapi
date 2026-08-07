@@ -8,6 +8,7 @@ import re
 from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import parse_qs, unquote, urlparse
+from zoneinfo import ZoneInfo
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -1036,8 +1037,76 @@ def _event_local_dates(item: dict, start_time: str | None) -> tuple[str | None, 
     return start_date, end_date, tz_name
 
 
+_EVENT_VISIBILITY_MAP = {
+    "PUBLIC_TYPE": "public",
+    "PRIVATE_TYPE": "private",
+    "FRIENDS_TYPE": "friends",
+    "GROUP_TYPE": "group",
+    "COMMUNITY_TYPE": "community",
+}
+
+
+def _event_visibility(raw: Any) -> str | None:
+    """Map Facebook Relay ``*_TYPE`` constants → lowercase visibility (PE4)."""
+    text = safe_str(raw)
+    if not text:
+        return None
+    up = text.strip().upper()
+    if up in _EVENT_VISIBILITY_MAP:
+        return _EVENT_VISIBILITY_MAP[up]
+    if up.endswith("_TYPE"):
+        return up[: -len("_TYPE")].lower()
+    return None
+
+
+def _format_event_start_time(
+    start_date: str | None,
+    end_date: str | None,
+    tz_name: str | None,
+    sentence: str | None,
+) -> str | None:
+    """Display string that always includes a year when we know the instant (PE5)."""
+    raw = (sentence or "").strip()
+    if raw and re.search(r"\b\d{4}\b", raw):
+        return raw
+    if not start_date:
+        return raw or None
+    try:
+        s = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return raw or start_date
+    if s.tzinfo is None:
+        s = s.replace(tzinfo=timezone.utc)
+    if tz_name:
+        try:
+            s = s.astimezone(ZoneInfo(tz_name))
+        except Exception:  # noqa: BLE001
+            pass
+    end_part = ""
+    if end_date:
+        try:
+            e = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+            if e.tzinfo is None:
+                e = e.replace(tzinfo=timezone.utc)
+            if tz_name:
+                try:
+                    e = e.astimezone(ZoneInfo(tz_name))
+                except Exception:  # noqa: BLE001
+                    pass
+            end_part = f" – {e.strftime('%I:%M %p').lstrip('0')}"
+        except (TypeError, ValueError):
+            end_part = ""
+    # "Friday, August 7, 2026 at 7:00 PM EDT"
+    abbr = s.tzname() or ""
+    stamp = s.strftime("%A, %B %d, %Y at %I:%M %p").replace(" 0", " ")
+    stamp = re.sub(r"\s+", " ", stamp).strip()
+    if abbr:
+        return f"{stamp}{end_part} {abbr}".strip()
+    return f"{stamp}{end_part}".strip()
+
+
 def _normalize_event(item: dict) -> dict:
-    """Map Facebook event actor rows into a stable response shape (same keys every time)."""
+    """Map Facebook event rows into one fixed Event shape (same keys every time)."""
     loc = item.get("location") if isinstance(item.get("location"), dict) else {}
     tickets = item.get("ticketsInfo") if isinstance(item.get("ticketsInfo"), dict) else {}
     organizers = item.get("organizators") if isinstance(item.get("organizators"), list) else []
@@ -1065,8 +1134,7 @@ def _normalize_event(item: dict) -> dict:
         )
         start_time = alt if alt and not facebook_events_native.is_relative_schedule(alt) else None
     start_date, end_date, tz_name = _event_local_dates(item, start_time)
-    if not start_time:
-        start_time = start_date
+    start_time = _format_event_start_time(start_date, end_date, tz_name, start_time)
 
     duration_seconds = safe_int(item.get("durationSeconds"))
     if duration_seconds is None and start_date and end_date:
@@ -1136,10 +1204,25 @@ def _normalize_event(item: dict) -> dict:
                         }
                     )
 
-    event_type = safe_str(item.get("eventType") or item.get("event_type") or item.get("type"))
-    # Prefer discovery category (Comedy) over Relay privacy kind (PUBLIC_TYPE).
-    if categories and (not event_type or event_type.upper().endswith("_TYPE")):
+    # PE4: eventType = category only; visibility = public|private|… from *_TYPE.
+    raw_kind = (
+        item.get("event_kind")
+        or item.get("eventKind")
+        or item.get("eventType")
+        or item.get("event_type")
+        or item.get("type")
+    )
+    visibility = _event_visibility(raw_kind)
+    if visibility is None:
+        visibility = _event_visibility(item.get("visibility"))
+    event_type = safe_str(item.get("eventType") or item.get("event_type"))
+    if event_type and event_type.upper().endswith("_TYPE"):
+        event_type = None
+    if categories:
+        # Prefer discovery category over any leftover raw type string.
         event_type = categories[0]["label"]
+    elif event_type and _event_visibility(event_type):
+        event_type = None
 
     is_past = item.get("isPast") if item.get("isPast") is not None else item.get("is_past")
     if is_past is None:
@@ -1190,7 +1273,18 @@ def _normalize_event(item: dict) -> dict:
         st = re.search(r",\s*([A-Z]{2})\b", city)
         if st and st.group(1) in _US_STATE_ABBR:
             country = "US"
-    out: dict[str, Any] = {
+
+    is_online = item.get("isOnline") if item.get("isOnline") is not None else item.get("is_online")
+    if not isinstance(is_online, bool):
+        is_online = None
+    is_canceled = (
+        item.get("isCanceled") if item.get("isCanceled") is not None else item.get("is_canceled")
+    )
+    if not isinstance(is_canceled, bool):
+        is_canceled = None
+
+    # PE1: one Event shape on details / search / profile-events — null, never omit.
+    return {
         "platform": "facebook",
         "id": safe_str(item.get("id") or item.get("event_id") or item.get("eventId")),
         "url": safe_str(item.get("url") or item.get("event_url") or item.get("eventUrl")),
@@ -1203,15 +1297,15 @@ def _normalize_event(item: dict) -> dict:
         "duration": duration,
         "durationSeconds": duration_seconds,
         "eventType": event_type,
-        "isOnline": item.get("isOnline") if item.get("isOnline") is not None else item.get("is_online"),
+        "visibility": visibility,
+        "isOnline": is_online,
         "isPast": is_past,
-        "isCanceled": item.get("isCanceled") if item.get("isCanceled") is not None else item.get("is_canceled"),
+        "isCanceled": is_canceled,
         "address": address,
         "image": safe_str(item.get("imageUrl") or item.get("photo_url") or item.get("image")),
         "usersGoing": users_going,
         "usersInterested": users_interested,
         "usersResponded": users_responded,
-        # Fixed key set (FE6) — null when unknown, never omit city/countryCode.
         "location": {
             "name": loc_name,
             "city": city,
@@ -1219,21 +1313,11 @@ def _normalize_event(item: dict) -> dict:
             "longitude": loc.get("longitude") if loc.get("longitude") is not None else item.get("longitude"),
             "countryCode": country,
         },
-        # organizers[] is canonical — no duplicate organizer string.
         "organizers": organizers_out,
         "ticketsUrl": tickets_url,
         "categories": categories,
         "externalLinks": external_links,
     }
-    for key in list(out.keys()):
-        if key == "location":
-            continue
-        # timezone stays when null — "should have a zone, we failed" (FE1), not omit.
-        if key == "timezone":
-            continue
-        if out.get(key) in (None, "", [], {}):
-            out.pop(key, None)
-    return out
 
 
 @router.get("/details", summary="Facebook video/post details")
@@ -1821,7 +1905,13 @@ async def facebook_profile_events(
             if native:
                 ctx["source"] = "direct"
                 events = [_normalize_event(i) for i in native]
-                return {"platform": "facebook", "url": url, "totalReturned": len(events), "events": events}
+                return {
+                    "platform": "facebook",
+                    "url": url,
+                    "source": "direct",
+                    "totalReturned": len(events),
+                    "events": events,
+                }
 
             # 2) Apify — prefer a recent snapshot before starting a 280s browser run.
             events_url = url.rstrip("/") + "/events"
@@ -1841,7 +1931,13 @@ async def facebook_profile_events(
                     await client.start_run(settings.APIFY_ACTOR_FACEBOOK_EVENTS, run_input)
                 events = [_normalize_event(i) for i in cached_items[:limit] if not i.get("error")]
                 ctx["source"] = "apify"
-                return {"platform": "facebook", "url": url, "totalReturned": len(events), "events": events}
+                return {
+                    "platform": "facebook",
+                    "url": url,
+                    "source": "apify",
+                    "totalReturned": len(events),
+                    "events": events,
+                }
 
             items = await client.run_actor_sync(
                 settings.APIFY_ACTOR_FACEBOOK_EVENTS,
@@ -1850,12 +1946,18 @@ async def facebook_profile_events(
             )
             events = [_normalize_event(i) for i in items[:limit] if not i.get("error")]
             ctx["source"] = "apify"
-            return {"platform": "facebook", "url": url, "totalReturned": len(events), "events": events}
+            return {
+                "platform": "facebook",
+                "url": url,
+                "source": "apify",
+                "totalReturned": len(events),
+                "events": events,
+            }
 
         data = await cached_or_run(
             endpoint="facebook.profile-events",
-            # v9: fixed location{} keys (FE6).
-            params={"url": url, "limit": limit, "v": 9},
+            # v10: full Event shape + source + visibility (PE1–PE4).
+            params={"url": url, "limit": limit, "v": 10},
             runner=_run,
             ctx=ctx,
             # Events actor runs take minutes (280s timeout); serve the last
@@ -2304,8 +2406,8 @@ async def facebook_event_search(
                 "from": effective_from or "",
                 "to": to_date or "",
                 "upcoming": upcoming,
-                # v10: fixed location{} keys (FE6); incremental hydrate + timings (FE5).
-                "v": 10,
+                # v11: full Event shape + visibility (PE1/PE4); year in startTime (PE5).
+                "v": 11,
             },
             runner=_run,
             ctx=ctx,

@@ -994,12 +994,16 @@ def normalize_raw_event(raw: dict[str, Any]) -> dict[str, Any]:
                         }
                     )
 
-    # eventType: category label when available (Comedy), else Relay event_kind.
-    event_type = None
-    if categories:
-        event_type = categories[0].get("label")
-    if not event_type:
-        event_type = raw.get("eventType") or raw.get("event_kind") or raw.get("event_type")
+    # PE4: eventType = discovery category only; visibility from Relay *_TYPE.
+    event_type = categories[0].get("label") if categories else None
+    raw_kind = raw.get("event_kind") or raw.get("eventKind") or raw.get("event_type")
+    visibility = None
+    if isinstance(raw_kind, str) and raw_kind.strip():
+        up = raw_kind.strip().upper()
+        if up.endswith("_TYPE"):
+            visibility = up[: -len("_TYPE")].lower()
+        else:
+            visibility = up.lower()
 
     organizers: list[dict[str, Any]] = []
     creator = raw.get("event_creator") if isinstance(raw.get("event_creator"), dict) else {}
@@ -1060,6 +1064,8 @@ def normalize_raw_event(raw: dict[str, Any]) -> dict[str, Any]:
         if raw.get("is_canceled") is not None
         else raw.get("isCanceled"),
         "eventType": event_type,
+        "event_kind": raw_kind,
+        "visibility": visibility,
         "imageUrl": _cover_image(raw),
         "image": _cover_image(raw),
         "usersGoing": going,

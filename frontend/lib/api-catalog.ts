@@ -1319,7 +1319,7 @@ const FACEBOOK_EVENTS: Spec[] = [
     tagline:
       "Search Facebook events by topic and city — local startDate/timezone, venue. 2 credits native (~2/result Apify).",
     longDescription:
-      "Search public Facebook events with a topic query (e.g. comedy) and optional location / from / to / upcoming filters. Each result uses the same Event shape as Event Details and Profile Events: startDate/endDate as ISO with the host timezone offset (calendar day matches startTime — evening CDT events do not roll to the next UTC day), IANA timezone (from venue lat/lng when present — never Etc/*), isPast, eventType, location{name,city,latitude,longitude,countryCode} (all five keys always — null when unknown), image, and usersGoing/usersInterested when Facebook exposes them. Relative labels like \"Happening now\" are never returned as startTime. Billing: flat 2 credits on the native path; Apify fallthrough bills ~2 credits per returned event (min 4) — check x-captapi-source. A 19-result Apify call is 38 credits, not 2. Envelope timings{serpMs,hydrateMs,hydrateAttempts,discoveryMs,totalMs,path} exposes per-stage latency. Set client timeouts ≥130s until typical searches stay under 60s.",
+      "Search public Facebook events with a topic query (e.g. comedy) and optional location / from / to / upcoming filters. Each result uses the same Event shape as Event Details and Profile Events — every field present, null when Facebook omits it: startDate/endDate as ISO with the host timezone offset (calendar day matches startTime — evening CDT events do not roll to the next UTC day), IANA timezone (from venue lat/lng when present — never Etc/*), startTime (always includes the year), isPast, eventType (discovery category, e.g. Comedy), visibility (public|private|friends|… from Facebook's *_TYPE), location{name,city,latitude,longitude,countryCode} (all five keys always — null when unknown), description, image, organizers, ticketsUrl, categories, and usersGoing/usersInterested when exposed. Relative labels like \"Happening now\" are never returned as startTime. Billing: flat 2 credits on the native path; Apify fallthrough bills ~2 credits per returned event (min 4) — check source / x-captapi-source. A 19-result Apify call is 38 credits, not 2. Envelope timings{serpMs,hydrateMs,hydrateAttempts,discoveryMs,totalMs,path} exposes per-stage latency. Set client timeouts ≥130s until typical searches stay under 60s.",
     platformLimits: [
       "Facebook/SERP discovery can return past events. Use upcoming=true (sets from=today UTC) or from=YYYY-MM-DD for a forward window, or filter client-side on isPast — same pattern as playCount absence on Spotify search.",
       "timezone is a real IANA zone or null — never Etc/GMT. Prefer location.latitude/longitude → IANA when coords exist.",
@@ -1338,7 +1338,7 @@ const FACEBOOK_EVENTS: Spec[] = [
     tagline:
       "Get a Facebook event — title, local start/end, timezone, place, host id, and attendance when exposed.",
     longDescription:
-      "Paste a Facebook event URL and get clean JSON: title, description, startDate/endDate as ISO with the host timezone offset (calendar day matches startTime), IANA timezone resolved from venue coordinates when present (else the display-sentence abbreviation — GMT→Europe/London; never Etc/*; null when unknown), duration, location{name,city,latitude,longitude,countryCode} (fixed key set — null when unknown), organizers[{id,name,url,verified}], categories, ticketsUrl, and going/interested counts when Facebook exposes them on the logged-out hydrate. Flat 2 credits per call.",
+      "Paste a Facebook event URL and get clean JSON using the shared Event shape: title, description, startDate/endDate as ISO with the host timezone offset (calendar day matches startTime), IANA timezone resolved from venue coordinates when present (else the display-sentence abbreviation — GMT→Europe/London; never Etc/*; null when unknown), duration, eventType (discovery category) + visibility (public|private|…), location{name,city,latitude,longitude,countryCode} (fixed key set — null when unknown), organizers[{id,name,url,verified}], categories, ticketsUrl, and going/interested counts when Facebook exposes them on the logged-out hydrate. Flat 2 credits per call.",
     platformLimits: [
       "timezone is never an Etc/* fixed-offset stand-in. lat/lng → IANA when coords exist; otherwise null.",
       "location always has name, city, latitude, longitude, countryCode — null when Facebook omits them.",
@@ -1356,7 +1356,7 @@ const FACEBOOK_EVENTS: Spec[] = [
     tagline:
       "List a Facebook Page's events — local startDate, timezone, venue. 2 credits native (~2/result Apify).",
     longDescription:
-      "Pass a Facebook Page URL and get that page's /events list as clean JSON using the same Event shape as Event Search / Event Details: id, url, name, startDate (ISO with host offset — year resolved from yearless cards like \"Tue, Aug 4 at 8:00 PM EDT\"), timezone, startTime, isPast, and location{name}. Billing: flat 2 credits on the native path; Apify fallthrough is ~2 credits per returned event (min 4).",
+      "Pass a Facebook Page URL and get that page's /events list as clean JSON using the same Event shape as Event Search / Event Details — every field present, null when the profile card omits it (description, endDate, duration, image, organizers, ticketsUrl, categories, …). startDate is ISO with host offset (year resolved from yearless cards like \"Tue, Aug 4 at 8:00 PM EDT\"); startTime always includes the year; eventType is the discovery category when known; visibility is public|private|… (not PUBLIC_TYPE). Envelope includes source (direct|apify) so dual billing is observable — same as Event Search. Billing: flat 2 credits on the native path; Apify fallthrough is ~2 credits per returned event (min 4).",
   },
 ];
 
@@ -3860,6 +3860,13 @@ const lpFlat = (def: number, max: number, credits: number): ApiParam => ({
   required: false,
   description: `Max items to return (default ${def}, max ${max}). Flat ${credits} credit${credits === 1 ? "" : "s"} per call.`,
 });
+/** Limit helper for native-flat + Apify-per-result dual pricing (check `source`). */
+const lpDual = (def: number, max: number, flat: number, perResult: number): ApiParam => ({
+  name: "limit",
+  type: "integer",
+  required: false,
+  description: `Max items to return (default ${def}, max ${max}). Billed ${flat} credit${flat === 1 ? "" : "s"} flat on the native path; ~${perResult} credit${perResult === 1 ? "" : "s"} per returned event on the Apify fallback — check \`source\` in the response.`,
+});
 /** Limit helper for free account endpoints (never bills). */
 const lpFree = (def: number, max: number): ApiParam => ({
   name: "limit",
@@ -4421,11 +4428,11 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       description:
         "When true and from is omitted, sets from to today's UTC date so past events are dropped.",
     },
-    lpFlat(20, 200, 2),
+    lpDual(20, 200, 2, 2),
   ],
   "facebook-event-details": [up("Facebook event URL, e.g. https://facebook.com/events/ID.")],
   "facebook-profile-photos": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
-  "facebook-profile-events": [up("Facebook profile/page URL, @handle, or page name."), lpFlat(20, 200, 2)],
+  "facebook-profile-events": [up("Facebook profile/page URL, @handle, or page name."), lpDual(20, 200, 2, 2)],
   "facebook-marketplace-item": [up("Facebook Marketplace item URL.")],
   // Twitter / X
   "twitter-tweet-details": [up("Public tweet URL, e.g. https://x.com/user/status/ID.")],
@@ -4723,7 +4730,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "integer",
       required: false,
       description:
-        "Max posts to return (default 20, max 80). Capped at 80 because Truth Social's statuses page is ~40 items — use nextCursor for more pages. Native path is flat 2 credits.",
+        "Max posts to return (default 20, max 80). Capped at 80 because Truth Social's statuses page is ~40 items — use nextCursor for more pages. Billed 2 credits flat on the native path; ~0.7/post on Apify — check `source` in the response.",
     },
     CURSOR,
   ],
@@ -8693,7 +8700,9 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     duration: "Human duration from Facebook (e.g. 1 hr 30 min) or derived from start/end.",
     durationSeconds: "Duration in seconds when start and end timestamps are known.",
     eventType:
-      "Discovery category label when present (e.g. Comedy); otherwise Relay event_kind (e.g. PUBLIC_TYPE).",
+      "Discovery category label when present (e.g. Comedy). Never a Facebook visibility constant — see visibility.",
+    visibility:
+      "Lowercase audience enum derived from Facebook's *_TYPE (public|private|friends|group|community). Null when unknown.",
     isPast: "Whether the event start is in the past (Relay is_past, else derived from startDate vs now).",
     usersGoing: "Public going count when Facebook exposes it on the logged-out hydrate.",
     usersInterested: "Public interested count when Facebook exposes it on the logged-out hydrate.",
@@ -8702,31 +8711,35 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     verified: "Whether the host Page/profile shows a verified badge (on organizers[].verified).",
     externalLinks: "Outbound links attached to the event when Facebook exposes them (often empty).",
     organizers: "Host Page/profile rows: {id, name, url, verified}. Prefer organizers[].id for joins.",
-    address: "Street / one-line address when distinct from location.name. Omitted when it would only echo city.",
+    address: "Street / one-line address when distinct from location.name. Null when it would only echo city.",
   },
   "facebook-event-search": {
     startDate:
       "Event start as ISO-8601 with the host timezone offset (e.g. 2026-07-27T19:45:00-05:00). Calendar day matches startTime — not UTC midnight.",
-    endDate: "Event end as ISO-8601 with the same host timezone offset when available.",
-    timezone: "IANA timezone from the startTime abbreviation (e.g. America/Chicago for CDT).",
-    startTime: "Absolute local schedule sentence — never relative labels like Happening now.",
-    duration: "Human duration when start/end are known.",
-    eventType: "Discovery category or Relay event_kind when present.",
+    endDate: "Event end as ISO-8601 with the same host timezone offset when available (null when unknown).",
+    timezone: "IANA timezone from venue coords or the startTime abbreviation (e.g. America/Chicago for CDT).",
+    startTime: "Absolute local schedule sentence that always includes the year — never relative labels like Happening now.",
+    duration: "Human duration when start/end are known; null otherwise.",
+    eventType: "Discovery category (e.g. Comedy). Null when unknown — never PUBLIC_TYPE.",
+    visibility: "Lowercase audience enum (public|private|friends|…). Null when unknown.",
     isPast: "Whether the event start is in the past.",
     usersGoing: "Public going count when Facebook exposes it.",
     usersInterested: "Public interested count when Facebook exposes it.",
-    location: "Venue block {name, city, latitude, longitude, countryCode} when exposed.",
+    location: "Venue block {name, city, latitude, longitude, countryCode} — all five keys always.",
+    source: "direct (native) or apify — drives dual billing. Also mirrored in X-Captapi-Source.",
   },
   "facebook-profile-events": {
     startDate:
       "Event start as ISO-8601 with host timezone offset. Year is resolved for yearless cards (Tue, Aug 4 at 8:00 PM EDT → 2026-08-04T20:00:00-04:00).",
-    endDate: "Event end as ISO-8601 with host timezone offset when available.",
+    endDate: "Event end as ISO-8601 with host timezone offset when available; null on thin profile cards.",
     timezone: "IANA timezone from the startTime abbreviation (e.g. America/New_York for EDT).",
-    startTime: "Facebook's local schedule sentence (may omit the year — use startDate for sorting).",
-    duration: "Human duration when start/end are known.",
-    eventType: "Discovery category or Relay event_kind when present.",
+    startTime: "Local schedule sentence that always includes the year (built from startDate when the card omits it).",
+    duration: "Human duration when start/end are known; null otherwise.",
+    eventType: "Discovery category when known; null on thin cards — never PUBLIC_TYPE.",
+    visibility: "Lowercase audience enum (public|private|friends|…) from Facebook's *_TYPE.",
     isPast: "Whether the event start is in the past (derived from startDate).",
-    address: "Omitted when it would only duplicate location.name.",
+    address: "Street when distinct from location.name; null when it would only duplicate the venue.",
+    source: "direct (native) or apify — drives dual billing. Also mirrored in X-Captapi-Source.",
   },
   "pinterest-board": {
     destinationUrl: "Outbound link on the pin (product/article URL). Not an ad creative field.",

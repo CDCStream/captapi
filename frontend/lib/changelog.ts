@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Facebook profile-events: full Event shape, source, visibility",
+    description:
+      "profile-events now returns the same Event key set as event-details / event-search (null when the card omits a field), adds source to the envelope for dual billing, splits eventType (category) from visibility (public|private|…), and always includes the year in startTime. Playground limit notes for event-search and profile-events no longer say Flat 2 when Apify bills per result.",
+    items: [
+      "Full Event shape with nulls (PE1)",
+      "Envelope source + X-Captapi-Source (PE2)",
+      "Playground lpDual note on both endpoints (PE3)",
+      "eventType vs visibility (PE4); startTime year (PE5)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Facebook events: fixed location{} keys + search stage timings",
     description:
       "event.location omitted city/countryCode when unknown (two shapes). Now always emits name/city/latitude/longitude/countryCode (null when unknown). event-search hydrates in batches and stops once limit matches (was over-fetching ~40 Decodo details — the 107s cost), exposes timings{}, and documents client timeouts ≥130s.",

@@ -88,6 +88,13 @@ const limitFlat = (def: number, max: number, credits: number): ToolParam => ({
   required: false,
   description: `Max items to return. Default ${def}, max ${max}. Flat ${credits} credit${credits === 1 ? "" : "s"} per call.`,
 });
+/** Limit helper for native-flat + Apify-per-result dual pricing (check `source`). */
+const limitDual = (def: number, max: number, flat: number, perResult: number): ToolParam => ({
+  name: "limit",
+  type: "number",
+  required: false,
+  description: `Max items to return (default ${def}, max ${max}). Billed ${flat} credit${flat === 1 ? "" : "s"} flat on the native path; ~${perResult} credit${perResult === 1 ? "" : "s"} per returned event on the Apify fallback — check \`source\` in the response.`,
+});
 /** Limit helper for free account endpoints (never bills). */
 const limitFree = (def: number, max: number): ToolParam => ({
   name: "limit",
@@ -312,9 +319,61 @@ const FACEBOOK_MARKETPLACE: Omit<Endpoint, "platform">[] = [
 ];
 
 const FACEBOOK_EVENTS: Omit<Endpoint, "platform">[] = [
-  { tool: "facebook_event_search", name: "Facebook Event Search", path: "/v1/facebook/event-search", credits: 40, summary: "Search Facebook events by topic and/or location.", params: [q("Topic and/or place, e.g. 'comedy Chicago' (min 2 chars)."), limit(20, 200)] },
-  { tool: "facebook_event_details", name: "Facebook Event Details", path: "/v1/facebook/event-details", credits: 2, summary: "Details for a Facebook event (date, location, attendees, tickets).", params: [url("Facebook event URL, e.g. https://facebook.com/events/ID.")] },
-  { tool: "facebook_profile_events", name: "Facebook Profile Events", path: "/v1/facebook/profile-events", credits: 40, summary: "Events from a Facebook profile or page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
+  {
+    tool: "facebook_event_search",
+    name: "Facebook Event Search",
+    path: "/v1/facebook/event-search",
+    credits: 2,
+    summary:
+      "Search Facebook events by topic/city — same Event shape as details/profile-events. 2 credits native (~2/result Apify).",
+    params: [
+      q("Topic keyword, e.g. 'comedy'. Pair with location for city-scoped results."),
+      {
+        name: "location",
+        type: "string",
+        required: false,
+        description:
+          "City/place geo filter (e.g. London). Matches timezone, location.city, or coords near the city — not a title substring.",
+      },
+      {
+        name: "from",
+        type: "string",
+        required: false,
+        description: "Inclusive local start date filter YYYY-MM-DD.",
+      },
+      {
+        name: "to",
+        type: "string",
+        required: false,
+        description: "Inclusive local start date filter YYYY-MM-DD.",
+      },
+      {
+        name: "upcoming",
+        type: "boolean",
+        required: false,
+        description: "When true and from is omitted, sets from to today's UTC date.",
+      },
+      limitDual(20, 200, 2, 2),
+    ],
+  },
+  {
+    tool: "facebook_event_details",
+    name: "Facebook Event Details",
+    path: "/v1/facebook/event-details",
+    credits: 2,
+    summary:
+      "Facebook event — title, local start/end, timezone, place, hosts, attendance when exposed. Flat 2 credits.",
+    params: [url("Facebook event URL, e.g. https://facebook.com/events/ID.")],
+  },
+  {
+    tool: "facebook_profile_events",
+    name: "Facebook Profile Events",
+    path: "/v1/facebook/profile-events",
+    credits: 2,
+    summary:
+      "List a Facebook Page's events — same Event shape as search/details. 2 credits native (~2/result Apify).",
+    params: [url("Facebook profile or page URL."), limitDual(20, 200, 2, 2)],
+  },
 ];
 
 const TW_TWEET = "Public tweet URL, e.g. https://x.com/user/status/ID.";
