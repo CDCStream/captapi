@@ -933,17 +933,18 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Latest posts from a public Instagram profile — carousel children[], mediaCount, user{} in one call.",
     longDescription:
-      "Send a profile URL or @handle and get recent posts as JSON plus a top-level user{} profile block (id, username, displayName, url, verified, followers, avatar, isPrivate) so you do not need a second channel-details call. Profile URLs are always https://www.instagram.com/{username}/ (www + trailing slash) on the envelope, user{}, and author{}. Each item includes postType / productType (Image/feed, Video/clips, Sidecar/carousel_container — the discriminator a mixed feed needs), caption (not a duplicated description), mediaCount (1 for singles; children.length when carousel expansion ran; null on Sidecar when slides were not expanded — never a fabricated 1), and children[] (per-slide id / mediaType / thumbnailUrl / videoUrl — [] on non-carousels and on unexpanded Sidecars). Cover thumbnailUrl is the first slide; Sidecar cover videoUrl stays null — video slides live in children[]. Also likes, comments, and on videos: durationSeconds, hasAudio, music{}, isAd / isAffiliate / isPaidPartnership when Instagram exposes them. accessibilityCaption when Instagram provides one (sparse — e.g. some @instagram carousels). Envelope always includes degraded (false on the native path; true + degradedReason when the Apify soft-fail path ran to return a partial result rather than time out). Metrics: engagement.views + viewsSource on videos. Cursor pagination via nextCursor + hasMore. Billing ceil(n × 0.3). Pass cache=true for the 24h shared cache.",
+      "Send a profile URL or @handle and get recent posts as JSON plus a top-level user{} profile block (id, username, displayName, url, verified, followers, avatar, isPrivate) so you do not need a second channel-details call. Profile URLs are always https://www.instagram.com/{username}/ (www + trailing slash) on the envelope, user{}, and author{}. Each item includes postType / productType (Image/feed, Video/clips, Sidecar/carousel_container — the discriminator a mixed feed needs), caption (not a duplicated description), mediaCount (1 for singles; children.length when carousel expansion ran; null on Sidecar when slides were not expanded — never a fabricated 1), and children[] (per-slide id / mediaType / thumbnailUrl / videoUrl — [] on non-carousels and on unexpanded Sidecars). Cover thumbnailUrl is the first slide; Sidecar cover videoUrl stays null — video slides live in children[]. Also likes, comments, and on videos: durationSeconds, hasAudio, music{}, isAd / isAffiliate / isPaidPartnership when Instagram exposes them. accessibilityCaption when Instagram provides one (sparse — populated e.g. on @instagram/DbbY9pdm6Q2; often null on nasa/natgeo). Envelope always includes the same keys on both paths: user / userId (null when unknown), degraded, degradedReason (null when healthy; apify-fallback or apify-timeout when soft-fail). The Apify soft-fail path is hard-capped at ~90s so a blocked native path returns a degraded answer instead of riding Cloudflare's 125s proxy read timeout to a 524. Metrics: engagement.views + viewsSource on videos. Cursor pagination via nextCursor + hasMore. Billing ceil(n × 0.3). Pass cache=true for the 24h shared cache. Set client timeouts ≥130s; responses with degraded:true may take over 90s.",
     delivers: [
-      "Top-level user{} profile (no second call)",
+      "Top-level user{} profile (null on degraded path)",
       "Sidecar children[] + honest mediaCount (null if unexpanded)",
-      "degraded / degradedReason on soft-fail path",
+      "Uniform envelope: degraded / degradedReason / user / userId",
       "nextCursor + hasMore pagination",
     ],
     platformLimits: [
       "location is not returned — logged-out feed/GraphQL samples never carry a tagged place (0/72 across nasa/natgeo/instagram); not a silent cover-only gap.",
       "description is not returned — caption is the text field (same as channel-reels).",
-      "degraded: true (often apify-fallback) is a deliberate soft-fail that returns a partial page instead of waiting on a blocked native path toward the edge timeout — treat Sidecar mediaCount:null / empty children as incomplete, not as single-media.",
+      "degraded: true (apify-fallback | apify-timeout) is a deliberate soft-fail under a ~90s Apify budget — prefer a partial/empty page over a 524 at the 125s edge. Set client timeouts ≥130s.",
+      "accessibilityCaption is sparse Instagram alt-text — null on many profiles (nasa/natgeo samples); populated on some carousels such as @instagram shortcode DbbY9pdm6Q2.",
     ],
   },
   {
@@ -7016,7 +7017,7 @@ const FIELD_DESCS: Record<string, string> = {
   percentageText:
     'Display form of percentage with a % suffix (e.g. "26.02%"). Prefer percentage for math.',
   accessibilityCaption:
-    "Facebook (or Instagram) image alt-text / accessibility description — not a user-written post caption.",
+    "Facebook (or Instagram) image alt-text / accessibility description — not a user-written post caption. On Instagram channel-posts this is sparse (often null); populated e.g. on @instagram/DbbY9pdm6Q2.",
   shopProductUrl:
     "TikTok Shop product page URL when the video anchors a product (https://www.tiktok.com/shop/pdp/…). Null/omitted when the video does not sell.",
   authorRegion:

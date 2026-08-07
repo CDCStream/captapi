@@ -190,27 +190,52 @@ def test_channel_user_uses_is_private_not_private() -> None:
     assert user["url"] == "https://www.instagram.com/kerrodgraygolf/"
 
 
-def test_finalise_payload_emits_degraded_false() -> None:
+def test_finalise_payload_emits_uniform_envelope() -> None:
     from app.routers import instagram as ig
 
-    out = ig._finalise_channel_list_payload(
+    healthy = ig._finalise_channel_list_payload(
         {"url": "https://www.instagram.com/nasa/", "posts": [], "totalReturned": 0},
         degraded=False,
     )
-    assert out["degraded"] is False
-    assert "degradedReason" not in out
+    assert healthy["degraded"] is False
+    assert healthy["degradedReason"] is None
+    assert healthy["user"] is None
+    assert healthy["userId"] is None
 
-
-def test_finalise_payload_emits_degraded_reason() -> None:
-    from app.routers import instagram as ig
-
-    out = ig._finalise_channel_list_payload(
+    degraded = ig._finalise_channel_list_payload(
         {"url": "https://www.instagram.com/nasa/", "posts": [], "totalReturned": 0},
         degraded=True,
         degraded_reason="apify-fallback",
     )
-    assert out["degraded"] is True
-    assert out["degradedReason"] == "apify-fallback"
+    assert degraded["degraded"] is True
+    assert degraded["degradedReason"] == "apify-fallback"
+    assert degraded["user"] is None
+    assert degraded["userId"] is None
+
+    timed_out = ig._finalise_channel_list_payload(
+        {"url": "https://www.instagram.com/nasa/", "posts": [], "totalReturned": 0},
+        degraded=True,
+        degraded_reason="apify-timeout",
+    )
+    assert timed_out["degradedReason"] == "apify-timeout"
+
+
+def test_accessibility_caption_preserved_when_present() -> None:
+    out = decodo.finalise_channel_post(
+        {
+            "id": "Acc1",
+            "shortcode": "Acc1",
+            "postType": "Image",
+            "productType": "feed",
+            "caption": "x",
+            "thumbnailUrl": "https://cdn.example/a.jpg",
+            "accessibilityCaption": "Person in striped rugby shirt and fur hat sitting on grass at night.",
+            "engagement": {"likes": 1, "comments": 0, "views": None},
+        }
+    )
+    assert out["accessibilityCaption"] == (
+        "Person in striped rugby shirt and fur hat sitting on grass at night."
+    )
 
 
 def test_sidecar_without_children_media_count_is_null() -> None:

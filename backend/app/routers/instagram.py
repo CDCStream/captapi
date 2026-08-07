@@ -56,6 +56,14 @@ _TRENDING_LIVE_BUDGET_SECS = _TRENDING_HARD_DEADLINE_SECS
 _TRENDING_SYNC_WAIT_SECS = _TRENDING_HARD_DEADLINE_SECS
 # channel-details: same Cloudflare-safe hard cap as trending-reels.
 _CHANNEL_DETAILS_HARD_DEADLINE_SECS = 110
+# channel-posts: Apify sync cold-starts were measured ~57–65s; the unbudgeted
+# fallback ran to ~123s (2s under Cloudflare's 125s proxy read timeout). Cap
+# the Apify leg and the whole first-page attempt at 90s so we return degraded
+# rather than a 524. Native soft-budget is high enough to keep a slow-but-fine
+# Decodo+overlay run (observed nasa 8s→35s) from being abandoned for Apify.
+_CHANNEL_POSTS_DEADLINE_SECS = 90.0
+_CHANNEL_POSTS_APIFY_TIMEOUT_SECS = 90.0
+_CHANNEL_POSTS_NATIVE_BUDGET_SECS = 55.0
 
 CREDIT_TRANSCRIPT = 2
 CREDIT_SUMMARIZE = 4
@@ -1678,9 +1686,10 @@ def _finalise_channel_list_payload(
             else decodo.finalise_channel_posts(items)
         )
         data["totalReturned"] = len(data[items_key])
-    if isinstance(data.get("user"), dict):
-        data["user"] = decodo.finalise_channel_user(data["user"])
-    # Explicit boolean so typed clients / schema gens see one shape.
+    # One envelope shape on both paths — null when unknown, never absent.
+    user = data.get("user")
+    data["user"] = decodo.finalise_channel_user(user) if isinstance(user, dict) else None
+    data["userId"] = safe_str(data.get("userId"))
     if degraded is not None:
         data["degraded"] = bool(degraded)
     elif "degraded" not in data:
@@ -1688,11 +1697,11 @@ def _finalise_channel_list_payload(
     else:
         data["degraded"] = bool(data.get("degraded"))
     if data["degraded"]:
-        reason = degraded_reason or safe_str(data.get("degradedReason"))
-        if reason:
-            data["degradedReason"] = reason
+        data["degradedReason"] = (
+            degraded_reason or safe_str(data.get("degradedReason")) or "apify-fallback"
+        )
     else:
-        data.pop("degradedReason", None)
+        data["degradedReason"] = None
     return data
 
 
@@ -1740,38 +1749,76 @@ async def instagram_channel_posts(
                     degraded=False,
                 )
 
-            async def _apify() -> dict[str, Any]:
-                apify = get_apify()
-                items, _actor = await apify.run_with_fallback(
-                    _instagram_profile_candidates(settings, f"https://www.instagram.com/{handle}/", limit, "posts"),
-                    max_items=limit,
+            # First page: Decodo/native first (soft-budgeted), then Apify with a
+            # hard deadline. Unbudgeted Apify previously ran ~123s — 2s under
+            # Cloudflare's 125s proxy read timeout.
+            t_all = time.perf_counter()
+            t0 = time.monotonic()
+            stages: dict[str, Any] = {"handle": handle, "limit": limit}
+
+            def _remaining() -> float:
+                return max(0.0, _CHANNEL_POSTS_DEADLINE_SECS - (time.monotonic() - t0))
+
+            def _empty_degraded(reason: str) -> dict[str, Any]:
+                return _finalise_channel_list_payload(
+                    {
+                        "url": profile_url,
+                        "totalReturned": 0,
+                        "posts": [],
+                        "nextCursor": None,
+                        "hasMore": False,
+                        "user": None,
+                        "userId": None,
+                    },
+                    degraded=True,
+                    degraded_reason=reason,
                 )
-                # Enrich author fields the listing actor omits (followers /
-                # verified / avatar) from a cheap profile lookup.
-                profile = await decodo._profile(handle)
-                author_extra = {}
-                if isinstance(profile, dict):
-                    author_extra = {
-                        "displayName": safe_str(profile.get("full_name")),
-                        "followers": safe_int(
-                            (profile.get("edge_followed_by") or {}).get("count")
-                            if isinstance(profile.get("edge_followed_by"), dict)
-                            else profile.get("follower_count") or profile.get("followers")
+
+            async def _apify(reason: str = "apify-fallback") -> dict[str, Any]:
+                # No second Decodo _profile here — native already failed/timed
+                # out; another 75s scrape was compounding the edge-timeout risk.
+                apify_budget = min(_CHANNEL_POSTS_APIFY_TIMEOUT_SECS, _remaining())
+                stages["apify_budget_s"] = round(apify_budget, 2)
+                if apify_budget < 3.0:
+                    stages["path"] = "apify_skipped_budget"
+                    stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+                    log.info("ig_channel_posts_stages", **stages)
+                    ctx["source"] = "apify"
+                    return _empty_degraded("apify-timeout")
+                apify = ApifyClient(timeout=apify_budget, max_attempts=1)
+                t_apify = time.perf_counter()
+                try:
+                    items, actor = await asyncio.wait_for(
+                        apify.run_with_fallback(
+                            _instagram_profile_candidates(
+                                settings, f"https://www.instagram.com/{handle}/", limit, "posts"
+                            ),
+                            max_items=limit,
                         ),
-                        "verified": profile.get("is_verified"),
-                        "profileImage": safe_str(
-                            (profile.get("profile_pic_url_hd") or profile.get("profile_pic_url"))
-                        ),
-                    }
-                    author_extra = {k: v for k, v in author_extra.items() if v is not None}
+                        timeout=apify_budget,
+                    )
+                except asyncio.TimeoutError:
+                    stages["apify_ms"] = int((time.perf_counter() - t_apify) * 1000)
+                    stages["path"] = "apify_timeout"
+                    stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+                    log.info("ig_channel_posts_stages", **stages)
+                    ctx["source"] = "apify"
+                    return _empty_degraded("apify-timeout")
+                stages["apify_ms"] = int((time.perf_counter() - t_apify) * 1000)
+                stages["apify_actor"] = actor
+                stages["apify_items"] = len(items) if isinstance(items, list) else 0
                 posts = []
+                t_norm = time.perf_counter()
                 for i in items[:limit]:
                     if i.get("error"):
                         continue
-                    post = _normalize_post(i)
-                    if author_extra:
-                        post["author"] = {**author_extra, **(post.get("author") or {})}
-                    posts.append(decodo.strip_null_post_fields(post))
+                    posts.append(decodo.strip_null_post_fields(_normalize_post(i)))
+                stages["normalize_ms"] = int((time.perf_counter() - t_norm) * 1000)
+                stages["path"] = "apify"
+                stages["posts"] = len(posts)
+                stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+                log.info("ig_channel_posts_stages", **stages)
+                ctx["source"] = "apify"
                 return _finalise_channel_list_payload(
                     {
                         "url": profile_url,
@@ -1779,43 +1826,84 @@ async def instagram_channel_posts(
                         "posts": posts,
                         "nextCursor": None,
                         "hasMore": False,
+                        "user": None,
+                        "userId": None,
                     },
-                    # Apify listing is the soft-fail path when Decodo/native
-                    # miss — often what keeps a response under the edge timeout.
                     degraded=True,
-                    degraded_reason="apify-fallback",
+                    degraded_reason=reason,
                 )
 
             async def _decodo_run() -> dict[str, Any] | None:
-                page = _ig_channel_page(await decodo.channel_posts(handle, limit), limit)
-                if page is None:
+                native_budget = min(_CHANNEL_POSTS_NATIVE_BUDGET_SECS, _remaining())
+                stages["native_budget_s"] = round(native_budget, 2)
+                if native_budget < 2.0:
+                    stages["native"] = "skipped_budget"
                     return None
-                posts, next_cursor, user_id, followers, channel_user = page
-                posts = await _overlay_feed_engagement(posts, user_id)
-                if len(posts) < limit and next_cursor and user_id:
-                    extra = await _ig_feed_collect(user_id, next_cursor, limit - len(posts), followers=followers)
-                    if extra is not None:
-                        more_posts, next_cursor = extra
-                        posts = posts + more_posts
-                out: dict[str, Any] = {
-                    "url": profile_url,
-                    "totalReturned": len(posts),
-                    "posts": posts,
-                    "nextCursor": next_cursor,
-                    "hasMore": next_cursor is not None,
-                }
-                if channel_user:
-                    out["user"] = channel_user
-                if user_id:
-                    out["userId"] = user_id
-                return _finalise_channel_list_payload(out, degraded=False)
+                t_native = time.perf_counter()
 
-            return await _try_decodo(ctx, _decodo_run, _apify)
+                async def _native_body() -> dict[str, Any] | None:
+                    t_decodo = time.perf_counter()
+                    page = _ig_channel_page(await decodo.channel_posts(handle, limit), limit)
+                    stages["decodo_ms"] = int((time.perf_counter() - t_decodo) * 1000)
+                    if page is None:
+                        return None
+                    posts, next_cursor, user_id, followers, channel_user = page
+                    t_overlay = time.perf_counter()
+                    posts = await _overlay_feed_engagement(posts, user_id)
+                    stages["overlay_ms"] = int((time.perf_counter() - t_overlay) * 1000)
+                    if len(posts) < limit and next_cursor and user_id:
+                        t_fill = time.perf_counter()
+                        extra = await _ig_feed_collect(
+                            user_id, next_cursor, limit - len(posts), followers=followers
+                        )
+                        stages["feed_fill_ms"] = int((time.perf_counter() - t_fill) * 1000)
+                        if extra is not None:
+                            more_posts, next_cursor = extra
+                            posts = posts + more_posts
+                    return _finalise_channel_list_payload(
+                        {
+                            "url": profile_url,
+                            "totalReturned": len(posts),
+                            "posts": posts,
+                            "nextCursor": next_cursor,
+                            "hasMore": next_cursor is not None,
+                            "user": channel_user,
+                            "userId": user_id,
+                        },
+                        degraded=False,
+                    )
+
+                try:
+                    result = await asyncio.wait_for(_native_body(), timeout=native_budget)
+                except asyncio.TimeoutError:
+                    stages["native_ms"] = int((time.perf_counter() - t_native) * 1000)
+                    stages["native"] = "timeout"
+                    return None
+                stages["native_ms"] = int((time.perf_counter() - t_native) * 1000)
+                if result is None:
+                    stages["native"] = "empty"
+                    return None
+                stages["native"] = "ok"
+                stages["path"] = "native"
+                stages["posts"] = result.get("totalReturned")
+                stages["total_ms"] = int((time.perf_counter() - t_all) * 1000)
+                log.info("ig_channel_posts_stages", **stages)
+                return result
+
+            if decodo.enabled():
+                native = await _decodo_run()
+                if native is not None:
+                    ctx["source"] = "direct"
+                    return native
+            else:
+                stages["native"] = "decodo_disabled"
+
+            return await _apify("apify-fallback")
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            # v21: Sidecar mediaCount null when unexpanded; explicit degraded.
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 21},
+            # v22: Apify ≤90s budget; envelope always has user/userId/degradedReason.
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 22},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

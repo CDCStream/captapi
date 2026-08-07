@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Instagram channel-posts: 90s Apify budget + uniform degraded envelope",
+    description:
+      "The Apify soft-fail path was running to ~123s (2s under Cloudflare's 125s proxy read timeout). First-page now soft-budgets native/Decodo (~55s, enough for the observed 35s healthy path), hard-caps Apify at ≤90s wall / sync timeout, skips the compounding Decodo profile re-scrape on fallback, and returns degradedReason=apify-timeout instead of a 524. Envelope always emits user / userId / degradedReason (null when unknown/healthy). Docs: set client timeouts ≥130s.",
+    items: [
+      "Apify fallback ≤90s (apify-timeout soft-fail)",
+      "user / userId / degradedReason always present",
+      "Stage logs: ig_channel_posts_stages",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Instagram channel-posts: honest Sidecar mediaCount + explicit degraded",
     description:
       "The Apify soft-fail path stamped Sidecar rows as mediaCount:1 with empty children — a fabricated complete single. Unexpanded carousels now return mediaCount:null (mediaCount === children.length only when expansion ran). Envelope always includes degraded (false on healthy; true + degradedReason on apify-fallback). accessibilityCaption kept — populated on mixed carousels like @instagram/DbbY9pdm6Q2.",
