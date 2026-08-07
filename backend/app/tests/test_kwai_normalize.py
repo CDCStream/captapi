@@ -31,6 +31,7 @@ def test_placeholder_caption_is_empty_string():
     }
     out = k._normalize_post(row)
     assert out["text"] == ""
+    assert out["hashtags"] == []
     assert out["transcript"] == "HELLO WORLD"
     assert out["videoType"] == "mp4"
     assert out["mediaUrlsExpireAt"] == "2026-07-22T20:46:12.000Z"
@@ -72,9 +73,37 @@ def test_real_caption_verbatim():
     }
     out = k._normalize_post(row, include_author=False)
     assert out["text"] == "#tag hello world"
+    assert out["hashtags"] == ["tag"]
     assert "transcript" not in out
     assert "author" not in out
     assert out["videoType"] == "hls"
+
+
+def test_hashtags_always_present_same_key_set():
+    """Caption-less and captioned posts share one key set (KW1)."""
+    empty = k._normalize_post(
+        {
+            "id": "1",
+            "url": "https://www.kwai.com/@u/video/1",
+            "caption": "",
+            "playUrl": "https://cdn.example/a.mp4",
+            "authorMeta": {"username": "u", "name": "U", "url": "https://www.kwai.com/@u"},
+        },
+        include_author=False,
+    )
+    tagged = k._normalize_post(
+        {
+            "id": "2",
+            "url": "https://www.kwai.com/@u/video/2",
+            "caption": "Bolo #Receita #comida",
+            "playUrl": "https://cdn.example/b.mp4",
+            "authorMeta": {"username": "u", "name": "U", "url": "https://www.kwai.com/@u"},
+        },
+        include_author=False,
+    )
+    assert set(empty.keys()) == set(tagged.keys())
+    assert empty["hashtags"] == []
+    assert tagged["hashtags"] == ["Receita", "comida"]
 
 
 def test_cdn_expires_at_kwai_tag():

@@ -298,6 +298,9 @@ def _normalize_post(
         "id": safe_str(item.get("id")),
         "url": safe_str(item.get("url")),
         "text": text,
+        # Always present — [] when the caption has no tags (same rule as
+        # Instagram children:[] on singles). Applicable to every Kwai post.
+        "hashtags": _hashtags(text),
         "transcript": transcript,
         "publishedAt": safe_str(item.get("createTime")),
         "durationSeconds": safe_int(duration) if isinstance(duration, (int, float)) else None,
@@ -372,12 +375,13 @@ async def profile(
     summary="Kwai user posts",
     description=(
         "Public posts for a Kwai profile as clean JSON. text is the post caption only "
-        "(empty string when none — never SEO title / meta boilerplate), engagement, "
-        "mp4 videoUrl + videoType, mediaUrlsExpireAt from the signed CDN tag, and "
-        "transcript when Kwai's JSON-LD exposes auto-captions (deduped). Author{} is "
-        "hoisted once at the top. Opaque cursor pages within the posts returned from "
-        "one profile fetch (Kwai's public web surface does not expose deep archive "
-        "pagination). ~1 credit per post returned (min 2)."
+        "(empty string when none — never SEO title / meta boilerplate), hashtags[] "
+        "always present ([] when none), engagement, mp4 videoUrl + videoType, "
+        "mediaUrlsExpireAt from the signed CDN tag, and transcript when Kwai's "
+        "JSON-LD exposes auto-captions (deduped). Author{} is hoisted once at the "
+        "top. Opaque cursor pages within the posts returned from one profile fetch "
+        "(Kwai's public web surface does not expose deep archive pagination). "
+        "~1 credit per post returned (min 2). Shares _normalize_post with /kwai/post."
     ),
 )
 async def user_posts(
@@ -442,8 +446,8 @@ async def user_posts(
 
         data = await cached_or_run(
             "kwai.user-posts",
-            # v9: text = caption only ("" when empty; never SEO name fallback).
-            {"url": profile_url, "limit": limit, "cursor": cursor or "", "v": 9},
+            # v10: hashtags always present ([] when none) via shared _normalize_post.
+            {"url": profile_url, "limit": limit, "cursor": cursor or "", "v": 10},
             _run,
             ctx,
             use_cache=cache,
@@ -457,11 +461,11 @@ async def user_posts(
     summary="Kwai post",
     description=(
         "Single Kwai video as clean JSON: text is the post caption only "
-        "(\"\" when none — never SEO title / author boilerplate), author{}, "
-        "engagement, videoUrl/videoType=mp4, mediaUrlsExpireAt from the signed "
-        "CDN tag, hashtags[] from the caption, and transcript when Kwai JSON-LD "
-        "exposes auto-captions (deduped). Same core card as user-posts rows, "
-        "plus hashtags. Flat 2 credits."
+        "(\"\" when none — never SEO title / author boilerplate), hashtags[] "
+        "always present ([] when none), author{}, engagement, "
+        "videoUrl/videoType=mp4, mediaUrlsExpireAt from the signed CDN tag, and "
+        "transcript when Kwai JSON-LD exposes auto-captions (deduped). Same core "
+        "card as user-posts rows via shared _normalize_post. Flat 2 credits."
     ),
 )
 async def post(
@@ -490,12 +494,8 @@ async def post(
                     raise HTTPException(status_code=404, detail="Kwai post not found")
                 ctx["source"] = "apify"
                 row = items[0]
-            out = _normalize_post(row, include_author=True)
-            tags = _hashtags(out.get("text") if isinstance(out.get("text"), str) else None)
-            if tags:
-                out["hashtags"] = tags
-            return out
+            return _normalize_post(row, include_author=True)
 
-        # v9: text = caption only ("" when empty; never SEO name fallback).
-        data = await cached_or_run("kwai.post", {"url": video_url, "v": 9}, _run, ctx, use_cache=cache)
+        # v10: hashtags always present ([] when none) via shared _normalize_post.
+        data = await cached_or_run("kwai.post", {"url": video_url, "v": 10}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-07",
     category: "fix",
+    title: "Kwai post/user-posts: always emit hashtags[]",
+    description:
+      "hashtags was omitted on caption-less posts and present when tags existed — two shapes for one endpoint. Shared _normalize_post now always emits hashtags ([] when none), matching Instagram children:[] on singles. Covers /kwai/post and /kwai/user-posts.",
+    items: [
+      "hashtags: [] on caption-less posts",
+      "One key set for both fixtures",
+      "Shared mapper (post + user-posts)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-07",
+    category: "fix",
     title: "Kwai post/user-posts: stop inventing captions from SEO titles",
     description:
       "text was falling back to VideoObject.name when description was empty — Kwai's SEO boilerplate (\"Display (handle). Áudio original criado por …\"). Shared _normalize_post now maps caption only: \"\" when none/placeholder, never name/title/meta. Both /kwai/post and /kwai/user-posts use the same mapper.",
