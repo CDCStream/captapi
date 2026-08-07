@@ -2415,33 +2415,53 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "komi-page": {
     "platform": "komi",
-    "url": "https://komi.io/ksi",
-    "username": "ksi",
-    "name": "KSI",
-    "firstName": "KSI",
-    "lastName": "Olatunji",
-    "avatar": "https://komi-production-assets.s3.amazonaws.com/photos/OsqFjkXZxCB6vsUAyuLtm.jpeg",
-    "linkCount": 7,
+    "id": "64d82830-59aa-4488-bfb0-93426971d139",
+    "url": "https://komi.io/kimkardashian",
+    "username": "kimkardashian",
+    "handle": "kimkardashian",
+    "displayName": "Kim Kardashian",
+    "name": "Kim Kardashian",
+    "firstName": "Kim",
+    "lastName": "Kardashian",
+    "avatar": "https://komi-production-assets.s3.amazonaws.com/photos/4Nd69ODJHs61_iNYPlqos.jpg",
+    "linkCount": 22,
+    "socials": {
+      "instagram": "https://www.instagram.com/kimkardashian/",
+      "tiktok": "https://www.tiktok.com/@kimkardashian",
+      "youtube": "https://www.youtube.com/@KUWTK",
+      "twitter": "https://twitter.com/KimKardashian",
+      "facebook": "https://www.facebook.com/KimKardashian",
+      "snapchat": "https://www.snapchat.com/add/kimkardashian?locale=en-GB"
+    },
+    "bio": "",
+    "description": "",
     "links": [
       {
-        "title": "INSTAGRAM",
-        "url": "https://www.instagram.com/ksi",
-        "type": "INSTAGRAM"
+        "id": "6d7086df-ede4-4f8a-85e5-0fa410e60bc2",
+        "url": "https://skims.social/shop-skims",
+        "title": "Visit SKIMS",
+        "type": "LINK",
+        "order": 0,
+        "visible": true,
+        "thumbnail": "https://komi-production-assets.s3-accelerate.amazonaws.com/photos/x_LQCBYzoWiel0-yrAnrF.jpg",
+        "moduleId": "e6ce39d2-e3df-4040-a5cc-ce016cacbc34",
+        "versionId": "944094bf-f124-4b13-866a-3498c492736d"
       },
       {
-        "title": "FACEBOOK",
-        "url": "https://www.facebook.com/KSIOlajidebt",
-        "type": "FACEBOOK"
+        "id": "f43e198b-2fd5-45f4-80d1-389906c5c840",
+        "url": "https://skims.com/products/signature-swim-triangle-bikini-top-dune-crocodile-print",
+        "title": "TRIANGLE BIKINI TOP | DUNE CROCODILE",
+        "type": "PRODUCT",
+        "order": 0,
+        "visible": false,
+        "thumbnail": "https://komi-production-assets.s3-accelerate.amazonaws.com/photos/dzDiYZjZFXPE4E8-ZwnSn.png",
+        "moduleId": "5c8bc46c-2d6b-4731-baf3-2f40aec1465c",
+        "versionId": "944094bf-f124-4b13-866a-3498c492736d",
+        "price": 44,
+        "currency": "USD"
       }
     ],
-    "socials": {
-      "instagram": "https://www.instagram.com/ksi",
-      "facebook": "https://www.facebook.com/KSIOlajidebt",
-      "twitter": "https://twitter.com/KSI",
-      "youtube": "https://www.youtube.com/c/ksi",
-      "spotify": "https://open.spotify.com/artist/1nzgtKYFckznkcVMR3Gg4z?si=0pADGmEwS1iluryfgiIy8Q",
-      "appleMusic": "https://music.apple.com/gb/artist/ksi/489704062"
-    }
+    "other": []
   },
   "kwai-post": {
     "platform": "kwai",
