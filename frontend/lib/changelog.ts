@@ -51,13 +51,25 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-08",
     category: "fix",
+    title: "YouTube video-details: degraded on partial microformat extraction",
+    description:
+      "ANDROID InnerTube omits playerMicroformatRenderer — publishedAt, genre, channelHandle, isFamilySafe, categoryId (and likes from the watch label) all come from the watch-page player. When that fetch fails, video-details used to return 200 with nulls and no signal. Now retries the watch page once (residential-first), falls back to InnerTube next for likes, and always stamps degraded / degradedReason (partial-extraction) plus timings.path — same envelope as Instagram channel-posts.",
+    items: [
+      "degraded + degradedReason always present (YT5)",
+      "watch-page retry + next likeCount fallback",
+      "timings.path: android|watch|android+watch",
+    ],
+  },
+  {
+    publishedAt: "2026-08-08",
+    category: "fix",
     title: "YouTube comments: honest publishedTimeApprox; unified transcript shape",
     description:
-      "Comments no longer present a derived relative label as an observed millisecond ISO. Renamed to publishedTimeApprox, truncated to label precision (day/hour/minute), with publishedTimeIsApproximate. video-details fills categoryId from genre when InnerTube omits the id (Music → 10). youtube/tiktok/instagram transcript now share audio-transcript's vocabulary: text + segments[{text,startMs,endMs}] — dropped redundant language twin and the segments-as-count collision.",
+      "Comments no longer present a derived relative label as an observed millisecond ISO. Renamed to publishedTimeApprox, truncated to label precision (day/hour/minute), with publishedTimeIsApproximate. video-details fills categoryId from genre when InnerTube omits the id (Music → 10). youtube/tiktok/instagram transcript now share audio-transcript's vocabulary: text + segments[{text,startMs,endMs}] — dropped redundant language twin, segments-as-count collision, and wordCount (callers can derive from text).",
     items: [
       "comments: publishedTimeApprox + truncation + isApproximate (YT3)",
       "video-details: categoryId from genre name when missing",
-      "transcript endpoints: text + segments[{text,startMs,endMs}] (YT1/YT2)",
+      "transcript: text + segments[{text,startMs,endMs}]; drop language + wordCount (YT1/YT2)",
     ],
   },
   {

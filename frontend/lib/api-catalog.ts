@@ -288,7 +288,24 @@ const YOUTUBE: Spec[] = [
     longDescription:
       "Fetches YouTube's published captions (same engine as /transcript — not speech-to-text) and returns a GPT summary, key points, topics, and sentiment. When the video has no caption tracks, you get the same diagnostic 404 as /transcript (code, reason, availableLanguages, hasAutoCaptions) and are charged 0 credits — never 3. Long live streams often lack auto-captions. Flat 3 credits only when a summary is returned.",
   },
-  { slug: "youtube-video-details", name: "YouTube Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/youtube/video-details", credits: 1 },
+  {
+    slug: "youtube-video-details",
+    name: "YouTube Video Details API",
+    shortName: "Video Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/youtube/video-details",
+    credits: 1,
+    tagline:
+      "YouTube video metadata + stats. Always includes degraded / degradedReason — retry when degraded is true.",
+    longDescription:
+      "Returns title, channel, duration, view/like/comment counts, publishedAt, genre/categoryId, captions list, and live flags. ANDROID InnerTube supplies engagement; publishDate / genre / @handle / isFamilySafe come from the watch-page microformat (retried once when missing). Responses always include degraded (boolean) and degradedReason (null or \"partial-extraction\") — same envelope as Instagram channel-posts — plus timings.path (android | watch | android+watch). Flat 1 credit.",
+    delivers: [
+      "degraded / degradedReason always present (retry on partial-extraction)",
+      "publishedAt + likeCount from watch microformat / label when ANDROID omits them",
+      "timings.path shows which fetch path filled the row",
+    ],
+  },
   {
     slug: "youtube-comments",
     name: "YouTube Comments API",
@@ -8353,6 +8370,22 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     returnedLanguage: "Language of the caption track actually returned.",
     videoId: "YouTube video id parsed from the url.",
     platform: 'Always "youtube" on this endpoint.',
+  },
+  "youtube-video-details": {
+    degraded:
+      "true when publishedAt or likeCount could not be read this call (usually watch-page microformat miss). Always present — false on healthy rows. Retry rather than persisting nulls.",
+    degradedReason:
+      'null when healthy; "partial-extraction" when core fields are missing after retry.',
+    timings:
+      "Lean fetch telemetry: path (android | watch | android+watch) and watchAttempts.",
+    publishedAt:
+      "ISO publish time from watch-page playerMicroformatRenderer (ANDROID omits it). null + degraded when the watch fetch failed.",
+    likeCount:
+      "Like count from the watch-page accessibility label (or InnerTube next fallback). null + degraded when unread.",
+    genre: "Category name from playerMicroformatRenderer (e.g. Music).",
+    categoryId: "YouTube category id — from the player when present, else mapped from genre.",
+    channelHandle: "@handle from microformat ownerProfileUrl.",
+    isFamilySafe: "From microformat; null when the watch player was not available.",
   },
   "youtube-audio-transcript": {
     source: 'Always "asr" — Whisper-class speech-to-text on the audio (not YouTube\'s published captions). Pair with /youtube/transcript source:"captions".',

@@ -1487,13 +1487,24 @@ def _parse_comment_count(html: str) -> int | None:
     return n
 
 
-async def _watch_player_response(norm_url: str) -> tuple[dict[str, Any] | None, str]:
+async def _watch_player_response(
+    norm_url: str,
+    *,
+    prefer_residential: bool = False,
+) -> tuple[dict[str, Any] | None, str]:
     """Parse ``ytInitialPlayerResponse`` from the watch page.
 
     Datacenter IPs are frequently 429'd; fall back to residential when needed.
+    ANDROID InnerTube omits ``playerMicroformatRenderer`` — publishDate, genre,
+    channel handle, and isFamilySafe live here.
     """
     html = ""
-    for tier, timeout in (("datacenter", 12.0), ("residential", 25.0)):
+    tiers = (
+        (("residential", 25.0), ("datacenter", 12.0))
+        if prefer_residential
+        else (("datacenter", 12.0), ("residential", 25.0))
+    )
+    for tier, timeout in tiers:
         try:
             resp = await proxy_fetch(
                 norm_url,
@@ -1522,13 +1533,124 @@ def _genre_tags_from_player(player: dict[str, Any] | None) -> tuple[str | None, 
     return safe_str(micro.get("category")), safe_list(details.get("keywords"))
 
 
+# Fields that come from watch-page ``playerMicroformatRenderer`` (ANDROID omits it).
+_WATCH_MICROFORMAT_KEYS = (
+    "publishedAt",
+    "genre",
+    "categoryId",
+    "channelHandle",
+    "channelUrl",
+    "isFamilySafe",
+    "defaultLanguage",
+    "defaultAudioLanguage",
+    "isPrivate",
+    "isUnlisted",
+    "isAgeRestricted",
+    "isMembersOnly",
+    "availableCaptions",
+    "thumbnails",
+    "descriptionLinks",
+    "contentType",
+    "isShort",
+    "liveStatus",
+)
+
+
+def _video_details_is_partial(out: dict[str, Any] | None) -> bool:
+    """True when core fields that the watch microformat should supply are missing."""
+    if not isinstance(out, dict):
+        return True
+    return out.get("publishedAt") is None or out.get("likeCount") is None
+
+
+def _finalise_youtube_video_details(
+    out: dict[str, Any],
+    *,
+    path: str,
+    watch_attempts: int = 0,
+) -> dict[str, Any]:
+    """Stamp ``degraded`` / ``degradedReason`` (channel-posts shape) + lean timings."""
+    from app.core.credits import public_degraded_reason
+
+    partial = _video_details_is_partial(out)
+    out["degraded"] = partial
+    out["degradedReason"] = (
+        public_degraded_reason("partial-extraction") if partial else None
+    )
+    out["timings"] = {
+        "path": path,
+        "watchAttempts": int(watch_attempts),
+    }
+    return out
+
+
+def _merge_watch_player_fields(
+    out: dict[str, Any],
+    *,
+    player: dict[str, Any] | None,
+    html: str,
+    vid: str,
+    norm_url: str,
+) -> dict[str, Any]:
+    """Fill ANDROID holes from watch-page microformat + like label."""
+    genre, tags = _genre_tags_from_player(player)
+    if not out.get("genre") and genre:
+        out["genre"] = genre
+    if not out.get("tags") and tags:
+        out["tags"] = tags
+    if out.get("likeCount") is None and html:
+        out["likeCount"] = _parse_like_count(html)
+    if player:
+        enriched = build_youtube_video_details(
+            player=player,
+            video_id=vid,
+            norm_url=norm_url,
+            like_count=out.get("likeCount"),
+            comment_count=out.get("commentCount"),
+            fetched_at=out.get("fetchedAt"),
+        )
+        if enriched:
+            for key in _WATCH_MICROFORMAT_KEYS:
+                if out.get(key) in (None, [], "") and enriched.get(key) not in (
+                    None,
+                    [],
+                    "",
+                ):
+                    out[key] = enriched[key]
+    return out
+
+
+async def _like_count_from_next(vid: str) -> int | None:
+    """Best-effort likes via InnerTube ``next`` when watch HTML parse misses."""
+    boot = await innertube("next", {"videoId": vid}, timeout=12)
+    if not isinstance(boot, dict):
+        return None
+    for btn in walk_find(boot, "toggleButtonRenderer"):
+        a11y = (
+            ((btn.get("defaultText") or {}).get("accessibility") or {}).get(
+                "accessibilityData"
+            )
+            or {}
+        )
+        label = text_of(a11y) or text_of(btn.get("defaultText")) or ""
+        if "like" in label.lower():
+            like = parse_count_text(label)
+            if like is not None:
+                return like
+    for vm in walk_find(boot, "likeButtonViewModel"):
+        like = parse_count_text(vm.get("likeCountEntity")) or parse_count_text(vm)
+        if like is not None:
+            return like
+    return None
+
+
 async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | None:
     """Fetch video metadata without Apify.
 
-    Prefer InnerTube ANDROID player (watch HTML is frequently 429 from datacenter
-    IPs). Fall back to parsing ``ytInitialPlayerResponse`` from the watch page
-    when the player API is unavailable. ANDROID often omits category/keywords —
-    enrich those from the watch-page microformat when missing.
+    Prefer InnerTube ANDROID player (engagement + captions). ANDROID omits
+    ``playerMicroformatRenderer`` — publishDate / genre / handle / isFamilySafe
+    come from the watch-page player. Retry the watch fetch once (residential
+    first) before surfacing ``degraded: true``.
     """
     android = await video_details_native(vid, norm_url)
     android_ok = isinstance(android, dict) and android.get("viewCount") is not None
@@ -1540,8 +1662,24 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
         or not android.get("channelHandle")
         or not android.get("availableCaptions")
     )
-    player, html = await _watch_player_response(norm_url) if need_page else (None, "")
-    genre, tags = _genre_tags_from_player(player)
+
+    player: dict[str, Any] | None = None
+    html = ""
+    watch_attempts = 0
+    if need_page:
+        for attempt in range(2):
+            watch_attempts += 1
+            player, html = await _watch_player_response(
+                norm_url, prefer_residential=(attempt > 0)
+            )
+            if player is not None:
+                break
+
+    path = (
+        "android+watch"
+        if android_ok and player is not None
+        else ("watch" if player is not None else "android")
+    )
 
     if android_ok and android is not None:
         duration_seconds = android.get("durationSeconds")
@@ -1551,53 +1689,13 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
                 int(duration_seconds) if duration_seconds is not None else None
             ),
         }
-        if not out.get("genre") and genre:
-            out["genre"] = genre
-        if not out.get("tags") and tags:
-            out["tags"] = tags
-        if out.get("likeCount") is None and html:
-            out["likeCount"] = _parse_like_count(html)
-        if out.get("publishedAt") is None and player:
-            micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
-            out["publishedAt"] = safe_str(micro.get("publishDate") or micro.get("uploadDate"))
-        # ANDROID often has captions but still omits channelHandle / microformat
-        # fields — merge missing keys from the watch-page player whenever we
-        # fetched it (not only when availableCaptions is empty).
-        if player and (
-            not out.get("availableCaptions")
-            or not out.get("channelHandle")
-            or not out.get("channelUrl")
-            or not out.get("genre")
-        ):
-            enriched = build_youtube_video_details(
-                player=player,
-                video_id=vid,
-                norm_url=norm_url,
-                like_count=out.get("likeCount"),
-                comment_count=out.get("commentCount"),
-                fetched_at=out.get("fetchedAt"),
-            )
-            if enriched:
-                for key in (
-                    "channelHandle",
-                    "channelUrl",
-                    "availableCaptions",
-                    "thumbnails",
-                    "descriptionLinks",
-                    "contentType",
-                    "isShort",
-                    "liveStatus",
-                    "defaultLanguage",
-                    "defaultAudioLanguage",
-                    "isFamilySafe",
-                    "isPrivate",
-                    "isUnlisted",
-                    "isAgeRestricted",
-                    "isMembersOnly",
-                    "categoryId",
-                ):
-                    if not out.get(key) and enriched.get(key) not in (None, [], ""):
-                        out[key] = enriched[key]
+        out = _merge_watch_player_fields(
+            out, player=player, html=html, vid=vid, norm_url=norm_url
+        )
+        if out.get("likeCount") is None:
+            like = await _like_count_from_next(vid)
+            if like is not None:
+                out["likeCount"] = like
         if out.get("commentCount") is None and html:
             n, approx = _parse_comment_count_meta(html)
             if n is not None:
@@ -1608,19 +1706,36 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
             out["commentCount"] = n
             if n is not None:
                 out["commentCountIsApproximate"] = approx
-        return out
+        return _finalise_youtube_video_details(
+            out, path=path, watch_attempts=watch_attempts
+        )
 
     if player is None:
-        if isinstance(android, dict) and android.get("commentCount") is None:
-            n, approx = await comment_count_native_meta(vid)
-            android = {**android, "commentCount": n}
-            if n is not None:
-                android["commentCountIsApproximate"] = approx
-            if android.get("durationSeconds") is not None and "durationFormatted" not in android:
-                android["durationFormatted"] = _format_duration(int(android["durationSeconds"]))
+        if isinstance(android, dict):
+            if android.get("commentCount") is None:
+                n, approx = await comment_count_native_meta(vid)
+                android = {**android, "commentCount": n}
+                if n is not None:
+                    android["commentCountIsApproximate"] = approx
+            if (
+                android.get("durationSeconds") is not None
+                and "durationFormatted" not in android
+            ):
+                android["durationFormatted"] = _format_duration(
+                    int(android["durationSeconds"])
+                )
+            if android.get("likeCount") is None:
+                like = await _like_count_from_next(vid)
+                if like is not None:
+                    android["likeCount"] = like
+            return _finalise_youtube_video_details(
+                android, path=path, watch_attempts=watch_attempts
+            )
         return android
 
     like_count = _parse_like_count(html) if html else None
+    if like_count is None:
+        like_count = await _like_count_from_next(vid)
     comment_count, comment_approx = (
         _parse_comment_count_meta(html) if html else (None, False)
     )
@@ -1634,15 +1749,22 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
         comment_count=comment_count,
     )
     if not out:
+        if isinstance(android, dict):
+            return _finalise_youtube_video_details(
+                android, path=path, watch_attempts=watch_attempts
+            )
         return android
     if comment_count is not None:
         out["commentCountIsApproximate"] = comment_approx
+    genre, tags = _genre_tags_from_player(player)
     if not out.get("genre") and genre:
         out["genre"] = genre
     if not out.get("tags") and tags:
         out["tags"] = tags
     out["durationFormatted"] = _format_duration(out.get("durationSeconds"))
-    return out
+    return _finalise_youtube_video_details(
+        out, path=path, watch_attempts=watch_attempts
+    )
 
 
 @router.get("/video-details", summary="YouTube video metadata + stats")
@@ -1670,7 +1792,7 @@ async def youtube_video_details(
 
         data = await cached_or_run(
             endpoint="youtube.video-details",
-            params={"url": norm_url, "v": 6},
+            params={"url": norm_url, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
