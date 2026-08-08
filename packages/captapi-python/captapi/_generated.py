@@ -181,17 +181,18 @@ class YoutubeApi:
         """
         return self._t.get("/v1/youtube/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
-    def channel_playlists(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Playlists — List a channel's playlists — id, title, videoCount, thumbnailUrl. (2 credits)
+    def channel_playlists(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Channel Playlists — Cursor-paginated playlists (totalVideos). (2 credits/page)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items for this page. Default 20, max 200. Flat 2 credits per page — limit does not multiply.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/youtube/channel-playlists", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/youtube/channel-playlists", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def community_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Community Posts — Community posts — likeCount+likeCountText, pollOptions, ISO dates, channel{}, cursor. (1 credit)
+        """YouTube Community Posts — channel{}, publishedTimeApprox, linkedVideos[], cursor. (1 credit)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Flat 1 credit per call.
@@ -395,17 +396,18 @@ class AsyncYoutubeApi:
         """
         return await self._t.get("/v1/youtube/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
-    async def channel_playlists(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Playlists — List a channel's playlists — id, title, videoCount, thumbnailUrl. (2 credits)
+    async def channel_playlists(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Channel Playlists — Cursor-paginated playlists (totalVideos). (2 credits/page)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items for this page. Default 20, max 200. Flat 2 credits per page — limit does not multiply.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/youtube/channel-playlists", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/youtube/channel-playlists", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def community_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Community Posts — Community posts — likeCount+likeCountText, pollOptions, ISO dates, channel{}, cursor. (1 credit)
+        """YouTube Community Posts — channel{}, publishedTimeApprox, linkedVideos[], cursor. (1 credit)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Flat 1 credit per call.

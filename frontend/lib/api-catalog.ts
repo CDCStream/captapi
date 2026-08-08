@@ -562,13 +562,13 @@ const YOUTUBE: Spec[] = [
     path: "/v1/youtube/channel-playlists",
     credits: 2,
     tagline:
-      "List a channel's playlists — id, title, videoCount, thumbnailUrl. Flat 2 credits.",
+      "Channel playlists with cursor pagination — id, title, totalVideos, thumbnailUrl. Flat 2 credits/page.",
     longDescription:
-      "Pass a channel URL, @handle, or UC… ID and get that channel's /playlists tab as clean JSON. Each row: id (playlist list= ID — chain into /v1/youtube/playlist), url, title, videoCount, thumbnailUrl. Flat 2 credits.",
+      "Pass a channel URL, @handle, or UC… ID and get that channel's /playlists tab as clean JSON with nextCursor + hasMore. Each row: id (playlist list= ID — chain into /v1/youtube/playlist), url, title, totalVideos (same name as /playlist), thumbnailUrl. Flat 2 credits per page.",
     delivers: [
-      "Playlist id (list=) for chaining into /youtube/playlist",
-      "title, videoCount, thumbnailUrl, canonical url",
-      "Flat 2 credits",
+      "cursor ↔ nextCursor / hasMore",
+      "Playlist id for chaining into /youtube/playlist",
+      "totalVideos (aligned with /playlist), thumbnailUrl",
     ],
   },
   {
@@ -580,14 +580,14 @@ const YOUTUBE: Spec[] = [
     path: "/v1/youtube/community-posts",
     credits: 1,
     tagline:
-      "List a YouTube channel's community posts — numeric likes, ISO dates, channel{}, linked video{}, cursor pagination (1 credit native).",
+      "Community posts — channel{}, publishedTimeApprox, likeCountIsApproximate, linkedVideos[], cursor (1 credit).",
     longDescription:
-      "Pass a channel URL, @handle, or UC… ID and get that channel's community /posts tab as clean JSON. Each post includes id/url, author + channel{id,title,url,handle}, text, likeCount (number) + likeCountText (e.g. \"3.2M\"; likeCountApproximate=true for compact K/M/B labels), publishedTime/publishedAt (ISO-8601; approximate when derived from YouTube's relative label) + publishedTimeText, postType (text|image|poll|video|playlist|quiz), pollOptions[] + totalVotes when postType is poll, images[] / image, hashtags[], and when the post links a video — video{id,title,thumbnail,url,viewCountText,viewCountInt,lengthText,lengthSeconds} plus linkedVideos[]. Cursor pagination via nextCursor + hasMore. Flat 1 credit on the native path; Apify fallback bills about 0.5 credits per returned post (min 2).",
+      "Pass a channel URL, @handle, or UC… ID and get that channel's community /posts tab as clean JSON. Each post: id/url, channel{id,title,url,handle} (no flat author twin), text, likeCount + likeCountText + likeCountIsApproximate, publishedTimeApprox + publishedTimeIsApproximate + publishedTimeText (relative labels only — no exact instant source), postType (text|image|poll|video|playlist|quiz), pollOptions[] + totalVotes + totalVotesIsApproximate when poll, images[], hashtags[], linkedVideos[] when the post attaches a video. Cursor pagination via nextCursor + hasMore. Flat 1 credit on the native path; Apify fallback bills about 0.5 credits per returned post (min 2).",
     delivers: [
-      "Community posts with text, images, polls (pollOptions), and post type",
-      "likeCount number + likeCountText; ISO publishedTime/publishedAt + publishedTimeText",
-      "channel{id,title,url,handle} and linked video{} when present",
-      "Cursor pagination (nextCursor + hasMore); 1 credit native",
+      "channel{} only — drop author string twin",
+      "publishedTimeApprox + publishedTimeIsApproximate (comments vocabulary)",
+      "likeCountIsApproximate / totalVotesIsApproximate naming",
+      "linkedVideos[] when attached; cursor pagination; 1 credit native",
     ],
   },
   {
@@ -599,14 +599,13 @@ const YOUTUBE: Spec[] = [
     path: "/v1/youtube/community-post-details",
     credits: 1,
     tagline:
-      "One YouTube community post — same schema as the list endpoint plus comments (pollOptions, numeric likeCount, channel{}, ISO dates).",
+      "One community post — same schema as the list endpoint plus comments (channel{}, publishedTimeApprox, pollOptions).",
     longDescription:
-      "Paste a YouTube community post URL and get the same clean shape as Community Posts list items: text, images[], postType (text|image|poll|video|playlist|quiz), pollOptions[{text,voteCount,percentage}] + totalVotes when the post is a poll, likeCount (number) + likeCountText, publishedAt/publishedTime (ISO; approximate from relative labels) + publishedTimeText, channel{id,title,url,handle}, linked video{} when present, and comments. Per-choice vote counts are often null on public pages (YouTube gates them behind sign-in); option text and totalVotes still return. Flat 1 credit. Pass cache=true for the 24h shared cache (0 credits on hit); default is always fresh.",
+      "Paste a YouTube community post URL and get the same clean shape as Community Posts list items: text, images[], postType, pollOptions + totalVotes + totalVotesIsApproximate when poll, likeCount + likeCountText + likeCountIsApproximate, publishedTimeApprox + publishedTimeIsApproximate + publishedTimeText, channel{}, linkedVideos[] when present, and comments. Flat 1 credit.",
     delivers: [
       "Same fields as community-posts list items + comments",
       "pollOptions[] + totalVotes for polls",
-      "likeCount number + likeCountText (not a \"727K\" string)",
-      "channel{id,title,url,handle}; ISO publishedAt / publishedTime",
+      "channel{}; publishedTimeApprox vocabulary",
     ],
   },
   {
@@ -1247,7 +1246,7 @@ const FACEBOOK: Spec[] = [
     tagline:
       "Facebook page profile — likes vs followers (distinct), talkingAbout, category, website, and public email.",
     longDescription:
-      "Pass a Facebook page URL, @handle, or page name and get clean JSON: username, displayName (short brand) + fullName (page title), bio, verified, profileImage/coverImage, category, website, and public email when the page exposes one (CRM/outreach-ready). Metrics are distinct: likes (exact page likes from Facebook), followers (often a compact chrome label like 28M — flagged with followersApproximate=true), following, and talkingAbout. Likes are never copied into followers. Flat 2 credits. Pass cache=true for the 24h shared cache.",
+      "Pass a Facebook page URL, @handle, or page name and get clean JSON: username, displayName (short brand) + fullName (page title), bio, verified, profileImage/coverImage, category, website, and public email when the page exposes one (CRM/outreach-ready). Metrics are distinct: likes (exact page likes from Facebook), followers (often a compact chrome label like 28M — flagged with followersIsApproximate=true), following, and talkingAbout. Likes are never copied into followers. Flat 2 credits. Pass cache=true for the 24h shared cache.",
   },
   {
     slug: "facebook-profile-posts",
@@ -4064,17 +4063,11 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-channel-streams": [up(YT_CHANNEL), lpFlat(20, 200, 2)],
   "youtube-hashtag-search": [qp("Hashtag with or without the # (min 2 characters)."), lp(20, 200)],
   "youtube-comment-replies": [up(YT_VIDEO), cid(), lpFlat(50, 500, 2)],
-  "youtube-channel-playlists": [up(YT_CHANNEL), lpFlat(20, 200, 2)],
+  "youtube-channel-playlists": [up(YT_CHANNEL), lpFlat(20, 200, 2), CURSOR],
   "youtube-community-posts": [
     up(YT_CHANNEL),
     lpFlat(20, 200, 1),
-    {
-      name: "cursor",
-      type: "string",
-      required: false,
-      description:
-        "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
-    },
+    CURSOR,
   ],
   "youtube-community-post-details": [up("YouTube community post URL.")],
   "youtube-video-sponsors": [
@@ -7091,8 +7084,12 @@ const FIELD_DESCS: Record<string, string> = {
     "true when publishedTimeApprox was derived from a relative label rather than an absolute timestamp YouTube exposed.",
   totalVideos: "Total videos in the playlist (full size). Differs from totalReturned, which is this response's page length.",
   viewCountApproximate:
+    "Deprecated alias — use viewCountIsApproximate. True when viewCount came from a compact UI label (e.g. 2.5B).",
+  viewCountIsApproximate:
     "True when viewCount was parsed from a compact UI label (e.g. 2.5B / 894M) rather than an exact integer.",
   followersApproximate:
+    "Deprecated alias — use followersIsApproximate. True when followers came from a compact Facebook chrome label (e.g. 28M).",
+  followersIsApproximate:
     "True when followers was parsed from a compact Facebook chrome label (e.g. 28M) rather than an exact integer.",
   talkingAbout:
     "Facebook 'people talking about this' count for the page when exposed (distinct from likes/followers).",
@@ -7120,10 +7117,10 @@ const FIELD_DESCS: Record<string, string> = {
     "Poll choices when postType is poll. Each item has text, voteCount (null when YouTube gates counts behind sign-in), and percentage.",
   totalVotes: "Total poll votes when YouTube exposes them (often approximate from a compact label).",
   totalVotesText: "Original poll vote-count label from YouTube (e.g. \"1.6M votes\").",
-  totalVotesApproximate:
-    "True when totalVotes was parsed from a compact K/M/B label rather than an exact integer.",
+  totalVotesIsApproximate:
+    "True when totalVotes was parsed from a compact K/M/B label; null on non-poll posts (no vote total).",
   likeCountText: "Original like-count label from the platform (e.g. \"727K\", \"3.2M\").",
-  likeCountApproximate:
+  likeCountIsApproximate:
     "True when likeCount was parsed from a compact K/M/B label rather than an exact integer.",
   language: "Detected or requested language code.",
   region: "Region or country code for this result (meaning depends on the endpoint — market vs creator home).",

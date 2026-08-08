@@ -264,7 +264,7 @@ async def _channel_playlists_native(url: str, limit: int) -> list[dict[str, Any]
                 "id": pid,
                 "url": f"https://www.youtube.com/playlist?list={pid}",
                 "title": title or "",
-                "videoCount": safe_int(badge.group(1).replace(",", "")) if badge else None,
+                "totalVideos": safe_int(badge.group(1).replace(",", "")) if badge else None,
                 "thumbnailUrl": thumbnail,
             }
         )
@@ -2667,8 +2667,8 @@ def _yt_hashtag_result_card(card: dict[str, Any]) -> dict[str, Any]:
         "channel": channel or ({"id": channel_id, "title": channel_name} if channel_id or channel_name else None),
         "badges": card.get("badges") if isinstance(card.get("badges"), list) else [],
     }
-    if card.get("viewCountApproximate"):
-        out["viewCountApproximate"] = True
+    if card.get("viewCountIsApproximate") or card.get("viewCountApproximate"):
+        out["viewCountIsApproximate"] = True
     return coerce_published_fields(strip_empty(out))
 
 
@@ -2884,10 +2884,25 @@ async def youtube_comment_replies(
 
 
 # ---------- CHANNEL PLAYLISTS ---------------------------------------------
-@router.get("/channel-playlists", summary="List a YouTube channel's playlists")
+@router.get(
+    "/channel-playlists",
+    summary="List a YouTube channel's playlists (cursor-paginated)",
+    description=(
+        "Channel /playlists tab as clean JSON with nextCursor + hasMore. Each row: "
+        "id, url, title, totalVideos (same name as /playlist), thumbnailUrl. "
+        "Flat 2 credits per page."
+    ),
+)
 async def youtube_channel_playlists(
     url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -2902,17 +2917,44 @@ async def youtube_channel_playlists(
         async def _run() -> dict[str, Any]:
             # InnerTube browse + HTML. The SEARCH actor cannot read /playlists
             # (it returns videos) — never fall through to it.
-            playlists = await channel_playlists_native(url, limit)
-            if not playlists:
-                playlists = await _channel_playlists_native(url, limit)
+            page = await channel_playlists_native(url, limit, cursor=cursor)
+            if page.get("invalidCursor"):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid or expired cursor. Start a new request without cursor.",
+                )
+            playlists = page.get("items") or []
+            next_cursor = safe_str(page.get("nextCursor")) or None
+            if playlists:
+                ctx["source"] = "direct"
+                return {
+                    "url": url,
+                    "totalReturned": len(playlists),
+                    "nextCursor": next_cursor,
+                    "hasMore": next_cursor is not None,
+                    "playlists": playlists,
+                }
+            if cursor:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid or expired cursor. Start a new request without cursor.",
+                )
+            # Legacy HTML-only fallback (no cursor).
+            playlists = await _channel_playlists_native(url, limit)
             if not playlists:
                 raise HTTPException(status_code=404, detail="No playlists found for this channel")
             ctx["source"] = "direct"
-            return {"url": url, "totalReturned": len(playlists), "playlists": playlists}
+            return {
+                "url": url,
+                "totalReturned": len(playlists),
+                "nextCursor": None,
+                "hasMore": False,
+                "playlists": playlists,
+            }
 
         data = await cached_or_run(
             endpoint="youtube.channel-playlists",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -3016,23 +3058,9 @@ async def youtube_community_posts(
                                 "lengthSeconds": safe_int(lv.get("lengthSeconds") or lv.get("duration")),
                             }
                         )
-                primary_video = None
-                if linked:
-                    first = linked[0]
-                    primary_video = {
-                        "id": first.get("id"),
-                        "title": first.get("title"),
-                        "thumbnail": first.get("thumbnail"),
-                        "url": first.get("url"),
-                        "viewCountText": first.get("viewCountText"),
-                        "viewCountInt": first.get("viewCountInt"),
-                        "lengthText": first.get("lengthText"),
-                        "lengthSeconds": first.get("lengthSeconds"),
-                    }
                 row: dict[str, Any] = {
                     "id": safe_str(p.get("post_id")),
                     "url": source_url,
-                    "author": author,
                     "channel": {
                         "id": safe_str(p.get("channel_id") or p.get("author_id")) or None,
                         "title": author or None,
@@ -3042,20 +3070,19 @@ async def youtube_community_posts(
                     "text": (p.get("content_text") or "").strip(),
                     "likeCount": like_count,
                     "likeCountText": like_text or None,
+                    "likeCountIsApproximate": bool(like_approx) if like_count is not None else None,
                     "hashtags": p.get("hashtags") or [],
                     "linkedVideos": linked,
-                    "video": primary_video,
-                    "publishedTime": published_iso,
+                    "publishedTimeApprox": published_iso,
+                    "publishedTimeIsApproximate": True if published_iso else None,
                     "publishedTimeText": published_text
                     or safe_str(p.get("published_time_text"))
                     or None,
                     "postType": safe_str(p.get("post_type")),
                     "images": images,
-                    "image": images[0] if images else None,
                     "sourceUrl": source_url,
+                    "totalVotesIsApproximate": None,
                 }
-                if like_approx:
-                    row["likeCountApproximate"] = True
                 posts.append(row)
             if not posts:
                 raise HTTPException(status_code=404, detail="No community posts found")
@@ -3070,7 +3097,7 @@ async def youtube_community_posts(
 
         data = await cached_or_run(
             endpoint="youtube.community-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 5},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -3145,14 +3172,10 @@ async def _fetch_community_post_page(url: str) -> dict[str, Any]:
     if not item:
         raise HTTPException(status_code=404, detail="Community post not found")
     comments = await _community_post_comment_count(data)
-    channel = item.get("channel") if isinstance(item.get("channel"), dict) else {}
     return {
         "platform": "youtube",
         **item,
         "comments": comments,
-        # Soft aliases for older clients that read channelName/channelUrl.
-        "channelName": channel.get("title") or item.get("author"),
-        "channelUrl": channel.get("url"),
     }
 
 
@@ -3187,7 +3210,7 @@ async def youtube_community_post_details(
 
         data = await cached_or_run(
             endpoint="youtube.community-post-details",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

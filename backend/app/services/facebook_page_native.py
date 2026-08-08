@@ -151,7 +151,7 @@ def _counts_from_text(html: str, og_desc: str | None) -> dict[str, Any]:
         "followers": followers,
         "following": following,
         "talkingAbout": talking_about,
-        "followersApproximate": True if followers_approximate and followers is not None else None,
+        "followersIsApproximate": True if followers_approximate and followers is not None else None,
     }
 
 
@@ -430,7 +430,7 @@ async def page_details_native(url: str) -> dict[str, Any] | None:
         "fullName": full_name or display_name,
         "bio": bio,
         "followers": counts["followers"],
-        "followersApproximate": counts.get("followersApproximate"),
+        "followersIsApproximate": counts.get("followersIsApproximate"),
         "following": counts["following"],
         "likes": counts["likes"],
         "talkingAbout": counts.get("talkingAbout"),

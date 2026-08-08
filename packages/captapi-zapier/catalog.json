@@ -569,7 +569,7 @@
     "name": "YouTube Channel Playlists",
     "path": "/v1/youtube/channel-playlists",
     "credits": 2,
-    "summary": "List a channel's playlists — id, title, videoCount, thumbnailUrl.",
+    "summary": "Channel playlists with cursor — id, title, totalVideos, thumbnailUrl.",
     "params": [
       {
         "name": "url",
@@ -581,7 +581,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items for this page. Default 20, max 200. Flat 2 credits per page — limit does not multiply."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -597,7 +603,7 @@
     "name": "YouTube Community Posts",
     "path": "/v1/youtube/community-posts",
     "credits": 1,
-    "summary": "Community posts — likeCount+likeCountText, pollOptions, ISO dates, channel{}, cursor.",
+    "summary": "Community posts — channel{}, publishedTimeApprox, likeCountIsApproximate, linkedVideos[], cursor.",
     "params": [
       {
         "name": "url",

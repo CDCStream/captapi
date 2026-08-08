@@ -2210,62 +2210,161 @@ def collect_playlist_cards(data: Any) -> list[dict[str, Any]]:
         seen.add(pid)
         meta = (lk.get("metadata") or {}).get("lockupMetadataViewModel") or {}
         title = text_of(meta.get("title")) or ""
-        video_count = None
+        total_videos = None
         for badge in walk_find(lk, "thumbnailBadgeViewModel"):
-            video_count = parse_count_text(badge.get("text"))
-            if video_count is not None:
+            total_videos = parse_count_text(badge.get("text"))
+            if total_videos is not None:
                 break
-        if video_count is None:
+        if total_videos is None:
             blob = json.dumps(lk)
             m = re.search(r"([\d,.]+)\s+videos?", blob)
             if m:
-                video_count = safe_int(m.group(1).replace(",", ""))
+                total_videos = safe_int(m.group(1).replace(",", ""))
         rows.append(
             {
                 "id": pid,
                 "url": f"https://www.youtube.com/playlist?list={pid}",
                 "title": title,
-                "videoCount": video_count,
+                # Same name as /playlist envelope totalVideos (CPL2).
+                "totalVideos": total_videos,
                 "thumbnailUrl": _best_thumb(lk.get("contentImage")),
             }
         )
     return rows
 
 
-async def channel_playlists_native(channel_url: str, limit: int) -> list[dict[str, Any]]:
-    """Channel playlists via InnerTube browse, then HTML tab parse."""
-    if limit <= 0:
-        return []
-    channel_id = await resolve_channel_id(channel_url)
-    params = _CHANNEL_TAB_PARAMS["playlists"]
-    if channel_id:
-        data = await innertube(
-            "browse",
-            {"browseId": channel_id, "params": params},
-            timeout=18,
-        )
-        if data is not None:
-            rows = collect_playlist_cards(data)
-            if rows:
-                return rows[:limit]
-    # HTML fallthrough (proxy-aware).
-    base = (channel_url or "").rstrip("/")
-    for suffix in (
-        "/videos",
-        "/shorts",
-        "/streams",
-        "/playlists",
-        "/featured",
-        "/posts",
-        "/community",
-    ):
-        if base.lower().endswith(suffix):
-            base = base[: -len(suffix)]
-            break
-    data, _ = await fetch_page_data(f"{base}/playlists", timeout=15.0)
-    if data is None:
-        return []
-    return collect_playlist_cards(data)[:limit]
+_CHANNEL_PLAYLISTS_CURSOR_PREFIX = "ycp1."
+
+
+def _encode_channel_playlists_cursor(
+    *,
+    buffer: list[dict[str, Any]],
+    continuations: list[str],
+) -> str | None:
+    """Opaque cursor: leftover first-page rows + browse tokens."""
+    buf = [r for r in buffer if isinstance(r, dict) and r.get("id")]
+    conts = [c for c in continuations if c]
+    if not buf and not conts:
+        return None
+    payload = {"v": 1, "b": buf, "c": conts}
+    raw = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return _CHANNEL_PLAYLISTS_CURSOR_PREFIX + base64.urlsafe_b64encode(raw).decode(
+        "ascii"
+    ).rstrip("=")
+
+
+def _decode_channel_playlists_cursor(cursor: str) -> dict[str, Any] | None:
+    raw = (cursor or "").strip()
+    if not raw:
+        return None
+    if raw.startswith(_CHANNEL_PLAYLISTS_CURSOR_PREFIX):
+        b64 = raw[len(_CHANNEL_PLAYLISTS_CURSOR_PREFIX) :]
+        pad = "=" * (-len(b64) % 4)
+        try:
+            payload = json.loads(base64.urlsafe_b64decode(b64 + pad).decode("utf-8"))
+        except (ValueError, json.JSONDecodeError, UnicodeDecodeError):
+            return None
+        if not isinstance(payload, dict):
+            return None
+        buf_raw = payload.get("b") or []
+        buf = [r for r in buf_raw if isinstance(r, dict) and safe_str(r.get("id"))]
+        conts_raw = payload.get("c") or []
+        if isinstance(conts_raw, str):
+            conts_raw = [conts_raw]
+        conts = [safe_str(c) for c in conts_raw if safe_str(c)]
+        return {"b": buf, "c": conts}
+    return {"b": [], "c": [raw]}
+
+
+async def _playlists_browse_continuation(
+    tokens: list[str],
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Follow playlists-tab browse tokens until a page yields cards."""
+    pending = [t for t in tokens if t]
+    seen_tok: set[str] = set(pending)
+    hops = 0
+    while pending and hops < 6:
+        token = pending.pop(0)
+        hops += 1
+        payload = await innertube("browse", {"continuation": token}, timeout=18)
+        if payload is None:
+            continue
+        cards = collect_playlist_cards(payload)
+        if cards:
+            # Only return tokens from this payload — sibling noise keeps hasMore alive.
+            return cards, find_continuation_tokens(payload)
+        for nxt in find_continuation_tokens(payload):
+            if nxt not in seen_tok:
+                seen_tok.add(nxt)
+                pending.append(nxt)
+    return [], []
+
+
+async def channel_playlists_native(
+    channel_url: str,
+    limit: int,
+    *,
+    cursor: str | None = None,
+) -> dict[str, Any]:
+    """One page of channel playlists + ``nextCursor`` (buffer-aware)."""
+    empty: dict[str, Any] = {"items": [], "nextCursor": None, "invalidCursor": False}
+    capped = max(1, min(int(limit or 20), 200))
+    buf: list[dict[str, Any]] = []
+    conts: list[str] = []
+
+    if cursor:
+        decoded = _decode_channel_playlists_cursor(cursor)
+        if decoded is None:
+            return {**empty, "invalidCursor": True}
+        buf = list(decoded.get("b") or [])
+        conts = list(decoded.get("c") or [])
+    else:
+        channel_id = await resolve_channel_id(channel_url)
+        params = _CHANNEL_TAB_PARAMS["playlists"]
+        data = None
+        if channel_id:
+            data = await innertube(
+                "browse",
+                {"browseId": channel_id, "params": params},
+                timeout=18,
+            )
+        if data is None or not collect_playlist_cards(data):
+            base = (channel_url or "").rstrip("/")
+            for suffix in (
+                "/videos",
+                "/shorts",
+                "/streams",
+                "/playlists",
+                "/featured",
+                "/posts",
+                "/community",
+            ):
+                if base.lower().endswith(suffix):
+                    base = base[: -len(suffix)]
+                    break
+            data, _ = await fetch_page_data(f"{base}/playlists", timeout=15.0)
+        if data is None:
+            return empty
+        buf = collect_playlist_cards(data)
+        conts = find_continuation_tokens(data)
+        if not buf and not conts:
+            return empty
+
+    items: list[dict[str, Any]] = []
+    if buf:
+        take = buf[:capped]
+        buf = buf[capped:]
+        items.extend(take)
+
+    if len(items) < capped and conts:
+        more, conts = await _playlists_browse_continuation(conts)
+        if more:
+            need = capped - len(items)
+            items.extend(more[:need])
+            buf = more[need:] + buf
+
+    next_cursor = _encode_channel_playlists_cursor(buffer=buf, continuations=conts)
+    return {"items": items, "nextCursor": next_cursor, "invalidCursor": False}
 
 
 # ---------------------------------------------------------------- hashtag --
@@ -3801,14 +3900,12 @@ def _poll_from_attachment(attachment: Any) -> dict[str, Any] | None:
         return None
     total_text = text_of(poll.get("totalVotes"))
     total_n, total_approx = parse_count_text_meta(total_text)
-    out: dict[str, Any] = {
+    return {
         "pollOptions": options,
         "totalVotes": total_n,
         "totalVotesText": total_text,
+        "totalVotesIsApproximate": bool(total_approx) if total_n is not None else None,
     }
-    if total_approx:
-        out["totalVotesApproximate"] = True
-    return out
 
 
 def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
@@ -3854,7 +3951,6 @@ def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
             video = _video_from_community_renderer(vr)
             if not video:
                 continue
-            # Keep videoId for older clients; mirror SC-style fields too.
             linked.append(
                 {
                     "videoId": video["id"],
@@ -3889,48 +3985,33 @@ def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
     hashtags = re.findall(r"#(\w+)", text)
     like_text = text_of(post.get("voteCount"))
     like_count, like_approx = parse_count_text_meta(like_text)
+    # Community posts only expose relative labels — same vocabulary as comments.
     published_iso, published_text = published_fields(post.get("publishedTimeText"))
     channel = _channel_from_community_post(post)
     source_url = f"https://www.youtube.com/post/{post_id}"
-    primary_video = None
-    if uniq_linked:
-        first = uniq_linked[0]
-        primary_video = {
-            "id": first.get("id"),
-            "title": first.get("title"),
-            "thumbnail": first.get("thumbnail"),
-            "url": first.get("url"),
-            "viewCountText": first.get("viewCountText"),
-            "viewCountInt": first.get("viewCountInt"),
-            "lengthText": first.get("lengthText"),
-            "lengthSeconds": first.get("lengthSeconds"),
-        }
     out: dict[str, Any] = {
         "id": post_id,
         "url": source_url,
-        "author": channel.get("title") or text_of(post.get("authorText")),
         "channel": channel,
         "text": text.strip(),
         "likeCount": like_count,
         "likeCountText": like_text,
+        "likeCountIsApproximate": bool(like_approx) if like_count is not None else None,
         "hashtags": hashtags,
         "linkedVideos": uniq_linked,
-        "video": primary_video,
-        # publishedTime is ISO-8601 (approx from relative labels); keep the
-        # YouTube UI string separately — same dual-field pattern as playlist.
-        "publishedTime": published_iso,
+        "publishedTimeApprox": published_iso,
+        "publishedTimeIsApproximate": True if published_iso else None,
         "publishedTimeText": published_text,
-        # Alias used by /community-post-details docs historically.
-        "publishedAt": published_iso,
         "postType": post_type,
         "images": uniq_images,
-        "image": uniq_images[0] if uniq_images else None,
         "sourceUrl": source_url,
+        # Null on non-poll rows — no vote total to flag.
+        "totalVotesIsApproximate": None,
     }
-    if like_approx:
-        out["likeCountApproximate"] = True
     if poll_meta:
         out.update(poll_meta)
+        if "totalVotesIsApproximate" not in poll_meta:
+            out["totalVotesIsApproximate"] = None
     return out
 
 

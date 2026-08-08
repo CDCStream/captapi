@@ -26,6 +26,8 @@ def test_channel_playlist_cards_include_id() -> None:
     assert rows
     assert rows[0]["id"] == "PLoSWVnSA9vG8example"
     assert "list=PLoSWVnSA9vG8example" in rows[0]["url"]
+    assert "videoCount" not in rows[0]
+    assert "totalVideos" in rows[0]
 
 
 def test_lockup_types_from_published_labels() -> None:

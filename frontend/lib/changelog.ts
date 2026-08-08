@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-08",
     category: "fix",
+    title: "YouTube community-posts naming + channel-playlists cursor",
+    description:
+      "community-posts drops author/image/video twins, uses publishedTimeApprox + publishedTimeIsApproximate (no exact instant on the /posts tab), and renames likeCountApproximate/totalVotesApproximate to …IsApproximate. channel-playlists gains cursor/nextCursor/hasMore and aligns videoCount → totalVideos with /playlist. Facebook page-details followersApproximate → followersIsApproximate.",
+    items: [
+      "community-posts: drop author; keep channel{} (CM1)",
+      "publishedTimeApprox vocabulary — no exact source on community posts (CM2/CM3)",
+      "drop image / scalar video; keep images[] + linkedVideos[] (CM4/CM6)",
+      "…IsApproximate rename + channel-playlists cursor + totalVideos (CM5/CPL1/CPL2)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-08",
+    category: "fix",
     title: "YouTube playlist vs playlist-videos: metadata split + cursor paging",
     description:
       "playlist is metadata-only (title, channel{}, totalVideos, thumbnailUrl) at 1 credit — no videos[]. playlist-videos is the paginated contents surface with cursor/nextCursor/hasMore (buffer-aware so page-2 does not skip leftover first-page rows), same enriched row shape as channel-videos, timings{}, flat 2 credits/page. Dropped channelName/owner twins in favour of channel{title}. commentCount* emits only on Shorts list rows.",

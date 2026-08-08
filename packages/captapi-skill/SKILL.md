@@ -109,7 +109,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `youtube_channel_streams` | `/v1/youtube/channel-streams` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `youtube_hashtag_search` | `/v1/youtube/hashtag-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 20 |
 | `youtube_comment_replies` | `/v1/youtube/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number), `cache`? (boolean) | 2 |
-| `youtube_channel_playlists` | `/v1/youtube/channel-playlists` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `youtube_channel_playlists` | `/v1/youtube/channel-playlists` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
 | `youtube_community_posts` | `/v1/youtube/community-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 1 |
 | `youtube_community_post_details` | `/v1/youtube/community-post-details` | `url` (string), `cache`? (boolean) | 1 |
 | `youtube_video_sponsors` | `/v1/youtube/video-sponsors` | `url` (string), `minVotes`? (number), `categories`? (string), `cache`? (boolean) | 1 |

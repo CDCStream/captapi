@@ -174,10 +174,16 @@ def test_community_poll_options_and_numeric_likes() -> None:
     assert row["postType"] == "poll"
     assert row["likeCount"] == 89000
     assert row["likeCountText"] == "89K"
-    assert row["likeCountApproximate"] is True
-    assert row["publishedTime"] and "T" in row["publishedTime"]
-    assert row["publishedAt"] == row["publishedTime"]
+    assert row["likeCountIsApproximate"] is True
+    assert "author" not in row
+    assert "image" not in row
+    assert "video" not in row
+    assert "publishedAt" not in row
+    assert "publishedTime" not in row
+    assert row["publishedTimeApprox"] and "T" in row["publishedTimeApprox"]
+    assert row["publishedTimeIsApproximate"] is True
     assert [o["text"] for o in row["pollOptions"]] == ["Option A", "Option B"]
     assert row["pollOptions"][0]["voteCount"] is None
     assert row["totalVotes"] == 1_600_000
+    assert row["totalVotesIsApproximate"] is True
     assert row["channel"]["id"] == "UCX6OQ3DkcsbYNE6H8uQQuVA"

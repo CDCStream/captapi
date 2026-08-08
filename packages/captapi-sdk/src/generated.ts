@@ -186,8 +186,10 @@ export interface YoutubeCommentRepliesParams {
 export interface YoutubeChannelPlaylistsParams {
   /** YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
+  /** Max items for this page. Default 20, max 200. Flat 2 credits per page — limit does not multiply. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -296,15 +298,15 @@ export class YoutubeApi {
   commentReplies(params: YoutubeCommentRepliesParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/comment-replies", params);
   }
-  /** YouTube Channel Playlists — List a channel's playlists — id, title, videoCount, thumbnailUrl. (2 credits) */
+  /** YouTube Channel Playlists — Cursor-paginated playlists (totalVideos). (2 credits/page) */
   channelPlaylists(params: YoutubeChannelPlaylistsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-playlists", params);
   }
-  /** YouTube Community Posts — Community posts — likeCount+likeCountText, pollOptions, ISO dates, channel{}, cursor. (1 credit) */
+  /** YouTube Community Posts — channel{}, publishedTimeApprox, linkedVideos[], cursor. (1 credit) */
   communityPosts(params: YoutubeCommunityPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/community-posts", params);
   }
-  /** YouTube Community Post Details — One community post — same schema as list + comments (pollOptions, numeric likeCount). (1 credit) */
+  /** YouTube Community Post Details — Same schema as list + comments. (1 credit) */
   communityPostDetails(params: YoutubeCommunityPostDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/community-post-details", params);
   }
