@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-08",
     category: "fix",
+    title: "YouTube search + channel-videos: cursor round-trip and channel subscriberCount",
+    description:
+      "Playground exposes cursor on both endpoints (pass nextCursor back). Dropped the continuationToken twin of nextCursor. Channel search rows parse subscriberCount when YouTube buries it in videoCountText. publishedTimeIsApproximate is null when there is no timestamp. Limit notes say flat 2 credits (not billed per result).",
+    items: [
+      "cursor param on search + channel-videos; page-2 zero id overlap (YS6)",
+      "drop continuationToken alias — use nextCursor only",
+      "subscriberCount on channel hits; publishedTimeIsApproximate null when no time (YS8)",
+      "limit notes: Flat 2 credits (YS7)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-08",
+    category: "fix",
     title: "YouTube search + channel-videos: paging, disjoint types, honest flags",
     description:
       "channel-videos gains nextCursor/hasMore (search-style browse continuations). search typed arrays are disjoint (live only in lives[]). List cards share coerce_published_fields / finalise_youtube_list_card with comments' publishedTimeApprox + publishedTimeIsApproximate; viewCountIsApproximate is always boolean (false on exact rows); drop viewCountInt and flat channelId/channelName/channelUrl twins.",

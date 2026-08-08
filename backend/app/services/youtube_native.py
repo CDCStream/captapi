@@ -376,6 +376,11 @@ def coerce_published_fields(card: dict[str, Any]) -> dict[str, Any]:
         card["publishedTimeText"] = safe_str(current)
     card.pop("publishedAt", None)
     card.pop("publishedTime", None)
+    # No timestamp → no approximate flag (channel / playlist rows).
+    if card.get("publishedTimeApprox") is None and not _looks_relative_published(
+        card.get("publishedTimeText")
+    ):
+        card["publishedTimeIsApproximate"] = None
     return card
 
 
@@ -788,6 +793,27 @@ def _normalize_playlist_video(pv: dict[str, Any]) -> dict[str, Any] | None:
     return card
 
 
+def _subscriber_count_from_channel_renderer(cr: dict[str, Any]) -> int | None:
+    """Parse subscriber count from a search ``channelRenderer``.
+
+    YouTube often puts the ``@handle`` in ``subscriberCountText`` and the real
+    ``3.51M subscribers`` label in ``videoCountText``. Prefer whichever field
+    actually contains a subscriber count — never treat a handle as a count.
+    """
+    for key in ("subscriberCountText", "videoCountText"):
+        raw = cr.get(key)
+        text = (text_of(raw) or "").strip()
+        if not text or text.startswith("@"):
+            continue
+        low = text.lower()
+        if "video" in low and "subscriber" not in low:
+            continue
+        n = parse_count_text(raw)
+        if n is not None:
+            return n
+    return None
+
+
 def _normalize_channel_renderer(cr: dict[str, Any]) -> dict[str, Any] | None:
     channel_id = safe_str(cr.get("channelId"))
     if not channel_id:
@@ -805,7 +831,7 @@ def _normalize_channel_renderer(cr: dict[str, Any]) -> dict[str, Any] | None:
         "url": url,
         "title": text_of(cr.get("title")) or "",
         "publishedTimeApprox": None,
-        "publishedTimeIsApproximate": False,
+        "publishedTimeIsApproximate": None,
         "viewCount": None,
         "durationSeconds": None,
         "thumbnailUrl": _best_thumb(cr.get("thumbnail")),
@@ -817,7 +843,7 @@ def _normalize_channel_renderer(cr: dict[str, Any]) -> dict[str, Any] | None:
             "thumbnail": _best_thumb(cr.get("thumbnail")),
         },
         "badges": _badge_labels(cr),
-        "subscriberCount": parse_count_text(cr.get("subscriberCountText") or cr.get("videoCountText")),
+        "subscriberCount": _subscriber_count_from_channel_renderer(cr),
     }
 
 
@@ -833,7 +859,7 @@ def _normalize_playlist_renderer(pr: dict[str, Any]) -> dict[str, Any] | None:
         "url": f"https://www.youtube.com/playlist?list={playlist_id}",
         "title": text_of(pr.get("title")) or "",
         "publishedTimeApprox": None,
-        "publishedTimeIsApproximate": False,
+        "publishedTimeIsApproximate": None,
         "viewCount": None,
         "durationSeconds": None,
         "thumbnailUrl": _best_thumb(pr.get("thumbnails") or pr.get("thumbnail")),

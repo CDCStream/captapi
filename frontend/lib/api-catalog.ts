@@ -350,12 +350,12 @@ const YOUTUBE: Spec[] = [
     tagline:
       "YouTube search with cursor pagination — typed hits, ids, canonical URLs, filters (2 credits/page).",
     longDescription:
-      "Search YouTube by keyword and get a cursor-paginated page of clean JSON: results[] with type (video|short|channel|playlist|live), id, canonical url, title, publishedTimeApprox + publishedTimeIsApproximate + publishedTimeText, viewCount + viewCountText + viewCountIsApproximate, durationSeconds, thumbnailUrl, channel{id,title,handle,url,thumbnail}, and badges[]. Typed arrays videos[] / shorts[] / channels[] / playlists[] / lives[] / shelves[] are disjoint partitions of results (a live is only in lives[], never also in videos[]) — Σ typed === results.length. Filter with type, sortBy, uploadDate, duration, region. nextCursor / continuationToken for the next page. Flat 2 credits per page.",
+      "Search YouTube by keyword and get a cursor-paginated page of clean JSON: results[] with type (video|short|channel|playlist|live), id, canonical url, title, publishedTimeApprox + publishedTimeIsApproximate + publishedTimeText, viewCount + viewCountText + viewCountIsApproximate, durationSeconds, thumbnailUrl, channel{id,title,handle,url,thumbnail}, badges[], and subscriberCount on channel hits. Typed arrays videos[] / shorts[] / channels[] / playlists[] / lives[] / shelves[] are disjoint partitions of results (a live is only in lives[], never also in videos[]) — Σ typed === results.length. Filter with type, sortBy, uploadDate, duration, region. Pass nextCursor as cursor for the next page. Flat 2 credits per page.",
     delivers: [
       "Disjoint typed arrays: videos / shorts / channels / playlists / lives",
-      "publishedTimeApprox + publishedTimeIsApproximate (comments shape)",
-      "viewCountIsApproximate false on exact rows",
-      "channel{} only — no flat channelId/channelName twins",
+      "cursor ↔ nextCursor round-trip (hasMore)",
+      "subscriberCount on channel hits; publishedTimeIsApproximate null when no time",
+      "viewCountIsApproximate false on exact rows; channel{} only",
     ],
   },
   {
@@ -369,9 +369,9 @@ const YOUTUBE: Spec[] = [
     tagline:
       "Channel uploads with cursor pagination — publishedTimeApprox + exact viewCount when the player enriches.",
     longDescription:
-      "Send a channel URL, @handle, or UC… id and get uploads as clean JSON with nextCursor + hasMore (same cursor mechanism as /search). Each row is player-enriched: exact viewCount + viewCountIsApproximate (false when exact; true when only a compact shelf label was available), publishedTimeApprox + publishedTimeIsApproximate + publishedTimeText, durationSeconds, thumbnailUrl, and nested channel{} (no flat channelId/channelName twins). Optional fast=true uses YouTube RSS (exact publish time, thinner metadata, no cursor). Flat 2 credits on the native path.",
+      "Send a channel URL, @handle, or UC… id and get uploads as clean JSON with nextCursor + hasMore. Pass the returned nextCursor as the cursor query param for page 2+. Each row is player-enriched: exact viewCount + viewCountIsApproximate (false when exact; true when only a compact shelf label was available), publishedTimeApprox + publishedTimeIsApproximate + publishedTimeText, durationSeconds, thumbnailUrl, and nested channel{} (no flat channelId/channelName twins). Optional fast=true uses YouTube RSS (exact publish time, thinner metadata, no cursor). Flat 2 credits on the native path.",
     delivers: [
-      "nextCursor + hasMore (page past the first 20)",
+      "cursor ↔ nextCursor + hasMore (zero id overlap across pages)",
       "publishedTimeApprox + publishedTimeIsApproximate",
       "viewCountIsApproximate false on exact player rows",
       "channel{} only — drop flat channel* twins",
@@ -3982,8 +3982,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-channel-details": [up(YT_CHANNEL)],
   "youtube-search": [
     qp(),
-    lp(20, 200),
-    { name: "cursor", type: "string", required: false, description: "Pagination cursor from nextCursor." },
+    lpFlat(20, 200, 2),
+    CURSOR,
     { name: "type", type: "string", required: false, description: "all | videos | shorts | channels | playlists." },
     { name: "sortBy", type: "string", required: false, description: "relevance | date | views | rating." },
     { name: "uploadDate", type: "string", required: false, description: "any | today | this_week | this_month | this_year." },
@@ -3996,9 +3996,9 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     },
     { name: "region", type: "string", required: false, description: "ISO country code for localized results (default US)." },
   ],
-  "youtube-channel-videos": [up(YT_CHANNEL), lp(20, 200), CURSOR, fastRss()],
-  "youtube-playlist-videos": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500), fastRss()],
-  "youtube-playlist": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500), fastRss()],
+  "youtube-channel-videos": [up(YT_CHANNEL), lpFlat(20, 200, 2), CURSOR, fastRss()],
+  "youtube-playlist-videos": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lpFlat(50, 500, 2), fastRss()],
+  "youtube-playlist": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lpFlat(50, 500, 2), fastRss()],
   "youtube-shorts-transcript": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-summarizer": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-stats": [up(YT_SHORTS)],
@@ -4016,8 +4016,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   ],
   "youtube-channel-streams": [up(YT_CHANNEL), lpFlat(20, 200, 2)],
   "youtube-hashtag-search": [qp("Hashtag with or without the # (min 2 characters)."), lp(20, 200)],
-  "youtube-comment-replies": [up(YT_VIDEO), cid(), lp(50, 500)],
-  "youtube-channel-playlists": [up(YT_CHANNEL), lp(20, 200)],
+  "youtube-comment-replies": [up(YT_VIDEO), cid(), lpFlat(50, 500, 2)],
+  "youtube-channel-playlists": [up(YT_CHANNEL), lpFlat(20, 200, 2)],
   "youtube-community-posts": [
     up(YT_CHANNEL),
     lpFlat(20, 200, 1),

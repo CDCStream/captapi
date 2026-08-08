@@ -1,8 +1,9 @@
-"""YS1?YS6 shape checks for YouTube search + channel-videos list cards."""
+"""YS1–YS8 shape checks for YouTube search + channel-videos list cards."""
 
 from __future__ import annotations
 
 from app.services.youtube_native import (
+    _normalize_channel_renderer,
     finalise_youtube_list_card,
     normalize_video_renderer,
 )
@@ -80,3 +81,32 @@ def test_exact_views_flag_is_false_not_null() -> None:
     assert out["viewCountIsApproximate"] is False
     assert "viewCountInt" not in out
     assert "channelId" not in out
+
+
+def test_channel_renderer_subscriber_count_from_swapped_fields() -> None:
+    """YouTube puts @handle in subscriberCountText and subs in videoCountText."""
+    card = _normalize_channel_renderer(
+        {
+            "channelId": "UC7_gcs09iThXybpVgjHZ_7g",
+            "title": {"simpleText": "PBS Space Time"},
+            "subscriberCountText": {"simpleText": "@pbsspacetime"},
+            "videoCountText": {
+                "accessibility": {
+                    "accessibilityData": {"label": "3.51 million subscribers"}
+                },
+                "simpleText": "3.51M subscribers",
+            },
+            "thumbnail": {"thumbnails": [{"url": "https://yt3.ggpht.com/x"}]},
+            "navigationEndpoint": {
+                "browseEndpoint": {
+                    "browseId": "UC7_gcs09iThXybpVgjHZ_7g",
+                    "canonicalBaseUrl": "/@pbsspacetime",
+                }
+            },
+        }
+    )
+    assert card is not None
+    out = finalise_youtube_list_card(card)
+    assert out["subscriberCount"] == 3_510_000
+    assert out["publishedTimeApprox"] is None
+    assert out["publishedTimeIsApproximate"] is None
