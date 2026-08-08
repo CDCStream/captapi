@@ -1690,7 +1690,10 @@ async def facebook_group_posts(
 @router.get("/comment-replies", summary="Replies to a Facebook comment")
 async def facebook_comment_replies(
     url: str = Query(..., description="Facebook post URL the comment belongs to"),
-    comment_id: str = Query(..., description="ID of the parent comment"),
+    commentId: str | None = Query(None, description="ID of the parent comment."),
+    comment_id: str | None = Query(
+        None, description="Deprecated alias of commentId.", deprecated=True
+    ),
     limit: int = Query(
         50,
         ge=1,
@@ -1700,6 +1703,9 @@ async def facebook_comment_replies(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    parent_id = (commentId or comment_id or "").strip()
+    if not parent_id:
+        raise HTTPException(status_code=400, detail="commentId is required")
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/page/posts/123")
     settings = get_settings()
     async with billed_call(
@@ -1710,13 +1716,13 @@ async def facebook_comment_replies(
         base_credits=CREDIT_FB_COMMENTS_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await facebook_comments_native.comment_replies_native(url, comment_id, limit)
+            native = await facebook_comments_native.comment_replies_native(url, parent_id, limit)
             if native is not None:
                 ctx["source"] = "direct"
                 return {
                     "platform": "facebook",
                     "url": url,
-                    "commentId": comment_id,
+                    "commentId": parent_id,
                     "totalReturned": len(native["replies"]),
                     "replies": native["replies"],
                     "hasMore": bool(native.get("hasMore")),
@@ -1743,10 +1749,10 @@ async def facebook_comment_replies(
                     or (c.get("commentId") if depth > 0 else None)
                 )
                 nested = c.get("replies") or c.get("nestedComments")
-                if isinstance(nested, list) and safe_str(c.get("id") or c.get("commentId")) == comment_id:
+                if isinstance(nested, list) and safe_str(c.get("id") or c.get("commentId")) == parent_id:
                     for r in nested:
                         replies.append(_reply_payload(r))
-                elif parent == comment_id and depth > 0:
+                elif parent == parent_id and depth > 0:
                     replies.append(_reply_payload(c))
                 if len(replies) >= limit:
                     break
@@ -1755,7 +1761,7 @@ async def facebook_comment_replies(
             return {
                 "platform": "facebook",
                 "url": url,
-                "commentId": comment_id,
+                "commentId": parent_id,
                 "totalReturned": len(page),
                 "replies": page,
                 "hasMore": len(replies) > limit,
@@ -1764,7 +1770,7 @@ async def facebook_comment_replies(
 
         data = await cached_or_run(
             endpoint="facebook.comment-replies",
-            params={"url": url, "comment_id": comment_id, "limit": limit, "v": 4},
+            params={"url": url, "comment_id": parent_id, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

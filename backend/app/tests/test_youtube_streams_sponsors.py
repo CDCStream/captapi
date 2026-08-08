@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
-from app.routers.youtube import _merged_coverage_seconds, _process_sponsor_segments
+from app.routers.youtube import (
+    _merged_coverage_seconds,
+    _process_sponsor_segments,
+    _sponsorblock_envelope,
+)
 from app.services.youtube_native import (
     _lockup_result_type,
+    _normalize_community_post,
     apply_channel_stream_row,
     collect_playlist_cards,
     finalize_channel_list_card,
@@ -90,6 +95,52 @@ def test_stream_live_status_and_row_semantics() -> None:
     )
     assert live["liveStatus"] == "live"
     assert live["type"] == "stream"
+
+
+def test_sponsorblock_envelope_always_has_duration_and_license() -> None:
+    empty = _sponsorblock_envelope(
+        vid="dQw4w9WgXcQ",
+        video_duration=212,
+        min_votes=0,
+        segments=[],
+        coverage=0.0,
+    )
+    assert empty["videoDurationSeconds"] == 212
+    assert empty["totalReturned"] == 0
+    assert empty["source"] == "sponsorblock"
+    assert empty["sourceUrl"] == "https://sponsor.ajay.app/"
+    assert empty["license"] == "CC BY-NC-SA 4.0"
+    assert empty["segments"] == []
+
+
+def test_community_post_edited_and_no_poll_nulls() -> None:
+    post = {
+        "postId": "UgkxImage",
+        "contentText": {"runs": [{"text": "hello"}]},
+        "publishedTimeText": {"simpleText": "2 months ago (edited)"},
+        "voteCount": {"simpleText": "732K"},
+        "authorText": {"runs": [{"text": "MrBeast"}]},
+        "authorEndpoint": {
+            "browseEndpoint": {
+                "browseId": "UCX6OQ3DkcsbYNE6H8uQQuVA",
+                "canonicalBaseUrl": "/@MrBeast",
+            }
+        },
+        "backstageAttachment": {
+            "backstageImageRenderer": {
+                "image": {"thumbnails": [{"url": "https://example.com/a.jpg"}]},
+            }
+        },
+    }
+    row = _normalize_community_post(post)
+    assert row is not None
+    assert row["isEdited"] is True
+    assert row["publishedTimeText"] == "2 months ago"
+    assert "(edited)" not in (row["publishedTimeText"] or "")
+    assert "sourceUrl" not in row
+    assert "pollOptions" not in row
+    assert "totalVotes" not in row
+    assert "totalVotesIsApproximate" not in row
 
 
 def test_sponsor_segments_sorted_min_votes_and_coverage() -> None:

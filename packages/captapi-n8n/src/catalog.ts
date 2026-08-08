@@ -141,10 +141,11 @@ const cacheParam = (): ToolParam => ({
   description: "Set true to serve from the 24h response cache. Default false — always fetch fresh data.",
 });
 const commentId = (): ToolParam => ({
-  name: "comment_id",
+  name: "commentId",
   type: "string",
   required: true,
-  description: "ID of the parent comment to fetch replies for (from the comments endpoint).",
+  description:
+    "ID of the parent (top-level) comment to fetch replies for (from the comments endpoint). Legacy alias: comment_id.",
 });
 
 const YT_VIDEO = "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL.";
@@ -222,11 +223,11 @@ const YOUTUBE: Omit<Endpoint, "platform">[] = [
   { tool: "youtube_trending_shorts", name: "YouTube Trending Shorts", path: "/v1/youtube/trending-shorts", credits: 2, summary: "Shorts reel_watch_sequence — fixed window per call (no cursor), not a keyword search.", params: [{ name: "q", type: "string", required: false, description: "Optional topic seed for the reel sequence. Omit for default trending feed." }, limitFlatWindow(20, 100, 2)] },
   { tool: "youtube_channel_streams", name: "YouTube Channel Streams", path: "/v1/youtube/channel-streams", credits: 2, summary: "Channel Live tab only — 0 credits when hasLiveTab=false; flat 2 when streams are fetched.", params: [url(YT_CHANNEL), limitFlatOrZeroLiveTab(20, 200, 2), cacheParam()] },
   { tool: "youtube_hashtag_search", name: "YouTube Hashtag Search", path: "/v1/youtube/hashtag-search", credits: 20, summary: "Hashtag page feed — nested channel{}, viewCountIsApproximate; fixed shelf, billed per result.", params: [q("Hashtag with or without the # (min 2 chars)."), limitWindow(20, 200)] },
-  { tool: "youtube_comment_replies", name: "YouTube Comment Replies", path: "/v1/youtube/comment-replies", credits: 2, summary: "Replies to a specific YouTube comment.", params: [url(YT_VIDEO), commentId(), limit(50, 500)] },
+  { tool: "youtube_comment_replies", name: "YouTube Comment Replies", path: "/v1/youtube/comment-replies", credits: 2, summary: "Top-level comment replies — parentReplyCount + cursor; nested reply ids 404.", params: [url(YT_VIDEO), commentId(), limitFlat(50, 500, 2), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }, cacheParam()] },
   { tool: "youtube_channel_playlists", name: "YouTube Channel Playlists", path: "/v1/youtube/channel-playlists", credits: 2, summary: "Channel playlists with cursor — id, title, totalVideos, thumbnailUrl.", params: [url(YT_CHANNEL), limitFlat(20, 200, 2), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }, cacheParam()] },
   { tool: "youtube_community_posts", name: "YouTube Community Posts", path: "/v1/youtube/community-posts", credits: 1, summary: "Community posts — channel{}, publishedTimeApprox, likeCountIsApproximate, linkedVideos[], cursor.", params: [url(YT_CHANNEL), limitFlat(20, 200, 1), { name: "cursor", type: "string", required: false, description: "Leave empty for the first page; then pass the nextCursor value from the previous response." }, cacheParam()] },
-  { tool: "youtube_community_post_details", name: "YouTube Community Post Details", path: "/v1/youtube/community-post-details", credits: 1, summary: "One community post — same schema as list + comments (pollOptions, numeric likeCount).", params: [url("YouTube community post URL."), cacheParam()] },
-  { tool: "youtube_video_sponsors", name: "YouTube Video Sponsors", path: "/v1/youtube/video-sponsors", credits: 1, summary: "SponsorBlock segments — sorted, overlapsWith, minVotes, coverageSeconds.", params: [url(YT_VIDEO), { name: "minVotes", type: "number", required: false, description: "Minimum votes (default 0; drops votes < 0)." }, { name: "categories", type: "string", required: false, description: "Comma-separated categories (default sponsor,selfpromo,interaction)." }, cacheParam()] },
+  { tool: "youtube_community_post_details", name: "YouTube Community Post Details", path: "/v1/youtube/community-post-details", credits: 1, summary: "One community post — list schema + commentCount trio + isEdited.", params: [url("YouTube community post URL."), cacheParam()] },
+  { tool: "youtube_video_sponsors", name: "YouTube Video Sponsors", path: "/v1/youtube/video-sponsors", credits: 1, summary: "SponsorBlock segments (CC BY-NC-SA 4.0) — source/license disclosed; empty bills 0.", params: [url(YT_VIDEO), { name: "minVotes", type: "number", required: false, description: "Minimum votes (default 0; drops votes < 0)." }, { name: "categories", type: "string", required: false, description: "Comma-separated categories (default sponsor,selfpromo,interaction)." }, cacheParam()] },
 ];
 
 const TIKTOK: Omit<Endpoint, "platform">[] = [

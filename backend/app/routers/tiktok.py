@@ -2071,7 +2071,10 @@ async def tiktok_channel_posts(
 @router.get("/comment-replies", summary="Replies to a TikTok comment (cursor-paginated)")
 async def tiktok_comment_replies(
     url: str = Query(..., description="URL of the TikTok video the comment belongs to"),
-    comment_id: str = Query(..., description="ID of the parent comment"),
+    commentId: str | None = Query(None, description="ID of the parent comment."),
+    comment_id: str | None = Query(
+        None, description="Deprecated alias of commentId.", deprecated=True
+    ),
     limit: int = Query(50, ge=1, le=500),
     cursor: str | None = Query(
         None,
@@ -2083,6 +2086,9 @@ async def tiktok_comment_replies(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    parent_id = (commentId or comment_id or "").strip()
+    if not parent_id:
+        raise HTTPException(status_code=400, detail="commentId is required")
     aweme_id = _require_tiktok_video_url(url)
     if cursor is not None and not str(cursor).isdigit():
         raise HTTPException(
@@ -2100,14 +2106,14 @@ async def tiktok_comment_replies(
         base_credits=CREDIT_COMMENT_REPLIES,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await comment_replies_native(aweme_id, comment_id, cursor, limit)
+            native = await comment_replies_native(aweme_id, parent_id, cursor, limit)
             if native is not None:
                 replies, next_cursor, total = native
                 ctx["source"] = "direct"
                 return {
                     "platform": "tiktok",
                     "url": url,
-                    "commentId": comment_id,
+                    "commentId": parent_id,
                     "totalReturned": len(replies),
                     "totalReplies": total,
                     "replies": replies,
@@ -2146,15 +2152,15 @@ async def tiktok_comment_replies(
             )
             replies: list[dict[str, Any]] = []
             for r in items:
-                parent_id = safe_str(
+                row_parent = safe_str(
                     r.get("parentCommentId")
                     or r.get("parentId")
                     or r.get("repliesToId")
                     or r.get("replyToCommentId")
                 )
-                if parent_id != comment_id:
+                if row_parent != parent_id:
                     nested = r.get("replies") or r.get("_replies") or []
-                    if isinstance(nested, list) and safe_str(r.get("id") or r.get("cid")) == comment_id:
+                    if isinstance(nested, list) and safe_str(r.get("id") or r.get("cid")) == parent_id:
                         for child in nested:
                             verified = child.get("replyAuthorVerified") or child.get("verified")
                             reply_row = {
@@ -2205,7 +2211,7 @@ async def tiktok_comment_replies(
             return {
                 "platform": "tiktok",
                 "url": url,
-                "commentId": comment_id,
+                "commentId": parent_id,
                 "totalReturned": len(replies),
                 "totalReplies": None,
                 "replies": replies,
@@ -2215,7 +2221,7 @@ async def tiktok_comment_replies(
 
         data = await cached_or_run(
             endpoint="tiktok.comment-replies",
-            params={"url": url, "comment_id": comment_id, "limit": limit, "cursor": cursor or "", "v": 4},
+            params={"url": url, "comment_id": parent_id, "limit": limit, "cursor": cursor or "", "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

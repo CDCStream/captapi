@@ -561,7 +561,25 @@ const YOUTUBE: Spec[] = [
       "Billed per returned result; lower limit ⇒ lower cost, but you cannot page past the first shelf.",
     ],
   },
-  { slug: "youtube-comment-replies", name: "YouTube Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/youtube/comment-replies", credits: 2 },
+  {
+    slug: "youtube-comment-replies",
+    name: "YouTube Comment Replies API",
+    shortName: "Comment Replies",
+    category: "comments",
+    method: "GET",
+    path: "/v1/youtube/comment-replies",
+    credits: 2,
+    tagline:
+      "Replies under a top-level comment — parentReplyCount + cursor. Nested reply ids return 404.",
+    longDescription:
+      "Pass a video URL and a top-level commentId from /comments. Returns replies with nextCursor/hasMore and parentReplyCount (the parent's total when YouTube exposes it). Nested reply ids are not supported (404). Reply rows omit replyCount — those nested threads are not fetchable. Accepts commentId (preferred) or legacy comment_id. Flat 2 credits; 0 on 404.",
+    delivers: [
+      "parentReplyCount when known",
+      "nextCursor + hasMore",
+      "commentId param (comment_id still accepted)",
+      "No replyCount on reply rows (unreachable nested threads)",
+    ],
+  },
   {
     slug: "youtube-channel-playlists",
     name: "YouTube Channel Playlists API",
@@ -608,12 +626,13 @@ const YOUTUBE: Spec[] = [
     path: "/v1/youtube/community-post-details",
     credits: 1,
     tagline:
-      "One community post — same schema as the list endpoint plus comments (channel{}, publishedTimeApprox, pollOptions).",
+      "One community post — list schema + commentCount trio + isEdited.",
     longDescription:
-      "Paste a YouTube community post URL and get the same clean shape as Community Posts list items: text, images[], postType, pollOptions + totalVotes + totalVotesIsApproximate when poll, likeCount + likeCountText + likeCountIsApproximate, publishedTimeApprox + publishedTimeIsApproximate + publishedTimeText, channel{}, linkedVideos[] when present, and comments. Flat 1 credit.",
+      "Paste a YouTube community post URL and get the same clean shape as Community Posts list items: text, images[], postType, pollOptions + totalVotes when poll (omitted on non-polls), likeCount trio, publishedTimeApprox vocabulary with isEdited (no \"(edited)\" in the time label), channel{}, linkedVideos[], and commentCount + commentCountText + commentCountIsApproximate. Flat 1 credit.",
     delivers: [
-      "Same fields as community-posts list items + comments",
-      "pollOptions[] + totalVotes for polls",
+      "Same fields as community-posts list items + commentCount trio",
+      "isEdited when YouTube marks the post edited",
+      "poll fields omitted (not null) on non-poll posts",
       "channel{}; publishedTimeApprox vocabulary",
     ],
   },
@@ -626,14 +645,18 @@ const YOUTUBE: Spec[] = [
     path: "/v1/youtube/video-sponsors",
     credits: 1,
     tagline:
-      "SponsorBlock segments — sorted by time, overlapsWith flagged, minVotes filter, coverageSeconds for density.",
+      "SponsorBlock community segments — source/license disclosed; empty lookups bill 0.",
     longDescription:
-      "Paste a YouTube video URL (response videoId/url always match the request). Returns community-sourced SponsorBlock skip segments: category (sponsor|selfpromo|interaction|intro|outro|preview|music_offtopic|poi_highlight|filler), actionType, start/end seconds + formatted times, votes, uuid. Segments are sorted by startSeconds; overlapping rows include overlapsWith:[uuid…]; coverageSeconds is the union duration (no double-count for brand-density). Default minVotes=0 drops rejected segments (votes < 0). Optional categories= comma list. Flat 1 credit. Data comes from SponsorBlock — not YouTube official.",
+      "Paste a YouTube video URL. Returns community-sourced skip segments from SponsorBlock (https://sponsor.ajay.app/) — not YouTube official data and not Captapi detection. Envelope always includes source:\"sponsorblock\", sourceUrl, license:\"CC BY-NC-SA 4.0\" (attribution required; commercial use needs SponsorBlock's explicit permission), and videoDurationSeconds even when segments is empty. Segments sorted by startSeconds with overlapsWith and coverageSeconds. Default minVotes=0 drops rejected segments (votes < 0). Flat 1 credit when segments return; 0 credits when the video exists but has no matching segments.",
     delivers: [
-      "Sorted segments + overlapsWith for nested skips",
-      "coverageSeconds union length for density math",
-      "minVotes filter (default 0 excludes votes < 0)",
-      "videoId/url echo the requested video",
+      "source / sourceUrl / license on every response",
+      "videoDurationSeconds always present (empty or not)",
+      "Sorted segments + overlapsWith + coverageSeconds",
+      "0 credits on determinate empty; 1 when segments return",
+    ],
+    platformLimits: [
+      "Data is the SponsorBlock community database (CC BY-NC-SA 4.0) — confirm commercial licensing before relying on this endpoint in a paid product.",
+      "votes reflects anonymous community agreement, not Captapi detection confidence.",
     ],
   },
 ];
@@ -3953,7 +3976,13 @@ const lpFree = (def: number, max: number): ApiParam => ({
 const lang = (): ApiParam => ({ name: "language", type: "string", required: false, description: 'Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.' });
 const langOut = (): ApiParam => ({ name: "language", type: "string", required: false, description: 'ISO code, e.g. "tr": pins the speech language and sets the summary output language. Defaults to auto-detect + English summary.' });
 const langUi = (): ApiParam => ({ name: "language", type: "string", required: false, description: "Interface language for localized results, e.g. en-US or de-DE. Default en-US." });
-const cid = (): ApiParam => ({ name: "comment_id", type: "string", required: true, description: "ID of the parent comment to fetch replies for (from the comments endpoint)." });
+const cid = (): ApiParam => ({
+  name: "commentId",
+  type: "string",
+  required: true,
+  description:
+    "ID of the parent (top-level) comment to fetch replies for — from the comments endpoint. Legacy alias: comment_id.",
+});
 const fastRss = (): ApiParam => ({ name: "fast", type: "boolean", required: false, description: "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters." });
 const cacheP = (): ApiParam => ({
   name: "cache",
@@ -4095,7 +4124,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     qp("Hashtag with or without the # (min 2 characters)."),
     lpWindow(20, 200),
   ],
-  "youtube-comment-replies": [up(YT_VIDEO), cid(), lpFlat(50, 500, 2)],
+  "youtube-comment-replies": [up(YT_VIDEO), cid(), lpFlat(50, 500, 2), CURSOR],
   "youtube-channel-playlists": [up(YT_CHANNEL), lpFlat(20, 200, 2), CURSOR],
   "youtube-community-posts": [
     up(YT_CHANNEL),
@@ -5859,7 +5888,15 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
     case "creative_id":
       return "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR13596485266373083137";
     case "comment_id":
+    case "commentId": {
+      // Prefer the captured example id so Try-it does not ship a TikTok-looking stub.
+      const captured = API_EXAMPLES[ep.slug]?.commentId;
+      if (typeof captured === "string" && captured.trim()) return captured;
+      if (ep.slug === "youtube-comment-replies" || ep.path?.includes("/youtube/")) {
+        return "Ugzge340dBgB75hWBm54AaABAg";
+      }
       return "7311234567890123456";
+    }
     case "limit":
       return ep.slug === "github-trending-repositories" ? "25" : "20";
     case "since":
@@ -8699,6 +8736,23 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     durationSeconds: "Sponsor segment length in seconds (end - start).",
     category:
       'SponsorBlock segment category: "sponsor" | "selfpromo" | "interaction" | "intro" | "outro" | "preview" | "music_offtopic" | "poi_highlight" | "filler".',
+    source: 'Always "sponsorblock" — community database, not YouTube detection.',
+    sourceUrl: "https://sponsor.ajay.app/",
+    license:
+      "CC BY-NC-SA 4.0 — attribution required; commercial use needs SponsorBlock's explicit permission.",
+    videoDurationSeconds:
+      "Full video length in seconds. Always present — including when segments is empty (proves the video was looked up).",
+  },
+  "youtube-comment-replies": {
+    parentReplyCount:
+      "Total replies on the parent top-level comment when YouTube exposes it. May exceed totalReturned; page with nextCursor.",
+    commentId: "Top-level parent comment id. Nested reply ids return 404.",
+  },
+  "youtube-community-post-details": {
+    isEdited: "True when YouTube marks the post as edited. The relative time label is returned without a trailing (edited).",
+    commentCount: "Comment total on the post when InnerTube exposes it.",
+    commentCountIsApproximate:
+      "True when commentCount was parsed from a rounded label (e.g. 16K).",
   },
   "reddit-subreddit-details": {
     category:

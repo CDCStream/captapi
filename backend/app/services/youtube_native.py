@@ -3661,7 +3661,11 @@ def _has_creator_heart(toolbar: dict[str, Any]) -> bool:
     )
 
 
-def _comment_payload_to_api(p: dict[str, Any]) -> dict[str, Any] | None:
+def _comment_payload_to_api(
+    p: dict[str, Any],
+    *,
+    include_reply_count: bool = True,
+) -> dict[str, Any] | None:
     props = p.get("properties") or {}
     author = p.get("author") or {}
     toolbar = p.get("toolbar") or {}
@@ -3677,7 +3681,7 @@ def _comment_payload_to_api(p: dict[str, Any]) -> dict[str, Any] | None:
         return None
     like_count = parse_count_text(toolbar.get("likeCountLiked") or toolbar.get("likeCountNotliked") or toolbar.get("likeCountA11y"))
     published_text, published_iso, published_approx = _comment_published_time(props)
-    return {
+    out = {
         "id": cid,
         "author": safe_str(author.get("displayName")),
         "authorChannelId": _comment_author_channel_id(author),
@@ -3686,7 +3690,6 @@ def _comment_payload_to_api(p: dict[str, Any]) -> dict[str, Any] | None:
         "authorIsChannelOwner": bool(author.get("isCreator")),
         "text": text.strip(),
         "likeCount": like_count,
-        "replyCount": safe_int(toolbar.get("replyCount")) or parse_count_text(toolbar.get("replyCountA11y")),
         "hasCreatorHeart": _has_creator_heart(toolbar),
         "publishedTimeText": published_text,
         # Derived from the relative label — truncated to label precision; never
@@ -3694,6 +3697,13 @@ def _comment_payload_to_api(p: dict[str, Any]) -> dict[str, Any] | None:
         "publishedTimeApprox": published_iso,
         "publishedTimeIsApproximate": published_approx,
     }
+    if include_reply_count:
+        # Top-level comments only — nested reply ids are not fetchable via
+        # /comment-replies (CR-B), so reply rows omit this field.
+        out["replyCount"] = safe_int(toolbar.get("replyCount")) or parse_count_text(
+            toolbar.get("replyCountA11y")
+        )
+    return out
 
 
 def _comment_payloads(data: Any) -> list[dict[str, Any]]:
@@ -3834,35 +3844,90 @@ async def comments_native(
     }
 
 
-def _reply_continuation_for_thread(thread: dict[str, Any], comment_id: str) -> str | None:
+def _thread_matches_comment(thread: dict[str, Any], comment_id: str) -> bool:
     vm = (((thread.get("commentViewModel") or {}).get("commentViewModel")) or {})
-    if safe_str(vm.get("commentId")) != comment_id:
+    if safe_str(vm.get("commentId")) == comment_id:
+        return True
+    # Some layouts only expose the id on the linked commentEntityPayload.
+    for payload in walk_find(thread, "commentEntityPayload"):
+        props = payload.get("properties") if isinstance(payload, dict) else None
+        if isinstance(props, dict) and safe_str(props.get("commentId")) == comment_id:
+            return True
+    return False
+
+
+def _parent_reply_count_from_thread(thread: dict[str, Any], comment_id: str) -> int | None:
+    for payload in walk_find(thread, "commentEntityPayload"):
+        row = _comment_payload_to_api(payload, include_reply_count=True)
+        if row and row.get("id") == comment_id:
+            return safe_int(row.get("replyCount"))
+    vm = (((thread.get("commentViewModel") or {}).get("commentViewModel")) or {})
+    toolbar = vm.get("toolbar") if isinstance(vm.get("toolbar"), dict) else {}
+    return safe_int(toolbar.get("replyCount")) or parse_count_text(
+        toolbar.get("replyCountA11y")
+    )
+
+
+def _reply_continuation_for_thread(thread: dict[str, Any], comment_id: str) -> str | None:
+    if not _thread_matches_comment(thread, comment_id):
         return None
     replies = thread.get("replies") or {}
     return find_continuation_token(replies)
 
 
-async def comment_replies_native(norm_url: str, comment_id: str, limit: int) -> list[dict[str, Any]]:
-    """Paginate reply continuations for ``comment_id`` (no hard ~20 cap)."""
-    token, _ = await _comments_entry_token(norm_url)
-    if not token:
-        return []
+async def comment_replies_native(
+    norm_url: str,
+    comment_id: str,
+    limit: int,
+    *,
+    cursor: str | None = None,
+) -> dict[str, Any]:
+    """Paginate reply continuations for a **top-level** ``comment_id``.
 
-    reply_token = None
-    hops = 0
-    while token and not reply_token and hops < 6:
-        payload = await innertube("next", {"continuation": token}, timeout=15)
-        if payload is None:
-            break
-        for thread in walk_find(payload, "commentThreadRenderer"):
-            reply_token = _reply_continuation_for_thread(thread, comment_id)
-            if reply_token:
-                break
-        token = find_continuation_token(payload)
-        hops += 1
+    Returns ``{found, replies, parentReplyCount, nextCursor}``. Nested reply ids
+    are not supported (``found=False``). Reply rows omit ``replyCount`` — those
+    nested threads are not fetchable through this endpoint.
+    """
+    empty = {
+        "found": False,
+        "replies": [],
+        "parentReplyCount": None,
+        "nextCursor": None,
+    }
+    parent_reply_count: int | None = None
+    reply_token = cursor or None
 
     if not reply_token:
-        return []
+        token, _ = await _comments_entry_token(norm_url)
+        if not token:
+            return empty
+
+        found_thread: dict[str, Any] | None = None
+        hops = 0
+        while token and found_thread is None and hops < 8:
+            payload = await innertube("next", {"continuation": token}, timeout=15)
+            if payload is None:
+                break
+            for thread in walk_find(payload, "commentThreadRenderer"):
+                if _thread_matches_comment(thread, comment_id):
+                    found_thread = thread
+                    parent_reply_count = _parent_reply_count_from_thread(
+                        thread, comment_id
+                    )
+                    reply_token = _reply_continuation_for_thread(thread, comment_id)
+                    break
+            token = find_continuation_token(payload)
+            hops += 1
+
+        if found_thread is None:
+            return empty
+        if not reply_token:
+            return {
+                "found": True,
+                "replies": [],
+                "parentReplyCount": parent_reply_count or 0,
+                "nextCursor": None,
+            }
 
     replies: list[dict[str, Any]] = []
     seen: set[str] = set()
@@ -3873,7 +3938,10 @@ async def comment_replies_native(norm_url: str, comment_id: str, limit: int) -> 
         payload = await innertube("next", {"continuation": token}, timeout=15)
         if payload is None:
             break
-        for row in _comment_payloads(payload):
+        for payload_row in walk_find(payload, "commentEntityPayload"):
+            row = _comment_payload_to_api(payload_row, include_reply_count=False)
+            if not row:
+                continue
             rid = row["id"]
             if rid in seen:
                 continue
@@ -3884,7 +3952,13 @@ async def comment_replies_native(norm_url: str, comment_id: str, limit: int) -> 
                 break
         token = find_continuation_token(payload)
         hops += 1
-    return replies[:limit]
+
+    return {
+        "found": True,
+        "replies": replies[:limit],
+        "parentReplyCount": parent_reply_count,
+        "nextCursor": token if token else None,
+    }
 
 
 # --------------------------------------------------------- community posts --
@@ -4071,12 +4145,15 @@ def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
     like_text = text_of(post.get("voteCount"))
     like_count, like_approx = parse_count_text_meta(like_text)
     # Community posts only expose relative labels — same vocabulary as comments.
-    published_iso, published_text = published_fields(post.get("publishedTimeText"))
+    raw_published = text_of(post.get("publishedTimeText")) or ""
+    is_edited = bool(re.search(r"\(edited\)\s*$", raw_published, flags=re.I))
+    clean_published = re.sub(r"\s*\(edited\)\s*$", "", raw_published, flags=re.I).strip()
+    published_iso, published_text = published_fields(clean_published or None)
     channel = _channel_from_community_post(post)
-    source_url = f"https://www.youtube.com/post/{post_id}"
+    post_url = f"https://www.youtube.com/post/{post_id}"
     out: dict[str, Any] = {
         "id": post_id,
-        "url": source_url,
+        "url": post_url,
         "channel": channel,
         "text": text.strip(),
         "likeCount": like_count,
@@ -4087,16 +4164,13 @@ def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
         "publishedTimeApprox": published_iso,
         "publishedTimeIsApproximate": True if published_iso else None,
         "publishedTimeText": published_text,
+        "isEdited": is_edited,
         "postType": post_type,
         "images": uniq_images,
-        "sourceUrl": source_url,
-        # Null on non-poll rows — no vote total to flag.
-        "totalVotesIsApproximate": None,
     }
+    # Poll fields only when applicable — omit (not null) on image/text posts.
     if poll_meta:
         out.update(poll_meta)
-        if "totalVotesIsApproximate" not in poll_meta:
-            out["totalVotesIsApproximate"] = None
     return out
 
 

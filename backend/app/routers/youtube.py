@@ -2900,14 +2900,38 @@ async def shorts_comments(
 
 
 # ---------- COMMENT REPLIES ----------------------------------------------
-@router.get("/comment-replies", summary="Replies to a YouTube comment")
+@router.get(
+    "/comment-replies",
+    summary="Replies to a YouTube comment",
+    description=(
+        "Replies under a **top-level** comment. Nested reply ids are not "
+        "supported (404). Envelope includes parentReplyCount when known, plus "
+        "nextCursor/hasMore. Reply rows omit replyCount (those threads are not "
+        "fetchable). Accepts ``commentId`` (preferred) or legacy ``comment_id``."
+    ),
+)
 async def youtube_comment_replies(
     url: str = Query(..., description="YouTube video URL the comment belongs to"),
-    comment_id: str = Query(..., description="ID of the parent comment"),
+    commentId: str | None = Query(
+        None,
+        description="ID of the parent (top-level) comment from /comments.",
+    ),
+    comment_id: str | None = Query(
+        None,
+        description="Deprecated alias of commentId.",
+        deprecated=True,
+    ),
     limit: int = Query(50, ge=1, le=500),
+    cursor: str | None = Query(
+        None,
+        description="Pagination cursor from a previous nextCursor. Leave empty for the first page.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    parent_id = (commentId or comment_id or "").strip()
+    if not parent_id:
+        raise HTTPException(status_code=400, detail="commentId is required")
     vid, norm_url = _require_youtube_url(url)
     async with billed_call(
         caller=caller,
@@ -2917,24 +2941,43 @@ async def youtube_comment_replies(
         base_credits=CREDIT_YT_NATIVE_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native_replies = await comment_replies_native(norm_url, comment_id, limit)
-            if native_replies:
-                ctx["source"] = "direct"
-                return {
-                    "url": norm_url,
-                    "videoId": vid,
-                    "commentId": comment_id,
-                    "totalReturned": len(native_replies),
-                    "replies": native_replies,
-                }
-            raise HTTPException(
-                status_code=502,
-                detail="Failed to fetch comment replies. Retry shortly.",
+            page = await comment_replies_native(
+                norm_url, parent_id, limit, cursor=cursor
             )
+            if not page.get("found"):
+                # 0 credits — determinate miss (wrong id / nested reply).
+                ctx["credits_override"] = 0
+                raise HTTPException(
+                    status_code=404,
+                    detail=(
+                        "Comment not found, or id is a nested reply. "
+                        "Pass a top-level commentId from /v1/youtube/comments."
+                    ),
+                )
+            ctx["source"] = "direct"
+            replies = page.get("replies") or []
+            next_cursor = safe_str(page.get("nextCursor")) or None
+            out: dict[str, Any] = {
+                "url": norm_url,
+                "videoId": vid,
+                "commentId": parent_id,
+                "totalReturned": len(replies),
+                "parentReplyCount": page.get("parentReplyCount"),
+                "nextCursor": next_cursor,
+                "hasMore": bool(next_cursor),
+                "replies": replies,
+            }
+            return out
 
         data = await cached_or_run(
             endpoint="youtube.comment-replies",
-            params={"url": norm_url, "comment_id": comment_id, "limit": limit, "v": 5},
+            params={
+                "url": norm_url,
+                "comment_id": parent_id,
+                "limit": limit,
+                "cursor": cursor or "",
+                "v": 6,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -3189,28 +3232,34 @@ def _find_backstage_post(obj: Any):
             yield from _find_backstage_post(value)
 
 
-async def _community_post_comment_count(page_data: dict[str, Any]) -> int | None:
-    """Comment totals load via InnerTube browse continuation, not ytInitialData."""
+async def _community_post_comment_count_meta(
+    page_data: dict[str, Any],
+) -> tuple[int | None, str | None, bool | None]:
+    """Comment totals load via InnerTube browse continuation, not ytInitialData.
+
+    Returns ``(count, displayText, isApproximate)``.
+    """
     token = find_continuation_token(page_data)
     if not token:
-        return None
+        return None, None, None
     payload = await innertube("browse", {"continuation": token}, timeout=15)
     if not isinstance(payload, dict):
-        return None
+        return None, None, None
     for header in walk_find(payload, "commentsHeaderRenderer"):
         for key in ("countText", "commentsCount", "headerText"):
-            n = parse_count_text(text_of(header.get(key)))
+            text = text_of(header.get(key))
+            n, approx = parse_count_text_meta(text)
             if n is not None:
-                return n
-    return None
+                return n, text, bool(approx)
+    return None, None, None
 
 
 async def _fetch_community_post_page(url: str) -> dict[str, Any]:
-    """Parse a single community post — same shape as list items + comments.
+    """Parse a single community post — same shape as list items + commentCount.
 
     Uses en-US cookies/headers so likeCountText parses as ``727K`` not locale
     forms. ``likes`` (string) is no longer returned — use ``likeCount`` (int)
-    + ``likeCountText``.
+    + ``likeCountText``. ``comments`` (int) renamed to ``commentCount`` trio.
     """
     try:
         resp = await proxy_fetch(
@@ -3230,12 +3279,15 @@ async def _fetch_community_post_page(url: str) -> dict[str, Any]:
     item = _normalize_community_post(post)
     if not item:
         raise HTTPException(status_code=404, detail="Community post not found")
-    comments = await _community_post_comment_count(data)
-    return {
+    count, count_text, count_approx = await _community_post_comment_count_meta(data)
+    out = {
         "platform": "youtube",
         **item,
-        "comments": comments,
+        "commentCount": count,
+        "commentCountText": count_text,
+        "commentCountIsApproximate": count_approx,
     }
+    return out
 
 
 def _find_images(obj: Any):
@@ -3269,7 +3321,7 @@ async def youtube_community_post_details(
 
         data = await cached_or_run(
             endpoint="youtube.community-post-details",
-            params={"url": url, "v": 6},
+            params={"url": url, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -3382,7 +3434,47 @@ def _process_sponsor_segments(
     return segments, _merged_coverage_seconds(segments)
 
 
-@router.get("/video-sponsors", summary="Sponsor/self-promo segments in a YouTube video")
+_SPONSORBLOCK_SOURCE = "sponsorblock"
+_SPONSORBLOCK_SOURCE_URL = "https://sponsor.ajay.app/"
+_SPONSORBLOCK_LICENSE = "CC BY-NC-SA 4.0"
+
+
+def _sponsorblock_envelope(
+    *,
+    vid: str,
+    video_duration: float | int | None,
+    min_votes: int,
+    segments: list[dict[str, Any]],
+    coverage: float,
+) -> dict[str, Any]:
+    """One shape for empty and populated SponsorBlock responses."""
+    return {
+        "videoId": vid,
+        "url": f"https://www.youtube.com/watch?v={vid}",
+        "videoDurationSeconds": video_duration,
+        "totalReturned": len(segments),
+        "coverageSeconds": coverage,
+        "minVotes": min_votes,
+        "segments": segments,
+        # Community database — not YouTube detection. Licence is non-commercial
+        # unless SponsorBlock grants explicit permission.
+        "source": _SPONSORBLOCK_SOURCE,
+        "sourceUrl": _SPONSORBLOCK_SOURCE_URL,
+        "license": _SPONSORBLOCK_LICENSE,
+    }
+
+
+@router.get(
+    "/video-sponsors",
+    summary="SponsorBlock segments for a YouTube video",
+    description=(
+        "Community-sourced skip segments from SponsorBlock (https://sponsor.ajay.app/), "
+        "not YouTube official data and not Captapi detection. Database/API licence: "
+        "CC BY-NC-SA 4.0 — attribution required; commercial use needs SponsorBlock's "
+        "explicit permission. Envelope always includes source, sourceUrl, license, "
+        "and videoDurationSeconds (even when segments is empty)."
+    ),
+)
 async def youtube_video_sponsors(
     url: str = Query(..., description="YouTube video URL or ID"),
     minVotes: int = Query(
@@ -3404,7 +3496,7 @@ async def youtube_video_sponsors(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    vid, _ = _require_youtube_url(url)
+    vid, norm_url = _require_youtube_url(url)
     settings = get_settings()
     if categories and categories.strip():
         cats = [c.strip().lower() for c in categories.split(",") if c.strip()]
@@ -3433,35 +3525,47 @@ async def youtube_video_sponsors(
                     f"{settings.SPONSORBLOCK_API_BASE}/api/skipSegments",
                     params=params,
                 )
+            ctx["source"] = _SPONSORBLOCK_SOURCE
             if resp.status_code == 404:
-                return {
-                    "videoId": vid,
-                    "url": f"https://www.youtube.com/watch?v={vid}",
-                    "totalReturned": 0,
-                    "coverageSeconds": 0,
-                    "minVotes": minVotes,
-                    "segments": [],
-                }
+                # No segments in the DB — still prove the video exists via player.
+                details = await video_details_native(vid, norm_url)
+                if details is None:
+                    raise HTTPException(status_code=404, detail="Video not found")
+                ctx["empty_segments"] = True
+                return _sponsorblock_envelope(
+                    vid=vid,
+                    video_duration=details.get("durationSeconds"),
+                    min_votes=minVotes,
+                    segments=[],
+                    coverage=0.0,
+                )
             if resp.status_code >= 400:
-                raise HTTPException(status_code=502, detail="Sponsor lookup failed upstream")
+                raise HTTPException(status_code=502, detail="SponsorBlock lookup failed upstream")
             raw = resp.json()
             if not isinstance(raw, list):
                 raw = []
-            ctx["source"] = "direct"  # SponsorBlock public API, no actor
             segments, coverage = _process_sponsor_segments(raw, min_votes=minVotes)
             video_duration = next(
-                (s.get("videoDuration") for s in raw if isinstance(s, dict) and s.get("videoDuration")),
+                (
+                    s.get("videoDuration")
+                    for s in raw
+                    if isinstance(s, dict) and s.get("videoDuration")
+                ),
                 None,
             )
-            return {
-                "videoId": vid,
-                "url": f"https://www.youtube.com/watch?v={vid}",
-                "videoDurationSeconds": video_duration,
-                "totalReturned": len(segments),
-                "coverageSeconds": coverage,
-                "minVotes": minVotes,
-                "segments": segments,
-            }
+            if video_duration is None and not segments:
+                details = await video_details_native(vid, norm_url)
+                if details is not None:
+                    video_duration = details.get("durationSeconds")
+            if not segments:
+                ctx["empty_segments"] = True
+            return _sponsorblock_envelope(
+                vid=vid,
+                video_duration=video_duration,
+                min_votes=minVotes,
+                segments=segments,
+                coverage=coverage,
+            )
 
         data = await cached_or_run(
             endpoint="youtube.video-sponsors",
@@ -3469,10 +3573,15 @@ async def youtube_video_sponsors(
                 "vid": vid,
                 "minVotes": minVotes,
                 "categories": ",".join(chosen),
-                "v": 3,
+                "v": 4,
             },
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
+        # Determinate empty (video exists, no segments after filters) → 0 credits.
+        if ctx.get("empty_segments") or (
+            isinstance(data, dict) and int(data.get("totalReturned") or 0) == 0
+        ):
+            ctx["credits_override"] = 0
         return ApiResponse(data=data)

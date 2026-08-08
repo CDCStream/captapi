@@ -187,3 +187,5 @@ def test_community_poll_options_and_numeric_likes() -> None:
     assert row["totalVotes"] == 1_600_000
     assert row["totalVotesIsApproximate"] is True
     assert row["channel"]["id"] == "UCX6OQ3DkcsbYNE6H8uQQuVA"
+    assert "sourceUrl" not in row
+    assert row["isEdited"] is False
