@@ -60,7 +60,8 @@ def test_map_aweme_includes_region_and_shop() -> None:
         }
     )
     assert post is not None
-    assert post["region"] == "DE"
+    assert post["locationCreated"] == "DE"
+    assert "region" not in post
     assert post["authorRegion"] == "DE"
     assert post["author"]["region"] == "DE"
     assert post["shopProductUrl"] == "https://www.tiktok.com/shop/pdp/1729494515984797858"

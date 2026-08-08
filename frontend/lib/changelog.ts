@@ -51,6 +51,20 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-08",
     category: "fix",
+    title: "TikTok audience latency, profile raw opt-in, video-details honesty",
+    description:
+      "audience-demographics parallelizes commenter sampling across videos and returns timings{} so 60-video calls finish under Cloudflare's ~125s ceiling. profile-region drops the default raw TikTok blob (raw=true opt-in). video-details gets per-counter *IsApproximate flags, second-precision mediaUrlsExpireAt from expire=, locationCreated instead of overloaded region, and drops flat authorId/secUid twins. isOrganization is a boolean.",
+    items: [
+      "audience-demographics: parallel video fan-out + timings (AD1)",
+      "profile-region: raw opt-in only; isOrganization boolean (PR1/PR3)",
+      "video-details: per-counter *IsApproximate; parse expire= (TV1/TV2)",
+      "locationCreated vs authorRegion / profile-region.region (TV4)",
+      "drop flat authorId/secUid; omit other when unused (TV3/AD2)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-08",
+    category: "fix",
     title: "YouTube community-posts naming + channel-playlists cursor",
     description:
       "community-posts drops author/image/video twins, uses publishedTimeApprox + publishedTimeIsApproximate (no exact instant on the /posts tab), and renames likeCountApproximate/totalVotesApproximate to …IsApproximate. channel-playlists gains cursor/nextCursor/hasMore and aligns videoCount → totalVideos with /playlist. Facebook page-details followersApproximate → followersIsApproximate.",

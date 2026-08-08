@@ -22,7 +22,11 @@ class SocialEngagement(BaseModel):
     comments: int | None = None
     shares: int | None = None
     saves: int | None = None
-    isApproximate: bool | None = None
+    viewsIsApproximate: bool | None = None
+    likesIsApproximate: bool | None = None
+    commentsIsApproximate: bool | None = None
+    sharesIsApproximate: bool | None = None
+    savesIsApproximate: bool | None = None
 
 
 class SocialVideoDetails(BaseModel):
@@ -42,8 +46,6 @@ class SocialVideoDetails(BaseModel):
     width: int | None = None
     height: int | None = None
     mediaUrlsExpireAt: str | None = None
-    authorId: str | None = None
-    secUid: str | None = None
     author: SocialAuthor | None = None
     engagement: SocialEngagement | None = None
     hashtags: list[str] = []
@@ -52,7 +54,7 @@ class SocialVideoDetails(BaseModel):
     musicId: str | None = None
     musicAuthor: str | None = None
     isOriginalSound: bool | None = None
-    region: str | None = None
+    locationCreated: str | None = None
     authorRegion: str | None = None
     isAd: bool | None = None
     isCommerce: bool | None = None

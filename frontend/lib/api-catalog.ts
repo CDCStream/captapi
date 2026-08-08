@@ -696,7 +696,7 @@ const TIKTOK: Spec[] = [
       "bioLink.risk, category, commerce + remix settings",
     ],
   },
-  { slug: "tiktok-profile-region", name: "TikTok Profile Region API", shortName: "Profile Region", category: "channel", method: "GET", path: "/v1/tiktok/profile-region", credits: 2 , tagline: "Find out where a TikTok creator is likely based and what language they use — country, language, stable ids, and core profile stats.", longDescription: "Give the TikTok Profile Region API a profile URL, @handle, or username and it returns location and language as clean JSON. TikTok almost never shows an account's country publicly, so when that value is missing we estimate the country from public cues like the bio, display name, and language. The response tells you whether the country came from TikTok itself or from that estimate (regionSource), and how confident the estimate is (regionConfidence: high, medium, or low). You also get stable id + secUid, account createTime / createTimeUnix, ttSeller + isOrganization, interface language, and core profile stats — followers, following, total likes, and videos (integer count) — plus display name, verified and private flags, and the avatar. Use it for audience and geo analysis, content localization, compliance checks, or vetting creators before a partnership. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Creator country — TikTok's own when available, otherwise an AI estimate", "regionSource + regionConfidence (measured vs inferred)", "id + secUid + createTime / createTimeUnix", "ttSeller + isOrganization for Shop / org vetting", "Interface language plus followers, following, likes, and video count", "Display name, verified and private flags, and avatar"] },
+  { slug: "tiktok-profile-region", name: "TikTok Profile Region API", shortName: "Profile Region", category: "channel", method: "GET", path: "/v1/tiktok/profile-region", credits: 2 , tagline: "Find out where a TikTok creator is likely based and what language they use — country, language, stable ids, and core profile stats.", longDescription: "Give the TikTok Profile Region API a profile URL, @handle, or username and it returns location and language as clean JSON. TikTok almost never shows an account's country publicly, so when that value is missing we estimate the country from public cues like the bio, display name, and language. The response tells you whether the country came from TikTok itself or from that estimate (regionSource), and how confident the estimate is (regionConfidence: high, medium, or low). You also get stable id + secUid, account createTime / createTimeUnix, ttSeller + isOrganization (boolean), interface language, and core profile stats — followers, following, total likes, and videos (integer count) — plus display name, verified and private flags, and the avatar. Upstream TikTok blobs are not returned by default — pass raw=true only when you need the opt-in escape hatch. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Creator country — TikTok's own when available, otherwise an AI estimate", "regionSource + regionConfidence (measured vs inferred)", "id + secUid + createTime / createTimeUnix", "ttSeller + isOrganization (boolean) for Shop / org vetting", "Interface language plus followers, following, likes, and video count", "Display name, verified and private flags, and avatar"] },
   {
     slug: "tiktok-audience-demographics",
     name: "TikTok Audience Demographics API",
@@ -708,13 +708,13 @@ const TIKTOK: Spec[] = [
     tagline:
       "Commenter country + language mix for a TikTok creator — engagement sample, not a follower census.",
     longDescription:
-      "Give a profile URL, @handle, or username and get a ranked commenter-country breakdown as clean JSON. TikTok does not publish follower geography — we sample people commenting on recent videos (user.region) and tally country name, countryCode, count, and numeric percentage (+ percentageText). Response includes basis=\"commenters\", sampleSize, totalCountries, confidence (low/medium/high), optional other{} when countriesLimit truncates, and audienceLanguages[] from comment_language (same sample, no extra cost). Choose videos=12|30|60 (credits 3/5/8) for sample depth. Percentages across audienceLocations (+ other) sum to ~100%. This reflects who engages, not a full follower census.",
+      "Give a profile URL, @handle, or username and get a ranked commenter-country breakdown as clean JSON. TikTok does not publish follower geography — we sample people commenting on recent videos (user.region) and tally country name, countryCode, count, and numeric percentage (+ percentageText). Response includes basis=\"commenters\", sampleSize, totalCountries, confidence from sampleSize (low <400, medium 400–999, high ≥1000), optional other{} only when countriesLimit truncates, audienceLanguages[] from comment_language (same sample, no extra cost), and timings{path,postsMs,commentsMs,totalMs}. Choose videos=12|30|60 (credits 3/5/8) for sample depth. Percentages across audienceLocations (+ other) sum to ~100%. This reflects who engages, not a full follower census.",
     delivers: [
       "Numeric percentage + percentageText per country",
-      "totalCountries + other{} when truncated",
+      "totalCountries + other{} only when truncated",
       "audienceLanguages[] from the same comment sample",
       "videos=12|30|60 with scaled credits (3/5/8)",
-      "basis=commenters + confidence label",
+      "basis=commenters + confidence + timings",
     ],
   },
   { slug: "tiktok-search-suggestions", name: "TikTok Search Suggestions API", shortName: "Search Suggestions", category: "search", method: "GET", path: "/v1/tiktok/search-suggestions", credits: 2, tagline: "Get the autocomplete terms TikTok suggests in its search bar for a keyword — the real phrases people search, ranked, so you can find trending queries and long-tail keyword ideas.", delivers: ["The autocomplete terms TikTok suggests for your keyword", "Each suggestion with its rank — the order it appears in the search bar", "A ready-to-open searchUrl that runs that exact search on TikTok", "The seed keyword plus the region and language it was localized for", "Localize by country + language to see what a specific market searches", "Flat 2 credits per call"] , longDescription: "Give the TikTok Search Suggestions API a seed keyword and it returns the autocomplete phrases TikTok shows in its search bar as clean JSON — the actual phrases people search for. Each suggestion includes the search term, its rank (1 = top of the list), a ready-to-open search URL, the seed keyword it came from, and the country and language it was localized for (region/language echo the market you requested — not a creator country). Use the country and language parameters to see what a specific market is searching (for example US in English, or DE in German). Great for TikTok keyword research, trending queries, and content planning. No TikTok login required. Flat 2 credits per call, no matter how many suggestions return. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
@@ -4155,7 +4155,16 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-video-details": [up(TT_VIDEO)],
   "tiktok-comments": [up(TT_VIDEO), lpFlat(50, 500, 2), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset, e.g. 50). A null nextCursor means the end of the comments." }],
   "tiktok-channel-details": [up(TT_PROFILE), cachePWithMaxAge(), cacheMaxAgeP()],
-  "tiktok-profile-region": [up(TT_PROFILE)],
+  "tiktok-profile-region": [
+    up(TT_PROFILE),
+    {
+      name: "raw",
+      type: "boolean",
+      required: false,
+      description:
+        "Set true to include TikTok's upstream user/statsV2 blob under raw. Default false — curated fields only.",
+    },
+  ],
   "tiktok-audience-demographics": [
     up(TT_PROFILE),
     {
@@ -4170,7 +4179,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "integer",
       required: false,
       description:
-        "Max countries in audienceLocations; remainder folds into other{count,percentage}. Omit for the full list.",
+        "Max countries in audienceLocations; remainder folds into other{count,percentage}. Omit for the full list (other is omitted when unused).",
     },
     cacheP(),
   ],
@@ -6731,6 +6740,10 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       q: `Is this follower geography?`,
       a: `No. TikTok does not publish follower country. We sample people commenting on recent videos (basis=commenters) and report sampleSize, videosSampled, and confidence. Percentages are numeric. Use videos=12|30|60 for deeper samples (3/5/8 credits). Do not treat this as a full follower census.`,
     });
+    list.push({
+      q: `What does confidence mean?`,
+      a: `It is a sample-strength label from sampleSize only: low when sampleSize < 400, medium for 400–999, high at ≥1000. It does not score country concentration or how many videos were requested — check videosSampled / videosRequested for coverage.`,
+    });
   }
   if (ep.slug === "tiktok-popular-creators") {
     list.push({
@@ -7196,6 +7209,8 @@ const FIELD_DESCS: Record<string, string> = {
     "True when likeCount was parsed from a compact K/M/B label rather than an exact integer.",
   language: "Detected or requested language code.",
   region: "Region or country code for this result (meaning depends on the endpoint — market vs creator home).",
+  locationCreated:
+    "ISO country where the TikTok video was posted/served (item locationCreated). Not the creator's home country — use authorRegion or /tiktok/profile-region for that.",
   regionConfidence: 'For an inferred region, confidence of the guess: "high", "medium", or "low". Null when the region came from TikTok.',
   regionSource: 'Where region came from: "tiktok" (authoritative, reported by TikTok) or "inferred" (best-effort estimate from public signals).',
   audienceLocations:
@@ -7203,12 +7218,12 @@ const FIELD_DESCS: Record<string, string> = {
   audienceLanguages:
     "Ranked comment-language breakdown from the same comment sample (comment_language). Each item has language, count, percentage, percentageText.",
   other:
-    "Remainder of the sample not shown in the truncated list (count + numeric percentage). Present when countriesLimit (or a docs example) keeps only the top N countries.",
+    "Remainder of the sample not shown in the truncated list (count + numeric percentage). Present only when countriesLimit truncates; omitted when unused.",
   basis:
     'What the demographics sample measures. For audience-demographics: "commenters" (people who commented on sampled videos) — not a full follower census.',
   totalCountries: "How many distinct countries appeared in the commenter sample (before countriesLimit truncation).",
   confidence:
-    'Sample-strength label from sampleSize: "low" (<400), "medium" (400–999), "high" (≥1000). Commenter geography is noisy at small n.',
+    'Sample-strength label from sampleSize only: "low" (<400), "medium" (400–999), "high" (≥1000). Not a concentration or videosRequested score — commenter geography is noisy at small n.',
   languageSampleSize: "How many comments contributed a language code to audienceLanguages.",
   videosRequested: "videos query parameter used for this call (12, 30, or 60).",
   country:
@@ -7224,7 +7239,19 @@ const FIELD_DESCS: Record<string, string> = {
   shopProductUrl:
     "TikTok Shop product page URL when the video anchors a product (https://www.tiktok.com/shop/pdp/…). Null/omitted when the video does not sell.",
   authorRegion:
-    "Author's TikTok profile region (ISO country) when present on the aweme — avoids a separate profile-region call per video.",
+    "Creator's TikTok profile region (ISO country) when present on the aweme. Often null on video payloads — use /tiktok/profile-region for the curated creator country. Distinct from locationCreated (video locale).",
+  viewsIsApproximate:
+    "True when engagement.views looks like a TikTok display-rounded counter (legacy stats / echoed statsV2), not an exact integer.",
+  likesIsApproximate:
+    "True when engagement.likes looks display-rounded rather than exact.",
+  commentsIsApproximate:
+    "True when engagement.comments looks display-rounded rather than exact.",
+  sharesIsApproximate:
+    "True when engagement.shares looks display-rounded rather than exact.",
+  savesIsApproximate:
+    "True when engagement.saves looks display-rounded rather than exact.",
+  mediaUrlsExpireAt:
+    "ISO-8601 UTC expiry parsed from signed playback/download URL expire= query params (second precision).",
   descLanguage: "Language code TikTok assigns to the video caption when exposed.",
   isEligibleForCommission:
     "Whether the video is marked eligible for affiliate commission when TikTok exposes the flag.",
@@ -7625,8 +7652,26 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     videos: "Total public video count on the profile (integer). Not a typed media asset list.",
     likes: "Total likes across the creator's videos (TikTok heartCount).",
     verified: "Whether TikTok shows a verified badge on this profile.",
+    isOrganization: "Whether TikTok marks the account as an organization (boolean — never 0/1).",
+    raw: "Opt-in upstream TikTok user/statsV2 blob (raw=true only). Not part of the default contract — prefer curated top-level fields.",
     region:
-      "Creator's country as an ISO code (e.g. IT, US). TikTok's authoritative value when it exposes one (rare); otherwise an AI-inferred guess from public profile cues. Check regionSource / regionConfidence.",
+      "Creator's country as an ISO code (e.g. IT, US). TikTok's authoritative value when it exposes one (rare); otherwise an AI-inferred guess from public profile cues. Check regionSource / regionConfidence. Distinct from video-details.locationCreated (video locale).",
+  },
+  "tiktok-video-details": {
+    locationCreated:
+      "ISO country for the video's posting/serving locale — not the creator's home country (see authorRegion / profile-region).",
+    authorRegion:
+      "Creator profile region when TikTok attaches it to the aweme (often null). For a reliable creator country use /tiktok/profile-region.",
+    mediaUrlsExpireAt:
+      "ISO expiry from videoUrl/downloadUrl expire= (second precision). Cover/avatar URLs are ignored so hour-floored CDN params cannot under-report.",
+  },
+  "tiktok-audience-demographics": {
+    timings:
+      "Stage timings {path, postsMs, commentsMs, totalMs, videosFetched, videoConcurrency} for the sample run.",
+    confidence:
+      'Sample-strength from sampleSize: "low" (<400), "medium" (400–999), "high" (≥1000).',
+    other:
+      "Remainder folded out of audienceLocations when countriesLimit truncates. Omitted when unused.",
   },
   "tiktok-search-suggestions": {
     region:

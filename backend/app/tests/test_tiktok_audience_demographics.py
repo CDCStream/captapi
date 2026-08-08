@@ -50,3 +50,12 @@ def test_audience_credits_and_confidence() -> None:
     assert _sample_confidence(269) == "low"
     assert _sample_confidence(400) == "medium"
     assert _sample_confidence(1000) == "high"
+
+
+def test_top_n_without_limit_has_no_other() -> None:
+    codes = ["US"] * 10 + ["IT"] * 5
+    items = _tally_locations(codes)
+    sample = sum(x["count"] for x in items)
+    head, other = _top_n_with_other(items, limit=None, sample_size=sample)
+    assert head == items
+    assert other is None

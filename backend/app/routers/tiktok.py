@@ -411,6 +411,8 @@ def _normalize_profile_region(item: dict, handle: str) -> dict:
         "verified": first_present(user.get("verified"), user.get("isVerified")),
         "private": first_present(user.get("privateAccount"), user.get("isPrivate")),
         "profileImage": safe_str(user.get("avatarLarger") or user.get("avatar") or user.get("avatarMedium")),
+        "_inferBio": safe_str(user.get("signature") or user.get("bio")),
+        # Kept for opt-in ``raw=true``; stripped by the handler by default.
         "raw": raw,
     }
 
@@ -563,8 +565,8 @@ def _normalize(item: dict) -> dict:
         "hashtags": _tt_hashtags(item, caption),
         "mentions": _tt_mentions(item),
         "musicName": _music_name(item, music),
-        "region": safe_str(
-            item.get("region") or item.get("locationCreated") or item.get("location_created")
+        "locationCreated": safe_str(
+            item.get("locationCreated") or item.get("location_created") or item.get("region")
         ),
         "authorRegion": author_region,
         "descLanguage": safe_str(
@@ -910,7 +912,7 @@ async def tiktok_video_details(
 
         data = await cached_or_run(
             endpoint="tiktok.video-details",
-            params={"url": url, "v": 6},
+            params={"url": url, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1357,36 +1359,170 @@ def _top_n_with_other(
     return head, {"count": rest, "percentage": pct, "percentageText": f"{pct:.2f}%"}
 
 
+async def _collect_audience_aweme_ids_once(handle: str, video_sample: int) -> list[str]:
+    """Page native channel posts in small chunks (count=30 soft-blocks more often)."""
+    ids: list[str] = []
+    cursor: str | None = None
+    while len(ids) < video_sample:
+        want = min(20, video_sample - len(ids))
+        page = await channel_posts_native(handle, cursor, want)
+        if page is None:
+            break
+        posts, nxt = page
+        for p in posts:
+            aid = safe_str(p.get("id"))
+            if aid and aid not in ids:
+                ids.append(aid)
+        if not nxt or not posts:
+            break
+        cursor = nxt
+    return ids[:video_sample]
+
+
+async def _collect_audience_aweme_ids(handle: str, video_sample: int) -> list[str]:
+    """Native post paging with a short budget — leave room for Apify + comments."""
+    best: list[str] = []
+    for attempt, timeout in enumerate((18.0, 12.0)):
+        try:
+            ids = await asyncio.wait_for(
+                _collect_audience_aweme_ids_once(handle, video_sample),
+                timeout=timeout,
+            )
+        except asyncio.TimeoutError:
+            ids = []
+        if len(ids) > len(best):
+            best = ids
+        if len(best) >= min(video_sample, 12):
+            return best
+        if attempt == 0:
+            await asyncio.sleep(0.2)
+    return best
+
+
+async def _apify_audience_video_ids(
+    handle: str, settings: Any, video_sample: int, *, timeout_secs: float
+) -> list[str]:
+    """Capped Apify fallthrough — must leave room for comment sampling under ~125s."""
+    try:
+        items = await asyncio.wait_for(
+            get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK,
+                {
+                    "profiles": [handle],
+                    "resultsPerPage": video_sample,
+                    "shouldDownloadVideos": False,
+                },
+                max_items=video_sample,
+            ),
+            timeout=timeout_secs,
+        )
+    except (asyncio.TimeoutError, ApifyError):
+        return []
+    ids = [safe_str(i.get("id") or i.get("videoId")) for i in (items or [])]
+    return [a for a in ids if a]
+
+
 async def _fetch_audience_demographics(
     handle: str, settings: Any, *, video_sample: int, target_total: int
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int]:
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int, dict[str, Any]]:
     """Sample commenter countries + languages across a creator's recent videos.
 
     Prefer native channel posts for video IDs; fall back to the profile actor
     when TikTok soft-blocks the post list. Commenter signals come from TikTok's
     native comment API (``user.region`` + ``comment_language``).
     """
-    aweme_ids: list[str] = []
-    native_posts = await channel_posts_native(handle, None, video_sample)
-    if native_posts is not None:
-        aweme_ids = [safe_str(p.get("id")) for p in native_posts[0] if safe_str(p.get("id"))]
-    if not aweme_ids:
-        items = await get_apify().run_actor_sync(
-            settings.APIFY_ACTOR_TIKTOK,
-            {"profiles": [handle], "resultsPerPage": video_sample, "shouldDownloadVideos": False},
-            max_items=video_sample,
+    import time
+
+    # Hard wall under Cloudflare's ~125s proxy read (leave margin for JSON/egress).
+    wall_budget_secs = 110.0
+    t0 = time.perf_counter()
+    # Race native post paging against a capped Apify fallthrough (CR1 pattern).
+    # Sequential native→Apify burned ~90s on soft-blocks before comments started.
+    posts_budget = 45.0
+    native_task = asyncio.create_task(_collect_audience_aweme_ids(handle, video_sample))
+    apify_task = asyncio.create_task(
+        _apify_audience_video_ids(
+            handle, settings, video_sample, timeout_secs=posts_budget
         )
-        aweme_ids = [safe_str(i.get("id") or i.get("videoId")) for i in (items or [])]
-        aweme_ids = [a for a in aweme_ids if a]
+    )
+    aweme_ids: list[str] = []
+    posts_path = "native"
+    pending_posts = {native_task, apify_task}
+    try:
+        while pending_posts and (time.perf_counter() - t0) < posts_budget:
+            done, pending_posts = await asyncio.wait(
+                pending_posts,
+                timeout=max(0.1, posts_budget - (time.perf_counter() - t0)),
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+            if not done:
+                break
+            for task in done:
+                try:
+                    ids = task.result() or []
+                except Exception:  # noqa: BLE001
+                    ids = []
+                if task is native_task and ids:
+                    aweme_ids = ids
+                    posts_path = "native"
+                    # Good enough native page — cancel Apify.
+                    if len(aweme_ids) >= min(12, video_sample):
+                        pending_posts = set()
+                        break
+                elif task is apify_task and len(ids) > len(aweme_ids):
+                    aweme_ids = ids
+                    posts_path = "apify"
+                    if len(aweme_ids) >= min(12, video_sample):
+                        # Prefer continuing briefly for native, but don't block comments.
+                        if native_task in pending_posts and (time.perf_counter() - t0) > 25:
+                            pending_posts = set()
+                            break
+    finally:
+        for task in (native_task, apify_task):
+            if not task.done():
+                task.cancel()
+        await asyncio.gather(native_task, apify_task, return_exceptions=True)
+    posts_ms = int((time.perf_counter() - t0) * 1000)
     if not aweme_ids:
-        return [], [], 0
-    got = await audience_commenters_native(aweme_ids, target_total=target_total)
+        return [], [], 0, {
+            "path": f"{posts_path}_posts",
+            "postsMs": posts_ms,
+            "commentsMs": 0,
+            "totalMs": posts_ms,
+            "videosFetched": 0,
+        }
+    t1 = time.perf_counter()
+    # Scale fan-out with depth; leave headroom under Cloudflare's ~125s read.
+    video_concurrency = 10 if video_sample >= 60 else (8 if video_sample >= 30 else 5)
+    # Fewer comments/video when sampling wider — same target_total, less wall time.
+    per_video = 60 if video_sample >= 60 else (100 if video_sample >= 30 else 150)
+    # Soft budget for comments so posts+comments stay under wall_budget_secs.
+    comments_budget = max(25.0, wall_budget_secs - (posts_ms / 1000.0) - 2.0)
+    got = await audience_commenters_native(
+        aweme_ids,
+        target_total=target_total,
+        per_video=per_video,
+        video_concurrency=video_concurrency,
+        deadline_secs=comments_budget,
+    )
+    comments_ms = int((time.perf_counter() - t1) * 1000)
+    total_ms = int((time.perf_counter() - t0) * 1000)
+    timings = {
+        "path": f"{posts_path}+native_comments",
+        "postsMs": posts_ms,
+        "commentsMs": comments_ms,
+        "totalMs": total_ms,
+        "videosFetched": len(aweme_ids),
+        "videoConcurrency": video_concurrency,
+        "perVideo": per_video,
+    }
     if got is None:
-        return [], [], len(aweme_ids)
+        return [], [], len(aweme_ids), timings
     return (
         _tally_locations(got.get("regions") or []),
         _tally_languages(got.get("languages") or []),
         len(aweme_ids),
+        timings,
     )
 
 
@@ -1403,9 +1539,11 @@ async def _resolve_region(data: dict[str, Any]) -> None:
         data["regionConfidence"] = None
         data["regionSource"] = "tiktok"
         return
-    raw = data.get("raw") or {}
-    user = raw.get("user") or raw.get("authorMeta") or {}
-    bio = safe_str(user.get("signature"))
+    bio = safe_str(data.get("_inferBio"))
+    if not bio:
+        raw = data.get("raw") or {}
+        user = raw.get("user") or raw.get("authorMeta") or {}
+        bio = safe_str(user.get("signature"))
     est = await infer_region(
         username=data.get("username"),
         display_name=data.get("displayName"),
@@ -1420,6 +1558,13 @@ async def _resolve_region(data: dict[str, Any]) -> None:
 @router.get("/profile-region", summary="TikTok creator region, language & core stats")
 async def tiktok_profile_region(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
+    raw: bool = Query(
+        False,
+        description=(
+            "Set true to include TikTok's upstream user/statsV2 blob under raw. "
+            "Default false — curated fields only (raw is not part of the public contract)."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -1436,7 +1581,7 @@ async def tiktok_profile_region(
             # Primary: profile page JSON. Returns None when it exposes neither
             # region nor language, in which case the actor's caption-language
             # sampling is still worth the cost.
-            native = await profile_region_native(handle)
+            native = await profile_region_native(handle, include_raw=raw)
             if native is not None:
                 ctx["source"] = "direct"
                 base = native
@@ -1452,11 +1597,14 @@ async def tiktok_profile_region(
                 base = _normalize_profile_region(items[0], handle)
 
             await _resolve_region(base)
+            base.pop("_inferBio", None)
+            if not raw:
+                base.pop("raw", None)
             return base
 
         data = await cached_or_run(
             endpoint="tiktok.profile-region",
-            params={"handle": handle, "v": 7},
+            params={"handle": handle, "raw": int(raw), "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1898,7 +2046,9 @@ async def tiktok_popular_creators(
         "commenter country (user.region) and comment language. Percentages "
         "are numeric and sum to ~100% across audienceLocations (+ other when "
         "countriesLimit truncates). Use videos=12|30|60 for sample depth "
-        "(credits 3/5/8). Reflects who engages — not a full follower census."
+        "(credits 3/5/8). Reflects who engages — not a full follower census. "
+        "confidence is from sampleSize: low <400, medium 400–999, high ≥1000. "
+        "Envelope includes timings{path,postsMs,commentsMs,totalMs}."
     ),
 )
 async def tiktok_audience_demographics(
@@ -1941,14 +2091,21 @@ async def tiktok_audience_demographics(
             # country IS exposed on its own comment API. Sampling commenters
             # across the creator's recent videos yields an engagement-based
             # audience-country breakdown — computed natively, no audience actor.
-            locations, languages, videos_sampled = await _fetch_audience_demographics(
+            locations, languages, videos_sampled, timings = await _fetch_audience_demographics(
                 handle,
                 settings,
                 video_sample=video_sample,
                 target_total=target_total,
             )
             if videos_sampled == 0:
-                raise HTTPException(status_code=404, detail="Profile not found or has no public videos")
+                raise HTTPException(
+                    status_code=404,
+                    detail={
+                        "code": "NOT_FOUND",
+                        "message": "Profile not found or has no public videos",
+                        "timings": timings,
+                    },
+                )
             sample_size = sum(int(loc["count"]) for loc in locations)
             total_countries = len(locations)
             shown, other = _top_n_with_other(
@@ -1956,7 +2113,7 @@ async def tiktok_audience_demographics(
             )
             lang_sample = sum(int(x["count"]) for x in languages)
             ctx["source"] = "direct"
-            return {
+            out: dict[str, Any] = {
                 "platform": "tiktok",
                 "username": handle,
                 "url": f"https://www.tiktok.com/@{handle}",
@@ -1967,10 +2124,14 @@ async def tiktok_audience_demographics(
                 "totalCountries": total_countries,
                 "confidence": _sample_confidence(sample_size),
                 "audienceLocations": shown,
-                "other": other,
                 "audienceLanguages": languages,
                 "languageSampleSize": lang_sample,
+                "timings": timings,
             }
+            # other is only meaningful when countriesLimit truncates (CPD-B).
+            if other is not None:
+                out["other"] = other
+            return out
 
         data = await cached_or_run(
             endpoint="tiktok.audience-demographics",
@@ -1978,7 +2139,7 @@ async def tiktok_audience_demographics(
                 "handle": handle,
                 "videos": video_sample,
                 "countriesLimit": countriesLimit or "",
-                "v": 4,
+                "v": 5,
             },
             runner=_run,
             ctx=ctx,

@@ -37,6 +37,7 @@ def test_tiktok_trust_fields_create_time() -> None:
     assert trust["createTime"].startswith("2019-")
     assert trust["bioLinkRisk"] == 0
     assert trust["ttSeller"] is True
+    assert trust["isOrganization"] is False
     assert trust["contact"]["emails"] == ["chef@brand.com"]
 
 

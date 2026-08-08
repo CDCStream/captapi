@@ -118,7 +118,65 @@ async def _fetch_scope(url: str) -> dict[str, Any] | None:
 
 def _stat(stats_v2: dict[str, Any], stats: dict[str, Any], key: str) -> int | None:
     """statsV2 carries exact counts as strings; legacy stats rounds big ones."""
-    return safe_int(stats_v2.get(key) if stats_v2.get(key) is not None else stats.get(key))
+    return _stat_meta(stats_v2, stats, key)[0]
+
+
+def _tiktok_stat_looks_display_rounded(n: int) -> bool:
+    """True when ``n`` matches TikTok's public display-rounding ladders.
+
+    Large play/like totals on the web itemStruct are often already rounded
+    (e.g. 18.0M → 18000000, 1.7M → 1700000, 17.5K → 17500) even inside
+    ``statsV2``. Exact counters like saves (67849) do not match.
+    """
+    if n < 10_000:
+        return False
+    if n >= 1_000_000:
+        return n % 100_000 == 0
+    return n % 100 == 0
+
+
+def _stat_meta(
+    stats_v2: dict[str, Any], stats: dict[str, Any], key: str
+) -> tuple[int | None, bool]:
+    """Return ``(count, is_approximate)`` for one engagement counter.
+
+    Prefer ``statsV2``. Legacy-only values are approximate. When V2 merely
+    echoes a display-rounded legacy int, mark approximate too — one global
+    flag cannot describe mixed exact/rounded counters.
+    """
+    if stats_v2.get(key) is not None:
+        n = safe_int(stats_v2.get(key))
+        if n is None:
+            return None, False
+        legacy = safe_int(stats.get(key))
+        if _tiktok_stat_looks_display_rounded(n) and (
+            legacy is None or legacy == n
+        ):
+            return n, True
+        return n, False
+    n = safe_int(stats.get(key))
+    if n is None:
+        return None, False
+    return n, True
+
+
+def _engagement_with_approx(
+    stats_v2: dict[str, Any], stats: dict[str, Any]
+) -> dict[str, Any]:
+    """Per-counter engagement + ``*IsApproximate`` flags (no single boolean)."""
+    mapping = (
+        ("views", "playCount"),
+        ("likes", "diggCount"),
+        ("comments", "commentCount"),
+        ("shares", "shareCount"),
+        ("saves", "collectCount"),
+    )
+    out: dict[str, Any] = {}
+    for out_key, src_key in mapping:
+        n, approx = _stat_meta(stats_v2, stats, src_key)
+        out[out_key] = n
+        out[f"{out_key}IsApproximate"] = bool(approx) if n is not None else False
+    return out
 
 
 def coerce_stats_v2(stats: dict[str, Any] | None) -> dict[str, Any]:
@@ -196,16 +254,12 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
     )
     thumbnail_url = safe_str(video.get("cover") or video.get("originCover"))
     profile_image = safe_str(author.get("avatarLarger") or author.get("avatarMedium"))
-    author_id = safe_str(author.get("id") or author.get("uid"))
-    author_sec = safe_str(author.get("secUid"))
     author_region = safe_str(author.get("region") or item.get("authorRegion"))
 
     music_title = safe_str(music.get("title"))
     is_original = bool(music.get("original")) or (
         bool(music_title) and music_title.strip().lower() in {"original sound", "original sound -"}
     )
-    # Exact counts live in statsV2; legacy stats often rounds large play counts.
-    engagement_approx = not bool(stats_v2.get("playCount") or stats_v2.get("diggCount"))
 
     return {
         "platform": "tiktok",
@@ -222,31 +276,24 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
         "downloadUrl": download_url,
         "downloadUrlNoWatermark": download_no_wm,
         "hasWatermark": bool(download_url) and not download_no_wm,
-        "mediaUrlsExpireAt": earliest_cdn_expires_at(
-            play_url, download_url, download_no_wm, thumbnail_url, profile_image
-        ),
-        "authorId": author_id,
-        "secUid": author_sec,
+        # Playback/download URLs only — cover/avatar often carry hour-floored
+        # expiry params that would under-report mediaUrlsExpireAt.
+        "mediaUrlsExpireAt": earliest_cdn_expires_at(play_url, download_url, download_no_wm),
         "author": {
             **build_author(author, author_stats=author_stats, profile_image=profile_image),
             "followersAsOf": fetched_at,
             "region": author_region,
         },
-        "engagement": {
-            "views": _stat(stats_v2, stats, "playCount"),
-            "likes": _stat(stats_v2, stats, "diggCount"),
-            "comments": _stat(stats_v2, stats, "commentCount"),
-            "shares": _stat(stats_v2, stats, "shareCount"),
-            "saves": _stat(stats_v2, stats, "collectCount"),
-            "isApproximate": engagement_approx,
-        },
+        "engagement": _engagement_with_approx(stats_v2, stats),
         "hashtags": hashtags,
         "mentions": mentions,
         "musicName": music_title,
         "musicId": safe_str(music.get("id") or music.get("idStr") or music.get("mid")),
         "musicAuthor": safe_str(music.get("authorName") or music.get("ownerNickname")),
         "isOriginalSound": is_original,
-        "region": safe_str(item.get("locationCreated") or item.get("region")),
+        # Video posting/serving locale — NOT the creator's home country.
+        # Creator country is authorRegion (when on the aweme) or /profile-region.
+        "locationCreated": safe_str(item.get("locationCreated") or item.get("region")),
         "authorRegion": author_region,
         "descLanguage": safe_str(
             item.get("desc_language")
@@ -659,7 +706,11 @@ async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None
         else None,
         "isSeller": bool(tt_seller) if tt_seller is not None else None,
         "ttSeller": bool(tt_seller) if tt_seller is not None else None,
-        "isOrganization": user.get("isOrganization"),
+        "isOrganization": (
+            bool(user.get("isOrganization"))
+            if user.get("isOrganization") is not None
+            else None
+        ),
         "isAdVirtual": user.get("isADVirtual"),
         "isEmbedBanned": (
             bool(user.get("isEmbedBanned"))
@@ -831,7 +882,12 @@ def _comment_page_ok(page: dict[str, Any], *, expect_items: bool) -> bool:
 
 
 async def _comment_page(
-    aweme_id: str, cursor: str, count: int, *, expect_items: bool = True
+    aweme_id: str,
+    cursor: str,
+    count: int,
+    *,
+    expect_items: bool = True,
+    concurrency: int = 16,
 ) -> dict[str, Any] | None:
     """One page of the mobile comment API, or None if every attempt is blocked.
 
@@ -841,7 +897,7 @@ async def _comment_page(
     """
     headers = {"User-Agent": _TT_MOBILE_UA, "Accept": "application/json"}
     rounds = 5 if str(cursor) not in ("", "0") else 4
-    concurrency = 16
+    race = max(1, min(int(concurrency), 16))
     geos = ("US", "NL", "FR", "DE")
 
     async def _attempt(host: str, country: str) -> dict[str, Any] | None:
@@ -861,7 +917,7 @@ async def _comment_page(
             asyncio.create_task(
                 _attempt(_TT_COMMENT_HOSTS[i % len(_TT_COMMENT_HOSTS)], geos[i % len(geos)])
             )
-            for i in range(concurrency)
+            for i in range(race)
         ]
         try:
             for coro in asyncio.as_completed(tasks):
@@ -1074,21 +1130,28 @@ def _profile_identity_fields(user: dict[str, Any]) -> dict[str, Any]:
     """
     create_unix = safe_int(user.get("createTime"))
     tt_seller = user.get("ttSeller")
+    is_org = user.get("isOrganization")
     return {
         "id": safe_str(user.get("id") or user.get("uid") or user.get("user_id")),
         "secUid": safe_str(user.get("secUid") or user.get("sec_uid")),
         "createTime": _iso(create_unix),
         "createTimeUnix": create_unix,
         "ttSeller": bool(tt_seller) if tt_seller is not None else None,
-        "isOrganization": user.get("isOrganization"),
+        # TikTok ships 0/1; expose a real boolean next to verified/private/ttSeller.
+        "isOrganization": bool(is_org) if is_org is not None else None,
     }
 
 
-async def profile_region_native(handle: str) -> dict[str, Any] | None:
+async def profile_region_native(
+    handle: str, *, include_raw: bool = False
+) -> dict[str, Any] | None:
     """Region/language signals from the profile page.
 
     Returns None when the page exposes neither region nor language, so the
     caller can fall back to the actor (which samples video caption language).
+
+    ``raw`` (TikTok's user + statsV2 blob) is omitted by default — pass
+    ``include_raw=True`` for the opt-in escape hatch.
     """
     ui = await _user_info(handle)
     if ui is None:
@@ -1101,7 +1164,7 @@ async def profile_region_native(handle: str) -> dict[str, Any] | None:
     stats_v2 = ui.get("statsV2") or {}
     stats = ui.get("stats") or {}
     username = safe_str(user.get("uniqueId")) or handle
-    return {
+    out: dict[str, Any] = {
         "platform": "tiktok",
         "username": username,
         "displayName": safe_str(user.get("nickname")),
@@ -1116,10 +1179,12 @@ async def profile_region_native(handle: str) -> dict[str, Any] | None:
         "verified": user.get("verified"),
         "private": user.get("privateAccount"),
         "profileImage": safe_str(user.get("avatarLarger") or user.get("avatarMedium")),
-        # roomId/eventList/shortDramaCreator often arrive empty from TikTok itself
-        # ("" / [] / {}); keep them in raw when present so live/event profiles still surface.
-        "raw": {"user": user, "statsV2": coerce_stats_v2(stats_v2)},
+        # Used by the router for region inference; stripped before the response.
+        "_inferBio": safe_str(user.get("signature")),
     }
+    if include_raw:
+        out["raw"] = {"user": user, "statsV2": coerce_stats_v2(stats_v2)}
+    return out
 
 
 # --- Channel posts (mobile aweme/post API, cursor-paginated) ---------------
@@ -1624,7 +1689,9 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
     )
     shop_url = extract_shop_product_url(item)
     video_region = safe_str(
-        item.get("region") or item.get("location_created") or item.get("locationCreated")
+        item.get("location_created")
+        or item.get("locationCreated")
+        or item.get("region")
     )
     desc_lang = safe_str(
         item.get("desc_language")
@@ -1677,9 +1744,7 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
         "downloadUrl": download_url,
         "downloadUrlNoWatermark": download_no_wm,
         "hasWatermark": bool(download_url) and not download_no_wm,
-        "mediaUrlsExpireAt": earliest_cdn_expires_at(
-            play_url, download_url, download_no_wm, cover, avatar
-        ),
+        "mediaUrlsExpireAt": earliest_cdn_expires_at(play_url, download_url, download_no_wm),
         "author": author_out,
         "engagement": engagement,
         "hashtags": hashtags,
@@ -1692,7 +1757,7 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
             or music.get("ownerNickname")
             or music.get("owner_nickname")
         ),
-        "region": video_region,
+        "locationCreated": video_region,
         "authorRegion": author_region,
         "descLanguage": desc_lang,
         "isAd": bool(item.get("is_ad") or item.get("isAd")),
@@ -1948,59 +2013,125 @@ async def channel_posts_native(
 # same signal third-party "audience" endpoints surface. Video IDs come from the
 # caller (or from ``channel_posts_native``).
 async def audience_commenters_native(
-    aweme_ids: list[str], target_total: int = 500, per_video: int = 150
+    aweme_ids: list[str],
+    target_total: int = 500,
+    per_video: int = 150,
+    *,
+    video_concurrency: int = 6,
+    deadline_secs: float | None = None,
 ) -> dict[str, list[str]] | None:
     """Collect commenter country codes + comment languages across videos.
 
     Fetches comment pages natively and pulls ``user.region`` and
     ``comment_language`` from each comment, stopping once ``target_total``
-    region codes are gathered or the videos are exhausted. Returns
-    ``{"regions": [...], "languages": [...]}`` (duplicates preserved for
-    tallying) or ``None`` if every video's comments were blocked.
+    region codes are gathered or the videos are exhausted. Videos are
+    sampled in parallel (bounded semaphore) so 60-video calls finish under
+    Cloudflare's ~125s proxy read. Returns ``{"regions": [...], "languages":
+    [...]}`` (duplicates preserved for tallying) or ``None`` if every video's
+    comments were blocked.
     """
+    import time as _time
+
     regions: list[str] = []
     languages: list[str] = []
     any_success = False
-    for aweme_id in aweme_ids:
-        if len(regions) >= target_total:
-            break
-        collected = 0
-        cur = "0"
-        for _ in range(per_video // 15 + 2):
-            if collected >= per_video or len(regions) >= target_total:
-                break
-            want = min(30, per_video - collected)
-            page = await _comment_page(aweme_id, cur, want)
-            if page is None:
-                break  # this video is blocked right now; try the next one
-            any_success = True
-            comments = page.get("comments") or []
-            for c in comments:
-                if not isinstance(c, dict):
-                    continue
-                user = c.get("user") or {}
-                if not isinstance(user, dict):
-                    user = {}
-                code = safe_str(user.get("region"))
-                if code:
-                    regions.append(code.strip().upper())
-                lang = normalize_language_code(
-                    safe_str(
-                        c.get("comment_language")
-                        or c.get("commentLanguage")
-                        or user.get("language")
-                    )
+    lock = asyncio.Lock()
+    stop = asyncio.Event()
+    sem = asyncio.Semaphore(max(1, min(int(video_concurrency), 12)))
+    # Lower per-page race when many videos run together (cap upstream load).
+    page_concurrency = 4 if len(aweme_ids) > 30 else (6 if len(aweme_ids) > 12 else 10)
+    deadline = (
+        _time.monotonic() + float(deadline_secs)
+        if deadline_secs is not None and deadline_secs > 0
+        else None
+    )
+
+    def _timed_out() -> bool:
+        return deadline is not None and _time.monotonic() >= deadline
+
+    async def _one(aweme_id: str) -> None:
+        nonlocal any_success
+        if stop.is_set() or _timed_out():
+            return
+        async with sem:
+            if stop.is_set() or _timed_out():
+                return
+            local_regions: list[str] = []
+            local_langs: list[str] = []
+            collected = 0
+            cur = "0"
+            video_ok = False
+            for _ in range(per_video // 15 + 2):
+                if stop.is_set() or _timed_out() or collected >= per_video:
+                    break
+                async with lock:
+                    if len(regions) + len(local_regions) >= target_total:
+                        stop.set()
+                        break
+                want = min(30, per_video - collected)
+                page = await _comment_page(
+                    aweme_id, cur, want, concurrency=page_concurrency
                 )
-                if lang:
-                    languages.append(lang)
-            collected += len(comments)
-            nxt = page.get("cursor")
-            cur = str(nxt) if nxt is not None else cur
-            if not page.get("has_more"):
-                break
+                if page is None:
+                    break  # this video is blocked right now; try the next one
+                video_ok = True
+                comments = page.get("comments") or []
+                for c in comments:
+                    if not isinstance(c, dict):
+                        continue
+                    user = c.get("user") or {}
+                    if not isinstance(user, dict):
+                        user = {}
+                    code = safe_str(user.get("region"))
+                    if code:
+                        local_regions.append(code.strip().upper())
+                    lang = normalize_language_code(
+                        safe_str(
+                            c.get("comment_language")
+                            or c.get("commentLanguage")
+                            or user.get("language")
+                        )
+                    )
+                    if lang:
+                        local_langs.append(lang)
+                collected += len(comments)
+                nxt = page.get("cursor")
+                cur = str(nxt) if nxt is not None else cur
+                if not page.get("has_more"):
+                    break
+            if not video_ok and not local_regions and not local_langs:
+                return
+            async with lock:
+                any_success = True
+                regions.extend(local_regions)
+                languages.extend(local_langs)
+                if len(regions) >= target_total or _timed_out():
+                    stop.set()
+
+    tasks = [asyncio.create_task(_one(aid)) for aid in aweme_ids if aid]
+    try:
+        if deadline is None:
+            await asyncio.gather(*tasks)
+        else:
+            remaining = max(0.1, deadline - _time.monotonic())
+            done, pending = await asyncio.wait(tasks, timeout=remaining)
+            for t in pending:
+                t.cancel()
+            if pending:
+                await asyncio.gather(*pending, return_exceptions=True)
+            stop.set()
+            # Ensure completed tasks finished cleanly
+            await asyncio.gather(*done, return_exceptions=True)
+    finally:
+        for t in tasks:
+            if not t.done():
+                t.cancel()
     if not any_success:
         return None
-    return {"regions": regions, "languages": languages}
+    return {
+        "regions": regions[:target_total],
+        "languages": languages,
+    }
 
 
 async def audience_regions_native(
@@ -3642,7 +3773,11 @@ def trust_fields_from_user_info(ui: dict[str, Any]) -> dict[str, Any]:
         "isCommerceUser": bool(commerce.get("commerceUser"))
         if commerce.get("commerceUser") is not None
         else None,
-        "isOrganization": user.get("isOrganization"),
+        "isOrganization": (
+            bool(user.get("isOrganization"))
+            if user.get("isOrganization") is not None
+            else None
+        ),
         "friendCount": _stat(stats_v2, stats, "friendCount"),
         "language": safe_str(user.get("language")),
         "secUid": safe_str(user.get("secUid") or user.get("sec_uid")),

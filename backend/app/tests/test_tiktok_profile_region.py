@@ -19,7 +19,7 @@ def test_profile_identity_fields_promoted() -> None:
     assert out["createTime"] == "2016-08-10T22:02:34.000Z"
     assert out["createTimeUnix"] == 1470866554
     assert out["ttSeller"] is False
-    assert out["isOrganization"] == 0
+    assert out["isOrganization"] is False
 
 
 def test_normalize_profile_region_promotes_identity() -> None:
@@ -45,5 +45,6 @@ def test_normalize_profile_region_promotes_identity() -> None:
     assert out["secUid"] == "MS4wLjABAAAA"
     assert out["createTimeUnix"] == 1470866554
     assert out["ttSeller"] is False
-    assert out["isOrganization"] == 0
+    assert out["isOrganization"] is False
     assert out["username"] == "khaby.lame"
+    assert out.get("_inferBio") is None or "_inferBio" in out

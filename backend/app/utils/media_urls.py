@@ -92,9 +92,10 @@ def cdn_expires_at(url: str | None) -> str | None:
         qs = parse_qs(parsed.query)
     except Exception:
         return None
-    # Case-insensitive: Google CDN uses ``Expires``, others ``expire`` / ``e``.
+    # Case-insensitive. Prefer TikTok/ByteDance ``expire`` (second precision)
+    # before ``x-expires`` / ``Expires``, which are often hour-floored.
     lowered = {str(k).lower(): v for k, v in qs.items()}
-    for key in ("x-expires", "expire", "expires", "e"):
+    for key in ("expire", "expires", "x-expires", "e"):
         raw = (lowered.get(key) or [None])[0]
         if not raw:
             continue
