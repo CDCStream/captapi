@@ -489,11 +489,66 @@ def format_duration_hms(seconds: int | None) -> str | None:
         total = int(seconds)
     except (TypeError, ValueError):
         return None
-    if total < 0:
+    # 0 is YouTube's "unknown / still live" sentinel — never render as 00:00:00.
+    if total <= 0:
         return None
     h, rem = divmod(total, 3600)
     m, s = divmod(rem, 60)
     return f"{h:02d}:{m:02d}:{s:02d}"
+
+
+def _positive_duration_seconds(value: Any) -> int | None:
+    """Duration in seconds, or None when missing / non-positive (live unknown)."""
+    dur = safe_int(value)
+    if dur is None or dur <= 0:
+        return None
+    return dur
+
+
+def stream_live_status(
+    *,
+    details: dict[str, Any] | None,
+    shelf_type: str | None = None,
+) -> str:
+    """Map player + shelf signals → ``live`` | ``upcoming`` | ``past`` for streams."""
+    raw = None
+    if isinstance(details, dict):
+        raw = safe_str(details.get("liveStatus"))
+    if raw == "live":
+        return "live"
+    if raw == "upcoming":
+        return "upcoming"
+    if raw in ("ended", "past"):
+        return "past"
+    t = (shelf_type or "").lower()
+    if t == "upcoming":
+        return "upcoming"
+    if t == "live":
+        return "live"
+    if t == "stream":
+        return "past"
+    # Live-tab rows without a stronger signal are archived broadcasts.
+    return "past"
+
+
+def apply_channel_stream_row(
+    row: dict[str, Any],
+    *,
+    details: dict[str, Any] | None = None,
+    shelf: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Stamp liveStatus + honest type/duration on a channel-streams list row."""
+    shelf = shelf if isinstance(shelf, dict) else {}
+    status = stream_live_status(
+        details=details,
+        shelf_type=safe_str(row.get("type")) or safe_str(shelf.get("type")),
+    )
+    row["liveStatus"] = status
+    row["type"] = "upcoming" if status == "upcoming" else "stream"
+    dur = _positive_duration_seconds(row.get("durationSeconds"))
+    row["durationSeconds"] = dur
+    row["durationFormatted"] = format_duration_hms(dur)
+    return row
 
 
 def _stamp_count_fields(
@@ -713,13 +768,15 @@ def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
             channel_name = txt
 
     duration = None
+    badge_labels: list[str] = []
     for badge in walk_find(lk.get("contentImage"), "thumbnailBadgeViewModel"):
-        duration = _duration_text_seconds(badge.get("text"))
-        if duration is not None:
-            break
-
+        label = text_of(badge.get("text")) or safe_str(badge.get("text"))
+        if label:
+            badge_labels.append(label)
+        if duration is None:
+            duration = _duration_text_seconds(badge.get("text"))
     published_at, published_text = published_fields(published_raw)
-    rtype = _lockup_result_type(published_raw)
+    rtype = _lockup_result_type(published_raw, badges=badge_labels)
     card: dict[str, Any] = {
         "type": rtype,
         "id": video_id,
@@ -740,16 +797,22 @@ def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
             "url": None,
             "thumbnail": None,
         },
-        "badges": [],
+        "badges": badge_labels,
     }
     return card
 
 
-def _lockup_result_type(published_raw: str | None) -> str:
-    """Classify Live-tab lockups: upcoming / live stream VOD / regular video."""
+def _lockup_result_type(
+    published_raw: str | None, *, badges: list[str] | None = None
+) -> str:
+    """Classify Live-tab lockups: live / upcoming / stream VOD / video."""
     low = (published_raw or "").lower()
-    if "scheduled" in low or "premiere" in low:
+    badge_low = " ".join(badges or []).lower()
+    if "scheduled" in low or "premiere" in low or "upcoming" in badge_low:
         return "upcoming"
+    if badge_low.strip() == "live" or re.search(r"\blive\b", badge_low):
+        if "streamed" not in low:
+            return "live"
     if "streamed" in low:
         return "stream"
     return "video"
@@ -1460,8 +1523,13 @@ def merge_short_player_details(
         if out.get("viewCount") is None and reel.get("viewCount") is not None:
             out["viewCount"] = reel["viewCount"]
             out["viewCountIsApproximate"] = reel.get("viewCountIsApproximate", False)
-        if out.get("durationSeconds") is None and reel.get("durationSeconds") is not None:
-            out["durationSeconds"] = reel["durationSeconds"]
+        if _positive_duration_seconds(out.get("durationSeconds")) is None:
+            reel_dur = _positive_duration_seconds(reel.get("durationSeconds"))
+            if reel_dur is not None:
+                out["durationSeconds"] = reel_dur
+            elif safe_int(out.get("durationSeconds")) is not None:
+                # Drop YouTube's 0-length sentinel so later enrich can stay null.
+                out["durationSeconds"] = None
         if out.get("likeCount") is None and reel.get("likeCount") is not None:
             out["likeCount"] = reel["likeCount"]
         if out.get("commentCount") is None and reel.get("commentCount") is not None:
@@ -1532,11 +1600,9 @@ def finalize_channel_list_card(
                 count=safe_int(shelf.get("viewCount")),
                 approximate=bool(shelf.get("viewCountIsApproximate")),
             )
-        if shelf.get("durationSeconds") is not None:
-            dur = safe_int(shelf.get("durationSeconds"))
-            out["durationSeconds"] = dur
-            if dur is not None:
-                out["durationFormatted"] = format_duration_hms(dur)
+        dur = _positive_duration_seconds(shelf.get("durationSeconds"))
+        out["durationSeconds"] = dur
+        out["durationFormatted"] = format_duration_hms(dur)
         if shelf.get("thumbnailUrl"):
             out["thumbnailUrl"] = shelf.get("thumbnailUrl")
         if isinstance(shelf.get("channel"), dict):
@@ -1562,12 +1628,11 @@ def finalize_channel_list_card(
             approximate=bool(shelf.get("viewCountIsApproximate")),
         )
 
-    dur = safe_int(details.get("durationSeconds"))
+    dur = _positive_duration_seconds(details.get("durationSeconds"))
     if dur is None:
-        dur = safe_int(shelf.get("durationSeconds"))
-    if dur is not None:
-        out["durationSeconds"] = dur
-        out["durationFormatted"] = format_duration_hms(dur)
+        dur = _positive_duration_seconds(shelf.get("durationSeconds"))
+    out["durationSeconds"] = dur
+    out["durationFormatted"] = format_duration_hms(dur)
 
     if typ == "short":
         _thumbs, thumb_url = prefer_short_thumbnails(
@@ -1687,12 +1752,16 @@ async def enrich_video_cards(
     *,
     concurrency: int = 6,
     with_engagement: bool = False,
+    stream_semantics: bool = False,
 ) -> list[dict[str, Any]]:
     """Player-enrich long-form / stream list rows — same source as channel-shorts.
 
     ``reel_item_watch`` supplies exact ``publishedAt`` / genre (ANDROID omits
     microformat). ANDROID still wins on engagement counts. Row shape matches
     ``enrich_short_cards`` via ``finalize_channel_list_card``.
+
+    ``stream_semantics``: channel-streams only — stamp ``liveStatus`` and coerce
+    ``type`` to stream|upcoming; drop non-positive durations.
     """
     if not cards:
         return cards
@@ -1705,11 +1774,16 @@ async def enrich_video_cards(
                 m = re.search(r"(?:shorts/|v=|youtu\.be/)([\w-]{11})", str(card.get("url")))
                 vid = m.group(1) if m else None
             if not vid:
-                return finalize_channel_list_card(
+                row = finalize_channel_list_card(
                     vid=safe_str(card.get("id")) or "",
                     details=None,
                     shelf=card,
                     content_type=safe_str(card.get("type")) or "video",
+                )
+                return (
+                    apply_channel_stream_row(row, details=None, shelf=card)
+                    if stream_semantics
+                    else row
                 )
             url = safe_str(card.get("url")) or f"https://www.youtube.com/watch?v={vid}"
             typ = safe_str(card.get("type")) or "video"
@@ -1731,9 +1805,17 @@ async def enrich_video_cards(
                         details["commentCount"] = cc
                         details["commentCountIsApproximate"] = cc_approx
 
-            return finalize_channel_list_card(
-                vid=vid, details=details, shelf=card, content_type=typ
+            # Prefer stream/upcoming shelf type over generic video when enriching
+            # Live-tab rows (player contentType is usually "video").
+            content_type = typ
+            if stream_semantics and typ in ("stream", "upcoming", "live"):
+                content_type = typ
+            row = finalize_channel_list_card(
+                vid=vid, details=details, shelf=card, content_type=content_type
             )
+            if stream_semantics:
+                return apply_channel_stream_row(row, details=details, shelf=card)
+            return row
 
     return list(await asyncio.gather(*[_one(c) for c in cards]))
 
@@ -3358,6 +3440,9 @@ def build_youtube_video_details(
             duration_seconds = int(int(approx) / 1000) if approx is not None else None
         except (TypeError, ValueError):
             duration_seconds = None
+    # YouTube reports lengthSeconds=0 for live / unknown — never treat as 0s long.
+    if duration_seconds is not None and duration_seconds <= 0:
+        duration_seconds = None
 
     owner_profile = safe_str(micro.get("ownerProfileUrl"))
     channel_handle = decode_youtube_handle(

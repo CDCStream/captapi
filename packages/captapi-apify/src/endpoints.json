@@ -463,7 +463,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
+        "description": "Max items to return. Default 20, max 100. Returns a single window; use limit to size it. No cursor. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -491,7 +491,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits when hasLiveTab is true; 0 credits when hasLiveTab is false."
       },
       {
         "name": "cache",
@@ -519,7 +519,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Returns a single window; use limit to size it. No cursor. Billed per result."
       },
       {
         "name": "cache",

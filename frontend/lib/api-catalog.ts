@@ -511,8 +511,8 @@ const YOUTUBE: Spec[] = [
       "Flat 2 credits",
     ],
     platformLimits: [
+      "Returns a single window; use limit to size it. No cursor.",
       "Not a global trending chart — recommendation sequence varies between calls.",
-      "Fixed window by design — no hasMore/nextCursor; each call returns a fresh batch up to limit.",
       "Older Shorts and re-uploads can appear; filter by publishedAt client-side if you need freshness.",
     ],
   },
@@ -524,14 +524,15 @@ const YOUTUBE: Spec[] = [
     method: "GET",
     path: "/v1/youtube/channel-streams",
     credits: 2,
-    tagline: "Channel Live tab only — past streams + upcoming; 0 credits when hasLiveTab is false.",
+    tagline: "Channel Live tab only — liveStatus per row; 0 credits when hasLiveTab is false.",
     longDescription:
-      "Reads YouTube's Live tab (not Videos). Channels without a Live tab (common for non-streamers) return totalReturned:0 and hasLiveTab:false instead of silently echoing Videos — billed 0 credits (tab check only; no stream fetch). When the Live tab exists, each row is player-enriched with exact viewCount, ISO publishedAt + publishedTimeText, thumbnailUrl, and type stream|upcoming|video at flat 2 credits on the native path.",
+      "Reads YouTube's Live tab (not Videos). Channels without a Live tab (common for non-streamers) return totalReturned:0 and hasLiveTab:false instead of silently echoing Videos — billed 0 credits (tab check only; no stream fetch). When the Live tab exists, each row is player-enriched with exact viewCount, ISO publishedAt + publishedTimeText, thumbnailUrl, type stream|upcoming, and liveStatus live|upcoming|past. durationSeconds/durationFormatted are null when YouTube reports 0 (live/unknown) — never 00:00:00. Flat 2 credits on the native path when streams are fetched.",
     delivers: [
       "Live tab only — never Videos fallthrough",
       "hasLiveTab false when the channel has no Live tab",
+      "liveStatus: live | upcoming | past on every row",
       "0 credits when hasLiveTab is false; flat 2 when streams are fetched",
-      "Exact viewCount + ISO publishedAt via player enrich",
+      "Honest duration — null when unknown, never 00:00:00",
     ],
   },
   {
@@ -546,16 +547,17 @@ const YOUTUBE: Spec[] = [
     tagline:
       "Videos from youtube.com/hashtag/{name} — nested channel{}, viewCountIsApproximate. Not keyword search.",
     longDescription:
-      "Pass a hashtag (with or without #) and get the videos listed on YouTube's hashtag page as clean JSON. This is the /hashtag/{name} feed — not a search?q= keyword query. Titles often omit the #tag (it may live only in the description); association is the hashtag page itself. Envelope field is hashtag (the normalized tag). Each result includes type (video|short|live), id, url, title, nested channel{}, viewCount + viewCountIsApproximate, and durationSeconds when YouTube exposes them. YouTube's hashtag shelf is a fixed first window (no continuation token / cursor) — billed per returned result (~1 credit each).",
+      "Pass a hashtag (with or without #) and get the videos listed on YouTube's hashtag page as clean JSON. This is the /hashtag/{name} feed — not a search?q= keyword query. Titles often omit the #tag (it may live only in the description); association is the hashtag page itself. Envelope field is hashtag (the normalized tag). Each result includes type (video|short|live), id, url, title, nested channel{id,title,handle?,url}, viewCount + viewCountIsApproximate, and durationSeconds when YouTube exposes them. Returns a single window; use limit to size it. No cursor. Billed per returned result (~1 credit each).",
     delivers: [
       "Hashtag page feed (not keyword search)",
       "type: video | short | live on every row",
       "Nested channel{} — no flat channelName/channelId twins",
       "viewCountIsApproximate on every row with viewCount",
-      "Fixed first window — no cursor; billed per result",
+      "Returns a single window; use limit to size it. No cursor.",
     ],
     platformLimits: [
-      "YouTube's hashtag page exposes no continuation token — one fixed shelf per call (typically ~20–30 cards).",
+      "Returns a single window; use limit to size it. No cursor.",
+      "YouTube's hashtag page exposes no continuation token — typically ~20–30 cards on the first shelf.",
       "Billed per returned result; lower limit ⇒ lower cost, but you cannot page past the first shelf.",
     ],
   },
@@ -3913,6 +3915,27 @@ const lpFlat = (def: number, max: number, credits: number): ApiParam => ({
   required: false,
   description: `Max items to return (default ${def}, max ${max}). Flat ${credits} credit${credits === 1 ? "" : "s"} per call.`,
 });
+/** Flat fee + fixed window (no cursor) — trending feeds / single-shelf lists. */
+const lpFlatWindow = (def: number, max: number, credits: number): ApiParam => ({
+  name: "limit",
+  type: "integer",
+  required: false,
+  description: `Max items to return (default ${def}, max ${max}). Returns a single window; use limit to size it. No cursor. Flat ${credits} credit${credits === 1 ? "" : "s"} per call.`,
+});
+/** Per-result billing + fixed window (no cursor) — hashtag shelves. */
+const lpWindow = (def: number, max: number): ApiParam => ({
+  name: "limit",
+  type: "integer",
+  required: false,
+  description: `Max items to return (default ${def}, max ${max}). Returns a single window; use limit to size it. No cursor. Billed per result.`,
+});
+/** Flat when streams are fetched; 0 when hasLiveTab is false. */
+const lpFlatOrZeroLiveTab = (def: number, max: number, credits: number): ApiParam => ({
+  name: "limit",
+  type: "integer",
+  required: false,
+  description: `Max items to return (default ${def}, max ${max}). Flat ${credits} credit${credits === 1 ? "" : "s"} when hasLiveTab is true; 0 credits when hasLiveTab is false.`,
+});
 /** Limit helper for published-flat list endpoints (path in \`source\`: native|extended). */
 const lpDual = (def: number, max: number, flat: number, _perResult?: number): ApiParam => ({
   name: "limit",
@@ -4065,10 +4088,13 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       description:
         "Optional topic seed for the Shorts recommendation sequence. Omit (or pass trending/shorts) for the default reel feed — not a keyword search.",
     },
-    lpFlat(20, 100, 2),
+    lpFlatWindow(20, 100, 2),
   ],
-  "youtube-channel-streams": [up(YT_CHANNEL), lpFlat(20, 200, 2)],
-  "youtube-hashtag-search": [qp("Hashtag with or without the # (min 2 characters)."), lp(20, 200)],
+  "youtube-channel-streams": [up(YT_CHANNEL), lpFlatOrZeroLiveTab(20, 200, 2)],
+  "youtube-hashtag-search": [
+    qp("Hashtag with or without the # (min 2 characters)."),
+    lpWindow(20, 200),
+  ],
   "youtube-comment-replies": [up(YT_VIDEO), cid(), lpFlat(50, 500, 2)],
   "youtube-channel-playlists": [up(YT_CHANNEL), lpFlat(20, 200, 2), CURSOR],
   "youtube-community-posts": [
@@ -7119,6 +7145,8 @@ const FIELD_DESCS: Record<string, string> = {
   endFormatted: "Segment end as M:SS or H:MM:SS.",
   hasLiveTab:
     "Whether the YouTube channel exposes a Live tab. False ⇒ channel-streams returns no rows (not Videos fallthrough) and bills 0 credits.",
+  liveStatus:
+    'Broadcast state on channel-streams rows: "live" | "upcoming" | "past". Complements hasLiveTab on the envelope.',
   productType: "Platform product type (e.g. clips, feed). Null when not applicable (Image/Sidecar) — never an empty string.",
   pollOptions:
     "Poll choices when postType is poll. Each item has text, voteCount (null when YouTube gates counts behind sign-in), and percentage.",

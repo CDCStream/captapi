@@ -3,7 +3,14 @@
 from __future__ import annotations
 
 from app.routers.youtube import _merged_coverage_seconds, _process_sponsor_segments
-from app.services.youtube_native import _lockup_result_type, collect_playlist_cards
+from app.services.youtube_native import (
+    _lockup_result_type,
+    apply_channel_stream_row,
+    collect_playlist_cards,
+    finalize_channel_list_card,
+    format_duration_hms,
+    stream_live_status,
+)
 
 
 def test_channel_playlist_cards_include_id() -> None:
@@ -34,6 +41,55 @@ def test_lockup_types_from_published_labels() -> None:
     assert _lockup_result_type("Streamed 1 hour ago") == "stream"
     assert _lockup_result_type("Scheduled for 8/12/26, 10:15 AM") == "upcoming"
     assert _lockup_result_type("4 days ago") == "video"
+    assert _lockup_result_type(None, badges=["LIVE"]) == "live"
+
+
+def test_zero_duration_is_null_not_midnight() -> None:
+    assert format_duration_hms(0) is None
+    row = finalize_channel_list_card(
+        vid="abcdefghijk",
+        details={
+            "title": "lofi",
+            "durationSeconds": 0,
+            "viewCount": 100,
+            "viewCountIsApproximate": False,
+            "channelId": "UCxxxxxxxxxxxxxxxxxxxxxx",
+            "channelName": "Lofi Girl",
+        },
+        shelf={"type": "video", "publishedTimeText": "Streamed 2 days ago"},
+        content_type="video",
+    )
+    assert row["durationSeconds"] is None
+    assert row["durationFormatted"] is None
+
+
+def test_stream_live_status_and_row_semantics() -> None:
+    assert stream_live_status(details={"liveStatus": "live"}) == "live"
+    assert stream_live_status(details={"liveStatus": "upcoming"}) == "upcoming"
+    assert stream_live_status(details={"liveStatus": "ended"}) == "past"
+    assert stream_live_status(details=None, shelf_type="video") == "past"
+
+    row = apply_channel_stream_row(
+        {
+            "type": "video",
+            "durationSeconds": 0,
+            "durationFormatted": "00:00:00",
+        },
+        details={"liveStatus": "ended"},
+        shelf={"type": "video"},
+    )
+    assert row["liveStatus"] == "past"
+    assert row["type"] == "stream"
+    assert row["durationSeconds"] is None
+    assert row["durationFormatted"] is None
+
+    live = apply_channel_stream_row(
+        {"type": "live", "durationSeconds": None},
+        details={"liveStatus": "live"},
+        shelf={"type": "live"},
+    )
+    assert live["liveStatus"] == "live"
+    assert live["type"] == "stream"
 
 
 def test_sponsor_segments_sorted_min_votes_and_coverage() -> None:

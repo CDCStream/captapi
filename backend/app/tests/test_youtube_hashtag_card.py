@@ -20,7 +20,9 @@ def test_yt_hashtag_card_type_from_shorts_url() -> None:
     assert card["id"] == "hwf0tDWlP7Q"
     assert "channelId" not in card
     assert "channelName" not in card
-    assert card["channel"] == {"id": "UCabc", "title": "Ch"}
+    assert card["channel"]["id"] == "UCabc"
+    assert card["channel"]["title"] == "Ch"
+    assert card["channel"]["url"] == "https://www.youtube.com/channel/UCabc"
     assert card["viewCount"] == 1_200_000
     assert card["viewCountIsApproximate"] is True
 

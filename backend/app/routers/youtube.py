@@ -42,6 +42,7 @@ from app.services.youtube_native import (
     comment_replies_native,
     comments_native,
     community_posts_native,
+    apply_channel_stream_row,
     enrich_short_cards,
     enrich_video_cards,
     finalize_channel_list_card,
@@ -2373,9 +2374,8 @@ def _normalize_trending_topic_q(q: str | None) -> str | None:
     "/trending-shorts",
     summary="Trending YouTube Shorts",
     description=(
-        "Shorts recommendation sequence (reel_watch_sequence). Returns a fixed "
-        "window up to ``limit`` — no ``hasMore`` / ``nextCursor`` (unlike "
-        "channel-videos / channel-shorts / search). Flat 2 credits."
+        "Shorts recommendation sequence (reel_watch_sequence). Returns a single "
+        "window; use limit to size it. No cursor. Flat 2 credits."
     ),
 )
 async def youtube_trending_shorts(
@@ -2393,7 +2393,10 @@ async def youtube_trending_shorts(
         20,
         ge=1,
         le=100,
-        description="How many Shorts to return (1–100). Fixed window — no cursor. Flat 2 credits.",
+        description=(
+            "How many Shorts to return (1–100). Returns a single window; use "
+            "limit to size it. No cursor. Flat 2 credits."
+        ),
     ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
@@ -2577,7 +2580,8 @@ async def youtube_channel_streams(
 
     Channels without a Live tab (e.g. MrBeast) return ``hasLiveTab:false`` and
     an empty list — **0 credits** (tab check only; no stream fetch). When the
-    Live tab exists, flat 2 credits on the native path.
+    Live tab exists, each row includes ``liveStatus`` (live|upcoming|past) and
+    honest durations (null when YouTube reports 0). Flat 2 credits on native.
     """
     url = normalize_youtube_channel_url(url)
     settings = get_settings()
@@ -2603,7 +2607,9 @@ async def youtube_channel_streams(
             )
             native_streams = page.get("items") or []
             if native_streams:
-                enriched = await enrich_video_cards(native_streams[:limit])
+                enriched = await enrich_video_cards(
+                    native_streams[:limit], stream_semantics=True
+                )
                 ctx["source"] = "direct"
                 return {
                     "url": url,
@@ -2618,7 +2624,10 @@ async def youtube_channel_streams(
                 {"startUrls": [{"url": _channel_tab_url(url, "streams")}], "maxResults": limit},
                 max_items=limit,
             )
-            streams = [_video_card(v) for v in items[:limit]]
+            streams = [
+                apply_channel_stream_row(_video_card(v), details=None, shelf=v)
+                for v in items[:limit]
+            ]
             ctx["source"] = "apify"
             return {
                 "url": url,
@@ -2629,7 +2638,7 @@ async def youtube_channel_streams(
 
         data = await cached_or_run(
             endpoint="youtube.channel-streams",
-            params={"url": url, "limit": limit, "v": 7},
+            params={"url": url, "limit": limit, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2660,13 +2669,20 @@ def _yt_hashtag_result_card(card: dict[str, Any]) -> dict[str, Any]:
     channel = card.get("channel") if isinstance(card.get("channel"), dict) else {}
     channel_id = safe_str(channel.get("id") or card.get("channelId"))
     channel_title = safe_str(channel.get("title") or card.get("channelName"))
+    channel_handle = safe_str(channel.get("handle")) if isinstance(channel, dict) else None
+    channel_url = safe_str(channel.get("url")) if isinstance(channel, dict) else None
+    if not channel_url and channel_id:
+        channel_url = f"https://www.youtube.com/channel/{channel_id}"
+    elif not channel_url and channel_handle:
+        handle = channel_handle if channel_handle.startswith("@") else f"@{channel_handle}"
+        channel_url = f"https://www.youtube.com/{handle}"
     nested = {
         k: v
         for k, v in {
             "id": channel_id,
             "title": channel_title,
-            "handle": channel.get("handle") if isinstance(channel, dict) else None,
-            "url": channel.get("url") if isinstance(channel, dict) else None,
+            "handle": channel_handle,
+            "url": channel_url,
             "thumbnail": channel.get("thumbnail") if isinstance(channel, dict) else None,
         }.items()
         if v not in (None, "")
@@ -2711,13 +2727,21 @@ def _yt_hashtag_result_card(card: dict[str, Any]) -> dict[str, Any]:
         "search. Titles often omit the #tag (hashtag may live only in the "
         "description); membership is the hashtag page itself. Each result "
         "includes type (video|short|live), id, channel{}, and "
-        "viewCountIsApproximate. YouTube's hashtag shelf is a fixed first "
-        "window (no continuation token) — billed per returned result."
+        "viewCountIsApproximate. Returns a single window; use limit to size "
+        "it. No cursor. Billed per returned result."
     ),
 )
 async def youtube_hashtag_search(
     q: str = Query(..., min_length=2, description="Hashtag (with or without #)"),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(
+        20,
+        ge=1,
+        le=200,
+        description=(
+            "Max results (1–200). Returns a single window; use limit to size "
+            "it. No cursor. Billed per result."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
