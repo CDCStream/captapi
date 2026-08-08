@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-08",
     category: "fix",
+    title: "YouTube channel-shorts cursor param + drop dead likeCount on list cards",
+    description:
+      "Playground and package catalogs expose cursor on channel-shorts (same round-trip as channel-videos). likeCount/likeCountText removed from both channel list shapes — they were null on every row; use video-details for likes. publishedTimeApprox stays only on comments/search.",
+    items: [
+      "channel-shorts: cursor in Playground + MCP/CLI/SDK catalogs (CS3)",
+      "Drop always-null likeCount/likeCountText from channel-videos and channel-shorts (CS4)",
+      "publishedTimeApprox audit: channel feeds use publishedAt only",
+    ],
+  },
+  {
+    publishedAt: "2026-08-08",
+    category: "fix",
     title: "YouTube channel-shorts paging + shared exact publishedAt with channel-videos",
     description:
       "channel-shorts gains cursor/nextCursor/hasMore (same as channel-videos). Both list endpoints now enrich via reel_item_watch for exact publishedAt (ANDROID omits microformat) and share one row shape — genre, badges, durationFormatted, commentCount*. publishedTimeApprox stays on comments/search only. shorts/video-details keeps defaultLanguage/defaultAudioLanguage as null; video-details timings unchanged.",

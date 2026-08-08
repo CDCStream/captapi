@@ -68,15 +68,16 @@ class YoutubeApi:
         """
         return self._t.get("/v1/youtube/search", {"q": q, "limit": limit, "cursor": cursor, "type": type_, "sortBy": sortBy, "uploadDate": uploadDate, "duration": duration, "region": region, "cache": cache})
 
-    def channel_videos(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Videos — List a channel's uploaded videos. (2 credits)
+    def channel_videos(self, *, url: str, limit: float | None = None, cursor: str | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Channel Videos — Channel uploads with cursor pagination. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param fast: Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/youtube/channel-videos", {"url": url, "limit": limit, "fast": fast, "cache": cache})
+        return self._t.get("/v1/youtube/channel-videos", {"url": url, "limit": limit, "cursor": cursor, "fast": fast, "cache": cache})
 
     def playlist_videos(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Playlist Videos — List videos in a YouTube playlist. (2 credits)
@@ -134,14 +135,15 @@ class YoutubeApi:
         """
         return self._t.get("/v1/youtube/shorts/comments", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
-    def channel_shorts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Shorts — List a channel's Shorts with player-enriched fields. (2 credits)
+    def channel_shorts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Channel Shorts — Channel Shorts with cursor pagination. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/youtube/channel-shorts", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/youtube/channel-shorts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def trending_shorts(self, *, q: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Trending Shorts — YouTube Shorts reel/trending feed (not a keyword search). (2 credits)
@@ -281,15 +283,16 @@ class AsyncYoutubeApi:
         """
         return await self._t.get("/v1/youtube/search", {"q": q, "limit": limit, "cursor": cursor, "type": type_, "sortBy": sortBy, "uploadDate": uploadDate, "duration": duration, "region": region, "cache": cache})
 
-    async def channel_videos(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Videos — List a channel's uploaded videos. (2 credits)
+    async def channel_videos(self, *, url: str, limit: float | None = None, cursor: str | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Channel Videos — Channel uploads with cursor pagination. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param fast: Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/youtube/channel-videos", {"url": url, "limit": limit, "fast": fast, "cache": cache})
+        return await self._t.get("/v1/youtube/channel-videos", {"url": url, "limit": limit, "cursor": cursor, "fast": fast, "cache": cache})
 
     async def playlist_videos(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Playlist Videos — List videos in a YouTube playlist. (2 credits)
@@ -347,14 +350,15 @@ class AsyncYoutubeApi:
         """
         return await self._t.get("/v1/youtube/shorts/comments", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
-    async def channel_shorts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Shorts — List a channel's Shorts with player-enriched fields. (2 credits)
+    async def channel_shorts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Channel Shorts — Channel Shorts with cursor pagination. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/youtube/channel-shorts", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/youtube/channel-shorts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def trending_shorts(self, *, q: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Trending Shorts — YouTube Shorts reel/trending feed (not a keyword search). (2 credits)

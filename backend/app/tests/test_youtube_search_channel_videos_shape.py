@@ -144,9 +144,10 @@ def test_channel_list_card_shared_keys_and_exact_published_at() -> None:
         "badges",
         "durationFormatted",
         "commentCount",
-        "likeCount",
     ):
         assert key in video
     assert "publishedTimeApprox" not in video
+    assert "likeCount" not in video
+    assert "likeCountText" not in video
     assert video["publishedAt"] == "2026-07-25T09:00:05-07:00"
     assert short["url"].endswith("/shorts/abcdefghijk")

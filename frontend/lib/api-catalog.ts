@@ -4009,7 +4009,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-shorts-summarizer": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-stats": [up(YT_SHORTS)],
   "youtube-shorts-comments": [up(YT_SHORTS), lpFlat(50, 500, 2), CURSOR, cacheP()],
-  "youtube-channel-shorts": [up(YT_CHANNEL), lpFlat(20, 200, 2), CURSOR],
+  "youtube-channel-shorts": [up(YT_CHANNEL), CURSOR, lpFlat(20, 200, 2)],
   "youtube-trending-shorts": [
     {
       name: "q",

@@ -1956,7 +1956,7 @@ async def youtube_channel_videos(
             native_videos = page.get("items") or []
             next_cursor = safe_str(page.get("nextCursor")) or None
             if native_videos:
-                # Player enrich: exact viewCount + ISO publishedTimeApprox.
+                # Player enrich: exact viewCount + publishedAt via reel_item_watch.
                 enriched = await enrich_video_cards(native_videos[:limit])
                 ctx["source"] = "direct"
                 return {
@@ -1991,7 +1991,7 @@ async def youtube_channel_videos(
                 "limit": limit,
                 "cursor": cursor or "",
                 "fast": fast,
-                "v": 11,
+                "v": 12,
             },
             runner=_run,
             ctx=ctx,
@@ -2513,7 +2513,7 @@ async def youtube_channel_shorts(
 
         data = await cached_or_run(
             endpoint="youtube.channel-shorts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 8},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 9},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -203,7 +203,7 @@
     "name": "YouTube Channel Videos",
     "path": "/v1/youtube/channel-videos",
     "credits": 2,
-    "summary": "List a channel's uploaded videos.",
+    "summary": "Channel uploads with cursor pagination — exact publishedAt via reel_item_watch.",
     "params": [
       {
         "name": "url",
@@ -215,7 +215,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "fast",
@@ -417,7 +423,7 @@
     "name": "YouTube Channel Shorts",
     "path": "/v1/youtube/channel-shorts",
     "credits": 2,
-    "summary": "List a channel's Shorts with player-enriched fields.",
+    "summary": "Channel Shorts with cursor pagination — same row shape as channel-videos.",
     "params": [
       {
         "name": "url",
@@ -429,7 +435,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",

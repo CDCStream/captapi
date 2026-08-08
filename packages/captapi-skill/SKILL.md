@@ -97,14 +97,14 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `youtube_comments` | `/v1/youtube/comments` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
 | `youtube_channel_details` | `/v1/youtube/channel-details` | `url` (string), `cache`? (boolean) | 1 |
 | `youtube_search` | `/v1/youtube/search` | `q` (string), `limit`? (number), `cursor`? (string), `type`? (string), `sortBy`? (string), `uploadDate`? (string), `duration`? (string), `region`? (string), `cache`? (boolean) | 2 |
-| `youtube_channel_videos` | `/v1/youtube/channel-videos` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 2 |
+| `youtube_channel_videos` | `/v1/youtube/channel-videos` | `url` (string), `limit`? (number), `cursor`? (string), `fast`? (boolean), `cache`? (boolean) | 2 |
 | `youtube_playlist_videos` | `/v1/youtube/playlist-videos` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 2 |
 | `youtube_playlist` | `/v1/youtube/playlist` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 2 |
 | `youtube_shorts_transcript` | `/v1/youtube/shorts/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 1 |
 | `youtube_shorts_summarize` | `/v1/youtube/shorts/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 3 |
 | `youtube_shorts_details` | `/v1/youtube/shorts/video-details` | `url` (string), `cache`? (boolean) | 1 |
 | `youtube_shorts_comments` | `/v1/youtube/shorts/comments` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
-| `youtube_channel_shorts` | `/v1/youtube/channel-shorts` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `youtube_channel_shorts` | `/v1/youtube/channel-shorts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
 | `youtube_trending_shorts` | `/v1/youtube/trending-shorts` | `q`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `youtube_channel_streams` | `/v1/youtube/channel-streams` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `youtube_hashtag_search` | `/v1/youtube/hashtag-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 20 |

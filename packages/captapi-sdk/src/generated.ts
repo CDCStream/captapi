@@ -68,8 +68,10 @@ export interface YoutubeSearchParams {
 export interface YoutubeChannelVideosParams {
   /** YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
+  /** Max items to return. Default 20, max 200. Flat 2 credits per call. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters. */
   fast?: boolean;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
@@ -137,8 +139,10 @@ export interface YoutubeShortsCommentsParams {
 export interface YoutubeChannelShortsParams {
   /** YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
+  /** Max items to return. Default 20, max 200. Flat 2 credits per call. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }

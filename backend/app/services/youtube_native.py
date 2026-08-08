@@ -1518,8 +1518,6 @@ def finalize_channel_list_card(
         "commentCount": None,
         "commentCountText": None,
         "commentCountIsApproximate": None,
-        "likeCount": None,
-        "likeCountText": None,
     }
 
     if not isinstance(details, dict):
@@ -1608,11 +1606,8 @@ def finalize_channel_list_card(
             out["commentCountIsApproximate"] = bool(
                 details.get("commentCountIsApproximate", True)
             )
-    if details.get("likeCount") is not None:
-        like = safe_int(details.get("likeCount"))
-        if like is not None:
-            out["likeCount"] = like
-            out["likeCountText"] = format_count_text(like)
+    # likeCount is not emitted on channel list cards — neither shelf nor the
+    # list enrich path exposes a reliable per-row like total (use video-details).
     return out
 
 
@@ -1676,28 +1671,6 @@ async def enrich_short_cards(
                     if cc is not None:
                         details["commentCount"] = cc
                         details["commentCountIsApproximate"] = cc_approx
-                    like = None
-                    for btn in walk_find(boot, "toggleButtonRenderer"):
-                        a11y = (
-                            ((btn.get("defaultText") or {}).get("accessibility") or {}).get(
-                                "accessibilityData"
-                            )
-                            or {}
-                        )
-                        label = text_of(a11y) or text_of(btn.get("defaultText")) or ""
-                        if "like" in label.lower():
-                            like = parse_count_text(label)
-                            if like is not None:
-                                break
-                    if like is None:
-                        for vm in walk_find(boot, "likeButtonViewModel"):
-                            like = parse_count_text(vm.get("likeCountEntity")) or parse_count_text(
-                                vm
-                            )
-                            if like is not None:
-                                break
-                    if like is not None:
-                        details["likeCount"] = like
 
             return finalize_channel_list_card(
                 vid=vid, details=details, shelf=card, content_type="short"
