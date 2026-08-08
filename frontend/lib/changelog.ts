@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-08",
     category: "fix",
+    title: "YouTube channel-shorts paging + shared exact publishedAt with channel-videos",
+    description:
+      "channel-shorts gains cursor/nextCursor/hasMore (same as channel-videos). Both list endpoints now enrich via reel_item_watch for exact publishedAt (ANDROID omits microformat) and share one row shape — genre, badges, durationFormatted, commentCount*. publishedTimeApprox stays on comments/search only. shorts/video-details keeps defaultLanguage/defaultAudioLanguage as null; video-details timings unchanged.",
+    items: [
+      "channel-shorts: cursor ↔ nextCursor (CS1)",
+      "channel-videos uses reel_item_watch for exact publishedAt (CS2)",
+      "One finalize_channel_list_card shape across videos + shorts",
+      "shorts/video-details: defaultLanguage* null-stable; timings on video-details",
+    ],
+  },
+  {
+    publishedAt: "2026-08-08",
+    category: "fix",
     title: "YouTube search + channel-videos: cursor round-trip and channel subscriberCount",
     description:
       "Playground exposes cursor on both endpoints (pass nextCursor back). Dropped the continuationToken twin of nextCursor. Channel search rows parse subscriberCount when YouTube buries it in videoCountText. publishedTimeIsApproximate is null when there is no timestamp. Limit notes say flat 2 credits (not billed per result).",

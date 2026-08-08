@@ -367,13 +367,13 @@ const YOUTUBE: Spec[] = [
     path: "/v1/youtube/channel-videos",
     credits: 2,
     tagline:
-      "Channel uploads with cursor pagination — publishedTimeApprox + exact viewCount when the player enriches.",
+      "Channel uploads with cursor pagination — exact publishedAt from reel_item_watch (same as channel-shorts).",
     longDescription:
-      "Send a channel URL, @handle, or UC… id and get uploads as clean JSON with nextCursor + hasMore. Pass the returned nextCursor as the cursor query param for page 2+. Each row is player-enriched: exact viewCount + viewCountIsApproximate (false when exact; true when only a compact shelf label was available), publishedTimeApprox + publishedTimeIsApproximate + publishedTimeText, durationSeconds, thumbnailUrl, and nested channel{} (no flat channelId/channelName twins). Optional fast=true uses YouTube RSS (exact publish time, thinner metadata, no cursor). Flat 2 credits on the native path.",
+      "Send a channel URL, @handle, or UC… id and get uploads as clean JSON with nextCursor + hasMore. Pass nextCursor as cursor for page 2+. Each row shares the channel-shorts shape: exact publishedAt from reel/reel_item_watch microformat (not publishedTimeApprox), publishedTimeText from the shelf label, viewCount + viewCountIsApproximate, durationSeconds + durationFormatted, genre, badges, commentCount trio (null when not hydrated), thumbnailUrl, and nested channel{}. Optional fast=true uses YouTube RSS (exact publishedAt, thinner metadata, no cursor). Flat 2 credits on the native path.",
     delivers: [
       "cursor ↔ nextCursor + hasMore (zero id overlap across pages)",
-      "publishedTimeApprox + publishedTimeIsApproximate",
-      "viewCountIsApproximate false on exact player rows",
+      "exact publishedAt via reel_item_watch (same source as channel-shorts)",
+      "Shared row shape with channel-shorts (genre, badges, durationFormatted, commentCount*)",
       "channel{} only — drop flat channel* twins",
     ],
   },
@@ -414,7 +414,7 @@ const YOUTUBE: Spec[] = [
     credits: 1,
     tagline: "YouTube Short metadata — same schema as Video Details, with isShort:true; long-form videos get HTTP 422.",
     longDescription:
-      "Same field schema as YouTube Video Details (title, channel, duration, view/like/comment counts, tags, …) but scoped to Shorts: response always includes platform, isShort:true, durationSeconds + durationFormatted, and a youtube.com/shorts/{id} URL. Uses reel_item_watch for publishDate / description / @handle (ANDROID player often omits Shorts microformat). Thumbnails prefer vertical / channel covers over landscape frame-2 stills. commentCountIsApproximate is true when YouTube only exposes a compact total (e.g. 11K→11000). genre / categoryId / isFamilySafe / defaultLanguage / defaultAudioLanguage are omitted when Shorts microformat does not expose them (not returned as null). Videos longer than 3 minutes — even if pasted as /shorts/{id} — return HTTP 422; use Video Details for those. Flat 1 credit.",
+      "Same field schema as YouTube Video Details (title, channel, duration, view/like/comment counts, tags, timings.path, …) but scoped to Shorts: response always includes platform, isShort:true, durationSeconds + durationFormatted, and a youtube.com/shorts/{id} URL. Uses reel_item_watch for publishDate / description / @handle (ANDROID player often omits Shorts microformat). Thumbnails prefer vertical / channel covers over landscape frame-2 stills. commentCountIsApproximate is true when YouTube only exposes a compact total (e.g. 11K→11000). defaultLanguage / defaultAudioLanguage are present (null when YouTube omits them). genre / categoryId / isFamilySafe are omitted when unavailable. Videos longer than 3 minutes — even if pasted as /shorts/{id} — return HTTP 422; use Video Details for those. Flat 1 credit.",
     delivers: [
       "Same schema as Video Details + isShort: true + platform",
       "publishedAt / description / channelHandle from reel_item_watch",
@@ -447,9 +447,15 @@ const YOUTUBE: Spec[] = [
     method: "GET",
     path: "/v1/youtube/channel-shorts",
     credits: 2,
-    tagline: "Channel Shorts shelf with player-enriched fields (SC channel/shorts parity).",
+    tagline:
+      "Channel Shorts with cursor pagination — same row shape as channel-videos (exact publishedAt).",
     longDescription:
-      "Lists a channel's Shorts tab, then fills each row via InnerTube player — nested channel{}, exact viewCount/viewCountText + viewCountIsApproximate, thumbnailUrl (prefers cover over frame-2 stills), publishedAt, durationSeconds/durationFormatted, description, genre, likeCount/commentCount (+ commentCountIsApproximate) when exposed. Flat 2 credits on the native path (was incorrectly 1/result at 20). Not an alias of Video Details.",
+      "Lists a channel's Shorts tab with nextCursor + hasMore (same cursor as channel-videos). Each row is player-enriched via reel_item_watch + ANDROID: exact publishedAt, publishedTimeText when the shelf exposes a relative label, viewCount + viewCountIsApproximate, durationSeconds/durationFormatted, genre, badges, commentCount trio, thumbnailUrl (prefers cover over frame-2 stills), and nested channel{}. Flat 2 credits on the native path. Not an alias of Video Details.",
+    delivers: [
+      "cursor ↔ nextCursor + hasMore (zero id overlap across pages)",
+      "exact publishedAt from reel_item_watch microformat",
+      "Shared row shape with channel-videos",
+    ],
   },
   {
     slug: "youtube-trending-shorts",
@@ -4003,7 +4009,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-shorts-summarizer": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-stats": [up(YT_SHORTS)],
   "youtube-shorts-comments": [up(YT_SHORTS), lpFlat(50, 500, 2), CURSOR, cacheP()],
-  "youtube-channel-shorts": [up(YT_CHANNEL), lpFlat(20, 200, 2)],
+  "youtube-channel-shorts": [up(YT_CHANNEL), lpFlat(20, 200, 2), CURSOR],
   "youtube-trending-shorts": [
     {
       name: "q",

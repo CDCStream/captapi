@@ -1387,11 +1387,12 @@ async def trending_shorts_native(
 
 
 async def short_details_via_reel_watch(video_id: str, norm_url: str) -> dict[str, Any] | None:
-    """Shorts-optimized details via ``reel/reel_item_watch`` (has microformat publishDate).
+    """Details via ``reel/reel_item_watch`` (microformat ``publishDate`` + genre).
 
-    ANDROID ``player`` often omits ``playerMicroformatRenderer`` for Shorts, which
-    is why shelf enrichment previously left ``publishedAt`` / ``genre`` null even
-    after a successful player call. WEB reel_item_watch returns both.
+    ANDROID ``player`` omits ``playerMicroformatRenderer`` for Shorts *and*
+    long-form uploads — that is why ``channel-videos`` used to keep only shelf
+    ``publishedTimeApprox`` while ``channel-shorts`` had exact ``publishedAt``.
+    ``reel_item_watch`` returns real upload timestamps (with offset) for both.
     """
     vid = (video_id or "").strip()
     if len(vid) != 11:
@@ -1471,46 +1472,117 @@ def merge_short_player_details(
     return out if out else None
 
 
-def _finalize_short_list_card(vid: str, details: dict[str, Any] | None) -> dict[str, Any]:
-    """Canonical Shorts list row — nested channel, no flat aliases / dead keys."""
+def finalize_channel_list_card(
+    *,
+    vid: str,
+    details: dict[str, Any] | None,
+    shelf: dict[str, Any] | None = None,
+    content_type: str = "video",
+) -> dict[str, Any]:
+    """One row shape for ``channel-videos`` / ``channel-shorts`` / streams.
+
+    Exact ``publishedAt`` from ``reel_item_watch`` microformat when available —
+    not ``publishedTimeApprox`` (that vocabulary stays on comments / search).
+    Shelf relative labels remain in ``publishedTimeText``. Shared nullable keys
+    (genre, badges, durationFormatted, commentCount*) are always present.
+    """
     from app.utils.media_urls import (
         canonicalize_youtube_channel_url,
         decode_youtube_handle,
     )
 
+    shelf = shelf if isinstance(shelf, dict) else {}
+    typ = safe_str(content_type) or safe_str(shelf.get("type")) or "video"
+    if typ == "short":
+        url = f"https://www.youtube.com/shorts/{vid}"
+    else:
+        url = safe_str(shelf.get("url")) or f"https://www.youtube.com/watch?v={vid}"
+
     out: dict[str, Any] = {
         "id": vid,
-        "url": f"https://www.youtube.com/shorts/{vid}",
-        "type": "short",
+        "url": url,
+        "type": typ,
+        "title": None,
+        "description": None,
+        "publishedAt": None,
+        "publishedTimeText": safe_str(shelf.get("publishedTimeText")),
+        "genre": None,
+        "badges": list(shelf.get("badges") or []),
+        "viewCount": None,
+        "viewCountText": None,
+        "viewCountIsApproximate": None,
+        "durationSeconds": None,
+        "durationFormatted": None,
+        "thumbnailUrl": thumbnail_url_for_video_id(vid),
+        "channel": None,
+        "commentCount": None,
+        "commentCountText": None,
+        "commentCountIsApproximate": None,
+        "likeCount": None,
+        "likeCountText": None,
     }
+
     if not isinstance(details, dict):
-        out["thumbnailUrl"] = thumbnail_url_for_video_id(vid)
+        if shelf.get("title"):
+            out["title"] = shelf.get("title")
+        if shelf.get("viewCount") is not None:
+            _stamp_count_fields(
+                out,
+                count=safe_int(shelf.get("viewCount")),
+                approximate=bool(shelf.get("viewCountIsApproximate")),
+            )
+        if shelf.get("durationSeconds") is not None:
+            dur = safe_int(shelf.get("durationSeconds"))
+            out["durationSeconds"] = dur
+            if dur is not None:
+                out["durationFormatted"] = format_duration_hms(dur)
+        if shelf.get("thumbnailUrl"):
+            out["thumbnailUrl"] = shelf.get("thumbnailUrl")
+        if isinstance(shelf.get("channel"), dict):
+            out["channel"] = shelf.get("channel")
         return out
 
     for key in ("title", "description", "publishedAt", "genre"):
         val = details.get(key)
         if val not in (None, "", []):
             out[key] = val
-    tags = details.get("tags") or details.get("keywords")
-    if isinstance(tags, list) and tags:
-        out["keywords"] = tags
+    if out.get("title") in (None, "") and shelf.get("title"):
+        out["title"] = shelf.get("title")
 
     exact_views = safe_int(details.get("viewCount"))
     if exact_views is not None:
         out["viewCount"] = exact_views
         out["viewCountText"] = format_count_text(exact_views)
         out["viewCountIsApproximate"] = bool(details.get("viewCountIsApproximate"))
+    elif shelf.get("viewCount") is not None:
+        _stamp_count_fields(
+            out,
+            count=safe_int(shelf.get("viewCount")),
+            approximate=bool(shelf.get("viewCountIsApproximate")),
+        )
 
     dur = safe_int(details.get("durationSeconds"))
+    if dur is None:
+        dur = safe_int(shelf.get("durationSeconds"))
     if dur is not None:
         out["durationSeconds"] = dur
         out["durationFormatted"] = format_duration_hms(dur)
 
-    thumbs, thumb_url = prefer_short_thumbnails(
-        vid, details.get("thumbnails"), details.get("thumbnailUrl")
-    )
-    out["thumbnailUrl"] = thumb_url or thumbnail_url_for_video_id(vid)
-    # List cards keep a single thumbnailUrl (not the full thumbnails[] ladder).
+    if typ == "short":
+        _thumbs, thumb_url = prefer_short_thumbnails(
+            vid, details.get("thumbnails"), details.get("thumbnailUrl")
+        )
+        out["thumbnailUrl"] = (
+            thumb_url
+            or safe_str(shelf.get("thumbnailUrl"))
+            or thumbnail_url_for_video_id(vid)
+        )
+    else:
+        out["thumbnailUrl"] = (
+            safe_str(details.get("thumbnailUrl"))
+            or safe_str(shelf.get("thumbnailUrl"))
+            or thumbnail_url_for_video_id(vid)
+        )
 
     handle = decode_youtube_handle(details.get("channelHandle"))
     channel_id = safe_str(details.get("channelId"))
@@ -1518,14 +1590,15 @@ def _finalize_short_list_card(vid: str, details: dict[str, Any] | None) -> dict[
         details.get("channelUrl"), channel_id=channel_id, handle=handle
     )
     channel_title = safe_str(details.get("channelName"))
-    if channel_id or channel_title or handle or channel_url:
-        channel: dict[str, Any] = {
-            "id": channel_id,
-            "title": channel_title,
-            "handle": handle,
-            "url": channel_url,
-        }
-        out["channel"] = {k: v for k, v in channel.items() if v not in (None, "")}
+    shelf_ch = shelf.get("channel") if isinstance(shelf.get("channel"), dict) else {}
+    channel: dict[str, Any] = {
+        "id": channel_id or shelf_ch.get("id"),
+        "title": channel_title or shelf_ch.get("title"),
+        "handle": handle or shelf_ch.get("handle"),
+        "url": channel_url or shelf_ch.get("url"),
+        "thumbnail": shelf_ch.get("thumbnail"),
+    }
+    out["channel"] = {k: v for k, v in channel.items() if v not in (None, "")} or None
 
     if details.get("commentCount") is not None:
         cc = safe_int(details.get("commentCount"))
@@ -1541,6 +1614,18 @@ def _finalize_short_list_card(vid: str, details: dict[str, Any] | None) -> dict[
             out["likeCount"] = like
             out["likeCountText"] = format_count_text(like)
     return out
+
+
+def _finalize_short_list_card(
+    vid: str,
+    details: dict[str, Any] | None,
+    *,
+    shelf: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Backward-compatible alias → ``finalize_channel_list_card`` (type=short)."""
+    return finalize_channel_list_card(
+        vid=vid, details=details, shelf=shelf, content_type="short"
+    )
 
 
 async def enrich_short_cards(
@@ -1614,7 +1699,9 @@ async def enrich_short_cards(
                     if like is not None:
                         details["likeCount"] = like
 
-            return _finalize_short_list_card(vid, details)
+            return finalize_channel_list_card(
+                vid=vid, details=details, shelf=card, content_type="short"
+            )
 
     return list(await asyncio.gather(*[_one(c) for c in cards]))
 
@@ -1623,11 +1710,13 @@ async def enrich_video_cards(
     cards: list[dict[str, Any]],
     *,
     concurrency: int = 6,
+    with_engagement: bool = False,
 ) -> list[dict[str, Any]]:
-    """Player-enrich long-form / stream list rows (exact views, ISO publishedAt).
+    """Player-enrich long-form / stream list rows — same source as channel-shorts.
 
-    Same dual-field pattern as ``enrich_short_cards`` but uses the watch player
-    (not reel_item_watch). Preserves card ``type`` (video|stream|upcoming|live).
+    ``reel_item_watch`` supplies exact ``publishedAt`` / genre (ANDROID omits
+    microformat). ANDROID still wins on engagement counts. Row shape matches
+    ``enrich_short_cards`` via ``finalize_channel_list_card``.
     """
     if not cards:
         return cards
@@ -1640,47 +1729,35 @@ async def enrich_video_cards(
                 m = re.search(r"(?:shorts/|v=|youtu\.be/)([\w-]{11})", str(card.get("url")))
                 vid = m.group(1) if m else None
             if not vid:
-                return card
-            url = safe_str(card.get("url")) or f"https://www.youtube.com/watch?v={vid}"
-            out = {**card, "id": vid, "url": url}
-            out["thumbnailUrl"] = out.get("thumbnailUrl") or thumbnail_url_for_video_id(vid)
-            details = await video_details_native(vid, url)
-            if not isinstance(details, dict):
-                return finalise_youtube_list_card(out)
-            exact_views = safe_int(details.get("viewCount"))
-            if exact_views is not None:
-                _stamp_count_fields(out, count=exact_views, approximate=False)
-            for src, dest in (
-                ("title", "title"),
-                ("description", "description"),
-                ("publishedAt", "publishedTimeApprox"),
-                ("durationSeconds", "durationSeconds"),
-                ("thumbnailUrl", "thumbnailUrl"),
-            ):
-                val = details.get(src)
-                if val not in (None, "", []):
-                    out[dest] = val
-            if details.get("publishedAt"):
-                # Player microformat publishDate is observed, not derived.
-                out["publishedTimeIsApproximate"] = False
-            ch = out.get("channel") if isinstance(out.get("channel"), dict) else {}
-            out["channel"] = {
-                "id": details.get("channelId") or ch.get("id"),
-                "title": details.get("channelName") or ch.get("title"),
-                "handle": details.get("channelHandle") or ch.get("handle"),
-                "url": details.get("channelUrl") or ch.get("url"),
-                "thumbnail": ch.get("thumbnail"),
-            }
-            # Keep relative label when player only gave ISO.
-            if out.get("publishedTimeApprox") and not out.get("publishedTimeText"):
-                _, rel = published_fields(
-                    card.get("publishedTimeText")
-                    or card.get("publishedTimeApprox")
-                    or card.get("publishedAt")
+                return finalize_channel_list_card(
+                    vid=safe_str(card.get("id")) or "",
+                    details=None,
+                    shelf=card,
+                    content_type=safe_str(card.get("type")) or "video",
                 )
-                if rel:
-                    out["publishedTimeText"] = rel
-            return finalise_youtube_list_card(out)
+            url = safe_str(card.get("url")) or f"https://www.youtube.com/watch?v={vid}"
+            typ = safe_str(card.get("type")) or "video"
+            reel, android = await asyncio.gather(
+                short_details_via_reel_watch(vid, url),
+                video_details_native(vid, url),
+            )
+            details = merge_short_player_details(android, reel)
+            if details is None and isinstance(reel, dict):
+                details = reel
+            if details is None and isinstance(android, dict):
+                details = android
+
+            if with_engagement and isinstance(details, dict):
+                boot = await innertube("next", {"videoId": vid}, timeout=12)
+                if boot is not None:
+                    cc, cc_approx = _comments_total_meta(boot)
+                    if cc is not None:
+                        details["commentCount"] = cc
+                        details["commentCountIsApproximate"] = cc_approx
+
+            return finalize_channel_list_card(
+                vid=vid, details=details, shelf=card, content_type=typ
+            )
 
     return list(await asyncio.gather(*[_one(c) for c in cards]))
 

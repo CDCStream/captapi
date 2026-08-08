@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from app.services.youtube_native import (
     _normalize_channel_renderer,
+    finalize_channel_list_card,
     finalise_youtube_list_card,
     normalize_video_renderer,
 )
@@ -61,6 +62,7 @@ def test_normalize_video_renderer_list_card_vocabulary() -> None:
     assert out["channel"]["id"] == "UCxxxxxxxxxxxxxxxxxxxxxx"
     assert out["viewCount"] == 1234
     assert out["viewCountIsApproximate"] is False
+    # Search / shelf cards still use the approximate vocabulary.
     assert out["publishedTimeApprox"] and out["publishedTimeIsApproximate"] is True
     assert "publishedAt" not in out
 
@@ -110,3 +112,41 @@ def test_channel_renderer_subscriber_count_from_swapped_fields() -> None:
     assert out["subscriberCount"] == 3_510_000
     assert out["publishedTimeApprox"] is None
     assert out["publishedTimeIsApproximate"] is None
+
+
+def test_channel_list_card_shared_keys_and_exact_published_at() -> None:
+    """CS2: channel-videos and channel-shorts share one shape with exact publishedAt."""
+    details = {
+        "title": "Hello",
+        "publishedAt": "2026-07-25T09:00:05-07:00",
+        "genre": "Entertainment",
+        "viewCount": 1000,
+        "viewCountIsApproximate": False,
+        "durationSeconds": 37,
+        "channelId": "UCxxxxxxxxxxxxxxxxxxxxxx",
+        "channelName": "Creator",
+        "channelHandle": "@Creator",
+        "commentCount": 12,
+        "commentCountIsApproximate": True,
+    }
+    shelf = {"publishedTimeText": "13 days ago", "badges": ["New"]}
+    video = finalize_channel_list_card(
+        vid="abcdefghijk", details=details, shelf=shelf, content_type="video"
+    )
+    short = finalize_channel_list_card(
+        vid="abcdefghijk", details=details, shelf=shelf, content_type="short"
+    )
+    assert set(video.keys()) == set(short.keys())
+    for key in (
+        "publishedAt",
+        "publishedTimeText",
+        "genre",
+        "badges",
+        "durationFormatted",
+        "commentCount",
+        "likeCount",
+    ):
+        assert key in video
+    assert "publishedTimeApprox" not in video
+    assert video["publishedAt"] == "2026-07-25T09:00:05-07:00"
+    assert short["url"].endswith("/shorts/abcdefghijk")

@@ -43,6 +43,7 @@ from app.services.youtube_native import (
     community_posts_native,
     enrich_short_cards,
     enrich_video_cards,
+    finalize_channel_list_card,
     extract_initial_json,
     find_continuation_token,
     format_duration_hms,
@@ -323,27 +324,21 @@ async def _youtube_feed_videos(feed_url: str, limit: int) -> list[dict[str, Any]
         if dur_el is not None and dur_el.get("seconds") is not None:
             duration = safe_int(dur_el.get("seconds"))
         videos.append(
-            finalise_youtube_list_card(
-                {
-                    "id": video_id,
-                    "url": f"https://www.youtube.com/watch?v={video_id}" if video_id else "",
+            finalize_channel_list_card(
+                vid=video_id or "",
+                details={
                     "title": title,
-                    "publishedTimeApprox": published,
-                    "publishedTimeIsApproximate": False,
+                    "publishedAt": published,
                     "viewCount": views,
                     "viewCountIsApproximate": False,
                     "durationSeconds": duration,
-                    "thumbnailUrl": (
-                        f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg" if video_id else ""
-                    ),
-                    "channel": {
-                        "id": None,
-                        "title": channel_name,
-                        "handle": None,
-                        "url": None,
-                        "thumbnail": None,
-                    },
-                }
+                    "channelName": channel_name,
+                },
+                shelf={
+                    "url": f"https://www.youtube.com/watch?v={video_id}" if video_id else "",
+                    "badges": [],
+                },
+                content_type="video",
             )
         )
     return videos
@@ -627,12 +622,11 @@ def _is_youtube_short_payload(details: dict[str, Any], *, input_url: str) -> boo
 # Microformat fields often absent on Shorts even when reel_item_watch succeeds
 # for publishDate/handle. Omit (do not null) when unavailable — matches the
 # transcript contract: omit N/A, null only for failed extract.
+# defaultLanguage / defaultAudioLanguage stay as null (video-details parity).
 _SHORTS_OMIT_IF_NULL = (
     "genre",
     "categoryId",
     "isFamilySafe",
-    "defaultLanguage",
-    "defaultAudioLanguage",
 )
 
 
@@ -673,6 +667,10 @@ def _stamp_short_fields(details: dict[str, Any], video_id: str) -> dict[str, Any
     for key in _SHORTS_OMIT_IF_NULL:
         if out.get(key) is None:
             out.pop(key, None)
+    # Same keys as /video-details — null when YouTube omits them for a Short.
+    for key in ("defaultLanguage", "defaultAudioLanguage"):
+        if key not in out:
+            out[key] = None
     return out
 
 
@@ -1594,6 +1592,10 @@ def _finalise_youtube_video_details(
         "path": path,
         "watchAttempts": int(watch_attempts),
     }
+    # Stable keys with shorts/video-details (null when YouTube omits).
+    for key in ("defaultLanguage", "defaultAudioLanguage"):
+        if key not in out:
+            out[key] = None
     return out
 
 
@@ -1805,7 +1807,7 @@ async def youtube_video_details(
 
         data = await cached_or_run(
             endpoint="youtube.video-details",
-            params={"url": norm_url, "v": 7},
+            params={"url": norm_url, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1989,7 +1991,7 @@ async def youtube_channel_videos(
                 "limit": limit,
                 "cursor": cursor or "",
                 "fast": fast,
-                "v": 10,
+                "v": 11,
             },
             runner=_run,
             ctx=ctx,
@@ -2437,13 +2439,21 @@ async def youtube_trending_shorts(
 async def youtube_channel_shorts(
     url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     """Channel Shorts shelf + player enrich (SC ``/v1/youtube/channel/shorts`` parity).
 
-    Flat 2 credits on the native path — shelf cards alone omit publish/duration/
-    thumbnail nesting; we fill those (and exact viewCount) via InnerTube player.
+    Same cursor pagination as ``/channel-videos``. Flat 2 credits on the native
+    path — shelf cards alone omit publish/duration/thumbnail nesting; we fill
+    those (and exact viewCount) via ``reel_item_watch`` + ANDROID player.
     """
     url = normalize_youtube_channel_url(url)
     settings = get_settings()
@@ -2457,13 +2467,29 @@ async def youtube_channel_shorts(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             page = await channel_tab_native(
-                _channel_tab_url(url, "shorts"), limit, shorts=True, tab="shorts"
+                _channel_tab_url(url, "shorts"),
+                limit,
+                shorts=True,
+                tab="shorts",
+                cursor=cursor,
             )
             native_shorts = page.get("items") or []
+            next_cursor = safe_str(page.get("nextCursor")) or None
             if native_shorts:
                 enriched = await enrich_short_cards(native_shorts[:limit])
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(enriched), "shorts": enriched}
+                return {
+                    "url": url,
+                    "totalReturned": len(enriched),
+                    "nextCursor": next_cursor,
+                    "hasMore": next_cursor is not None,
+                    "shorts": enriched,
+                }
+            if cursor:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid or expired cursor. Start a new request without cursor.",
+                )
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -2477,11 +2503,17 @@ async def youtube_channel_shorts(
                 if vid and not row.get("thumbnailUrl"):
                     row["thumbnailUrl"] = thumbnail_url_for_video_id(vid)
             ctx["source"] = "apify"
-            return {"url": url, "totalReturned": len(shorts), "shorts": shorts}
+            return {
+                "url": url,
+                "totalReturned": len(shorts),
+                "nextCursor": None,
+                "hasMore": False,
+                "shorts": shorts,
+            }
 
         data = await cached_or_run(
             endpoint="youtube.channel-shorts",
-            params={"url": url, "limit": limit, "v": 7},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2745,7 +2777,7 @@ async def shorts_details(
 
         data = await cached_or_run(
             endpoint="youtube.shorts-video-details",
-            params={"url": shorts_url, "v": 4},
+            params={"url": shorts_url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
