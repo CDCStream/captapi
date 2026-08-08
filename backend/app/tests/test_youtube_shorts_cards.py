@@ -54,8 +54,9 @@ def test_normalize_shorts_lockup_uses_thumbnail_view_model_and_id_fallback():
     assert card["thumbnailUrl"]
     assert "Df5Y-2ndQyU" in card["thumbnailUrl"]
     assert card["viewCount"] == 17000
-    assert card.get("viewCountApproximate") is True
-    assert card["viewCountInt"] == 17000
+    assert card.get("viewCountIsApproximate") is True
+    assert "viewCountInt" not in card
+    assert "viewCountApproximate" not in card
 
 
 def test_normalize_shorts_lockup_id_fallback_when_no_thumb_tree():
@@ -75,7 +76,7 @@ def test_normalize_shorts_lockup_id_fallback_when_no_thumb_tree():
     assert card is not None
     assert card["thumbnailUrl"] == thumbnail_url_for_video_id("AAAAAAAAAAA")
     assert card["viewCount"] == 1234
-    assert card.get("viewCountApproximate") is not True
+    assert card.get("viewCountIsApproximate") is False
 
 
 def test_normalize_reel_item_thumb_fallback():

@@ -350,12 +350,12 @@ const YOUTUBE: Spec[] = [
     tagline:
       "YouTube search with cursor pagination — typed hits, ids, canonical URLs, filters (2 credits/page).",
     longDescription:
-      "Search YouTube by keyword and get a cursor-paginated page of clean JSON: results[] with type (video|short|channel|playlist|live), id, canonical url (no radio/mix junk), title, publishedAt, viewCount + viewCountText/viewCountInt (compact label + parsed number), durationSeconds, thumbnailUrl, channelName, channelId, channel{id,title,handle,url,thumbnail}, and badges[]. Partitioned as videos[] / shorts[] / channels[] / playlists[] / lives[] / shelves[]. Filter with type, sortBy (relevance|date|views|rating), uploadDate (today|this_week|this_month|this_year), duration (under_4|4_20|over_20 — applies to long-form videos, not Shorts), and region. nextCursor / continuationToken for the next page. Flat 2 credits per page. cache=true uses the 24h shared cache.",
+      "Search YouTube by keyword and get a cursor-paginated page of clean JSON: results[] with type (video|short|channel|playlist|live), id, canonical url, title, publishedTimeApprox + publishedTimeIsApproximate + publishedTimeText, viewCount + viewCountText + viewCountIsApproximate, durationSeconds, thumbnailUrl, channel{id,title,handle,url,thumbnail}, and badges[]. Typed arrays videos[] / shorts[] / channels[] / playlists[] / lives[] / shelves[] are disjoint partitions of results (a live is only in lives[], never also in videos[]) — Σ typed === results.length. Filter with type, sortBy, uploadDate, duration, region. nextCursor / continuationToken for the next page. Flat 2 credits per page.",
     delivers: [
-      "Typed arrays: videos / shorts / channels / playlists / lives / shelves",
-      "viewCountText + viewCountInt (no silent million-rounding)",
-      "channel{id,title,handle,url} + channelId",
-      "Filters: type, sortBy, uploadDate, duration, region",
+      "Disjoint typed arrays: videos / shorts / channels / playlists / lives",
+      "publishedTimeApprox + publishedTimeIsApproximate (comments shape)",
+      "viewCountIsApproximate false on exact rows",
+      "channel{} only — no flat channelId/channelName twins",
     ],
   },
   {
@@ -367,14 +367,14 @@ const YOUTUBE: Spec[] = [
     path: "/v1/youtube/channel-videos",
     credits: 2,
     tagline:
-      "Latest uploads from a YouTube channel — ISO publishedAt + relative publishedTimeText for monitors.",
+      "Channel uploads with cursor pagination — publishedTimeApprox + exact viewCount when the player enriches.",
     longDescription:
-      "Send a channel URL, @handle, or UC… id and get recent uploads as clean JSON. Each row is player-enriched like channel-streams: exact viewCount (not shelf K/M rounding), publishedAt ISO-8601 + publishedTimeText (e.g. \"4 days ago\"), durationSeconds, thumbnailUrl, and channel{}. Use publishedAt for sorting and \"detect new uploads\" monitors — never parse the relative string. Optional fast=true uses YouTube RSS (exact publishedAt, thinner metadata, no player enrich). Flat 2 credits on the native path. Pass cache=true for the 24h shared cache.",
+      "Send a channel URL, @handle, or UC… id and get uploads as clean JSON with nextCursor + hasMore (same cursor mechanism as /search). Each row is player-enriched: exact viewCount + viewCountIsApproximate (false when exact; true when only a compact shelf label was available), publishedTimeApprox + publishedTimeIsApproximate + publishedTimeText, durationSeconds, thumbnailUrl, and nested channel{} (no flat channelId/channelName twins). Optional fast=true uses YouTube RSS (exact publish time, thinner metadata, no cursor). Flat 2 credits on the native path.",
     delivers: [
-      "Player-enriched exact viewCount + ISO publishedAt",
-      "publishedTimeText keeps the UI label (e.g. \"4 days ago\")",
-      "thumbnailUrl + durationSeconds from player when shelf omits them",
-      "Optional fast RSS path",
+      "nextCursor + hasMore (page past the first 20)",
+      "publishedTimeApprox + publishedTimeIsApproximate",
+      "viewCountIsApproximate false on exact player rows",
+      "channel{} only — drop flat channel* twins",
     ],
   },
   { slug: "youtube-playlist-videos", name: "YouTube Playlist Videos API", shortName: "Playlist Videos", category: "list", method: "GET", path: "/v1/youtube/playlist-videos", credits: 2 , tagline: "List videos in a YouTube playlist — id, exact views, ISO publishedAt, totalVideos. Flat 2 credits.", longDescription: "Paste a YouTube playlist URL and get the videos as clean JSON: id, url, title, publishedAt (ISO-8601 from the watch player; publishedTimeText keeps YouTube's relative label), exact viewCount (not K/M/B rounded), durationSeconds, thumbnailUrl, channelName + channel{id,title,handle,url}. Also returns playlist id and totalVideos (full playlist size vs totalReturned for this page). Prefer Playlist when you also need owner metadata. Optional fast=true uses YouTube RSS (exact publishedAt, fewer items, no views). Flat 2 credits on the native path." },
@@ -3996,7 +3996,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     },
     { name: "region", type: "string", required: false, description: "ISO country code for localized results (default US)." },
   ],
-  "youtube-channel-videos": [up(YT_CHANNEL), lp(20, 200), fastRss()],
+  "youtube-channel-videos": [up(YT_CHANNEL), lp(20, 200), CURSOR, fastRss()],
   "youtube-playlist-videos": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500), fastRss()],
   "youtube-playlist": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500), fastRss()],
   "youtube-shorts-transcript": [up(YT_SHORTS), lang(), cacheP()],

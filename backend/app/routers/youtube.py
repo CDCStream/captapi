@@ -29,6 +29,7 @@ from app.services.youtube_native import (
     YT_HEADERS,
     _normalize_community_post,
     coerce_published_fields,
+    finalise_youtube_list_card,
     published_fields,
     build_youtube_video_details,
     channel_details_native,
@@ -322,16 +323,28 @@ async def _youtube_feed_videos(feed_url: str, limit: int) -> list[dict[str, Any]
         if dur_el is not None and dur_el.get("seconds") is not None:
             duration = safe_int(dur_el.get("seconds"))
         videos.append(
-            {
-                "id": video_id,
-                "url": f"https://www.youtube.com/watch?v={video_id}" if video_id else "",
-                "title": title,
-                "publishedAt": published,
-                "viewCount": views,
-                "durationSeconds": duration,
-                "thumbnailUrl": f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg" if video_id else "",
-                "channelName": channel_name,
-            }
+            finalise_youtube_list_card(
+                {
+                    "id": video_id,
+                    "url": f"https://www.youtube.com/watch?v={video_id}" if video_id else "",
+                    "title": title,
+                    "publishedTimeApprox": published,
+                    "publishedTimeIsApproximate": False,
+                    "viewCount": views,
+                    "viewCountIsApproximate": False,
+                    "durationSeconds": duration,
+                    "thumbnailUrl": (
+                        f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg" if video_id else ""
+                    ),
+                    "channel": {
+                        "id": None,
+                        "title": channel_name,
+                        "handle": None,
+                        "url": None,
+                        "thumbnail": None,
+                    },
+                }
+            )
         )
     return videos
 
@@ -1900,6 +1913,13 @@ async def youtube_channel_details(
 async def youtube_channel_videos(
     url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
     fast: bool = Query(False, description="Use YouTube's public RSS feed for faster but less detailed metadata."),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
@@ -1914,30 +1934,63 @@ async def youtube_channel_videos(
         base_credits=CREDIT_YT_NATIVE_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            if fast:
+            if fast and not cursor:
                 feed_videos = await _youtube_channel_feed(url, limit)
                 if feed_videos:
                     ctx["source"] = "direct"
-                    return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
-            native_videos = await channel_tab_native(
-                _channel_tab_url(url, "videos"), limit, tab="videos"
+                    return {
+                        "url": url,
+                        "totalReturned": len(feed_videos),
+                        "nextCursor": None,
+                        "hasMore": False,
+                        "videos": feed_videos,
+                    }
+            page = await channel_tab_native(
+                _channel_tab_url(url, "videos"),
+                limit,
+                tab="videos",
+                cursor=cursor,
             )
+            native_videos = page.get("items") or []
+            next_cursor = safe_str(page.get("nextCursor")) or None
             if native_videos:
-                # Player enrich: exact viewCount + ISO publishedAt (same mapper
-                # quality channel-streams historically got via Apify fallthrough).
+                # Player enrich: exact viewCount + ISO publishedTimeApprox.
                 enriched = await enrich_video_cards(native_videos[:limit])
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(enriched), "videos": enriched}
-            # RSS fallback — thinner metadata, no Apify.
+                return {
+                    "url": url,
+                    "totalReturned": len(enriched),
+                    "nextCursor": next_cursor,
+                    "hasMore": next_cursor is not None,
+                    "videos": enriched,
+                }
+            if cursor:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid or expired cursor. Start a new request without cursor.",
+                )
+            # RSS fallback — thinner metadata, no Apify / no cursor.
             feed_videos = await _youtube_channel_feed(url, limit)
             if feed_videos:
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
+                return {
+                    "url": url,
+                    "totalReturned": len(feed_videos),
+                    "nextCursor": None,
+                    "hasMore": False,
+                    "videos": feed_videos,
+                }
             raise HTTPException(status_code=404, detail="No videos found")
 
         data = await cached_or_run(
             endpoint="youtube.channel-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 9},
+            params={
+                "url": url,
+                "limit": limit,
+                "cursor": cursor or "",
+                "fast": fast,
+                "v": 10,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2227,7 +2280,9 @@ async def youtube_search(
             ctx["source"] = "direct"
             results = page.get("results") or []
             next_cursor = safe_str(page.get("nextCursor")) or None
-            videos = [r for r in results if r.get("type") in {"video", "live", "upcoming"}]
+            # Disjoint typed views — a live/upcoming row is only in lives[],
+            # never also in videos[] (YS3). Σ typed === results.length.
+            videos = [r for r in results if r.get("type") == "video"]
             shorts = [r for r in results if r.get("type") == "short"]
             channels = [r for r in results if r.get("type") == "channel"]
             playlists = [r for r in results if r.get("type") == "playlist"]
@@ -2259,7 +2314,7 @@ async def youtube_search(
                 "uploadDate": upload_date or "",
                 "duration": duration or "",
                 "region": (region or "").upper(),
-                "v": 6,
+                "v": 7,
             },
             runner=_run,
             ctx=ctx,
@@ -2402,9 +2457,10 @@ async def youtube_channel_shorts(
         base_credits=2,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native_shorts = await channel_tab_native(
+            page = await channel_tab_native(
                 _channel_tab_url(url, "shorts"), limit, shorts=True, tab="shorts"
             )
+            native_shorts = page.get("items") or []
             if native_shorts:
                 enriched = await enrich_short_cards(native_shorts[:limit])
                 ctx["source"] = "direct"
@@ -2468,9 +2524,10 @@ async def youtube_channel_streams(
                     "hasLiveTab": False,
                     "streams": [],
                 }
-            native_streams = await channel_tab_native(
+            page = await channel_tab_native(
                 _channel_tab_url(url, "streams"), limit, tab="streams"
             )
+            native_streams = page.get("items") or []
             if native_streams:
                 enriched = await enrich_video_cards(native_streams[:limit])
                 ctx["source"] = "direct"

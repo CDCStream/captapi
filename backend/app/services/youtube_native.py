@@ -326,21 +326,37 @@ def _looks_relative_published(value: Any) -> bool:
 
 
 def coerce_published_fields(card: dict[str, Any]) -> dict[str, Any]:
-    """Guarantee ``publishedAt`` is ISO (or null) — never a relative label.
+    """Stamp ``publishedTimeApprox`` + ``publishedTimeIsApproximate`` (comments shape).
 
-    YouTube list cards often only expose ``"4 days ago"``. Callers must keep
-    that string in ``publishedTimeText`` and put an approximate ISO in
-    ``publishedAt`` so typed SDKs / monitors / date filters work.
+    YouTube list cards often only expose ``"4 days ago"``. Keep that string in
+    ``publishedTimeText`` and put a truncated ISO in ``publishedTimeApprox`` —
+    never a relative label, never false millisecond precision. Exact player /
+    RSS timestamps set ``publishedTimeIsApproximate: false``.
     """
     if not isinstance(card, dict):
         return card
-    current = card.get("publishedAt")
-    text = card.get("publishedTimeText") or card.get("publishedTime")
+    current = (
+        card.get("publishedTimeApprox")
+        or card.get("publishedAt")
+        or card.get("publishedTime")
+    )
+    text = card.get("publishedTimeText")
+    # Already stamped as derived from a relative label — do not downgrade.
+    if (
+        _looks_iso8601(current)
+        and card.get("publishedTimeIsApproximate") is True
+    ):
+        card["publishedTimeApprox"] = safe_str(current)
+        card.pop("publishedAt", None)
+        card.pop("publishedTime", None)
+        return card
     if _looks_iso8601(current):
-        # Already typed; if the only relative label lived in publishedAt before
-        # a partial migrate, leave publishedTimeText alone.
-        if text is None and _looks_relative_published(card.get("publishedTimeText")):
-            pass
+        # Observed ISO (player / RSS). Relative publishedTimeText may still
+        # be kept for display without making the instant approximate.
+        card["publishedTimeApprox"] = safe_str(current)
+        card["publishedTimeIsApproximate"] = False
+        card.pop("publishedAt", None)
+        card.pop("publishedTime", None)
         return card
     raw = text if _looks_relative_published(text) else None
     if raw is None and _looks_relative_published(current):
@@ -349,14 +365,58 @@ def coerce_published_fields(card: dict[str, Any]) -> dict[str, Any]:
         raw = text or current
     iso, rel = published_fields(raw)
     if iso is not None:
-        card["publishedAt"] = iso
+        card["publishedTimeApprox"] = iso
+        card["publishedTimeIsApproximate"] = bool(rel) or _looks_relative_published(raw)
     elif _looks_relative_published(current):
-        # Never leave "4 days ago" in the ISO field.
-        card["publishedAt"] = None
+        card["publishedTimeApprox"] = None
+        card["publishedTimeIsApproximate"] = True
     if rel:
         card["publishedTimeText"] = rel
     elif _looks_relative_published(current) and not card.get("publishedTimeText"):
         card["publishedTimeText"] = safe_str(current)
+    card.pop("publishedAt", None)
+    card.pop("publishedTime", None)
+    return card
+
+
+def finalise_youtube_list_card(card: dict[str, Any]) -> dict[str, Any]:
+    """One list-card vocabulary: nested channel{}, one viewCount, honest flags."""
+    if not isinstance(card, dict):
+        return card
+    coerce_published_fields(card)
+    ch = card.get("channel") if isinstance(card.get("channel"), dict) else None
+    if ch is None and any(
+        card.get(k) not in (None, "")
+        for k in ("channelId", "channelName", "channelHandle", "channelUrl")
+    ):
+        ch = {
+            "id": card.get("channelId"),
+            "title": card.get("channelName"),
+            "handle": card.get("channelHandle"),
+            "url": card.get("channelUrl"),
+            "thumbnail": None,
+        }
+    if isinstance(ch, dict):
+        # Prefer nested object; drop flat twins (YS1).
+        if card.get("channelName") and not ch.get("title"):
+            ch["title"] = card.get("channelName")
+        if card.get("channelId") and not ch.get("id"):
+            ch["id"] = card.get("channelId")
+        if card.get("channelHandle") and not ch.get("handle"):
+            ch["handle"] = card.get("channelHandle")
+        if card.get("channelUrl") and not ch.get("url"):
+            ch["url"] = card.get("channelUrl")
+        card["channel"] = ch
+    for k in ("channelId", "channelName", "channelHandle", "channelUrl"):
+        card.pop(k, None)
+    # One integer + display string; always boolean approximate flag (YS2/YS5).
+    card.pop("viewCountInt", None)
+    legacy_approx = card.pop("viewCountApproximate", None)
+    if card.get("viewCount") is not None or "viewCountIsApproximate" in card or legacy_approx is not None:
+        if "viewCountIsApproximate" in card:
+            card["viewCountIsApproximate"] = bool(card.get("viewCountIsApproximate"))
+        else:
+            card["viewCountIsApproximate"] = bool(legacy_approx)
     return card
 
 
@@ -437,14 +497,12 @@ def _stamp_count_fields(
     text: str | None = None,
     approximate: bool = False,
 ) -> dict[str, Any]:
-    """Attach ``viewCount`` + SC-style ``viewCountInt`` / ``viewCountText``."""
+    """Attach ``viewCount`` + ``viewCountText`` + ``viewCountIsApproximate``."""
     card["viewCount"] = count
-    card["viewCountInt"] = count
     card["viewCountText"] = text or format_count_text(count)
-    if approximate and count is not None:
-        card["viewCountApproximate"] = True
-    elif "viewCountApproximate" in card and not approximate:
-        card.pop("viewCountApproximate", None)
+    card["viewCountIsApproximate"] = bool(approximate)
+    card.pop("viewCountInt", None)
+    card.pop("viewCountApproximate", None)
     return card
 
 
@@ -533,21 +591,17 @@ def normalize_video_renderer(vr: dict[str, Any]) -> dict[str, Any] | None:
         "id": video_id,
         "url": url,
         "title": text_of(vr.get("title")) or "",
-        "publishedAt": published_at,
+        "publishedTimeApprox": published_at,
         "publishedTimeText": published_text,
+        "publishedTimeIsApproximate": bool(published_text) and published_at is not None,
         "viewCount": view_count,
-        # Compact label + parsed int (SC-style) — round numbers stay honest.
         "viewCountText": view_text,
-        "viewCountInt": view_count,
+        "viewCountIsApproximate": bool(view_approx),
         "durationSeconds": duration,
         "thumbnailUrl": _best_thumb(vr.get("thumbnail")),
-        "channelName": channel.get("title"),
-        "channelId": channel.get("id"),
         "channel": channel,
         "badges": badges,
     }
-    if view_approx:
-        card["viewCountApproximate"] = True
     return card
 
 
@@ -579,11 +633,10 @@ def _normalize_shorts_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
         "id": video_id,
         "url": f"https://www.youtube.com/shorts/{video_id}",
         "title": text_of((overlay.get("primaryText") or {})) or "",
-        "publishedAt": None,
+        "publishedTimeApprox": None,
+        "publishedTimeIsApproximate": False,
         "durationSeconds": None,
         "thumbnailUrl": thumb,
-        "channelName": None,
-        "channelId": None,
         "channel": None,
         "badges": [],
     }
@@ -602,11 +655,10 @@ def _normalize_reel_item(r: dict[str, Any]) -> dict[str, Any] | None:
         "id": video_id,
         "url": f"https://www.youtube.com/shorts/{video_id}",
         "title": text_of(r.get("headline")) or "",
-        "publishedAt": None,
+        "publishedTimeApprox": None,
+        "publishedTimeIsApproximate": False,
         "durationSeconds": None,
         "thumbnailUrl": _best_thumb(r.get("thumbnail")) or thumbnail_url_for_video_id(video_id),
-        "channelName": None,
-        "channelId": None,
         "channel": None,
         "badges": [],
     }
@@ -667,18 +719,23 @@ def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
         "id": video_id,
         "url": f"https://www.youtube.com/watch?v={video_id}",
         "title": title,
-        "publishedAt": published_at,
+        "publishedTimeApprox": published_at,
         "publishedTimeText": published_text,
+        "publishedTimeIsApproximate": bool(published_text) and published_at is not None,
         "viewCount": view_count,
+        "viewCountText": None,
+        "viewCountIsApproximate": bool(view_approx),
         "durationSeconds": duration,
         "thumbnailUrl": _best_thumb(lk.get("contentImage")) or thumbnail_url_for_video_id(video_id),
-        "channelName": channel_name,
-        "channelId": None,
-        "channel": {"id": None, "title": channel_name, "handle": None, "url": None, "thumbnail": None},
+        "channel": {
+            "id": None,
+            "title": channel_name,
+            "handle": None,
+            "url": None,
+            "thumbnail": None,
+        },
         "badges": [],
     }
-    if view_approx:
-        card["viewCountApproximate"] = True
     return card
 
 
@@ -711,23 +768,23 @@ def _normalize_playlist_video(pv: dict[str, Any]) -> dict[str, Any] | None:
     duration = int(secs) if secs and secs.isdigit() else _duration_text_seconds(pv.get("lengthText"))
     channel = _channel_from_text_runs(pv.get("shortBylineText"))
     published_at, published_text = published_fields(published_raw)
+    if not channel.get("title"):
+        channel["title"] = text_of(pv.get("shortBylineText"))
     card: dict[str, Any] = {
         "type": "video",
         "id": video_id,
         "url": f"https://www.youtube.com/watch?v={video_id}",
         "title": text_of(pv.get("title")) or "",
-        "publishedAt": published_at,
+        "publishedTimeApprox": published_at,
         "publishedTimeText": published_text,
+        "publishedTimeIsApproximate": bool(published_text) and published_at is not None,
         "viewCount": view_count,
+        "viewCountIsApproximate": bool(view_approx),
         "durationSeconds": duration,
         "thumbnailUrl": _best_thumb(pv.get("thumbnail")),
-        "channelName": channel.get("title") or text_of(pv.get("shortBylineText")),
-        "channelId": channel.get("id"),
         "channel": channel,
         "badges": [],
     }
-    if view_approx:
-        card["viewCountApproximate"] = True
     return card
 
 
@@ -747,12 +804,11 @@ def _normalize_channel_renderer(cr: dict[str, Any]) -> dict[str, Any] | None:
         "id": channel_id,
         "url": url,
         "title": text_of(cr.get("title")) or "",
-        "publishedAt": None,
+        "publishedTimeApprox": None,
+        "publishedTimeIsApproximate": False,
         "viewCount": None,
         "durationSeconds": None,
         "thumbnailUrl": _best_thumb(cr.get("thumbnail")),
-        "channelName": text_of(cr.get("title")),
-        "channelId": channel_id,
         "channel": {
             "id": channel_id,
             "title": text_of(cr.get("title")),
@@ -776,12 +832,11 @@ def _normalize_playlist_renderer(pr: dict[str, Any]) -> dict[str, Any] | None:
         "id": playlist_id,
         "url": f"https://www.youtube.com/playlist?list={playlist_id}",
         "title": text_of(pr.get("title")) or "",
-        "publishedAt": None,
+        "publishedTimeApprox": None,
+        "publishedTimeIsApproximate": False,
         "viewCount": None,
         "durationSeconds": None,
         "thumbnailUrl": _best_thumb(pr.get("thumbnails") or pr.get("thumbnail")),
-        "channelName": channel.get("title"),
-        "channelId": channel.get("id"),
         "channel": channel,
         "badges": [],
         "videoCount": video_count,
@@ -1000,8 +1055,11 @@ async def _paginate(
     continuation_endpoint: str,
     shorts: bool = False,
     max_hops: int = 8,
-) -> list[dict[str, Any]]:
-    """Cards from the initial tree plus InnerTube continuations up to limit."""
+) -> tuple[list[dict[str, Any]], str | None]:
+    """Cards from the initial tree plus InnerTube continuations up to limit.
+
+    Returns ``(cards, next_cursor)`` — leftover continuation when more pages exist.
+    """
     cards = collect_video_cards(first_page, shorts=shorts)
     pending = find_continuation_tokens(first_page)
     hops = 0
@@ -1030,7 +1088,8 @@ async def _paginate(
                 seen_tok.add(t)
                 uniq.append(t)
         pending = uniq
-    return cards[:limit]
+    next_cursor = pending[0] if pending else None
+    return cards[:limit], next_cursor
 
 
 async def resolve_channel_id(url: str) -> str | None:
@@ -1116,7 +1175,7 @@ async def search_native_page(
         results = collect_video_cards(data, shorts=True)
     else:
         results = collect_search_results(data)
-    results = results[: max(0, int(limit))]
+    results = _coerce_card_dates(results[: max(0, int(limit))])
     next_cursor = find_continuation_token(data)
     # Avoid returning the same cursor we just used.
     if next_cursor and token and next_cursor == token:
@@ -1162,7 +1221,7 @@ async def search_shorts_native(q: str, limit: int) -> list[dict[str, Any]] | Non
         "search", {"query": seed, "params": _SEARCH_SHORTS_PARAMS}, timeout=15
     )
     if data is not None:
-        cards = await _paginate(
+        cards, _ = await _paginate(
             data, limit=limit, continuation_endpoint="search", shorts=True
         )
         if cards:
@@ -1172,7 +1231,9 @@ async def search_shorts_native(q: str, limit: int) -> list[dict[str, Any]] | Non
     )
     if data is None:
         return None
-    cards = await _paginate(data, limit=limit, continuation_endpoint="search", shorts=True)
+    cards, _ = await _paginate(
+        data, limit=limit, continuation_endpoint="search", shorts=True
+    )
     return cards if cards else None
 
 
@@ -1559,39 +1620,41 @@ async def enrich_video_cards(
             out["thumbnailUrl"] = out.get("thumbnailUrl") or thumbnail_url_for_video_id(vid)
             details = await video_details_native(vid, url)
             if not isinstance(details, dict):
-                return coerce_published_fields(out)
+                return finalise_youtube_list_card(out)
             exact_views = safe_int(details.get("viewCount"))
             if exact_views is not None:
                 _stamp_count_fields(out, count=exact_views, approximate=False)
-                out.pop("viewCountApproximate", None)
             for src, dest in (
                 ("title", "title"),
                 ("description", "description"),
-                ("publishedAt", "publishedAt"),
+                ("publishedAt", "publishedTimeApprox"),
                 ("durationSeconds", "durationSeconds"),
-                ("channelName", "channelName"),
-                ("channelId", "channelId"),
-                ("channelHandle", "channelHandle"),
-                ("channelUrl", "channelUrl"),
                 ("thumbnailUrl", "thumbnailUrl"),
             ):
                 val = details.get(src)
                 if val not in (None, "", []):
                     out[dest] = val
-            if out.get("channelId") or out.get("channelName"):
-                out["channel"] = {
-                    "id": out.get("channelId"),
-                    "title": out.get("channelName"),
-                    "handle": out.get("channelHandle"),
-                    "url": out.get("channelUrl"),
-                    "thumbnail": None,
-                }
+            if details.get("publishedAt"):
+                # Player microformat publishDate is observed, not derived.
+                out["publishedTimeIsApproximate"] = False
+            ch = out.get("channel") if isinstance(out.get("channel"), dict) else {}
+            out["channel"] = {
+                "id": details.get("channelId") or ch.get("id"),
+                "title": details.get("channelName") or ch.get("title"),
+                "handle": details.get("channelHandle") or ch.get("handle"),
+                "url": details.get("channelUrl") or ch.get("url"),
+                "thumbnail": ch.get("thumbnail"),
+            }
             # Keep relative label when player only gave ISO.
-            if out.get("publishedAt") and not out.get("publishedTimeText"):
-                _, rel = published_fields(card.get("publishedTimeText") or card.get("publishedAt"))
+            if out.get("publishedTimeApprox") and not out.get("publishedTimeText"):
+                _, rel = published_fields(
+                    card.get("publishedTimeText")
+                    or card.get("publishedTimeApprox")
+                    or card.get("publishedAt")
+                )
                 if rel:
                     out["publishedTimeText"] = rel
-            return coerce_published_fields(out)
+            return finalise_youtube_list_card(out)
 
     return list(await asyncio.gather(*[_one(c) for c in cards]))
 
@@ -1698,7 +1761,7 @@ async def playlist_native(url: str, limit: int) -> dict[str, Any] | None:
     data, _ = await fetch_page_data(url)
     if data is None:
         return None
-    videos = await _paginate(data, limit=limit, continuation_endpoint="browse")
+    videos, _ = await _paginate(data, limit=limit, continuation_endpoint="browse")
     if not videos:
         return None
 
@@ -1773,14 +1836,22 @@ def _fill_missing_channel_name(
     if not channel_name:
         return cards
     for card in cards:
-        if not card.get("channelName"):
-            card["channelName"] = channel_name
+        ch = card.get("channel") if isinstance(card.get("channel"), dict) else {}
+        if not ch.get("title"):
+            card["channel"] = {
+                **ch,
+                "title": channel_name,
+                "id": ch.get("id"),
+                "handle": ch.get("handle"),
+                "url": ch.get("url"),
+                "thumbnail": ch.get("thumbnail"),
+            }
     return cards
 
 
 def _coerce_card_dates(cards: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for card in cards:
-        coerce_published_fields(card)
+        finalise_youtube_list_card(card)
     return cards
 
 
@@ -1790,12 +1861,30 @@ async def channel_tab_native(
     *,
     shorts: bool = False,
     tab: str | None = None,
-) -> list[dict[str, Any]]:
-    """Videos / streams / shorts tab of a channel.
+    cursor: str | None = None,
+) -> dict[str, Any]:
+    """Videos / streams / shorts tab of a channel (one page + nextCursor).
 
     Prefers InnerTube ``browse`` with known tab ``params`` (works when the
     HTML tab is 429'd). Falls back to ``ytInitialData`` on the tab URL.
     """
+    empty: dict[str, Any] = {"items": [], "nextCursor": None}
+
+    async def _page_from(data: Any) -> dict[str, Any]:
+        cards, next_cursor = await _paginate(
+            data, limit=limit, continuation_endpoint="browse", shorts=shorts
+        )
+        cards = _coerce_card_dates(
+            _fill_missing_channel_name(cards, _channel_title_from_data(data))
+        )
+        return {"items": cards, "nextCursor": next_cursor}
+
+    if cursor:
+        payload = await innertube("browse", {"continuation": cursor}, timeout=18)
+        if payload is None:
+            return empty
+        return await _page_from(payload)
+
     tab_key = (tab or "").strip().lower()
     if not tab_key:
         low = (tab_url or "").rstrip("/").lower()
@@ -1813,22 +1902,13 @@ async def channel_tab_native(
                 timeout=18,
             )
             if data is not None:
-                cards = await _paginate(
-                    data, limit=limit, continuation_endpoint="browse", shorts=shorts
-                )
-                if cards:
-                    return _coerce_card_dates(
-                        _fill_missing_channel_name(
-                            cards, _channel_title_from_data(data)
-                        )
-                    )
+                page = await _page_from(data)
+                if page["items"]:
+                    return page
     data, _ = await fetch_page_data(tab_url, timeout=15.0)
     if data is None:
-        return []
-    cards = await _paginate(data, limit=limit, continuation_endpoint="browse", shorts=shorts)
-    return _coerce_card_dates(
-        _fill_missing_channel_name(cards, _channel_title_from_data(data))
-    )
+        return empty
+    return await _page_from(data)
 
 
 def collect_playlist_cards(data: Any) -> list[dict[str, Any]]:
@@ -1912,9 +1992,8 @@ async def hashtag_native(tag: str, limit: int) -> list[dict[str, Any]]:
     data, _ = await fetch_page_data(f"https://www.youtube.com/hashtag/{quote(name)}")
     if data is None:
         return []
-    return _coerce_card_dates(
-        await _paginate(data, limit=limit, continuation_endpoint="browse")
-    )
+    cards, _ = await _paginate(data, limit=limit, continuation_endpoint="browse")
+    return _coerce_card_dates(cards)
 
 
 # --------------------------------------------------------- channel details --

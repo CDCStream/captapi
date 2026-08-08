@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-08",
     category: "fix",
+    title: "YouTube search + channel-videos: paging, disjoint types, honest flags",
+    description:
+      "channel-videos gains nextCursor/hasMore (search-style browse continuations). search typed arrays are disjoint (live only in lives[]). List cards share coerce_published_fields / finalise_youtube_list_card with comments' publishedTimeApprox + publishedTimeIsApproximate; viewCountIsApproximate is always boolean (false on exact rows); drop viewCountInt and flat channelId/channelName/channelUrl twins.",
+    items: [
+      "channel-videos: nextCursor + hasMore (YS6)",
+      "search: disjoint typed arrays; Σ typed === results.length (YS3)",
+      "publishedTimeApprox on search + channel-videos via shared coerce (YS4)",
+      "viewCountIsApproximate false on exact; drop viewCountInt + flat channel* (YS5/YS1/YS2)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-08",
+    category: "fix",
     title: "YouTube video-details: degraded on partial microformat extraction",
     description:
       "ANDROID InnerTube omits playerMicroformatRenderer — publishedAt, genre, channelHandle, isFamilySafe, categoryId (and likes from the watch label) all come from the watch-page player. When that fetch fails, video-details used to return 200 with nulls and no signal. Now retries the watch page once (residential-first), falls back to InnerTube next for likes, and always stamps degraded / degradedReason (partial-extraction) plus timings.path — same envelope as Instagram channel-posts.",

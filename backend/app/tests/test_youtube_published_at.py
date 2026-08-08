@@ -53,15 +53,22 @@ def test_published_fields_splits_iso_and_text() -> None:
     assert text2 is None
 
 
-def test_coerce_never_leaves_relative_in_published_at() -> None:
+def test_coerce_never_leaves_relative_in_published_time_approx() -> None:
     card = {"publishedAt": "4 days ago", "title": "x"}
     out = coerce_published_fields(card)
-    assert out["publishedAt"] and "ago" not in out["publishedAt"]
+    assert out["publishedTimeApprox"] and "ago" not in out["publishedTimeApprox"]
+    assert out["publishedTimeIsApproximate"] is True
     assert out["publishedTimeText"] == "4 days ago"
-    # Already ISO stays
-    card2 = {"publishedAt": "2026-07-27T22:52:21.000Z", "publishedTimeText": "4 days ago"}
+    assert "publishedAt" not in out
+    # Exact ISO from player + relative label → not approximate
+    card2 = {
+        "publishedAt": "2026-07-27T22:52:21.000Z",
+        "publishedTimeText": "4 days ago",
+    }
     out2 = coerce_published_fields(card2)
-    assert out2["publishedAt"] == "2026-07-27T22:52:21.000Z"
+    assert out2["publishedTimeApprox"] == "2026-07-27T22:52:21.000Z"
+    assert out2["publishedTimeIsApproximate"] is False
+    assert "publishedAt" not in out2
 
 
 def test_inactive_heart_tooltip_by_channel_is_false() -> None:
