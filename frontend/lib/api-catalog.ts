@@ -389,7 +389,7 @@ const YOUTUBE: Spec[] = [
       "Paginated playlist contents — cursor/nextCursor/hasMore, same row shape as channel-videos. Flat 2 credits/page.",
     longDescription:
       "Paste a YouTube playlist URL and get one page of videos as clean JSON (same enriched row shape as channel-videos / channel-shorts): id, url, title, publishedAt (ISO from reel_item_watch), publishedTimeText, viewCount, durationSeconds/durationFormatted, genre, badges, thumbnailUrl, channel{}. Envelope: id, totalVideos, totalReturned, nextCursor, hasMore, timings. Pass nextCursor for the next page until hasMore is false. Optional fast=true uses YouTube RSS (no cursor). Flat 2 credits per page on the native path. For title/channel/thumbnail without videos, use Playlist (1 credit).",
-    highlights: [
+    delivers: [
       "cursor ↔ nextCursor / hasMore (pages to totalVideos)",
       "Shared row shape with channel-videos",
       "timings{path,fetchMs,browseMs,enrichMs,totalMs}",
@@ -407,7 +407,7 @@ const YOUTUBE: Spec[] = [
       "Playlist metadata only — title, channel{}, totalVideos, thumbnailUrl. No videos[]. Flat 1 credit.",
     longDescription:
       "Paste a YouTube playlist URL and get identity JSON: platform, url, id, title, channel{id,title,handle,url}, totalVideos, thumbnailUrl, timings. No videos array — use Playlist Videos for paginated contents. Flat 1 credit (single HTML fetch, no player enrich).",
-    highlights: [
+    delivers: [
       "Metadata only (no videos[]) — 1 credit",
       "channel{} (not owner / channelName twins)",
       "Pair with /playlist-videos for contents",
