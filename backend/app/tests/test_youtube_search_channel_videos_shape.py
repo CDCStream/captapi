@@ -115,7 +115,7 @@ def test_channel_renderer_subscriber_count_from_swapped_fields() -> None:
 
 
 def test_channel_list_card_shared_keys_and_exact_published_at() -> None:
-    """CS2: channel-videos and channel-shorts share one shape with exact publishedAt."""
+    """CS2/PL3: shared long-form keys; commentCount* only on short rows."""
     details = {
         "title": "Hello",
         "publishedAt": "2026-07-25T09:00:05-07:00",
@@ -136,16 +136,19 @@ def test_channel_list_card_shared_keys_and_exact_published_at() -> None:
     short = finalize_channel_list_card(
         vid="abcdefghijk", details=details, shelf=shelf, content_type="short"
     )
-    assert set(video.keys()) == set(short.keys())
-    for key in (
+    shared = {
         "publishedAt",
         "publishedTimeText",
         "genre",
         "badges",
         "durationFormatted",
-        "commentCount",
-    ):
-        assert key in video
+        "channel",
+    }
+    assert shared.issubset(video.keys())
+    assert shared.issubset(short.keys())
+    assert "commentCount" not in video
+    assert short["commentCount"] == 12
+    assert short["commentCountText"] is not None
     assert "publishedTimeApprox" not in video
     assert "likeCount" not in video
     assert "likeCountText" not in video

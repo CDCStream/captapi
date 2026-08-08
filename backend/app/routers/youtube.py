@@ -6,6 +6,7 @@ import asyncio
 import json
 import math
 import re
+import time
 from datetime import datetime, timezone
 from typing import Any, NoReturn
 from urllib.parse import parse_qs, urlparse
@@ -52,7 +53,8 @@ from app.services.youtube_native import (
     merge_short_player_details,
     parse_count_text,
     parse_count_text_meta,
-    playlist_native,
+    playlist_meta_native,
+    playlist_videos_native,
     prefer_short_thumbnails,
     search_native,
     search_shorts_native,
@@ -92,10 +94,12 @@ _YT_ASR_HARD_DEADLINE_SECS = 110
 # Native InnerTube / RSS list endpoints (comments, search, channel-videos,
 # channel-playlists): ~$0–0.001 proxy cost → flat 2 keeps ~80%+ markup.
 CREDIT_YT_NATIVE_LIST = 2
-# Playlist pages + InnerTube continuations via datacenter proxy (~$0.001).
-# At $0.0045/credit with 120% markup → ~1 credit; bill 2 flat when native/RSS
-# succeeds. Apify fallback keeps RATE_YT_VIDEO per-result scale.
+# Playlist video pages + InnerTube continuations via datacenter proxy (~$0.001)
+# plus per-row player enrich. Flat 2 credits per page on the native path.
+# Apify fallback keeps RATE_YT_VIDEO per-result scale.
 CREDIT_YT_PLAYLIST_NATIVE = 2
+# Playlist metadata only (single HTML fetch, no video enrich) → flat 1 credit.
+CREDIT_YT_PLAYLIST_META = 1
 # Community /posts tab ytInitialData + InnerTube continuations (~$0–0.001).
 # Flat 1 credit on the native path (ScrapeCreators parity); Apify fallback
 # keeps RATE_YT_COMMUNITY per-result scale.
@@ -2001,10 +2005,25 @@ async def youtube_channel_videos(
 
 
 # ---------- PLAYLIST VIDEOS -----------------------------------------------
-@router.get("/playlist-videos", summary="List videos in a YouTube playlist")
+@router.get(
+    "/playlist-videos",
+    summary="List videos in a YouTube playlist (cursor-paginated)",
+    description=(
+        "Paginated playlist contents — same enriched row shape as channel-videos. "
+        "Pass nextCursor for the next page. Flat 2 credits per page on the native "
+        "path. For title/owner/thumbnail without videos, use /playlist (1 credit)."
+    ),
+)
 async def youtube_playlist_videos(
     url: str = Query(...),
     limit: int = Query(50, ge=1, le=500),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
     fast: bool = Query(False, description="Use YouTube's public RSS feed for faster but less detailed metadata."),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
@@ -2025,10 +2044,10 @@ async def youtube_playlist_videos(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            t0 = time.perf_counter()
             # RSS is instant but caps at 15 items with no view/duration data.
-            # Prefer it for fast=true, and as a cheap step before Apify so dead
-            # playlist IDs 404 in seconds instead of multi-actor timeouts.
-            if fast:
+            # Prefer it for fast=true (no cursor), and as a cheap probe before Apify.
+            if fast and not cursor:
                 feed_videos = await _youtube_playlist_feed(url, limit)
                 if feed_videos:
                     ctx["source"] = "direct"
@@ -2036,19 +2055,68 @@ async def youtube_playlist_videos(
                         "url": url,
                         "id": _playlist_id(url),
                         "totalReturned": len(feed_videos),
+                        "nextCursor": None,
+                        "hasMore": False,
                         "videos": feed_videos,
+                        "timings": {
+                            "path": "rss",
+                            "totalMs": round((time.perf_counter() - t0) * 1000),
+                        },
                     }
-            native = await playlist_native(url, limit)
-            if native and native.get("videos"):
+            page = await playlist_videos_native(url, limit, cursor=cursor)
+            if page and page.get("invalidCursor"):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid or expired cursor. Start a new request without cursor.",
+                )
+            native_videos = (page or {}).get("videos") or []
+            next_cursor = safe_str((page or {}).get("nextCursor")) or None
+            stage = (page or {}).get("timings") if isinstance((page or {}).get("timings"), dict) else {}
+            if native_videos:
+                t_en = time.perf_counter()
+                videos = await enrich_video_cards(native_videos[:limit])
+                enrich_ms = round((time.perf_counter() - t_en) * 1000)
                 ctx["source"] = "direct"
-                videos = await enrich_video_cards(native["videos"][:limit])
                 return {
                     "url": url,
-                    "id": safe_str(native.get("id")) or _playlist_id(url),
-                    "totalVideos": native.get("totalVideos"),
+                    "id": safe_str((page or {}).get("id")) or _playlist_id(url),
+                    "totalVideos": (page or {}).get("totalVideos"),
                     "totalReturned": len(videos),
+                    "nextCursor": next_cursor,
+                    "hasMore": next_cursor is not None,
                     "videos": videos,
+                    "timings": {
+                        "path": "native",
+                        "fetchMs": stage.get("fetchMs"),
+                        "browseMs": stage.get("browseMs"),
+                        "enrichMs": enrich_ms,
+                        "totalMs": round((time.perf_counter() - t0) * 1000),
+                    },
                 }
+            if cursor and page is not None and not page.get("invalidCursor"):
+                # Valid cursor that drained the playlist (or hit a dead token).
+                ctx["source"] = "direct"
+                return {
+                    "url": url,
+                    "id": safe_str((page or {}).get("id")) or _playlist_id(url),
+                    "totalVideos": (page or {}).get("totalVideos"),
+                    "totalReturned": 0,
+                    "nextCursor": None,
+                    "hasMore": False,
+                    "videos": [],
+                    "timings": {
+                        "path": "native",
+                        "fetchMs": stage.get("fetchMs"),
+                        "browseMs": stage.get("browseMs"),
+                        "enrichMs": 0,
+                        "totalMs": round((time.perf_counter() - t0) * 1000),
+                    },
+                }
+            if cursor:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid or expired cursor. Start a new request without cursor.",
+                )
             feed_videos = await _youtube_playlist_feed(url, limit)
             if feed_videos:
                 ctx["source"] = "direct"
@@ -2056,7 +2124,13 @@ async def youtube_playlist_videos(
                     "url": url,
                     "id": _playlist_id(url),
                     "totalReturned": len(feed_videos),
+                    "nextCursor": None,
+                    "hasMore": False,
                     "videos": feed_videos,
+                    "timings": {
+                        "path": "rss",
+                        "totalMs": round((time.perf_counter() - t0) * 1000),
+                    },
                 }
             apify = get_apify()
             items, _actor = await apify.run_with_fallback(
@@ -2067,20 +2141,30 @@ async def youtube_playlist_videos(
             items = _valid_video_items(items)
             if not items:
                 raise HTTPException(status_code=404, detail="Playlist not found")
-            videos = []
-            for v in items[:limit]:
-                videos.append(_video_card(v))
+            videos = [_video_card(v) for v in items[:limit]]
             ctx["source"] = "apify"
             return {
                 "url": url,
                 "id": _playlist_id(url),
                 "totalReturned": len(videos),
+                "nextCursor": None,
+                "hasMore": False,
                 "videos": videos,
+                "timings": {
+                    "path": "apify",
+                    "totalMs": round((time.perf_counter() - t0) * 1000),
+                },
             }
 
         data = await cached_or_run(
             endpoint="youtube.playlist-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 12},
+            params={
+                "url": url,
+                "limit": limit,
+                "cursor": cursor or "",
+                "fast": fast,
+                "v": 13,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2092,11 +2176,16 @@ async def youtube_playlist_videos(
         return ApiResponse(data=data)
 
 
-@router.get("/playlist", summary="YouTube playlist metadata + videos")
+@router.get(
+    "/playlist",
+    summary="YouTube playlist metadata",
+    description=(
+        "Playlist identity only — title, channel{}, totalVideos, thumbnailUrl. "
+        "No videos array. Flat 1 credit. For paginated contents use /playlist-videos."
+    ),
+)
 async def youtube_playlist(
     url: str = Query(..., description="YouTube playlist URL"),
-    limit: int = Query(50, ge=1, le=500),
-    fast: bool = Query(False, description="Use YouTube's public RSS feed for faster but less detailed metadata."),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -2105,98 +2194,43 @@ async def youtube_playlist(
             status_code=400,
             detail="Invalid playlist URL. Expected a YouTube playlist URL with a list= ID.",
         )
-    settings = get_settings()
-    cost = _scaled_credits(limit, RATE_YT_VIDEO, 5)
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/playlist",
         platform="youtube",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_YT_PLAYLIST_META,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            t0 = time.perf_counter()
             pid = _playlist_id(url)
-            if fast:
-                feed_videos = await _youtube_playlist_feed(url, limit)
-                if feed_videos:
-                    ctx["source"] = "direct"
-                    channel_name = feed_videos[0].get("channelName") if feed_videos else ""
-                    return {
-                        "platform": "youtube",
-                        "url": url,
-                        "id": pid,
-                        "title": "",
-                        "channelName": channel_name,
-                        "owner": {"name": channel_name} if channel_name else None,
-                        "totalReturned": len(feed_videos),
-                        "videos": feed_videos,
-                    }
-            native = await playlist_native(url, limit)
-            if native and native.get("videos"):
+            meta = await playlist_meta_native(url)
+            if meta and (meta.get("title") or meta.get("totalVideos") is not None or meta.get("id")):
                 ctx["source"] = "direct"
-                owner = native.get("owner") if isinstance(native.get("owner"), dict) else None
-                videos = await enrich_video_cards(native["videos"][:limit])
+                channel = meta.get("channel") if isinstance(meta.get("channel"), dict) else None
                 return {
                     "platform": "youtube",
                     "url": url,
-                    "id": safe_str(native.get("id")) or pid,
-                    "title": safe_str(native.get("title")) or "",
-                    "channelName": safe_str(native.get("channelName")) or "",
-                    "owner": owner,
-                    "totalVideos": native.get("totalVideos"),
-                    "totalReturned": len(videos),
-                    "videos": videos,
+                    "id": safe_str(meta.get("id")) or pid,
+                    "title": safe_str(meta.get("title")) or "",
+                    "channel": channel,
+                    "totalVideos": meta.get("totalVideos"),
+                    "thumbnailUrl": meta.get("thumbnailUrl"),
+                    "timings": {
+                        "path": "native",
+                        "totalMs": round((time.perf_counter() - t0) * 1000),
+                    },
                 }
-            feed_videos = await _youtube_playlist_feed(url, limit)
-            if feed_videos:
-                ctx["source"] = "direct"
-                channel_name = feed_videos[0].get("channelName") if feed_videos else ""
-                return {
-                    "platform": "youtube",
-                    "url": url,
-                    "id": pid,
-                    "title": "",
-                    "channelName": channel_name,
-                    "owner": {"name": channel_name} if channel_name else None,
-                    "totalReturned": len(feed_videos),
-                    "videos": feed_videos,
-                }
-            # Single actor only — multi-actor fallback was timing out 2–3 min on
-            # deleted playlist IDs that RSS already proved empty.
-            items, _actor = await get_apify().run_with_fallback(
-                _playlist_actor_candidates(settings, url, limit)[:1],
-                max_items=limit,
-                is_valid=lambda rows: bool(_valid_video_items(rows)),
-            )
-            items = _valid_video_items(items)
-            if not items:
-                raise HTTPException(status_code=404, detail="Playlist not found")
-            videos = [_video_card(v) for v in items[:limit]]
-            first = items[0] if items else {}
-            ctx["source"] = "apify"
-            channel_name = safe_str(first.get("channelName") or first.get("channel"))
-            return {
-                "platform": "youtube",
-                "url": url,
-                "id": pid,
-                "title": safe_str(first.get("playlistTitle") or first.get("playlistName")),
-                "channelName": channel_name,
-                "owner": {"name": channel_name} if channel_name else None,
-                "totalReturned": len(videos),
-                "videos": videos,
-            }
+            raise HTTPException(status_code=404, detail="Playlist not found")
 
         data = await cached_or_run(
             endpoint="youtube.playlist",
-            params={"url": url, "limit": limit, "fast": fast, "v": 11},
+            params={"url": url, "v": 12},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        if ctx.get("source") == "direct":
-            ctx["credits_override"] = CREDIT_YT_PLAYLIST_NATIVE
-        else:
-            ctx["credits_override"] = _scaled_credits(len(data["videos"]), RATE_YT_VIDEO, 5)
+        ctx["credits_override"] = CREDIT_YT_PLAYLIST_META
         return ApiResponse(data=data)
 
 

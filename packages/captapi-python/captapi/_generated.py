@@ -79,25 +79,24 @@ class YoutubeApi:
         """
         return self._t.get("/v1/youtube/channel-videos", {"url": url, "limit": limit, "cursor": cursor, "fast": fast, "cache": cache})
 
-    def playlist_videos(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Playlist Videos — List videos in a YouTube playlist. (2 credits)
+    def playlist_videos(self, *, url: str, limit: float | None = None, cursor: str | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Playlist Videos — Paginated playlist contents with cursor. (2 credits/page)
 
         :param url: YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max items for this page. Default 50, max 500. Flat 2 credits per page — limit does not multiply.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param fast: Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/youtube/playlist-videos", {"url": url, "limit": limit, "fast": fast, "cache": cache})
+        return self._t.get("/v1/youtube/playlist-videos", {"url": url, "limit": limit, "cursor": cursor, "fast": fast, "cache": cache})
 
-    def playlist(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Playlist — Playlist metadata plus videos from a YouTube playlist. (2 credits)
+    def playlist(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Playlist — Metadata only (title, channel{}, totalVideos, thumbnail). (1 credit)
 
         :param url: YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param fast: Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/youtube/playlist", {"url": url, "limit": limit, "fast": fast, "cache": cache})
+        return self._t.get("/v1/youtube/playlist", {"url": url, "cache": cache})
 
     def shorts_transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Transcript — Transcript of a YouTube Short. (1 credit)
@@ -294,25 +293,24 @@ class AsyncYoutubeApi:
         """
         return await self._t.get("/v1/youtube/channel-videos", {"url": url, "limit": limit, "cursor": cursor, "fast": fast, "cache": cache})
 
-    async def playlist_videos(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Playlist Videos — List videos in a YouTube playlist. (2 credits)
+    async def playlist_videos(self, *, url: str, limit: float | None = None, cursor: str | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Playlist Videos — Paginated playlist contents with cursor. (2 credits/page)
 
         :param url: YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max items for this page. Default 50, max 500. Flat 2 credits per page — limit does not multiply.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param fast: Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/youtube/playlist-videos", {"url": url, "limit": limit, "fast": fast, "cache": cache})
+        return await self._t.get("/v1/youtube/playlist-videos", {"url": url, "limit": limit, "cursor": cursor, "fast": fast, "cache": cache})
 
-    async def playlist(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Playlist — Playlist metadata plus videos from a YouTube playlist. (2 credits)
+    async def playlist(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Playlist — Metadata only (title, channel{}, totalVideos, thumbnail). (1 credit)
 
         :param url: YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param fast: Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/youtube/playlist", {"url": url, "limit": limit, "fast": fast, "cache": cache})
+        return await self._t.get("/v1/youtube/playlist", {"url": url, "cache": cache})
 
     async def shorts_transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Transcript — Transcript of a YouTube Short. (1 credit)

@@ -11,6 +11,8 @@ Audit habit: check footer stamp `N/M · docs YYYY-MM-DD` before judging a page. 
 - [x] `hasCreatorHeart`: inactive tip ? true (cache bump comments / comment-replies)
 - [x] `playlist` + `playlist-videos`: enrich (ISO publishedAt, exact views, video id, channel{})
 - [x] `playlist-videos` example: `totalVideos` + `channel{}`
+- [x] `playlist` metadata-only (1 credit) vs `playlist-videos` paginated contents (cursor, 2/page)
+- [x] playlist envelope: `channel{}` (not `owner` / `channelName`); `commentCount*` only on short rows
 - [x] `channel-playlists`: `id` field
 - [x] `channel-videos` / `channel-streams` / `channel-shorts`: player enrich path in code
 - [x] `popular-hashtags`: Creative Center population videoCount vs sampleVideoCount (verify on current docs stamp)

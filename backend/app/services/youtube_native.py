@@ -22,6 +22,7 @@ import base64
 import json
 import re
 import shlex
+import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from typing import Any, Iterator
@@ -1479,12 +1480,13 @@ def finalize_channel_list_card(
     shelf: dict[str, Any] | None = None,
     content_type: str = "video",
 ) -> dict[str, Any]:
-    """One row shape for ``channel-videos`` / ``channel-shorts`` / streams.
+    """One row shape for ``channel-videos`` / ``channel-shorts`` / playlist rows.
 
     Exact ``publishedAt`` from ``reel_item_watch`` microformat when available —
     not ``publishedTimeApprox`` (that vocabulary stays on comments / search).
     Shelf relative labels remain in ``publishedTimeText``. Shared nullable keys
-    (genre, badges, durationFormatted, commentCount*) are always present.
+    (genre, badges, durationFormatted) are always present. ``commentCount*`` is
+    emitted only for ``type=short`` — long-form list enrich never populates it.
     """
     from app.utils.media_urls import (
         canonicalize_youtube_channel_url,
@@ -1515,10 +1517,11 @@ def finalize_channel_list_card(
         "durationFormatted": None,
         "thumbnailUrl": thumbnail_url_for_video_id(vid),
         "channel": None,
-        "commentCount": None,
-        "commentCountText": None,
-        "commentCountIsApproximate": None,
     }
+    if typ == "short":
+        out["commentCount"] = None
+        out["commentCountText"] = None
+        out["commentCountIsApproximate"] = None
 
     if not isinstance(details, dict):
         if shelf.get("title"):
@@ -1598,7 +1601,7 @@ def finalize_channel_list_card(
     }
     out["channel"] = {k: v for k, v in channel.items() if v not in (None, "")} or None
 
-    if details.get("commentCount") is not None:
+    if typ == "short" and details.get("commentCount") is not None:
         cc = safe_int(details.get("commentCount"))
         if cc is not None:
             out["commentCount"] = cc
@@ -1803,7 +1806,8 @@ def _playlist_total_videos(data: Any, header: dict[str, Any] | None) -> int | No
     return None
 
 
-def _playlist_owner(data: Any, header: dict[str, Any] | None) -> dict[str, Any]:
+def _playlist_channel(data: Any, header: dict[str, Any] | None) -> dict[str, Any]:
+    """Owning channel — same ``channel{id,title,url,handle}`` shape as siblings."""
     owner_node = None
     if isinstance(header, dict):
         owner_node = header.get("ownerText")
@@ -1820,27 +1824,37 @@ def _playlist_owner(data: Any, header: dict[str, Any] | None) -> dict[str, Any]:
         "url": None,
         "thumbnail": None,
     }
-    # Normalize to SC-like owner{id,name,url,handle}; keep title alias.
-    name = channel.get("title")
+    title = channel.get("title")
     return {
-        "id": channel.get("id"),
-        "name": name,
-        "title": name,
-        "url": channel.get("url")
-        or (f"https://www.youtube.com/channel/{channel['id']}" if channel.get("id") else None),
-        "handle": channel.get("handle"),
+        k: v
+        for k, v in {
+            "id": channel.get("id"),
+            "title": title,
+            "url": channel.get("url")
+            or (
+                f"https://www.youtube.com/channel/{channel['id']}"
+                if channel.get("id")
+                else None
+            ),
+            "handle": channel.get("handle"),
+        }.items()
+        if v not in (None, "")
     }
 
 
-async def playlist_native(url: str, limit: int) -> dict[str, Any] | None:
-    """Videos (plus title/owner/totalVideos) straight from a /playlist page."""
-    data, _ = await fetch_page_data(url)
-    if data is None:
-        return None
-    videos, _ = await _paginate(data, limit=limit, continuation_endpoint="browse")
-    if not videos:
-        return None
+def _playlist_thumbnail(data: Any) -> str | None:
+    for side in walk_find(data, "playlistSidebarPrimaryInfoRenderer"):
+        got = _best_thumb(side.get("thumbnailRenderer") or side)
+        if got:
+            return got
+    for hdr in walk_find(data, "playlistHeaderRenderer"):
+        got = _best_thumb(hdr)
+        if got:
+            return got
+    return None
 
+
+def _playlist_header_meta(data: Any, url: str) -> dict[str, Any]:
     title = None
     header: dict[str, Any] | None = None
     for meta in walk_find(data, "playlistMetadataRenderer"):
@@ -1851,13 +1865,6 @@ async def playlist_native(url: str, limit: int) -> dict[str, Any] | None:
         title = title or text_of(hdr.get("title"))
         break
 
-    owner = _playlist_owner(data, header)
-    channel_name = owner.get("name")
-    if not channel_name:
-        channel_name = videos[0].get("channelName")
-        owner["name"] = channel_name
-        owner["title"] = channel_name
-
     playlist_id = None
     m = re.search(r"[?&]list=([\w-]+)", url or "")
     if m:
@@ -1865,25 +1872,228 @@ async def playlist_native(url: str, limit: int) -> dict[str, Any] | None:
     if not playlist_id and isinstance(header, dict):
         playlist_id = safe_str(header.get("playlistId"))
 
-    total_videos = _playlist_total_videos(data, header)
-    # Drop empty nested channel thumbs on video cards for a leaner payload.
-    for vid in videos:
-        coerce_published_fields(vid)
-        ch = vid.get("channel")
-        if isinstance(ch, dict):
-            vid["channel"] = {k: v for k, v in ch.items() if v is not None}
-            if not vid["channel"]:
-                vid.pop("channel", None)
-        if vid.get("publishedTimeText") is None:
-            vid.pop("publishedTimeText", None)
-
+    channel = _playlist_channel(data, header)
     return {
         "id": playlist_id,
         "title": title,
-        "channelName": channel_name,
-        "owner": {k: v for k, v in owner.items() if v is not None},
+        "channel": channel or None,
+        "totalVideos": _playlist_total_videos(data, header),
+        "thumbnailUrl": _playlist_thumbnail(data),
+    }
+
+
+_PLAYLIST_CURSOR_PREFIX = "yp1."
+
+
+def _encode_playlist_cursor(
+    *,
+    ids: list[str],
+    continuations: list[str],
+    total_videos: int | None = None,
+    playlist_id: str | None = None,
+) -> str | None:
+    """Opaque cursor: leftover video ids from the current browse page + tokens.
+
+    YouTube playlist HTML often embeds ~100 rows while clients request 50 —
+    truncating and returning a raw Innertube token would skip the leftover
+    half of the page. Buffer those ids in the cursor first.
+    """
+    ids = [i for i in ids if i]
+    conts = [c for c in continuations if c]
+    if not ids and not conts:
+        return None
+    payload = {
+        "v": 1,
+        "ids": ids,
+        "c": conts,
+        "tv": total_videos,
+        "pid": playlist_id,
+    }
+    raw = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return _PLAYLIST_CURSOR_PREFIX + base64.urlsafe_b64encode(raw).decode("ascii").rstrip(
+        "="
+    )
+
+
+def _decode_playlist_cursor(cursor: str) -> dict[str, Any] | None:
+    raw = (cursor or "").strip()
+    if not raw:
+        return None
+    if raw.startswith(_PLAYLIST_CURSOR_PREFIX):
+        b64 = raw[len(_PLAYLIST_CURSOR_PREFIX) :]
+        pad = "=" * (-len(b64) % 4)
+        try:
+            payload = json.loads(base64.urlsafe_b64decode(b64 + pad).decode("utf-8"))
+        except (ValueError, json.JSONDecodeError, UnicodeDecodeError):
+            return None
+        if not isinstance(payload, dict):
+            return None
+        ids = [safe_str(i) for i in (payload.get("ids") or []) if safe_str(i)]
+        conts_raw = payload.get("c") or []
+        if isinstance(conts_raw, str):
+            conts_raw = [conts_raw]
+        conts = [safe_str(c) for c in conts_raw if safe_str(c)]
+        return {
+            "ids": ids,
+            "c": conts,
+            "tv": safe_int(payload.get("tv")),
+            "pid": safe_str(payload.get("pid")),
+        }
+    # Bare Innertube continuation (tests / older clients).
+    return {"ids": [], "c": [raw], "tv": None, "pid": None}
+
+
+def _stub_playlist_cards(ids: list[str]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for vid in ids:
+        if not vid:
+            continue
+        out.append(
+            {
+                "type": "video",
+                "id": vid,
+                "url": f"https://www.youtube.com/watch?v={vid}",
+                "title": "",
+                "thumbnailUrl": thumbnail_url_for_video_id(vid),
+            }
+        )
+    return out
+
+
+async def _playlist_browse_continuation(
+    tokens: list[str],
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Follow playlist browse tokens until a page yields cards (or exhausted).
+
+    On success, return only continuations from that payload — sibling tokens from
+    the previous page are often shelf/noise and must not keep hasMore alive.
+    """
+    pending = [t for t in tokens if t]
+    seen_tok: set[str] = set(pending)
+    hops = 0
+    while pending and hops < 6:
+        token = pending.pop(0)
+        hops += 1
+        payload = await innertube("browse", {"continuation": token}, timeout=18)
+        if payload is None:
+            continue
+        cards = collect_video_cards(payload)
+        if cards:
+            return cards, find_continuation_tokens(payload)
+        for nxt in find_continuation_tokens(payload):
+            if nxt not in seen_tok:
+                seen_tok.add(nxt)
+                pending.append(nxt)
+    return [], []
+
+
+async def playlist_meta_native(url: str) -> dict[str, Any] | None:
+    """Playlist identity only — no video rows (cheap /playlist path)."""
+    data, _ = await fetch_page_data(url)
+    if data is None:
+        return None
+    meta = _playlist_header_meta(data, url)
+    if not meta.get("id") and not meta.get("title") and meta.get("totalVideos") is None:
+        return None
+    return meta
+
+
+async def playlist_videos_native(
+    url: str,
+    limit: int,
+    *,
+    cursor: str | None = None,
+) -> dict[str, Any] | None:
+    """One page of playlist videos + ``nextCursor`` (buffer-aware)."""
+    capped = max(1, min(int(limit or 50), 500))
+    buf_ids: list[str] = []
+    conts: list[str] = []
+    total_videos: int | None = None
+    playlist_id: str | None = None
+    fetch_ms = 0.0
+    browse_ms = 0.0
+
+    if cursor:
+        decoded = _decode_playlist_cursor(cursor)
+        if decoded is None:
+            return {"videos": [], "nextCursor": None, "invalidCursor": True}
+        buf_ids = list(decoded.get("ids") or [])
+        conts = list(decoded.get("c") or [])
+        total_videos = decoded.get("tv")
+        playlist_id = decoded.get("pid")
+    else:
+        t_fetch = time.perf_counter()
+        data, _ = await fetch_page_data(url)
+        fetch_ms = (time.perf_counter() - t_fetch) * 1000
+        if data is None:
+            return None
+        meta = _playlist_header_meta(data, url)
+        playlist_id = safe_str(meta.get("id"))
+        total_videos = meta.get("totalVideos")
+        cards = collect_video_cards(data)
+        conts = find_continuation_tokens(data)
+        if not cards and not conts:
+            return None
+        buf_ids = [safe_str(c.get("id")) for c in cards if safe_str(c.get("id"))]
+
+    videos: list[dict[str, Any]] = []
+    # Drain buffered ids first (leftover from a prior truncated page).
+    if buf_ids:
+        take = buf_ids[:capped]
+        buf_ids = buf_ids[capped:]
+        videos.extend(_stub_playlist_cards(take))
+
+    # At most one browse hop per HTTP page — further pages use nextCursor.
+    if len(videos) < capped and conts:
+        t_b = time.perf_counter()
+        more, conts = await _playlist_browse_continuation(conts)
+        browse_ms += (time.perf_counter() - t_b) * 1000
+        if more:
+            more_ids = [safe_str(c.get("id")) for c in more if safe_str(c.get("id"))]
+            need = capped - len(videos)
+            videos.extend(_stub_playlist_cards(more_ids[:need]))
+            buf_ids = more_ids[need:] + buf_ids
+
+    next_cursor = _encode_playlist_cursor(
+        ids=buf_ids,
+        continuations=conts,
+        total_videos=total_videos,
+        playlist_id=playlist_id,
+    )
+
+    for vid in videos:
+        coerce_published_fields(vid)
+
+    if not videos and not cursor:
+        return None
+
+    return {
+        "id": playlist_id,
         "totalVideos": total_videos,
         "videos": videos,
+        "nextCursor": next_cursor,
+        "timings": {
+            "fetchMs": round(fetch_ms),
+            "browseMs": round(browse_ms),
+        },
+        "invalidCursor": False,
+    }
+
+
+async def playlist_native(url: str, limit: int) -> dict[str, Any] | None:
+    """Backward-compatible helper: meta + first video page (two fetches)."""
+    meta = await playlist_meta_native(url)
+    page = await playlist_videos_native(url, limit)
+    if not page or not page.get("videos"):
+        return None
+    return {
+        "id": (meta or {}).get("id") or page.get("id"),
+        "title": (meta or {}).get("title"),
+        "channel": (meta or {}).get("channel") if meta else None,
+        "totalVideos": (meta or {}).get("totalVideos") or page.get("totalVideos"),
+        "thumbnailUrl": (meta or {}).get("thumbnailUrl") if meta else None,
+        "videos": page["videos"],
+        "nextCursor": page.get("nextCursor"),
     }
 
 

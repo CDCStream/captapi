@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-08",
     category: "fix",
+    title: "YouTube playlist vs playlist-videos: metadata split + cursor paging",
+    description:
+      "playlist is metadata-only (title, channel{}, totalVideos, thumbnailUrl) at 1 credit — no videos[]. playlist-videos is the paginated contents surface with cursor/nextCursor/hasMore (buffer-aware so page-2 does not skip leftover first-page rows), same enriched row shape as channel-videos, timings{}, flat 2 credits/page. Dropped channelName/owner twins in favour of channel{title}. commentCount* emits only on Shorts list rows.",
+    items: [
+      "playlist-videos: cursor ↔ nextCursor / hasMore to totalVideos (PL1)",
+      "playlist metadata-only @ 1 credit; playlist-videos keeps contents @ 2/page (PL5)",
+      "channel{} naming; drop channelName / owner.name|title twins (PL2)",
+      "commentCount* only on short rows (PL3); timings on both playlist surfaces (PL4)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-08",
+    category: "fix",
     title: "YouTube channel-shorts cursor param + drop dead likeCount on list cards",
     description:
       "Playground and package catalogs expose cursor on channel-shorts (same round-trip as channel-videos). likeCount/likeCountText removed from both channel list shapes — they were null on every row; use video-details for likes. publishedTimeApprox stays only on comments/search.",

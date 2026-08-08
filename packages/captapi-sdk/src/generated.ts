@@ -81,8 +81,10 @@ export interface YoutubeChannelVideosParams {
 export interface YoutubePlaylistVideosParams {
   /** YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 50, max 500. Billed per result. */
+  /** Max items for this page. Default 50, max 500. Flat 2 credits per page — limit does not multiply. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters. */
   fast?: boolean;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
@@ -92,10 +94,6 @@ export interface YoutubePlaylistVideosParams {
 export interface YoutubePlaylistParams {
   /** YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 50, max 500. Billed per result. */
-  limit?: number;
-  /** Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters. */
-  fast?: boolean;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -254,10 +252,11 @@ export class YoutubeApi {
     return this.core.get("/v1/youtube/channel-videos", params);
   }
   /** YouTube Playlist Videos — List videos in a YouTube playlist. (2 credits) */
+  /** YouTube Playlist Videos — Paginated playlist contents with cursor. (2 credits/page) */
   playlistVideos(params: YoutubePlaylistVideosParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/playlist-videos", params);
   }
-  /** YouTube Playlist — Playlist metadata plus videos from a YouTube playlist. (2 credits) */
+  /** YouTube Playlist — Metadata only (title, channel{}, totalVideos, thumbnail). (1 credit) */
   playlist(params: YoutubePlaylistParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/playlist", params);
   }

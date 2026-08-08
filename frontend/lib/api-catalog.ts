@@ -369,16 +369,50 @@ const YOUTUBE: Spec[] = [
     tagline:
       "Channel uploads with cursor pagination — exact publishedAt from reel_item_watch (same as channel-shorts).",
     longDescription:
-      "Send a channel URL, @handle, or UC… id and get uploads as clean JSON with nextCursor + hasMore. Pass nextCursor as cursor for page 2+. Each row shares the channel-shorts shape: exact publishedAt from reel/reel_item_watch microformat (not publishedTimeApprox), publishedTimeText from the shelf label, viewCount + viewCountIsApproximate, durationSeconds + durationFormatted, genre, badges, commentCount trio (null when not hydrated), thumbnailUrl, and nested channel{}. Optional fast=true uses YouTube RSS (exact publishedAt, thinner metadata, no cursor). Flat 2 credits on the native path.",
+      "Send a channel URL, @handle, or UC… id and get uploads as clean JSON with nextCursor + hasMore. Pass nextCursor as cursor for page 2+. Each row shares the channel-shorts / playlist-videos shape: exact publishedAt from reel/reel_item_watch microformat (not publishedTimeApprox), publishedTimeText from the shelf label, viewCount + viewCountIsApproximate, durationSeconds + durationFormatted, genre, badges, thumbnailUrl, and nested channel{}. commentCount* appears only on Shorts rows (channel-shorts). Optional fast=true uses YouTube RSS (exact publishedAt, thinner metadata, no cursor). Flat 2 credits on the native path.",
     delivers: [
       "cursor ↔ nextCursor + hasMore (zero id overlap across pages)",
       "exact publishedAt via reel_item_watch (same source as channel-shorts)",
-      "Shared row shape with channel-shorts (genre, badges, durationFormatted, commentCount*)",
+      "Shared row shape with channel-shorts / playlist-videos (genre, badges, durationFormatted)",
       "channel{} only — drop flat channel* twins",
     ],
   },
-  { slug: "youtube-playlist-videos", name: "YouTube Playlist Videos API", shortName: "Playlist Videos", category: "list", method: "GET", path: "/v1/youtube/playlist-videos", credits: 2 , tagline: "List videos in a YouTube playlist — id, exact views, ISO publishedAt, totalVideos. Flat 2 credits.", longDescription: "Paste a YouTube playlist URL and get the videos as clean JSON: id, url, title, publishedAt (ISO-8601 from the watch player; publishedTimeText keeps YouTube's relative label), exact viewCount (not K/M/B rounded), durationSeconds, thumbnailUrl, channelName + channel{id,title,handle,url}. Also returns playlist id and totalVideos (full playlist size vs totalReturned for this page). Prefer Playlist when you also need owner metadata. Optional fast=true uses YouTube RSS (exact publishedAt, fewer items, no views). Flat 2 credits on the native path." },
-  { slug: "youtube-playlist", name: "YouTube Playlist API", shortName: "Playlist", category: "list", method: "GET", path: "/v1/youtube/playlist", credits: 2 , tagline: "YouTube playlist metadata + videos — owner{}, totalVideos, exact views, ISO publishedAt. Flat 2 credits.", longDescription: "Paste a YouTube playlist URL and get playlist id/title, channelName, owner{id,name,url,handle}, totalVideos (full playlist size), totalReturned (this page), and videos[] with id, url, title, publishedAt (ISO from the watch player; publishedTimeText keeps relative labels), exact viewCount, durationSeconds, thumbnailUrl, and channel{id,title,handle,url}. Prefer this over Playlist Videos when you need owner + total size. Optional fast=true uses YouTube RSS. Flat 2 credits on the native path." },
+  {
+    slug: "youtube-playlist-videos",
+    name: "YouTube Playlist Videos API",
+    shortName: "Playlist Videos",
+    category: "list",
+    method: "GET",
+    path: "/v1/youtube/playlist-videos",
+    credits: 2,
+    tagline:
+      "Paginated playlist contents — cursor/nextCursor/hasMore, same row shape as channel-videos. Flat 2 credits/page.",
+    longDescription:
+      "Paste a YouTube playlist URL and get one page of videos as clean JSON (same enriched row shape as channel-videos / channel-shorts): id, url, title, publishedAt (ISO from reel_item_watch), publishedTimeText, viewCount, durationSeconds/durationFormatted, genre, badges, thumbnailUrl, channel{}. Envelope: id, totalVideos, totalReturned, nextCursor, hasMore, timings. Pass nextCursor for the next page until hasMore is false. Optional fast=true uses YouTube RSS (no cursor). Flat 2 credits per page on the native path. For title/channel/thumbnail without videos, use Playlist (1 credit).",
+    highlights: [
+      "cursor ↔ nextCursor / hasMore (pages to totalVideos)",
+      "Shared row shape with channel-videos",
+      "timings{path,fetchMs,browseMs,enrichMs,totalMs}",
+    ],
+  },
+  {
+    slug: "youtube-playlist",
+    name: "YouTube Playlist API",
+    shortName: "Playlist",
+    category: "list",
+    method: "GET",
+    path: "/v1/youtube/playlist",
+    credits: 1,
+    tagline:
+      "Playlist metadata only — title, channel{}, totalVideos, thumbnailUrl. No videos[]. Flat 1 credit.",
+    longDescription:
+      "Paste a YouTube playlist URL and get identity JSON: platform, url, id, title, channel{id,title,handle,url}, totalVideos, thumbnailUrl, timings. No videos array — use Playlist Videos for paginated contents. Flat 1 credit (single HTML fetch, no player enrich).",
+    highlights: [
+      "Metadata only (no videos[]) — 1 credit",
+      "channel{} (not owner / channelName twins)",
+      "Pair with /playlist-videos for contents",
+    ],
+  },
 
   {
     slug: "youtube-shorts-transcript",
@@ -4003,8 +4037,15 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     { name: "region", type: "string", required: false, description: "ISO country code for localized results (default US)." },
   ],
   "youtube-channel-videos": [up(YT_CHANNEL), lpFlat(20, 200, 2), CURSOR, fastRss()],
-  "youtube-playlist-videos": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lpFlat(50, 500, 2), fastRss()],
-  "youtube-playlist": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lpFlat(50, 500, 2), fastRss()],
+  "youtube-playlist-videos": [
+    up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."),
+    lpFlat(50, 500, 2),
+    CURSOR,
+    fastRss(),
+  ],
+  "youtube-playlist": [
+    up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."),
+  ],
   "youtube-shorts-transcript": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-summarizer": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-stats": [up(YT_SHORTS)],
@@ -8242,12 +8283,17 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
       "Publish time as ISO-8601 when YouTube exposes an absolute timestamp; approximate when derived from a relative label — see publishedTimeText.",
   },
   "youtube-playlist": {
-    channel: "YouTube channel that owns the playlist.",
+    channel: "Owning YouTube channel — id, title, handle, url (same shape as sibling list endpoints).",
+    thumbnailUrl: "Playlist cover thumbnail from the sidebar when YouTube exposes one.",
+    totalVideos: "Full playlist size from the header (not the page length).",
   },
   "youtube-playlist-videos": {
-    channel: "YouTube channel for the playlist/video when present.",
+    channel: "Channel object on each video row (uploader), same as channel-videos.",
     publishedAt:
-      "ISO-8601 when available; approximate from relative labels on list cards — see publishedTimeText.",
+      "Exact ISO-8601 from reel_item_watch when available; publishedTimeText keeps shelf relative labels.",
+    nextCursor: "Opaque cursor for the next page; null when hasMore is false.",
+    hasMore: "True when nextCursor is present — more videos remain toward totalVideos.",
+    timings: "Stage breakdown: path, fetchMs, browseMs, enrichMs, totalMs.",
   },
   "youtube-channel-details": {
     platform: "Platform identifier for this response (matches the endpoint's platform).",
