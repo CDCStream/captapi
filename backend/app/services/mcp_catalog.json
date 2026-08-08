@@ -445,7 +445,7 @@
     "name": "YouTube Trending Shorts",
     "path": "/v1/youtube/trending-shorts",
     "credits": 2,
-    "summary": "YouTube Shorts reel/trending feed (not a keyword search).",
+    "summary": "Shorts reel_watch_sequence — fixed window per call (no cursor), not a keyword search.",
     "params": [
       {
         "name": "q",
@@ -473,7 +473,7 @@
     "name": "YouTube Channel Streams",
     "path": "/v1/youtube/channel-streams",
     "credits": 2,
-    "summary": "Channel Live tab only (empty when hasLiveTab=false) — player-enriched streams.",
+    "summary": "Channel Live tab only — 0 credits when hasLiveTab=false; flat 2 when streams are fetched.",
     "params": [
       {
         "name": "url",
@@ -501,7 +501,7 @@
     "name": "YouTube Hashtag Search",
     "path": "/v1/youtube/hashtag-search",
     "credits": 20,
-    "summary": "Search YouTube videos by hashtag.",
+    "summary": "Hashtag page feed — nested channel{}, viewCountIsApproximate; fixed shelf, billed per result.",
     "params": [
       {
         "name": "q",

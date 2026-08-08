@@ -282,15 +282,15 @@ export class YoutubeApi {
   channelShorts(params: YoutubeChannelShortsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-shorts", params);
   }
-  /** YouTube Trending Shorts — YouTube Shorts reel/trending feed (not a keyword search). (2 credits) */
+  /** YouTube Trending Shorts — Shorts reel_watch_sequence — fixed window per call (no cursor), not a keyword search. (2 credits) */
   trendingShorts(params: YoutubeTrendingShortsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/trending-shorts", params);
   }
-  /** YouTube Channel Streams — Channel Live tab only (empty when hasLiveTab=false) — player-enriched streams. (2 credits) */
+  /** YouTube Channel Streams — Channel Live tab only — 0 credits when hasLiveTab=false; flat 2 when streams are fetched. (2 credits) */
   channelStreams(params: YoutubeChannelStreamsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-streams", params);
   }
-  /** YouTube Hashtag Search — Search YouTube videos by hashtag. (20 credits) */
+  /** YouTube Hashtag Search — Hashtag page feed — nested channel{}, viewCountIsApproximate; fixed shelf, billed per result. (20 credits) */
   hashtagSearch(params: YoutubeHashtagSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/hashtag-search", params);
   }

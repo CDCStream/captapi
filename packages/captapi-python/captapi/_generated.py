@@ -145,7 +145,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/channel-shorts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def trending_shorts(self, *, q: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Trending Shorts — YouTube Shorts reel/trending feed (not a keyword search). (2 credits)
+        """YouTube Trending Shorts — Shorts reel_watch_sequence — fixed window per call (no cursor), not a keyword search. (2 credits)
 
         :param q: Optional topic seed for the reel sequence. Omit for default trending feed.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
@@ -154,7 +154,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/trending-shorts", {"q": q, "limit": limit, "cache": cache})
 
     def channel_streams(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Streams — Channel Live tab only (empty when hasLiveTab=false) — player-enriched streams. (2 credits)
+        """YouTube Channel Streams — Channel Live tab only — 0 credits when hasLiveTab=false; flat 2 when streams are fetched. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
@@ -163,7 +163,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/channel-streams", {"url": url, "limit": limit, "cache": cache})
 
     def hashtag_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Hashtag Search — Search YouTube videos by hashtag. (20 credits)
+        """YouTube Hashtag Search — Hashtag page feed — nested channel{}, viewCountIsApproximate; fixed shelf, billed per result. (20 credits)
 
         :param q: Hashtag with or without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -360,7 +360,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/channel-shorts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def trending_shorts(self, *, q: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Trending Shorts — YouTube Shorts reel/trending feed (not a keyword search). (2 credits)
+        """YouTube Trending Shorts — Shorts reel_watch_sequence — fixed window per call (no cursor), not a keyword search. (2 credits)
 
         :param q: Optional topic seed for the reel sequence. Omit for default trending feed.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
@@ -369,7 +369,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/trending-shorts", {"q": q, "limit": limit, "cache": cache})
 
     async def channel_streams(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Streams — Channel Live tab only (empty when hasLiveTab=false) — player-enriched streams. (2 credits)
+        """YouTube Channel Streams — Channel Live tab only — 0 credits when hasLiveTab=false; flat 2 when streams are fetched. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
@@ -378,7 +378,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/channel-streams", {"url": url, "limit": limit, "cache": cache})
 
     async def hashtag_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Hashtag Search — Search YouTube videos by hashtag. (20 credits)
+        """YouTube Hashtag Search — Hashtag page feed — nested channel{}, viewCountIsApproximate; fixed shelf, billed per result. (20 credits)
 
         :param q: Hashtag with or without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.

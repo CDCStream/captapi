@@ -499,19 +499,21 @@ const YOUTUBE: Spec[] = [
     method: "GET",
     path: "/v1/youtube/trending-shorts",
     credits: 2,
-    tagline: "YouTube Shorts recommendation sequence — not a global trending chart or keyword search.",
+    tagline:
+      "YouTube Shorts recommendation sequence — fixed window per call (no cursor), not a global chart.",
     longDescription:
-      "Served from YouTube's reel_watch_sequence (Shorts recommendation feed — same surface ScrapeCreators uses for /v1/youtube/shorts/trending). This is not a global trending ranking: results are session-dependent, may include older or re-uploaded Shorts, and can vary between calls. Response source is always reel_watch_sequence on the native path. Each row is player-enriched with nested channel{id,url,title,handle} (https + percent-decoded @handle), exact viewCount + viewCountText + viewCountIsApproximate, durationSeconds + durationFormatted, publishedAt/genre when microformat exposes them, and commentCount with commentCountIsApproximate. Flat aliases (channelId/channelUrl/viewCountInt/…) and empty badges/channel.thumbnail are omitted. Optional q seeds the sequence from a topic Short only — values like trending/shorts are ignored (not echoed as query). Flat 2 credits.",
+      "Served from YouTube's reel_watch_sequence (Shorts recommendation feed — same surface ScrapeCreators uses for /v1/youtube/shorts/trending). This is not a global trending ranking: results are session-dependent, may include older or re-uploaded Shorts, and can vary between calls. Trending returns a fixed window up to limit — there is no hasMore/nextCursor (unlike channel-videos / channel-shorts / search). Response source is always reel_watch_sequence on the native path. Each row is player-enriched with nested channel{id,url,title,handle} (https + percent-decoded @handle), exact viewCount + viewCountText + viewCountIsApproximate, durationSeconds + durationFormatted, publishedAt/genre when microformat exposes them, and commentCount with commentCountIsApproximate. Flat aliases (channelId/channelUrl/viewCountInt/…) and empty badges/channel.thumbnail are omitted. Optional q seeds the sequence from a topic Short only — values like trending/shorts are ignored (not echoed as query). Flat 2 credits.",
     delivers: [
       "reel_watch_sequence feed — not a keyword search for \"trending\"",
+      "Fixed window per call — no cursor / hasMore",
       "Nested channel{} with https + decoded @handle",
       "Exact views + commentCountIsApproximate; no dead empty fields",
       "Flat 2 credits",
     ],
     platformLimits: [
       "Not a global trending chart — recommendation sequence varies between calls.",
+      "Fixed window by design — no hasMore/nextCursor; each call returns a fresh batch up to limit.",
       "Older Shorts and re-uploads can appear; filter by publishedAt client-side if you need freshness.",
-      "No cursor — each call returns a fresh batch up to limit.",
     ],
   },
   {
@@ -522,14 +524,14 @@ const YOUTUBE: Spec[] = [
     method: "GET",
     path: "/v1/youtube/channel-streams",
     credits: 2,
-    tagline: "Channel Live tab only — past streams + upcoming; empty when the channel has no Live tab.",
+    tagline: "Channel Live tab only — past streams + upcoming; 0 credits when hasLiveTab is false.",
     longDescription:
-      "Reads YouTube's Live tab (not Videos). Channels without a Live tab (common for non-streamers) return totalReturned:0 and hasLiveTab:false instead of silently echoing Videos. Each row is player-enriched with exact viewCount, ISO publishedAt + publishedTimeText, thumbnailUrl, and type stream|upcoming|video. Flat 2 credits on the native path (was incorrectly ~1/result at 20).",
+      "Reads YouTube's Live tab (not Videos). Channels without a Live tab (common for non-streamers) return totalReturned:0 and hasLiveTab:false instead of silently echoing Videos — billed 0 credits (tab check only; no stream fetch). When the Live tab exists, each row is player-enriched with exact viewCount, ISO publishedAt + publishedTimeText, thumbnailUrl, and type stream|upcoming|video at flat 2 credits on the native path.",
     delivers: [
       "Live tab only — never Videos fallthrough",
       "hasLiveTab false when the channel has no Live tab",
+      "0 credits when hasLiveTab is false; flat 2 when streams are fetched",
       "Exact viewCount + ISO publishedAt via player enrich",
-      "Flat 2 credits native",
     ],
   },
   {
@@ -542,14 +544,19 @@ const YOUTUBE: Spec[] = [
     credits: 20,
     creditsPerResult: 1,
     tagline:
-      "Videos from youtube.com/hashtag/{name} — type (video|short|live), id, channelId. Not keyword search.",
+      "Videos from youtube.com/hashtag/{name} — nested channel{}, viewCountIsApproximate. Not keyword search.",
     longDescription:
-      "Pass a hashtag (with or without #) and get the videos listed on YouTube's hashtag page as clean JSON. This is the /hashtag/{name} feed — not a search?q= keyword query. Titles often omit the #tag (it may live only in the description); association is the hashtag page itself. Each result includes type (video|short|live), id, url, title, publishedAt, viewCount, durationSeconds, channelName, and channelId when YouTube exposes them. Billed per result (~1 credit each).",
+      "Pass a hashtag (with or without #) and get the videos listed on YouTube's hashtag page as clean JSON. This is the /hashtag/{name} feed — not a search?q= keyword query. Titles often omit the #tag (it may live only in the description); association is the hashtag page itself. Envelope field is hashtag (the normalized tag). Each result includes type (video|short|live), id, url, title, nested channel{}, viewCount + viewCountIsApproximate, and durationSeconds when YouTube exposes them. YouTube's hashtag shelf is a fixed first window (no continuation token / cursor) — billed per returned result (~1 credit each).",
     delivers: [
       "Hashtag page feed (not keyword search)",
       "type: video | short | live on every row",
-      "id + channelId when available",
-      "ISO publishedAt + numeric viewCount",
+      "Nested channel{} — no flat channelName/channelId twins",
+      "viewCountIsApproximate on every row with viewCount",
+      "Fixed first window — no cursor; billed per result",
+    ],
+    platformLimits: [
+      "YouTube's hashtag page exposes no continuation token — one fixed shelf per call (typically ~20–30 cards).",
+      "Billed per returned result; lower limit ⇒ lower cost, but you cannot page past the first shelf.",
     ],
   },
   { slug: "youtube-comment-replies", name: "YouTube Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/youtube/comment-replies", credits: 2 },
@@ -7111,7 +7118,7 @@ const FIELD_DESCS: Record<string, string> = {
   startFormatted: "Segment start as M:SS or H:MM:SS.",
   endFormatted: "Segment end as M:SS or H:MM:SS.",
   hasLiveTab:
-    "Whether the YouTube channel exposes a Live tab. False ⇒ channel-streams returns no rows (not Videos fallthrough).",
+    "Whether the YouTube channel exposes a Live tab. False ⇒ channel-streams returns no rows (not Videos fallthrough) and bills 0 credits.",
   productType: "Platform product type (e.g. clips, feed). Null when not applicable (Image/Sidecar) — never an empty string.",
   pollOptions:
     "Poll choices when postType is poll. Each item has text, voteCount (null when YouTube gates counts behind sign-in), and percentage.",

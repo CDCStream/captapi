@@ -12,11 +12,35 @@ def test_yt_hashtag_card_type_from_shorts_url() -> None:
             "durationSeconds": 19,
             "channelId": "UCabc",
             "channelName": "Ch",
+            "viewCount": 1_200_000,
+            "viewCountIsApproximate": True,
         }
     )
     assert card["type"] == "short"
     assert card["id"] == "hwf0tDWlP7Q"
-    assert card["channelId"] == "UCabc"
+    assert "channelId" not in card
+    assert "channelName" not in card
+    assert card["channel"] == {"id": "UCabc", "title": "Ch"}
+    assert card["viewCount"] == 1_200_000
+    assert card["viewCountIsApproximate"] is True
+
+
+def test_yt_hashtag_card_exact_views_flag_false() -> None:
+    card = _yt_hashtag_result_card(
+        {
+            "type": "video",
+            "id": "3iAiWIytqdw",
+            "url": "https://www.youtube.com/watch?v=3iAiWIytqdw",
+            "title": "Forever Young",
+            "durationSeconds": 265,
+            "viewCount": 42,
+            "channel": {"id": "UCx", "title": "Name"},
+        }
+    )
+    assert card["type"] == "video"
+    assert card["channel"]["id"] == "UCx"
+    assert "channelId" not in card
+    assert card["viewCountIsApproximate"] is False
 
 
 def test_yt_hashtag_card_type_watch() -> None:
