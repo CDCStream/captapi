@@ -8728,6 +8728,11 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     likes:
       "Like count as a number when YouTube exposes it — prefer likeCount + likeCountText on this endpoint.",
     images: "Image URLs attached to the community post.",
+    isEdited:
+      "True when YouTube marks the post as edited. The relative time label is returned without a trailing (edited).",
+    commentCount: "Comment total on the post when InnerTube exposes it.",
+    commentCountIsApproximate:
+      "True when commentCount was parsed from a rounded label (e.g. 16K).",
   },
   "youtube-channel-streams": {
     durationSeconds: "Live stream or VOD length in seconds when YouTube exposes it.",
@@ -8747,12 +8752,6 @@ const SLUG_FIELD_DESCS: Record<string, Record<string, string>> = {
     parentReplyCount:
       "Total replies on the parent top-level comment when YouTube exposes it. May exceed totalReturned; page with nextCursor.",
     commentId: "Top-level parent comment id. Nested reply ids return 404.",
-  },
-  "youtube-community-post-details": {
-    isEdited: "True when YouTube marks the post as edited. The relative time label is returned without a trailing (edited).",
-    commentCount: "Comment total on the post when InnerTube exposes it.",
-    commentCountIsApproximate:
-      "True when commentCount was parsed from a rounded label (e.g. 16K).",
   },
   "reddit-subreddit-details": {
     category:
