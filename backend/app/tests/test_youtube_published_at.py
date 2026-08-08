@@ -5,8 +5,10 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from app.services.youtube_native import (
+    _comment_payload_to_api,
     _comment_published_time,
     _has_creator_heart,
+    _resolve_youtube_category_id,
     approximate_iso_from_relative,
     coerce_published_fields,
     published_fields,
@@ -16,10 +18,30 @@ NOW = datetime(2026, 8, 2, 12, 0, 0, tzinfo=timezone.utc)
 
 
 def test_approximate_iso_from_relative_common_labels() -> None:
-    assert approximate_iso_from_relative("4 days ago", now=NOW) == "2026-07-29T12:00:00.000Z"
-    assert approximate_iso_from_relative("1 month ago", now=NOW) == "2026-07-03T12:00:00.000Z"
-    assert approximate_iso_from_relative("5d ago", now=NOW) == "2026-07-28T12:00:00.000Z"
-    assert approximate_iso_from_relative("Streamed 3 days ago", now=NOW) == "2026-07-30T12:00:00.000Z"
+    # Truncated to day — not fetch-time wall-clock seconds.
+    assert approximate_iso_from_relative("4 days ago", now=NOW) == "2026-07-29T00:00:00.000Z"
+    assert approximate_iso_from_relative("1 month ago", now=NOW) == "2026-07-03T00:00:00.000Z"
+    assert approximate_iso_from_relative("5d ago", now=NOW) == "2026-07-28T00:00:00.000Z"
+    assert approximate_iso_from_relative("Streamed 3 days ago", now=NOW) == "2026-07-30T00:00:00.000Z"
+
+
+def test_hour_label_truncated_to_hour() -> None:
+    assert (
+        approximate_iso_from_relative("22 hours ago", now=NOW) == "2026-08-01T14:00:00.000Z"
+    )
+
+
+def test_day_label_stable_across_fetch_times_same_day() -> None:
+    """Same relative day label + same UTC calendar day → identical truncated ISO."""
+    a = approximate_iso_from_relative(
+        "7 days ago",
+        now=datetime(2026, 8, 8, 11, 26, 22, tzinfo=timezone.utc),
+    )
+    b = approximate_iso_from_relative(
+        "7 days ago",
+        now=datetime(2026, 8, 8, 23, 59, 59, tzinfo=timezone.utc),
+    )
+    assert a == b == "2026-08-01T00:00:00.000Z"
 
 
 def test_published_fields_splits_iso_and_text() -> None:
@@ -68,11 +90,51 @@ def test_creator_heart_renderer_with_thumbnail_is_true() -> None:
     )
 
 
-def test_comment_published_time_iso_from_relative_including_edited() -> None:
+def test_comment_published_time_approx_from_relative_including_edited() -> None:
     edited = "1 month ago " + "(edited)"
-    text, iso = _comment_published_time({"publishedTime": edited})
+    text, iso, is_approx = _comment_published_time({"publishedTime": edited})
     assert text == edited
     assert iso is not None and "T" in iso and "ago" not in iso
+    assert is_approx is True
+    # Day precision — :00:00 not fetch-second :22.000
+    assert iso.endswith("T00:00:00.000Z")
+
+
+def test_comment_published_time_exact_not_flagged_approximate() -> None:
+    text, iso, is_approx = _comment_published_time(
+        {
+            "publishedTimeText": "1 year ago",
+            "publishedAt": "2025-01-15T10:11:12.000Z",
+        }
+    )
+    assert iso == "2025-01-15T10:11:12.000Z"
+    assert is_approx is False
+
+
+def test_comment_payload_uses_published_time_approx_not_published_time() -> None:
+    row = _comment_payload_to_api(
+        {
+            "properties": {
+                "commentId": "UgkxTest",
+                "content": {"content": "hello"},
+                "publishedTime": "7 days ago",
+            },
+            "author": {"displayName": "Viewer"},
+            "toolbar": {},
+        }
+    )
+    assert row is not None
+    assert "publishedTime" not in row
+    assert row["publishedTimeText"] == "7 days ago"
+    assert row["publishedTimeApprox"] is not None
+    assert row["publishedTimeIsApproximate"] is True
+    assert row["publishedTimeApprox"].endswith("T00:00:00.000Z")
+
+
+def test_category_id_from_genre_when_id_missing() -> None:
+    assert _resolve_youtube_category_id(None, "Music") == "10"
+    assert _resolve_youtube_category_id("22", "People & Blogs") == "22"
+    assert _resolve_youtube_category_id(None, None) is None
 
 
 def test_community_poll_options_and_numeric_likes() -> None:

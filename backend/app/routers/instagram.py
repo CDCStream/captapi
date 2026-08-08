@@ -24,6 +24,7 @@ from app.services import instagram_native
 from app.services.cache import cache_get, make_cache_key
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript, transcribe_video_url
+from app.services.transcript_segments import join_segment_text, segments_from_seconds
 from app.utils.formatters import (
     first_present,
     normalize_language_code,
@@ -789,21 +790,24 @@ async def instagram_transcript(
         base_credits=CREDIT_TRANSCRIPT,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            full, segments, source, detected = await _fetch_instagram_transcript(url, language=lang)
+            full, segments_raw, source, detected = await _fetch_instagram_transcript(
+                url, language=lang
+            )
             ctx["source"] = source
+            # Catalogue vocabulary: text + segments[{text,startMs,endMs}].
+            segments = segments_from_seconds(segments_raw)
+            text = (full or "").strip() or join_segment_text(segments)
             return {
                 "platform": "instagram",
                 "url": url,
-                "transcript": full,
-                "transcriptSegments": segments,
-                "wordCount": len(full.split()),
-                "segments": len(segments),
+                "text": text,
+                "segments": segments,
                 "language": detected,
             }
 
         data = await cached_or_run(
             endpoint="instagram.transcript",
-            params={"url": url, "language": lang, "v": 11},
+            params={"url": url, "language": lang, "v": 12},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

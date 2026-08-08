@@ -254,11 +254,19 @@ def parse_count_text_meta(value: Any) -> tuple[int | None, bool]:
     return int(base * _MULT.get(suffix, 1)), bool(suffix)
 
 
+_DAY_SCALE_UNITS = frozenset(
+    {"day", "days", "d", "week", "weeks", "w", "month", "months", "mo", "year", "years", "y", "yr"}
+)
+_HOUR_SCALE_UNITS = frozenset({"hour", "hours", "h"})
+_MINUTE_SCALE_UNITS = frozenset({"minute", "minutes", "m"})
+
+
 def approximate_iso_from_relative(value: Any, *, now: datetime | None = None) -> str | None:
     """Turn YouTube labels like ``1 year ago`` / ``5d ago`` into approximate ISO-8601.
 
-    Exact timestamps are rarely on playlist/search cards; this keeps ``publishedAt``
-    sortable/ISO-typed while ``publishedTimeText`` retains the original label.
+    Truncates to the label's precision — day for ``N days/weeks/months/years ago``,
+    hour for ``N hours ago``, minute for ``N minutes ago``. Never claims second/ms
+    resolution from a coarse relative string.
     """
     text = (text_of(value) if not isinstance(value, str) else value) or ""
     text = text.strip()
@@ -277,6 +285,14 @@ def approximate_iso_from_relative(value: Any, *, now: datetime | None = None) ->
         return None
     base = now or datetime.now(timezone.utc)
     approx = base - timedelta(seconds=amount * secs)
+    if unit in _DAY_SCALE_UNITS:
+        approx = approx.replace(hour=0, minute=0, second=0, microsecond=0)
+    elif unit in _HOUR_SCALE_UNITS:
+        approx = approx.replace(minute=0, second=0, microsecond=0)
+    elif unit in _MINUTE_SCALE_UNITS:
+        approx = approx.replace(second=0, microsecond=0)
+    else:
+        approx = approx.replace(microsecond=0)
     return approx.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
@@ -2788,6 +2804,53 @@ def _youtube_available_captions(player: dict[str, Any]) -> list[dict[str, Any]]:
     return out
 
 
+# YouTube Data API assignable category ids. InnerTube ANDROID often omits
+# categoryId while microformat still exposes the category name (genre).
+_YOUTUBE_CATEGORY_NAME_TO_ID: dict[str, str] = {
+    "film & animation": "1",
+    "autos & vehicles": "2",
+    "music": "10",
+    "pets & animals": "15",
+    "sports": "17",
+    "short movies": "18",
+    "travel & events": "19",
+    "gaming": "20",
+    "videoblogging": "21",
+    "people & blogs": "22",
+    "comedy": "23",
+    "entertainment": "24",
+    "news & politics": "25",
+    "howto & style": "26",
+    "education": "27",
+    "science & technology": "28",
+    "nonprofits & activism": "29",
+    "movies": "30",
+    "anime/animation": "31",
+    "action/adventure": "32",
+    "classics": "33",
+    "documentary": "35",
+    "drama": "36",
+    "family": "37",
+    "foreign": "38",
+    "horror": "39",
+    "sci-fi/fantasy": "40",
+    "thriller": "41",
+    "shorts": "42",
+    "shows": "43",
+    "trailers": "44",
+}
+
+
+def _resolve_youtube_category_id(
+    category_id: str | None, genre: str | None
+) -> str | None:
+    if category_id:
+        return category_id
+    if not genre:
+        return None
+    return _YOUTUBE_CATEGORY_NAME_TO_ID.get(genre.strip().lower())
+
+
 def build_youtube_video_details(
     *,
     player: dict[str, Any],
@@ -2889,7 +2952,10 @@ def build_youtube_video_details(
         "thumbnailUrl": best_thumb,
         "thumbnails": thumbnails,
         "genre": safe_str(micro.get("category")),
-        "categoryId": safe_str(details.get("categoryId") or micro.get("categoryId")),
+        "categoryId": _resolve_youtube_category_id(
+            safe_str(details.get("categoryId") or micro.get("categoryId")),
+            safe_str(micro.get("category")),
+        ),
         "tags": safe_list(details.get("keywords")),
         "contentType": content_type,
         "isShort": is_short,
@@ -2967,8 +3033,10 @@ def _comment_author_channel_id(author: dict[str, Any]) -> str | None:
     return None
 
 
-def _comment_published_time(props: dict[str, Any]) -> tuple[str | None, str | None]:
-    """Return (publishedTimeText, publishedTime ISO or None)."""
+def _comment_published_time(
+    props: dict[str, Any],
+) -> tuple[str | None, str | None, bool]:
+    """Return (publishedTimeText, publishedTimeApprox ISO or None, isApproximate)."""
     text = text_of(props.get("publishedTime")) or safe_str(props.get("publishedTimeText"))
     iso: str | None = None
     for key in (
@@ -2988,11 +3056,13 @@ def _comment_published_time(props: dict[str, Any]) -> tuple[str | None, str | No
                 "%Y-%m-%dT%H:%M:%S.000Z"
             )
             break
-    if iso is None and text:
+    if iso is not None:
+        return text, iso, False
+    if text:
         # Strip YouTube's "(edited)" suffix before approximating ISO.
         clean = re.sub(r"\s*\(edited\)\s*$", "", text, flags=re.I).strip()
         iso = approximate_iso_from_relative(clean)
-    return text, iso
+    return text, iso, True
 
 
 def _has_creator_heart(toolbar: dict[str, Any]) -> bool:
@@ -3057,7 +3127,7 @@ def _comment_payload_to_api(p: dict[str, Any]) -> dict[str, Any] | None:
     if not cid or text is None:
         return None
     like_count = parse_count_text(toolbar.get("likeCountLiked") or toolbar.get("likeCountNotliked") or toolbar.get("likeCountA11y"))
-    published_text, published_iso = _comment_published_time(props)
+    published_text, published_iso, published_approx = _comment_published_time(props)
     return {
         "id": cid,
         "author": safe_str(author.get("displayName")),
@@ -3070,7 +3140,10 @@ def _comment_payload_to_api(p: dict[str, Any]) -> dict[str, Any] | None:
         "replyCount": safe_int(toolbar.get("replyCount")) or parse_count_text(toolbar.get("replyCountA11y")),
         "hasCreatorHeart": _has_creator_heart(toolbar),
         "publishedTimeText": published_text,
-        "publishedTime": published_iso,
+        # Derived from the relative label — truncated to label precision; never
+        # claim observed millisecond timestamps YouTube does not expose.
+        "publishedTimeApprox": published_iso,
+        "publishedTimeIsApproximate": published_approx,
     }
 
 

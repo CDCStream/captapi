@@ -5,19 +5,18 @@ from pydantic import BaseModel
 
 class TranscriptSegment(BaseModel):
     text: str
-    start: float
-    duration: float
-    timestamp: str
+    startMs: int
+    endMs: int
 
 
 class YouTubeTranscript(BaseModel):
     url: str
     title: str | None = None
-    transcript: str
-    transcriptSegments: list[TranscriptSegment]
-    wordCount: int
-    segments: int
-    language: str | None = None
+    text: str
+    segments: list[TranscriptSegment]
+    requestedLanguage: str | None = None
+    returnedLanguage: str | None = None
+    source: str | None = None
 
 
 class YouTubeSummary(BaseModel):
@@ -63,7 +62,9 @@ class YouTubeComment(BaseModel):
     author: str | None = None
     text: str
     likeCount: int | None = None
-    publishedAt: str | None = None
+    publishedTimeText: str | None = None
+    publishedTimeApprox: str | None = None
+    publishedTimeIsApproximate: bool | None = None
     replyCount: int | None = None
 
 

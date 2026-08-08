@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-08",
+    category: "fix",
+    title: "YouTube comments: honest publishedTimeApprox; unified transcript shape",
+    description:
+      "Comments no longer present a derived relative label as an observed millisecond ISO. Renamed to publishedTimeApprox, truncated to label precision (day/hour/minute), with publishedTimeIsApproximate. video-details fills categoryId from genre when InnerTube omits the id (Music → 10). youtube/tiktok/instagram transcript now share audio-transcript's vocabulary: text + segments[{text,startMs,endMs}] — dropped redundant language twin and the segments-as-count collision.",
+    items: [
+      "comments: publishedTimeApprox + truncation + isApproximate (YT3)",
+      "video-details: categoryId from genre name when missing",
+      "transcript endpoints: text + segments[{text,startMs,endMs}] (YT1/YT2)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-08",
     category: "improvement",
     title: "One published price + fetch-path telemetry",
     description:

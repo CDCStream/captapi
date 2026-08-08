@@ -26,6 +26,7 @@ from app.services.openai_client import (
     transcribe_audio,
 )
 from app.services import tiktok_native
+from app.services.transcript_segments import join_segment_text, segments_from_seconds
 from app.utils.retry import retry_none
 from app.core.cache_params import CACHE_MAX_AGE_DESC, resolve_cache_options
 from app.services.tiktok_native import (
@@ -1009,31 +1010,32 @@ async def tiktok_transcript(
         base_credits=CREDIT_TRANSCRIPT,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            full, segments, detected, source = await _fetch_tiktok_transcript(
+            full, segments_raw, detected, source = await _fetch_tiktok_transcript(
                 url, language=lang
             )
             ctx["source"] = source
-            # Additive body field for RAG weighting. Existing keys unchanged.
+            # Additive body field for RAG weighting.
             if source == "direct":
                 public_source = "captions"
             elif source == "openai":
                 public_source = "whisper"
             else:
                 public_source = source
+            # Catalogue vocabulary: text + segments[{text,startMs,endMs}].
+            segments = segments_from_seconds(segments_raw)
+            text = (full or "").strip() or join_segment_text(segments)
             return {
                 "platform": "tiktok",
                 "url": url,
-                "transcript": full,
-                "transcriptSegments": segments,
-                "wordCount": len(full.split()),
-                "segments": len(segments),
+                "text": text,
+                "segments": segments,
                 "language": normalize_language_code(detected),
                 "source": public_source,
             }
 
         data = await cached_or_run(
             endpoint="tiktok.transcript",
-            params={"url": url, "language": lang, "v": 8},
+            params={"url": url, "language": lang, "v": 9},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

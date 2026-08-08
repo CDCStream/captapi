@@ -23,6 +23,7 @@ from app.services.cached_runner import cached_or_run
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.openai_client import summarize_transcript, transcribe_audio, WHISPER_MAX_BYTES
 from app.services import youtube_audio
+from app.services.transcript_segments import join_segment_text, segments_from_seconds
 from app.services.youtube_native import (
     YT_COOKIES,
     YT_HEADERS,
@@ -955,25 +956,17 @@ async def youtube_transcript(
             item = await _fetch_transcript_item(norm_url, language)
             ctx["source"] = item.get("source")
             segments_raw = _transcript_segments(item)
-            segments = []
-            text_parts = []
+            second_rows: list[dict[str, Any]] = []
             for s in segments_raw:
                 text = (s.get("text") or "").strip()
+                if not text:
+                    continue
                 start = float(s.get("start") or s.get("offset") or 0.0)
                 duration = float(s.get("duration") or s.get("dur") or 0.0)
-                mm = int(start // 60)
-                ss = int(start % 60)
-                if text:
-                    segments.append(
-                        {
-                            "text": text,
-                            "start": start,
-                            "duration": duration,
-                            "end": round(start + duration, 3),
-                            "timestamp": f"{mm:02d}:{ss:02d}",
-                        }
-                    )
-                    text_parts.append(text)
+                end = float(s.get("end") or (start + duration))
+                second_rows.append({"text": text, "start": start, "end": end})
+            # Same vocabulary as /audio-transcript and rumble: text + segments[{text,startMs,endMs}].
+            segments = segments_from_seconds(second_rows)
             if not segments:
                 ctx["credits_override"] = 0
                 suggestion: dict[str, Any] | None = None
@@ -1001,7 +994,7 @@ async def youtube_transcript(
                 _raise_transcript_unavailable(
                     item, language=language, suggestion=suggestion
                 )
-            full = " ".join(text_parts)
+            full = join_segment_text(segments)
             title = safe_str(item.get("title")) or await _oembed_title(norm_url)
             # Union discriminator with /audio-transcript (source=asr). Always
             # populated — never null on success (captions path includes Apify).
@@ -1023,11 +1016,8 @@ async def youtube_transcript(
                 "url": norm_url,
                 "videoId": vid,
                 "title": title,
-                "transcript": full,
-                "transcriptSegments": segments,
-                "wordCount": len(full.split()),
-                "segments": len(segments),
-                "language": returned,
+                "text": full,
+                "segments": segments,
                 "requestedLanguage": requested,
                 "returnedLanguage": returned,
                 "source": "captions",
@@ -1039,7 +1029,7 @@ async def youtube_transcript(
 
         data = await cached_or_run(
             endpoint="youtube.transcript",
-            params={"url": norm_url, "language": language or "", "v": 9},
+            params={"url": norm_url, "language": language or "", "v": 10},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1680,7 +1670,7 @@ async def youtube_video_details(
 
         data = await cached_or_run(
             endpoint="youtube.video-details",
-            params={"url": norm_url, "v": 5},
+            params={"url": norm_url, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1743,7 +1733,7 @@ async def youtube_comments(
 
         data = await cached_or_run(
             endpoint="youtube.comments",
-            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 8},
+            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 9},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

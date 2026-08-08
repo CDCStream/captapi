@@ -870,30 +870,32 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "facebook-marketplace-item": {
     "platform": "facebook",
-    "id": "2467979733629080",
-    "url": "https://www.facebook.com/marketplace/item/2467979733629080/",
-    "title": "Gaiam Classic Balance Ball Chair - Ergonomic Office/Desk Chair",
-    "price": 50.0,
-    "priceFormatted": "$50",
+    "id": "2228870800986975",
+    "url": "https://www.facebook.com/marketplace/item/2228870800986975/",
+    "title": "Elabest Mesh Office Chair, Ergonomic Computer Desk Chair, Sturdy Task Chair - Adjustable Lumbar Support",
+    "description": "Breathable mesh office chair has an ergonomic design with a high back and adjustable headrest. This light gray task chair is manufactured by Elabest and features adjustable armrests, a five-point rolling base, and integrated lumbar support.\n\nEstimated (WxDxH): 26 x 24 x 45 in",
+    "price": 125.0,
+    "priceFormatted": "$125",
     "currency": "USD",
-    "location": {
-      "name": "Fresno, CA",
-      "city": "Fresno",
-      "state": "CA",
-      "countryCode": "US",
-      "latitude": null,
-      "longitude": null
-    },
-    "city": "Fresno",
-    "state": "CA",
-    "cityPageId": "107983435897193",
-    "isSold": false,
-    "isPending": false,
-    "isHidden": false,
-    "deliveryTypes": ["IN_PERSON", "SHIPPING_ONSITE"],
-    "status": "available",
-    "priceAmount": 5000,
-    "createdAt": "2026-07-18T17:45:28+00:00"
+    "condition": "Used - like new",
+    "location": "Arlington, VA",
+    "latitude": 38.888854980469,
+    "longitude": -77.085571289062,
+    "isSold": true,
+    "deliveryTypes": [
+      "IN_PERSON",
+      "DOOR_PICKUP"
+    ],
+    "image": "https://scontent-mad1-1.xx.fbcdn.net/v/t39.84726-6/749377945_1746854896315726_817991790771142418_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=Td50J02FhxwQ7kNvwEMS5Gk&_nc_oc=Adq3GF3R5f05eu3AlZfXV5BYX7n-dl-fGhjd7L4VfCb2IZztMYgOGJOLqDwEA8uVUvU&_nc_zt=14&_nc_ht=scontent-mad1-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQC6x7FebWsdvTVd2WTXik82gabWPwTIgqcmEHjtOn9PRA&oe=6A6D9DBB",
+    "photos": [
+      "https://scontent-mad1-1.xx.fbcdn.net/v/t39.84726-6/749377945_1746854896315726_817991790771142418_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=Td50J02FhxwQ7kNvwEMS5Gk&_nc_oc=Adq3GF3R5f05eu3AlZfXV5BYX7n-dl-fGhjd7L4VfCb2IZztMYgOGJOLqDwEA8uVUvU&_nc_zt=14&_nc_ht=scontent-mad1-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQC6x7FebWsdvTVd2WTXik82gabWPwTIgqcmEHjtOn9PRA&oe=6A6D9DBB",
+      "https://scontent-mad2-1.xx.fbcdn.net/v/t45.5328-4/750643688_1384573667068640_514500939676617077_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=111&ccb=1-7&_nc_sid=247b10&_nc_ohc=Aa-65J_vFfcQ7kNvwF56W3U&_nc_oc=AdqZo7FznGIikAd34m8FI2BzTOz3YUC3qQQ7lZPPYOm6lxpve9wXM1XMfZkSG1T1N-k&_nc_zt=23&_nc_ht=scontent-mad2-1.xx&_nc_gid=Srmkvq9GlIeOtnd0GDpLVA&_nc_ss=7b289&oh=00_AQADpKLF9okchpYthAq_g22eIr1EZlOHwgG-Ih5jzyIFyQ&oe=6A6D812F"
+    ],
+    "createdAt": "2026-07-17T18:23:51+00:00",
+    "status": "sold",
+    "priceAmount": 12500,
+    "city": "Arlington",
+    "state": "VA"
   },
   "facebook-marketplace-location-search": {
     "query": "Austin",
@@ -901,6 +903,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "locations": [
       {
         "id": "109791499039942",
+        "cityPageId": "109791499039942",
         "slug": "austin",
         "name": "Austin, TX",
         "city": "Austin",
@@ -915,22 +918,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "state": "MN",
         "latitude": 43.6666,
         "longitude": -92.9746
-      },
-      {
-        "slug": "austin-indiana",
-        "name": "Austin, IN",
-        "city": "Austin",
-        "state": "IN",
-        "latitude": 38.7584,
-        "longitude": -85.808
       }
-    ],
-    "timings": {
-      "path": "ambiguous_table",
-      "hubMs": 0,
-      "hubCount": 0,
-      "totalMs": 2
-    }
+    ]
   },
   "facebook-marketplace-search": {
     "query": "desk chair",
@@ -2241,68 +2230,50 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "instagram-transcript": {
     "platform": "instagram",
     "url": "https://www.instagram.com/p/DZFsjH9E3gK/",
-    "transcript": "Can you guess where we are? We're about to unveil the seven natural wonders of America. Look how close we are. This is amazing. From a geologist standpoint, globally, this is geology and action that is all-inspiring. The touch is something very human. There are myths, there are legends, there are important stories that hold a sacred dish if you will. It's absolutely beautiful. And you just see how lush the vegetation is. There's such a diverse ecosystem. It's incredible. We're having so much fun about to unveil the seven natural wonders of America, just in time for the Fourth of July. Absolutely. You'll see this on ABC National Geographic in NatGeo.com. So guess where we are, comment and let us know what you think and we'll see you on Independence Day. And keep exploring.",
-    "transcriptSegments": [
+    "language": "en",
+    "text": "Can you guess where we are? We're about to unveil the seven natural wonders of America. Look how close we are. This is amazing. From a geologist standpoint, globally, this is geology and action that is all-inspiring. The touch is something very human. There are myths, there are legends, there are important stories that hold a sacred dish if you will. It's absolutely beautiful. And you just see how lush the vegetation is. There's such a diverse ecosystem. It's incredible. We're having so much fun about to unveil the seven natural wonders of America, just in time for the Fourth of July. Absolutely. You'll see this on ABC National Geographic in NatGeo.com. So guess where we are, comment and let us know what you think and we'll see you on Independence Day. And keep exploring.",
+    "segments": [
       {
         "text": "Can you guess where we are? We're about to unveil the seven natural wonders of America.",
-        "start": 0,
-        "duration": 4.64,
-        "end": 4.64,
-        "timestamp": "00:00"
+        "startMs": 0,
+        "endMs": 4640
       },
       {
         "text": "Look how close we are. This is amazing. From a geologist standpoint,",
-        "start": 5.92,
-        "duration": 4.72,
-        "end": 10.64,
-        "timestamp": "00:05"
+        "startMs": 5920,
+        "endMs": 10640
       },
       {
         "text": "globally, this is geology and action that is all-inspiring. The touch is something very human.",
-        "start": 10.64,
-        "duration": 5.04,
-        "end": 15.68,
-        "timestamp": "00:10"
+        "startMs": 10640,
+        "endMs": 15680
       },
       {
         "text": "There are myths, there are legends, there are important stories that hold a sacred",
-        "start": 16.24,
-        "duration": 5.36,
-        "end": 21.6,
-        "timestamp": "00:16"
+        "startMs": 16240,
+        "endMs": 21600
       },
       {
         "text": "dish if you will. It's absolutely beautiful. And you just see how lush the vegetation is. There's",
-        "start": 21.6,
-        "duration": 4.24,
-        "end": 25.84,
-        "timestamp": "00:21"
+        "startMs": 21600,
+        "endMs": 25840
       },
       {
         "text": "such a diverse ecosystem. It's incredible. We're having so much fun about to unveil the seven",
-        "start": 25.84,
-        "duration": 7.28,
-        "end": 33.12,
-        "timestamp": "00:25"
+        "startMs": 25840,
+        "endMs": 33120
       },
       {
         "text": "natural wonders of America, just in time for the Fourth of July. Absolutely. You'll see this on",
-        "start": 33.12,
-        "duration": 4.56,
-        "end": 37.68,
-        "timestamp": "00:33"
+        "startMs": 33120,
+        "endMs": 37680
       },
       {
         "text": "ABC National Geographic in NatGeo.com. So guess where we are, comment and let us know what you think",
-        "start": 37.68,
-        "duration": 5.76,
-        "end": 43.44,
-        "timestamp": "00:37"
+        "startMs": 37680,
+        "endMs": 43440
       }
-    ],
-    "wordCount": 135,
-    "segments": 9,
-    "language": "en"
+    ]
   },
   "instagram-trending-reels": {
     "platform": "instagram",
@@ -6697,47 +6668,35 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "tiktok-transcript": {
     "platform": "tiktok",
     "url": "https://www.tiktok.com/@promakeuppro/video/7652684315989462290",
-    "transcript": "Well, spin on my mind, I wanna make a rock and a-na-na I wanna make a rock and a-na-na Wish we never go, go, rock and a-na We need to make a rock and a-na I wanna make a rock and a-na I wanna make a rock and a-na Wish we never go, go, rock and a-na We need to make a rock and a-na Wish we never go, go, rock and a-na We need to make a rock and a-na",
-    "transcriptSegments": [
+    "language": "en",
+    "text": "Well, spin on my mind, I wanna make a rock and a-na-na I wanna make a rock and a-na-na Wish we never go, go, rock and a-na We need to make a rock and a-na I wanna make a rock and a-na I wanna make a rock and a-na Wish we never go, go, rock and a-na We need to make a rock and a-na Wish we never go, go, rock and a-na We need to make a rock and a-na",
+    "segments": [
       {
         "text": "Well, spin on my mind, I wanna make a rock and a-na-na I wanna make a rock and a-na-na",
-        "start": 0,
-        "duration": 9.28,
-        "end": 9.28,
-        "timestamp": "00:00"
+        "startMs": 0,
+        "endMs": 9280
       },
       {
         "text": "Wish we never go, go, rock and a-na We need to make a rock and a-na",
-        "start": 9.28,
-        "duration": 7.2,
-        "end": 16.48,
-        "timestamp": "00:09"
+        "startMs": 9280,
+        "endMs": 16480
       },
       {
         "text": "I wanna make a rock and a-na I wanna make a rock and a-na",
-        "start": 16.48,
-        "duration": 6.72,
-        "end": 23.2,
-        "timestamp": "00:16"
+        "startMs": 16480,
+        "endMs": 23200
       },
       {
         "text": "Wish we never go, go, rock and a-na We need to make a rock and a-na",
-        "start": 23.2,
-        "duration": 7.28,
-        "end": 30.48,
-        "timestamp": "00:23"
+        "startMs": 23200,
+        "endMs": 30480
       },
       {
         "text": "Wish we never go, go, rock and a-na We need to make a rock and a-na",
-        "start": 30.48,
-        "duration": 2.0,
-        "end": 32.48,
-        "timestamp": "00:30"
+        "startMs": 30480,
+        "endMs": 32480
       }
-    ],
-    "wordCount": 81,
-    "segments": 5,
-    "language": "en"
+    ]
   },
   "tiktok-trending-feed": {
     "country": "US",
@@ -7912,8 +7871,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "replyCount": 5,
         "hasCreatorHeart": false,
         "publishedTimeText": "1 year ago",
-        "publishedTime": "2025-08-03T20:35:17.000Z",
-        "replyToId": "Ugzge340dBgB75hWBm54AaABAg"
+        "replyToId": "Ugzge340dBgB75hWBm54AaABAg",
+        "publishedTimeApprox": "2025-08-03T00:00:00.000Z",
+        "publishedTimeIsApproximate": true
       },
       {
         "id": "Ugzge340dBgB75hWBm54AaABAg.AHE8_QAWJx9AHEAB_-JmDA",
@@ -7927,8 +7887,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "replyCount": 2,
         "hasCreatorHeart": false,
         "publishedTimeText": "1 year ago",
-        "publishedTime": "2025-08-03T20:35:17.000Z",
-        "replyToId": "Ugzge340dBgB75hWBm54AaABAg"
+        "replyToId": "Ugzge340dBgB75hWBm54AaABAg",
+        "publishedTimeApprox": "2025-08-03T00:00:00.000Z",
+        "publishedTimeIsApproximate": true
       }
     ]
   },
@@ -7952,7 +7913,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "replyCount": 961,
         "hasCreatorHeart": false,
         "publishedTimeText": "1 year ago",
-        "publishedTime": "2025-08-03T20:35:12.000Z"
+        "publishedTimeApprox": "2025-08-03T00:00:00.000Z",
+        "publishedTimeIsApproximate": true
       },
       {
         "id": "UgxTsG2dsspEiq6MAZJ4AaABAg",
@@ -7966,7 +7928,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "replyCount": 982,
         "hasCreatorHeart": false,
         "publishedTimeText": "3 days ago",
-        "publishedTime": "2026-07-31T20:35:12.000Z"
+        "publishedTimeApprox": "2026-07-31T00:00:00.000Z",
+        "publishedTimeIsApproximate": true
       }
     ]
   },
@@ -8382,26 +8345,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "videoId": "dQw4w9WgXcQ",
     "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
-    "transcript": "[♪♪♪] ♪ We're no strangers to love ♪ ♪ You know the rules and so do I ♪ ♪ A full commitment's what I'm thinking of ♪ ♪ You wouldn't get this from any other guy ♪ ♪ I just wanna tell you how I'm feeling ♪ ♪ Gotta make you understand ♪ ♪ Never gonna give you up ♪ ♪ Never gonna let you down ♪ ♪ Never gonna run around and desert you ♪ ♪ Never gonna make you cry ♪ ♪ Never gonna say goodbye ♪ ♪ Never gonna tell a lie and hurt you ♪ ...",
-    "transcriptSegments": [
+    "text": "[♪♪♪] ♪ We're no strangers to love ♪ ♪ You know the rules and so do I ♪ ♪ A full commitment's what I'm thinking of ♪ ♪ You wouldn't get this from any other guy ♪ ♪ I just wanna tell you how I'm feeling ♪ ♪ Gotta make you understand ♪ ♪ Never gonna give you up ♪ ♪ Never gonna let you down ♪ ♪ Never gonna run around and desert you ♪ ♪ Never gonna make you cry ♪ ♪ Never gonna say goodbye ♪ ♪ Never gonna tell a lie and hurt you ♪ ...",
+    "segments": [
       {
         "text": "[♪♪♪]",
-        "start": 1.36,
-        "duration": 1.68,
-        "end": 3.04,
-        "timestamp": "00:01"
+        "startMs": 1360,
+        "endMs": 3040
       },
       {
         "text": "♪ We're no strangers to love ♪",
-        "start": 18.64,
-        "duration": 3.24,
-        "end": 21.88,
-        "timestamp": "00:18"
+        "startMs": 18640,
+        "endMs": 21880
       }
     ],
-    "wordCount": 487,
-    "segments": 61,
-    "language": "en"
+    "platform": "youtube",
+    "requestedLanguage": null,
+    "returnedLanguage": "en",
+    "source": "captions",
+    "isAutoGenerated": false,
+    "isTranslated": false,
+    "hasAutoCaptions": true
   },
   "youtube-trending-shorts": {
     "platform": "youtube",
@@ -8435,6 +8398,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "commentCount": 2400000,
     "thumbnailUrl": "https://i.ytimg.com/vi_webp/dQw4w9WgXcQ/sddefault.webp",
     "genre": "Music",
+    "categoryId": "10",
     "tags": [
       "rick astley",
       "Never Gonna Give You Up"
